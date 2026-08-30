@@ -10,7 +10,7 @@
   <!-- O app verifica esta URL para conferir se ha versao nova.      -->
   <!-- ============================================================ -->
   <meta name="fast-deploy-url" content="https://sites.super.myninja.ai/527fbff7-825d-4ba8-b705-a4629764647b/9193ef88/index.html">
-  <meta name="fast-app-version" content="2025.08.30-r27">
+  <meta name="fast-app-version" content="2025.08.30-r28">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https:; img-src 'self' data: blob: https: http:; connect-src 'self' https: data: blob:; font-src 'self' https: data:;">
   <!-- PWA: Meta tags para app instalavel -->
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -11494,14 +11494,14 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
         }
       }
 
-      // Verificar as tabelas principais (bloqueantes) + destinos (opcional, nao bloqueante)
+      // Verificar as tabelas principais (todas obrigatórias para sync completo)
       const okRotas = await checarTabela('rotas', tblRotas, tblRotasCount);
       const okDespesas = await checarTabela('despesas', tblDespesas, tblDespesasCount);
       const okSeq = await checarTabela('sequencias_itens', tblSeq, tblSeqCount);
       const okEmp = await checarTabela('dados_empresa', tblEmp, tblEmpCount);
       const okDest = await checarTabela('destinos', tblDest, tblDestCount);
-      // destinos e opcional (local-first, auto-gerado). Nao bloqueia o sync se faltar.
-      const todasOk = okRotas && okDespesas && okSeq && okEmp;
+      // Todas as 5 tabelas são obrigatórias agora (destinos sincroniza na nuvem desde r28)
+      const todasOk = okRotas && okDespesas && okSeq && okEmp && okDest;
 
       // Atualizar flags globais
       supabaseDisponivel = todasOk;
@@ -11511,19 +11511,20 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
         card.className = 'emp-db-status-card ok';
         card.querySelector('.emp-db-ico').innerHTML = '<i class="fa-solid fa-circle-check"></i>';
         titleEl.textContent = 'Banco Online — todas as tabelas OK';
-        subEl.textContent = 'A conexão com o Supabase está ativa e as tabelas principais existem. Você já pode sincronizar os dados.' + (okDest ? '' : ' (Tabela \"destinos\" opcional ainda não criada \u2014 destinos funcionam localmente.)');
+        subEl.textContent = 'A conexão com o Supabase está ativa e todas as tabelas existem. Você já pode sincronizar os dados.';
         atualizarStatusSync('ok', 'Conectado ao Supabase ✓');
-        mostrarToastSync('Banco de dados online! Todas as tabelas principais estão OK.', 'success');
+        mostrarToastSync('Banco de dados online! Todas as tabelas estão OK.', 'success');
       } else {
         const faltando = [];
         if (!okRotas) faltando.push('rotas');
         if (!okDespesas) faltando.push('despesas');
         if (!okSeq) faltando.push('sequencias_itens');
         if (!okEmp) faltando.push('dados_empresa');
+        if (!okDest) faltando.push('destinos');
         card.className = 'emp-db-status-card erro';
         card.querySelector('.emp-db-ico').innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
         titleEl.textContent = 'Banco com problemas';
-        if (faltando.length === 4) {
+        if (faltando.length === 5) {
           subEl.textContent = 'Nenhuma tabela foi encontrada. Acesse a aba "Passo a Passo SQL", copie o script SQL e execute no SQL Editor do Supabase para criar as tabelas.';
         } else {
           subEl.textContent = 'Tabelas faltando ou com erro: ' + faltando.join(', ') + '. Acesse a aba "Passo a Passo SQL" e execute o script para criar as tabelas que faltam.';
@@ -12248,6 +12249,85 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
       }
     }
 
+    // --- Mapear destino do app para formato da tabela Supabase ---
+    function destinoToSupabase(d) {
+      return {
+        id: Number(d.id),
+        nome: d.nome || '',
+        endereco: d.endereco || '',
+        bairro: d.bairro || '',
+        telefone: d.telefone || '',
+        endereco_obj: d.enderecoObj || null,
+        usado_em: Number(d.usadoEm) || 0,
+        ultima_uso: Number(d.ultimaUso) || null,
+        updated_at: new Date().toISOString()
+      };
+    }
+
+    // --- Mapear linha do Supabase de volta para formato do app ---
+    function supabaseToDestino(row) {
+      return {
+        id: row.id,
+        nome: row.nome || '',
+        endereco: row.endereco || '',
+        bairro: row.bairro || '',
+        telefone: row.telefone || '',
+        enderecoObj: row.endereco_obj || null,
+        usadoEm: row.usado_em || 0,
+        ultimaUso: row.ultima_uso || null
+      };
+    }
+
+    // --- Ler TODOS os destinos do Supabase (GET) ---
+    async function supabaseGetDestinos() {
+      const resp = await fetch(SUPABASE_URL + '/destinos?select=*', {
+        method: 'GET',
+        headers: supabaseHeaders()
+      });
+      if (!resp.ok) throw new Error('GET destinos: HTTP ' + resp.status);
+      const rows = await resp.json();
+      return rows.map(supabaseToDestino);
+    }
+
+    // --- Sincronizar (upsert) TODOS os destinos para o Supabase ---
+    async function supabaseSyncDestinos() {
+      const destLocais = bancoDados.destinos || [];
+      if (destLocais.length > 0) {
+        const payload = destLocais.map(destinoToSupabase);
+        const resp = await fetch(SUPABASE_URL + '/destinos', {
+          method: 'POST',
+          headers: supabaseHeaders({
+            'Prefer': 'resolution=merge-duplicates,return=minimal'
+          }),
+          body: JSON.stringify(payload)
+        });
+        if (!resp.ok) {
+          const errBody = await resp.text();
+          throw new Error('POST destinos (upsert): HTTP ' + resp.status + ' — ' + errBody);
+        }
+      }
+      // Deletar destinos que existem na nuvem mas não localmente
+      const idsLocais = destLocais.map(d => Number(d.id));
+      const respGet = await fetch(SUPABASE_URL + '/destinos?select=id', {
+        method: 'GET',
+        headers: supabaseHeaders()
+      });
+      if (respGet.ok) {
+        const cloudRows = await respGet.json();
+        const orfaos = cloudRows.filter(r => !idsLocais.includes(r.id)).map(r => r.id);
+        if (orfaos.length > 0) {
+          for (let i = 0; i < orfaos.length; i += 50) {
+            const lote = orfaos.slice(i, i + 50);
+            const filter = 'id=in.(' + lote.join(',') + ')';
+            await fetch(SUPABASE_URL + '/destinos?' + filter, {
+              method: 'DELETE',
+              headers: supabaseHeaders({ 'Prefer': 'return=minimal' })
+            });
+          }
+        }
+      }
+    }
+
     // --- Salvar dados da empresa no Supabase (upsert, id=1) ---
     async function supabaseSaveEmpresa(dados) {
       const payload = {
@@ -12396,12 +12476,13 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
 
     // --- Baixar TODOS os dados do Supabase (GET de todas as tabelas) ---
     async function baixarDaNuvem() {
-      const [rotas, despesas, sequencias] = await Promise.all([
+      const [rotas, despesas, sequencias, destinos] = await Promise.all([
         supabaseGetRotas(),
         supabaseGetDespesas(),
-        supabaseGetSequencias()
+        supabaseGetSequencias(),
+        supabaseGetDestinos()
       ]);
-      return { rotas, despesas, sequencias };
+      return { rotas, despesas, sequencias, destinos };
     }
 
     // --- Enviar TODOS os dados locais para o Supabase (upsert) ---
@@ -12409,6 +12490,7 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
       await supabaseSyncRotas();
       await supabaseSyncDespesas();
       await supabaseSyncSequencias();
+      await supabaseSyncDestinos();
       ultimoSyncTimestamp = Date.now();
       mudancasPendentes = false;
       return true;
@@ -13101,7 +13183,7 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
       // O cache offline real depende do manifest + Cache API via fetch handler do SW.
       if ('serviceWorker' in navigator && location.protocol.startsWith('http') && !location.protocol.startsWith('blob')) {
         const swCode = `
-          const CACHE = 'fast-v17-cache';
+          const CACHE = 'fast-v18-cache';
           const ASSETS = [
             'https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js',
             'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
