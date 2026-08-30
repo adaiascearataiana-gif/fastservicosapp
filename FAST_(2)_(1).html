@@ -9,8 +9,8 @@
   <!-- CONFIG DEPLOY: URL oficial do app (auto-atualizacao)         -->
   <!-- O app verifica esta URL para conferir se ha versao nova.      -->
   <!-- ============================================================ -->
-  <meta name="fast-deploy-url" content="https://sites.super.myninja.ai/5b8c27b0-41a6-49a0-8a5d-91427bce2d07/7231169c/index.html">
-  <meta name="fast-app-version" content="2025.08.29-r20">
+  <meta name="fast-deploy-url" content="https://sites.super.myninja.ai/527fbff7-825d-4ba8-b705-a4629764647b/9193ef88/index.html">
+  <meta name="fast-app-version" content="2025.08.30-r27">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https:; img-src 'self' data: blob: https: http:; connect-src 'self' https: data: blob:; font-src 'self' https: data:;">
   <!-- PWA: Meta tags para app instalavel -->
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1444,6 +1444,27 @@ body.fast-edition-mobile .pro-page-sub { font-size:12px; }
         }
       } catch(e) {}
 
+      // ---- RESET FORÇADO DA ÁREA PROTEGIDA (r26) ----
+      // Zera TODA e qualquer senha da Área Protegida (dados da empresa) UMA VEZ ao
+      // carregar esta versão, para que o usuário possa criar uma senha nova do zero.
+      // Limpa: senha própria da Área Protegida (EMP_PWD_KEY), palavra-chave de
+      // recuperação (EMP_RECOVERY_KEY) e a credencial de login unificada (K_CRED),
+      // já que a Área Protegida usa a mesma senha do login quando ele existe.
+      // Usa uma flag versionada para garantir que só executa uma vez.
+      try {
+        var EMP_RESET_FLAG = 'fast_emp_reset_r26';
+        if (localStorage.getItem(EMP_RESET_FLAG) !== '1') {
+          localStorage.removeItem('fast_empresa_senha_hash');   // EMP_PWD_KEY
+          localStorage.removeItem('fast_empresa_recovery');     // EMP_RECOVERY_KEY
+          localStorage.removeItem('fast_auth_cred');            // K_CRED (credencial de login)
+          localStorage.removeItem('fast_auth_bio');             // K_BIO  (biometria do login)
+          localStorage.removeItem('fast_auth_fails');
+          // Marca que o reset da Área Protegida já foi feito para esta versão
+          localStorage.setItem(EMP_RESET_FLAG, '1');
+          if (window.console) console.log('FAST r26: Senha da Área Protegida zerada. Crie uma nova senha ao entrar.');
+        }
+      } catch(e) {}
+
     // ---- Constantes / chaves de armazenamento ----
     var K_CRED   = 'fast_auth_cred';      // {user, saltB64, hashB64, iter, created}
     var K_SESS   = 'fast_auth_sess';      // sessionStorage: {token, exp} (sessão por aba)
@@ -2398,6 +2419,20 @@ body.fast-edition-mobile .pro-page-sub { font-size:12px; }
     window.addEventListener('pageshow', function(event){
       revalidarEAutenticar();
     });
+
+    // ---- EXPORTS para a Área Protegida usar biometria (r26) ----
+    // Expõe as funções de WebAuthn e credenciais para o script principal,
+    // permitindo que o overlay da Área Protegida ofereça entrada/ativação por biometria.
+    window.fastBioIsSupported       = fastBioIsSupported;
+    window.fastBioPlatformAvailable = fastBioPlatformAvailable;
+    window.fastBioRegister          = fastBioRegister;
+    window.fastBioAuthenticate      = fastBioAuthenticate;
+    window.bioCredExists            = bioCredExists;
+    window.clearBioCred             = clearBioCred;
+    window.getCred                  = getCred;
+    window.verifyCred               = verifyCred;
+    window.credExists               = credExists;
+    window.refreshSecCard           = refreshSecCard;
 
   })();
   </script>
@@ -3823,6 +3858,44 @@ body.fast-edition-mobile .pro-page-sub { font-size:12px; }
     }
     .emp-esquecer-btn i { margin-right: 6px; }
     .emp-esquecer-btn:hover { background: var(--bg-soft); border-color: var(--accent); }
+
+    /* Biometria na Área Protegida (r26) */
+    .emp-bio-wrap { width: 100%; margin-top: 14px; }
+    .emp-bio-divider {
+      display: flex; align-items: center; gap: 10px;
+      margin: 6px 0 12px; color: var(--text-faint); font-size: 11px; font-weight: 700;
+    }
+    .emp-bio-divider::before, .emp-bio-divider::after {
+      content: ''; flex: 1; height: 1px; background: var(--border-strong);
+    }
+    .emp-bio-btn {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      width: 100%; padding: 12px; border-radius: 12px; cursor: pointer;
+      border: 1.5px solid var(--accent); background: var(--grad-accent);
+      color: #fff; font-weight: 800; font-size: 13.5px; transition: all 0.2s;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.12);
+    }
+    .emp-bio-btn i { font-size: 17px; }
+    .emp-bio-btn:hover { filter: brightness(1.08); transform: translateY(-1px); box-shadow: 0 4px 14px rgba(0,0,0,0.18); }
+    .emp-bio-btn:active { transform: translateY(0); }
+    /* Botão para ATIVAR biometria dentro da área de dados (r26) */
+    .emp-bio-toggle-btn {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      width: 100%; padding: 11px; margin-top: 10px; border-radius: 10px; cursor: pointer;
+      border: 1.5px solid var(--accent); background: transparent; color: var(--accent);
+      font-weight: 800; font-size: 12.5px; transition: all 0.2s;
+    }
+    .emp-bio-toggle-btn i { font-size: 15px; }
+    .emp-bio-toggle-btn:hover { background: var(--bg-soft); }
+    .emp-bio-toggle-btn.ativo { border-color: var(--success); color: var(--success); }
+    /* Botão "Zerar senha da Área Protegida" na config (r26) */
+    .emp-reset-emp-btn {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      width: 100%; padding: 10px; border-radius: 10px; cursor: pointer;
+      border: 1.5px solid var(--border-strong); background: transparent; color: var(--danger, #ef4444);
+      font-weight: 800; font-size: 12px; transition: all 0.2s;
+    }
+    .emp-reset-emp-btn:hover { background: var(--bg-soft); border-color: var(--danger, #ef4444); }
 
     /* Caixa de redefinicao de senha (tela "Esquecer senha") */
     .emp-reset-box { text-align: left; }
@@ -5599,8 +5672,20 @@ body.fast-edition-mobile .pro-page-sub { font-size:12px; }
     <!-- ABA 1: ROTAS -->
     <div id="rotas" class="tab-content">
       <div class="card">
-        <div class="card-title"><i class="fa-solid fa-plus"></i> Nova Rota
-          
+        <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+          <span><i class="fa-solid fa-plus"></i> Nova Rota</span>
+          <div class="no-print" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+            <button type="button" class="btn-secondary" onclick="fastWhatsappSincronizarAgora()" title="Buscar novas mensagens recebidas pelo backend do WhatsApp">
+              <i class="fa-brands fa-whatsapp"></i> Sincronizar WhatsApp
+            </button>
+            <button type="button" class="btn-secondary" onclick="fastWhatsappConfigurar()" title="Configurar integração automática do WhatsApp">
+              <i class="fa-solid fa-gear"></i> WhatsApp
+            </button>
+            <button type="button" class="btn-secondary" onclick="document.getElementById('fastWhatsappImportInput').click()" title="Importar histórico já convertido do WhatsApp Business">
+              <i class="fa-solid fa-file-import"></i> Histórico
+            </button>
+          </div>
+          <input type="file" id="fastWhatsappImportInput" accept=".json,application/json" style="display:none" onchange="fastImportarHistoricoWhatsApp(this)">
         </div>
         <div id="alertPreviewRota" class="preview-alert" style="display: none;">
           ℹ️ Dados pré-carregados da última rota realizada para este cliente. Você pode alterar se necessário.
@@ -8612,6 +8697,7 @@ body.fast-edition-mobile .pro-page-sub { font-size:12px; }
               <p class="config-desc">Todos os <strong>dados cadastrais da empresa</strong> e as <strong>configurações do banco de dados (Supabase/SQL)</strong> ficam protegidos por senha e não aparecem expostos. Use o botão abaixo para acessar a área protegida, onde você poderá: editar os dados da empresa, verificar o status do banco de dados SQL, criar/rodar o script SQL e sincronizar com a nuvem.</p>
               <button type="button" class="emp-lock-btn" onclick="abrirAcessoDadosEmpresa()"><i class="fa-solid fa-lock"></i> Acessar Área Protegida</button>
               <div class="emp-lock-info" id="empLockInfoMini"></div>
+              <button type="button" class="emp-reset-emp-btn" id="empResetEmpBtn" onclick="empZerarSenhaConfig()" style="display:none;margin-top:10px;"><i class="fa-solid fa-key-skeleton"></i> Zerar senha da Área Protegida</button>
             </div>
           </div>
 
@@ -10607,6 +10693,7 @@ body.fast-edition-mobile .pro-page-sub { font-size:12px; }
       const recoveryInput = document.getElementById('empRecoveryInput');
       const esquecerBtn = document.getElementById('empEsquecerSenhaBtn');
       const resetBox = document.getElementById('empResetBox');
+      const bioWrap = document.getElementById('empBioWrap');
 
       dataBox.style.display = 'none';
       pwdBox.style.display = 'block';
@@ -10615,6 +10702,7 @@ body.fast-edition-mobile .pro-page-sub { font-size:12px; }
       if (recoveryInput) recoveryInput.value = '';
       if (resetBox) resetBox.style.display = 'none';
       if (recoveryBox) recoveryBox.style.display = 'none';
+      if (bioWrap) bioWrap.style.display = 'none';
       input.style.display = 'block';
       confirmBtn.style.display = 'inline-block';
 
@@ -10638,6 +10726,11 @@ body.fast-edition-mobile .pro-page-sub { font-size:12px; }
         confirmBtn.dataset.modo = 'entrar';
         // Mostra o botao "Esquecer senha" apenas se houver palavra-chave de recuperacao cadastrada
         if (esquecerBtn) esquecerBtn.style.display = empRecoveryExiste() ? 'block' : 'none';
+        // Mostra o botao "Entrar com biometria" se houver biometria cadastrada (r26)
+        if (bioWrap) {
+          var temBio = (typeof window.bioCredExists === 'function' && window.bioCredExists());
+          bioWrap.style.display = temBio ? 'block' : 'none';
+        }
       }
 
       overlay.classList.add('show');
@@ -10855,9 +10948,149 @@ body.fast-edition-mobile .pro-page-sub { font-size:12px; }
       const pwdActions3 = document.getElementById('empPwdActions');
       if (pwdActions3) pwdActions3.style.display = 'flex';
       document.getElementById('empPwdConfirmBtn').style.display = 'inline-block';
+      // Atualizar info da Área Protegida na config ao fechar (r26)
+      try { empAtualizarLockInfo(); } catch(e) {}
     }
 
     // Montar e mostrar a caixa flutuante com TODOS os dados da empresa
+    // ---- BIOMETRIA NA ÁREA PROTEGIDA (r26) ----
+    // Entrar na Área Protegida usando biometria (WebAuthn)
+    async function empBioEntrar() {
+      if (typeof window.fastBioAuthenticate !== 'function') {
+        alert('Biometria não disponível neste dispositivo/navegador.');
+        return;
+      }
+      try {
+        var ok = await window.fastBioAuthenticate();
+        if (ok) {
+          mostrarEmpDados();
+        }
+      } catch(e) {
+        if (window.console) console.log('empBioEntrar erro:', e);
+      }
+    }
+
+    // Ativar/desativar biometria para a Área Protegida
+    async function empBioToggleAtivar() {
+      var btn = document.getElementById('empBioToggleBtn');
+      var txt = document.getElementById('empBioToggleTxt');
+      var statusTxt = document.getElementById('empBioStatusTxt');
+      if (!btn || !txt) return;
+
+      // Se já tem biometria cadastrada, perguntar se quer remover
+      if (typeof window.bioCredExists === 'function' && window.bioCredExists()) {
+        if (confirm('Biometria já está ativada. Deseja remover a biometria da Área Protegida?')) {
+          if (typeof window.clearBioCred === 'function') window.clearBioCred();
+          if (statusTxt) statusTxt.textContent = 'Biometria removida. Você precisará digitar a senha para entrar.';
+          btn.classList.remove('ativo');
+          txt.textContent = 'Ativar biometria';
+        }
+        return;
+      }
+
+      // Verificar suporte a biometria
+      if (typeof window.fastBioIsSupported === 'function' && !window.fastBioIsSupported()) {
+        alert('Este navegador não suporta biometria (WebAuthn). Tente em um navegador moderno como Chrome ou Edge.');
+        return;
+      }
+      if (typeof window.fastBioPlatformAvailable === 'function' && !window.fastBioPlatformAvailable()) {
+        alert('A biometria não está disponível neste dispositivo. Verifique se há um leitor de impressão digital, Face ID ou Windows Hello configurado.');
+        return;
+      }
+
+      // Confirmar com a senha antes de registrar biometria
+      var senha = prompt('Digite a senha da Área Protegida para confirmar a ativação da biometria:');
+      if (!senha) return;
+
+      try {
+        var valida = await empVerificarSenha(senha);
+        if (!valida) {
+          alert('Senha incorreta. A biometria não foi ativada.');
+          return;
+        }
+      } catch(e) {
+        alert('Erro ao verificar senha. A biometria não foi ativada.');
+        return;
+      }
+
+      // Registrar biometria
+      try {
+        var registrado = await window.fastBioRegister();
+        if (registrado) {
+          if (statusTxt) statusTxt.textContent = 'Biometria ativada! Agora você pode entrar na Área Protegida usando impressão digital, Face ID ou Windows Hello.';
+          btn.classList.add('ativo');
+          txt.textContent = 'Biometria ativada (tocar para remover)';
+        }
+      } catch(e) {
+        if (window.console) console.log('empBioToggleAtivar registro erro:', e);
+        alert('Não foi possível ativar a biometria. Tente novamente.');
+      }
+    }
+
+    // Atualiza o estado do botão de biometria na área de dados
+    function empBioAtualizarToggle() {
+      var btn = document.getElementById('empBioToggleBtn');
+      var txt = document.getElementById('empBioToggleTxt');
+      var statusTxt = document.getElementById('empBioStatusTxt');
+      if (!btn || !txt) return;
+      var temBio = (typeof window.bioCredExists === 'function' && window.bioCredExists());
+      if (temBio) {
+        btn.classList.add('ativo');
+        txt.textContent = 'Biometria ativada (tocar para remover)';
+        if (statusTxt) statusTxt.textContent = 'Biometria ativada! Você pode entrar na Área Protegida usando impressão digital, Face ID ou Windows Hello.';
+      } else {
+        btn.classList.remove('ativo');
+        txt.textContent = 'Ativar biometria';
+        var suportado = (typeof window.fastBioIsSupported === 'function' && window.fastBioIsSupported());
+        if (statusTxt) {
+          statusTxt.textContent = suportado
+            ? 'Ative a biometria (impressão digital, Face ID ou Windows Hello) para entrar na Área Protegida sem digitar a senha.'
+            : 'Este navegador não suporta biometria (WebAuthn). Use um navegador moderno para ativar.';
+        }
+      }
+    }
+
+    // Atualiza info da Área Protegida na aba Configurações (r26)
+    function empAtualizarLockInfo() {
+      var infoMini = document.getElementById('empLockInfoMini');
+      var resetBtn = document.getElementById('empResetEmpBtn');
+      var existe = empSenhaExiste();
+      var temRecovery = empRecoveryExiste();
+      var temBio = (typeof window.bioCredExists === 'function' && window.bioCredExists());
+      if (infoMini) {
+        if (existe) {
+          var partes = [];
+          partes.push('<i class="fa-solid fa-circle-check" style="color:var(--success);"></i> Senha cadastrada');
+          if (temRecovery) partes.push('<i class="fa-solid fa-key" style="color:var(--accent);"></i> Palavra-chave de recuperação configurada');
+          if (temBio) partes.push('<i class="fa-solid fa-fingerprint" style="color:var(--accent);"></i> Biometria ativada');
+          infoMini.innerHTML = '<div style="font-size:11.5px;color:var(--text-muted);margin-top:8px;line-height:1.8;">' + partes.join(' &nbsp; ') + '</div>';
+        } else {
+          infoMini.innerHTML = '<div style="font-size:11.5px;color:var(--text-muted);margin-top:8px;"><i class="fa-solid fa-circle-info" style="color:var(--accent);"></i> Nenhuma senha cadastrada — ao acessar, você criará uma nova senha com palavra-chave de recuperação.</div>';
+        }
+      }
+      if (resetBtn) {
+        resetBtn.style.display = existe ? 'flex' : 'none';
+      }
+    }
+
+    // Zerar a senha da Área Protegida a partir da Configuração (r26)
+    function empZerarSenhaConfig() {
+      if (!empSenhaExiste()) {
+        alert('Não há senha cadastrada na Área Protegida.');
+        return;
+      }
+      var msg = 'ATENÇÃO: isto vai apagar a senha e a palavra-chave de recuperação da Área Protegida.\n\nApós confirmar, ao acessar a Área Protegida o app pedirá para criar uma NOVA senha (com nova palavra-chave de recuperação).\n\nDeseja continuar?';
+      if (!confirm(msg)) return;
+      // Apagar senha, recovery e biometria
+      empApagarSenha(false);
+      try {
+        localStorage.removeItem('fast_auth_bio'); // K_BIO
+        if (typeof window.clearBioCred === 'function') window.clearBioCred();
+      } catch(e) {}
+      empAtualizarLockInfo();
+      alert('Senha da Área Protegida zerada com sucesso! Ao acessar a Área Protegida, será pedido para criar uma nova senha.');
+    }
+
     function mostrarEmpDados() {
       const pwdBox = document.getElementById('empPwdBox');
       const dataBox = document.getElementById('empDataBox');
@@ -10876,6 +11109,9 @@ body.fast-edition-mobile .pro-page-sub { font-size:12px; }
 
       // Atualizar a visualização (logo, nome e lista de campos)
       empAtualizarVisualizacao(dados);
+
+      // Atualizar estado do botão de biometria (r26)
+      empBioAtualizarToggle();
     }
 
     function empTraduzirNatureza(v) {
@@ -10998,8 +11234,14 @@ CREATE TABLE IF NOT EXISTS rotas (
   statusexecucao  TEXT DEFAULT '',
   valor           NUMERIC(12,2) DEFAULT 0,
   descricao       TEXT DEFAULT '',
+  whatsapp_message_id TEXT DEFAULT '',
+  origem_importacao   TEXT DEFAULT '',
   updated_at      TIMESTAMPTZ DEFAULT now()
 );
+
+-- Migração: adiciona as colunas do WhatsApp (idempotente — executa só se não existirem)
+ALTER TABLE rotas ADD COLUMN IF NOT EXISTS whatsapp_message_id TEXT DEFAULT '';
+ALTER TABLE rotas ADD COLUMN IF NOT EXISTS origem_importacao   TEXT DEFAULT '';
 
 -- Tabela: despesas (gastos/lançamentos financeiros)
 CREATE TABLE IF NOT EXISTS despesas (
@@ -11700,6 +11942,8 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
         statusexecucao: r.statusExecucao || '',
         valor: Number(r.valor) || 0,
         descricao: r.descricao || '',
+        whatsapp_message_id: r.whatsappMessageId ? String(r.whatsappMessageId) : '',
+        origem_importacao: r.origemImportacao ? String(r.origemImportacao) : '',
         updated_at: new Date().toISOString()
       };
     }
@@ -11718,7 +11962,9 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
         status: row.status || '',
         statusExecucao: row.statusexecucao || '',
         valor: Number(row.valor) || 0,
-        descricao: row.descricao || ''
+        descricao: row.descricao || '',
+        whatsappMessageId: row.whatsapp_message_id ? String(row.whatsapp_message_id) : '',
+        origemImportacao: row.origem_importacao ? String(row.origem_importacao) : ''
       };
     }
 
@@ -12855,7 +13101,7 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
       // O cache offline real depende do manifest + Cache API via fetch handler do SW.
       if ('serviceWorker' in navigator && location.protocol.startsWith('http') && !location.protocol.startsWith('blob')) {
         const swCode = `
-          const CACHE = 'fast-v14-cache';
+          const CACHE = 'fast-v17-cache';
           const ASSETS = [
             'https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js',
             'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
@@ -13327,7 +13573,7 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
       if(abaId === 'rotasDia') { carregarSequenciaDia(); autoAutorizarPastaFotos(); }
       if(abaId === 'dashboard') { dashRenderizar(); atualizarEstatisticasDia(); atualizarRankingMotoristas(); renderizarQuickActions(); }
       if(abaId === 'dre') { dreCalcular(); }
-      if(abaId === 'configuracoes') { atualizarDescricaoModoFotos(); atualizarStatusPastaFoto(); atualizarInfoBackup(); }
+      if(abaId === 'configuracoes') { atualizarDescricaoModoFotos(); atualizarStatusPastaFoto(); atualizarInfoBackup(); empAtualizarLockInfo(); }
       if(abaId === 'lugares') { destRenderizarLista(); }
       if(abaId === 'rh') { renderizarRh(); }
       if(abaId === 'despesasEmpresa') { renderizarDespesasEmp(); const deData = document.getElementById('deData'); if (deData && !deData.value) deData.value = new Date().toISOString().split('T')[0]; }
@@ -23446,6 +23692,271 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
       }
     }
 
+    /* --- WhatsApp contínuo: backend -> revisão -> Rotas --- */
+    const FAST_WA_DEFAULT_BACKEND = 'https://fast-whatsapp-backend.onrender.com';
+    const FAST_WA_CFG_KEY = 'fast_whatsapp_integracao_v2';
+
+    function fastWaCfg() {
+      let cfg = {};
+      try { cfg = JSON.parse(localStorage.getItem(FAST_WA_CFG_KEY) || '{}') || {}; } catch(e) {}
+      return {
+        backend: String(cfg.backend || FAST_WA_DEFAULT_BACKEND).replace(/\/+$/, ''),
+        auto: cfg.auto !== false,
+        intervalo: Math.max(60, Number(cfg.intervalo) || 300),
+        ultimaSync: cfg.ultimaSync || '',
+        vistos: Array.isArray(cfg.vistos) ? cfg.vistos.slice(-5000) : []
+      };
+    }
+    function fastWaSalvarCfg(cfg) {
+      try { localStorage.setItem(FAST_WA_CFG_KEY, JSON.stringify(cfg)); } catch(e) {}
+    }
+    function fastWhatsappConfigurar() {
+      const cfg = fastWaCfg();
+      const backend = prompt('Backend do WhatsApp FAST:', cfg.backend);
+      if (backend === null) return;
+      const auto = confirm('Ativar verificação automática de novas mensagens a cada 5 minutos?');
+      cfg.backend = String(backend || '').trim().replace(/\/+$/, '');
+      cfg.auto = auto;
+      cfg.intervalo = 300;
+      fastWaSalvarCfg(cfg);
+      fastWaAgendar();
+      mostrarToast('Configuração do WhatsApp salva.', 'success');
+    }
+    function fastWaId(m) {
+      return String(m.id || m.message_id || m.key_id || [m.timestamp,m.data_hora,m.telefone,m.from,m.mensagem,m.texto,m.body].join('|'));
+    }
+    function fastWaTexto(m) { return String(m.mensagem || m.texto || m.text || m.body || m.message || '').trim(); }
+    function fastWaTelefone(m) { return String(m.telefone || m.phone || m.from || m.wa_id || m.contato || '').replace(/\D/g,''); }
+    function fastWaData(m) {
+      const raw = m.data_hora || m.created_at || m.timestamp || m.data || '';
+      let d;
+      if (typeof raw === 'number' || /^\d{10,13}$/.test(String(raw))) {
+        let n=Number(raw); if(n<1e12)n*=1000; d=new Date(n);
+      } else d=new Date(raw);
+      if (isNaN(d)) d=new Date();
+      const pad=n=>String(n).padStart(2,'0');
+      return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+    }
+    function fastWaCampo(texto, nomes) {
+      const esc = nomes.map(x=>x.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|');
+      const re = new RegExp('(?:^|\\n)\\s*\\*{0,2}(?:'+esc+')\\*{0,2}\\s*[:\\-]\\s*([^\\n]+)','i');
+      const m=texto.match(re); return m ? m[1].trim() : '';
+    }
+    function fastWaExtrair(m) {
+      const texto=fastWaTexto(m); if(!texto)return null;
+      let cliente=String(m.cliente||'').trim() || fastWaCampo(texto,['cliente','nome']);
+      let origem=String(m.origem||'').trim() || fastWaCampo(texto,['retirada','origem','coleta']);
+      let destino=String(m.destino||'').trim() || fastWaCampo(texto,['entrega','destino','endereço de entrega','endereco de entrega','endereço','endereco']);
+      let carga=String(m.carga||m.mercadoria||'').trim() || fastWaCampo(texto,['carga','mercadoria','encomenda','produto','levou','pacote']);
+      let valor=Number(m.valor_extraido ?? m.valor ?? 0) || 0;
+      if(destino && /^(?:r\$\s*)?\d{1,5}[,.]\d{1,2}(?:\s|$)/i.test(destino)) destino='';
+      if(!carga){ const x=texto.match(/(?:^|\n)\s*((?:\d+\s*)?(?:caixas?|cx|pacotes?|fardos?|envelopes?|documentos?|mercadoria)[^\n]*)/i); if(x)carga=x[1].trim(); }
+      if(!valor){ const x=texto.match(/(?:frete|taxa(?: de entrega)?|valor)\s*[:\-]?\s*(?:r\$\s*)?(\d{1,5}(?:[.,]\d{1,2})?)/i); if(x)valor=Number(x[1].replace('.','').replace(',','.'))||0; }
+      let score=0; if(origem)score+=4;if(destino)score+=4;if(carga)score+=2;if(cliente)score+=1;if(valor)score+=1;
+      if(!origem && !destino && !carga) return null;
+      return {id:fastWaId(m), data:fastWaData(m), cliente, origem, destino, carga, valor, telefone:fastWaTelefone(m), texto, score};
+    }
+    function fastWaRota(x) {
+      return {
+        id: Date.now()+Math.floor(Math.random()*100000), cliente:x.cliente||'', origem:x.origem||'', destino:x.destino||'', data:x.data,
+        tipoVolume:/document|envelope|certific/i.test(x.carga)?'DOCUMENTO':(/caixa|\bcx\b/i.test(x.carga)?'CAIXA':(/fardo/i.test(x.carga)?'FARDO':'MERCADORIA')),
+        qtdMercadorias:(()=>{const q=String(x.carga||'').match(/\b(\d+)\s*(?:caixa|cx|pacote|fardo|pe[cç]a|volume)/i);return q?Number(q[1]):(x.carga?1:0)})(),
+        pagamento:'PIX', status:'Pendente', statusExecucao:'EM ROTA', valor:x.valor||0,
+        descricao:['Carga: '+(x.carga||''),x.telefone?'WhatsApp: '+x.telefone:'','Fonte: WhatsApp Business automático'].filter(Boolean).join(' | '),
+        origemImportacao:'WHATSAPP_AUTO', whatsappMessageId:x.id, importadoEm:new Date().toISOString()
+      };
+    }
+    async function fastWhatsappSincronizarAgora(silencioso=false) {
+      const cfg=fastWaCfg();
+      if(!cfg.backend){ if(!silencioso) fastWhatsappConfigurar(); return; }
+      try {
+        if(!silencioso) mostrarToast('Buscando novas mensagens do WhatsApp...', 'info');
+        const url=cfg.backend+'/messages';
+        const resp=await fetch(url,{headers:{'Accept':'application/json'},cache:'no-store'});
+        if(!resp.ok) throw new Error('HTTP '+resp.status);
+        const raw=await resp.json();
+        const arr=Array.isArray(raw)?raw:(Array.isArray(raw.messages)?raw.messages:(Array.isArray(raw.data)?raw.data:[]));
+        const vistos=new Set(cfg.vistos||[]);
+        const existentes=new Set((bancoDados.rotas||[]).map(r=>String(r.whatsappMessageId||'')));
+        const candidatos=[];
+        for(const m of arr){ const id=fastWaId(m); if(vistos.has(id)||existentes.has(id))continue; const x=fastWaExtrair(m); if(x && x.score>=6)candidatos.push(x); }
+        cfg.ultimaSync=new Date().toISOString();
+        if(!candidatos.length){ fastWaSalvarCfg(cfg); if(!silencioso)mostrarToast('WhatsApp sincronizado. Nenhuma nova rota encontrada.','success'); return; }
+        const resumo=candidatos.slice(0,8).map((x,i)=>(i+1)+'. '+(x.cliente||x.telefone||'Sem cliente')+' → '+(x.destino||x.origem||'local não identificado')).join('\n');
+        const ok=silencioso ? false : confirm('WhatsApp FAST encontrou '+candidatos.length+' possível(is) nova(s) rota(s).\n\n'+resumo+(candidatos.length>8?'\n...':'')+'\n\nImportar agora?');
+        if(!ok){ if(!silencioso)mostrarToast('Novas mensagens mantidas para revisão posterior.','info'); return; }
+        if(typeof backupExportar==='function') backupExportar();
+        if(!bancoDados.rotas)bancoDados.rotas=[];
+        candidatos.forEach(x=>{ bancoDados.rotas.push(fastWaRota(x)); vistos.add(x.id); });
+        cfg.vistos=Array.from(vistos).slice(-5000); fastWaSalvarCfg(cfg);
+        if(typeof reordenarRotasPorData==='function')reordenarRotasPorData();
+        if(typeof salvarStorage==='function')salvarStorage();
+        if(typeof renderizar==='function')renderizar();
+        mostrarToast(candidatos.length+' nova(s) rota(s) importada(s) do WhatsApp.','success');
+      } catch(err) {
+        console.warn('FAST WhatsApp sync:',err);
+        if(!silencioso) mostrarToast('Não foi possível sincronizar o WhatsApp: '+err.message,'error');
+      }
+    }
+    let fastWaTimer=null;
+    function fastWaAgendar(){
+      if(fastWaTimer)clearInterval(fastWaTimer);
+      const cfg=fastWaCfg(); if(!cfg.auto)return;
+      fastWaTimer=setInterval(()=>fastWhatsappSincronizarAgora(true),cfg.intervalo*1000);
+    }
+    document.addEventListener('DOMContentLoaded',()=>setTimeout(fastWaAgendar,1500));
+
+    /* --- Importação segura do histórico WhatsApp Business --- */
+    function fastImportNorm(v) {
+      return String(v == null ? '' : v).trim().toLowerCase().replace(/\s+/g, ' ');
+    }
+
+    function fastImportChaveRota(r) {
+      // Se a rota veio do WhatsApp (auto ou historico), usa o whatsappMessageId
+      // como chave primaria de deduplicacao para evitar importar 2x a mesma rota.
+      if (r && r.whatsappMessageId) {
+        return 'wa:' + String(r.whatsappMessageId);
+      }
+      const imp = r && r._importacao ? r._importacao : {};
+      const dataHoraOriginal = imp.data_hora_original || '';
+      const telefone = imp.telefone || '';
+      return [
+        fastImportNorm(r && r.data),
+        fastImportNorm(r && r.cliente),
+        fastImportNorm(r && r.origem),
+        fastImportNorm(r && r.destino),
+        fastImportNorm(telefone),
+        fastImportNorm(dataHoraOriginal)
+      ].join('|');
+    }
+
+    function fastImportarHistoricoWhatsApp(input) {
+      const file = input && input.files ? input.files[0] : null;
+      if (!file) return;
+
+      const limparInput = () => { try { input.value = ''; } catch(e) {} };
+      const reader = new FileReader();
+
+      reader.onload = function(e) {
+        try {
+          const dados = JSON.parse(e.target.result);
+          if (!Array.isArray(dados)) {
+            mostrarToast('Arquivo inválido: esperado um JSON com uma lista de rotas.', 'error');
+            limparInput();
+            return;
+          }
+
+          const validas = dados.filter(r => r && typeof r === 'object' && (r.destino || r.origem || r.cliente));
+          if (!validas.length) {
+            mostrarToast('Nenhuma rota válida encontrada no arquivo.', 'warning');
+            limparInput();
+            return;
+          }
+
+          if (!bancoDados.rotas) bancoDados.rotas = [];
+          const existentes = new Set((bancoDados.rotas || []).map(fastImportChaveRota));
+          const novos = [];
+          let repetidosNoArquivo = 0;
+
+          validas.forEach((r, idx) => {
+            const copia = { ...r };
+            const chave = fastImportChaveRota(copia);
+            if (existentes.has(chave)) {
+              repetidosNoArquivo++;
+              return;
+            }
+            existentes.add(chave);
+
+            let novoId = Number(copia.id);
+            if (!Number.isFinite(novoId) || (bancoDados.rotas || []).some(x => String(x.id) === String(novoId))) {
+              novoId = Date.now() + idx;
+            }
+
+            copia.id = novoId;
+            copia.cliente = String(copia.cliente || '').trim();
+            copia.origem = String(copia.origem || '').trim();
+            copia.destino = String(copia.destino || '').trim();
+            copia.data = String(copia.data || '').slice(0, 10);
+            copia.tipoVolume = copia.tipoVolume || 'MERCADORIA';
+            copia.qtdMercadorias = parseInt(copia.qtdMercadorias, 10) || 0;
+            copia.pagamento = copia.pagamento || 'PIX';
+            copia.status = copia.status || 'Pendente';
+            copia.statusExecucao = copia.statusExecucao || 'CONCLUÍDA';
+            copia.valor = parseFloat(copia.valor) || 0;
+            copia.descricao = String(copia.descricao || '').trim();
+            copia.origemImportacao = 'WHATSAPP_HISTORICO';
+            copia.importadoEm = new Date().toISOString();
+            novos.push(copia);
+          });
+
+          if (!novos.length) {
+            mostrarToast('Nenhuma rota nova: os registros já parecem estar importados.', 'info');
+            limparInput();
+            return;
+          }
+
+          const executar = function() {
+            try {
+              // Backup baixado ANTES de qualquer alteração.
+              if (typeof backupExportar === 'function') backupExportar();
+
+              bancoDados.rotas.push(...novos);
+              if (typeof reordenarRotasPorData === 'function') reordenarRotasPorData();
+              const salvou = (typeof salvarStorage === 'function') ? salvarStorage() : false;
+              if (salvou === false) {
+                bancoDados.rotas.splice(Math.max(0, bancoDados.rotas.length - novos.length), novos.length);
+                mostrarToast('A importação foi revertida porque não foi possível salvar.', 'error');
+                limparInput();
+                return;
+              }
+
+              if (typeof renderizar === 'function') renderizar();
+              if (typeof atualizarListaClientes === 'function') { try { atualizarListaClientes(); } catch(e) {} }
+              mostrarToast('Histórico WhatsApp importado: ' + novos.length + ' rota(s).', 'success');
+
+              setTimeout(function() {
+                alert('Importação concluída.\n\n' +
+                  'Importadas: ' + novos.length + '\n' +
+                  'Ignoradas por duplicidade: ' + repetidosNoArquivo + '\n' +
+                  'Total de rotas no FAST: ' + (bancoDados.rotas || []).length + '\n\n' +
+                  'Um backup foi baixado antes da importação.');
+              }, 150);
+            } catch(err) {
+              console.error('FAST WhatsApp import:', err);
+              mostrarToast('Erro ao importar histórico: ' + err.message, 'error');
+            } finally {
+              limparInput();
+            }
+          };
+
+          const esc = function(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); };
+          const mensagem = 'Arquivo: ' + esc(file.name) + '<br><br>' +
+            '<strong>Registros válidos:</strong> ' + validas.length + '<br>' +
+            '<strong>Novos:</strong> ' + novos.length + '<br>' +
+            '<strong>Já existentes/duplicados:</strong> ' + repetidosNoArquivo + '<br><br>' +
+            'Antes de gravar, o FAST fará download de um backup completo dos dados atuais.';
+
+          if (typeof confirmarDialog === 'function') {
+            confirmarDialog('Importar histórico do WhatsApp', mensagem, executar);
+          } else if (confirm('Importar ' + novos.length + ' nova(s) rota(s) do histórico do WhatsApp?')) {
+            executar();
+          } else {
+            limparInput();
+          }
+        } catch(err) {
+          console.error(err);
+          mostrarToast('Erro ao ler o arquivo de importação: ' + err.message, 'error');
+          limparInput();
+        }
+      };
+
+      reader.onerror = function() {
+        mostrarToast('Não foi possível ler o arquivo selecionado.', 'error');
+        limparInput();
+      };
+      reader.readAsText(file);
+    }
+
     /* --- 4. Backup / Restore --- */
     function backupExportar() {
       const dados = JSON.stringify(bancoDados, null, 2);
@@ -23942,6 +24453,16 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
       <button type="button" class="emp-esquecer-btn" id="empEsquecerSenhaBtn" style="display:none;" onclick="empEsquecerSenha()">
         <i class="fa-solid fa-arrow-rotate-left"></i>Esquecer senha / Redefinir senha
       </button>
+      <!-- BOTÃO: Entrar na Área Protegida por biometria (r26) -->
+      <div id="empBioWrap" class="emp-bio-wrap" style="display:none;">
+        <div class="emp-bio-divider"><span>ou</span></div>
+        <button type="button" class="emp-bio-btn" id="empBioBtn" onclick="empBioEntrar()">
+          <i class="fa-solid fa-fingerprint"></i>
+          <span>Entrar com biometria</span>
+        </button>
+      </div>
+      <!-- BOTÃO: Ativar biometria na Área Protegida (mostrado após entrar, dentro dos dados) -->
+      <!-- (colocado dentro da caixa de dados via JS) -->
       <!-- Caixa de redefinicao de senha (tela "Esquecer senha") -->
       <div class="emp-reset-box" id="empResetBox" style="display:none;">
         <label for="empResetInput"><i class="fa-solid fa-shield-halved"></i>Palavra-chave de recuperação</label>
@@ -24111,6 +24632,16 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
           <div class="emp-data-logo" id="empDataLogo"></div>
           <div class="emp-data-name" id="empDataName"></div>
           <div class="emp-data-body" id="empDataBody"></div>
+        </div>
+
+        <!-- SEÇÃO: Biometria da Área Protegida (r26) -->
+        <div class="emp-section">
+          <div class="emp-section-title"><i class="fa-solid fa-fingerprint"></i> Biometria da Área Protegida</div>
+          <p class="emp-sql-info" id="empBioStatusTxt">Ative a biometria (impressão digital, Face ID ou Windows Hello) para entrar na Área Protegida sem digitar a senha.</p>
+          <button type="button" class="emp-bio-toggle-btn" id="empBioToggleBtn" onclick="empBioToggleAtivar()">
+            <i class="fa-solid fa-fingerprint"></i>
+            <span id="empBioToggleTxt">Ativar biometria</span>
+          </button>
         </div>
       </div>
 
@@ -24672,5 +25203,4 @@ window.fastMobileNav = function(ev, abaId, botao) {
 
 </body>
 </html>
-
 
