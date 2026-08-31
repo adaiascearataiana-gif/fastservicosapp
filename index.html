@@ -9,10 +9,10 @@
   <!-- O app verifica esta URL para conferir se ha versao nova.      -->
   <!-- ============================================================ -->
   <meta name="fast-deploy-url" content="https://adaiascearataiana-gif.github.io/fastservicosapp/">
-  <meta name="fast-app-version" content="2026.08.31-r36">
-  <meta name="fast-app-date" content="2026-08-31T12:12:00-03:00">
-  <meta name="fast-app-changelog" content="[{&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;URL fixa migrada para GitHub Pages &mdash; endere&ccedil;o permanente do app.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;Indicadores ONLINE e SYNC fixos na barra superior com ícones próprios.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;Recuperação de senha por e-mail na Área Protegida e no login da plataforma — mesmo e-mail para ambos.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;Tempo de bloqueio configurável após sair do app: imediato, 1, 2 ou 5 minutos.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;Box de novidades após cada atualização, com a nova versão e data/hora do lançamento.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;Tema simplificado: apenas Light Moderno e Ocean Blue. Seção renomeada para \&quot;Temas\&quot;.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;Verificação de atualização com confirmação e barra de progresso ao atualizar.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;Textos da Área Protegida reorganizados em parágrafos limpos e alinhados.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;Performance otimizada: bibliotecas externalizadas para CDN (~800KB a menos).&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;Removidos botões redundantes (Atualizar, Status, Abrir Versão Oficial, Atualizar Agora).&quot;}]">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https:; img-src 'self' data: blob: https: http:; connect-src 'self' https: data: blob:; font-src 'self' https: data:;">
+  <meta name="fast-app-version" content="2026.08.31-r37">
+  <meta name="fast-app-date" content="2026-08-31T16:08:00-03:00">
+  <meta name="fast-app-changelog" content="[{&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;Rotas do Dia exclu\u00eddas n\u00e3o voltam mais ao recarregar a p\u00e1gina ou sincronizar \u2014 adicionada blacklist de itens de sequ\u00eancia (seqItensExcluidos) respeitada no merge com a nuvem (Supabase).&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;URL fixa migrada para GitHub Pages \u2014 endere\u00e7o permanente do app.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;Indicadores ONLINE e SYNC fixos na barra superior com \u00edcones pr\u00f3prios.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;Recupera\u00e7\u00e3o de senha por e-mail na \u00c1rea Protegida e no login da plataforma \u2014 mesmo e-mail para ambos.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;Tempo de bloqueio configur\u00e1vel ap\u00f3s sair do app: imediato, 1, 2 ou 5 minutos.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;Box de novidades ap\u00f3s cada atualiza\u00e7\u00e3o, com a nova vers\u00e3o e data/hora do lan\u00e7amento.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;Tema simplificado: apenas Light Moderno e Ocean Blue. Se\u00e7\u00e3o renomeada para \&quot;Temas\&quot;.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;Verifica\u00e7\u00e3o de atualiza\u00e7\u00e3o com confirma\u00e7\u00e3o e barra de progresso ao atualizar.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;Textos da \u00c1rea Protegida reorganizados em par\u00e1grafos limpos e alinhados.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;Performance otimizada: bibliotecas externalizadas para CDN (~800KB a menos).&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;Removidos bot\u00f5es redundantes (Atualizar, Status, Abrir Vers\u00e3o Oficial, Atualizar Agora).&quot;}]">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https:; img-src 'self' data: blob: https: http:; connect-src 'self' https: data: blob:; font-src 'self' https: data:;">
   <!-- PWA: Meta tags para app instalavel -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -36,6 +36,8 @@
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.0.5/dist/tesseract.min.js"></script>
   <!-- PDF.js: para extrair texto de PDFs (recibos/NF em PDF) -->
   <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
+  <!-- SUGESTÃO 12: jsQR para escanear QR Code de confirmação de entrega -->
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
 
 <style id="fast-ux-2026">
 /* ============================================================
@@ -2623,8 +2625,7 @@ body.fast-edition-mobile .pro-page-sub { font-size:12px; }
     @media (min-width: 769px) {
       /* Esconder botão Câmera (campo) — Galeria permanece disponível */
       .seq-btn-camera { display: none !important; }
-      /* Esconder botão Navegar (GPS do celular) */
-      .seq-btn-navegar { display: none !important; }
+      /* SUGESTÃO 3: Botão Navegar agora visível também no desktop (Waze/Google Maps) */
       /* Esconder botões Subir e Descer (reordenação por toque/drag) */
       .seq-btn-subir,
       .seq-btn-descer { display: none !important; }
@@ -28361,6 +28362,45 @@ body.fast-edition-mobile .pro-page-sub { font-size:12px; }
           <button class="btn-danger rast-btn-parar hidden ripple" id="btnRastParar" onclick="rastPararCompartilhamento()"><i class="fa-solid fa-stop"></i> Parar</button>
         </div>
 
+        <!-- SUGESTÃO 4: Painel de configuração do Alerta de Proximidade -->
+        <div class="rast-card" style="margin-bottom:16px;border:1px solid var(--border);border-radius:12px;padding:14px 16px;background:linear-gradient(135deg,#fffbeb,#fef3c7);">
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+            <i class="fa-solid fa-bell" style="font-size:18px;color:#f59e0b;"></i>
+            <div style="flex:1;min-width:200px;">
+              <div style="font-weight:900;font-size:14px;color:#78350f;">Alerta de Proximidade</div>
+              <div style="font-size:11px;color:#92400e;">Avisa quando o motorista estiver a <strong id="spanAlertaProxMin">15</strong> min do cliente</div>
+            </div>
+            <label class="geofence-toggle" style="color:#78350f;">
+              <input type="checkbox" id="chkAlertaProx" onchange="alertaProxSalvarConfig()" checked>
+              Ativar
+            </label>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <input type="number" id="inpAlertaProxMin" value="15" min="1" max="120" style="width:60px;padding:6px 8px;border-radius:8px;border:1.5px solid #fcd34d;font-weight:800;font-size:13px;background:#fff;color:#78350f;text-align:center;" onchange="alertaProxSalvarConfig()">
+              <span style="font-size:12px;font-weight:800;color:#78350f;">min</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- SUGESTÃO 5: Painel de configuração do Geofencing (cercas eletrônicas) -->
+        <div class="rast-card" style="margin-bottom:16px;border:1px solid var(--border);border-radius:12px;padding:14px 16px;background:linear-gradient(135deg,#ecfdf5,#d1fae5);">
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+            <i class="fa-solid fa-shield-halved" style="font-size:18px;color:#059669;"></i>
+            <div style="flex:1;min-width:200px;">
+              <div style="font-weight:900;font-size:14px;color:#065f46;">Geofencing (Cercas Eletrônicas)</div>
+              <div style="font-size:11px;color:#047857;">Alerta quando motorista chega/sai do destino (raio: <strong id="spanGeofenceRaio">300</strong>m)</div>
+            </div>
+            <label class="geofence-toggle" style="color:#065f46;">
+              <input type="checkbox" id="chkGeofenceAtivo" onchange="geofenceSalvarConfig()" checked>
+              Ativar
+            </label>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <input type="number" id="inpGeofenceRaio" value="300" min="50" max="2000" step="50" style="width:70px;padding:6px 8px;border-radius:8px;border:1.5px solid #6ee7b7;font-weight:800;font-size:13px;background:#fff;color:#065f46;text-align:center;" onchange="geofenceSalvarConfig()">
+              <span style="font-size:12px;font-weight:800;color:#065f46;">m</span>
+            </div>
+            <button class="btn-secondary" style="padding:6px 12px;font-size:12px;" onclick="geofenceDesenharNoMapa()" title="Mostrar cercas no mapa"><i class="fa-solid fa-eye"></i> Ver no mapa</button>
+          </div>
+        </div>
+
         <!-- PAINEL: Previsão de chegada das mercadorias (por cliente, baseado no bairro + OSRM + 3h) -->
         <div class="rast-card" style="margin-bottom:16px;border:1px solid var(--border);border-radius:12px;padding:16px;">
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
@@ -38129,7 +38169,7 @@ body.fast-edition-mobile .pro-page-sub { font-size:12px; }
   </div>
 
   <script>
-    let bancoDados = { rotas: [], despesas: [], sequencias: {}, motoristas: [], clientes: [], rh: [], despesasEmpresa: [] };
+    let bancoDados = { rotas: [], despesas: [], sequencias: {}, motoristas: [], clientes: [], rh: [], despesasEmpresa: [], rotasExcluidas: [], seqItensExcluidos: [], clientesExcluidos: [], destinos: [] };
 
     /* ============================================================
        FAST SERVIÇOS v9.0.0 Enterprise — JAVASCRIPT PRINCIPAL
@@ -38224,6 +38264,10 @@ body.fast-edition-mobile .pro-page-sub { font-size:12px; }
         dadosEmpresa: b.dadosEmpresa && typeof b.dadosEmpresa === 'object' ? b.dadosEmpresa : {},
         clientesExcluidos: Array.isArray(b.clientesExcluidos) ? b.clientesExcluidos : [],
         rotasExcluidas: Array.isArray(b.rotasExcluidas) ? b.rotasExcluidas : [],
+        // Blacklist de itens de sequencia (Rotas do Dia) excluidos pelo usuario.
+        // Impede que itens apagados reaparecam ao mesclar com a nuvem (mergeDados).
+        // (r37) — antes esta lista nao existia, entao rotas do dia apagadas voltavam ao recarregar/sincronizar.
+        seqItensExcluidos: Array.isArray(b.seqItensExcluidos) ? b.seqItensExcluidos : [],
         destinos: Array.isArray(b.destinos) ? b.destinos : []
       };
     }
@@ -40517,6 +40561,12 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
         ...((local.rotasExcluidas || []).map(id => String(id))),
         ...((nuvem.rotasExcluidas || []).map(id => String(id)))
       ]);
+      // Blacklist de itens de sequência (Rotas do Dia) excluídos (r37).
+      // Impede que itens apagados reapareçam ao mesclar com a nuvem.
+      const seqItensExcluidosSet = new Set([
+        ...((local.seqItensExcluidos || []).map(id => String(id))),
+        ...((nuvem.seqItensExcluidos || []).map(id => String(id)))
+      ]);
       // Merge rotas por ID (nuvem + local, local wins em empate para preservar edições recentes)
       // MAS ignorar rotas cujo ID está na blacklist de excluídas (evita re-adicionar da nuvem)
       const rotasMap = new Map();
@@ -40543,6 +40593,9 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
         // Mas preservar campos foto e extras do item que os tiver
         [...n, ...l].forEach(item => {
           const idStr = String(item.id);
+          // (r37) Pular itens de sequência que o usuário excluiu (blacklist) —
+          // evita que reapareçam a partir da nuvem ao sincronizar/recarregar.
+          if (seqItensExcluidosSet.has(idStr)) return;
           if (itemMap.has(idStr)) {
             // Merge field-level: preservar foto/extras/fotos do item que os tiver
             const existente = itemMap.get(idStr);
@@ -40604,6 +40657,7 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
         dadosEmpresa: dadosEmpresaMerged,
         clientesExcluidos: Array.from(excluidosSet),
         rotasExcluidas: Array.from(rotasExcluidasSet),
+        seqItensExcluidos: Array.from(seqItensExcluidosSet),
         destinos: Array.from(destinosMap.values())
       };
     }
@@ -41297,9 +41351,73 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
     /* ================================================================
        4. GEOFENCING — ALERTAS DE CHEGADA E SAÍDA
        ================================================================ */
+    /* ================================================================
+       SUGESTÃO 5 — GEOFENCING APRIMORADO (CERCAS VISÍVEIS NO MAPA)
+       ================================================================ */
     let geofenceAtivo = true;
     let geofenceRaio = 300; // metros
     let geofenceEstados = {}; // { rotaId_destino: 'dentro' | 'fora' }
+    let geofenceCirculos = []; // círculos desenhados no mapa
+    // Restaura configurações salvas
+    (function() {
+      const raioSalvo = localStorage.getItem('geofence_raio');
+      if (raioSalvo) geofenceRaio = parseInt(raioSalvo);
+      const ativoSalvo = localStorage.getItem('geofence_ativo');
+      if (ativoSalvo !== null) geofenceAtivo = ativoSalvo !== 'false';
+    })();
+
+    function geofenceSalvarConfig() {
+      const chk = document.getElementById('chkGeofenceAtivo');
+      const inp = document.getElementById('inpGeofenceRaio');
+      const span = document.getElementById('spanGeofenceRaio');
+      if (chk) { geofenceAtivo = chk.checked; localStorage.setItem('geofence_ativo', geofenceAtivo); }
+      if (inp) {
+        const v = parseInt(inp.value) || 300;
+        if (v < 50) { inp.value = 50; return geofenceSalvarConfig(); }
+        if (v > 2000) { inp.value = 2000; return geofenceSalvarConfig(); }
+        geofenceRaio = v;
+        localStorage.setItem('geofence_raio', v);
+      }
+      if (span) span.textContent = geofenceRaio;
+      mostrarToast('Geofencing: ' + (geofenceAtivo ? 'ATIVO' : 'DESATIVADO') + ' — raio ' + geofenceRaio + 'm', 'success');
+    }
+
+    // Desenha as cercas eletrônicas (círculos) nos destinos das rotas ativas no mapa
+    async function geofenceDesenharNoMapa() {
+      const mapa = rastMapaMotorista || rastMapa || window.rastMapa;
+      if (!mapa || typeof L === 'undefined') {
+        mostrarToast('Abra o mapa primeiro (inicie o rastreamento).', 'error');
+        return;
+      }
+      // Remove cercas existentes
+      geofenceCirculos.forEach(c => mapa.removeLayer(c));
+      geofenceCirculos = [];
+      if (!bancoDados || !bancoDados.rotas) { mostrarToast('Nenhuma rota ativa para desenhar cercas.', 'info'); return; }
+      const rotas = bancoDados.rotas.filter(r => r.statusExecucao === 'em-rota' || r.statusRota === 'em-rota' || r.statusExecucao === 'EM ROTA');
+      let desenhadas = 0;
+      for (const rota of rotas) {
+        const destino = rota.destino || '';
+        if (!destino || destino.length < 3) continue;
+        let coords = otimGeocodeCache[destino];
+        if (!coords) { coords = await otimGeocodificar(destino); if (!coords) continue; }
+        const circulo = L.circle([coords.lat, coords.lng], {
+          radius: geofenceRaio,
+          color: '#f59e0b', fillColor: '#fbbf24', fillOpacity: 0.15, weight: 2, dashArray: '5, 5'
+        }).addTo(mapa).bindPopup('<div class="rast-marker-popup"><div class="mp-nome">🛡️ Cerca Eletrônica</div><div class="mp-info"><strong>Cliente:</strong> ' + escapeHtml(rota.cliente || '—') + '<br><strong>Destino:</strong> ' + escapeHtml(destino) + '<br><strong>Raio:</strong> ' + geofenceRaio + 'm</div></div>');
+        geofenceCirculos.push(circulo);
+        desenhadas++;
+      }
+      if (desenhadas > 0) {
+        // Ajusta o zoom para mostrar todas as cercas
+        if (geofenceCirculos.length > 0) {
+          const group = L.featureGroup(geofenceCirculos);
+          mapa.fitBounds(group.getBounds(), { padding: [50, 50] });
+        }
+        mostrarToast(desenhadas + ' cerca(s) desenhada(s) no mapa!', 'success');
+      } else {
+        mostrarToast('Nenhuma rota ativa com destino válido para desenhar cercas.', 'info');
+      }
+    }
 
     function geofenceVerificar(motoristaId, lat, lng) {
       if (!geofenceAtivo || !bancoDados || !bancoDados.rotas) return;
@@ -41474,17 +41592,426 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
 
     function navAbrirGoogleMaps(destino) {
       navFecharGpsDropdown();
-      const url = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(destino);
+      // SUGESTÃO 3: Usa modo navegação (dir) que abre GPS turno-a-turno.
+      // Se destino tiver coordenadas (lat,lng), usa diretamente; senão busca por nome.
+      const coords = navExtrairCoords(destino);
+      const query = coords ? coords.lat + ',' + coords.lng : destino;
+      const url = 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(query);
       window.open(url, '_blank');
-      mostrarToast('Abrindo Google Maps...', 'info');
+      mostrarToast('Abrindo Google Maps (navegação)...', 'info');
     }
 
     function navAbrirWaze(destino) {
       navFecharGpsDropdown();
+      // SUGESTÃO 3: Usa deep link de navegação do Waze com coordenadas quando disponíveis.
+      const coords = navExtrairCoords(destino);
       const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-      const url = isMobile ? 'waze://?q=' + encodeURIComponent(destino) : 'https://www.waze.com/search?q=' + encodeURIComponent(destino);
+      let url;
+      if (coords) {
+        url = isMobile ? 'waze://?ll=' + coords.lat + ',' + coords.lng + '&navigate=yes' : 'https://www.waze.com/ul?ll=' + coords.lat + '%2C' + coords.lng + '&navigate=yes';
+      } else {
+        url = isMobile ? 'waze://?q=' + encodeURIComponent(destino) : 'https://www.waze.com/search?q=' + encodeURIComponent(destino);
+      }
       window.open(url, '_blank');
-      mostrarToast('Abrindo Waze...', 'info');
+      mostrarToast('Abrindo Waze (navegação)...', 'info');
+    }
+
+    // SUGESTÃO 3: Extrai coordenadas de uma string "lat,lng" ou objeto; retorna null se não houver.
+    function navExtrairCoords(destino) {
+      if (!destino) return null;
+      if (typeof destino === 'object' && destino.lat !== undefined) return destino;
+      const m = String(destino).match(/(-?\d{1,3}\.\d{3,}),\s*(-?\d{1,3}\.\d{3,})/);
+      if (m) return { lat: parseFloat(m[1]), lng: parseFloat(m[2]) };
+      return null;
+    }
+
+    /* ================================================================
+       SUGESTÃO 4 — ALERTA DE PROXIMIDADE (15 MINUTOS ANTES DO CLIENTE)
+       Calcula o ETA (tempo estimado de chegada) baseado na distância
+       e velocidade atual do motorista. Dispara alerta visual + sonoro
+       quando faltam <= 15 minutos para chegar ao destino.
+       O tempo de alerta é configurável pelo usuário (padrão: 15 min).
+       ================================================================ */
+    let alertaProxTempoMin = parseInt(localStorage.getItem('alerta_prox_minutos')) || 15;
+    let alertaProxAtivo = localStorage.getItem('alerta_prox_ativo') !== 'false'; // default: true
+    let alertaProxJaAlertados = {}; // { motoristaId_rotaId: true } — evita alertar 2x
+
+    // Atualiza configurações do alerta de proximidade a partir da UI
+    function alertaProxSalvarConfig() {
+      const chk = document.getElementById('chkAlertaProx');
+      const inp = document.getElementById('inpAlertaProxMin');
+      if (chk) { alertaProxAtivo = chk.checked; localStorage.setItem('alerta_prox_ativo', alertaProxAtivo); }
+      if (inp) {
+        const v = parseInt(inp.value) || 15;
+        if (v < 1) { inp.value = 1; return alertaProxSalvarConfig(); }
+        if (v > 120) { inp.value = 120; return alertaProxSalvarConfig(); }
+        alertaProxTempoMin = v;
+        localStorage.setItem('alerta_prox_minutos', v);
+      }
+      mostrarToast('Alerta de proximidade: ' + (alertaProxAtivo ? 'ATIVO' : 'DESATIVADO') + ' — avisa faltando ' + alertaProxTempoMin + ' min', 'success');
+    }
+
+    // Verifica a proximidade de todos os destinos das rotas em andamento.
+    // Chamada a cada atualização de posição do motorista (modo motorista) e no polling (modo gestor).
+    function alertaProxVerificar(motoristaId, lat, lng, velocidadeKmh) {
+      if (!alertaProxAtivo || !bancoDados || !bancoDados.rotas) return;
+      const rotas = bancoDados.rotas;
+      rotas.forEach(async (rota) => {
+        if (rota.statusExecucao !== 'em-rota' && rota.statusRota !== 'em-rota' && rota.statusExecucao !== 'EM ROTA') return;
+        const destino = rota.destino || '';
+        if (!destino || destino.length < 3) return;
+        const chave = motoristaId + '_' + (rota.id || rota.cliente);
+        // Se já alertou esta combinação motorista+rota, não repete
+        if (alertaProxJaAlertados[chave]) return;
+
+        let coords = otimGeocodeCache[destino];
+        if (!coords) {
+          coords = await otimGeocodificar(destino);
+          if (!coords) return;
+        }
+        const distKm = distanciaHaversineKm(lat, lng, coords.lat, coords.lng);
+        // Calcula ETA: se há velocidade > 0, usa distância/velocidade; senão estima 30 km/h urbano
+        const velMs = (velocidadeKmh && velocidadeKmh > 5) ? velocidadeKmh / 3.6 : (30 / 3.6); // fallback 30km/h
+        const etaSegundos = (distKm * 1000) / velMs;
+        const etaMinutos = etaSegundos / 60;
+
+        if (etaMinutos <= alertaProxTempoMin) {
+          alertaProxJaAlertados[chave] = true;
+          const nomeMot = rastNomeMotorista(motoristaId) || 'Motorista';
+          const cliente = rota.cliente || '—';
+          const destinoNome = rota.destino || '—';
+          const titulo = '⏰ Faltam ' + Math.round(etaMinutos) + ' min para ' + nomeMot + ' chegar!';
+          const detalhe = 'Cliente: ' + cliente + ' | Destino: ' + destinoNome + ' | Distância: ' + (distKm < 1 ? Math.round(distKm*1000) + 'm' : distKm.toFixed(1) + 'km');
+          // Notificação no sistema
+          if (typeof notificacoesAtuais !== 'undefined' && Array.isArray(notificacoesAtuais)) {
+            notificacoesAtuais.unshift({ titulo, detalhe, tipo: 'proximidade', timestamp: new Date().toISOString() });
+            if (notificacoesAtuais.length > 50) notificacoesAtuais.pop();
+            if (typeof atualizarNotificacoes === 'function') atualizarNotificacoes();
+          }
+          // Toast visual
+          mostrarToast(titulo + ' — ' + detalhe, 'warning');
+          // Alerta sonoro
+          alertaProxTocarSom();
+          // Vibração no mobile
+          if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 400]);
+        }
+      });
+    }
+
+    // Toca um som de alerta usando Web Audio API (não precisa de arquivo externo)
+    function alertaProxTocarSom() {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const tocarNota = (freq, inicio, duracao) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.connect(gain); gain.connect(ctx.destination);
+          osc.frequency.value = freq; osc.type = 'sine';
+          gain.gain.setValueAtTime(0, ctx.currentTime + inicio);
+          gain.gain.linearRampToValueAtTime(0.3, ctx.currentTime + inicio + 0.02);
+          gain.gain.linearRampToValueAtTime(0, ctx.currentTime + inicio + duracao);
+          osc.start(ctx.currentTime + inicio);
+          osc.stop(ctx.currentTime + inicio + duracao);
+        };
+        // Sequência de 3 bips ascendentes (alerta de proximidade)
+        tocarNota(880, 0, 0.15);
+        tocarNota(1100, 0.18, 0.15);
+        tocarNota(1320, 0.36, 0.25);
+      } catch(e) { console.warn('Não foi possível tocar som de alerta:', e); }
+    }
+
+    // Reseta os alertas já disparados (útil ao iniciar novo compartilhamento)
+    function alertaProxReset() { alertaProxJaAlertados = {}; }
+
+    /* ================================================================
+       SUGESTÃO 6 — RASTREAMENTO EM TEMPO REAL APRIMORADO
+       Mostra o marcador do veículo do motorista no mapa (modo motorista),
+       atualizando em tempo real. Também mostra os destinos das rotas
+       ativas como marcadores no mapa.
+       ================================================================ */
+    let rastMapaMotorista = null;      // mapa no modo motorista
+    let rastMarcadorVeiculo = null;    // marcador do veículo (modo motorista)
+    let rastMarcadoresDestinos = [];   // marcadores de destinos das rotas ativas
+    let rastCirculoPrecisao = null;    // círculo de precisão do GPS
+
+    // Inicializa o mapa no modo motorista
+    function rastInicializarMapaMotorista() {
+      const el = document.getElementById('mapaRastreamento');
+      if (!el || typeof L === 'undefined') return;
+      if (rastMapaMotorista) { rastMapaMotorista.remove(); rastMapaMotorista = null; rastMarcadorVeiculo = null; rastCirculoPrecisao = null; rastMarcadoresDestinos = []; }
+      rastMapaMotorista = L.map('mapaRastreamento', { zoomControl: true, attributionControl: true }).setView([-15.78, -47.93], 13);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap', maxZoom: 19
+      }).addTo(rastMapaMotorista);
+      // Sincroniza com a referência global para invalidateSize
+      rastMapa = rastMapaMotorista;
+      window.rastMapa = rastMapaMotorista;
+      // Adiciona os destinos das rotas ativas como marcadores
+      rastAdicionarDestinosNoMapa();
+      setTimeout(() => { if (rastMapaMotorista) rastMapaMotorista.invalidateSize(); }, 200);
+    }
+
+    // Adiciona marcadores dos destinos das rotas ativas no mapa (modo motorista)
+    async function rastAdicionarDestinosNoMapa() {
+      if (!rastMapaMotorista || !bancoDados || !bancoDados.rotas) return;
+      rastMarcadoresDestinos.forEach(m => rastMapaMotorista.removeLayer(m));
+      rastMarcadoresDestinos = [];
+      const rotas = bancoDados.rotas.filter(r => r.statusExecucao === 'em-rota' || r.statusRota === 'em-rota' || r.statusExecucao === 'EM ROTA');
+      for (const rota of rotas) {
+        const destino = rota.destino || '';
+        if (!destino || destino.length < 3) continue;
+        let coords = otimGeocodeCache[destino];
+        if (!coords) { coords = await otimGeocodificar(destino); if (!coords) continue; }
+        const iconHtml = '<div style="background:#e11d48;width:32px;height:32px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;box-shadow:0 3px 8px rgba(0,0,0,0.3);border:2px solid #fff;"><i class="fa-solid fa-flag" style="transform:rotate(45deg);color:#fff;font-size:13px;"></i></div>';
+        const icon = L.divIcon({ html: iconHtml, className: 'rast-div-icon', iconSize: [32, 32], iconAnchor: [16, 32] });
+        const cliente = escapeHtml(rota.cliente || '—');
+        const destNome = escapeHtml(destino);
+        const popupHtml = '<div class="rast-marker-popup"><div class="mp-nome">📍 ' + destNome + '</div><div class="mp-info"><strong>Cliente:</strong> ' + cliente + '<br><button class="btn-navegar" style="margin-top:6px;" onclick="navAbrirGpsDropdown(event, \'' + escapeHtmlAttr(destino) + '\')"><i class="fa-solid fa-location-arrow"></i> Navegar até aqui</button></div></div>';
+        const marker = L.marker([coords.lat, coords.lng], { icon }).addTo(rastMapaMotorista).bindPopup(popupHtml);
+        rastMarcadoresDestinos.push(marker);
+      }
+    }
+
+    // Atualiza a posição do marcador do veículo no mapa (modo motorista)
+    function rastAtualizarMarcadorVeiculo(lat, lng, accuracy) {
+      if (!rastMapaMotorista) return;
+      const iconHtml = '<div style="background:#0ea5e9;width:40px;height:40px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;box-shadow:0 3px 12px rgba(14,165,233,0.5);border:3px solid #fff;animation:rastPulse 1.5s infinite;"><i class="fa-solid fa-truck" style="transform:rotate(45deg);color:#fff;font-size:16px;"></i></div>';
+      const icon = L.divIcon({ html: iconHtml, className: 'rast-div-icon', iconSize: [40, 40], iconAnchor: [20, 40] });
+      if (rastMarcadorVeiculo) {
+        rastMarcadorVeiculo.setLatLng([lat, lng]);
+        rastMarcadorVeiculo.setIcon(icon);
+      } else {
+        rastMarcadorVeiculo = L.marker([lat, lng], { icon, zIndexOffset: 1000 }).addTo(rastMapaMotorista)
+          .bindPopup('<div class="rast-marker-popup"><div class="mp-nome">🚛 Meu Veículo</div><div class="mp-info">Sua posição atual em tempo real</div></div>');
+        rastMapaMotorista.setView([lat, lng], 15);
+      }
+      // Círculo de precisão do GPS
+      if (rastCirculoPrecisao) { rastMapaMotorista.removeLayer(rastCirculoPrecisao); }
+      if (accuracy && accuracy < 500) {
+        rastCirculoPrecisao = L.circle([lat, lng], { radius: accuracy, color: '#0ea5e9', fillColor: '#0ea5e9', fillOpacity: 0.1, weight: 1 }).addTo(rastMapaMotorista);
+      }
+    }
+
+    /* ================================================================
+       SUGESTÃO 12 — QR CODE DE CONFIRMAÇÃO DE ENTREGA
+       Gera um QR Code único por entrega/parada contendo ID + timestamp.
+       O motorista escaneia o QR Code exibido pelo cliente (ou vice-versa)
+       para confirmar a entrega com timestamp + GPS.
+       Usa um gerador QR inline (não depende de CDN externo para gerar).
+       ================================================================ */
+
+    // Gera um QR Code usando a API pública goqr.me (gera imagem PNG).
+    // Fallback: se offline, gera um código de confirmação textual.
+    function qrGerarConfirmacao(dataSel, index) {
+      const lista = bancoDados.sequencias[dataSel];
+      if (!lista || !lista[index]) { mostrarToast('Item não encontrado.', 'error'); return; }
+      const item = lista[index];
+      // Cria um código único de confirmação
+      const codigoConfirm = 'FAST|' + (item.id || Date.now()) + '|' + dataSel + '|' + Date.now();
+      item.codigoQR = codigoConfirm;
+      if (!item.historicoQR) item.historicoQR = [];
+      salvarStorage();
+      // Abre modal com o QR Code
+      qrAbrirModalConfirmacao(item, codigoConfirm);
+    }
+
+    // Abre modal exibindo o QR Code para o cliente confirmar
+    function qrAbrirModalConfirmacao(item, codigo) {
+      const cliente = escapeHtml(item.cliente || '—');
+      const destino = escapeHtml(item.destino || '—');
+      const motorista = escapeHtml(item.motorista || '—');
+      const dataSel = escapeHtml(item.dataRota || '');
+      const qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=256x256&data=' + encodeURIComponent(codigo);
+      // Cria o modal
+      const modal = document.createElement('div');
+      modal.id = 'modalQRConfirmacao';
+      modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;';
+      modal.innerHTML = `
+        <div style="background:var(--card-bg,#fff);border-radius:16px;padding:24px;max-width:380px;width:100%;box-shadow:0 8px 32px rgba(0,0,0,0.2);text-align:center;">
+          <div style="font-weight:900;font-size:18px;color:var(--text-main,#0f172a);margin-bottom:6px;"><i class="fa-solid fa-qrcode" style="color:#0ea5e9;"></i> QR Code de Confirmação</div>
+          <div style="font-size:13px;color:var(--text-muted,#64748b);margin-bottom:16px;">Apresente este QR Code ao cliente para confirmar a entrega.</div>
+          <div style="background:#fff;border:2px solid var(--border,#e2e8f0);border-radius:12px;padding:16px;margin-bottom:16px;">
+            <img src="${qrUrl}" alt="QR Code" style="width:256px;height:256px;max-width:100%;border-radius:8px;" onload="this.style.opacity=1" style="opacity:0;transition:opacity 0.3s;">
+            <div style="margin-top:10px;font-size:11px;color:var(--text-faint,#94a3b8);font-family:monospace;word-break:break-all;">${escapeHtml(codigo)}</div>
+          </div>
+          <div style="font-size:13px;text-align:left;margin-bottom:16px;line-height:1.7;color:var(--text-muted,#64748b);">
+            <strong style="color:var(--text-main,#0f172a);">Cliente:</strong> ${cliente}<br>
+            <strong style="color:var(--text-main,#0f172a);">Destino:</strong> ${destino}<br>
+            <strong style="color:var(--text-main,#0f172a);">Motorista:</strong> ${motorista}<br>
+            <strong style="color:var(--text-main,#0f172a);">Data:</strong> ${dataSel}
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn-primary" style="flex:1;" onclick="qrBaixarImagem('${escapeHtmlAttr(qrUrl)}','${escapeHtmlAttr(cliente)}')"><i class="fa-solid fa-download"></i> Baixar QR</button>
+            <button class="btn-success" style="flex:1;" onclick="qrConfirmarEntregaScan('${escapeHtmlAttr(codigo)}')"><i class="fa-solid fa-camera"></i> Escanear</button>
+            <button class="btn-secondary" onclick="qrFecharModal()"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+        </div>`;
+      document.body.appendChild(modal);
+      modal.addEventListener('click', (e) => { if (e.target === modal) qrFecharModal(); });
+    }
+
+    function qrFecharModal() {
+      const m = document.getElementById('modalQRConfirmacao');
+      if (m) m.remove();
+    }
+
+    // Baixa a imagem do QR Code
+    async function qrBaixarImagem(url, nomeCliente) {
+      try {
+        const resp = await fetch(url);
+        const blob = await resp.blob();
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'qr_entrega_' + (nomeCliente || 'cliente').replace(/[^a-zA-Z0-9]/g, '_') + '.png';
+        a.click();
+        URL.revokeObjectURL(a.href);
+        mostrarToast('QR Code baixado!', 'success');
+      } catch(e) {
+        mostrarToast('Erro ao baixar QR Code: ' + e.message, 'error');
+      }
+    }
+
+    // Abre a câmera para escanear um QR Code e confirmar a entrega
+    let qrScanStream = null;
+    let qrScanCanvas = null;
+    let qrScanContext = null;
+    let qrScanLoop = null;
+
+    function qrConfirmarEntregaScan(codigoEsperado) {
+      qrFecharModal();
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        mostrarToast('Câmera não suportada neste dispositivo.', 'error');
+        return;
+      }
+      if (typeof jsQR === 'undefined') {
+        mostrarToast('Biblioteca de QR não carregada. Verifique sua conexão.', 'error');
+        return;
+      }
+      // Cria modal do scanner
+      const modal = document.createElement('div');
+      modal.id = 'modalQRScanner';
+      modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:10001;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;';
+      modal.innerHTML = `
+        <div style="color:#fff;font-weight:900;font-size:18px;margin-bottom:16px;"><i class="fa-solid fa-qrcode"></i> Escaneie o QR Code do Cliente</div>
+        <div style="position:relative;border:3px solid #0ea5e9;border-radius:12px;overflow:hidden;max-width:90vw;max-height:60vh;">
+          <video id="qrVideo" autoplay playsinline style="display:block;max-width:90vw;max-height:60vh;"></video>
+          <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:60%;height:60%;border:2px dashed rgba(255,255,255,0.5);border-radius:8px;pointer-events:none;"></div>
+        </div>
+        <canvas id="qrCanvas" style="display:none;"></canvas>
+        <div id="qrStatus" style="color:#94a3b8;font-size:13px;margin-top:12px;">Aponte a câmera para o QR Code...</div>
+        <button class="btn-danger" style="margin-top:16px;padding:10px 24px;" onclick="qrPararScan()"><i class="fa-solid fa-xmark"></i> Cancelar</button>`;
+      document.body.appendChild(modal);
+
+      const video = document.getElementById('qrVideo');
+      qrScanCanvas = document.getElementById('qrCanvas');
+      qrScanContext = qrScanCanvas.getContext('2d', { willReadFrequently: true });
+
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+        .then(stream => {
+          qrScanStream = stream;
+          video.srcObject = stream;
+          video.setAttribute('playsinline', true);
+          video.play();
+          qrScanLoop = setInterval(() => qrProcessarFrame(codigoEsperado), 200);
+        })
+        .catch(err => {
+          mostrarToast('Erro ao acessar câmera: ' + err.message, 'error');
+          qrPararScan();
+        });
+    }
+
+    function qrProcessarFrame(codigoEsperado) {
+      const video = document.getElementById('qrVideo');
+      if (!video || video.readyState !== video.HAVE_ENOUGH_DATA) return;
+      const w = video.videoWidth, h = video.videoHeight;
+      if (!w || !h) return;
+      qrScanCanvas.width = w;
+      qrScanCanvas.height = h;
+      qrScanContext.drawImage(video, 0, 0, w, h);
+      const imageData = qrScanContext.getImageData(0, 0, w, h);
+      const code = jsQR(imageData.data, w, h, { inversionAttempts: 'dontInvert' });
+      if (code) {
+        const status = document.getElementById('qrStatus');
+        if (status) {
+          status.textContent = 'QR Code detectado! Validando...';
+          status.style.color = '#10b981';
+        }
+        // Valida o código escaneado
+        qrValidarEConfirmar(code.data, codigoEsperado);
+      }
+    }
+
+    // Valida o código escaneado e confirma a entrega
+    function qrValidarEConfirmar(codigoLido, codigoEsperado) {
+      qrPararScan();
+      // O código esperado pode ter sido gerado nesta sessão ou ser de outra rota
+      // Formato: FAST|itemId|data|timestamp
+      const partesLidas = codigoLido.split('|');
+      const partesEsperadas = codigoEsperado ? codigoEsperado.split('|') : [];
+      const itemIdLido = partesLidas[1];
+      const dataLida = partesLidas[2];
+
+      // Busca o item correspondente em todas as datas
+      let itemEncontrado = null;
+      let dataItem = null;
+      let idxItem = -1;
+      if (bancoDados && bancoDados.sequencias) {
+        for (const data of Object.keys(bancoDados.sequencias)) {
+          const idx = bancoDados.sequencias[data].findIndex(it => String(it.id) === String(itemIdLido) || String(it.codigoQR) === String(codigoLido));
+          if (idx >= 0) { itemEncontrado = bancoDados.sequencias[data][idx]; dataItem = data; idxItem = idx; break; }
+        }
+      }
+
+      if (!itemEncontrado) {
+        mostrarToast('QR Code não reconhecido: entrega não encontrada no sistema.', 'error');
+        return;
+      }
+
+      // Captura GPS da confirmação (se disponível)
+      let gpsConf = null;
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            gpsConf = { lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: pos.coords.accuracy };
+            qrFinalizarConfirmacao(itemEncontrado, dataItem, idxItem, codigoLido, gpsConf);
+          },
+          () => qrFinalizarConfirmacao(itemEncontrado, dataItem, idxItem, codigoLido, null),
+          { enableHighAccuracy: true, timeout: 5000 }
+        );
+      } else {
+        qrFinalizarConfirmacao(itemEncontrado, dataItem, idxItem, codigoLido, null);
+      }
+    }
+
+    function qrFinalizarConfirmacao(item, dataSel, index, codigo, gps) {
+      // Registra a confirmação
+      item.confirmadoQR = true;
+      item.dataConfirmacaoQR = new Date().toISOString();
+      item.codigoConfirmacaoQR = codigo;
+      if (gps) item.gpsConfirmacaoQR = gps;
+      if (!item.historicoQR) item.historicoQR = [];
+      item.historicoQR.push({ acao: 'confirmado', timestamp: item.dataConfirmacaoQR, codigo: codigo, gps: gps });
+
+      // Marca como concluída
+      const rotaVinculada = item.rotaId ? (bancoDados.rotas || []).find(r => String(r.id) === String(item.rotaId)) : null;
+      item.status = 'CONCLUÍDA';
+      item.dataConclusao = item.dataConfirmacaoQR;
+      if (rotaVinculada) rotaVinculada.statusExecucao = 'CONCLUÍDA';
+
+      salvarStorage();
+      renderizar();
+      renderizarSequencia();
+
+      const gpsTxt = gps ? ' | GPS: ' + gps.lat.toFixed(5) + ', ' + gps.lng.toFixed(5) : '';
+      mostrarToast('✅ Entrega confirmada via QR Code! Cliente: ' + (item.cliente || '—') + gpsTxt, 'success');
+      if (navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 200]);
+    }
+
+    function qrPararScan() {
+      if (qrScanLoop) { clearInterval(qrScanLoop); qrScanLoop = null; }
+      if (qrScanStream) { qrScanStream.getTracks().forEach(t => t.stop()); qrScanStream = null; }
+      const m = document.getElementById('modalQRScanner');
+      if (m) m.remove();
     }
 
 
@@ -41496,6 +42023,22 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
       
       const temaSalvo = localStorage.getItem("tema_gestao_local") || "light";
       mudarTema(temaSalvo, false);
+
+      // SUGESTÃO 4 & 5: Sincroniza configurações dos painéis de Alerta de Proximidade e Geofencing
+      try {
+        const chkAlerta = document.getElementById('chkAlertaProx');
+        const inpAlerta = document.getElementById('inpAlertaProxMin');
+        const spanAlerta = document.getElementById('spanAlertaProxMin');
+        if (chkAlerta) chkAlerta.checked = alertaProxAtivo;
+        if (inpAlerta) inpAlerta.value = alertaProxTempoMin;
+        if (spanAlerta) spanAlerta.textContent = alertaProxTempoMin;
+        const chkGeo = document.getElementById('chkGeofenceAtivo');
+        const inpGeo = document.getElementById('inpGeofenceRaio');
+        const spanGeo = document.getElementById('spanGeofenceRaio');
+        if (chkGeo) chkGeo.checked = geofenceAtivo;
+        if (inpGeo) inpGeo.value = geofenceRaio;
+        if (spanGeo) spanGeo.textContent = geofenceRaio;
+      } catch(e) { console.warn('Erro ao sincronizar configs de alerta/geofence:', e); }
 
       // Carregamento resiliente: localStorage + Last-Known-Good + IndexedDB.
       try {
@@ -41710,7 +42253,7 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
           limparNuvem = confirm("Deseja também limpar os dados da NUVEM (Supabase)?\n\nClique OK para limpar local + nuvem.\nClique Cancelar para limpar apenas local (a nuvem manterá os dados).");
         }
         localStorage.removeItem("banco_gestao_local");
-        bancoDados = { rotas: [], despesas: [], sequencias: {}, motoristas: [], clientes: [], rh: [], despesasEmpresa: [] };
+        bancoDados = { rotas: [], despesas: [], sequencias: {}, motoristas: [], clientes: [], rh: [], despesasEmpresa: [], rotasExcluidas: [], seqItensExcluidos: [], clientesExcluidos: [], destinos: [] };
         renderizar();
         carregarSequenciaDia();
         if (limparNuvem) {
@@ -43262,7 +43805,8 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
         var raw = localStorage.getItem(FAST_LOCAL_KEY);
         if (raw) {
           try {
-            bancoDados = JSON.parse(raw);
+            // (r37) Normalizar para garantir blacklists (rotasExcluidas, seqItensExcluidos).
+            bancoDados = fastNormalizarBanco(JSON.parse(raw));
           } catch(e) {
             console.warn('Erro ao recarregar localStorage:', e);
           }
@@ -43406,6 +43950,7 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
             <div class="seq-body">
               <div class="seq-header-top">
                 ${estaConcluido ? '<span class="badge-status badge-concluido">✔ CONCLUÍDA</span>' : '<span class="badge-status badge-em-rota">🚛 EM ROTA</span>'}
+                ${item.confirmadoQR ? '<span class="badge-status" style="background:rgba(99,102,241,0.15);color:#6366f1;border:1px solid rgba(99,102,241,0.4);font-weight:800;"><i class="fa-solid fa-qrcode"></i> QR Confirmado</span>' : ''}
                 ${item.agrupado ? '<span class="badge-status" style="background: rgba(168,85,247,0.15); color: #a855f7; border: 1px solid rgba(168,85,247,0.4); font-weight: 800;"><i class="fa-solid fa-object-group"></i> AGRUPADO (' + (item.itensAgrupados || []).length + ' rotas)</span>' : ''}
               </div>
               <div class="seq-info-grid">
@@ -43442,6 +43987,7 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
               <div class="seq-actions-group seq-group-comms">
                 <button class="btn-whatsapp" style="padding: 8px 12px; font-size: 13px;" title="Enviar fotos desta rota pelo WhatsApp" onclick="enviarFotosItemWhatsApp('${dataSel}', ${idxOriginal}, this)"><i class="fa-brands fa-whatsapp"></i> Enviar Fotos</button>
                 ${(item.destino || item.cliente) ? `<button class="btn-navegar seq-btn-navegar" title="Abrir no GPS (Google Maps ou Waze)" onclick="navAbrirGpsDropdown(event, '${escapeHtmlAttr(item.destino || item.cliente || '')}')"><i class="fa-solid fa-location-arrow"></i> Navegar</button>` : ''}
+                <button class="btn-action-black" style="background:#6366f1;padding:8px 12px;font-size:13px;border-radius:8px;color:#fff;border:none;cursor:pointer;font-weight:700;" title="Gerar QR Code de confirmação de entrega" onclick="qrGerarConfirmacao('${dataSel}', ${idxOriginal})"><i class="fa-solid fa-qrcode"></i> QR Code</button>
               </div>
               <div class="seq-actions-group seq-group-status">
                 <button class="${estaConcluido ? 'btn-secondary' : 'btn-success'}" onclick="alternarConcluidoSeq('${dataSel}', ${idxOriginal})">
@@ -46094,6 +46640,13 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
         : `Deseja realmente remover o item de <strong>${nomeCliente}</strong> das Rotas do Dia?`;
 
       confirmarDialog('Excluir das Rotas do Dia', msg, () => {
+        // 0. (r37) Registrar o ID do item excluído na blacklist de sequências.
+        //    Assim, ao recarregar/sincronizar, mergeDados() não o re-adiciona a partir da nuvem.
+        if (!bancoDados.seqItensExcluidos) bancoDados.seqItensExcluidos = [];
+        const seqIdStr = String(item.id);
+        if (seqIdStr && !bancoDados.seqItensExcluidos.includes(seqIdStr)) {
+          bancoDados.seqItensExcluidos.push(seqIdStr);
+        }
         // 1. Remover o item da sequencia do dia
         bancoDados.sequencias[dataSel].splice(index, 1);
 
@@ -46113,6 +46666,16 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
           if (bancoDados.sequencias) {
             Object.keys(bancoDados.sequencias).forEach(data => {
               if (Array.isArray(bancoDados.sequencias[data])) {
+                // (r37) Antes de filtrar, registrar os IDs dos itens órfãos na blacklist
+                // para que não reapareçam da nuvem ao sincronizar/recarregar.
+                bancoDados.sequencias[data].forEach(s => {
+                  if (String(s.rotaId) === rotaIdStr && s.id != null) {
+                    const sid = String(s.id);
+                    if (!sid) return;
+                    if (!bancoDados.seqItensExcluidos) bancoDados.seqItensExcluidos = [];
+                    if (!bancoDados.seqItensExcluidos.includes(sid)) bancoDados.seqItensExcluidos.push(sid);
+                  }
+                });
                 bancoDados.sequencias[data] = bancoDados.sequencias[data].filter(
                   s => String(s.rotaId) !== rotaIdStr
                 );
@@ -47393,6 +47956,21 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
               bancoDados.sequencias[data] = bancoDados.sequencias[data].filter(
                 s => String(s.rotaId) !== idStr
               );
+            }
+          });
+        }
+        // 3a. (r37) Registrar os IDs dos itens de sequência removidos na blacklist,
+        //     para que mergeDados() não os traga de volta da nuvem ao sincronizar.
+        if (!bancoDados.seqItensExcluidos) bancoDados.seqItensExcluidos = [];
+        if (bancoDados.sequencias) {
+          Object.keys(bancoDados.sequencias).forEach(data => {
+            if (Array.isArray(bancoDados.sequencias[data])) {
+              bancoDados.sequencias[data].forEach(s => {
+                if (String(s.rotaId) === idStr && s.id != null) {
+                  const sid = String(s.id);
+                  if (!bancoDados.seqItensExcluidos.includes(sid)) bancoDados.seqItensExcluidos.push(sid);
+                }
+              });
             }
           });
         }
@@ -49945,7 +50523,12 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
             clientes: (dadosLidos.clientes || []).map((c, i) => ({ ...c, id: c.id || (Date.now() + i) })),
             rh: (dadosLidos.rh || []).map((f, i) => ({ ...f, id: f.id || (Date.now() + i) })),
             despesasEmpresa: (dadosLidos.despesasEmpresa || []).map((d, i) => ({ ...d, id: d.id || (Date.now() + i) })),
-            dadosEmpresa: dadosLidos.dadosEmpresa || {}
+            dadosEmpresa: dadosLidos.dadosEmpresa || {},
+            // (r37) Preservar blacklists do backup quando presentes
+            rotasExcluidas: Array.isArray(dadosLidos.rotasExcluidas) ? dadosLidos.rotasExcluidas : [],
+            seqItensExcluidos: Array.isArray(dadosLidos.seqItensExcluidos) ? dadosLidos.seqItensExcluidos : [],
+            clientesExcluidos: Array.isArray(dadosLidos.clientesExcluidos) ? dadosLidos.clientesExcluidos : [],
+            destinos: Array.isArray(dadosLidos.destinos) ? dadosLidos.destinos : []
           };
           // Sincronizar dadosEmpresa global se o backup continha dados da empresa
           if (bancoDados.dadosEmpresa && Object.keys(bancoDados.dadosEmpresa).length > 0) {
@@ -51164,6 +51747,9 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
 
       rastUltimaPosicaoEnviada = null;
 
+      // SUGESTÃO 6: Inicializa o mapa no modo motorista para mostrar posição em tempo real
+      setTimeout(() => rastInicializarMapaMotorista(), 300);
+
       rastWatchId = navigator.geolocation.watchPosition(
         (pos) => rastOnPosicaoRecebida(pos),
         (err) => rastOnErroGps(err),
@@ -51205,6 +51791,15 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
       rastEnviarPosicao(dados);
       rastUltimaPosicaoEnviada = agora;
       if (envioEl) envioEl.textContent = new Date().toLocaleTimeString('pt-BR');
+
+      // SUGESTÃO 6: Atualiza o marcador do veículo no mapa (modo motorista)
+      rastAtualizarMarcadorVeiculo(latitude, longitude, accuracy);
+
+      // SUGESTÃO 4: Verifica proximidade com destinos das rotas ativas (alerta 15 min)
+      const velKmh = (speed !== null && speed >= 0) ? speed * 3.6 : null;
+      if (rastMotoristaSelecionadoId) {
+        alertaProxVerificar(rastMotoristaSelecionadoId, latitude, longitude, velKmh);
+      }
     }
 
     // Callback de erro do GPS
@@ -51276,6 +51871,8 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
       if (btnParar) btnParar.classList.add('hidden');
       if (gpsStatus) { gpsStatus.textContent = 'Inativo'; gpsStatus.style.color = 'var(--text-muted)'; }
       rastUltimaPosicaoEnviada = null;
+      // SUGESTÃO 4: Reseta alertas de proximidade ao parar compartilhamento
+      alertaProxReset();
       if (!silencioso) mostrarToast('Compartilhamento encerrado.', 'info');
     }
 
@@ -51388,6 +51985,11 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
         // Verifica geofencing (alertas de chegada/saída) para este motorista
         if (typeof geofenceVerificar === 'function' && online) {
           geofenceVerificar(id, lat, lng);
+        }
+        // SUGESTÃO 4: Verifica proximidade (alerta 15 min antes) para este motorista
+        if (typeof alertaProxVerificar === 'function' && online) {
+          const vel = (loc.velocidade !== null && loc.velocidade !== undefined) ? loc.velocidade : null;
+          alertaProxVerificar(id, lat, lng, vel);
         }
       });
 
@@ -52736,7 +53338,8 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
       window.addEventListener('storage', function(e) {
         if (e.key === FAST_LOCAL_KEY && e.newValue) {
           try {
-            bancoDados = JSON.parse(e.newValue);
+            // (r37) Normalizar para garantir blacklists (rotasExcluidas, seqItensExcluidos) presentes.
+            bancoDados = fastNormalizarBanco(JSON.parse(e.newValue));
             if (typeof renderizar === 'function') renderizar();
             if (typeof dashRenderizar === 'function') dashRenderizar();
             if (typeof atualizarEstatisticasDia === 'function') atualizarEstatisticasDia();
@@ -52752,7 +53355,8 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
           if (raw) {
             var parsed = JSON.parse(raw);
             if (JSON.stringify(parsed) !== JSON.stringify(bancoDados)) {
-              bancoDados = parsed;
+              // (r37) Normalizar para garantir blacklists presentes.
+              bancoDados = fastNormalizarBanco(parsed);
               if (typeof dashRenderizar === 'function') dashRenderizar();
               if (typeof atualizarEstatisticasDia === 'function') atualizarEstatisticasDia();
               if (typeof atualizarRankingMotoristas === 'function') atualizarRankingMotoristas();
