@@ -799,6 +799,138 @@ a:hover {
   --r47-shadow-pop: 0 18px 60px rgba(124,58,237,0.22), 0 6px 18px rgba(31,24,64,0.10);
   /* Foco acessivel (WCAG 2.2 AA) */
   --r47-focus: 0 0 0 3px rgba(124,58,237,0.32);
+  /* r47 TOPBAR ESCURA — gradiente profundo premium (independente da aba) */
+  --r47-topbar-bg: linear-gradient(135deg, #0b1220 0%, #131c31 45%, #1a1545 100%);
+  --r47-topbar-border: 1px solid rgba(124,58,237,0.22);
+  --r47-topbar-shadow: 0 4px 24px rgba(7,11,25,0.45), 0 1px 0 rgba(255,255,255,0.04) inset;
+  /* r47 BOTTOM-NAV ESCURA — vidro escuro organizado (nao transparente) */
+  --r47-dock-bg: linear-gradient(180deg, rgba(16,21,38,0.96) 0%, rgba(11,15,28,0.98) 100%);
+  --r47-dock-border: 1px solid rgba(124,58,237,0.18);
+  --r47-dock-shadow: 0 -6px 28px rgba(7,11,25,0.38);
+}
+
+/* ================================================================ */
+/* r47 — TOPBAR ESCURA FIXA (sempre escura, bem destacada,         */
+/*       independente da aba/estado). Restaura o visual premium     */
+/*       escuro que estava apagado/transparente.                    */
+/* ================================================================ */
+
+/* Topbar: fundo escuro gradiente profundo + borda roxa sutil + sombra */
+.top-nav,
+body.fast-pro .top-nav,
+body.fast-edition-desktop.fast-pro .top-nav {
+  background: var(--r47-topbar-bg) !important;
+  background-image: var(--r47-topbar-bg) !important;
+  backdrop-filter: saturate(140%) blur(8px) !important;
+  -webkit-backdrop-filter: saturate(140%) blur(8px) !important;
+  border-bottom: var(--r47-topbar-border) !important;
+  box-shadow: var(--r47-topbar-shadow) !important;
+}
+/* Brand "FAST SERVIÇOS" — branco forte, bem destacado */
+.top-nav-brand,
+body.fast-pro .top-nav-brand,
+body.fast-edition-desktop.fast-pro .top-nav-brand {
+  color: #ffffff !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.3px !important;
+  text-shadow: 0 1px 8px rgba(124,58,237,0.45) !important;
+}
+.top-nav-brand i,
+body.fast-pro .top-nav-brand i {
+  color: #a78bfa !important;
+  filter: drop-shadow(0 0 6px rgba(167,139,250,0.6)) !important;
+}
+/* Sino de notificacoes e outros icones da topbar: brancos/claros sobre escuro */
+body.fast-pro .bell-btn,
+.top-nav .bell-btn,
+.top-nav .sync-neon,
+body.fast-pro .sync-neon {
+  color: rgba(255,255,255,0.92) !important;
+}
+.top-nav .sync-neon.sync-online,
+body.fast-pro .sync-neon.sync-online {
+  color: #34d399 !important;
+}
+body.fast-pro .nav-dropdown-btn,
+.top-nav .nav-dropdown-btn {
+  color: rgba(255,255,255,0.9) !important;
+  background: rgba(255,255,255,0.06) !important;
+  border: 1px solid rgba(255,255,255,0.1) !important;
+}
+
+/* Botao IA (top-ia-btn) — gradiente roxo->ciano premium + glow + sombra */
+.top-ia-btn,
+body.fast-pro .top-ia-btn {
+  background: linear-gradient(135deg, #7c3aed 0%, #6366f1 50%, #06b6d4 100%) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255,255,255,0.18) !important;
+  box-shadow: 0 4px 18px -2px rgba(124,58,237,0.55), 0 0 0 1px rgba(255,255,255,0.06) inset !important;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.25) !important;
+}
+.top-ia-btn:hover,
+body.fast-pro .top-ia-btn:hover {
+  transform: translateY(-1px) scale(1.06) !important;
+  box-shadow: 0 6px 24px -2px rgba(124,58,237,0.7), 0 0 0 1px rgba(255,255,255,0.1) inset !important;
+}
+.top-ia-btn:active,
+body.fast-pro .top-ia-btn:active {
+  transform: scale(0.94) !important;
+}
+/* Badge da IA — destaque roxo brilhante */
+.top-ia-badge {
+  background: linear-gradient(135deg, #f59e0b, #ef4444) !important;
+  color: #fff !important;
+  box-shadow: 0 2px 10px rgba(245,158,11,0.6) !important;
+}
+
+/* ================================================================ */
+/* r47 — BOTTOM-NAV / FAST DOCK: vidro escuro organizado            */
+/*       (restaura o fundo escuro bonito, SEM voltar a barra azul). */
+/*       Continua sem selecao de texto (user-select:none permanece).*/
+/* ================================================================ */
+.bottom-nav,
+.bottom-nav.fast-dock,
+.fast-dock,
+.fast-dock-items,
+body.fast-pro .bottom-nav,
+body.fast-pro .fast-dock {
+  background: var(--r47-dock-bg) !important;
+  background-image: var(--r47-dock-bg) !important;
+  backdrop-filter: saturate(150%) blur(14px) !important;
+  -webkit-backdrop-filter: saturate(150%) blur(14px) !important;
+  border-top: var(--r47-dock-border) !important;
+  box-shadow: var(--r47-dock-shadow) !important;
+}
+/* Itens do dock: texto claro sobre fundo escuro (nao azul/apagado) */
+.fast-dock-btn,
+.bottom-nav-item,
+body.fast-pro .fast-dock-btn,
+body.fast-pro .bottom-nav-item {
+  color: rgba(255,255,255,0.62) !important;
+  background: transparent !important;
+}
+/* Item ativo: destaque roxo/ciano SEM barra azul atras (so cor + glow) */
+.fast-dock-btn.active,
+.bottom-nav-item.active,
+body.fast-pro .fast-dock-btn.active,
+body.fast-pro .bottom-nav-item.active {
+  color: #a78bfa !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.fast-dock-btn.active i,
+.bottom-nav-item.active i {
+  color: #06b6d4 !important;
+  filter: drop-shadow(0 0 6px rgba(6,182,212,0.55)) !important;
+}
+/* Pseudo-elementos continuam transparentes (sem barra azul/pill) */
+.bottom-nav::before, .bottom-nav::after,
+.bottom-nav-item::before, .bottom-nav-item::after,
+.fast-dock-btn::before, .fast-dock-btn::after,
+.fast-dock-btn.active::before, .fast-dock-btn.active::after,
+.bottom-nav-item.active::before, .bottom-nav-item.active::after {
+  background: transparent !important;
+  background-image: none !important;
 }
 
 /* --- Fundo: gradientes ainda mais suaves (Calm UX) --- */
@@ -5348,12 +5480,12 @@ tbody tr:hover td {
        visível independentemente da largura CSS reduzida pelo zoom. Em touch/mobile,
        continua obedecendo ao breakpoint normal. */
     @media (min-width: 1100px), (hover: hover) and (pointer: fine) {
-      body.fast-pro .top-nav { margin-left:var(--pro-sidebar); width:calc(100% - var(--pro-sidebar)); height:var(--pro-top); padding:0 26px; background:color-mix(in srgb,var(--card-bg) 88%,transparent); border-bottom:1px solid var(--pro-line); box-shadow:none; backdrop-filter:blur(18px); position:fixed; top:0; }
-      body.fast-pro .top-nav-brand { color:var(--text-main); text-shadow:none; }
-      body.fast-pro .top-nav-brand i { color:var(--accent); filter:none; }
+      body.fast-pro .top-nav { margin-left:var(--pro-sidebar); width:calc(100% - var(--pro-sidebar)); height:var(--pro-top); padding:0 26px; background:var(--r47-topbar-bg, #0b1220); border-bottom:var(--r47-topbar-border, 1px solid rgba(124,58,237,0.22)); box-shadow:var(--r47-topbar-shadow, 0 4px 24px rgba(7,11,25,0.45)); backdrop-filter:saturate(140%) blur(8px); position:fixed; top:0; }
+      body.fast-pro .top-nav-brand { color:#ffffff; text-shadow:0 1px 8px rgba(124,58,237,0.45); }
+      body.fast-pro .top-nav-brand i { color:#a78bfa; filter:drop-shadow(0 0 6px rgba(167,139,250,0.6)); }
       body.fast-pro .nav-dropdown { display:none; }
-      body.fast-pro .bell-btn { color:var(--text-main); }
-      body.fast-pro .sync-neon { box-shadow:none; }
+      body.fast-pro .bell-btn { color:rgba(255,255,255,0.92); }
+      body.fast-pro .sync-neon { box-shadow:none; color:rgba(255,255,255,0.82); }
       body.fast-pro main { margin-left:var(--pro-sidebar); padding-top:calc(var(--pro-top) + 28px)!important; min-height:100vh; }
       .pro-sidebar { position:fixed; inset:0 auto 0 0; width:var(--pro-sidebar); z-index:500; display:flex; flex-direction:column; background:#08111f; color:#fff; border-right:1px solid rgba(255,255,255,.06); }
       .pro-side-brand { height:var(--pro-top); display:flex; align-items:center; gap:11px; padding:0 20px; border-bottom:1px solid rgba(255,255,255,.06); }
@@ -5408,13 +5540,20 @@ tbody tr:hover td {
     body.fast-edition-desktop.fast-pro .top-nav {
       margin-left:var(--pro-sidebar)!important; width:calc(100% - var(--pro-sidebar))!important;
       height:var(--pro-top)!important; padding:0 26px!important; position:fixed!important; top:0!important;
-      background:color-mix(in srgb,var(--card-bg) 88%,transparent)!important;
-      border-bottom:1px solid var(--pro-line)!important; box-shadow:none!important; backdrop-filter:blur(18px)!important;
+      background:var(--r47-topbar-bg, #0b1220)!important;
+      border-bottom:var(--r47-topbar-border, 1px solid rgba(124,58,237,0.22))!important; box-shadow:var(--r47-topbar-shadow, 0 4px 24px rgba(7,11,25,0.45))!important; backdrop-filter:saturate(140%) blur(8px)!important;
     }
-    body.fast-edition-desktop.fast-pro .top-nav-brand { color:var(--text-main)!important; text-shadow:none!important; }
-    body.fast-edition-desktop.fast-pro .top-nav-brand i { color:var(--accent)!important; filter:none!important; }
+    body.fast-edition-desktop.fast-pro .top-nav-brand { color:#ffffff!important; text-shadow:0 1px 8px rgba(124,58,237,0.45)!important; }
+    body.fast-edition-desktop.fast-pro .top-nav-brand i { color:#a78bfa!important; filter:drop-shadow(0 0 6px rgba(167,139,250,0.6))!important; }
     body.fast-edition-desktop.fast-pro .nav-dropdown { display:none!important; }
-    body.fast-edition-desktop.fast-pro .bell-btn { color:var(--text-main)!important; }
+    body.fast-edition-desktop.fast-pro .bell-btn { color:rgba(255,255,255,0.92)!important; }
+    body.fast-edition-desktop.fast-pro .sync-neon { color:rgba(255,255,255,0.82)!important; }
+    body.fast-edition-desktop.fast-pro .top-ia-btn {
+      background:linear-gradient(135deg, #7c3aed 0%, #6366f1 50%, #06b6d4 100%)!important;
+      color:#ffffff!important; border:1px solid rgba(255,255,255,0.18)!important;
+      box-shadow:0 4px 18px -2px rgba(124,58,237,0.55), 0 0 0 1px rgba(255,255,255,0.06) inset!important;
+    }
+    body.fast-edition-desktop.fast-pro .nav-dropdown-btn { color:rgba(255,255,255,0.9)!important; background:rgba(255,255,255,0.06)!important; border:1px solid rgba(255,255,255,0.1)!important; }
     body.fast-edition-desktop.fast-pro main {
       margin-left:var(--pro-sidebar)!important; padding-top:calc(var(--pro-top) + 28px)!important;
       min-height:100vh!important; max-width:none!important;
