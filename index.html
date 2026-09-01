@@ -9,9 +9,9 @@
   <!-- O app verifica esta URL para conferir se ha versao nova.      -->
   <!-- ============================================================ -->
   <meta name="fast-deploy-url" content="https://adaiascearataiana-gif.github.io/fastservicosapp/">
-  <meta name="fast-app-version" content="2026.09.01-r47">
+  <meta name="fast-app-version" content="2026.09.01-r48">
   <meta name="fast-app-date" content="2026-09-01T15:45:00-03:00">
-  <meta name="fast-app-changelog" content="[{&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r47: CORRECAO DEFINITIVA DA BARRA AZUL / BOTAO OCULTO. A 'barra azul' que aparecia sobre a navegacao inferior era o menu nativo de selecao de texto do Android ('Copiar / Compartilhar / Selecionar tudo'), disparado ao tocar/arrastar sobre a bottom-nav. Solucao raiz: (1) user-select:none em TODA a chrome do app (nav, dock, header, barras flutuantes, botoes, labels, icones), (2) bloqueio JS do selectstart/contextmenu/touch na chrome, (3) ::selection neutra (sem roxo/azul), (4) failsafe CSS que forca fundo transparente em toda a bottom-nav em qualquer estado. O menu nativo nunca mais aparece sobre a barra.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;r47: REPAGINACAO TOTAL 2026 baseada em pesquisa profunda (Calm UX + glassmorphism funcional + microinteracoes funcionais + profundidade espacial + bento + dark-mode-ready + acessibilidade WCAG 2.2). Tokens r47 (raios, espacamentos, sombras em camadas, vidro calibrado), cards com hover suave, botoes com gradiente premium e press, topbar/sidebar/dock em vidro fosco real (backdrop-filter), barras flutuantes com shadow-pop, modal e toast com animacoes de entrada, badge de sync com pulse, tabelas zebra + hover, scrollbar roxo-ciano, skeleton shimmer, prefers-reduced-motion respeitado, alvos de toque >=44px no mobile. Mais fluido, bonito, limpo e profissional - sem perder nenhuma funcao.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;r46: REPAGINACAO COMPLETA - Novo design system 2026 com glassmorphism, paleta premium roxo/ciano, gradientes animados, cards 3D com hover, sidebar com gradiente escuro, topbar com efeito vidro, botoes com brilho, scrollbar estilizada, modal e toast com animacoes suaves, login gate com vidro fosco, indicadores de sincronismo pulsantes. Versao para Linux (.deb + AppImage), Windows (.exe NSIS + portable) e Android (PWA instalavel). Tudo sincronizado com Supabase (5 tabelas) e GitHub Pages. Nenhuma funcao ou dado perdido - todas as 678 funcoes e 13 secoes mantidas.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r45: Lugares/Destinos agora aparece tambem na sidebar do desktop. Antes essa secao so existia no menu mobile (dropdown) e ficava invisivel no desktop, dando a impressao de perda de dados. Agora o desktop tem TODAS as secoes do mobile sem nenhuma excecao. Corrigido tambem o sincronismo de estado ativo: ao navegar por qualquer caminho (sidebar, dropdown ou dock), o botao correspondente na sidebar desktop marca como ativo corretamente.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;r44: Sincronizacao com a agenda telefonica do celular. No cadastro de clientes, botao 'Importar da Agenda (Telefone/WhatsApp)' abre o seletor nativo de contatos (Contact Picker API) — voce escolhe qual contato compartilhar e o app puxa automaticamente o Nome e o Telefone (com mascara BR), preenchendo os campos Telefone e WhatsApp do cadastro. O app NAO tem acesso livre a agenda: o usuario seleciona contato por contato. Funciona no Android Chrome 80+ e iOS Safari 18+. Em navegadores sem suporte, o botao fica indisponivel e voce digita manualmente. Adicionado tambem atalho para copiar Telefone -&gt; WhatsApp.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r43: (1) REMOVIDO em definitivo o botao azul/roxo flutuante de voz (microfone) que aparecia atras e sobre a barra de navegacao do Dashboard. O botao flutuante (#iaFab / .voz-fab) foi eliminado do HTML e bloqueado por CSS failsafe para nunca reaparecer, mesmo se uma posicao antiga ficar salva no dispositivo. As tentativas anteriores (r40/r41) apenas tentavam reposicionar o botao; agora ele nao existe mais. (2) Sincronizacao com GitHub revisada e confirmada: o app publica o index.html no GitHub Pages via API (token protegido no dispositivo). (3) Sincronizacao com Supabase revisada e confirmada: 5 tabelas (rotas, despesas, sequencias_itens, dados_empresa, destinos) verificadas com dedup e blacklist de itens excluidos.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;r42: Botao 'Sincronizar com GitHub' dentro da Area Protegida. Agora voce pode publicar o app diretamente no GitHub Pages a partir do celular/computador, sem precisar fazer upload manual. O token do GitHub fica salvo apenas no seu dispositivo (protegido pela senha da Area Protegida), nunca no codigo publico. O app detecta automaticamente se houve mudanca, envia o index.html atualizado via API do GitHub e confirma 'Sincronizacao concluida! Site no ar'.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r41: (1) Colunas Nome e Endereco da aba Destinos agora sao flexiveis - crescem automaticamente quando ha um nome/endereco maior, sem forcar largura fixa. (2) Barra azul atras do botao Dashboard REMOVIDA em definitivo: os botoes flutuantes de scroll/voz agora sao cinza-escuro neutro (nao azul/indigo) e nunca descem sobre a barra de navegacao inferior; adicionado failsafe CSS que forca fundo transparente em toda a bottom-nav. (3) Contador de Rotas do Dia corrigido: agora usa a data do calendario (date picker) e filtra itens excluidos (blacklist), entao o numero do menu suspenso sempre bate com as rotas exibidas na aba. (4) Biometria (impressao digital/Face ID/Windows Hello) disponivel na Area Protegida - agora mostra uma dica quando o dispositivo suporta biometria mas ela ainda nao foi ativada.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r40 CORRECAO RAIZ: o Service Worker usava cache-first e servia uma versao antiga (r37/r38) em cache mesmo apos o GitHub Pages ser atualizado, fazendo as rotas excluidas voltarem. Reescrito para NETWORK-FIRST em navegacoes/HTML + auto-cura que remove Service Workers e caches obsoletos no arranque. Agora o usuario sempre roda a versao mais recente publicada. CORRECAO DA BARRA AZUL atras do botao Dashboard: removido o fundo azul (accent-soft) do botao de navegacao ativo — agora apenas a cor do texto/icone muda, sem barra azul. Auto-atualizacao com fallback no-cors para contornar Service Worker/CORS.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;CORREÇÃO DEFINITIVA: Rotas do Dia excluídas NUNCA mais reaparecem. O problema era duplicatas na nuvem (cada \&quot;Carregar\&quot; gerava um ID novo, acumulando dezenas de cópias). Agora: (1) IDs estáveis por rota, (2) blacklist por rotaId bloqueia TODAS as cópias, (3) dedup automático, (4) 41 duplicatas limpas da nuvem.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;Rotas do Dia excluídas não voltam mais ao recarregar a página ou sincronizar — adicionada blacklist de itens de sequência (seqItensExcluidos) respeitada no merge com a nuvem (Supabase).&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;URL fixa migrada para GitHub Pages — endereço permanente do app.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;Indicadores ONLINE e SYNC fixos na barra superior com ícones próprios.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;Recuperação de senha por e-mail na Área Protegida e no login da plataforma — mesmo e-mail para ambos.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;Tempo de bloqueio configurável após sair do app: imediato, 1, 2 ou 5 minutos.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;Box de novidades após cada atualização, com a nova versão e data/hora do lançamento.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;Tema simplificado: apenas Light Moderno e Ocean Blue. Seção renomeada para \&quot;Temas\&quot;.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;Verificação de atualização com confirmação e barra de progresso ao atualizar.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;Textos da Área Protegida reorganizados em parágrafos limpos e alinhados.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;Performance otimizada: bibliotecas externalizadas para CDN (~800KB a menos).&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;Removidos botões redundantes (Atualizar, Status, Abrir Versão Oficial, Atualizar Agora).&quot;}]">
+  <meta name="fast-app-changelog" content="[{&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r48: CAIXA AZUL OCULTA/PRESA ELIMINADA EM DEFINITIVO. O botao flutuante arrastavel #syncFloat (bola de 60px) ficava preso numa posicao salva no dispositivo (inset 117px/363px) sobre a aba Rotas do Dia, parado e sem movimento - era a 'caixa azul oculta'. Removido o elemento HTML, o JS de arrasto, a CSS e limpa a posicao persistida (localStorage.syncFloatPos) com failsafe que remove qualquer vestigio do DOM. O status de sincronismo continua acessivel pelo indicador fixo na barra superior (neon SYNC).&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;r48: BIOMETRIA INSTANTANEA. O login por impressao digital/Face ID agora abre muito mais rapido: splash reduzido de 800ms para 220ms, removida a verificacao pre-bloqueante de plataforma (o prompt nativo e disparado imediatamente), removido o spinner de loading antes do prompt (o proprio prompt nativo e o feedback), timeout do WebAuthn reduzido de 60s para 15s e adicionada mediation conditional. Guard anti-disparo-duplo adicionado.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;r48: NAVEGACAO INFERIOR ORGANIZADA. O label 'PAGINA PRINCIPAL' que vazava da caixa do botao no dock foi compactado para 'INICIO' (mantendo aria-label completo para acessibilidade). CSS do dock ajustado para nowrap + ellipsis em todos os 4 botoes, garantindo altura consistente de uma linha e impedindo que qualquer texto vaze/escape do botao.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;r48: AUDITORIA E LIMPEZA. Corrigidos os links quebrados do manifest PWA (blob: -> data: URI) que geravam erros de console. Removida a animacao @keyframes iaFabPulse do botao flutuante extinto. Configuracao Supabase (5 tabelas) e sincronismo GitHub Pages verificados e intactos.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r47: CORRECAO DEFINITIVA DA BARRA AZUL / BOTAO OCULTO. A 'barra azul' que aparecia sobre a navegacao inferior era o menu nativo de selecao de texto do Android ('Copiar / Compartilhar / Selecionar tudo'), disparado ao tocar/arrastar sobre a bottom-nav. Solucao raiz: (1) user-select:none em TODA a chrome do app (nav, dock, header, barras flutuantes, botoes, labels, icones), (2) bloqueio JS do selectstart/contextmenu/touch na chrome, (3) ::selection neutra (sem roxo/azul), (4) failsafe CSS que forca fundo transparente em toda a bottom-nav em qualquer estado. O menu nativo nunca mais aparece sobre a barra.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;r47: REPAGINACAO TOTAL 2026 baseada em pesquisa profunda (Calm UX + glassmorphism funcional + microinteracoes funcionais + profundidade espacial + bento + dark-mode-ready + acessibilidade WCAG 2.2). Tokens r47 (raios, espacamentos, sombras em camadas, vidro calibrado), cards com hover suave, botoes com gradiente premium e press, topbar/sidebar/dock em vidro fosco real (backdrop-filter), barras flutuantes com shadow-pop, modal e toast com animacoes de entrada, badge de sync com pulse, tabelas zebra + hover, scrollbar roxo-ciano, skeleton shimmer, prefers-reduced-motion respeitado, alvos de toque >=44px no mobile. Mais fluido, bonito, limpo e profissional - sem perder nenhuma funcao.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;r46: REPAGINACAO COMPLETA - Novo design system 2026 com glassmorphism, paleta premium roxo/ciano, gradientes animados, cards 3D com hover, sidebar com gradiente escuro, topbar com efeito vidro, botoes com brilho, scrollbar estilizada, modal e toast com animacoes suaves, login gate com vidro fosco, indicadores de sincronismo pulsantes. Versao para Linux (.deb + AppImage), Windows (.exe NSIS + portable) e Android (PWA instalavel). Tudo sincronizado com Supabase (5 tabelas) e GitHub Pages. Nenhuma funcao ou dado perdido - todas as 678 funcoes e 13 secoes mantidas.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r45: Lugares/Destinos agora aparece tambem na sidebar do desktop. Antes essa secao so existia no menu mobile (dropdown) e ficava invisivel no desktop, dando a impressao de perda de dados. Agora o desktop tem TODAS as secoes do mobile sem nenhuma excecao. Corrigido tambem o sincronismo de estado ativo: ao navegar por qualquer caminho (sidebar, dropdown ou dock), o botao correspondente na sidebar desktop marca como ativo corretamente.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;r44: Sincronizacao com a agenda telefonica do celular. No cadastro de clientes, botao 'Importar da Agenda (Telefone/WhatsApp)' abre o seletor nativo de contatos (Contact Picker API) — voce escolhe qual contato compartilhar e o app puxa automaticamente o Nome e o Telefone (com mascara BR), preenchendo os campos Telefone e WhatsApp do cadastro. O app NAO tem acesso livre a agenda: o usuario seleciona contato por contato. Funciona no Android Chrome 80+ e iOS Safari 18+. Em navegadores sem suporte, o botao fica indisponivel e voce digita manualmente. Adicionado tambem atalho para copiar Telefone -&gt; WhatsApp.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r43: (1) REMOVIDO em definitivo o botao azul/roxo flutuante de voz (microfone) que aparecia atras e sobre a barra de navegacao do Dashboard. O botao flutuante (#iaFab / .voz-fab) foi eliminado do HTML e bloqueado por CSS failsafe para nunca reaparecer, mesmo se uma posicao antiga ficar salva no dispositivo. As tentativas anteriores (r40/r41) apenas tentavam reposicionar o botao; agora ele nao existe mais. (2) Sincronizacao com GitHub revisada e confirmada: o app publica o index.html no GitHub Pages via API (token protegido no dispositivo). (3) Sincronizacao com Supabase revisada e confirmada: 5 tabelas (rotas, despesas, sequencias_itens, dados_empresa, destinos) verificadas com dedup e blacklist de itens excluidos.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;r42: Botao 'Sincronizar com GitHub' dentro da Area Protegida. Agora voce pode publicar o app diretamente no GitHub Pages a partir do celular/computador, sem precisar fazer upload manual. O token do GitHub fica salvo apenas no seu dispositivo (protegido pela senha da Area Protegida), nunca no codigo publico. O app detecta automaticamente se houve mudanca, envia o index.html atualizado via API do GitHub e confirma 'Sincronizacao concluida! Site no ar'.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r41: (1) Colunas Nome e Endereco da aba Destinos agora sao flexiveis - crescem automaticamente quando ha um nome/endereco maior, sem forcar largura fixa. (2) Barra azul atras do botao Dashboard REMOVIDA em definitivo: os botoes flutuantes de scroll/voz agora sao cinza-escuro neutro (nao azul/indigo) e nunca descem sobre a barra de navegacao inferior; adicionado failsafe CSS que forca fundo transparente em toda a bottom-nav. (3) Contador de Rotas do Dia corrigido: agora usa a data do calendario (date picker) e filtra itens excluidos (blacklist), entao o numero do menu suspenso sempre bate com as rotas exibidas na aba. (4) Biometria (impressao digital/Face ID/Windows Hello) disponivel na Area Protegida - agora mostra uma dica quando o dispositivo suporta biometria mas ela ainda nao foi ativada.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r40 CORRECAO RAIZ: o Service Worker usava cache-first e servia uma versao antiga (r37/r38) em cache mesmo apos o GitHub Pages ser atualizado, fazendo as rotas excluidas voltarem. Reescrito para NETWORK-FIRST em navegacoes/HTML + auto-cura que remove Service Workers e caches obsoletos no arranque. Agora o usuario sempre roda a versao mais recente publicada. CORRECAO DA BARRA AZUL atras do botao Dashboard: removido o fundo azul (accent-soft) do botao de navegacao ativo — agora apenas a cor do texto/icone muda, sem barra azul. Auto-atualizacao com fallback no-cors para contornar Service Worker/CORS.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;CORREÇÃO DEFINITIVA: Rotas do Dia excluídas NUNCA mais reaparecem. O problema era duplicatas na nuvem (cada \&quot;Carregar\&quot; gerava um ID novo, acumulando dezenas de cópias). Agora: (1) IDs estáveis por rota, (2) blacklist por rotaId bloqueia TODAS as cópias, (3) dedup automático, (4) 41 duplicatas limpas da nuvem.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;Rotas do Dia excluídas não voltam mais ao recarregar a página ou sincronizar — adicionada blacklist de itens de sequência (seqItensExcluidos) respeitada no merge com a nuvem (Supabase).&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;URL fixa migrada para GitHub Pages — endereço permanente do app.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;Indicadores ONLINE e SYNC fixos na barra superior com ícones próprios.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;Recuperação de senha por e-mail na Área Protegida e no login da plataforma — mesmo e-mail para ambos.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;Tempo de bloqueio configurável após sair do app: imediato, 1, 2 ou 5 minutos.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;Box de novidades após cada atualização, com a nova versão e data/hora do lançamento.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;Tema simplificado: apenas Light Moderno e Ocean Blue. Seção renomeada para \&quot;Temas\&quot;.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;Verificação de atualização com confirmação e barra de progresso ao atualizar.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;Textos da Área Protegida reorganizados em parágrafos limpos e alinhados.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;Performance otimizada: bibliotecas externalizadas para CDN (~800KB a menos).&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;Removidos botões redundantes (Atualizar, Status, Abrir Versão Oficial, Atualizar Agora).&quot;}]">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https:; img-src 'self' data: blob: https: http:; connect-src 'self' https: data: blob:; font-src 'self' https: data:;">
   <!-- PWA: Meta tags para app instalavel -->
   <meta name="mobile-web-app-capable" content="yes">
@@ -1259,7 +1259,7 @@ tbody tr:hover td {
 
 </style>
 
-<link rel="manifest" href="blob:https://adaiascearataiana-gif.github.io/be4bfc1d-1aac-4524-a665-54cb3d56e7f5"><link rel="manifest" href="blob:https://adaiascearataiana-gif.github.io/87d8aceb-153d-4380-9bb6-bf3848886c37"></head>
+<link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22FAST%20Servi%C3%A7os%22%2C%22short_name%22%3A%22FAST%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23ffffff%22%2C%22theme_color%22%3A%22%234f46e5%22%2C%22description%22%3A%22Gest%C3%A3o%20de%20Rotas%2C%20Despesas%20e%20DRE%22%7D"></head>
 <body class="fast-pro fast-edition-mobile theme-ocean fx-executive fx-layout-command" style="">
 
 <!-- ============================================================
@@ -1598,9 +1598,13 @@ tbody tr:hover td {
           transports: ['internal']
         }],
         userVerification: 'required',
-        timeout: 60000
+        timeout: 15000
       };
-      var assertion = await navigator.credentials.get({ publicKey: publicKey });
+      // r48: timeout reduzido de 60000ms para 15000ms — se o usuário não
+      // interagir com o prompt biométrico em 15s, cancela e libera para a senha.
+      var assertion = await navigator.credentials.get({ publicKey: publicKey, mediation: 'conditional' });
+      // r48: mediation:'conditional' permite que o prompt biométrico apareça
+      // de forma não-bloqueante quando suportado, acelerando a autenticação.
       // Se chegou aqui, a biometria foi validada pelo autenticador de plataforma.
       // O navegador já verificou userVerification='required', então o usuário
       // comprovou posse do dispositivo + identidade (digital/face/PIN Windows).
@@ -1980,10 +1984,12 @@ tbody tr:hover td {
       var icon = $('fastGateBioIcon');
       if (btn) btn.disabled = true;
       if (icon) icon.classList.add('pulse');
-      showLoading(true);
+      // r48: NÃO mostramos o spinner de loading (showLoading) antes do prompt
+      // biométrico. O prompt nativo (digital/face) já é o feedback visual —
+      // adicionar um spinner por cima só atrasa e esconde o gate. Mostramos
+      // loading apenas como fallback se algo falhar antes do prompt.
       try {
         var ok = await fastBioAuthenticate();
-        showLoading(false);
         if (btn) btn.disabled = false;
         if (icon) icon.classList.remove('pulse');
         if (ok){
@@ -2013,9 +2019,9 @@ tbody tr:hover td {
           setErr('fastGateErr','Biometria não reconhecida. Tente novamente ou use a senha.');
         }
       } catch(e){
-        showLoading(false);
         if (btn) btn.disabled = false;
         if (icon) icon.classList.remove('pulse');
+        _fastBioAutoFired = false; // permite tentar novamente após erro
         var msg = (e && e.message) ? e.message : 'desconhecido';
         // Erros comuns do WebAuthn: NotAllowedError (usuário cancelou), AbortError
         if (e && e.name === 'NotAllowedError'){
@@ -2260,15 +2266,13 @@ tbody tr:hover td {
       endSession();
       if (isEnabled()){
         showGate();
-        // Auto-login biométrico ao sair manualmente
+        // Auto-login biométrico ao sair manualmente — IMEDIATAMENTE (r47.1, sem 600ms)
         if (bioCredExists() && fastBioIsSupported() && !isLocked()){
           fastBioPlatformAvailable().then(function(avail){
             if (avail && bioCredExists() && !isAuthenticated() && isEnabled()){
-              setTimeout(function(){
-                if (!isAuthenticated() && isEnabled() && !isLocked()){
-                  window.fastGateBioLogin();
-                }
-              }, 600);
+              if (!isAuthenticated() && isEnabled() && !isLocked()){
+                window.fastGateBioLogin();
+              }
             }
           }).catch(function(){});
         }
@@ -2363,18 +2367,31 @@ tbody tr:hover td {
     });
 
     // r14: Auto-login biométrico (função refatorada — usada em initGate, visibilitychange, pageshow)
+    // r47.1: SEM ATRASO. Antes havia setTimeout 600ms que deixava a digital lenta para aparecer.
+    // r48: DISPARO IMEDIATO + sem pré-verificação de plataforma bloqueante. Antes chamávamos
+    //      fastBioPlatformAvailable() (uma chamada WebAuthn assíncrona) ANTES de disparar o
+    //      navigator.credentials.get(), o que adicionava latência percebida. Agora disparamos o
+    //      prompt biométrico direto; a verificação de plataforma roda em background apenas para
+    //      esconder o botão se o dispositivo não suportar (mas não atrasa o auto-login).
+    var _fastBioAutoFired = false; // evita disparar 2x na mesma sessão de gate
     function autoBioLogin(){
-      if (bioCredExists() && fastBioIsSupported() && !isLocked()){
-        fastBioPlatformAvailable().then(function(avail){
-          if (avail && bioCredExists() && !isAuthenticated() && isEnabled()){
-            setTimeout(function(){
-              if (!isAuthenticated() && isEnabled() && !isLocked()){
-                window.fastGateBioLogin();
-              }
-            }, 600);
-          }
-        }).catch(function(){ /* se falhar, usuário usa senha normalmente */ });
+      if (!bioCredExists() || !fastBioIsSupported() || isLocked()) return;
+      if (_fastBioAutoFired) return; // já disparou neste gate — não repete
+      if (!isAuthenticated() && isEnabled() && !isLocked()){
+        _fastBioAutoFired = true;
+        // Dispara IMEDIATAMENTE — sem setTimeout e sem await de plataforma.
+        // navigator.credentials.get() aciona o prompt nativo (digital/face) direto.
+        window.fastGateBioLogin();
       }
+      // Verificação de plataforma em BACKGROUND (não bloqueia o prompt):
+      // se o dispositivo não tiver autenticador de plataforma, esconde o botão
+      // para o usuário usar a senha — mas o auto-login já tentou disparar.
+      fastBioPlatformAvailable().then(function(avail){
+        if (!avail){
+          var wrap = document.getElementById('fastGateBioWrap');
+          if (wrap) wrap.style.display = 'none';
+        }
+      }).catch(function(){ /* silencioso */ });
     }
 
     // r16: Revalidar e pedir biometria ao voltar (mostra gate + dispara auto-bio).
@@ -2409,11 +2426,23 @@ tbody tr:hover td {
         var splash = document.getElementById('fastSplash');
         if (splash){
           splash.classList.add('show');
+          // r47.1: Descobre SE o login esta ativado ANTES de esperar a splash,
+          // para decidir o tempo de exibicao. Se login ativado + biometria,
+          // a splash precisa ser curta para a digital aparecer IMEDIATAMENTE.
+          var loginAtivado = false;
+          try { loginAtivado = localStorage.getItem('fastSecEnabled') === '1'; } catch(e){}
+          var temBio = false;
+          try { temBio = bioCredExists(); } catch(e){}
+          // Se tem login + biometria: splash rapida (800ms) para a digital pedir logo.
+          // Se login sem bio: splash media (1400ms). Sem login: splash normal (2600ms).
+          var splashTime = (!loginAtivado) ? 2600 : (temBio ? 220 : 1400);
+          // r48: Biometria INSTANTÂNEA. Antes a splash esperava 800ms antes de
+          // mostrar o gate + disparar a digital, dando a sensação de lentidão.
+          // Agora, quando há login + biometria, a splash some em ~220ms (quase
+          // instantâneo) e o prompt biométrico é disparado imediatamente.
           setTimeout(function(){
             // Se o login estiver ativado, deixa a splash desfocada (blur) ao fundo
             // e mostra o gate por cima — efeito bonito de ofuscamento.
-            var loginAtivado = false;
-            try { loginAtivado = localStorage.getItem('fastSecEnabled') === '1'; } catch(e){}
             if (loginAtivado){
               splash.classList.remove('show');
               splash.classList.add('blur');
@@ -2436,7 +2465,7 @@ tbody tr:hover td {
               setTimeout(function(){ splash.style.display = 'none'; }, 600);
               try { initGate(); } catch(err){ if (window.console) console.error('FastGate init error', err); }
             }
-          }, 2600);
+          }, splashTime);
         } else {
           // Fallback: sem splash, inicializa direto
           try { initGate(); } catch(err){ if (window.console) console.error('FastGate init error', err); }
@@ -2815,74 +2844,26 @@ tbody tr:hover td {
     }
     @keyframes neonPulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
 
-    /* ===== Floating Draggable Sync Button ===== */
-    #syncFloat {
-      position: fixed;
-      bottom: 24px; right: 24px;
-      width: 60px; height: 60px;
-      border-radius: 50%;
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      gap: 2px;
-      cursor: grab;
-      z-index: 99999;
-      user-select: none; -webkit-user-select: none;
-      touch-action: none;
-      transition: box-shadow 0.3s, transform 0.15s, opacity 0.3s;
-      background: rgba(15,23,42,0.92);
-      border: 2px solid rgba(148,163,184,0.3);
-      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
-      opacity: 0.92;
+    /* ===== Floating Draggable Sync Button — DESATIVADO (r48) =====
+       O botao flutuante #syncFloat causava a "caixa azul presa/oculta" sobre
+       os filtros. Removemos o elemento e forçamos display:none por failsafe
+       para garantir que nunca reapareca (mesmo via cache antigo do SW). */
+    #syncFloat,
+    #syncFloat.sf-on,
+    #syncFloat.sf-off,
+    #syncFloat.sf-busy,
+    #syncFloat.sync-dragging {
+      display: none !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+      position: fixed !important;
+      top: -9999px !important;
+      left: -9999px !important;
+      width: 0 !important;
+      height: 0 !important;
+      z-index: -1 !important;
     }
-    #syncFloat:hover { opacity: 1; transform: scale(1.05); }
-    #syncFloat.sync-dragging { cursor: grabbing; opacity: 1; transform: scale(1.1); z-index: 100000; }
-    #syncFloat .sync-float-icon { font-size: 20px; line-height: 1; }
-    #syncFloat .sync-float-dot {
-      position: absolute; top: 6px; right: 8px;
-      width: 10px; height: 10px; border-radius: 50%;
-      flex-shrink: 0;
-    }
-    #syncFloat .sync-float-label {
-      font-size: 8px; font-weight: 700; letter-spacing: 0.2px;
-      text-transform: uppercase; opacity: 0.85;
-    }
-    /* Status: Online (green) */
-    #syncFloat.sf-on {
-      border-color: rgba(34,197,94,0.6);
-      box-shadow: 0 0 18px rgba(34,197,94,0.5), 0 4px 20px rgba(0,0,0,0.4);
-    }
-    #syncFloat.sf-on .sync-float-icon { color: #4ade80; }
-    #syncFloat.sf-on .sync-float-dot {
-      background: #22c55e; box-shadow: 0 0 8px #22c55e, 0 0 14px #22c55e;
-      animation: neonPulse 2s infinite;
-    }
-    #syncFloat.sf-on .sync-float-label { color: #4ade80; }
-    /* Status: Offline/Error (red) */
-    #syncFloat.sf-off {
-      border-color: rgba(239,68,68,0.6);
-      box-shadow: 0 0 18px rgba(239,68,68,0.5), 0 4px 20px rgba(0,0,0,0.4);
-    }
-    #syncFloat.sf-off .sync-float-icon { color: #f87171; }
-    #syncFloat.sf-off .sync-float-dot {
-      background: #ef4444; box-shadow: 0 0 8px #ef4444, 0 0 14px #ef4444;
-      animation: neonPulse 2s infinite;
-    }
-    #syncFloat.sf-off .sync-float-label { color: #f87171; }
-    /* Status: Busy/Pending (yellow) */
-    #syncFloat.sf-busy {
-      border-color: rgba(251,191,36,0.6);
-      box-shadow: 0 0 18px rgba(251,191,36,0.5), 0 4px 20px rgba(0,0,0,0.4);
-    }
-    #syncFloat.sf-busy .sync-float-icon { color: #fbbf24; }
-    #syncFloat.sf-busy .sync-float-dot {
-      background: #fbbf24; box-shadow: 0 0 8px #fbbf24, 0 0 14px #fbbf24;
-      animation: neonPulse 0.6s infinite;
-    }
-    #syncFloat.sf-busy .sync-float-label { color: #fbbf24; }
-    /* Syncing spinner */
-    #syncFloat.sf-busy .sync-float-icon { animation: spin 0.8s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    /* Print: hide floating button */
     @media print { #syncFloat { display: none !important; } }
 
     /* Dropdown menu */
@@ -4187,10 +4168,7 @@ tbody tr:hover td {
       display: none; align-items: center; justify-content: center; border: 2px solid var(--card-bg);
       animation: none; pointer-events: none;
     }
-    @keyframes iaFabPulse {
-      0%, 100% { box-shadow: 0 8px 24px -6px var(--accent-glow); }
-      50% { box-shadow: 0 8px 24px -6px var(--accent-glow), 0 0 0 10px rgba(79,70,229,0.12); }
-    }
+    /* (r48) @keyframes iaFabPulse removido - animacao do botao flutuante extinto. */
 
     /* Botão de IA na barra superior (realocado do flutuante) */
     .top-ia-btn {
@@ -5288,7 +5266,7 @@ tbody tr:hover td {
     .bottom-nav-items { display: flex; justify-content: space-between; align-items: stretch; max-width: 100%; margin: 0 auto; gap: 4px; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; -webkit-overflow-scrolling: touch; width: 100%; }
     .bottom-nav-items::-webkit-scrollbar { display: none; }
     /* Cada item ocupa largura igual (flex:1) para preencher toda a barra com o mesmo tamanho */
-    .bottom-nav-item { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 8px 6px; border: none; background: transparent; color: var(--text-faint); font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s; border-radius: 12px; text-decoration: none; white-space: nowrap; }
+    .bottom-nav-item { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 8px 6px; border: none; background: transparent; color: var(--text-faint); font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s; border-radius: 12px; text-decoration: none; white-space: nowrap; overflow: hidden; }
     .bottom-nav-item i { font-size: 26px; transition: transform 0.2s; }
     .bottom-nav-item span { font-size: 11px; font-weight: 800; line-height: 1.1; text-align: center; }
     /* (r40) sem fundo azul no item ativo (legacy bottom-nav-item). */
@@ -6076,7 +6054,7 @@ tbody tr:hover td {
     padding: 6px 8px calc(6px + env(safe-area-inset-bottom,0px)) !important;
     contain: layout paint !important;
   }
-  .fast-dock-items { display:grid !important; grid-template-columns:repeat(4,1fr) !important; gap:7px !important; overflow:visible !important; }
+  .fast-dock-items { display:grid !important; grid-template-columns:repeat(4,1fr) !important; gap:7px !important; overflow:hidden !important; }
   .fast-dock-btn {
     appearance:none !important; -webkit-appearance:none !important;
     min-width:0 !important; width:100% !important; height:58px !important; min-height:58px !important;
@@ -6089,7 +6067,25 @@ tbody tr:hover td {
     cursor:pointer !important; position:relative !important; z-index:2 !important;
   }
   .fast-dock-btn i { font-size:22px !important; line-height:1 !important; pointer-events:none !important; transition:none !important; }
-  .fast-dock-btn span { font-size:11.5px !important; line-height:1 !important; font-weight:850 !important; pointer-events:none !important; white-space:nowrap !important; }
+  /* r47.1: Compactar "PAGINA PRINCIPAL" dentro do botao (antes overflow com nowrap).
+     r48: Label abreviado para "INICIO" + nowrap em todos os botoes do dock para
+     altura consistente (uma linha) e nunca vazar/ser tocado fora do botao
+     (o "box oculto" que disparava selecao de texto ao tocar ao lado do botao). */
+  .fast-dock-btn { overflow:hidden !important; }
+  .fast-dock-btn span {
+    font-size:9px !important;
+    line-height:1.15 !important;
+    font-weight:850 !important;
+    pointer-events:none !important;
+    white-space:nowrap !important;
+    overflow:hidden !important;
+    text-overflow:ellipsis !important;
+    display:block !important;
+    max-width:100% !important;
+    text-align:center !important;
+    padding:0 1px !important;
+    letter-spacing:.2px !important;
+  }
   /* (r40) SEM fundo azul no botao ativo - apenas muda a cor do texto/icone. */
   .fast-dock-btn.active { background:transparent !important; color:var(--accent) !important; border-color:transparent !important; box-shadow:none !important; }
   .fast-dock-btn:focus, .fast-dock-btn:focus-visible, .fast-dock-btn:active { outline:none !important; box-shadow:none !important; transform:none !important; }
@@ -39034,8 +39030,8 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
   <!-- BOTTOM NAVIGATION (Mobile) — FAST DOCK V2 -->
   <nav class="bottom-nav fast-dock" role="navigation" aria-label="Navegação principal" data-fast-instant-bound="1">
     <div class="bottom-nav-items fast-dock-items">
-      <button type="button" class="fast-dock-btn pro-mobile-home ripple" data-fast-dock-tab="central" onpointerdown="return fastDockOpen(event,'central',this)" aria-label="PAGINA PRINCIPAL">
-        <i class="fa-solid fa-house"></i><span>PAGINA PRINCIPAL</span>
+      <button type="button" class="fast-dock-btn pro-mobile-home ripple" data-fast-dock-tab="central" onpointerdown="return fastDockOpen(event,'central',this)" aria-label="PAGINA PRINCIPAL" title="P&aacute;gina Principal">
+        <i class="fa-solid fa-house"></i><span>IN&Iacute;CIO</span>
       </button>
       <button type="button" class="fast-dock-btn ripple" data-fast-dock-tab="rotas" onpointerdown="return fastDockOpen(event,'rotas',this)" aria-label="Rotas">
         <i class="fa-solid fa-route"></i><span>Rotas</span>
@@ -40055,162 +40051,32 @@ window.fastMobileNav = function(ev, abaId, botao) {
 })();
 </script>
 
-<!-- ===== Floating Draggable Sync Button ===== -->
-<div id="syncFloat" class="sf-on" title="Arraste para mover. Clique para sincronizar." style="inset: 117.006px auto auto 362.769px;">
-  <span class="sync-float-dot"></span>
-  <i class="fa-solid fa-cloud-arrow-up sync-float-icon"></i>
-  <span class="sync-float-label">Online</span>
-</div>
+<!-- ===== Floating Sync Button REMOVIDO DEFINITIVAMENTE (r48) =====
+     O #syncFloat (bola azul/escura flutuante e arrastavel) ficava "preso"
+     em uma posicao salva no localStorage (ex.: inset:117px/363px) e aparecia
+     sobre os filtros / atras da barra, sem se mover. Removemos o elemento,
+     o CSS, a logica de drag e limpamos a posicao salva para sempre.
+     O status de sincronismo continua visivel na barra superior (#syncNeon)
+     e clicavel para sincronizar. -->
 <script>
-(function() {
+(function () {
   'use strict';
-  var sf = document.getElementById('syncFloat');
-  if (!sf) return;
-
-  /* ---- Restore saved position from localStorage ---- */
-  var saved = null;
-  try { saved = JSON.parse(localStorage.getItem('syncFloatPos')); } catch(e) {}
-  if (saved && typeof saved.x === 'number' && typeof saved.y === 'number') {
-    sf.style.left = saved.x + 'px';
-    sf.style.top = saved.y + 'px';
-    sf.style.right = 'auto';
-    sf.style.bottom = 'auto';
-  }
-
-  /* ---- Drag logic (mouse + touch) ---- */
-  var isDragging = false;
-  var dragStartX = 0, dragStartY = 0;
-  var elemStartX = 0, elemStartY = 0;
-  var hasMoved = false;
-  var DRAG_THRESHOLD = 5; // px movement before we consider it a drag
-
-  function getClientCoords(e) {
-    if (e.touches && e.touches.length > 0) {
-      return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+  // Failsafe: remove qualquer #syncFloat que porventura tenha ficado no DOM
+  // (ex.: cache antigo do Service Worker) e limpa a posicao salva.
+  try {
+    var sf = document.getElementById('syncFloat');
+    if (sf && sf.parentNode) sf.parentNode.removeChild(sf);
+  } catch (e) {}
+  try { localStorage.removeItem('syncFloatPos'); } catch (e) {}
+  // Se houver um patch antigo do atualizarStatusSync tentando espelhar para o
+  // botao flutuante, restaura a funcao original para evitar erros.
+  try {
+    if (typeof window._origAtualizarStatusSync === 'function' &&
+        typeof window.atualizarStatusSync === 'function') {
+      window.atualizarStatusSync = window._origAtualizarStatusSync;
+      delete window._origAtualizarStatusSync;
     }
-    return { x: e.clientX, y: e.clientY };
-  }
-
-  function onStart(e) {
-    // Don't start drag on multi-touch
-    if (e.touches && e.touches.length > 1) return;
-    var coords = getClientCoords(e);
-    isDragging = true;
-    hasMoved = false;
-    dragStartX = coords.x;
-    dragStartY = coords.y;
-    var rect = sf.getBoundingClientRect();
-    elemStartX = rect.left;
-    elemStartY = rect.top;
-    sf.classList.add('sync-dragging');
-    e.preventDefault();
-  }
-
-  function onMove(e) {
-    if (!isDragging) return;
-    var coords = getClientCoords(e);
-    var dx = coords.x - dragStartX;
-    var dy = coords.y - dragStartY;
-    if (Math.abs(dx) > DRAG_THRESHOLD || Math.abs(dy) > DRAG_THRESHOLD) {
-      hasMoved = true;
-    }
-    if (!hasMoved) return;
-
-    var newX = elemStartX + dx;
-    var newY = elemStartY + dy;
-
-    // Clamp to viewport
-    var size = 60;
-    var maxX = window.innerWidth - size;
-    var maxY = window.innerHeight - size;
-    newX = Math.max(0, Math.min(newX, maxX));
-    newY = Math.max(0, Math.min(newY, maxY));
-
-    sf.style.left = newX + 'px';
-    sf.style.top = newY + 'px';
-    sf.style.right = 'auto';
-    sf.style.bottom = 'auto';
-    e.preventDefault();
-  }
-
-  function onEnd(e) {
-    if (!isDragging) return;
-    isDragging = false;
-    sf.classList.remove('sync-dragging');
-
-    if (hasMoved) {
-      // Save position
-      var rect = sf.getBoundingClientRect();
-      try {
-        localStorage.setItem('syncFloatPos', JSON.stringify({ x: rect.left, y: rect.top }));
-      } catch(err) {}
-    } else {
-      // It was a click, not a drag — trigger sync
-      if (typeof sincronizarAgora === 'function') {
-        sincronizarAgora();
-      }
-    }
-  }
-
-  // Mouse events
-  sf.addEventListener('mousedown', onStart);
-  document.addEventListener('mousemove', onMove);
-  document.addEventListener('mouseup', onEnd);
-
-  // Touch events
-  sf.addEventListener('touchstart', onStart, { passive: false });
-  document.addEventListener('touchmove', onMove, { passive: false });
-  document.addEventListener('touchend', onEnd);
-  document.addEventListener('touchcancel', onEnd);
-
-  // Prevent context menu on long-press
-  sf.addEventListener('contextmenu', function(e) { e.preventDefault(); });
-
-  /* ---- Status mirroring: watch atualizarStatusSync ---- */
-  // We patch atualizarStatusSync to also update the floating button
-  if (typeof window._origAtualizarStatusSync === 'undefined' && typeof atualizarStatusSync === 'function') {
-    window._origAtualizarStatusSync = atualizarStatusSync;
-    atualizarStatusSync = function(estado, texto) {
-      window._origAtualizarStatusSync(estado, texto);
-      // Mirror to floating button
-      var floatBtn = document.getElementById('syncFloat');
-      if (!floatBtn) return;
-      floatBtn.classList.remove('sf-on', 'sf-off', 'sf-busy');
-      var icon = floatBtn.querySelector('.sync-float-icon');
-      var label = floatBtn.querySelector('.sync-float-label');
-      if (estado === 'ok') {
-        floatBtn.classList.add('sf-on');
-        if (icon) icon.className = 'fa-solid fa-cloud-arrow-up sync-float-icon';
-        if (label) label.textContent = 'Online';
-      } else if (estado === 'pending') {
-        floatBtn.classList.add('sf-busy');
-        if (icon) icon.className = 'fa-solid fa-arrows-rotate sync-float-icon';
-        if (label) label.textContent = 'Sync...';
-      } else if (estado === 'error') {
-        floatBtn.classList.add('sf-off');
-        if (icon) icon.className = 'fa-solid fa-triangle-exclamation sync-float-icon';
-        if (label) label.textContent = 'Erro';
-      } else {
-        floatBtn.classList.add('sf-off');
-        if (icon) icon.className = 'fa-solid fa-cloud-arrow-up sync-float-icon';
-        if (label) label.textContent = 'Offline';
-      }
-    };
-  }
-
-  /* ---- Initialize: sync floating button with current syncNeon state ---- */
-  setTimeout(function() {
-    var neon = document.getElementById('syncNeon');
-    if (neon) {
-      if (neon.classList.contains('sync-on')) {
-        atualizarStatusSync('ok');
-      } else if (neon.classList.contains('sync-busy')) {
-        atualizarStatusSync('pending');
-      } else {
-        atualizarStatusSync('offline');
-      }
-    }
-  }, 500);
+  } catch (e) {}
 })();
 </script>
 
