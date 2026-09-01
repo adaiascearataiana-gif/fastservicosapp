@@ -1245,6 +1245,7 @@ tbody tr:hover td {
         <div class="fast-gate-logo"><i class="fa-solid fa-truck-fast"></i></div>
         <h1 id="fastGateTitle">FAST Serviços</h1>
         <p id="fastGateSubtitle">SOLUÇÕES EM LOGÍSTICA</p>
+        <p class="fast-gate-version" id="fastGateVersion">Versão <span id="fastGateVersionNum">--</span></p>
       </div>
 
       <!-- Bloqueio por tentativas -->
@@ -1685,6 +1686,11 @@ tbody tr:hover td {
       if (!isEnabled()) { hideGate(); return; }
       gate = $('fastLoginGate');
       if (!gate) return;
+      // Preenche a versao atual do app no rodape do brand (tela de login)
+      try {
+        var vNum = $('fastGateVersionNum');
+        if (vNum) vNum.textContent = (typeof fastObterVersao === 'function') ? fastObterVersao() : '2026.09.01-r47';
+      } catch(e){}
       gate.classList.add('show');
       document.body.style.overflow = 'hidden';
       if (isLocked()){ showLockout(); return; } else { hideLockout(); }
@@ -4567,6 +4573,8 @@ tbody tr:hover td {
       font-size: 26px; color: #fff; box-shadow: 0 8px 24px rgba(79,70,229,0.45); }
     .fast-gate-brand h1 { font-size: 24px; font-weight: 900; margin: 0; letter-spacing: -0.5px; }
     .fast-gate-brand p { font-size: 13px; color: rgba(255,255,255,0.6); margin: 4px 0 0; font-weight: 600; }
+    .fast-gate-version { font-size: 11px !important; color: rgba(255,255,255,0.42) !important; margin: 10px 0 0 !important; font-weight: 500 !important; letter-spacing: 0.3px; text-align: center; }
+    .fast-gate-version span { color: rgba(129,140,248,0.85); font-weight: 700; }
 
     .fast-gate-lockout { display: none; text-align: center; padding: 20px; border-radius: 14px;
       background: rgba(220,38,38,0.12); border: 1px solid rgba(220,38,38,0.3); color: #fca5a5;
