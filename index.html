@@ -21,7 +21,7 @@
   <meta name="fast-github-branch" content="main">
   <meta name="fast-github-path" content="index.html">
   <meta name="fast-github-token-env" content="GH_TOKEN">
-  <meta name="fast-app-version" content="2026.09.02-r76">
+  <meta name="fast-app-version" content="2026.09.02-r78">
   <meta name="fast-app-date" content="2026-09-02T21:00:00Z">
   <meta name="fast-latest-update" content="r70: gestão avançada, segurança das fotos, Drive, restauração, usuários do RH, auditoria, fechamento, rentabilidade, OCR, proximidade e atalhos Android">
   <!-- r70.1: lista corrente no HTML inicial; o painel não espera scripts tardios -->
@@ -1310,7 +1310,7 @@ tbody tr:hover td {
 
 </style>
 
-<link rel="manifest" href="manifest.webmanifest?v=r76"><link rel="apple-touch-icon" href="assets/fast-servicos-icon-192.png?v=r76"><link rel="icon" href="assets/fast-servicos-icon-192.png?v=r76"></head>
+<link rel="manifest" href="manifest.webmanifest?v=r78"><link rel="apple-touch-icon" href="assets/fast-servicos-icon-192.png?v=r78"><link rel="icon" href="assets/fast-servicos-icon-192.png?v=r78"></head>
 <body class="fast-pro fast-edition-mobile theme-light fx-executive fx-layout-command" style="">
 
 <!-- ============================================================
@@ -23129,7 +23129,7 @@ tbody tr:hover td {
               <div id="fastDeployInfo" style="background:var(--card-bg-2);border:1px solid var(--border);border-radius:10px;padding:12px;margin:10px 0;font-size:13px;">
                 <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
                   <div>
-                    <div><strong>Versão atual:</strong> <span id="fastVersaoLabel" style="color:var(--accent);font-weight:800;">2026.09.02-r76</span></div>
+                    <div><strong>Versão atual:</strong> <span id="fastVersaoLabel" style="color:var(--accent);font-weight:800;">2026.09.02-r78</span></div>
                     <div id="fastVersaoDateLabel" style="font-size:11.5px;color:var(--text-muted);margin-top:3px;"><i class="fa-solid fa-clock"></i> Lançada em 02/09/2026 18:00</div>
                   </div>
                   <div id="fastVersaoOnlineLabel" style="font-size:12px;color:var(--text-muted);text-align:right;">Online: <strong>2026.09.02-r68</strong> <span style="color:var(--success);">(ok)</span></div>
@@ -23166,10 +23166,12 @@ tbody tr:hover td {
                 <div class="fast-updates-panel-head" onclick="fastToggleUpdatesPanel()">
                   <i class="fa-solid fa-bolt fup-icon"></i>
                   <span class="fup-title">Novidades e correções recentes</span>
-                  <span class="fup-count" id="fastUpdatesCount">11</span>
+                  <span class="fup-count" id="fastUpdatesCount">13</span>
                   <i class="fa-solid fa-chevron-down fup-chevron"></i>
                 </div>
                 <div class="fast-updates-panel-body" id="fastUpdatesBody">
+                  <div class="fup-item"><div class="fup-item-dot" style="background:rgba(79,70,229,.12)"><i class="fa-solid fa-palette" style="color:#4f46e5"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#4f46e5;background:rgba(79,70,229,.12)">Novo</span><div class="fup-item-text">r78: Central de Aparência adicionada com cinco perfis visuais sem migração de dados: Moderno, Operacional, Executivo, Escuro e Automático.</div></div></div>
+                  <div class="fup-item"><div class="fup-item-dot" style="background:rgba(22,163,74,.10)"><i class="fa-solid fa-mobile-screen-button" style="color:#16a34a"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#16a34a;background:rgba(22,163,74,.10)">Corrigido</span><div class="fup-item-text">r77: Rotas do Dia e Despesas agora são aplicativos independentes, com endereço, identidade, ícone, manifesto e Service Worker próprios, eliminando o aviso incorreto “já instalado”.</div></div></div>
                   <div class="fup-item"><div class="fup-item-dot" style="background:rgba(217,119,6,.10)"><i class="fa-solid fa-wrench" style="color:#d97706"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#d97706;background:rgba(217,119,6,.10)">Corrigido</span><div class="fup-item-text">r76: Balão promocional “Made by SuperNinja/MyNinja” removido definitivamente da área atrás da barra fixa.</div></div></div>
                   <div class="fup-item"><div class="fup-item-dot" style="background:rgba(217,119,6,.10)"><i class="fa-solid fa-wrench" style="color:#d97706"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#d97706;background:rgba(217,119,6,.10)">Corrigido</span><div class="fup-item-text">r75: Cada item de Rotas do Dia permanece como rota individual em Rotas. Agrupar agora serve exclusivamente para selecionar e enviar fotos juntas, sem unir destinos, valores ou status.</div></div></div>
                   <div class="fup-item"><div class="fup-item-dot" style="background:rgba(22,163,74,.10)"><i class="fa-solid fa-circle-plus" style="color:#16a34a"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#16a34a;background:rgba(22,163,74,.10)">Novo</span><div class="fup-item-text">r74: Permissões individuais por funcionário baseadas nas áreas do menu; áreas não autorizadas ficam ocultas e bloqueadas inclusive por acesso direto.</div></div></div>
@@ -28287,7 +28289,7 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
           });
         `;
         try {
-          navigator.serviceWorker.register('sw.js?v=r76', { scope: './' })
+          navigator.serviceWorker.register('sw.js?v=r78', { scope: './' })
             .then(function(reg) { console.info('SW permanente registrado (r73 network-first).'); })
             .catch(function(e) { console.info('SW: nao registrado neste ambiente (normal).', e.message); });
         } catch (e) { console.info('SW init skip:', e); }
@@ -40142,7 +40144,7 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
       links.forEach(function(el,i){ if(i>0) el.remove(); });
       var link = links[0] || document.createElement('link');
       link.rel = 'manifest';
-      link.href = 'manifest.webmanifest?v=r76';
+      link.href = 'manifest.webmanifest?v=r78';
       if(!link.parentNode) document.head.appendChild(link);
 
       // A mesma logomarca oficial também aparece no gate e na abertura.
@@ -43125,7 +43127,7 @@ window.fastMobileNav = function(ev, abaId, botao) {
   (function(){
     function add(tab,id,cls,icon,text,url){var area=document.getElementById(tab);if(!area||document.getElementById(id))return;var title=area.querySelector('.card-title');var b=document.createElement('button');b.type='button';b.id=id;b.className='fast-install-shortcut '+cls;b.innerHTML='<i class="fa-solid '+icon+'"></i> '+text;b.onclick=function(){window.open(url,'_blank','noopener')};if(title)title.insertAdjacentElement('afterend',b);else area.insertBefore(b,area.firstChild)}
     function abrir(url){var full=new URL(url,location.href).href;if(/Android/i.test(navigator.userAgent)){var u=new URL(full);location.href='intent://'+u.host+u.pathname+'#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url='+encodeURIComponent(full)+';end';return}window.open(full,'_blank','noopener')}
-    document.addEventListener('DOMContentLoaded',function(){add('rotasDia','fastInstallRotas','fast-install-routes','fa-calendar-day','Adicionar Rotas do Dia à tela inicial','rotas-do-dia/');add('despesas','fastInstallDespesas','fast-install-expenses','fa-receipt','Adicionar Despesas à tela inicial','despesas/');var r=document.getElementById('fastInstallRotas'),d=document.getElementById('fastInstallDespesas');if(r)r.onclick=function(){abrir('rotas-do-dia/')};if(d)d.onclick=function(){abrir('despesas/')}});
+    document.addEventListener('DOMContentLoaded',function(){add('rotasDia','fastInstallRotas','fast-install-routes','fa-calendar-day','Instalar Rotas do Dia','app-rotas-dia/');add('despesas','fastInstallDespesas','fast-install-expenses','fa-receipt','Instalar Despesas','app-despesas/');var r=document.getElementById('fastInstallRotas'),d=document.getElementById('fastInstallDespesas');if(r)r.onclick=function(){abrir('app-rotas-dia/')};if(d)d.onclick=function(){abrir('app-despesas/')}});
   })();
   </script>
   <style id="r74-permissoes-style">.fast74-perms{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:8px;margin:10px 0 14px}.fast74-perm{display:flex;align-items:center;gap:9px;padding:10px;border:1px solid var(--border);border-radius:10px;background:var(--card-bg,#fff);font-size:13px;font-weight:700}.fast74-perm input{width:18px;height:18px}.fast74-admin-note{padding:9px;border-radius:9px;background:rgba(245,158,11,.10);font-size:12px}</style>
@@ -43178,6 +43180,24 @@ window.fastMobileNav = function(ev, abaId, botao) {
     function decorar(){var c=lista();document.querySelectorAll('.seq-item[data-item-id]').forEach(function(card){var x=c.itens.find(function(i){return String(i.id)===String(card.dataset.itemId)});if(!x||!x.grupoFotosId||card.querySelector('.fast75-photo-group'))return;var h=card.querySelector('.seq-header-top');if(h){var b=document.createElement('span');b.className='fast75-photo-group';b.innerHTML='<i class="fa-solid fa-images"></i> GRUPO DE FOTOS ('+(x.grupoFotosMembros||[]).length+')';h.appendChild(b)}})}
     document.addEventListener('change',function(e){if(!e.target.classList||!e.target.classList.contains('seq-checkbox'))return;var c=lista(),i=Number(e.target.value),x=c.itens[i];if(!x||!x.grupoFotosId)return;c.itens.forEach(function(it,idx){if(it.grupoFotosId===x.grupoFotosId){var cb=document.querySelector('.seq-checkbox[value="'+idx+'"]');if(cb)cb.checked=e.target.checked}});if(typeof atualizarBoxFlutuanteSelecao==='function')atualizarBoxFlutuanteSelecao();if(typeof atualizarContagemAgrupar==='function')atualizarContagemAgrupar()});
     document.addEventListener('DOMContentLoaded',function(){var modal=document.getElementById('modalAgrupar');if(modal){var title=modal.querySelector('.modal-header h3');if(title)title.innerHTML='<i class="fa-solid fa-images"></i> Agrupar somente para Fotos';var labels=modal.querySelectorAll('.agrupar-option-label');labels.forEach(function(x){x.style.display='none'});var info=document.getElementById('agruparContagem');if(info)info.insertAdjacentHTML('afterend','<p class="fast71-note"><b>Importante:</b> nenhuma rota será unida ou apagada. O grupo serve somente para selecionar e enviar as fotos juntas.</p>')}fast75RepararVinculos(true);setTimeout(decorar,500);var render=window.renderizarSequencia;if(typeof render==='function'&&!render.fast75){var w=function(){var r=render.apply(this,arguments);setTimeout(decorar,30);return r};w.fast75=true;window.renderizarSequencia=w}});
+  })();
+  </script>
+  <style id="r78-layout-profiles">
+    .fast78-layout-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:12px}.fast78-layout-btn{min-height:74px;padding:12px;border:2px solid var(--border,#dbe2ea);border-radius:16px;background:var(--card-bg,#fff);color:var(--text,#172033);font-weight:800;cursor:pointer;text-align:left}.fast78-layout-btn i{display:block;font-size:20px;margin-bottom:7px;color:var(--accent,#4f46e5)}.fast78-layout-btn.active{border-color:var(--accent,#4f46e5);box-shadow:0 0 0 3px rgba(79,70,229,.13)}
+    body[data-fast-layout="moderno"] .card,body[data-fast-layout="moderno"] .config-topic{border-radius:20px!important;box-shadow:0 10px 30px rgba(30,41,59,.09)!important}body[data-fast-layout="moderno"] button{transition:transform .16s ease,box-shadow .16s ease}body[data-fast-layout="moderno"] button:active{transform:scale(.98)}
+    body[data-fast-layout="operacional"] .card{padding:14px!important}body[data-fast-layout="operacional"] .form-group{margin-bottom:10px!important}body[data-fast-layout="operacional"] button,body[data-fast-layout="operacional"] .btn{min-height:48px!important;font-weight:850!important}body[data-fast-layout="operacional"] .seq-item{margin-bottom:8px!important}
+    body[data-fast-layout="executivo"] .card,body[data-fast-layout="executivo"] .config-topic{border-radius:10px!important;box-shadow:0 3px 12px rgba(15,23,42,.08)!important}body[data-fast-layout="executivo"] table{font-size:13px}body[data-fast-layout="executivo"] th{letter-spacing:.035em;text-transform:uppercase;font-size:11px}
+    body[data-fast-layout="escuro"]{--bg:#0b1220!important;--card-bg:#111c2f!important;--text:#eef4ff!important;--text-muted:#a9b8ce!important;--border:#2a3950!important;--accent:#818cf8!important;background:#0b1220!important;color:#eef4ff!important}body[data-fast-layout="escuro"] .card,body[data-fast-layout="escuro"] .config-topic,body[data-fast-layout="escuro"] input,body[data-fast-layout="escuro"] select,body[data-fast-layout="escuro"] textarea{background:#111c2f!important;color:#eef4ff!important;border-color:#2a3950!important}
+    @media(prefers-color-scheme:dark){body[data-fast-layout="automatico"]{--bg:#0b1220!important;--card-bg:#111c2f!important;--text:#eef4ff!important;--text-muted:#a9b8ce!important;--border:#2a3950!important;--accent:#818cf8!important;background:#0b1220!important;color:#eef4ff!important}body[data-fast-layout="automatico"] .card,body[data-fast-layout="automatico"] .config-topic,body[data-fast-layout="automatico"] input,body[data-fast-layout="automatico"] select,body[data-fast-layout="automatico"] textarea{background:#111c2f!important;color:#eef4ff!important;border-color:#2a3950!important}}
+  </style>
+  <script id="r78-layout-profiles-script">
+  (function(){
+    'use strict';var KEY='fast_layout_profile_v1',valid=['moderno','operacional','executivo','escuro','automatico'];
+    function current(){var v=localStorage.getItem(KEY)||'moderno';return valid.indexOf(v)>=0?v:'moderno'}
+    function mark(){document.querySelectorAll('.fast78-layout-btn').forEach(function(b){b.classList.toggle('active',b.dataset.layout===current())})}
+    window.fast78SetLayout=function(v){if(valid.indexOf(v)<0)return;localStorage.setItem(KEY,v);document.body.dataset.fastLayout=v;mark();if(window.mostrarToast)mostrarToast('Perfil visual aplicado: '+v.charAt(0).toUpperCase()+v.slice(1)+'. Seus dados não foram alterados.','success')};
+    function install(){document.body.dataset.fastLayout=current();var cfg=document.querySelector('#configuracoes .config-page,#configuracoes .config-topics,#configuracoes');if(!cfg||document.getElementById('fast78Appearance'))return;var box=document.createElement('div');box.id='fast78Appearance';box.className='config-topic';box.innerHTML='<div class="config-topic-header"><div class="config-topic-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></div><div><div class="config-topic-title">Aparência e modo de trabalho</div><div class="config-topic-sub">Mude somente o visual. Rotas, fotos, clientes e despesas permanecem intactos.</div></div></div><div class="config-topic-body"><div class="fast78-layout-grid"><button class="fast78-layout-btn" data-layout="moderno" onclick="fast78SetLayout(\'moderno\')"><i class="fa-solid fa-sparkles"></i>Moderno</button><button class="fast78-layout-btn" data-layout="operacional" onclick="fast78SetLayout(\'operacional\')"><i class="fa-solid fa-motorcycle"></i>Operacional</button><button class="fast78-layout-btn" data-layout="executivo" onclick="fast78SetLayout(\'executivo\')"><i class="fa-solid fa-chart-column"></i>Executivo</button><button class="fast78-layout-btn" data-layout="escuro" onclick="fast78SetLayout(\'escuro\')"><i class="fa-solid fa-moon"></i>Escuro</button><button class="fast78-layout-btn" data-layout="automatico" onclick="fast78SetLayout(\'automatico\')"><i class="fa-solid fa-circle-half-stroke"></i>Automático</button></div></div>';cfg.insertBefore(box,cfg.firstChild);mark()}
+    if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install);else install();
   })();
   </script>
   <style id="r76-no-ninja">#ninja-badge,.ninja-badge,[href*="ninjatech.ai/product/super-ninja"]{display:none!important;visibility:hidden!important;pointer-events:none!important}</style>
