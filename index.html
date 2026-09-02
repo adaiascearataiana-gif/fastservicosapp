@@ -21,7 +21,7 @@
   <meta name="fast-github-branch" content="main">
   <meta name="fast-github-path" content="index.html">
   <meta name="fast-github-token-env" content="GH_TOKEN">
-  <meta name="fast-app-version" content="2026.09.02-r75">
+  <meta name="fast-app-version" content="2026.09.02-r76">
   <meta name="fast-app-date" content="2026-09-02T21:00:00Z">
   <meta name="fast-latest-update" content="r70: gestão avançada, segurança das fotos, Drive, restauração, usuários do RH, auditoria, fechamento, rentabilidade, OCR, proximidade e atalhos Android">
   <!-- r70.1: lista corrente no HTML inicial; o painel não espera scripts tardios -->
@@ -1310,7 +1310,7 @@ tbody tr:hover td {
 
 </style>
 
-<link rel="manifest" href="manifest.webmanifest?v=r75"><link rel="apple-touch-icon" href="assets/fast-servicos-icon-192.png?v=r75"><link rel="icon" href="assets/fast-servicos-icon-192.png?v=r75"></head>
+<link rel="manifest" href="manifest.webmanifest?v=r76"><link rel="apple-touch-icon" href="assets/fast-servicos-icon-192.png?v=r76"><link rel="icon" href="assets/fast-servicos-icon-192.png?v=r76"></head>
 <body class="fast-pro fast-edition-mobile theme-light fx-executive fx-layout-command" style="">
 
 <!-- ============================================================
@@ -23129,7 +23129,7 @@ tbody tr:hover td {
               <div id="fastDeployInfo" style="background:var(--card-bg-2);border:1px solid var(--border);border-radius:10px;padding:12px;margin:10px 0;font-size:13px;">
                 <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
                   <div>
-                    <div><strong>Versão atual:</strong> <span id="fastVersaoLabel" style="color:var(--accent);font-weight:800;">2026.09.02-r75</span></div>
+                    <div><strong>Versão atual:</strong> <span id="fastVersaoLabel" style="color:var(--accent);font-weight:800;">2026.09.02-r76</span></div>
                     <div id="fastVersaoDateLabel" style="font-size:11.5px;color:var(--text-muted);margin-top:3px;"><i class="fa-solid fa-clock"></i> Lançada em 02/09/2026 18:00</div>
                   </div>
                   <div id="fastVersaoOnlineLabel" style="font-size:12px;color:var(--text-muted);text-align:right;">Online: <strong>2026.09.02-r68</strong> <span style="color:var(--success);">(ok)</span></div>
@@ -23166,10 +23166,11 @@ tbody tr:hover td {
                 <div class="fast-updates-panel-head" onclick="fastToggleUpdatesPanel()">
                   <i class="fa-solid fa-bolt fup-icon"></i>
                   <span class="fup-title">Novidades e correções recentes</span>
-                  <span class="fup-count" id="fastUpdatesCount">10</span>
+                  <span class="fup-count" id="fastUpdatesCount">11</span>
                   <i class="fa-solid fa-chevron-down fup-chevron"></i>
                 </div>
                 <div class="fast-updates-panel-body" id="fastUpdatesBody">
+                  <div class="fup-item"><div class="fup-item-dot" style="background:rgba(217,119,6,.10)"><i class="fa-solid fa-wrench" style="color:#d97706"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#d97706;background:rgba(217,119,6,.10)">Corrigido</span><div class="fup-item-text">r76: Balão promocional “Made by SuperNinja/MyNinja” removido definitivamente da área atrás da barra fixa.</div></div></div>
                   <div class="fup-item"><div class="fup-item-dot" style="background:rgba(217,119,6,.10)"><i class="fa-solid fa-wrench" style="color:#d97706"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#d97706;background:rgba(217,119,6,.10)">Corrigido</span><div class="fup-item-text">r75: Cada item de Rotas do Dia permanece como rota individual em Rotas. Agrupar agora serve exclusivamente para selecionar e enviar fotos juntas, sem unir destinos, valores ou status.</div></div></div>
                   <div class="fup-item"><div class="fup-item-dot" style="background:rgba(22,163,74,.10)"><i class="fa-solid fa-circle-plus" style="color:#16a34a"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#16a34a;background:rgba(22,163,74,.10)">Novo</span><div class="fup-item-text">r74: Permissões individuais por funcionário baseadas nas áreas do menu; áreas não autorizadas ficam ocultas e bloqueadas inclusive por acesso direto.</div></div></div>
                   <div class="fup-item"><div class="fup-item-dot" style="background:rgba(217,119,6,.10)"><i class="fa-solid fa-wrench" style="color:#d97706"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#d97706;background:rgba(217,119,6,.10)">Corrigido</span><div class="fup-item-text">r73: Instalação do FAST restaurada com Service Worker permanente; Rotas do Dia e Despesas agora têm escopos independentes para o Android não reutilizar a logo principal.</div></div></div>
@@ -28286,7 +28287,7 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
           });
         `;
         try {
-          navigator.serviceWorker.register('sw.js?v=r75', { scope: './' })
+          navigator.serviceWorker.register('sw.js?v=r76', { scope: './' })
             .then(function(reg) { console.info('SW permanente registrado (r73 network-first).'); })
             .catch(function(e) { console.info('SW: nao registrado neste ambiente (normal).', e.message); });
         } catch (e) { console.info('SW init skip:', e); }
@@ -40141,7 +40142,7 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
       links.forEach(function(el,i){ if(i>0) el.remove(); });
       var link = links[0] || document.createElement('link');
       link.rel = 'manifest';
-      link.href = 'manifest.webmanifest?v=r75';
+      link.href = 'manifest.webmanifest?v=r76';
       if(!link.parentNode) document.head.appendChild(link);
 
       // A mesma logomarca oficial também aparece no gate e na abertura.
@@ -42436,13 +42437,7 @@ window.fastMobileNav = function(ev, abaId, botao) {
 
 </style>
 
-<div id="ninja-badge" class="ninja-badge" data-gjs-editable="false" data-gjs-selectable="false" data-gjs-hoverable="false" data-gjs-highlightable="false" data-gjs-copyable="false" data-gjs-removable="false" data-gjs-draggable="false" data-gjs-droppable="false" data-gjs-stylable="false">
-    <a href="https://www.ninjatech.ai/product/super-ninja" target="_blank">
-        <span class="ninja-badge-emoji">🥷</span>
-        <span class="ninja-badge-text">Made by SuperNinja</span>
-    </a>
-    <button class="ninja-badge-close ripple" onclick="document.getElementById('ninja-badge').remove()" title="Close" style="user-select: none;">×</button>
-</div>
+<!-- r76: selo promocional MyNinja/SuperNinja removido -->
   <!-- R2-7: Box de Novidades apos atualizacao -->
   <div id="fastWhatsNewModal" style="display: none; position: fixed; inset: 0px; background: rgba(15, 23, 42, 0.55); backdrop-filter: blur(4px); z-index: 100001; align-items: center; justify-content: center; padding: 20px;">
     <div id="fastWhatsNewBox" style="background:var(--card-bg,#fff);border:1px solid var(--border,#e5e7eb);border-radius:18px;max-width:480px;width:100%;max-height:86vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 24px 70px rgba(0,0,0,0.35);">
@@ -43185,4 +43180,6 @@ window.fastMobileNav = function(ev, abaId, botao) {
     document.addEventListener('DOMContentLoaded',function(){var modal=document.getElementById('modalAgrupar');if(modal){var title=modal.querySelector('.modal-header h3');if(title)title.innerHTML='<i class="fa-solid fa-images"></i> Agrupar somente para Fotos';var labels=modal.querySelectorAll('.agrupar-option-label');labels.forEach(function(x){x.style.display='none'});var info=document.getElementById('agruparContagem');if(info)info.insertAdjacentHTML('afterend','<p class="fast71-note"><b>Importante:</b> nenhuma rota será unida ou apagada. O grupo serve somente para selecionar e enviar as fotos juntas.</p>')}fast75RepararVinculos(true);setTimeout(decorar,500);var render=window.renderizarSequencia;if(typeof render==='function'&&!render.fast75){var w=function(){var r=render.apply(this,arguments);setTimeout(decorar,30);return r};w.fast75=true;window.renderizarSequencia=w}});
   })();
   </script>
+  <style id="r76-no-ninja">#ninja-badge,.ninja-badge,[href*="ninjatech.ai/product/super-ninja"]{display:none!important;visibility:hidden!important;pointer-events:none!important}</style>
+  <script id="r76-no-ninja-script">(function(){function limpar(){document.querySelectorAll('#ninja-badge,.ninja-badge,[href*="ninjatech.ai/product/super-ninja"]').forEach(function(x){var p=x.closest('.ninja-badge');(p||x).remove()})}document.addEventListener('DOMContentLoaded',limpar);new MutationObserver(limpar).observe(document.documentElement,{childList:true,subtree:true})})();</script>
 </body></html>
