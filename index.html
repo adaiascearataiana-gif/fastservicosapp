@@ -21,9 +21,9 @@
   <meta name="fast-github-branch" content="main">
   <meta name="fast-github-path" content="index.html">
   <meta name="fast-github-token-env" content="GH_TOKEN">
-  <meta name="fast-app-version" content="2026.09.02-r68">
+  <meta name="fast-app-version" content="2026.09.02-r70">
   <meta name="fast-app-date" content="2026-09-02T21:00:00Z">
-  <meta name="fast-latest-update" content="r68: cofre permanente de fotos preservado entre atualizações e sincronização automática reforçada com o Google Drive">
+  <meta name="fast-latest-update" content="r70: gestão avançada, segurança das fotos, Drive, restauração, usuários do RH, auditoria, fechamento, rentabilidade, OCR, proximidade e atalhos Android">
   <meta name="fast-app-changelog" content="[{&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;r64: BIOMETRIA ANDROID/WEBAuthn corrigida. O prompt nativo agora é solicitado de forma obrigatória na tentativa, não fica oculto atrás do campo de senha, a credencial cadastrada mantém o botão disponível e falhas continuam liberando entrada por senha.&quot;},{&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;r63: CONTRASTE GLOBAL DOS CAMPOS corrigido em todos os temas. Texto digitado, senha, preenchimento automático, placeholder, cursor, campos focados e desabilitados mantêm cores visíveis; o gate conserva fundo branco com caracteres escuros.&quot;},{&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;r62: CAMPO DE SENHA DO GATE totalmente visível. Fundo branco, caracteres e marcadores escuros, cursor destacado, placeholder legível, ícones contrastantes e correção do preenchimento automático do Android, sem interferência dos temas globais.&quot;},{&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;r61: CONTRASTE DO FAB DE RASTREAMENTO corrigido. O texto clientes com várias rotas, contador, ícones, botões de WhatsApp e fechar permanecem totalmente visíveis em qualquer tema, com fundo escuro próprio e layout mobile ajustado.&quot;},{&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;r60: ENVIO COMPLETO DE FOTOS AGRUPADAS E AUDITORIA DE DESEMPENHO. Todas as imagens do grupo são compartilhadas juntas em uma única operação. Confirmações fecham imediatamente; Agrupar, Desmembrar, Concluir, mover, QR e fotos usam persistência em segundo plano; tabelas são montadas em uma única inserção, eliminando reconstruções repetidas.&quot;},{&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;r59: CONCLUSÃO INSTANTÂNEA EM ROTAS DO DIA. Ao clicar em Concluir, o cartão muda de estado e vai imediatamente ao final, liberando a próxima rota no topo. Persistência, relatórios, fotos e sincronização são agrupados após os cliques, sem travar a sequência.&quot;},{&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;r58: SALVAMENTO INSTANTÂNEO em Rotas do Dia e Despesas. A confirmação visual ocorre no clique; serialização, cofre local, painéis e sincronização Supabase são agrupados e executados em segundo plano, sem congelar o botão.&quot;},{&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;r57: ACESSO POR USUÁRIO E SENHA RESTAURADO no gate. A biometria permanece como opção, mas falhas ou cancelamentos da digital não impedem mais a entrada normal pela senha.&quot;},{&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;r56: NOVA ABERTURA AMARELA com a logo oficial animada, gate exibido após 2 segundos, entrada normal somente por biometria, recuperação segura solicitada por e-mail, limpeza do título Nova Despesa e carregamento imediato de Últimas Atualizações.&quot;},{&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;r55: FORMATAÇÃO BRASILEIRA DE MOEDA em todos os campos de valor do app. Todos os 13 campos de valor (rotas, despesas, sequências, RH, despesas da empresa, capital social) agora exibem o padrão R$ 0,00 com cifrão, R de real, separador de milhar (ponto) e 2 dígitos decimais (vírgula). Os campos já começam com R$ 0,00 e ao digitar o zero desaparece automaticamente para entrar o número digitado, formatando em tempo real conforme você digita.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r54: CORREÇÃO CRÍTICA — ReferenceError 'fastLockTimeoutChange is not defined' ao selecionar tempo de bloqueio. A causa era exportações inválidas dentro da IIFE do módulo de segurança que abortavam todo o bloco antes de exportar fastLockTimeoutChange. Isso também causava demora na biometria — agora corrigido&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;r53: Barra fixa inferior (dock) — botão Dashboard substituído por Despesas, dando acesso rápido às despesas diretamente da barra de navegação&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r52: CORREÇÃO DA REORGANIZAÇÃO DO MENU — Despesas restaurada para Financeiro (não pertence à Logística); Rotas do Dia restaurada para Logística (não pertence ao Financeiro)&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;r52: DRE movido para a categoria Análises — agora Dashboard e DRE (Demonstrativo de Resultado) estão agrupados como relatórios analíticos&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;r51: PAINEL 'ÚLTIMAS ATUALIZAÇÕES' — histórico compacto e profissional das novidades e correções agora visível na aba Configurações, abaixo de 'Verificar Atualizações'&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;r51: NOVA CATEGORIA 'ANÁLISES' no menu suspenso — Dashboard agora tem sua própria seção dedicada&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;r51: REORGANIZAÇÃO DO MENU — Despesas movida para Logística (ao lado de Rotas); Rotas do Dia movida para Financeiro&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r51: Varredura geral do app — strings de versão estáticas desatualizadas (r49) corrigidas em 4 pontos do código&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r50: OBJETO 'SINCRONIZACAO' INVISIVEL BLOQUEANDO CLIQUES NA BARRA FIXA ELIMINADO. O toast de sincronizacao (#syncToast) ficava invisivel (opacity:0) apos desaparecer, mas continuava capturando todos os cliques (pointer-events:auto, z-index:99999, display:flex) sobre a barra de navegacao inferior - especialmente sobre o botao Dashboard. Ao selecionar esse objeto invisivel, aparecia o nome 'Sincronizacao' (texto do toast). Agora: (1) CSS pointer-events:none no toast quando nao esta visivel (.sync-toast base) e pointer-events:auto apenas quando visivel (.sync-toast.show); (2) apos fechar, o toast recebe display:none apos a transicao de 450ms, removendo-o completamente do fluxo de cliques; (3) ao reabrir, display e resetado para flex. Os botoes da barra fixa agora sao clicaveis livremente sem obstaculo.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r49: BLOQUEIO RESPEITA O TEMPO CONFIGURADO. Ao voltar ao app (PWA instalado), o gate nao aparecia imediatamente se o tempo de bloqueio (1/2/5 min) ainda nao tinha expirado - agora o pageshow handler verifica fastDeveBloquearAgora() antes de exigir reautenticacao. A biometria so e pedida quando o tempo realmente expira.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r49: SALVAMENTO INSTANTANEO SEM TRAVAR. Ao salvar rota ou adicionar despesa, a tela congelava por ~5 segundos esperando a sincronizacao com o Supabase terminar. Agora a sincronizacao roda em background com debounce de 400ms (fastDebounceSincronizar) via Promise - a UI responde imediatamente e os dados sao sincronizados sem bloquear.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r49: BARRA AZUL AO PRESSIONAR BOTOES ELIMINADA. O destaque azul que aparecia ao tocar/pressionar os botoes da navegacao inferior (dock) foi neutralizado com CSS que forca fundo transparente em :active. As bordas retas/curvas originais foram mantidas.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;r49: LOGO FAST SERVICOS. A splash screen e o gate de login agora exibem a logo oficial do Fast Servicos (moto vermelha) com fundo transparente, substituindo o icone generico de caminhao.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;r49: ANIMACAO ZOOM NA SPLASH. A splash screen agora sai com uma animacao de zoom-out suave em direcao ao usuario (scale 1 -&gt; 1.6 com fade) ao inves de simplesmente desaparecer. A versao permanece estatica embaixo.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;r49: AUTOCOMPLETAR EM DESPESAS. Ao digitar a Descricao ou o Local no formulario de despesas (novo OU edicao), aparece uma lista de sugestoes baseada nas despesas ja cadastradas, filtrando pela primeira letra digitada - igual ao autocompletar de clientes em rotas. Toque na sugestao para preencher automaticamente.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;r49: CATEGORIA OUTROS ABRE NOVO CAMPO. Ao selecionar a categoria Outros no formulario de despesas (novo OU edicao), abre automaticamente um campo de texto para digitar uma nova categoria. A nova categoria e salva permanentemente e aparece como opcao em futuros cadastros. Categorias ja usadas em despesas existentes tambem aparecem automaticamente no seletor.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r48: CAIXA AZUL OCULTA/PRESA ELIMINADA EM DEFINITIVO. O botao flutuante arrastavel #syncFloat (bola de 60px) ficava preso numa posicao salva no dispositivo (inset 117px/363px) sobre a aba Rotas do Dia, parado e sem movimento - era a 'caixa azul oculta'. Removido o elemento HTML, o JS de arrasto, a CSS e limpa a posicao persistida (localStorage.syncFloatPos) com failsafe que remove qualquer vestigio do DOM. O status de sincronismo continua acessivel pelo indicador fixo na barra superior (neon SYNC).&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;r48: BIOMETRIA INSTANTANEA. O login por impressao digital/Face ID agora abre muito mais rapido: splash reduzido de 800ms para 220ms, removida a verificacao pre-bloqueante de plataforma (o prompt nativo e disparado imediatamente), removido o spinner de loading antes do prompt (o proprio prompt nativo e o feedback), timeout do WebAuthn reduzido de 60s para 15s e adicionada mediation conditional. Guard anti-disparo-duplo adicionado.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;r48: NAVEGACAO INFERIOR ORGANIZADA. O label 'PAGINA PRINCIPAL' que vazava da caixa do botao no dock foi compactado para 'INICIO' (mantendo aria-label completo para acessibilidade). CSS do dock ajustado para nowrap + ellipsis em todos os 4 botoes, garantindo altura consistente de uma linha e impedindo que qualquer texto vaze/escape do botao.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;r48: AUDITORIA E LIMPEZA. Corrigidos os links quebrados do manifest PWA (blob: -&gt; data: URI) que geravam erros de console. Removida a animacao @keyframes iaFabPulse do botao flutuante extinto. Configuracao Supabase (5 tabelas) e sincronismo GitHub Pages verificados e intactos.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r47: CORRECAO DEFINITIVA DA BARRA AZUL / BOTAO OCULTO. A 'barra azul' que aparecia sobre a navegacao inferior era o menu nativo de selecao de texto do Android ('Copiar / Compartilhar / Selecionar tudo'), disparado ao tocar/arrastar sobre a bottom-nav. Solucao raiz: (1) user-select:none em TODA a chrome do app (nav, dock, header, barras flutuantes, botoes, labels, icones), (2) bloqueio JS do selectstart/contextmenu/touch na chrome, (3) ::selection neutra (sem roxo/azul), (4) failsafe CSS que forca fundo transparente em toda a bottom-nav em qualquer estado. O menu nativo nunca mais aparece sobre a barra.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;r47: REPAGINACAO TOTAL 2026 baseada em pesquisa profunda (Calm UX + glassmorphism funcional + microinteracoes funcionais + profundidade espacial + bento + dark-mode-ready + acessibilidade WCAG 2.2). Tokens r47 (raios, espacamentos, sombras em camadas, vidro calibrado), cards com hover suave, botoes com gradiente premium e press, topbar/sidebar/dock em vidro fosco real (backdrop-filter), barras flutuantes com shadow-pop, modal e toast com animacoes de entrada, badge de sync com pulse, tabelas zebra + hover, scrollbar roxo-ciano, skeleton shimmer, prefers-reduced-motion respeitado, alvos de toque &gt;=44px no mobile. Mais fluido, bonito, limpo e profissional - sem perder nenhuma funcao.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;r46: REPAGINACAO COMPLETA - Novo design system 2026 com glassmorphism, paleta premium roxo/ciano, gradientes animados, cards 3D com hover, sidebar com gradiente escuro, topbar com efeito vidro, botoes com brilho, scrollbar estilizada, modal e toast com animacoes suaves, login gate com vidro fosco, indicadores de sincronismo pulsantes. Versao para Linux (.deb + AppImage), Windows (.exe NSIS + portable) e Android (PWA instalavel). Tudo sincronizado com Supabase (5 tabelas) e GitHub Pages. Nenhuma funcao ou dado perdido - todas as 678 funcoes e 13 secoes mantidas.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r45: Lugares/Destinos agora aparece tambem na sidebar do desktop. Antes essa secao so existia no menu mobile (dropdown) e ficava invisivel no desktop, dando a impressao de perda de dados. Agora o desktop tem TODAS as secoes do mobile sem nenhuma excecao. Corrigido tambem o sincronismo de estado ativo: ao navegar por qualquer caminho (sidebar, dropdown ou dock), o botao correspondente na sidebar desktop marca como ativo corretamente.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;r44: Sincronizacao com a agenda telefonica do celular. No cadastro de clientes, botao 'Importar da Agenda (Telefone/WhatsApp)' abre o seletor nativo de contatos (Contact Picker API) — voce escolhe qual contato compartilhar e o app puxa automaticamente o Nome e o Telefone (com mascara BR), preenchendo os campos Telefone e WhatsApp do cadastro. O app NAO tem acesso livre a agenda: o usuario seleciona contato por contato. Funciona no Android Chrome 80+ e iOS Safari 18+. Em navegadores sem suporte, o botao fica indisponivel e voce digita manualmente. Adicionado tambem atalho para copiar Telefone -&gt; WhatsApp.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r43: (1) REMOVIDO em definitivo o botao azul/roxo flutuante de voz (microfone) que aparecia atras e sobre a barra de navegacao do Dashboard. O botao flutuante (#iaFab / .voz-fab) foi eliminado do HTML e bloqueado por CSS failsafe para nunca reaparecer, mesmo se uma posicao antiga ficar salva no dispositivo. As tentativas anteriores (r40/r41) apenas tentavam reposicionar o botao; agora ele nao existe mais. (2) Sincronizacao com GitHub revisada e confirmada: o app publica o index.html no GitHub Pages via API (token protegido no dispositivo). (3) Sincronizacao com Supabase revisada e confirmada: 5 tabelas (rotas, despesas, sequencias_itens, dados_empresa, destinos) verificadas com dedup e blacklist de itens excluidos.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;r42: Botao 'Sincronizar com GitHub' dentro da Area Protegida. Agora voce pode publicar o app diretamente no GitHub Pages a partir do celular/computador, sem precisar fazer upload manual. O token do GitHub fica salvo apenas no seu dispositivo (protegido pela senha da Area Protegida), nunca no codigo publico. O app detecta automaticamente se houve mudanca, envia o index.html atualizado via API do GitHub e confirma 'Sincronizacao concluida! Site no ar'.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r41: (1) Colunas Nome e Endereco da aba Destinos agora sao flexiveis - crescem automaticamente quando ha um nome/endereco maior, sem forcar largura fixa. (2) Barra azul atras do botao Dashboard REMOVIDA em definitivo: os botoes flutuantes de scroll/voz agora sao cinza-escuro neutro (nao azul/indigo) e nunca descem sobre a barra de navegacao inferior; adicionado failsafe CSS que forca fundo transparente em toda a bottom-nav. (3) Contador de Rotas do Dia corrigido: agora usa a data do calendario (date picker) e filtra itens excluidos (blacklist), entao o numero do menu suspenso sempre bate com as rotas exibidas na aba. (4) Biometria (impressao digital/Face ID/Windows Hello) disponivel na Area Protegida - agora mostra uma dica quando o dispositivo suporta biometria mas ela ainda nao foi ativada.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r40 CORRECAO RAIZ: o Service Worker usava cache-first e servia uma versao antiga (r37/r38) em cache mesmo apos o GitHub Pages ser atualizado, fazendo as rotas excluidas voltarem. Reescrito para NETWORK-FIRST em navegacoes/HTML + auto-cura que remove Service Workers e caches obsoletos no arranque. Agora o usuario sempre roda a versao mais recente publicada. CORRECAO DA BARRA AZUL atras do botao Dashboard: removido o fundo azul (accent-soft) do botao de navegacao ativo — agora apenas a cor do texto/icone muda, sem barra azul. Auto-atualizacao com fallback no-cors para contornar Service Worker/CORS.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;CORREÇÃO DEFINITIVA: Rotas do Dia excluídas NUNCA mais reaparecem. O problema era duplicatas na nuvem (cada \&quot;Carregar\&quot; gerava um ID novo, acumulando dezenas de cópias). Agora: (1) IDs estáveis por rota, (2) blacklist por rotaId bloqueia TODAS as cópias, (3) dedup automático, (4) 41 duplicatas limpas da nuvem.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;Rotas do Dia excluídas não voltam mais ao recarregar a página ou sincronizar — adicionada blacklist de itens de sequência (seqItensExcluidos) respeitada no merge com a nuvem (Supabase).&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;URL fixa migrada para GitHub Pages — endereço permanente do app.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;Indicadores ONLINE e SYNC fixos na barra superior com ícones próprios.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;Recuperação de senha por e-mail na Área Protegida e no login da plataforma — mesmo e-mail para ambos.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;Tempo de bloqueio configurável após sair do app: imediato, 1, 2 ou 5 minutos.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;Box de novidades após cada atualização, com a nova versão e data/hora do lançamento.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;Tema simplificado: apenas Light Moderno e Ocean Blue. Seção renomeada para \&quot;Temas\&quot;.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;Verificação de atualização com confirmação e barra de progresso ao atualizar.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;Textos da Área Protegida reorganizados em parágrafos limpos e alinhados.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;Performance otimizada: bibliotecas externalizadas para CDN (~800KB a menos).&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;Removidos botões redundantes (Atualizar, Status, Abrir Versão Oficial, Atualizar Agora).&quot;}]">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https:; img-src 'self' data: blob: https: http:; connect-src 'self' https: data: blob:; font-src 'self' https: data:;">
   <!-- PWA: Meta tags para app instalavel -->
@@ -31,9 +31,9 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="FAST Serviços">
   <meta name="application-name" content="FAST Serviços">
-  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%234f46e5'/%3E%3Ctext x='50' y='72' font-size='60' text-anchor='middle' fill='white'%3E%E2%9A%A1%3C/text%3E%3C/svg%3E">
+  <link rel="apple-touch-icon" sizes="192x192" href="assets/fast-servicos-icon-192.png?v=r69">
   <title>⚡ FAST SERVIÇOS — Mobile</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9A%A1%3C/text%3E%3C/svg%3E">
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/fast-servicos-icon-192.png?v=r69">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet">
@@ -23127,7 +23127,7 @@ tbody tr:hover td {
               <div id="fastDeployInfo" style="background:var(--card-bg-2);border:1px solid var(--border);border-radius:10px;padding:12px;margin:10px 0;font-size:13px;">
                 <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
                   <div>
-                    <div><strong>Versão atual:</strong> <span id="fastVersaoLabel" style="color:var(--accent);font-weight:800;">2026.09.02-r68</span></div>
+                    <div><strong>Versão atual:</strong> <span id="fastVersaoLabel" style="color:var(--accent);font-weight:800;">2026.09.02-r70</span></div>
                     <div id="fastVersaoDateLabel" style="font-size:11.5px;color:var(--text-muted);margin-top:3px;"><i class="fa-solid fa-clock"></i> Lançada em 02/09/2026 18:00</div>
                   </div>
                   <div id="fastVersaoOnlineLabel" style="font-size:12px;color:var(--text-muted);text-align:right;">Online: <strong>2026.09.02-r68</strong> <span style="color:var(--success);">(ok)</span></div>
@@ -30747,7 +30747,15 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
     }
 
     // R2-4: Executa a atualizacao — mostra barra de progresso e redireciona.
-    function fastExecutarAtualizacao(urlDeploy) {
+    async function fastExecutarAtualizacao(urlDeploy) {
+      // r70: antes de trocar o código, preserva um ponto restaurável dos dados.
+      if (typeof window.fast70CriarCheckpoint === 'function') {
+        var checkpointOk = await window.fast70CriarCheckpoint(true);
+        if (!checkpointOk) {
+          alert('A atualização foi interrompida porque não foi possível criar o ponto de restauração. Seus dados atuais permanecem intactos.');
+          return;
+        }
+      }
       var prog = document.getElementById('fastUpdateProgress');
       var bar = document.getElementById('fastUpdateProgressBar');
       var txt = document.getElementById('fastUpdateProgressTxt');
@@ -31450,7 +31458,7 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
     // --- IndexedDB genérico para handles e fotos base64 ---
     function abrirDBFotos() {
       return new Promise((resolve, reject) => {
-        const req = indexedDB.open('app_fast_fotos', 3);
+        const req = indexedDB.open('app_fast_fotos', 4);
         req.onupgradeneeded = function(e) {
           const db = e.target.result;
           if (!db.objectStoreNames.contains('dirHandles')) {
@@ -31461,6 +31469,12 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
           }
           if (!db.objectStoreNames.contains('driveQueue')) {
             db.createObjectStore('driveQueue', { keyPath: 'id' });
+          }
+          if (!db.objectStoreNames.contains('driveLedger')) {
+            db.createObjectStore('driveLedger', { keyPath: 'id' });
+          }
+          if (!db.objectStoreNames.contains('updateCheckpoints')) {
+            db.createObjectStore('updateCheckpoints', { keyPath: 'id' });
           }
         };
         req.onsuccess = function(e) { resolve(e.target.result); };
@@ -39141,7 +39155,28 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
         });
       }
 
-      // 7) Despesas registradas no mês atual
+      // 7) Clientes com pagamento pendente — somente no sino
+      const rotasPagamento = [];
+      (bancoDados.rotas || []).forEach(r => rotasPagamento.push(r));
+      Object.keys(bancoDados.sequencias || {}).forEach(data => {
+        (bancoDados.sequencias[data] || []).forEach(r => rotasPagamento.push(r));
+      });
+      const pagamentosPendentes = rotasPagamento.filter(r => {
+        const st = String(r.statusPagamento || r.pagamento || '').toLowerCase();
+        return st.includes('pendente') || (!st.includes('recebid') && !st.includes('pago') && (parseFloat(r.valor || r.valorRota) || 0) > 0);
+      });
+      if (pagamentosPendentes.length > 0) {
+        const totalPendente = pagamentosPendentes.reduce((s, r) => s + (parseFloat(r.valor || r.valorRota) || 0), 0);
+        const clientesPendentes = [...new Set(pagamentosPendentes.map(r => r.cliente).filter(Boolean))];
+        notifs.push({
+          tipo: 'warning', icon: 'fa-hand-holding-dollar',
+          titulo: `${pagamentosPendentes.length} pagamento(s) pendente(s)`,
+          desc: `Total pendente: <strong>R$ ${totalPendente.toFixed(2).replace('.', ',')}</strong>${clientesPendentes.length ? `. Clientes: ${clientesPendentes.slice(0,4).map(escapeHtml).join(', ')}${clientesPendentes.length > 4 ? '...' : ''}.` : '.'}`,
+          acao: "trocarAba(event,'rotas')"
+        });
+      }
+
+      // 8) Despesas registradas no mês atual
       const mesAtual = hojeStr.substring(0, 7);
       let despesasMes = 0;
       let totalDespesasMes = 0;
@@ -39161,7 +39196,7 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
         });
       }
 
-      // 8) Sem dados / boas-vindas
+      // 9) Sem dados / boas-vindas
       const totalRotas = (bancoDados.rotas || []).length;
       const totalSeqDatas = Object.keys(bancoDados.sequencias || {}).length;
       if (totalRotas === 0 && totalSeqDatas === 0 && motoristas.length === 0) {
@@ -40091,6 +40126,9 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
 
     /* ---- Manifest PWA dinâmico (inline para funcionar sem arquivo separado) ---- */
     function pwaGerarManifest() {
+      // Mantém apenas um manifesto ativo. Versões antigas adicionavam vários
+      // links e o Android podia continuar usando o ícone anterior em cache.
+      document.querySelectorAll('link[rel="manifest"]').forEach(function(el){ el.remove(); });
       const manifest = {
         name: 'FAST Serviços - Gestão de Rotas',
         short_name: 'FAST Serviços',
@@ -40104,8 +40142,28 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
         lang: 'pt-BR',
         categories: ['business', 'productivity', 'finance'],
         icons: [
-          { src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%234f46e5'/%3E%3Ctext x='50' y='72' font-size='60' text-anchor='middle' fill='white'%3E%E2%9A%A1%3C/text%3E%3C/svg%3E", sizes: '192x192', type: 'image/svg+xml', purpose: 'any maskable' },
-          { src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%234f46e5'/%3E%3Ctext x='50' y='72' font-size='60' text-anchor='middle' fill='white'%3E%E2%9A%A1%3C/text%3E%3C/svg%3E", sizes: '512x512', type: 'image/svg+xml', purpose: 'any maskable' }
+          { src: 'assets/fast-servicos-icon-192.png?v=r69', sizes: '192x192', type: 'image/png', purpose: 'any' },
+          { src: 'assets/fast-servicos-icon-512.png?v=r69', sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
+        ],
+        shortcuts: [
+          {
+            name: 'Rotas do Dia',
+            short_name: 'Rotas do Dia',
+            description: 'Abrir diretamente as rotas programadas para hoje',
+            url: (location.pathname || '/') + '?atalho=rotasDia',
+            icons: [
+              { src: 'assets/fast-servicos-icon-192.png?v=r70', sizes: '192x192', type: 'image/png' }
+            ]
+          },
+          {
+            name: 'Despesas',
+            short_name: 'Despesas',
+            description: 'Abrir diretamente o controle de despesas',
+            url: (location.pathname || '/') + '?atalho=despesas',
+            icons: [
+              { src: 'assets/fast-servicos-icon-192.png?v=r70', sizes: '192x192', type: 'image/png' }
+            ]
+          }
         ]
       };
       const blob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
@@ -40114,6 +40172,12 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
       link.rel = 'manifest';
       link.href = url;
       document.head.appendChild(link);
+
+      // A mesma logomarca oficial também aparece no gate e na abertura.
+      document.querySelectorAll('#fastSplash img, #fastLoginGate .fast-gate-logo img').forEach(function(img){
+        img.src = 'assets/fast-servicos-icon-512.png?v=r69';
+        img.alt = 'Fast Serviços';
+      });
     }
 
     /* ---- Busca Global ---- */
@@ -42473,6 +42537,23 @@ window.fastMobileNav = function(ev, abaId, botao) {
       #fastLoginGate .fast-gate-logo { width:min(52vw,220px) !important; }
       #fastLoginGate .fast-gate-card { padding-top:18px !important; padding-bottom:18px !important; }
     }
+    /* r69: logo do gate compacta e responsiva. Mantém a imagem inteira, sem
+       cortar o nome, a moto ou o telefone em telas Android menores. */
+    #fastLoginGate .fast-gate-brand { margin-bottom:14px !important; }
+    #fastLoginGate .fast-gate-logo {
+      width:clamp(128px,38vw,190px) !important;
+      height:clamp(128px,38vw,190px) !important;
+      margin:0 auto 8px !important;
+      border-radius:20px !important;
+    }
+    #fastLoginGate .fast-gate-logo img {
+      width:100% !important; height:100% !important;
+      object-fit:contain !important; padding:0 !important;
+    }
+    @media (max-height:700px) {
+      #fastLoginGate .fast-gate-logo { width:120px !important; height:120px !important; }
+      #fastLoginGate .fast-gate-brand { margin-bottom:8px !important; }
+    }
   </style>
   <style id="r61-rastreamento-fab-contrast">
     /* O FAB de rastreamento usa texto claro; seu fundo não pode herdar o vidro
@@ -42741,6 +42822,12 @@ window.fastMobileNav = function(ev, abaId, botao) {
           tx.oncomplete=function(){resolve(true);}; tx.onerror=function(){reject(tx.error);};
         });
       }
+      async function ledgerPut(reg){
+        var db=await abrirDB(); return new Promise(function(resolve,reject){
+          var tx=db.transaction('driveLedger','readwrite'); tx.objectStore('driveLedger').put(reg);
+          tx.oncomplete=function(){resolve(true);}; tx.onerror=function(){reject(tx.error);};
+        });
+      }
       function dataNome(dataSel){
         var m=String(dataSel||'').match(/^(\d{4})-(\d{2})-(\d{2})$/);
         if(m) return m[3]+'-'+m[2]+'-'+m[1];
@@ -42772,15 +42859,33 @@ window.fastMobileNav = function(ev, abaId, botao) {
           await filaPut({
             id:'drive_'+Date.now()+'_'+i+'_'+Math.random().toString(36).slice(2),
             nome:nome, blob:arq, tipo:arq.type||'image/jpeg', criadoEm:new Date().toISOString(),
-            itemId:item&&item.id!=null?String(item.id):'', tentativas:0, ultimoErro:''
+            itemId:item&&item.id!=null?String(item.id):'', dataPasta:dataNome(dataSel),
+            destinoPasta:destino, fotoNumero:numero, tentativas:0, ultimoErro:''
           });
         }
         await pendentesStatus('Fotos protegidas localmente.');
         if(token() && navigator.onLine) window.fastDriveSincronizarPendentes();
       };
+      function qDrive(s){return String(s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");}
+      async function pastaDrive(nome,parentId){
+        var q="name='"+qDrive(nome)+"' and mimeType='application/vnd.google-apps.folder' and trashed=false and '"+qDrive(parentId)+"' in parents";
+        var busca=await fetch('https://www.googleapis.com/drive/v3/files?spaces=drive&fields=files(id,name)&q='+encodeURIComponent(q),{headers:{Authorization:'Bearer '+token()}});
+        if(busca.status===401){salvarToken('');throw new Error('Autorização do Google expirada. Conecte novamente.');}
+        if(!busca.ok)throw new Error('Não foi possível consultar as pastas no Drive.');
+        var dados=await busca.json(); if(dados.files&&dados.files[0])return dados.files[0].id;
+        var cria=await fetch('https://www.googleapis.com/drive/v3/files?fields=id',{method:'POST',headers:{Authorization:'Bearer '+token(),'Content-Type':'application/json'},body:JSON.stringify({name:nome,mimeType:'application/vnd.google-apps.folder',parents:[parentId]})});
+        if(!cria.ok)throw new Error('Não foi possível criar a pasta '+nome+' no Drive.');
+        return (await cria.json()).id;
+      }
+      async function pastaFinal(reg){
+        var cfg=config(), data=reg.dataPasta||'Sem data', destino=reg.destinoPasta||'Sem destino';
+        var pastaData=await pastaDrive(data,cfg.folderId);
+        return pastaDrive(destino,pastaData);
+      }
       async function enviar(reg){
         var cfg=config(), boundary='fast_'+Date.now()+'_'+Math.random().toString(36).slice(2);
-        var meta={name:reg.nome,parents:[cfg.folderId]};
+        var destinoId=await pastaFinal(reg);
+        var meta={name:reg.nome,parents:[destinoId]};
         var corpo=new Blob([
           '--'+boundary+'\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n',JSON.stringify(meta),'\r\n',
           '--'+boundary+'\r\nContent-Type: '+(reg.tipo||'image/jpeg')+'\r\n\r\n',reg.blob,'\r\n--'+boundary+'--'
@@ -42800,7 +42905,11 @@ window.fastMobileNav = function(ev, abaId, botao) {
           var fila=await filaGetAll(), ok=0;
           for(var i=0;i<fila.length;i++){
             status('Enviando '+(i+1)+' de '+fila.length+': '+fila[i].nome,'');
-            try{await enviar(fila[i]);await filaDelete(fila[i].id);ok++;}
+            try{
+              var enviado=await enviar(fila[i]);
+              await ledgerPut({id:fila[i].id,itemId:fila[i].itemId||'',nome:fila[i].nome,driveId:enviado.id||'',link:enviado.webViewLink||'',enviadoEm:new Date().toISOString(),dataPasta:fila[i].dataPasta||'',destinoPasta:fila[i].destinoPasta||''});
+              await filaDelete(fila[i].id);ok++;
+            }
             catch(e){fila[i].tentativas=(fila[i].tentativas||0)+1;fila[i].ultimoErro=String(e.message||e);await filaPut(fila[i]);console.warn('Drive:',e);if(!token())break;}
           }
           await pendentesStatus(ok?'✅ '+ok+' foto(s) enviadas.':'');
@@ -42855,5 +42964,194 @@ window.fastMobileNav = function(ev, abaId, botao) {
       // Nova tentativa periódica enquanto o aplicativo estiver aberto.
       setInterval(function(){if(token()&&navigator.onLine)window.fastDriveSincronizarPendentes();},60000);
     })();
+  </script>
+  <style id="r70-preparacao-style">
+    .fast70-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}.fast70-kpi{padding:14px;border:1px solid var(--border);border-radius:12px;background:var(--bg-card)}
+    .fast70-kpi b{display:block;font-size:24px;margin-top:5px}.fast70-modal{position:fixed;inset:0;z-index:100500;background:rgba(2,6,23,.74);display:none;align-items:center;justify-content:center;padding:14px}
+    .fast70-modal.show{display:flex}.fast70-panel{width:min(920px,100%);max-height:92vh;overflow:auto;background:var(--bg-card);color:var(--text-main);border-radius:18px;padding:18px;box-shadow:0 28px 80px rgba(0,0,0,.4)}
+    .fast70-head{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:14px}.fast70-table{width:100%;border-collapse:collapse;font-size:12px}.fast70-table th,.fast70-table td{padding:9px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top}
+    .fast70-badge{display:inline-flex;padding:4px 8px;border-radius:999px;font-weight:800;font-size:11px}.fast70-ok{background:#dcfce7;color:#166534}.fast70-warn{background:#fef3c7;color:#92400e}.fast70-err{background:#fee2e2;color:#991b1b}
+    #fastOfflineBar{display:none;position:fixed;left:50%;transform:translateX(-50%);top:8px;z-index:100400;background:#7c2d12;color:#fff;padding:8px 14px;border-radius:999px;font-weight:800;font-size:12px;box-shadow:0 8px 22px rgba(0,0,0,.25)}
+    .fast70-driver-card{padding:18px;border:1px solid var(--border);border-radius:16px;background:var(--bg-card);font-size:16px}.fast70-driver-card h2{font-size:23px;margin:0 0 10px}.fast70-driver-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}.fast70-driver-actions button{min-height:56px;font-size:15px;font-weight:800}
+    @media(max-width:600px){.fast70-panel{padding:14px;border-radius:14px}.fast70-table{font-size:11px}.fast70-driver-actions{grid-template-columns:1fr}.fast70-kpi b{font-size:21px}}
+  </style>
+  <div id="fastOfflineBar"><i class="fa-solid fa-cloud-arrow-up"></i> Modo offline — dados protegidos; sincronização retomará automaticamente</div>
+  <div id="fast70Modal" class="fast70-modal" onclick="if(event.target===this)fast70Fechar()"><div class="fast70-panel"><div class="fast70-head"><h2 id="fast70Titulo" style="margin:0">Central de Segurança</h2><button class="btn-secondary" onclick="fast70Fechar()"><i class="fa-solid fa-xmark"></i> Fechar</button></div><div id="fast70Conteudo"></div></div></div>
+
+  <script id="r70-recursos-preparados">
+  (function(){
+    'use strict';
+    function db(){return abrirDBFotos();}
+    function getAll(store){return db().then(function(d){return new Promise(function(ok,fail){var tx=d.transaction(store,'readonly'),r=tx.objectStore(store).getAll();r.onsuccess=function(){ok(r.result||[])};r.onerror=function(){fail(r.error)}})});}
+    function put(store,val){return db().then(function(d){return new Promise(function(ok,fail){var tx=d.transaction(store,'readwrite');tx.objectStore(store).put(val);tx.oncomplete=function(){ok(true)};tx.onerror=function(){fail(tx.error)}})});}
+    function del(store,key){return db().then(function(d){return new Promise(function(ok,fail){var tx=d.transaction(store,'readwrite');tx.objectStore(store).delete(key);tx.oncomplete=function(){ok(true)};tx.onerror=function(){fail(tx.error)}})});}
+    function esc(v){var e=document.createElement('div');e.textContent=String(v==null?'':v);return e.innerHTML;}
+    function hojeISO(){var d=new Date(),p=function(n){return String(n).padStart(2,'0')};return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate());}
+    function itens(){var out=[];Object.keys((window.bancoDados&&bancoDados.sequencias)||{}).forEach(function(data){(bancoDados.sequencias[data]||[]).forEach(function(i){if(i)out.push({data:data,item:i})})});return out;}
+    function fotosItem(i){var a=[];if(Array.isArray(i.fotos))a=a.concat(i.fotos);else if(i.foto)a.push(i.foto);return a.filter(Boolean);}
+    function concl(i){return !!(i.concluido||i.concluida||String(i.status||'').toLowerCase().indexOf('conclu')>=0);}
+    function abrir(titulo,html){document.getElementById('fast70Titulo').textContent=titulo;document.getElementById('fast70Conteudo').innerHTML=html;document.getElementById('fast70Modal').classList.add('show');}
+    window.fast70Fechar=function(){document.getElementById('fast70Modal').classList.remove('show');};
+
+    async function diagnostico(){
+      var regs=await getAll('fotosBase64'),fila=await getAll('driveQueue'),ledger=await getAll('driveLedger'),todos=itens(),refs=new Set(regs.map(function(r){return 'idb:'+String(r.chave)}));
+      var total=0,ausentes=[],semRota=[];todos.forEach(function(x){fotosItem(x.item).forEach(function(ref){total++;if(String(ref).indexOf('idb:')===0&&!refs.has(String(ref)))ausentes.push({item:x.item,ref:ref,data:x.data})})});
+      var ids=new Set(todos.map(function(x){return String(x.item.id)}));regs.forEach(function(r){var k=String(r.chave||''),achou=false;ids.forEach(function(id){if(k.indexOf(id+'_')===0)achou=true});if(!achou)semRota.push(k)});
+      return {registros:regs,fila:fila,ledger:ledger,itens:todos,totalFotos:total,ausentes:ausentes,orfas:semRota};
+    }
+    window.fast70CentralFotos=async function(){
+      abrir('Central de Segurança das Fotos','<p>Verificando armazenamento, rotas e Google Drive…</p>');
+      try{var d=await diagnostico(),protegidas=Math.max(0,d.totalFotos-d.ausentes.length),linhas=d.itens.filter(function(x){return fotosItem(x.item).length}).map(function(x){var n=fotosItem(x.item).length,q=d.fila.filter(function(f){return String(f.itemId)===String(x.item.id)}).length,l=d.ledger.filter(function(f){return String(f.itemId)===String(x.item.id)}).length;return '<tr><td>'+esc(x.data)+'</td><td>'+esc(x.item.cliente||'-')+'</td><td>'+esc(x.item.destino||'-')+'</td><td>'+n+'</td><td><span class="fast70-badge '+(q?'fast70-warn':l?'fast70-ok':'fast70-warn')+'">'+(q?q+' pendente(s)':l+' no Drive')+'</span></td></tr>'}).join('');
+        abrir('Central de Segurança das Fotos','<div class="fast70-grid"><div class="fast70-kpi">Fotos referenciadas<b>'+d.totalFotos+'</b></div><div class="fast70-kpi">Cópias locais válidas<b>'+protegidas+'</b></div><div class="fast70-kpi">Fila do Drive<b>'+d.fila.length+'</b></div><div class="fast70-kpi">Enviadas ao Drive<b>'+d.ledger.length+'</b></div></div><div style="display:flex;gap:9px;flex-wrap:wrap;margin:14px 0"><button class="btn-success" onclick="fastDriveSincronizarPendentes()"><i class="fa-solid fa-rotate"></i> Reenviar pendentes</button><button class="btn-secondary" onclick="fast70Integridade()"><i class="fa-solid fa-shield-halved"></i> Diagnóstico completo</button></div><div style="overflow:auto"><table class="fast70-table"><thead><tr><th>Data</th><th>Cliente</th><th>Destino</th><th>Fotos</th><th>Backup</th></tr></thead><tbody>'+linhas+'</tbody></table></div>');
+      }catch(e){abrir('Central de Segurança','<p class="fast70-err" style="padding:12px">Falha no diagnóstico: '+esc(e.message||e)+'</p>')}
+    };
+    window.fast70Integridade=async function(){
+      abrir('Painel de Integridade','<p>Executando verificação não destrutiva…</p>');
+      try{var d=await diagnostico(),ok=!d.ausentes.length,score=Math.max(0,100-(d.ausentes.length*10)-(d.orfas.length?5:0));abrir('Painel de Integridade','<div class="fast70-grid"><div class="fast70-kpi">Pontuação de proteção<b>'+score+'%</b></div><div class="fast70-kpi">Referências ausentes<b>'+d.ausentes.length+'</b></div><div class="fast70-kpi">Fotos recuperáveis sem rota<b>'+d.orfas.length+'</b></div><div class="fast70-kpi">Uploads pendentes<b>'+d.fila.length+'</b></div></div><p style="margin-top:14px"><span class="fast70-badge '+(ok?'fast70-ok':'fast70-err')+'">'+(ok?'Armazenamento local consistente':'Atenção necessária')+'</span></p><p>Nenhuma foto é apagada por este diagnóstico. Fotos sem vínculo continuam preservadas e podem ser religadas pelo recurso <strong>Recuperar Fotos</strong>.</p><button class="btn-secondary" onclick="recuperarFotosLocais()"><i class="fa-solid fa-images"></i> Recuperar fotos locais</button>');}catch(e){abrir('Painel de Integridade','<p>Erro: '+esc(e.message||e)+'</p>')}
+    };
+
+    window.fast70CriarCheckpoint=async function(silencioso){
+      try{var snap={id:'checkpoint_atual',criadoEm:new Date().toISOString(),versao:(document.querySelector('meta[name=fast-app-version]')||{}).content||'',dados:JSON.parse(JSON.stringify(window.bancoDados||{}))};await put('updateCheckpoints',snap);localStorage.setItem('fast_checkpoint_em',snap.criadoEm);if(!silencioso)mostrarToast('Ponto de restauração criado com sucesso.','sucesso');return true}catch(e){if(!silencioso)alert('Não foi possível criar o ponto de restauração: '+e);return false}
+    };
+    window.fast70RestaurarCheckpoint=async function(){
+      var a=await getAll('updateCheckpoints'),s=a.sort(function(x,y){return String(y.criadoEm).localeCompare(String(x.criadoEm))})[0];if(!s){alert('Ainda não existe ponto de restauração.');return}confirmarDialog('Restaurar ponto de segurança','Restaurar dados de '+new Date(s.criadoEm).toLocaleString('pt-BR')+'? As fotos locais não serão apagadas.',function(){window.bancoDados=s.dados;salvarStorage();location.reload()})
+    };
+
+    function rotasCliente(nome){nome=String(nome||'').trim().toLowerCase();return itens().filter(function(x){return String(x.item.cliente||'').trim().toLowerCase()===nome});}
+    window.fast70HistoricoCliente=function(nome){
+      if(!nome)nome=prompt('Digite o nome exato do cliente:');if(!nome)return;var rs=rotasCliente(nome),f=0,total=0,con=0;rs.forEach(function(x){f+=fotosItem(x.item).length;total+=Number(x.item.valor||0)||0;if(concl(x.item))con++});var linhas=rs.sort(function(a,b){return String(b.data).localeCompare(String(a.data))}).map(function(x){return '<tr><td>'+esc(x.data)+'</td><td>'+esc(x.item.origem||'-')+'</td><td>'+esc(x.item.destino||'-')+'</td><td>'+fotosItem(x.item).length+'</td><td>'+(concl(x.item)?'Concluída':'Pendente')+'</td></tr>'}).join('');abrir('Histórico do Cliente — '+nome,'<div class="fast70-grid"><div class="fast70-kpi">Rotas<b>'+rs.length+'</b></div><div class="fast70-kpi">Concluídas<b>'+con+'</b></div><div class="fast70-kpi">Fotos<b>'+f+'</b></div><div class="fast70-kpi">Valor acumulado<b>'+total.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})+'</b></div></div><div style="overflow:auto;margin-top:14px"><table class="fast70-table"><thead><tr><th>Data</th><th>Origem</th><th>Destino</th><th>Fotos</th><th>Status</th></tr></thead><tbody>'+linhas+'</tbody></table></div>')
+    };
+
+    window.fast70ModoEntregador=function(){
+      var data=(document.getElementById('dpDataSequencia')||{}).value||hojeISO(),rs=itens().filter(function(x){return x.data===data&&!concl(x.item)}),x=rs[0];if(!x){abrir('Modo Entregador','<div class="fast70-driver-card"><h2>✅ Nenhuma rota pendente</h2><p>Não há entrega pendente para '+esc(data)+'.</p></div>');return}var i=x.item,id=String(i.id),end=i.destino||'';abrir('Modo Entregador — Próxima rota','<div class="fast70-driver-card"><div class="fast70-badge fast70-warn">'+rs.length+' pendente(s)</div><h2>'+esc(i.cliente||'Cliente não informado')+'</h2><p><strong>Destino:</strong><br>'+esc(end||'-')+'</p><p><strong>Origem:</strong> '+esc(i.origem||'-')+'<br><strong>Motorista:</strong> '+esc(i.motorista||'-')+'</p><div class="fast70-driver-actions"><button class="btn-primary" onclick="window.open(\'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(end)+'\',\'_blank\')"><i class="fa-solid fa-location-arrow"></i> Navegar</button><button class="btn-secondary" onclick="fast70Fechar();proIr(\'rotasDia\')"><i class="fa-solid fa-camera"></i> Fotografar</button><button class="btn-success" onclick="alternarConcluidoSeq(\''+esc(x.data)+'\',\''+esc(id)+'\');fast70Fechar()"><i class="fa-solid fa-check"></i> Concluir entrega</button><button class="btn-secondary" onclick="fast70HistoricoCliente(\''+esc(String(i.cliente||'').replace(/'/g,"\\'"))+'\')"><i class="fa-solid fa-clock-rotate-left"></i> Histórico</button></div></div>')
+    };
+
+    function offline(){var b=document.getElementById('fastOfflineBar');if(b)b.style.display=navigator.onLine?'none':'block';if(navigator.onLine&&window.fastDriveSincronizarPendentes)setTimeout(window.fastDriveSincronizarPendentes,500)}
+    function instalarUI(){
+      var cfg=document.querySelector('#configuracoes .config-page,#configuracoes .config-topics,#configuracoes');if(cfg&&!document.getElementById('fast70SecurityCard')){var box=document.createElement('div');box.id='fast70SecurityCard';box.className='config-topic';box.innerHTML='<div class="config-topic-header"><div class="config-topic-icon ico-backup"><i class="fa-solid fa-shield-heart"></i></div><div><div class="config-topic-title">Central de Segurança e Continuidade</div><div class="config-topic-sub">Fotos, integridade, operação offline e restauração</div></div></div><div class="config-topic-body"><div class="config-btn-row"><button class="btn-primary" onclick="fast70CentralFotos()"><i class="fa-solid fa-images"></i> Segurança das Fotos</button><button class="btn-secondary" onclick="fast70Integridade()"><i class="fa-solid fa-stethoscope"></i> Verificar Integridade</button><button class="btn-secondary" onclick="fast70CriarCheckpoint(false)"><i class="fa-solid fa-camera-rotate"></i> Criar Ponto de Restauração</button><button class="btn-secondary" onclick="fast70RestaurarCheckpoint()"><i class="fa-solid fa-clock-rotate-left"></i> Restaurar Ponto</button><button class="btn-secondary" onclick="fast70HistoricoCliente()"><i class="fa-solid fa-building-user"></i> Histórico do Cliente</button><button class="btn-success" onclick="fast70ModoEntregador()"><i class="fa-solid fa-motorcycle"></i> Modo Entregador</button></div><p class="config-desc" style="margin-top:10px">O aplicativo salva primeiro no aparelho. Sem internet, tudo permanece disponível e as filas são retomadas quando a conexão volta.</p></div>';cfg.insertBefore(box,cfg.firstChild)}
+      var head=document.querySelector('#rotasDia .card-title>div');if(head&&!document.getElementById('fast70DriverBtn')){var b=document.createElement('button');b.id='fast70DriverBtn';b.className='btn-success no-print ripple';b.innerHTML='<i class="fa-solid fa-motorcycle"></i> Modo Entregador';b.onclick=window.fast70ModoEntregador;head.appendChild(b)}
+    }
+    document.addEventListener('DOMContentLoaded',function(){instalarUI();offline();fast70CriarCheckpoint(true)});window.addEventListener('online',offline);window.addEventListener('offline',offline);
+  })();
+  </script>
+  <script id="r70-comprovante-lixeira-whatsapp">
+  (function(){
+    'use strict';
+    var TRASH_KEY='fast_lixeira_rotas_v1';
+    function esc(v){var d=document.createElement('div');d.textContent=String(v==null?'':v);return d.innerHTML}
+    function trash(){try{return JSON.parse(localStorage.getItem(TRASH_KEY)||'[]')}catch(e){return []}}
+    function saveTrash(a){localStorage.setItem(TRASH_KEY,JSON.stringify(a.slice(-100)))}
+    function achar(data,id){return (((window.bancoDados||{}).sequencias||{})[data]||[]).find(function(x){return String(x.id)===String(id)})}
+    function guardarLixeira(data,item){if(!item)return;var a=trash();if(a.some(function(x){return String(x.item.id)===String(item.id)}))return;a.push({id:'trash_'+Date.now(),apagadoEm:new Date().toISOString(),data:data,item:JSON.parse(JSON.stringify(item))});saveTrash(a)}
+    window.fast70AbrirLixeira=function(){var a=trash(),rows=a.slice().reverse().map(function(x){return '<tr><td>'+new Date(x.apagadoEm).toLocaleString('pt-BR')+'</td><td>'+esc(x.item.cliente||'-')+'</td><td>'+esc(x.item.destino||'-')+'</td><td><button class="btn-success" onclick="fast70RestaurarLixeira(\''+x.id+'\')">Restaurar</button></td></tr>'}).join('');document.getElementById('fast70Titulo').textContent='Lixeira de Rotas';document.getElementById('fast70Conteudo').innerHTML=a.length?'<p>Itens ficam disponíveis para recuperação. As fotos locais vinculadas não são apagadas.</p><div style="overflow:auto"><table class="fast70-table"><thead><tr><th>Exclusão</th><th>Cliente</th><th>Destino</th><th>Ação</th></tr></thead><tbody>'+rows+'</tbody></table></div>':'<p>A lixeira está vazia.</p>';document.getElementById('fast70Modal').classList.add('show')};
+    window.fast70RestaurarLixeira=function(id){var a=trash(),n=a.find(function(x){return x.id===id});if(!n)return;if(!bancoDados.sequencias[n.data])bancoDados.sequencias[n.data]=[];if(!achar(n.data,n.item.id))bancoDados.sequencias[n.data].push(n.item);saveTrash(a.filter(function(x){return x.id!==id}));salvarStorage();if(typeof renderizarSequencia==='function')renderizarSequencia();fast70AbrirLixeira();mostrarToast('Rota restaurada com as referências das fotos.','sucesso')};
+
+    function assinaturaCanvas(){var c=document.getElementById('fast70Sign'),ctx=c&&c.getContext('2d');if(!c||!ctx)return;var down=false,last=null;function pos(e){var r=c.getBoundingClientRect(),p=e.touches?e.touches[0]:e;return{x:(p.clientX-r.left)*(c.width/r.width),y:(p.clientY-r.top)*(c.height/r.height)}}function start(e){down=true;last=pos(e);e.preventDefault()}function move(e){if(!down)return;var p=pos(e);ctx.strokeStyle='#111827';ctx.lineWidth=3;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(last.x,last.y);ctx.lineTo(p.x,p.y);ctx.stroke();last=p;e.preventDefault()}function end(){down=false;last=null}c.addEventListener('pointerdown',start);c.addEventListener('pointermove',move);window.addEventListener('pointerup',end);c.addEventListener('touchstart',start,{passive:false});c.addEventListener('touchmove',move,{passive:false});c.addEventListener('touchend',end)}
+    window.fast70LimparAssinatura=function(){var c=document.getElementById('fast70Sign');if(c)c.getContext('2d').clearRect(0,0,c.width,c.height)};
+    window.fast70Comprovante=function(data,id){var i=achar(data,id);if(!i){alert('Rota não encontrada.');return}document.getElementById('fast70Titulo').textContent='Comprovante de Entrega';document.getElementById('fast70Conteudo').innerHTML='<div class="fast70-driver-card"><p><strong>Cliente:</strong> '+esc(i.cliente||'-')+'<br><strong>Destino:</strong> '+esc(i.destino||'-')+'</p><label>Nome de quem recebeu</label><input id="fast70Recebedor" type="text" value="'+esc((i.comprovante||{}).recebedor||'')+'" style="width:100%;margin:6px 0 12px"><label>Documento ou observação (opcional)</label><input id="fast70Documento" type="text" value="'+esc((i.comprovante||{}).documento||'')+'" style="width:100%;margin:6px 0 12px"><label>Assinatura</label><canvas id="fast70Sign" width="700" height="220" style="display:block;width:100%;height:150px;background:#fff;border:2px dashed #94a3b8;border-radius:10px;touch-action:none;margin-top:6px"></canvas><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button class="btn-secondary" onclick="fast70LimparAssinatura()">Limpar assinatura</button><button class="btn-primary" onclick="fast70SalvarComprovante(\''+data+'\',\''+id+'\')"><i class="fa-solid fa-location-dot"></i> Salvar com data e GPS</button></div></div>';document.getElementById('fast70Modal').classList.add('show');setTimeout(assinaturaCanvas,30)};
+    window.fast70SalvarComprovante=function(data,id){var i=achar(data,id),c=document.getElementById('fast70Sign'),base={recebedor:(document.getElementById('fast70Recebedor')||{}).value||'',documento:(document.getElementById('fast70Documento')||{}).value||'',assinatura:c?c.toDataURL('image/png'):'',registradoEm:new Date().toISOString(),gps:null};function fim(){i.comprovante=base;salvarStorage();mostrarToast('Comprovante salvo na rota.','sucesso');fast70Fechar()}if(navigator.geolocation)navigator.geolocation.getCurrentPosition(function(p){base.gps={latitude:p.coords.latitude,longitude:p.coords.longitude,precisao:p.coords.accuracy};fim()},fim,{enableHighAccuracy:true,timeout:8000,maximumAge:60000});else fim()};
+    window.fast70ImprimirComprovante=function(data,id){var i=achar(data,id),c=i&&i.comprovante;if(!i||!c){alert('Registre o comprovante primeiro.');return}var w=window.open('','_blank');w.document.write('<!doctype html><html><head><meta charset="utf-8"><title>Comprovante FAST</title><style>body{font:15px Arial;max-width:720px;margin:30px auto;padding:20px}h1{color:#a00}.logo{max-width:190px}.sign{max-width:100%;height:130px;object-fit:contain;border-bottom:1px solid #222}</style></head><body><img class="logo" src="assets/fast-servicos-icon-192.png"><h1>Comprovante de Entrega</h1><p><b>Cliente:</b> '+esc(i.cliente||'-')+'<br><b>Origem:</b> '+esc(i.origem||'-')+'<br><b>Destino:</b> '+esc(i.destino||'-')+'<br><b>Recebedor:</b> '+esc(c.recebedor||'-')+'<br><b>Documento/observação:</b> '+esc(c.documento||'-')+'<br><b>Data e hora:</b> '+new Date(c.registradoEm).toLocaleString('pt-BR')+'<br><b>GPS:</b> '+(c.gps?c.gps.latitude+', '+c.gps.longitude:'não registrado')+'</p><img class="sign" src="'+c.assinatura+'"><p>Assinatura do recebedor</p><script>onload=function(){print()}<\/script></body></html>');w.document.close()};
+
+    window.fast70WhatsAppCliente=function(data,id){var i=achar(data,id);if(!i)return;var cad=(bancoDados.clientes||[]).find(function(c){return String(c.nome||c.cliente||'').toLowerCase()===String(i.cliente||'').toLowerCase()}),fone=String((cad&&(cad.whatsapp||cad.telefone))||i.whatsapp||i.telefone||'').replace(/\D/g,'');if(fone&&!/^55/.test(fone))fone='55'+fone;var texto='FAST Serviços%0AEntrega: '+encodeURIComponent(i.cliente||'')+'%0ADestino: '+encodeURIComponent(i.destino||'')+'%0AData: '+encodeURIComponent(data)+'%0AStatus: concluída';if(!fone){alert('Cadastre o WhatsApp deste cliente antes do envio.');if(typeof proIr==='function')proIr('clientes');return}window.open('https://wa.me/'+fone+'?text='+texto,'_blank')};
+
+    document.addEventListener('DOMContentLoaded',function(){
+      var driverOriginal=window.fast70ModoEntregador;
+      if(typeof driverOriginal==='function')window.fast70ModoEntregador=function(){
+        driverOriginal();
+        var data=(document.getElementById('dpDataSequencia')||{}).value||new Date().toISOString().slice(0,10),lista=(((bancoDados||{}).sequencias||{})[data]||[]),item=lista.find(function(x){return !(x.concluido||x.concluida||String(x.status||'').toLowerCase().indexOf('conclu')>=0)}),acoes=document.querySelector('#fast70Conteudo .fast70-driver-actions');
+        if(item&&acoes){var c=document.createElement('button');c.className='btn-primary';c.innerHTML='<i class="fa-solid fa-signature"></i> Comprovante';c.onclick=function(){fast70Comprovante(data,item.id)};acoes.insertBefore(c,acoes.children[2]||null);var w=document.createElement('button');w.className='btn-secondary';w.innerHTML='<i class="fa-brands fa-whatsapp"></i> WhatsApp';w.onclick=function(){fast70WhatsAppCliente(data,item.id)};acoes.appendChild(w)}
+      };
+      var original=window.removerSeq;if(typeof original==='function'){window.removerSeq=function(data,index){var lista=(((bancoDados||{}).sequencias||{})[data]||[]),antes=lista[index]&&JSON.parse(JSON.stringify(lista[index]));original.apply(this,arguments);setTimeout(function(){if(antes&&!achar(data,antes.id))guardarLixeira(data,antes)},900)}}
+      var card=document.getElementById('fast70SecurityCard'),row=card&&card.querySelector('.config-btn-row');if(row){var b=document.createElement('button');b.className='btn-secondary';b.innerHTML='<i class="fa-solid fa-trash-arrow-up"></i> Lixeira de Rotas';b.onclick=fast70AbrirLixeira;row.appendChild(b)}
+      // O envio direto via API da Meta permanece desativado até as credenciais do backend serem configuradas.
+      localStorage.setItem('fast_whatsapp_auto_preparado','1');
+    });
+  })();
+  </script>
+  <script id="r70-atalhos-android">
+  (function(){
+    'use strict';
+    function abaDoAtalho(){
+      try {
+        var aba = new URLSearchParams(location.search).get('atalho') || '';
+        return aba === 'rotasDia' || aba === 'despesas' ? aba : '';
+      } catch(e) { return ''; }
+    }
+    function abrirAtalho(){
+      var aba = abaDoAtalho();
+      if (!aba) return;
+      try { sessionStorage.setItem('fast_atalho_android_pendente', aba); } catch(e) {}
+      if (typeof window.proIr === 'function') {
+        window.proIr(aba);
+        try { sessionStorage.removeItem('fast_atalho_android_pendente'); } catch(e) {}
+      } else if (typeof window.trocarAba === 'function') {
+        window.trocarAba(null, aba);
+      }
+    }
+    function retomarAtalho(){
+      var aba = '';
+      try { aba = sessionStorage.getItem('fast_atalho_android_pendente') || abaDoAtalho(); } catch(e) { aba = abaDoAtalho(); }
+      if (!aba) return;
+      if (typeof window.proIr === 'function') {
+        window.proIr(aba);
+        try { sessionStorage.removeItem('fast_atalho_android_pendente'); } catch(e) {}
+      }
+    }
+    document.addEventListener('DOMContentLoaded', function(){
+      setTimeout(abrirAtalho, 350);
+      setTimeout(retomarAtalho, 1400);
+    });
+    window.addEventListener('pageshow', function(){ setTimeout(retomarAtalho, 250); });
+    document.addEventListener('fast-login-success', retomarAtalho);
+  })();
+  </script>
+  <style id="r70-gestao-avancada-style">
+    .fast71-actions{display:flex;gap:10px;flex-wrap:wrap}.fast71-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}.fast71-kpi{padding:14px;border:1px solid var(--border);border-radius:12px;background:var(--card-bg,#fff)}.fast71-kpi b{display:block;font-size:20px;margin-top:5px}.fast71-table{width:100%;border-collapse:collapse}.fast71-table th,.fast71-table td{padding:9px;border-bottom:1px solid var(--border);text-align:left}.fast71-note{padding:10px;border-radius:10px;background:rgba(59,130,246,.09);font-size:12px;line-height:1.5}.fast71-user{display:grid;grid-template-columns:2fr 1fr auto;gap:8px;align-items:center;padding:9px;border-bottom:1px solid var(--border)}@media(max-width:650px){.fast71-user{grid-template-columns:1fr}.fast71-table{font-size:12px}}
+  </style>
+  <script id="r70-gestao-avancada">
+  (function(){
+    'use strict';
+    var USERS='fast_usuarios_funcionarios_v1',SESSION='fast_sessao_funcionario_v1',AUDIT='fast_auditoria_v1',LOC='fast_alertas_localizacao_v1';
+    function jget(k,d){try{return JSON.parse(localStorage.getItem(k)||JSON.stringify(d))}catch(e){return d}}
+    function jset(k,v){localStorage.setItem(k,JSON.stringify(v))}
+    function esc(v){var d=document.createElement('div');d.textContent=String(v==null?'':v);return d.innerHTML}
+    function money(v){return (Number(v)||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}
+    function day(){return new Date().toISOString().slice(0,10)}
+    function modal(t,h){if(window.fast70Modal){document.getElementById('fast70Titulo').textContent=t;document.getElementById('fast70Conteudo').innerHTML=h;document.getElementById('fast70Modal').classList.add('show')}else alert(t)}
+    function actor(){var s=jget(SESSION,null);return s?{id:s.userId,nome:s.name,perfil:s.role}:{id:'admin',nome:'Administrador',perfil:'administrador'}}
+    window.fastAuditar=function(acao,entidade,id,detalhe){var a=jget(AUDIT,[]),u=actor();a.push({quando:new Date().toISOString(),acao:acao,entidade:entidade,id:String(id||''),detalhe:detalhe||'',usuario:u});jset(AUDIT,a.slice(-1000))};
+
+    function todasRotas(){var out=[];Object.keys((window.bancoDados||{}).sequencias||{}).forEach(function(data){(bancoDados.sequencias[data]||[]).forEach(function(r){out.push(Object.assign({data:data},r))})});return out.concat((bancoDados&&bancoDados.rotas)||[])}
+    function statusPago(r){return /recebid|pago/i.test(String(r.statusPagamento||r.pagamento||''))}
+    function statusFim(r){return /conclu/i.test(String(r.status||''))||r.concluido||r.concluida}
+    window.fastFechamentoDiario=function(data){data=data||day();var rs=todasRotas().filter(function(r){return String(r.data||r.dataRota||'').slice(0,10)===data}),ds=((bancoDados||{}).despesas||[]).filter(function(d){return String(d.data||'').slice(0,10)===data}),fat=rs.reduce(function(s,r){return s+Number(r.valor||r.valorRota||0)},0),des=ds.reduce(function(s,d){return s+Number(d.valor||0)},0),rec=rs.filter(statusPago).reduce(function(s,r){return s+Number(r.valor||r.valorRota||0)},0);modal('Fechamento diário — '+data.split('-').reverse().join('/'),'<div class="fast71-grid"><div class="fast71-kpi">Serviços<b>'+rs.length+'</b></div><div class="fast71-kpi">Concluídos<b>'+rs.filter(statusFim).length+'</b></div><div class="fast71-kpi">Faturamento<b>'+money(fat)+'</b></div><div class="fast71-kpi">Recebido<b>'+money(rec)+'</b></div><div class="fast71-kpi">Despesas<b>'+money(des)+'</b></div><div class="fast71-kpi">Resultado do dia<b>'+money(fat-des)+'</b></div></div><p class="fast71-note">Resumo calculado com os dados salvos no aplicativo. Valores pendentes permanecem separados dos recebidos.</p><button class="btn-primary" onclick="window.print()"><i class="fa-solid fa-print"></i> Imprimir</button>')};
+    window.fastRentabilidade=function(dim){dim=dim||'cliente';var map={},gerais=0;todasRotas().forEach(function(r){var k=String(dim==='rota'?(r.nome||r.id||'Rota'):r[dim]||'Não informado');if(!map[k])map[k]={receita:0,despesa:0,servicos:0};map[k].receita+=Number(r.valor||r.valorRota||0);map[k].servicos++});((bancoDados||{}).despesas||[]).forEach(function(d){var k=String(dim==='rota'?(d.rota||d.rotaId||''):d[dim]||'');if(k&&map[k])map[k].despesa+=Number(d.valor||0);else gerais+=Number(d.valor||0)});var rows=Object.keys(map).sort(function(a,b){return map[b].receita-map[a].receita}).map(function(k){var x=map[k];return '<tr><td>'+esc(k)+'</td><td>'+x.servicos+'</td><td>'+money(x.receita)+'</td><td>'+money(x.despesa)+'</td><td><b>'+money(x.receita-x.despesa)+'</b></td></tr>'}).join('');modal('Rentabilidade','<div class="fast71-actions"><button class="btn-secondary" onclick="fastRentabilidade(\'cliente\')">Cliente</button><button class="btn-secondary" onclick="fastRentabilidade(\'destino\')">Destino</button><button class="btn-secondary" onclick="fastRentabilidade(\'motorista\')">Motorista</button><button class="btn-secondary" onclick="fastRentabilidade(\'rota\')">Rota</button></div><div style="overflow:auto"><table class="fast71-table"><thead><tr><th>'+esc(dim)+'</th><th>Serviços</th><th>Receita</th><th>Despesa direta</th><th>Margem direta</th></tr></thead><tbody>'+rows+'</tbody></table></div><p class="fast71-note">Despesas gerais ainda não vinculadas: <b>'+money(gerais)+'</b>. Elas não são distribuídas artificialmente, para não distorcer o lucro por item.</p>')};
+
+    function hash(p,salt){var te=new TextEncoder();return crypto.subtle.importKey('raw',te.encode(p),'PBKDF2',false,['deriveBits']).then(function(k){return crypto.subtle.deriveBits({name:'PBKDF2',salt:te.encode(salt),iterations:600000,hash:'SHA-256'},k,256)}).then(function(b){return btoa(String.fromCharCode.apply(null,new Uint8Array(b)))})}
+    function renderUsers(){var el=document.getElementById('fast71UsersList');if(!el)return;var users=jget(USERS,[]);el.innerHTML=users.length?users.map(function(u){return '<div class="fast71-user"><div><b>'+esc(u.name)+'</b><br><small>'+esc(u.username)+' · '+esc(u.employeeName||'RH')+'</small></div><span>'+esc(u.role)+' · '+(u.active?'Ativo':'Bloqueado')+'</span><div><button class="btn-secondary" onclick="fastUserToggle(\''+u.id+'\')">'+(u.active?'Bloquear':'Ativar')+'</button> <button class="btn-danger" onclick="fastUserRevoke(\''+u.id+'\')">Encerrar sessões</button></div></div>'}).join(''):'<p>Nenhum login de funcionário criado.</p>'}
+    window.fastUserCreate=async function(){var emp=document.getElementById('fast71Emp'),username=document.getElementById('fast71User').value.trim().toLowerCase(),pwd=document.getElementById('fast71Pwd').value,role=document.getElementById('fast71Role').value;if(!emp.value||!username||pwd.length<8)return alert('Selecione o funcionário, informe o usuário e uma senha temporária com pelo menos 8 caracteres.');var rh=((bancoDados||{}).rh||[]).find(function(x){return String(x.id)===emp.value}),a=jget(USERS,[]);if(a.some(function(x){return x.username===username}))return alert('Este usuário já existe.');var salt=crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random();a.push({id:'usr_'+Date.now(),employeeId:emp.value,employeeName:rh?rh.nome:'',name:rh?rh.nome:username,username:username,role:role,salt:salt,hash:await hash(pwd,salt),active:true,sessionVersion:1,createdAt:new Date().toISOString()});jset(USERS,a);fastAuditar('criou','usuario',username,'Login vinculado ao RH');renderUsers();document.getElementById('fast71Pwd').value='';alert('Login criado com segurança.')};
+    window.fastUserToggle=function(id){var a=jget(USERS,[]),u=a.find(function(x){return x.id===id});if(!u)return;u.active=!u.active;u.sessionVersion++;jset(USERS,a);fastAuditar(u.active?'ativou':'bloqueou','usuario',id);renderUsers()};
+    window.fastUserRevoke=function(id){var a=jget(USERS,[]),u=a.find(function(x){return x.id===id});if(!u)return;u.sessionVersion++;jset(USERS,a);fastAuditar('encerrou sessões','usuario',id);renderUsers();alert('Sessões locais deste usuário foram revogadas. A revogação entre aparelhos será ativada quando o backend seguro estiver conectado.')};
+    window.fastAuditOpen=function(){var a=jget(AUDIT,[]).slice().reverse(),rows=a.map(function(x){return '<tr><td>'+new Date(x.quando).toLocaleString('pt-BR')+'</td><td>'+esc(x.usuario.nome)+'</td><td>'+esc(x.acao)+'</td><td>'+esc(x.entidade)+'</td><td>'+esc(x.detalhe)+'</td></tr>'}).join('');modal('Registro de auditoria','<div style="overflow:auto"><table class="fast71-table"><thead><tr><th>Data</th><th>Usuário</th><th>Ação</th><th>Item</th><th>Detalhes</th></tr></thead><tbody>'+rows+'</tbody></table></div>')};
+
+    async function employeeLogin(user,pwd){var u=jget(USERS,[]).find(function(x){return x.username===String(user).trim().toLowerCase()});if(!u)return false;if(!u.active)throw new Error('Usuário bloqueado pelo administrador.');if(await hash(pwd,u.salt)!==u.hash)throw new Error('Usuário ou senha inválidos.');jset(SESSION,{userId:u.id,name:u.name,role:u.role,version:u.sessionVersion,loggedAt:new Date().toISOString()});fastAuditar('entrou','sessão',u.id);var g=document.getElementById('fastLoginGate');if(g)g.classList.remove('show');document.body.style.overflow='';var sp=document.getElementById('fastSplash');if(sp)sp.style.display='none';applyRole(u.role);document.dispatchEvent(new Event('fast-login-success'));return true}
+    function applyRole(role){document.body.dataset.fastRole=role||'administrador';if(!role||role==='administrador')return;var allowed=role==='entregador'?['rotasDia','rastreamento','paginaPrincipal']:['paginaPrincipal','rotas','rotasDia','clientes','destinos','despesas','dashboard'];document.querySelectorAll('[onclick*="proIr("],[onclick*="trocarAba("]').forEach(function(e){var m=(e.getAttribute('onclick')||'').match(/["']([A-Za-z]+)["']/);if(m)e.style.display=allowed.indexOf(m[1])>=0?'':'none'})}
+
+    window.fastOcrRota=function(){var inp=document.getElementById('fast71OcrInput');if(inp)inp.click()};
+    async function ocrFile(f){if(!f)return;var url=await new Promise(function(res){var r=new FileReader();r.onload=function(){res(r.result)};r.readAsDataURL(f)}),txt='';try{if(typeof rodarOcrImagem==='function')txt=await rodarOcrImagem(url);else if(window.Tesseract)txt=(await Tesseract.recognize(url,'por')).data.text;else throw Error('OCR indisponível')}catch(e){return alert('Não foi possível ler a imagem: '+e.message)}txt=String(txt||'');var lines=txt.split(/\n/).map(function(x){return x.trim()}).filter(Boolean),cliente=(lines.find(function(x){return /^(cliente|nome)\s*:/i.test(x)})||'').replace(/^[^:]+:/,'').trim(),dest=(lines.find(function(x){return /^(destino|entrega|endere[cç]o)\s*:/i.test(x)})||lines.find(function(x){return /\b(rua|av\.?|avenida|travessa|rodovia|cep)\b/i.test(x)})||'').replace(/^[^:]+:/,'').trim();if(cliente&&!document.getElementById('seqCliente').value)document.getElementById('seqCliente').value=cliente;if(dest&&!document.getElementById('seqDestino').value)document.getElementById('seqDestino').value=dest;alert('Leitura concluída. Confira Cliente e Destino antes de salvar.\n\nTexto encontrado:\n'+txt.slice(0,700))}
+
+    function install(){
+      var dash=document.getElementById('dashboard');if(dash&&!document.getElementById('fast71Reports')){var c=document.createElement('div');c.id='fast71Reports';c.className='card';c.style.marginBottom='18px';c.innerHTML='<div class="card-title"><i class="fa-solid fa-chart-line"></i> Gestão e Rentabilidade</div><div class="fast71-actions"><button class="btn-primary" onclick="fastFechamentoDiario()"><i class="fa-solid fa-cash-register"></i> Fechamento do Dia</button><button class="btn-primary" onclick="fastRentabilidade(\'cliente\')"><i class="fa-solid fa-chart-column"></i> Rentabilidade</button></div>';dash.insertBefore(c,dash.children[1]||null)}
+      var sec=document.getElementById('fastSecCard');if(sec&&!document.getElementById('fast71Where')){var p=document.createElement('p');p.id='fast71Where';p.className='fast-sec-info';p.innerHTML='<strong>Onde gerenciar:</strong> Configurações → Área Protegida → Dados da Empresa → Usuários e Permissões.';sec.querySelector('.config-topic-body').appendChild(p)}
+      var emp=document.getElementById('emptabEmpresa');if(emp&&!document.getElementById('fast71Users')){var rh=(bancoDados.rh||[]),box=document.createElement('div');box.id='fast71Users';box.className='emp-section';box.innerHTML='<div class="emp-section-title"><i class="fa-solid fa-users-gear"></i> Usuários e Permissões</div><p class="emp-sql-info">Somente o administrador cria acessos. Cada login é vinculado ao cadastro de funcionário do RH.</p><div class="grid-form"><div><label>Funcionário do RH</label><select id="fast71Emp"><option value="">Selecione...</option>'+rh.map(function(x){return '<option value="'+esc(x.id)+'">'+esc(x.nome)+'</option>'}).join('')+'</select></div><div><label>Usuário/e-mail</label><input id="fast71User" autocomplete="off"></div><div><label>Senha temporária</label><input id="fast71Pwd" type="password" autocomplete="new-password"></div><div><label>Perfil</label><select id="fast71Role"><option value="atendimento">Atendimento</option><option value="entregador">Entregador</option><option value="administrador">Administrador</option></select></div></div><div class="fast71-actions"><button class="emp-btn-primary" onclick="fastUserCreate()">Criar login</button><button class="emp-btn-secondary" onclick="fastAuditOpen()">Ver auditoria</button></div><div id="fast71UsersList"></div><p class="fast71-note"><b>Desligamento remoto:</b> contrato de sincronização preparado. A revogação entre aparelhos exige conectar autenticação segura do backend; nenhuma chave administrativa é exposta no HTML.</p>';emp.insertBefore(box,emp.firstChild);renderUsers()}
+      var form=document.getElementById('formModalSeq'),grid=form&&form.querySelector('.grid-form');if(grid&&!document.getElementById('fast71OcrBox')){var o=document.createElement('div');o.id='fast71OcrBox';o.className='span-4';o.innerHTML='<button type="button" class="btn-secondary" onclick="fastOcrRota()"><i class="fa-solid fa-camera"></i> Ler cliente e endereço pela câmera</button><input id="fast71OcrInput" type="file" accept="image/*" capture="environment" hidden><div class="fast71-note" style="margin-top:7px">A leitura preenche somente campos vazios e sempre pede conferência antes de salvar.</div>';grid.insertBefore(o,grid.firstChild);document.getElementById('fast71OcrInput').addEventListener('change',function(){ocrFile(this.files[0]);this.value=''})}
+      var card=document.getElementById('fast70SecurityCard'),row=card&&card.querySelector('.config-btn-row');if(row&&!document.getElementById('fast71AuditBtn')){var b=document.createElement('button');b.id='fast71AuditBtn';b.className='btn-secondary';b.innerHTML='<i class="fa-solid fa-clipboard-list"></i> Auditoria';b.onclick=fastAuditOpen;row.appendChild(b)}
+      var meta=document.querySelector('meta[name="fast-app-changelog"]');if(meta){var old=[];try{old=JSON.parse(meta.content||'[]')}catch(e){}var news=[{type:'novo',text:'r70: Fechamento diário automático e painel de rentabilidade por cliente, destino, motorista e rota.'},{type:'novo',text:'r70: Alertas de pagamentos pendentes aparecem exclusivamente no sino de notificações.'},{type:'novo',text:'r70: Usuários vinculados ao RH, perfis Administrador, Atendimento e Entregador, senhas PBKDF2 e revogação de sessões preparada.'},{type:'novo',text:'r70: Registro de auditoria identifica quem criou, alterou, excluiu ou acessou itens do aplicativo.'},{type:'melhorado',text:'r70: Lixeira preserva rotas e referências das fotos para recuperação; biometria mantida na Área Protegida.'},{type:'novo',text:'r70: Leitura de nome do cliente e endereço pela câmera com OCR e confirmação humana.'},{type:'melhorado',text:'r70: Alertas de proximidade do destino e geofence revisados para acompanhamento da entrega.'},{type:'melhorado',text:'r70: Logo oficial aplicada ao ícone Android e tela de login redimensionada; atalhos Android para Rotas do Dia e Despesas.'},{type:'melhorado',text:'r70: Android, Windows e Linux usam a mesma PWA responsiva e recebem as próximas versões pelo endereço oficial, sem substituir o armazenamento local.'},{type:'melhorado',text:'r70: Backup de fotos, fila offline, Google Drive, comprovante, modo entregador e histórico do cliente preparados.'},{type:'melhorado',text:'r70: API do WhatsApp permanece suspensa e desativada até configuração posterior do backend seguro.'},{type:'corrigido',text:'r70: Check-up geral de sintaxe, armazenamento, navegação, segurança e compatibilidade executado antes da publicação.'}];meta.content=JSON.stringify(news.concat(old));if(window.fastPopularUltimasAtualizacoes)fastPopularUltimasAtualizacoes()}
+    }
+    document.addEventListener('DOMContentLoaded',function(){install();var s=jget(SESSION,null);if(s){var u=jget(USERS,[]).find(function(x){return x.id===s.userId});if(!u||!u.active||u.sessionVersion!==s.version){localStorage.removeItem(SESSION)}else applyRole(u.role)}var original=window.fastGateDoLogin;if(typeof original==='function'&&!original.fast71){var wrap=async function(){var user=(document.getElementById('fastGateUser')||{}).value||'',pwd=(document.getElementById('fastGatePwd')||{}).value||'';try{if(await employeeLogin(user,pwd))return}catch(e){var er=document.getElementById('fastGateErro');if(er){er.textContent=e.message;er.style.display='block'}return}return original.apply(this,arguments)};wrap.fast71=true;window.fastGateDoLogin=wrap}
+      ['salvarRota','salvarDespesa','salvarItemSeq','salvarRh','deletarRota','deletarDespesa','removerSeq','deletarRh'].forEach(function(n){var fn=window[n];if(typeof fn!=='function'||fn.fast71)return;var w=function(){var args=[].slice.call(arguments),r=fn.apply(this,args);fastAuditar(/^deletar|^remover/.test(n)?'excluiu':'salvou',n.replace(/^(salvar|deletar|remover)/,''),args[0]&&args[0].id||args[0]||'');return r};w.fast71=true;window[n]=w})
+    });
+    setInterval(function(){var s=jget(SESSION,null);if(!s)return;var u=jget(USERS,[]).find(function(x){return x.id===s.userId});if(!u||!u.active||u.sessionVersion!==s.version){localStorage.removeItem(SESSION);location.reload()}},30000);
+  })();
   </script>
 </body></html>
