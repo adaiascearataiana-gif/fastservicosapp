@@ -1,0 +1,33 @@
+{
+  "name": "FAST Serviços - Gestão de Rotas",
+  "short_name": "FAST Serviços",
+  "description": "Gestão de Rotas, Despesas e DRE",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#4f46e5",
+  "theme_color": "#4f46e5",
+  "lang": "pt-BR",
+  "categories": ["business", "productivity", "finance"],
+  "icons": [
+    {"src":"assets/fast-servicos-icon-192.png?v=r72","sizes":"192x192","type":"image/png","purpose":"any"},
+    {"src":"assets/fast-servicos-icon-512.png?v=r72","sizes":"512x512","type":"image/png","purpose":"any maskable"}
+  ],
+  "shortcuts": [
+    {
+      "name":"Rotas do Dia",
+      "short_name":"Rotas do Dia",
+      "description":"Abrir diretamente as rotas programadas para hoje",
+      "url":"./?atalho=rotasDia",
+      "icons":[{"src":"assets/atalho-rotas-dia-192.png?v=r72","sizes":"192x192","type":"image/png"}]
+    },
+    {
+      "name":"Despesas",
+      "short_name":"Despesas",
+      "description":"Abrir diretamente o controle de despesas",
+      "url":"./?atalho=despesas",
+      "icons":[{"src":"assets/atalho-despesas-192.png?v=r72","sizes":"192x192","type":"image/png"}]
+    }
+  ]
+}
