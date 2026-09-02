@@ -2662,6 +2662,30 @@ tbody tr:hover td {
         return Array.isArray(arr) ? arr : [];
       } catch(e){ return []; }
     }
+    // r55: Retorna apenas os itens da versao atual + versao anterior
+    // (novidades, melhorias e correcoes das ultimas 2 versoes)
+    function fastObterUltimasAtualizacoes() {
+      var all = fastObterChangelog();
+      if (!all.length) return [];
+      // Descobre o numero da versao atual (ex: r55 -> 55)
+      var verAtual = fastObterVersao();
+      var m = /r(\d+)$/.exec(verAtual || '');
+      var rAtual = m ? parseInt(m[1], 10) : 0;
+      var rAnterior = rAtual - 1;
+      // Filtra: itens cujo texto comeca com rXX onde XX >= rAnterior
+      var filtrados = [];
+      for (var i = 0; i < all.length; i++) {
+        var texto = all[i].text || '';
+        var rm = /^r(\d+)/.exec(texto);
+        if (rm) {
+          var rItem = parseInt(rm[1], 10);
+          if (rItem >= rAnterior) filtrados.push(all[i]);
+        }
+      }
+      // Se nao encontrou nenhum (ex: itens sem prefixo rXX), mostra os 5 primeiros
+      if (!filtrados.length) return all.slice(0, 5);
+      return filtrados;
+    }
     function fastVerificarNovidades() {
       try {
         var versaoAtual = fastObterVersao();
@@ -2683,7 +2707,7 @@ tbody tr:hover td {
       if (dateEl) dateEl.innerHTML = '<i class="fa-solid fa-clock"></i> <span>Lan&ccedil;ada em ' + (dt || '—') + '</span>';
       var listEl = document.getElementById('fastWhatsNewList');
       if (listEl) {
-        var items = fastObterChangelog();
+        var items = fastObterUltimasAtualizacoes();
         var typeMap = {
           'novo':       { label: 'Novo',       color: '#16a34a', bg: 'rgba(22,163,74,0.10)', icon: 'fa-solid fa-circle-plus' },
           'melhorado':  { label: 'Melhorado',  color: '#2563eb', bg: 'rgba(37,99,235,0.10)', icon: 'fa-solid fa-arrow-up' },
@@ -22056,14 +22080,14 @@ tbody tr:hover td {
               <div class="config-topic-icon ico-palette"><i class="fa-solid fa-list-check"></i></div>
               <div>
                 <div class="config-topic-title">Últimas Atualizações</div>
-                <div class="config-topic-sub">Histórico compacto das melhorias e correções mais recentes do aplicativo</div>
+                <div class="config-topic-sub">Novidades, melhorias e correções da versão atual e anterior</div>
               </div>
             </div>
             <div class="config-topic-body">
               <div class="fast-updates-panel" id="fastUpdatesPanel">
                 <div class="fast-updates-panel-head" onclick="fastToggleUpdatesPanel()">
                   <i class="fa-solid fa-bolt fup-icon"></i>
-                  <span class="fup-title">Novidades da versão atual</span>
+                  <span class="fup-title">Novidades e correções recentes</span>
                   <span class="fup-count" id="fastUpdatesCount">0</span>
                   <i class="fa-solid fa-chevron-down fup-chevron"></i>
                 </div>
@@ -29520,7 +29544,7 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
     function fastPopularUltimasAtualizacoes() {
       var body = document.getElementById('fastUpdatesBody');
       if (!body) return;
-      var items = fastObterChangelog();
+      var items = fastObterUltimasAtualizacoes();
       var countEl = document.getElementById('fastUpdatesCount');
       if (countEl) countEl.textContent = items.length;
       if (!items.length) {
