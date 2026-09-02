@@ -21,7 +21,7 @@
   <meta name="fast-github-branch" content="main">
   <meta name="fast-github-path" content="index.html">
   <meta name="fast-github-token-env" content="GH_TOKEN">
-  <meta name="fast-app-version" content="2026.09.02-r72">
+  <meta name="fast-app-version" content="2026.09.02-r73">
   <meta name="fast-app-date" content="2026-09-02T21:00:00Z">
   <meta name="fast-latest-update" content="r70: gestão avançada, segurança das fotos, Drive, restauração, usuários do RH, auditoria, fechamento, rentabilidade, OCR, proximidade e atalhos Android">
   <!-- r70.1: lista corrente no HTML inicial; o painel não espera scripts tardios -->
@@ -1310,7 +1310,7 @@ tbody tr:hover td {
 
 </style>
 
-<link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22FAST%20Servi%C3%A7os%22%2C%22short_name%22%3A%22FAST%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23ffffff%22%2C%22theme_color%22%3A%22%234f46e5%22%2C%22description%22%3A%22Gest%C3%A3o%20de%20Rotas%2C%20Despesas%20e%20DRE%22%7D"><link rel="manifest" href="blob:https://adaiascearataiana-gif.github.io/16d9cb7b-9e51-4593-bcee-ca6a8a8d2000"><link rel="manifest" href="blob:https://adaiascearataiana-gif.github.io/a718488a-8cb8-4c2c-81e0-ece13b9f6cb5"><link rel="manifest" href="blob:https://adaiascearataiana-gif.github.io/e5c29e96-bcdb-4205-92db-1b081d2f8dae"></head>
+<link rel="manifest" href="manifest.webmanifest?v=r73"><link rel="apple-touch-icon" href="assets/fast-servicos-icon-192.png?v=r73"><link rel="icon" href="assets/fast-servicos-icon-192.png?v=r73"></head>
 <body class="fast-pro fast-edition-mobile theme-light fx-executive fx-layout-command" style="">
 
 <!-- ============================================================
@@ -23129,7 +23129,7 @@ tbody tr:hover td {
               <div id="fastDeployInfo" style="background:var(--card-bg-2);border:1px solid var(--border);border-radius:10px;padding:12px;margin:10px 0;font-size:13px;">
                 <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
                   <div>
-                    <div><strong>Versão atual:</strong> <span id="fastVersaoLabel" style="color:var(--accent);font-weight:800;">2026.09.02-r72</span></div>
+                    <div><strong>Versão atual:</strong> <span id="fastVersaoLabel" style="color:var(--accent);font-weight:800;">2026.09.02-r73</span></div>
                     <div id="fastVersaoDateLabel" style="font-size:11.5px;color:var(--text-muted);margin-top:3px;"><i class="fa-solid fa-clock"></i> Lançada em 02/09/2026 18:00</div>
                   </div>
                   <div id="fastVersaoOnlineLabel" style="font-size:12px;color:var(--text-muted);text-align:right;">Online: <strong>2026.09.02-r68</strong> <span style="color:var(--success);">(ok)</span></div>
@@ -23166,10 +23166,11 @@ tbody tr:hover td {
                 <div class="fast-updates-panel-head" onclick="fastToggleUpdatesPanel()">
                   <i class="fa-solid fa-bolt fup-icon"></i>
                   <span class="fup-title">Novidades e correções recentes</span>
-                  <span class="fup-count" id="fastUpdatesCount">7</span>
+                  <span class="fup-count" id="fastUpdatesCount">8</span>
                   <i class="fa-solid fa-chevron-down fup-chevron"></i>
                 </div>
                 <div class="fast-updates-panel-body" id="fastUpdatesBody">
+                  <div class="fup-item"><div class="fup-item-dot" style="background:rgba(217,119,6,.10)"><i class="fa-solid fa-wrench" style="color:#d97706"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#d97706;background:rgba(217,119,6,.10)">Corrigido</span><div class="fup-item-text">r73: Instalação do FAST restaurada com Service Worker permanente; Rotas do Dia e Despesas agora têm escopos independentes para o Android não reutilizar a logo principal.</div></div></div>
                   <div class="fup-item"><div class="fup-item-dot" style="background:rgba(22,163,74,.10)"><i class="fa-solid fa-circle-plus" style="color:#16a34a"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#16a34a;background:rgba(22,163,74,.10)">Novo</span><div class="fup-item-text">r72: Botões dentro de Rotas do Dia e Despesas iniciam a instalação dos respectivos ícones na tela inicial.</div></div></div>
                   <div class="fup-item"><div class="fup-item-dot" style="background:rgba(22,163,74,.10)"><i class="fa-solid fa-circle-plus" style="color:#16a34a"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#16a34a;background:rgba(22,163,74,.10)">Novo</span><div class="fup-item-text">r72: Atalhos Android com identidade visual própria — calendário azul/roxo para Rotas do Dia e recibo vermelho para Despesas — usando manifesto permanente.</div></div></div>
                   <div class="fup-item"><div class="fup-item-dot" style="background:rgba(22,163,74,.10)"><i class="fa-solid fa-circle-plus" style="color:#16a34a"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#16a34a;background:rgba(22,163,74,.10)">Novo</span><div class="fup-item-text">r70: Fechamento diário, rentabilidade, usuários vinculados ao RH, perfis de acesso e auditoria.</div></div></div>
@@ -28283,10 +28284,8 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
           });
         `;
         try {
-          const blob = new Blob([swCode], { type: 'application/javascript' });
-          const swUrl = URL.createObjectURL(blob);
-          navigator.serviceWorker.register(swUrl)
-            .then(function(reg) { console.info('SW registrado (r40 network-first).'); })
+          navigator.serviceWorker.register('sw.js?v=r73', { scope: './' })
+            .then(function(reg) { console.info('SW permanente registrado (r73 network-first).'); })
             .catch(function(e) { console.info('SW: nao registrado neste ambiente (normal).', e.message); });
         } catch (e) { console.info('SW init skip:', e); }
       }
@@ -40136,11 +40135,12 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
     function pwaGerarManifest() {
       // Mantém apenas um manifesto ativo. Versões antigas adicionavam vários
       // links e o Android podia continuar usando o ícone anterior em cache.
-      document.querySelectorAll('link[rel="manifest"]').forEach(function(el){ el.remove(); });
-      const link = document.createElement('link');
+      var links = document.querySelectorAll('link[rel="manifest"]');
+      links.forEach(function(el,i){ if(i>0) el.remove(); });
+      var link = links[0] || document.createElement('link');
       link.rel = 'manifest';
-      link.href = 'manifest.webmanifest?v=r72';
-      document.head.appendChild(link);
+      link.href = 'manifest.webmanifest?v=r73';
+      if(!link.parentNode) document.head.appendChild(link);
 
       // A mesma logomarca oficial também aparece no gate e na abertura.
       document.querySelectorAll('#fastSplash img, #fastLoginGate .fast-gate-logo img').forEach(function(img){
@@ -43127,7 +43127,8 @@ window.fastMobileNav = function(ev, abaId, botao) {
   <script id="r72-install-shortcuts">
   (function(){
     function add(tab,id,cls,icon,text,url){var area=document.getElementById(tab);if(!area||document.getElementById(id))return;var title=area.querySelector('.card-title');var b=document.createElement('button');b.type='button';b.id=id;b.className='fast-install-shortcut '+cls;b.innerHTML='<i class="fa-solid '+icon+'"></i> '+text;b.onclick=function(){window.open(url,'_blank','noopener')};if(title)title.insertAdjacentElement('afterend',b);else area.insertBefore(b,area.firstChild)}
-    document.addEventListener('DOMContentLoaded',function(){add('rotasDia','fastInstallRotas','fast-install-routes','fa-calendar-day','Adicionar Rotas do Dia à tela inicial','instalar-rotas.html');add('despesas','fastInstallDespesas','fast-install-expenses','fa-receipt','Adicionar Despesas à tela inicial','instalar-despesas.html')});
+    function abrir(url){var full=new URL(url,location.href).href;if(/Android/i.test(navigator.userAgent)){var u=new URL(full);location.href='intent://'+u.host+u.pathname+'#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url='+encodeURIComponent(full)+';end';return}window.open(full,'_blank','noopener')}
+    document.addEventListener('DOMContentLoaded',function(){add('rotasDia','fastInstallRotas','fast-install-routes','fa-calendar-day','Adicionar Rotas do Dia à tela inicial','rotas-do-dia/');add('despesas','fastInstallDespesas','fast-install-expenses','fa-receipt','Adicionar Despesas à tela inicial','despesas/');var r=document.getElementById('fastInstallRotas'),d=document.getElementById('fastInstallDespesas');if(r)r.onclick=function(){abrir('rotas-do-dia/')};if(d)d.onclick=function(){abrir('despesas/')}});
   })();
   </script>
 </body></html>
