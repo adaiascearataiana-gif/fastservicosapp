@@ -21,7 +21,7 @@
   <meta name="fast-github-branch" content="main">
   <meta name="fast-github-path" content="index.html">
   <meta name="fast-github-token-env" content="GH_TOKEN">
-  <meta name="fast-app-version" content="2026.09.02-r74">
+  <meta name="fast-app-version" content="2026.09.02-r75">
   <meta name="fast-app-date" content="2026-09-02T21:00:00Z">
   <meta name="fast-latest-update" content="r70: gestão avançada, segurança das fotos, Drive, restauração, usuários do RH, auditoria, fechamento, rentabilidade, OCR, proximidade e atalhos Android">
   <!-- r70.1: lista corrente no HTML inicial; o painel não espera scripts tardios -->
@@ -1310,7 +1310,7 @@ tbody tr:hover td {
 
 </style>
 
-<link rel="manifest" href="manifest.webmanifest?v=r73"><link rel="apple-touch-icon" href="assets/fast-servicos-icon-192.png?v=r73"><link rel="icon" href="assets/fast-servicos-icon-192.png?v=r73"></head>
+<link rel="manifest" href="manifest.webmanifest?v=r75"><link rel="apple-touch-icon" href="assets/fast-servicos-icon-192.png?v=r75"><link rel="icon" href="assets/fast-servicos-icon-192.png?v=r75"></head>
 <body class="fast-pro fast-edition-mobile theme-light fx-executive fx-layout-command" style="">
 
 <!-- ============================================================
@@ -23129,7 +23129,7 @@ tbody tr:hover td {
               <div id="fastDeployInfo" style="background:var(--card-bg-2);border:1px solid var(--border);border-radius:10px;padding:12px;margin:10px 0;font-size:13px;">
                 <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
                   <div>
-                    <div><strong>Versão atual:</strong> <span id="fastVersaoLabel" style="color:var(--accent);font-weight:800;">2026.09.02-r74</span></div>
+                    <div><strong>Versão atual:</strong> <span id="fastVersaoLabel" style="color:var(--accent);font-weight:800;">2026.09.02-r75</span></div>
                     <div id="fastVersaoDateLabel" style="font-size:11.5px;color:var(--text-muted);margin-top:3px;"><i class="fa-solid fa-clock"></i> Lançada em 02/09/2026 18:00</div>
                   </div>
                   <div id="fastVersaoOnlineLabel" style="font-size:12px;color:var(--text-muted);text-align:right;">Online: <strong>2026.09.02-r68</strong> <span style="color:var(--success);">(ok)</span></div>
@@ -23166,10 +23166,11 @@ tbody tr:hover td {
                 <div class="fast-updates-panel-head" onclick="fastToggleUpdatesPanel()">
                   <i class="fa-solid fa-bolt fup-icon"></i>
                   <span class="fup-title">Novidades e correções recentes</span>
-                  <span class="fup-count" id="fastUpdatesCount">9</span>
+                  <span class="fup-count" id="fastUpdatesCount">10</span>
                   <i class="fa-solid fa-chevron-down fup-chevron"></i>
                 </div>
                 <div class="fast-updates-panel-body" id="fastUpdatesBody">
+                  <div class="fup-item"><div class="fup-item-dot" style="background:rgba(217,119,6,.10)"><i class="fa-solid fa-wrench" style="color:#d97706"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#d97706;background:rgba(217,119,6,.10)">Corrigido</span><div class="fup-item-text">r75: Cada item de Rotas do Dia permanece como rota individual em Rotas. Agrupar agora serve exclusivamente para selecionar e enviar fotos juntas, sem unir destinos, valores ou status.</div></div></div>
                   <div class="fup-item"><div class="fup-item-dot" style="background:rgba(22,163,74,.10)"><i class="fa-solid fa-circle-plus" style="color:#16a34a"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#16a34a;background:rgba(22,163,74,.10)">Novo</span><div class="fup-item-text">r74: Permissões individuais por funcionário baseadas nas áreas do menu; áreas não autorizadas ficam ocultas e bloqueadas inclusive por acesso direto.</div></div></div>
                   <div class="fup-item"><div class="fup-item-dot" style="background:rgba(217,119,6,.10)"><i class="fa-solid fa-wrench" style="color:#d97706"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#d97706;background:rgba(217,119,6,.10)">Corrigido</span><div class="fup-item-text">r73: Instalação do FAST restaurada com Service Worker permanente; Rotas do Dia e Despesas agora têm escopos independentes para o Android não reutilizar a logo principal.</div></div></div>
                   <div class="fup-item"><div class="fup-item-dot" style="background:rgba(22,163,74,.10)"><i class="fa-solid fa-circle-plus" style="color:#16a34a"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#16a34a;background:rgba(22,163,74,.10)">Novo</span><div class="fup-item-text">r72: Botões dentro de Rotas do Dia e Despesas iniciam a instalação dos respectivos ícones na tela inicial.</div></div></div>
@@ -28285,7 +28286,7 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
           });
         `;
         try {
-          navigator.serviceWorker.register('sw.js?v=r73', { scope: './' })
+          navigator.serviceWorker.register('sw.js?v=r75', { scope: './' })
             .then(function(reg) { console.info('SW permanente registrado (r73 network-first).'); })
             .catch(function(e) { console.info('SW: nao registrado neste ambiente (normal).', e.message); });
         } catch (e) { console.info('SW init skip:', e); }
@@ -40140,7 +40141,7 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
       links.forEach(function(el,i){ if(i>0) el.remove(); });
       var link = links[0] || document.createElement('link');
       link.rel = 'manifest';
-      link.href = 'manifest.webmanifest?v=r73';
+      link.href = 'manifest.webmanifest?v=r75';
       if(!link.parentNode) document.head.appendChild(link);
 
       // A mesma logomarca oficial também aparece no gate e na abertura.
@@ -43165,6 +43166,23 @@ window.fastMobileNav = function(ev, abaId, botao) {
       var create=window.fastUserCreate;if(typeof create==='function'&&!create.fast74){var wc=async function(){var username=(document.getElementById('fast71User')||{}).value.trim().toLowerCase(),ps=selected('create');if(!ps.length)return alert('Marque pelo menos uma área permitida.');await create.apply(this,arguments);var us=get(K_USERS,[]),u=us.find(function(x){return x.username===username});if(u){u.permissions=u.role==='administrador'?Object.keys(AREAS):ps;set(K_USERS,us);if(window.fastAuditar)fastAuditar('definiu permissões','usuario',u.id,u.permissions.join(', '))}populateEditor()};wc.fast74=true;window.fastUserCreate=wc}
     }
     document.addEventListener('DOMContentLoaded',function(){installUI();wrapNav('proIr');wrapNav('trocarAba');aplicar()});document.addEventListener('fast-login-success',function(){setTimeout(aplicar,80)});window.addEventListener('pageshow',function(){setTimeout(aplicar,80)});
+  })();
+  </script>
+  <style id="r75-grupo-fotos-style">.fast75-photo-group{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:999px;background:rgba(168,85,247,.14);color:#9333ea;border:1px solid rgba(168,85,247,.35);font-size:11px;font-weight:800}</style>
+  <script id="r75-rotas-individuais">
+  (function(){
+    'use strict';
+    function lista(){var d=(document.getElementById('dpDataSequencia')||{}).value;return{data:d,itens:(((window.bancoDados||{}).sequencias||{})[d]||[])}}
+    function selecionados(ctx){return [].slice.call(document.querySelectorAll('.seq-checkbox:checked')).map(function(c){return Number(c.value)}).filter(function(i){return Number.isInteger(i)&&ctx.itens[i]})}
+    function grupoId(){return 'fotos_'+Date.now()+'_'+Math.random().toString(36).slice(2,7)}
+    function salvar(){if(typeof fastSalvarSemBloquear==='function')fastSalvarSemBloquear(80);else if(typeof salvarStorage==='function')salvarStorage();if(typeof fastAgendarRenderizacaoCompleta==='function')fastAgendarRenderizacaoCompleta(true,120);else if(typeof renderizarSequencia==='function')renderizarSequencia()}
+    function sincronizarIndividual(item,data,forcarNovo){if(typeof sincronizarComCadastroRotas!=='function')return;var rid=forcarNovo?null:item.rotaId,id=sincronizarComCadastroRotas(item.cliente||'',item.origem||'',item.destino||'',item.obs||'',data,rid,Number(item.valor)||0,Number(item.qtdMercadorias)||1);item.rotaId=id;var r=(bancoDados.rotas||[]).find(function(x){return String(x.id)===String(id)});if(r){r.statusExecucao=item.status||r.statusExecucao||'EM ROTA';if(item.fotos)r.fotos=item.fotos.slice();if(item.foto)r.foto=item.foto}}
+    window.fast75RepararVinculos=function(silencioso){var usados={},corrigidos=0;Object.keys((bancoDados||{}).sequencias||{}).forEach(function(data){(bancoDados.sequencias[data]||[]).forEach(function(item){var key=item.rotaId?String(item.rotaId):'',duplicado=key&&usados[key];if(!key||!(bancoDados.rotas||[]).some(function(r){return String(r.id)===key})||duplicado){sincronizarIndividual(item,data,!!duplicado);corrigidos++}else{usados[key]=true;sincronizarIndividual(item,data,false)}})});if(corrigidos){salvar();if(!silencioso&&window.mostrarToast)mostrarToast(corrigidos+' vínculo(s) individual(is) corrigido(s).','success')}return corrigidos};
+    window.confirmarAgrupamento=function(){var c=lista(),ids=selecionados(c);if(ids.length<2){mostrarToast('Selecione pelo menos 2 rotas para agrupar as fotos.','warning');return}var gid=grupoId(),membros=ids.map(function(i){return String(c.itens[i].id)});ids.forEach(function(i){var x=c.itens[i];x.grupoFotosId=gid;x.grupoFotosMembros=membros.slice();x.agrupadoFotos=true;delete x.agrupado;delete x.itensAgrupados;sincronizarIndividual(x,c.data,false)});if(typeof fecharModalAgrupar==='function')fecharModalAgrupar();salvar();mostrarToast(ids.length+' rotas agrupadas somente para envio de fotos. Cada rota continua individual em Rotas.','success')};
+    window.desmembrarRotas=function(){var c=lista(),ids=selecionados(c),alvos=ids.length?ids.map(function(i){return c.itens[i]}):c.itens.filter(function(x){return x.grupoFotosId});if(!alvos.length){mostrarToast('Não há grupos de fotos para desfazer.','info');return}var gids={};alvos.forEach(function(x){if(x.grupoFotosId)gids[x.grupoFotosId]=true});c.itens.forEach(function(x){if(gids[x.grupoFotosId]){delete x.grupoFotosId;delete x.grupoFotosMembros;delete x.agrupadoFotos}});salvar();mostrarToast('Agrupamento de fotos desfeito. As rotas individuais foram mantidas.','success')};
+    function decorar(){var c=lista();document.querySelectorAll('.seq-item[data-item-id]').forEach(function(card){var x=c.itens.find(function(i){return String(i.id)===String(card.dataset.itemId)});if(!x||!x.grupoFotosId||card.querySelector('.fast75-photo-group'))return;var h=card.querySelector('.seq-header-top');if(h){var b=document.createElement('span');b.className='fast75-photo-group';b.innerHTML='<i class="fa-solid fa-images"></i> GRUPO DE FOTOS ('+(x.grupoFotosMembros||[]).length+')';h.appendChild(b)}})}
+    document.addEventListener('change',function(e){if(!e.target.classList||!e.target.classList.contains('seq-checkbox'))return;var c=lista(),i=Number(e.target.value),x=c.itens[i];if(!x||!x.grupoFotosId)return;c.itens.forEach(function(it,idx){if(it.grupoFotosId===x.grupoFotosId){var cb=document.querySelector('.seq-checkbox[value="'+idx+'"]');if(cb)cb.checked=e.target.checked}});if(typeof atualizarBoxFlutuanteSelecao==='function')atualizarBoxFlutuanteSelecao();if(typeof atualizarContagemAgrupar==='function')atualizarContagemAgrupar()});
+    document.addEventListener('DOMContentLoaded',function(){var modal=document.getElementById('modalAgrupar');if(modal){var title=modal.querySelector('.modal-header h3');if(title)title.innerHTML='<i class="fa-solid fa-images"></i> Agrupar somente para Fotos';var labels=modal.querySelectorAll('.agrupar-option-label');labels.forEach(function(x){x.style.display='none'});var info=document.getElementById('agruparContagem');if(info)info.insertAdjacentHTML('afterend','<p class="fast71-note"><b>Importante:</b> nenhuma rota será unida ou apagada. O grupo serve somente para selecionar e enviar as fotos juntas.</p>')}fast75RepararVinculos(true);setTimeout(decorar,500);var render=window.renderizarSequencia;if(typeof render==='function'&&!render.fast75){var w=function(){var r=render.apply(this,arguments);setTimeout(decorar,30);return r};w.fast75=true;window.renderizarSequencia=w}});
   })();
   </script>
 </body></html>
