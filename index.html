@@ -9,9 +9,9 @@
   <!-- O app verifica esta URL para conferir se ha versao nova.      -->
   <!-- ============================================================ -->
   <meta name="fast-deploy-url" content="https://adaiascearataiana-gif.github.io/fastservicosapp/">
-  <meta name="fast-app-version" content="2026.09.01-r54">
-  <meta name="fast-app-date" content="2026-09-01T21:24:37-03:00">
-  <meta name="fast-app-changelog" content="[{&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r54: CORREÇÃO CRÍTICA — ReferenceError 'fastLockTimeoutChange is not defined' ao selecionar tempo de bloqueio. A causa era exportações inválidas dentro da IIFE do módulo de segurança que abortavam todo o bloco antes de exportar fastLockTimeoutChange. Isso também causava demora na biometria — agora corrigido&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;r53: Barra fixa inferior (dock) — botão Dashboard substituído por Despesas, dando acesso rápido às despesas diretamente da barra de navegação&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r52: CORREÇÃO DA REORGANIZAÇÃO DO MENU — Despesas restaurada para Financeiro (não pertence à Logística); Rotas do Dia restaurada para Logística (não pertence ao Financeiro)&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;r52: DRE movido para a categoria Análises — agora Dashboard e DRE (Demonstrativo de Resultado) estão agrupados como relatórios analíticos&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;r51: PAINEL 'ÚLTIMAS ATUALIZAÇÕES' — histórico compacto e profissional das novidades e correções agora visível na aba Configurações, abaixo de 'Verificar Atualizações'&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;r51: NOVA CATEGORIA 'ANÁLISES' no menu suspenso — Dashboard agora tem sua própria seção dedicada&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;r51: REORGANIZAÇÃO DO MENU — Despesas movida para Logística (ao lado de Rotas); Rotas do Dia movida para Financeiro&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r51: Varredura geral do app — strings de versão estáticas desatualizadas (r49) corrigidas em 4 pontos do código&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r50: OBJETO 'SINCRONIZACAO' INVISIVEL BLOQUEANDO CLIQUES NA BARRA FIXA ELIMINADO. O toast de sincronizacao (#syncToast) ficava invisivel (opacity:0) apos desaparecer, mas continuava capturando todos os cliques (pointer-events:auto, z-index:99999, display:flex) sobre a barra de navegacao inferior - especialmente sobre o botao Dashboard. Ao selecionar esse objeto invisivel, aparecia o nome 'Sincronizacao' (texto do toast). Agora: (1) CSS pointer-events:none no toast quando nao esta visivel (.sync-toast base) e pointer-events:auto apenas quando visivel (.sync-toast.show); (2) apos fechar, o toast recebe display:none apos a transicao de 450ms, removendo-o completamente do fluxo de cliques; (3) ao reabrir, display e resetado para flex. Os botoes da barra fixa agora sao clicaveis livremente sem obstaculo.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r49: BLOQUEIO RESPEITA O TEMPO CONFIGURADO. Ao voltar ao app (PWA instalado), o gate nao aparecia imediatamente se o tempo de bloqueio (1/2/5 min) ainda nao tinha expirado - agora o pageshow handler verifica fastDeveBloquearAgora() antes de exigir reautenticacao. A biometria so e pedida quando o tempo realmente expira.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r49: SALVAMENTO INSTANTANEO SEM TRAVAR. Ao salvar rota ou adicionar despesa, a tela congelava por ~5 segundos esperando a sincronizacao com o Supabase terminar. Agora a sincronizacao roda em background com debounce de 400ms (fastDebounceSincronizar) via Promise - a UI responde imediatamente e os dados sao sincronizados sem bloquear.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r49: BARRA AZUL AO PRESSIONAR BOTOES ELIMINADA. O destaque azul que aparecia ao tocar/pressionar os botoes da navegacao inferior (dock) foi neutralizado com CSS que forca fundo transparente em :active. As bordas retas/curvas originais foram mantidas.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;r49: LOGO FAST SERVICOS. A splash screen e o gate de login agora exibem a logo oficial do Fast Servicos (moto vermelha) com fundo transparente, substituindo o icone generico de caminhao.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;r49: ANIMACAO ZOOM NA SPLASH. A splash screen agora sai com uma animacao de zoom-out suave em direcao ao usuario (scale 1 -&gt; 1.6 com fade) ao inves de simplesmente desaparecer. A versao permanece estatica embaixo.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;r49: AUTOCOMPLETAR EM DESPESAS. Ao digitar a Descricao ou o Local no formulario de despesas (novo OU edicao), aparece uma lista de sugestoes baseada nas despesas ja cadastradas, filtrando pela primeira letra digitada - igual ao autocompletar de clientes em rotas. Toque na sugestao para preencher automaticamente.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;r49: CATEGORIA OUTROS ABRE NOVO CAMPO. Ao selecionar a categoria Outros no formulario de despesas (novo OU edicao), abre automaticamente um campo de texto para digitar uma nova categoria. A nova categoria e salva permanentemente e aparece como opcao em futuros cadastros. Categorias ja usadas em despesas existentes tambem aparecem automaticamente no seletor.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r48: CAIXA AZUL OCULTA/PRESA ELIMINADA EM DEFINITIVO. O botao flutuante arrastavel #syncFloat (bola de 60px) ficava preso numa posicao salva no dispositivo (inset 117px/363px) sobre a aba Rotas do Dia, parado e sem movimento - era a 'caixa azul oculta'. Removido o elemento HTML, o JS de arrasto, a CSS e limpa a posicao persistida (localStorage.syncFloatPos) com failsafe que remove qualquer vestigio do DOM. O status de sincronismo continua acessivel pelo indicador fixo na barra superior (neon SYNC).&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;r48: BIOMETRIA INSTANTANEA. O login por impressao digital/Face ID agora abre muito mais rapido: splash reduzido de 800ms para 220ms, removida a verificacao pre-bloqueante de plataforma (o prompt nativo e disparado imediatamente), removido o spinner de loading antes do prompt (o proprio prompt nativo e o feedback), timeout do WebAuthn reduzido de 60s para 15s e adicionada mediation conditional. Guard anti-disparo-duplo adicionado.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;r48: NAVEGACAO INFERIOR ORGANIZADA. O label 'PAGINA PRINCIPAL' que vazava da caixa do botao no dock foi compactado para 'INICIO' (mantendo aria-label completo para acessibilidade). CSS do dock ajustado para nowrap + ellipsis em todos os 4 botoes, garantindo altura consistente de uma linha e impedindo que qualquer texto vaze/escape do botao.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;r48: AUDITORIA E LIMPEZA. Corrigidos os links quebrados do manifest PWA (blob: -&gt; data: URI) que geravam erros de console. Removida a animacao @keyframes iaFabPulse do botao flutuante extinto. Configuracao Supabase (5 tabelas) e sincronismo GitHub Pages verificados e intactos.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r47: CORRECAO DEFINITIVA DA BARRA AZUL / BOTAO OCULTO. A 'barra azul' que aparecia sobre a navegacao inferior era o menu nativo de selecao de texto do Android ('Copiar / Compartilhar / Selecionar tudo'), disparado ao tocar/arrastar sobre a bottom-nav. Solucao raiz: (1) user-select:none em TODA a chrome do app (nav, dock, header, barras flutuantes, botoes, labels, icones), (2) bloqueio JS do selectstart/contextmenu/touch na chrome, (3) ::selection neutra (sem roxo/azul), (4) failsafe CSS que forca fundo transparente em toda a bottom-nav em qualquer estado. O menu nativo nunca mais aparece sobre a barra.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;r47: REPAGINACAO TOTAL 2026 baseada em pesquisa profunda (Calm UX + glassmorphism funcional + microinteracoes funcionais + profundidade espacial + bento + dark-mode-ready + acessibilidade WCAG 2.2). Tokens r47 (raios, espacamentos, sombras em camadas, vidro calibrado), cards com hover suave, botoes com gradiente premium e press, topbar/sidebar/dock em vidro fosco real (backdrop-filter), barras flutuantes com shadow-pop, modal e toast com animacoes de entrada, badge de sync com pulse, tabelas zebra + hover, scrollbar roxo-ciano, skeleton shimmer, prefers-reduced-motion respeitado, alvos de toque &gt;=44px no mobile. Mais fluido, bonito, limpo e profissional - sem perder nenhuma funcao.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;r46: REPAGINACAO COMPLETA - Novo design system 2026 com glassmorphism, paleta premium roxo/ciano, gradientes animados, cards 3D com hover, sidebar com gradiente escuro, topbar com efeito vidro, botoes com brilho, scrollbar estilizada, modal e toast com animacoes suaves, login gate com vidro fosco, indicadores de sincronismo pulsantes. Versao para Linux (.deb + AppImage), Windows (.exe NSIS + portable) e Android (PWA instalavel). Tudo sincronizado com Supabase (5 tabelas) e GitHub Pages. Nenhuma funcao ou dado perdido - todas as 678 funcoes e 13 secoes mantidas.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r45: Lugares/Destinos agora aparece tambem na sidebar do desktop. Antes essa secao so existia no menu mobile (dropdown) e ficava invisivel no desktop, dando a impressao de perda de dados. Agora o desktop tem TODAS as secoes do mobile sem nenhuma excecao. Corrigido tambem o sincronismo de estado ativo: ao navegar por qualquer caminho (sidebar, dropdown ou dock), o botao correspondente na sidebar desktop marca como ativo corretamente.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;r44: Sincronizacao com a agenda telefonica do celular. No cadastro de clientes, botao 'Importar da Agenda (Telefone/WhatsApp)' abre o seletor nativo de contatos (Contact Picker API) — voce escolhe qual contato compartilhar e o app puxa automaticamente o Nome e o Telefone (com mascara BR), preenchendo os campos Telefone e WhatsApp do cadastro. O app NAO tem acesso livre a agenda: o usuario seleciona contato por contato. Funciona no Android Chrome 80+ e iOS Safari 18+. Em navegadores sem suporte, o botao fica indisponivel e voce digita manualmente. Adicionado tambem atalho para copiar Telefone -&gt; WhatsApp.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r43: (1) REMOVIDO em definitivo o botao azul/roxo flutuante de voz (microfone) que aparecia atras e sobre a barra de navegacao do Dashboard. O botao flutuante (#iaFab / .voz-fab) foi eliminado do HTML e bloqueado por CSS failsafe para nunca reaparecer, mesmo se uma posicao antiga ficar salva no dispositivo. As tentativas anteriores (r40/r41) apenas tentavam reposicionar o botao; agora ele nao existe mais. (2) Sincronizacao com GitHub revisada e confirmada: o app publica o index.html no GitHub Pages via API (token protegido no dispositivo). (3) Sincronizacao com Supabase revisada e confirmada: 5 tabelas (rotas, despesas, sequencias_itens, dados_empresa, destinos) verificadas com dedup e blacklist de itens excluidos.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;r42: Botao 'Sincronizar com GitHub' dentro da Area Protegida. Agora voce pode publicar o app diretamente no GitHub Pages a partir do celular/computador, sem precisar fazer upload manual. O token do GitHub fica salvo apenas no seu dispositivo (protegido pela senha da Area Protegida), nunca no codigo publico. O app detecta automaticamente se houve mudanca, envia o index.html atualizado via API do GitHub e confirma 'Sincronizacao concluida! Site no ar'.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r41: (1) Colunas Nome e Endereco da aba Destinos agora sao flexiveis - crescem automaticamente quando ha um nome/endereco maior, sem forcar largura fixa. (2) Barra azul atras do botao Dashboard REMOVIDA em definitivo: os botoes flutuantes de scroll/voz agora sao cinza-escuro neutro (nao azul/indigo) e nunca descem sobre a barra de navegacao inferior; adicionado failsafe CSS que forca fundo transparente em toda a bottom-nav. (3) Contador de Rotas do Dia corrigido: agora usa a data do calendario (date picker) e filtra itens excluidos (blacklist), entao o numero do menu suspenso sempre bate com as rotas exibidas na aba. (4) Biometria (impressao digital/Face ID/Windows Hello) disponivel na Area Protegida - agora mostra uma dica quando o dispositivo suporta biometria mas ela ainda nao foi ativada.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r40 CORRECAO RAIZ: o Service Worker usava cache-first e servia uma versao antiga (r37/r38) em cache mesmo apos o GitHub Pages ser atualizado, fazendo as rotas excluidas voltarem. Reescrito para NETWORK-FIRST em navegacoes/HTML + auto-cura que remove Service Workers e caches obsoletos no arranque. Agora o usuario sempre roda a versao mais recente publicada. CORRECAO DA BARRA AZUL atras do botao Dashboard: removido o fundo azul (accent-soft) do botao de navegacao ativo — agora apenas a cor do texto/icone muda, sem barra azul. Auto-atualizacao com fallback no-cors para contornar Service Worker/CORS.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;CORREÇÃO DEFINITIVA: Rotas do Dia excluídas NUNCA mais reaparecem. O problema era duplicatas na nuvem (cada \&quot;Carregar\&quot; gerava um ID novo, acumulando dezenas de cópias). Agora: (1) IDs estáveis por rota, (2) blacklist por rotaId bloqueia TODAS as cópias, (3) dedup automático, (4) 41 duplicatas limpas da nuvem.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;Rotas do Dia excluídas não voltam mais ao recarregar a página ou sincronizar — adicionada blacklist de itens de sequência (seqItensExcluidos) respeitada no merge com a nuvem (Supabase).&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;URL fixa migrada para GitHub Pages — endereço permanente do app.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;Indicadores ONLINE e SYNC fixos na barra superior com ícones próprios.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;Recuperação de senha por e-mail na Área Protegida e no login da plataforma — mesmo e-mail para ambos.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;Tempo de bloqueio configurável após sair do app: imediato, 1, 2 ou 5 minutos.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;Box de novidades após cada atualização, com a nova versão e data/hora do lançamento.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;Tema simplificado: apenas Light Moderno e Ocean Blue. Seção renomeada para \&quot;Temas\&quot;.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;Verificação de atualização com confirmação e barra de progresso ao atualizar.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;Textos da Área Protegida reorganizados em parágrafos limpos e alinhados.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;Performance otimizada: bibliotecas externalizadas para CDN (~800KB a menos).&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;Removidos botões redundantes (Atualizar, Status, Abrir Versão Oficial, Atualizar Agora).&quot;}]">
+  <meta name="fast-app-version" content="2026.09.01-r55">
+  <meta name="fast-app-date" content="2026-09-02T01:20:03">
+  <meta name="fast-app-changelog" content="[{"type": "novo", "text": "r55: FORMATAÇÃO BRASILEIRA DE MOEDA em todos os campos de valor do app. Todos os 13 campos de valor (rotas, despesas, sequências, RH, despesas da empresa, capital social) agora exibem o padrão R$ 0,00 com cifrão, R de real, separador de milhar (ponto) e 2 dígitos decimais (vírgula). Os campos já começam com R$ 0,00 e ao digitar o zero desaparece automaticamente para entrar o número digitado, formatando em tempo real conforme você digita."}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r54: CORREÇÃO CRÍTICA — ReferenceError 'fastLockTimeoutChange is not defined' ao selecionar tempo de bloqueio. A causa era exportações inválidas dentro da IIFE do módulo de segurança que abortavam todo o bloco antes de exportar fastLockTimeoutChange. Isso também causava demora na biometria — agora corrigido&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;r53: Barra fixa inferior (dock) — botão Dashboard substituído por Despesas, dando acesso rápido às despesas diretamente da barra de navegação&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r52: CORREÇÃO DA REORGANIZAÇÃO DO MENU — Despesas restaurada para Financeiro (não pertence à Logística); Rotas do Dia restaurada para Logística (não pertence ao Financeiro)&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;r52: DRE movido para a categoria Análises — agora Dashboard e DRE (Demonstrativo de Resultado) estão agrupados como relatórios analíticos&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;r51: PAINEL 'ÚLTIMAS ATUALIZAÇÕES' — histórico compacto e profissional das novidades e correções agora visível na aba Configurações, abaixo de 'Verificar Atualizações'&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;r51: NOVA CATEGORIA 'ANÁLISES' no menu suspenso — Dashboard agora tem sua própria seção dedicada&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;r51: REORGANIZAÇÃO DO MENU — Despesas movida para Logística (ao lado de Rotas); Rotas do Dia movida para Financeiro&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r51: Varredura geral do app — strings de versão estáticas desatualizadas (r49) corrigidas em 4 pontos do código&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r50: OBJETO 'SINCRONIZACAO' INVISIVEL BLOQUEANDO CLIQUES NA BARRA FIXA ELIMINADO. O toast de sincronizacao (#syncToast) ficava invisivel (opacity:0) apos desaparecer, mas continuava capturando todos os cliques (pointer-events:auto, z-index:99999, display:flex) sobre a barra de navegacao inferior - especialmente sobre o botao Dashboard. Ao selecionar esse objeto invisivel, aparecia o nome 'Sincronizacao' (texto do toast). Agora: (1) CSS pointer-events:none no toast quando nao esta visivel (.sync-toast base) e pointer-events:auto apenas quando visivel (.sync-toast.show); (2) apos fechar, o toast recebe display:none apos a transicao de 450ms, removendo-o completamente do fluxo de cliques; (3) ao reabrir, display e resetado para flex. Os botoes da barra fixa agora sao clicaveis livremente sem obstaculo.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r49: BLOQUEIO RESPEITA O TEMPO CONFIGURADO. Ao voltar ao app (PWA instalado), o gate nao aparecia imediatamente se o tempo de bloqueio (1/2/5 min) ainda nao tinha expirado - agora o pageshow handler verifica fastDeveBloquearAgora() antes de exigir reautenticacao. A biometria so e pedida quando o tempo realmente expira.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r49: SALVAMENTO INSTANTANEO SEM TRAVAR. Ao salvar rota ou adicionar despesa, a tela congelava por ~5 segundos esperando a sincronizacao com o Supabase terminar. Agora a sincronizacao roda em background com debounce de 400ms (fastDebounceSincronizar) via Promise - a UI responde imediatamente e os dados sao sincronizados sem bloquear.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r49: BARRA AZUL AO PRESSIONAR BOTOES ELIMINADA. O destaque azul que aparecia ao tocar/pressionar os botoes da navegacao inferior (dock) foi neutralizado com CSS que forca fundo transparente em :active. As bordas retas/curvas originais foram mantidas.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;r49: LOGO FAST SERVICOS. A splash screen e o gate de login agora exibem a logo oficial do Fast Servicos (moto vermelha) com fundo transparente, substituindo o icone generico de caminhao.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;r49: ANIMACAO ZOOM NA SPLASH. A splash screen agora sai com uma animacao de zoom-out suave em direcao ao usuario (scale 1 -&gt; 1.6 com fade) ao inves de simplesmente desaparecer. A versao permanece estatica embaixo.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;r49: AUTOCOMPLETAR EM DESPESAS. Ao digitar a Descricao ou o Local no formulario de despesas (novo OU edicao), aparece uma lista de sugestoes baseada nas despesas ja cadastradas, filtrando pela primeira letra digitada - igual ao autocompletar de clientes em rotas. Toque na sugestao para preencher automaticamente.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;r49: CATEGORIA OUTROS ABRE NOVO CAMPO. Ao selecionar a categoria Outros no formulario de despesas (novo OU edicao), abre automaticamente um campo de texto para digitar uma nova categoria. A nova categoria e salva permanentemente e aparece como opcao em futuros cadastros. Categorias ja usadas em despesas existentes tambem aparecem automaticamente no seletor.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r48: CAIXA AZUL OCULTA/PRESA ELIMINADA EM DEFINITIVO. O botao flutuante arrastavel #syncFloat (bola de 60px) ficava preso numa posicao salva no dispositivo (inset 117px/363px) sobre a aba Rotas do Dia, parado e sem movimento - era a 'caixa azul oculta'. Removido o elemento HTML, o JS de arrasto, a CSS e limpa a posicao persistida (localStorage.syncFloatPos) com failsafe que remove qualquer vestigio do DOM. O status de sincronismo continua acessivel pelo indicador fixo na barra superior (neon SYNC).&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;r48: BIOMETRIA INSTANTANEA. O login por impressao digital/Face ID agora abre muito mais rapido: splash reduzido de 800ms para 220ms, removida a verificacao pre-bloqueante de plataforma (o prompt nativo e disparado imediatamente), removido o spinner de loading antes do prompt (o proprio prompt nativo e o feedback), timeout do WebAuthn reduzido de 60s para 15s e adicionada mediation conditional. Guard anti-disparo-duplo adicionado.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;r48: NAVEGACAO INFERIOR ORGANIZADA. O label 'PAGINA PRINCIPAL' que vazava da caixa do botao no dock foi compactado para 'INICIO' (mantendo aria-label completo para acessibilidade). CSS do dock ajustado para nowrap + ellipsis em todos os 4 botoes, garantindo altura consistente de uma linha e impedindo que qualquer texto vaze/escape do botao.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;r48: AUDITORIA E LIMPEZA. Corrigidos os links quebrados do manifest PWA (blob: -&gt; data: URI) que geravam erros de console. Removida a animacao @keyframes iaFabPulse do botao flutuante extinto. Configuracao Supabase (5 tabelas) e sincronismo GitHub Pages verificados e intactos.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r47: CORRECAO DEFINITIVA DA BARRA AZUL / BOTAO OCULTO. A 'barra azul' que aparecia sobre a navegacao inferior era o menu nativo de selecao de texto do Android ('Copiar / Compartilhar / Selecionar tudo'), disparado ao tocar/arrastar sobre a bottom-nav. Solucao raiz: (1) user-select:none em TODA a chrome do app (nav, dock, header, barras flutuantes, botoes, labels, icones), (2) bloqueio JS do selectstart/contextmenu/touch na chrome, (3) ::selection neutra (sem roxo/azul), (4) failsafe CSS que forca fundo transparente em toda a bottom-nav em qualquer estado. O menu nativo nunca mais aparece sobre a barra.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;r47: REPAGINACAO TOTAL 2026 baseada em pesquisa profunda (Calm UX + glassmorphism funcional + microinteracoes funcionais + profundidade espacial + bento + dark-mode-ready + acessibilidade WCAG 2.2). Tokens r47 (raios, espacamentos, sombras em camadas, vidro calibrado), cards com hover suave, botoes com gradiente premium e press, topbar/sidebar/dock em vidro fosco real (backdrop-filter), barras flutuantes com shadow-pop, modal e toast com animacoes de entrada, badge de sync com pulse, tabelas zebra + hover, scrollbar roxo-ciano, skeleton shimmer, prefers-reduced-motion respeitado, alvos de toque &gt;=44px no mobile. Mais fluido, bonito, limpo e profissional - sem perder nenhuma funcao.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;r46: REPAGINACAO COMPLETA - Novo design system 2026 com glassmorphism, paleta premium roxo/ciano, gradientes animados, cards 3D com hover, sidebar com gradiente escuro, topbar com efeito vidro, botoes com brilho, scrollbar estilizada, modal e toast com animacoes suaves, login gate com vidro fosco, indicadores de sincronismo pulsantes. Versao para Linux (.deb + AppImage), Windows (.exe NSIS + portable) e Android (PWA instalavel). Tudo sincronizado com Supabase (5 tabelas) e GitHub Pages. Nenhuma funcao ou dado perdido - todas as 678 funcoes e 13 secoes mantidas.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r45: Lugares/Destinos agora aparece tambem na sidebar do desktop. Antes essa secao so existia no menu mobile (dropdown) e ficava invisivel no desktop, dando a impressao de perda de dados. Agora o desktop tem TODAS as secoes do mobile sem nenhuma excecao. Corrigido tambem o sincronismo de estado ativo: ao navegar por qualquer caminho (sidebar, dropdown ou dock), o botao correspondente na sidebar desktop marca como ativo corretamente.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;r44: Sincronizacao com a agenda telefonica do celular. No cadastro de clientes, botao 'Importar da Agenda (Telefone/WhatsApp)' abre o seletor nativo de contatos (Contact Picker API) — voce escolhe qual contato compartilhar e o app puxa automaticamente o Nome e o Telefone (com mascara BR), preenchendo os campos Telefone e WhatsApp do cadastro. O app NAO tem acesso livre a agenda: o usuario seleciona contato por contato. Funciona no Android Chrome 80+ e iOS Safari 18+. Em navegadores sem suporte, o botao fica indisponivel e voce digita manualmente. Adicionado tambem atalho para copiar Telefone -&gt; WhatsApp.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r43: (1) REMOVIDO em definitivo o botao azul/roxo flutuante de voz (microfone) que aparecia atras e sobre a barra de navegacao do Dashboard. O botao flutuante (#iaFab / .voz-fab) foi eliminado do HTML e bloqueado por CSS failsafe para nunca reaparecer, mesmo se uma posicao antiga ficar salva no dispositivo. As tentativas anteriores (r40/r41) apenas tentavam reposicionar o botao; agora ele nao existe mais. (2) Sincronizacao com GitHub revisada e confirmada: o app publica o index.html no GitHub Pages via API (token protegido no dispositivo). (3) Sincronizacao com Supabase revisada e confirmada: 5 tabelas (rotas, despesas, sequencias_itens, dados_empresa, destinos) verificadas com dedup e blacklist de itens excluidos.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;r42: Botao 'Sincronizar com GitHub' dentro da Area Protegida. Agora voce pode publicar o app diretamente no GitHub Pages a partir do celular/computador, sem precisar fazer upload manual. O token do GitHub fica salvo apenas no seu dispositivo (protegido pela senha da Area Protegida), nunca no codigo publico. O app detecta automaticamente se houve mudanca, envia o index.html atualizado via API do GitHub e confirma 'Sincronizacao concluida! Site no ar'.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r41: (1) Colunas Nome e Endereco da aba Destinos agora sao flexiveis - crescem automaticamente quando ha um nome/endereco maior, sem forcar largura fixa. (2) Barra azul atras do botao Dashboard REMOVIDA em definitivo: os botoes flutuantes de scroll/voz agora sao cinza-escuro neutro (nao azul/indigo) e nunca descem sobre a barra de navegacao inferior; adicionado failsafe CSS que forca fundo transparente em toda a bottom-nav. (3) Contador de Rotas do Dia corrigido: agora usa a data do calendario (date picker) e filtra itens excluidos (blacklist), entao o numero do menu suspenso sempre bate com as rotas exibidas na aba. (4) Biometria (impressao digital/Face ID/Windows Hello) disponivel na Area Protegida - agora mostra uma dica quando o dispositivo suporta biometria mas ela ainda nao foi ativada.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r40 CORRECAO RAIZ: o Service Worker usava cache-first e servia uma versao antiga (r37/r38) em cache mesmo apos o GitHub Pages ser atualizado, fazendo as rotas excluidas voltarem. Reescrito para NETWORK-FIRST em navegacoes/HTML + auto-cura que remove Service Workers e caches obsoletos no arranque. Agora o usuario sempre roda a versao mais recente publicada. CORRECAO DA BARRA AZUL atras do botao Dashboard: removido o fundo azul (accent-soft) do botao de navegacao ativo — agora apenas a cor do texto/icone muda, sem barra azul. Auto-atualizacao com fallback no-cors para contornar Service Worker/CORS.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;CORREÇÃO DEFINITIVA: Rotas do Dia excluídas NUNCA mais reaparecem. O problema era duplicatas na nuvem (cada \&quot;Carregar\&quot; gerava um ID novo, acumulando dezenas de cópias). Agora: (1) IDs estáveis por rota, (2) blacklist por rotaId bloqueia TODAS as cópias, (3) dedup automático, (4) 41 duplicatas limpas da nuvem.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;Rotas do Dia excluídas não voltam mais ao recarregar a página ou sincronizar — adicionada blacklist de itens de sequência (seqItensExcluidos) respeitada no merge com a nuvem (Supabase).&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;URL fixa migrada para GitHub Pages — endereço permanente do app.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;Indicadores ONLINE e SYNC fixos na barra superior com ícones próprios.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;Recuperação de senha por e-mail na Área Protegida e no login da plataforma — mesmo e-mail para ambos.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;Tempo de bloqueio configurável após sair do app: imediato, 1, 2 ou 5 minutos.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;Box de novidades após cada atualização, com a nova versão e data/hora do lançamento.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;Tema simplificado: apenas Light Moderno e Ocean Blue. Seção renomeada para \&quot;Temas\&quot;.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;Verificação de atualização com confirmação e barra de progresso ao atualizar.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;Textos da Área Protegida reorganizados em parágrafos limpos e alinhados.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;Performance otimizada: bibliotecas externalizadas para CDN (~800KB a menos).&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;Removidos botões redundantes (Atualizar, Status, Abrir Versão Oficial, Atualizar Agora).&quot;}]">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https:; img-src 'self' data: blob: https: http:; connect-src 'self' https: data: blob:; font-src 'self' https: data:;">
   <!-- PWA: Meta tags para app instalavel -->
   <meta name="mobile-web-app-capable" content="yes">
@@ -6695,7 +6695,7 @@ tbody tr:hover td {
             </div>
             <div>
               <label>Valor (R$):</label>
-              <input type="number" id="txtValorRota" step="0.01" min="0" inputmode="decimal" required="" oninput="atualizarPreviewAba1();">
+              <input type="text" id="txtValorRota" inputmode="numeric" placeholder="R$ 0,00" required="" onfocus="fastMoedaFocus(this)" oninput="fastMascaraMoeda(this); atualizarPreviewAba1();" onblur="fastMoedaBlur(this)" style="text-align:left;">
             </div>
             <div class="span-3">
               <label>Descrição:</label>
@@ -21683,7 +21683,7 @@ tbody tr:hover td {
             </div>
             <div>
               <label>Valor (R$):</label>
-              <input type="number" id="txtValorDespesa" step="0.01" min="0" inputmode="decimal" required="">
+              <input type="text" id="txtValorDespesa" inputmode="numeric" placeholder="R$ 0,00" required="" onfocus="fastMoedaFocus(this)" oninput="fastMascaraMoeda(this)" onblur="fastMoedaBlur(this)" style="text-align:left;">
             </div>
 
             <!-- UPLOAD DE DOCUMENTOS (recibos, NF, etc.) — com IA que lê e preenche os dados -->
@@ -22519,11 +22519,11 @@ tbody tr:hover td {
             </div>
             <div>
               <label>Salário Base (R$):</label>
-              <input type="number" id="rhSalario" step="0.01" min="0">
+              <input type="text" id="rhSalario" inputmode="numeric" placeholder="R$ 0,00" value="R$ 0,00" onfocus="fastMoedaFocus(this)" oninput="fastMascaraMoeda(this)" onblur="fastMoedaBlur(this)" style="text-align:left;">
             </div>
             <div>
               <label>Salário Variável/Comissão (R$):</label>
-              <input type="number" id="rhSalarioVariavel" step="0.01" min="0">
+              <input type="text" id="rhSalarioVariavel" inputmode="numeric" placeholder="R$ 0,00" value="R$ 0,00" onfocus="fastMoedaFocus(this)" oninput="fastMascaraMoeda(this)" onblur="fastMoedaBlur(this)" style="text-align:left;">
             </div>
             <div>
               <label>Vale-Transporte:</label>
@@ -22545,7 +22545,7 @@ tbody tr:hover td {
             </div>
             <div>
               <label>Valor VR/VA (R$):</label>
-              <input type="number" id="rhValorVr" step="0.01" min="0">
+              <input type="text" id="rhValorVr" inputmode="numeric" placeholder="R$ 0,00" value="R$ 0,00" onfocus="fastMoedaFocus(this)" oninput="fastMascaraMoeda(this)" onblur="fastMoedaBlur(this)" style="text-align:left;">
             </div>
             <div>
               <label>Plano de Saúde:</label>
@@ -22774,19 +22774,19 @@ tbody tr:hover td {
             <div class="span-4" style="font-weight:700;font-size:14px;color:var(--primary,#e11d48);margin-top:10px;border-bottom:2px solid var(--border-soft,#e2e8f0);padding-bottom:4px;">💵 Valores e Pagamento</div>
             <div>
               <label>Valor (R$): *</label>
-              <input type="number" id="deValor" step="0.01" required="" min="0">
+              <input type="text" id="deValor" inputmode="numeric" placeholder="R$ 0,00" value="R$ 0,00" onfocus="fastMoedaFocus(this)" oninput="fastMascaraMoeda(this); " onblur="fastMoedaBlur(this)" style="text-align:left;">
             </div>
             <div>
               <label>Desconto / Abatimento (R$):</label>
-              <input type="number" id="deDesconto" step="0.01" min="0" value="0">
+              <input type="text" id="deDesconto" inputmode="numeric" placeholder="R$ 0,00" value="R$ 0,00" onfocus="fastMoedaFocus(this)" oninput="fastMascaraMoeda(this); " onblur="fastMoedaBlur(this)" style="text-align:left;">
             </div>
             <div>
               <label>Multa/Juros (R$):</label>
-              <input type="number" id="deMulta" step="0.01" min="0" value="0">
+              <input type="text" id="deMulta" inputmode="numeric" placeholder="R$ 0,00" value="R$ 0,00" onfocus="fastMoedaFocus(this)" oninput="fastMascaraMoeda(this); " onblur="fastMoedaBlur(this)" style="text-align:left;">
             </div>
             <div>
               <label>Valor Total (R$):</label>
-              <input type="number" id="deValorTotal" step="0.01" readonly="" style="background:var(--bg-soft,#f1f5f9);">
+              <input type="text" id="deValorTotal" readonly="" placeholder="R$ 0,00" value="R$ 0,00" style="background:var(--bg-soft,#f1f5f9); text-align:left;">
             </div>
             <div>
               <label>Forma de Pagamento:</label>
@@ -23136,7 +23136,7 @@ tbody tr:hover td {
           </div>
           <div>
             <label>Valor (R$):</label>
-            <input type="number" id="seqValor" step="0.01" min="0" inputmode="decimal" value="0" onfocus="limparZero(this)" oninput="atualizarPreviewAba2();">
+            <input type="text" id="seqValor" inputmode="numeric" placeholder="R$ 0,00" value="R$ 0,00" onfocus="fastMoedaFocus(this)" oninput="fastMascaraMoeda(this); atualizarPreviewAba2();" onblur="fastMoedaBlur(this)" style="text-align:left;">
           </div>
           <div>
             <label>Quantidade de Volumes:</label>
@@ -23290,7 +23290,7 @@ tbody tr:hover td {
           </div>
           <div>
             <label>Valor (R$):</label>
-            <input type="number" id="editTxtValorRota" step="0.01" min="0" inputmode="decimal" required="">
+            <input type="text" id="editTxtValorRota" inputmode="numeric" placeholder="R$ 0,00" required="" onfocus="fastMoedaFocus(this)" oninput="fastMascaraMoeda(this)" onblur="fastMoedaBlur(this)" style="text-align:left;">
           </div>
           <div class="span-3">
             <label>Descrição:</label>
@@ -23387,7 +23387,7 @@ tbody tr:hover td {
           </div>
           <div>
             <label>Valor (R$):</label>
-            <input type="number" id="editTxtValorDespesa" step="0.01" required="">
+            <input type="text" id="editTxtValorDespesa" inputmode="numeric" placeholder="R$ 0,00" required="" onfocus="fastMoedaFocus(this)" oninput="fastMascaraMoeda(this)" onblur="fastMoedaBlur(this)" style="text-align:left;">
           </div>
 
           <!-- UPLOAD DE DOCUMENTOS (recibos, NF, etc.) — edição -->
@@ -25833,7 +25833,7 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
         empEmail: r.emp_email || '',
         empWebsite: r.emp_website || '',
         empResponsavel: r.emp_responsavel || '',
-        empCapitalSocial: r.emp_capitalsocial || '',
+        empCapitalSocial: r.emp_capitalsocial != null ? fastFormatMoeda(r.emp_capitalsocial) : 'R$ 0,00',
         empDataAbertura: r.emp_dataabertura || '',
         empObjetoSocial: r.emp_objetosocial || '',
         empLogoUrl: r.emp_logourl || ''
@@ -26083,7 +26083,7 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
         emp_email: dados.empEmail || '',
         emp_website: dados.empWebsite || '',
         emp_responsavel: dados.empResponsavel || '',
-        emp_capitalsocial: dados.empCapitalSocial || '',
+        emp_capitalsocial: fastParseMoeda(dados.empCapitalSocial),
         emp_dataabertura: dados.empDataAbertura || '',
         emp_objetosocial: dados.empObjetoSocial || '',
         emp_logourl: dados.empLogoUrl || '',
@@ -27925,6 +27925,147 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
     function limparZero(input) {
       if (input.value === '0' || input.value === 0) input.value = '';
     }
+    // ============================================================
+    // r55: MÁSCARA DE MOEDA BRASILEIRA (R$ 0,00)
+    // Campos de valor começam com R$ 0,00; ao digitar, o zero
+    // desaparece e o número digitado aparece formatado em tempo real.
+    // ============================================================
+    const FAST_MOEDA_FIELDS = [
+      'txtValorRota','txtValorDespesa','seqValor',
+      'editTxtValorRota','editTxtValorDespesa',
+      'rhSalario','rhSalarioVariavel','rhValorVr',
+      'deValor','deDesconto','deMulta','deValorTotal',
+      'empCapitalSocial'
+    ];
+
+    // Converte um número (float) -> string "R$ X.XXX,XX"
+    function fastFormatMoeda(num) {
+      if (num === null || num === undefined || num === '' || isNaN(num)) num = 0;
+      let n = Number(num);
+      if (isNaN(n)) n = 0;
+      let negativo = n < 0;
+      n = Math.abs(n);
+      // Arredonda para 2 casas
+      n = Math.round(n * 100) / 100;
+      let partes = n.toFixed(2).split('.');
+      let intPart = partes[0];
+      let decPart = partes[1] || '00';
+      // Separador de milhares: ponto a cada 3 dígitos
+      intPart = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+      let str = 'R$ ' + intPart + ',' + decPart;
+      if (negativo) str = '-R$ ' + intPart + ',' + decPart;
+      return str;
+    }
+
+    // Converte string formatada "R$ 1.234,56" -> número 1234.56
+    function fastParseMoeda(str) {
+      if (str === null || str === undefined) return 0;
+      let s = String(str).trim();
+      if (s === '') return 0;
+      let negativo = false;
+      if (s.indexOf('-') !== -1) { negativo = true; s = s.replace(/-/g, ''); }
+      // Remove R$, espaços, e pontos (separador de milhar)
+      s = s.replace(/R\$/gi, '').replace(/\s/g, '').replace(/\./g, '');
+      // Troca vírgula decimal por ponto
+      s = s.replace(/,/g, '.');
+      // Se houver múltiplos pontos (caso raro), pega só o último como decimal
+      if ((s.match(/\./g) || []).length > 1) {
+        let parts = s.split('.');
+        let dec = parts.pop();
+        s = parts.join('') + '.' + dec;
+      }
+      let v = parseFloat(s);
+      if (isNaN(v)) return 0;
+      return negativo ? -v : v;
+    }
+
+    // Máscara aplicada em tempo real conforme o usuário digita
+    function fastMascaraMoeda(input) {
+      if (!input) return;
+      // Pega apenas os dígitos digitados
+      let raw = input.value;
+      // Remove tudo que não for dígito
+      let digitos = raw.replace(/\D/g, '');
+      if (digitos === '') {
+        // Campo vazio -> mostra R$ 0,00
+        input.value = 'R$ 0,00';
+        // Posiciona cursor antes do "0,00" para o usuário poder digitar
+        fastMoedaPosicionarCursor(input);
+        return;
+      }
+      // Remove zeros à esquerda extras (mas mantém pelo menos um dígito)
+      // digitos representa o valor em centavos
+      let centavos = parseInt(digitos, 10);
+      if (isNaN(centavos)) centavos = 0;
+      // Converte centavos para formato moeda
+      let reais = Math.floor(centavos / 100);
+      let cents = centavos % 100;
+      let intStr = String(reais);
+      intStr = intStr.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+      let decStr = String(cents).padStart(2, '0');
+      input.value = 'R$ ' + intStr + ',' + decStr;
+      // Posiciona cursor no final
+      let len = input.value.length;
+      try { input.setSelectionRange(len, len); } catch(e) {}
+    }
+
+    // Posiciona o cursor de forma inteligente no campo de moeda
+    function fastMoedaPosicionarCursor(input) {
+      // Coloca cursor depois de "R$ " para o usuário começar a digitar
+      try { input.setSelectionRange(3, 3); } catch(e) {}
+    }
+
+    // Handler de focus: seleciona todo o conteúdo para digitação fácil
+    function fastMoedaFocus(input) {
+      if (!input) return;
+      // Se o valor for R$ 0,00, seleciona tudo para o usuário digitar por cima
+      let val = input.value ? input.value.trim() : '';
+      if (val === '' || val === 'R$ 0,00' || fastParseMoeda(val) === 0) {
+        // Seleciona tudo para que ao digitar, o zero desapareça
+        setTimeout(function(){
+          try { input.select(); } catch(e) {}
+        }, 0);
+      }
+    }
+
+    // Handler de blur: se vazio, restaura R$ 0,00
+    function fastMoedaBlur(input) {
+      if (!input) return;
+      let val = input.value ? input.value.trim() : '';
+      if (val === '' || fastParseMoeda(val) === 0) {
+        input.value = 'R$ 0,00';
+      }
+    }
+
+    // Inicializa todos os campos de moeda com R$ 0,00
+    function fastInitMoedaFields() {
+      FAST_MOEDA_FIELDS.forEach(function(id){
+        const el = document.getElementById(id);
+        if (el) {
+          // Se já tem valor numérico (edição), formata; senão R$ 0,00
+          let cur = el.value ? el.value.trim() : '';
+          if (cur === '' || cur === '0' || cur === '0,00' || cur === '0.00') {
+            el.value = 'R$ 0,00';
+          } else if (cur.indexOf('R$') === -1) {
+            // Valor numérico puro -> formata
+            el.value = fastFormatMoeda(fastParseMoeda(cur));
+          }
+        }
+      });
+    }
+
+    // Helper: define o valor de um campo de moeda já formatado
+    function fastSetMoeda(id, valor) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      if (valor === null || valor === undefined || valor === '') {
+        el.value = 'R$ 0,00';
+      } else {
+        el.value = fastFormatMoeda(fastParseMoeda(valor));
+      }
+    }
+
+
 
     function formatarDataBR(dataISO) {
       if (!dataISO) return '-';
@@ -28109,7 +28250,7 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
       const pagamento = document.getElementById('cbPagamento').value;
       const statusPag = document.getElementById('cbStatusRota').value;
       const execucao = document.getElementById('cbStatusExecucao').value;
-      const val = parseFloat(document.getElementById('txtValorRota').value) || 0;
+      const val = fastParseMoeda(document.getElementById('txtValorRota').value);
 
       document.getElementById('prev1-cliente').textContent = cliente;
       document.getElementById('prev1-trajeto').textContent = trajetoPrev;
@@ -28128,7 +28269,7 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
       const obs = document.getElementById('seqObs').value || '-';
       const motoristaSel = document.getElementById('seqMotorista');
       const motorista = (motoristaSel && motoristaSel.value) ? motoristaSel.value : '-';
-      const val = parseFloat(document.getElementById('seqValor').value) || 0;
+      const val = fastParseMoeda(document.getElementById('seqValor').value);
       const qtdVol = parseInt(document.getElementById('seqQtdVolumes').value) || 1;
 
       document.getElementById('prev2-cliente').textContent = cliente;
@@ -28283,7 +28424,7 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
       setVal('seqOrigem', ultimaRota.origem || '');
       setVal('seqDestino', ultimaRota.destino || '');
       setVal('seqObs', ultimaRota.descricao || ultimaRota.observacao || '');
-      setVal('seqValor', ultimaRota.valor != null ? ultimaRota.valor : 0);
+      fastSetMoeda('seqValor', ultimaRota.valor != null ? ultimaRota.valor : 0);
       setVal('seqQtdVolumes', ultimaRota.qtdMercadorias != null ? ultimaRota.qtdMercadorias : (ultimaRota.qtdVolumes || 0));
       atualizarPreviewAba2();
     }
@@ -28398,7 +28539,7 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
       setVal('cbPagamento', ultimaRota.pagamento || 'PIX');
       setVal('cbStatusRota', ultimaRota.status || 'Pendente');
       setVal('cbStatusExecucao', ultimaRota.statusExecucao || 'EM ROTA');
-      setVal('txtValorRota', ultimaRota.valor != null ? ultimaRota.valor : '');
+      fastSetMoeda('txtValorRota', ultimaRota.valor != null ? ultimaRota.valor : '');
       setVal('txtDescricaoRota', ultimaRota.descricao || ultimaRota.observacao || '');
 
       const alerta = document.getElementById('alertPreviewRota');
@@ -32478,7 +32619,7 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
       document.getElementById('seqItemId').value = '';
       document.getElementById('modalSeqTitulo').innerHTML = '<i class="fa-solid fa-calendar-plus"></i> Adicionar Item às Rotas do Dia';
       document.getElementById('formModalSeq').reset();
-      document.getElementById('seqValor').value = 0;
+      fastSetMoeda('seqValor', 0);
       document.getElementById('seqQtdVolumes').value = 0;
       document.getElementById('containerCamposExtras').innerHTML = '';
       limparDestinosExtras();
@@ -32508,7 +32649,7 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
         document.getElementById('seqDestino').value = item.destino || '';
       }
       document.getElementById('seqObs').value = item.obs || '';
-      document.getElementById('seqValor').value = item.valor != null ? item.valor : 0;
+      fastSetMoeda('seqValor', item.valor != null ? item.valor : 0);
       document.getElementById('seqQtdVolumes').value = item.qtdMercadorias != null ? item.qtdMercadorias : 0;
       atualizarSelectMotoristasSeq();
       const selMot = document.getElementById('seqMotorista');
@@ -32649,7 +32790,7 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
         // Coletar destinos extras no modo edicao
         const destinosExtrasEdit = obterDestinosExtras();
         const todosDestinosEdit = [destino, ...destinosExtrasEdit].filter(d => d && d.trim());
-        const valor = parseFloat(document.getElementById('seqValor').value) || 0;
+        const valor = fastParseMoeda(document.getElementById('seqValor').value);
 
         // Atualizar o item existente com o primeiro destino
         bancoDados.sequencias[dataSel] = bancoDados.sequencias[dataSel].map(item => {
@@ -32680,7 +32821,7 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
         }
         fecharModalSeq();
       } else {
-        const valor = parseFloat(document.getElementById('seqValor').value) || 0;
+        const valor = fastParseMoeda(document.getElementById('seqValor').value);
         // Coletar todos os destinos: principal + extras
         const destinosExtras = obterDestinosExtras();
         const todosDestinos = [destino, ...destinosExtras].filter(d => d && d.trim());
@@ -33815,7 +33956,7 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
       const pagamento = document.getElementById('cbPagamento').value;
       const status = document.getElementById('cbStatusRota').value;
       const statusExecucao = document.getElementById('cbStatusExecucao').value || 'EM ROTA';
-      const valor = parseFloat(document.getElementById('txtValorRota').value) || 0;
+      const valor = fastParseMoeda(document.getElementById('txtValorRota').value);
       const descricao = document.getElementById('txtDescricaoRota').value;
 
       // Coletar destinos extras (além do principal)
@@ -33930,7 +34071,7 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
       document.getElementById('editCbPagamento').value = r.pagamento || 'PIX';
       document.getElementById('editCbStatusRota').value = r.status || 'Pendente';
       document.getElementById('editCbStatusExecucao').value = r.statusExecucao || 'EM ROTA';
-      document.getElementById('editTxtValorRota').value = r.valor || '';
+      fastSetMoeda('editTxtValorRota', r.valor || '');
       document.getElementById('editTxtDescricaoRota').value = r.descricao || '';
       const editChkTeste = document.getElementById('editChkRotaTeste');
       if (editChkTeste) editChkTeste.checked = !!r.teste;
@@ -33987,7 +34128,7 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
           pagamento: document.getElementById('editCbPagamento').value,
           status: document.getElementById('editCbStatusRota').value,
           statusExecucao: novoStatusExec,
-          valor: parseFloat(document.getElementById('editTxtValorRota').value) || 0,
+          valor: fastParseMoeda(document.getElementById('editTxtValorRota').value),
           descricao: document.getElementById('editTxtDescricaoRota').value,
           teste: document.getElementById('editChkRotaTeste') && document.getElementById('editChkRotaTeste').checked
         };
@@ -34055,6 +34196,7 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
 
     function limparFormularioRota() {
       document.getElementById('formRota').reset();
+      fastSetMoeda('txtValorRota', 0);
       document.getElementById('dpDataRota').value = new Date().toISOString().split('T')[0];
       document.getElementById('txtQtdMercadorias').value = '0';
       document.getElementById('cbStatusExecucao').value = 'EM ROTA';
@@ -34638,7 +34780,7 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
       let camposPreenchidos = 0;
       if (d.descricao) { const el = document.getElementById('txtDescricaoDespesa'); if (el) { el.value = d.descricao; camposPreenchidos++; } }
       if (d.local) { const el = document.getElementById('txtLocalDespesa'); if (el) { el.value = d.local; camposPreenchidos++; } }
-      if (d.valor != null) { const el = document.getElementById('txtValorDespesa'); if (el) { el.value = String(d.valor).replace('.', ','); camposPreenchidos++; } }
+      if (d.valor != null) { fastSetMoeda('txtValorDespesa', d.valor); camposPreenchidos++; }
       if (d.data) { const el = document.getElementById('dpDataDespesa'); if (el) { el.value = d.data; camposPreenchidos++; } }
       if (d.categoria) {
         const sel = document.getElementById('cbCategoriaDespesa');
@@ -35842,7 +35984,7 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
       if (d.pagamento) setVal('cbPagamento', d.pagamento);
       if (d.status) setVal('cbStatusRota', d.status);
       if (d.statusExecucao) setVal('cbStatusExecucao', d.statusExecucao);
-      if (d.valor !== null) setVal('txtValorRota', d.valor);
+      if (d.valor !== null) fastSetMoeda('txtValorRota', d.valor);
       if (typeof atualizarPreviewAba1 === 'function') atualizarPreviewAba1();
       mostrarToast('Formulário preenchido por voz! Revise e clique em "Salvar Rota".', 'success');
       const st = document.getElementById('vozStatus');
@@ -36018,7 +36160,7 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
         local: document.getElementById('txtLocalDespesa').value,
         categoria: catFinal,
         data: document.getElementById('dpDataDespesa').value,
-        valor: parseFloat(document.getElementById('txtValorDespesa').value) || 0,
+        valor: fastParseMoeda(document.getElementById('txtValorDespesa').value),
         documentos: (docsDespesaAtual || []).slice()
       };
 
@@ -36037,7 +36179,7 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
       document.getElementById('editTxtDescricaoDespesa').value = d.descricao || '';
       document.getElementById('editTxtLocalDespesa').value = d.local || '';
       document.getElementById('editDpDataDespesa').value = d.data || '';
-      document.getElementById('editTxtValorDespesa').value = d.valor || '';
+      fastSetMoeda('editTxtValorDespesa', d.valor || '');
       // r49: Popular categorias dinamicas antes de setar o valor
       var editCatSel = document.getElementById('editCbCategoriaDespesa');
       if (editCatSel) fastPopularCategoriasDespesa(editCatSel);
@@ -36110,7 +36252,7 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
             local: document.getElementById('editTxtLocalDespesa').value,
             categoria: (document.getElementById('editCbCategoriaDespesa').value === 'Outros') ? (function(){ var nc = document.getElementById('editTxtNovaCategoria'); var v = nc ? nc.value.trim() : ''; if (v && v !== 'Outros') { try { fastSalvarCategoriaDespesa(v); } catch(e) {} return v; } return 'Outros'; })() : document.getElementById('editCbCategoriaDespesa').value,
             data: document.getElementById('editDpDataDespesa').value,
-            valor: parseFloat(document.getElementById('editTxtValorDespesa').value) || 0,
+            valor: fastParseMoeda(document.getElementById('editTxtValorDespesa').value),
             documentos: (docsDespesaEditAtual || []).slice()
           };
         }
@@ -36132,6 +36274,7 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
 
     function limparFormularioDespesa() {
       document.getElementById('formDespesa').reset();
+      fastSetMoeda('txtValorDespesa', 0);
       document.getElementById('dpDataDespesa').value = new Date().toISOString().split('T')[0];
       document.getElementById('divNovaCategoria').style.display = 'none';
       // r49: Limpar campo de nova categoria e popular categorias dinamicas
@@ -36197,12 +36340,12 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
         escala: document.getElementById('rhEscala').value,
         situacao: document.getElementById('rhSituacao').value,
         sindicato: document.getElementById('rhSindicato').value,
-        salario: parseFloat(document.getElementById('rhSalario').value) || 0,
-        salarioVariavel: parseFloat(document.getElementById('rhSalarioVariavel').value) || 0,
+        salario: fastParseMoeda(document.getElementById('rhSalario').value),
+        salarioVariavel: fastParseMoeda(document.getElementById('rhSalarioVariavel').value),
         valeTransporte: document.getElementById('rhValeTransporte').value,
         qtdeVt: parseInt(document.getElementById('rhQtdeVt').value) || 0,
         vr: document.getElementById('rhVr').value,
-        valorVr: parseFloat(document.getElementById('rhValorVr').value) || 0,
+        valorVr: fastParseMoeda(document.getElementById('rhValorVr').value),
         planoSaude: document.getElementById('rhPlanoSaude').value,
         escolaridade: document.getElementById('rhEscolaridade').value,
         pcd: document.getElementById('rhPcd').value,
@@ -36288,9 +36431,16 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
         emergenciaTel:'rhEmergenciaTel', emergenciaParentesco:'rhEmergenciaParentesco',
         obs:'rhObs'
       };
+      const fastRhMoedaFields = ['rhSalario','rhSalarioVariavel','rhValorVr'];
       campos.forEach(function(c){
         const el = document.getElementById(idMap[c]);
-        if (el && f[c] !== undefined && f[c] !== null) el.value = f[c];
+        if (el && f[c] !== undefined && f[c] !== null) {
+          if (fastRhMoedaFields.indexOf(idMap[c]) !== -1) {
+            el.value = fastFormatMoeda(f[c]);
+          } else {
+            el.value = f[c];
+          }
+        }
       });
       // Store editing id in a hidden field
       let hidden = document.getElementById('rhEditId');
@@ -36359,12 +36509,12 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
         escala: document.getElementById('rhEscala').value,
         situacao: document.getElementById('rhSituacao').value,
         sindicato: document.getElementById('rhSindicato').value,
-        salario: parseFloat(document.getElementById('rhSalario').value) || 0,
-        salarioVariavel: parseFloat(document.getElementById('rhSalarioVariavel').value) || 0,
+        salario: fastParseMoeda(document.getElementById('rhSalario').value),
+        salarioVariavel: fastParseMoeda(document.getElementById('rhSalarioVariavel').value),
         valeTransporte: document.getElementById('rhValeTransporte').value,
         qtdeVt: parseInt(document.getElementById('rhQtdeVt').value) || 0,
         vr: document.getElementById('rhVr').value,
-        valorVr: parseFloat(document.getElementById('rhValorVr').value) || 0,
+        valorVr: fastParseMoeda(document.getElementById('rhValorVr').value),
         planoSaude: document.getElementById('rhPlanoSaude').value,
         escolaridade: document.getElementById('rhEscolaridade').value,
         pcd: document.getElementById('rhPcd').value,
@@ -36421,13 +36571,14 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
 
     // Auto-calc valor total para Despesas da Empresa (edit/new handled inside salvarDespesaEmp)
     document.addEventListener('DOMContentLoaded', function(){
+      fastInitMoedaFields();
       const formDe = document.getElementById('formDespesaEmp');
       if (formDe) {
         const calcTotal = function(){
-          const v = parseFloat(document.getElementById('deValor').value) || 0;
-          const d = parseFloat(document.getElementById('deDesconto').value) || 0;
-          const m = parseFloat(document.getElementById('deMulta').value) || 0;
-          document.getElementById('deValorTotal').value = (v - d + m).toFixed(2);
+          const v = fastParseMoeda(document.getElementById('deValor').value);
+          const d = fastParseMoeda(document.getElementById('deDesconto').value);
+          const m = fastParseMoeda(document.getElementById('deMulta').value);
+          fastSetMoeda('deValorTotal', v - d + m);
         };
         ['deValor','deDesconto','deMulta'].forEach(function(id){
           const el = document.getElementById(id);
@@ -36463,10 +36614,10 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
         centroCusto: document.getElementById('deCentroCusto').value,
         departamento: document.getElementById('deDepartamento').value,
         projeto: document.getElementById('deProjeto').value,
-        valor: parseFloat(document.getElementById('deValor').value) || 0,
-        desconto: parseFloat(document.getElementById('deDesconto').value) || 0,
-        multa: parseFloat(document.getElementById('deMulta').value) || 0,
-        valorTotal: (parseFloat(document.getElementById('deValor').value) || 0) - (parseFloat(document.getElementById('deDesconto').value) || 0) + (parseFloat(document.getElementById('deMulta').value) || 0),
+        valor: fastParseMoeda(document.getElementById('deValor').value),
+        desconto: fastParseMoeda(document.getElementById('deDesconto').value),
+        multa: fastParseMoeda(document.getElementById('deMulta').value),
+        valorTotal: (fastParseMoeda(document.getElementById('deValor').value)) - (fastParseMoeda(document.getElementById('deDesconto').value)) + (fastParseMoeda(document.getElementById('deMulta').value)),
         formaPagamento: document.getElementById('deFormaPagamento').value,
         status: document.getElementById('deStatus').value,
         recorrencia: document.getElementById('deRecorrencia').value,
@@ -36504,12 +36655,14 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
     function limparFormDespesaEmp() {
       const form = document.getElementById('formDespesaEmp');
       if (form) form.reset();
+      fastSetMoeda('deValor', 0);
+      fastSetMoeda('deDesconto', 0);
+      fastSetMoeda('deMulta', 0);
       const dt = document.getElementById('deData');
       if (dt) dt.value = new Date().toISOString().split('T')[0];
       const div = document.getElementById('divNovaCategoriaEmp');
       if (div) div.style.display = 'none';
-      const vt = document.getElementById('deValorTotal');
-      if (vt) vt.value = '';
+      fastSetMoeda('deValorTotal', 0);
       const hidden = document.getElementById('deEditId');
       if (hidden) hidden.value = '';
     }
@@ -36528,9 +36681,16 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
         numComprovante:'deNumComprovante', temNf:'deTemNf', chaveNfe:'deChaveNfe',
         reembolsavel:'deReembolsavel', obs:'deObs'
       };
+      const fastDeMoedaFields = ['deValor','deDesconto','deMulta','deValorTotal'];
       Object.keys(idMap).forEach(function(k){
         const el = document.getElementById(idMap[k]);
-        if (el && d[k] !== undefined && d[k] !== null) el.value = d[k];
+        if (el && d[k] !== undefined && d[k] !== null) {
+          if (fastDeMoedaFields.indexOf(idMap[k]) !== -1) {
+            el.value = fastFormatMoeda(d[k]);
+          } else {
+            el.value = d[k];
+          }
+        }
       });
       // Show new category field if category is custom
       const catEl = document.getElementById('deCategoria');
@@ -36572,10 +36732,10 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
         centroCusto: document.getElementById('deCentroCusto').value,
         departamento: document.getElementById('deDepartamento').value,
         projeto: document.getElementById('deProjeto').value,
-        valor: parseFloat(document.getElementById('deValor').value) || 0,
-        desconto: parseFloat(document.getElementById('deDesconto').value) || 0,
-        multa: parseFloat(document.getElementById('deMulta').value) || 0,
-        valorTotal: (parseFloat(document.getElementById('deValor').value) || 0) - (parseFloat(document.getElementById('deDesconto').value) || 0) + (parseFloat(document.getElementById('deMulta').value) || 0),
+        valor: fastParseMoeda(document.getElementById('deValor').value),
+        desconto: fastParseMoeda(document.getElementById('deDesconto').value),
+        multa: fastParseMoeda(document.getElementById('deMulta').value),
+        valorTotal: (fastParseMoeda(document.getElementById('deValor').value)) - (fastParseMoeda(document.getElementById('deDesconto').value)) + (fastParseMoeda(document.getElementById('deMulta').value)),
         formaPagamento: document.getElementById('deFormaPagamento').value,
         status: document.getElementById('deStatus').value,
         recorrencia: document.getElementById('deRecorrencia').value,
@@ -38553,7 +38713,7 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
     function dreExportarCSV() {
       try {
         const { rotas, despesas } = dreFiltrarDados();
-        const fmtMoeda = v => v.toFixed(2).replace('.', ',');
+        const fmtMoeda = v => fastFormatMoeda(v);
         const receitaBruta = rotas.reduce((s, r) => s + parseFloat(r.valorRota || r.valor || 0), 0);
         const despesasTotais = despesas.reduce((s, d) => s + parseFloat(d.valor || 0), 0);
         const lucroLiquido = receitaBruta - despesasTotais;
@@ -39885,7 +40045,7 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
             </div>
             <div>
               <label for="empCapitalSocial"><i class="fa-solid fa-coins"></i> Capital Social (R$)</label>
-              <input type="number" id="empCapitalSocial" step="0.01" placeholder="0.00" autocomplete="off">
+              <input type="text" id="empCapitalSocial" inputmode="numeric" placeholder="R$ 0,00" value="R$ 0,00" autocomplete="off" onfocus="fastMoedaFocus(this)" oninput="fastMascaraMoeda(this)" onblur="fastMoedaBlur(this)" style="text-align:left;">
             </div>
             <div>
               <label for="empDataAbertura"><i class="fa-solid fa-calendar-day"></i> Data de Abertura</label>
