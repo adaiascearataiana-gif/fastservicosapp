@@ -21,7 +21,7 @@
   <meta name="fast-github-branch" content="main">
   <meta name="fast-github-path" content="index.html">
   <meta name="fast-github-token-env" content="GH_TOKEN">
-  <meta name="fast-app-version" content="2026.09.02-r73">
+  <meta name="fast-app-version" content="2026.09.02-r74">
   <meta name="fast-app-date" content="2026-09-02T21:00:00Z">
   <meta name="fast-latest-update" content="r70: gestão avançada, segurança das fotos, Drive, restauração, usuários do RH, auditoria, fechamento, rentabilidade, OCR, proximidade e atalhos Android">
   <!-- r70.1: lista corrente no HTML inicial; o painel não espera scripts tardios -->
@@ -23129,7 +23129,7 @@ tbody tr:hover td {
               <div id="fastDeployInfo" style="background:var(--card-bg-2);border:1px solid var(--border);border-radius:10px;padding:12px;margin:10px 0;font-size:13px;">
                 <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
                   <div>
-                    <div><strong>Versão atual:</strong> <span id="fastVersaoLabel" style="color:var(--accent);font-weight:800;">2026.09.02-r73</span></div>
+                    <div><strong>Versão atual:</strong> <span id="fastVersaoLabel" style="color:var(--accent);font-weight:800;">2026.09.02-r74</span></div>
                     <div id="fastVersaoDateLabel" style="font-size:11.5px;color:var(--text-muted);margin-top:3px;"><i class="fa-solid fa-clock"></i> Lançada em 02/09/2026 18:00</div>
                   </div>
                   <div id="fastVersaoOnlineLabel" style="font-size:12px;color:var(--text-muted);text-align:right;">Online: <strong>2026.09.02-r68</strong> <span style="color:var(--success);">(ok)</span></div>
@@ -23166,10 +23166,11 @@ tbody tr:hover td {
                 <div class="fast-updates-panel-head" onclick="fastToggleUpdatesPanel()">
                   <i class="fa-solid fa-bolt fup-icon"></i>
                   <span class="fup-title">Novidades e correções recentes</span>
-                  <span class="fup-count" id="fastUpdatesCount">8</span>
+                  <span class="fup-count" id="fastUpdatesCount">9</span>
                   <i class="fa-solid fa-chevron-down fup-chevron"></i>
                 </div>
                 <div class="fast-updates-panel-body" id="fastUpdatesBody">
+                  <div class="fup-item"><div class="fup-item-dot" style="background:rgba(22,163,74,.10)"><i class="fa-solid fa-circle-plus" style="color:#16a34a"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#16a34a;background:rgba(22,163,74,.10)">Novo</span><div class="fup-item-text">r74: Permissões individuais por funcionário baseadas nas áreas do menu; áreas não autorizadas ficam ocultas e bloqueadas inclusive por acesso direto.</div></div></div>
                   <div class="fup-item"><div class="fup-item-dot" style="background:rgba(217,119,6,.10)"><i class="fa-solid fa-wrench" style="color:#d97706"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#d97706;background:rgba(217,119,6,.10)">Corrigido</span><div class="fup-item-text">r73: Instalação do FAST restaurada com Service Worker permanente; Rotas do Dia e Despesas agora têm escopos independentes para o Android não reutilizar a logo principal.</div></div></div>
                   <div class="fup-item"><div class="fup-item-dot" style="background:rgba(22,163,74,.10)"><i class="fa-solid fa-circle-plus" style="color:#16a34a"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#16a34a;background:rgba(22,163,74,.10)">Novo</span><div class="fup-item-text">r72: Botões dentro de Rotas do Dia e Despesas iniciam a instalação dos respectivos ícones na tela inicial.</div></div></div>
                   <div class="fup-item"><div class="fup-item-dot" style="background:rgba(22,163,74,.10)"><i class="fa-solid fa-circle-plus" style="color:#16a34a"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#16a34a;background:rgba(22,163,74,.10)">Novo</span><div class="fup-item-text">r72: Atalhos Android com identidade visual própria — calendário azul/roxo para Rotas do Dia e recibo vermelho para Despesas — usando manifesto permanente.</div></div></div>
@@ -43129,6 +43130,41 @@ window.fastMobileNav = function(ev, abaId, botao) {
     function add(tab,id,cls,icon,text,url){var area=document.getElementById(tab);if(!area||document.getElementById(id))return;var title=area.querySelector('.card-title');var b=document.createElement('button');b.type='button';b.id=id;b.className='fast-install-shortcut '+cls;b.innerHTML='<i class="fa-solid '+icon+'"></i> '+text;b.onclick=function(){window.open(url,'_blank','noopener')};if(title)title.insertAdjacentElement('afterend',b);else area.insertBefore(b,area.firstChild)}
     function abrir(url){var full=new URL(url,location.href).href;if(/Android/i.test(navigator.userAgent)){var u=new URL(full);location.href='intent://'+u.host+u.pathname+'#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url='+encodeURIComponent(full)+';end';return}window.open(full,'_blank','noopener')}
     document.addEventListener('DOMContentLoaded',function(){add('rotasDia','fastInstallRotas','fast-install-routes','fa-calendar-day','Adicionar Rotas do Dia à tela inicial','rotas-do-dia/');add('despesas','fastInstallDespesas','fast-install-expenses','fa-receipt','Adicionar Despesas à tela inicial','despesas/');var r=document.getElementById('fastInstallRotas'),d=document.getElementById('fastInstallDespesas');if(r)r.onclick=function(){abrir('rotas-do-dia/')};if(d)d.onclick=function(){abrir('despesas/')}});
+  })();
+  </script>
+  <style id="r74-permissoes-style">.fast74-perms{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:8px;margin:10px 0 14px}.fast74-perm{display:flex;align-items:center;gap:9px;padding:10px;border:1px solid var(--border);border-radius:10px;background:var(--card-bg,#fff);font-size:13px;font-weight:700}.fast74-perm input{width:18px;height:18px}.fast74-admin-note{padding:9px;border-radius:9px;background:rgba(245,158,11,.10);font-size:12px}</style>
+  <script id="r74-permissoes-menu">
+  (function(){
+    'use strict';
+    var K_USERS='fast_usuarios_funcionarios_v1',K_SESSION='fast_sessao_funcionario_v1';
+    var AREAS={
+      inicio:{nome:'Página Principal',icone:'fa-house',tabs:['paginaPrincipal','central']},
+      logistica:{nome:'Logística',icone:'fa-route',tabs:['rotas','rotasDia','rastreamento']},
+      financeiro:{nome:'Financeiro',icone:'fa-coins',tabs:['despesas','despesasEmpresa','dre']},
+      cadastros:{nome:'Clientes e Destinos',icone:'fa-address-book',tabs:['clientes','destinos']},
+      equipe:{nome:'Motoristas',icone:'fa-id-card',tabs:['motoristas']},
+      rh:{nome:'Recursos Humanos',icone:'fa-users-gear',tabs:['rh']},
+      analises:{nome:'Dashboard e Análises',icone:'fa-chart-line',tabs:['dashboard']}
+    };
+    function get(k,d){try{return JSON.parse(localStorage.getItem(k)||JSON.stringify(d))}catch(e){return d}}
+    function set(k,v){localStorage.setItem(k,JSON.stringify(v))}
+    function defaults(role){if(role==='administrador')return Object.keys(AREAS);if(role==='entregador')return ['inicio','logistica'];if(role==='atendimento')return ['inicio','logistica','cadastros'];return ['inicio']}
+    function checks(selected,prefix){selected=selected||[];return '<div class="fast74-perms">'+Object.keys(AREAS).map(function(k){var a=AREAS[k];return '<label class="fast74-perm"><input type="checkbox" data-fast74="'+prefix+'" value="'+k+'" '+(selected.indexOf(k)>=0?'checked':'')+'><i class="fa-solid '+a.icone+'"></i> '+a.nome+'</label>'}).join('')+'</div>'}
+    function selected(prefix){return [].slice.call(document.querySelectorAll('input[data-fast74="'+prefix+'"]:checked')).map(function(x){return x.value})}
+    function user(){var s=get(K_SESSION,null);if(!s)return null;return get(K_USERS,[]).find(function(u){return u.id===s.userId})||null}
+    function allowedTabs(u){if(!u||u.role==='administrador')return null;var ps=u.permissions&&u.permissions.length?u.permissions:defaults(u.role),tabs=[];ps.forEach(function(k){if(AREAS[k])tabs=tabs.concat(AREAS[k].tabs)});return tabs}
+    function tabFromArgs(args){for(var i=0;i<args.length;i++){if(typeof args[i]==='string'&&/^[A-Za-z]+$/.test(args[i]))return args[i]}return ''}
+    function autorizado(tab){var u=user(),a=allowedTabs(u);return !a||!tab||a.indexOf(tab)>=0}
+    function aplicar(){var u=user(),a=allowedTabs(u);if(!u||!a)return;document.body.dataset.fastPermissions=(u.permissions||defaults(u.role)).join(',');document.querySelectorAll('[data-pro-tab],[onclick*="proIr("],[onclick*="trocarAba("]').forEach(function(el){var tab=el.getAttribute('data-pro-tab')||tabFromArgs([(el.getAttribute('onclick')||'').replace(/^.*?["']([A-Za-z]+)["'].*$/,'$1')]);if(tab&&tab!==(el.getAttribute('onclick')||'')&&a.indexOf(tab)<0)el.style.display='none'});var active=document.querySelector('.tab-content.active');if(active&&a.indexOf(active.id)<0&&a[0])setTimeout(function(){if(window.proIr)window.proIr(a[0])},50)}
+    function wrapNav(name){var fn=window[name];if(typeof fn!=='function'||fn.fast74)return;var w=function(){var tab=tabFromArgs(arguments);if(!autorizado(tab)){if(window.mostrarToast)mostrarToast('Seu usuário não possui acesso a esta área.','erro');else alert('Acesso não autorizado para este usuário.');return false}return fn.apply(this,arguments)};w.fast74=true;window[name]=w}
+    function populateEditor(){var sel=document.getElementById('fast74UserEdit');if(!sel)return;var old=sel.value,us=get(K_USERS,[]);sel.innerHTML='<option value="">Selecione um login...</option>'+us.map(function(u){return '<option value="'+u.id+'">'+String(u.name||u.username).replace(/</g,'&lt;')+'</option>'}).join('');sel.value=old}
+    window.fast74Load=function(){var id=(document.getElementById('fast74UserEdit')||{}).value,u=get(K_USERS,[]).find(function(x){return x.id===id}),box=document.getElementById('fast74EditChecks');if(box)box.innerHTML=u?checks(u.permissions&&u.permissions.length?u.permissions:defaults(u.role),'edit'):'<p class="fast71-note">Selecione um funcionário para alterar as áreas.</p>'}
+    window.fast74Save=function(){var id=document.getElementById('fast74UserEdit').value,us=get(K_USERS,[]),u=us.find(function(x){return x.id===id});if(!u)return alert('Selecione um funcionário.');var ps=selected('edit');if(!ps.length)return alert('Marque pelo menos uma área.');u.permissions=ps;u.sessionVersion=(u.sessionVersion||1)+1;set(K_USERS,us);if(window.fastAuditar)fastAuditar('alterou permissões','usuario',u.id,ps.join(', '));alert('Permissões salvas. As sessões anteriores foram encerradas para aplicar a nova configuração.');fast74Load()}
+    function installUI(){var role=document.getElementById('fast71Role');if(role&&!document.getElementById('fast74CreatePerms')){var host=document.createElement('div');host.id='fast74CreatePerms';host.className='span-4';host.innerHTML='<label><b>Áreas permitidas para este funcionário</b></label>'+checks(defaults(role.value),'create')+'<div class="fast74-admin-note">Administrador possui acesso total. Para os demais perfis, marque somente as áreas necessárias.</div>';role.closest('.grid-form').appendChild(host);role.addEventListener('change',function(){host.innerHTML='<label><b>Áreas permitidas para este funcionário</b></label>'+checks(defaults(role.value),'create')+'<div class="fast74-admin-note">Administrador possui acesso total. Para os demais perfis, marque somente as áreas necessárias.</div>'})}
+      var users=document.getElementById('fast71Users');if(users&&!document.getElementById('fast74Editor')){var e=document.createElement('div');e.id='fast74Editor';e.innerHTML='<hr style="margin:18px 0;border:0;border-top:1px solid var(--border)"><div class="emp-section-title"><i class="fa-solid fa-key"></i> Editar áreas de acesso</div><div class="grid-form"><div class="span-2"><label>Login do funcionário</label><select id="fast74UserEdit" onchange="fast74Load()"></select></div></div><div id="fast74EditChecks"><p class="fast71-note">Selecione um funcionário para alterar as áreas.</p></div><button class="emp-btn-primary" type="button" onclick="fast74Save()"><i class="fa-solid fa-floppy-disk"></i> Salvar permissões</button>';users.appendChild(e);populateEditor()}
+      var create=window.fastUserCreate;if(typeof create==='function'&&!create.fast74){var wc=async function(){var username=(document.getElementById('fast71User')||{}).value.trim().toLowerCase(),ps=selected('create');if(!ps.length)return alert('Marque pelo menos uma área permitida.');await create.apply(this,arguments);var us=get(K_USERS,[]),u=us.find(function(x){return x.username===username});if(u){u.permissions=u.role==='administrador'?Object.keys(AREAS):ps;set(K_USERS,us);if(window.fastAuditar)fastAuditar('definiu permissões','usuario',u.id,u.permissions.join(', '))}populateEditor()};wc.fast74=true;window.fastUserCreate=wc}
+    }
+    document.addEventListener('DOMContentLoaded',function(){installUI();wrapNav('proIr');wrapNav('trocarAba');aplicar()});document.addEventListener('fast-login-success',function(){setTimeout(aplicar,80)});window.addEventListener('pageshow',function(){setTimeout(aplicar,80)});
   })();
   </script>
 </body></html>
