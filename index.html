@@ -21,7 +21,7 @@
   <meta name="fast-github-branch" content="main">
   <meta name="fast-github-path" content="index.html">
   <meta name="fast-github-token-env" content="GH_TOKEN">
-  <meta name="fast-app-version" content="2026.09.03-r81">
+  <meta name="fast-app-version" content="2026.09.03-r82">
   <meta name="fast-app-date" content="2026-09-02T21:00:00Z">
   <meta name="fast-latest-update" content="r70: gestão avançada, segurança das fotos, Drive, restauração, usuários do RH, auditoria, fechamento, rentabilidade, OCR, proximidade e atalhos Android">
   <!-- r70.1: lista corrente no HTML inicial; o painel não espera scripts tardios -->
@@ -1310,7 +1310,7 @@ tbody tr:hover td {
 
 </style>
 
-<link rel="manifest" href="manifest.webmanifest?v=r81"><link rel="apple-touch-icon" href="assets/fast-servicos-icon-192.png?v=r81"><link rel="icon" href="assets/fast-servicos-icon-192.png?v=r81"></head>
+<link rel="manifest" href="manifest.webmanifest?v=r82"><link rel="apple-touch-icon" href="assets/fast-servicos-icon-192.png?v=r82"><link rel="icon" href="assets/fast-servicos-icon-192.png?v=r82"></head>
 <body class="fast-pro fast-edition-mobile theme-light fx-executive fx-layout-command" style="">
 
 <!-- ============================================================
@@ -1789,6 +1789,9 @@ tbody tr:hover td {
       if (!isEnabled()) { hideGate(); return; }
       gate = $('fastLoginGate');
       if (!gate) return;
+      // r82: uma nova abertura real do gate libera novo disparo automático.
+      // Enquanto o mesmo gate já está visível, evita prompts duplicados.
+      if (!gate.classList.contains('show')) _fastBioAutoFired = false;
       // Preenche a versao atual do app no rodape do brand (tela de login)
       try {
         var vNum = $('fastGateVersionNum');
@@ -2390,7 +2393,14 @@ tbody tr:hover td {
         var bootDone = false;
         try { bootDone = sessionStorage.getItem(K_BOOT_DONE) === '1'; } catch(e){}
 
-        if (hasBio && !bootDone){
+        var deveBloquearBoot = true;
+        try {
+          var marcouSaidaBoot = !!parseInt(localStorage.getItem('fast_lock_left_at')||'0',10);
+          // Abertura realmente nova, sem marca de saída, sempre autentica.
+          // Se houve saída recente, respeita exatamente o tempo configurado.
+          deveBloquearBoot = !marcouSaidaBoot || fastDeveBloquearAgora();
+        } catch(e){}
+        if (hasBio && !bootDone && deveBloquearBoot){
           // r16: PRIMEIRO carregamento (aba nova) com biometria registrada.
           // Sempre exige biometria, mesmo com "manter conectado" em localStorage.
           // O "manter conectado" sera respeitado APOS a biometria (nao pedira senha).
@@ -2585,7 +2595,10 @@ tbody tr:hover td {
       if (timeoutMs <= 0) return true; // imediato
       try {
         var leftAt = parseInt(localStorage.getItem(FAST_LOCK_LEFT_AT_KEY)||'0',10);
-        if (!leftAt) return true; // nunca registrou saida -> bloqueia
+        // Sem marca de saída, não bloqueia neste listener. A abertura inicial é
+        // tratada pelo initGate; isso evita que visibilitychange e pageshow se
+        // executem em sequência e o segundo evento invalide a tolerância.
+        if (!leftAt) return false;
         var elapsed = Date.now() - leftAt;
         return elapsed >= timeoutMs;
       } catch(e){ return true; }
@@ -23129,7 +23142,7 @@ tbody tr:hover td {
               <div id="fastDeployInfo" style="background:var(--card-bg-2);border:1px solid var(--border);border-radius:10px;padding:12px;margin:10px 0;font-size:13px;">
                 <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
                   <div>
-                    <div><strong>Versão atual:</strong> <span id="fastVersaoLabel" style="color:var(--accent);font-weight:800;">2026.09.03-r81</span></div>
+                    <div><strong>Versão atual:</strong> <span id="fastVersaoLabel" style="color:var(--accent);font-weight:800;">2026.09.03-r82</span></div>
                     <div id="fastVersaoDateLabel" style="font-size:11.5px;color:var(--text-muted);margin-top:3px;"><i class="fa-solid fa-clock"></i> Lançada em 02/09/2026 18:00</div>
                   </div>
                   <div id="fastVersaoOnlineLabel" style="font-size:12px;color:var(--text-muted);text-align:right;">Online: <strong>2026.09.02-r68</strong> <span style="color:var(--success);">(ok)</span></div>
@@ -23166,10 +23179,11 @@ tbody tr:hover td {
                 <div class="fast-updates-panel-head" onclick="fastToggleUpdatesPanel()">
                   <i class="fa-solid fa-bolt fup-icon"></i>
                   <span class="fup-title">Novidades e correções recentes</span>
-                  <span class="fup-count" id="fastUpdatesCount">16</span>
+                  <span class="fup-count" id="fastUpdatesCount">17</span>
                   <i class="fa-solid fa-chevron-down fup-chevron"></i>
                 </div>
                 <div class="fast-updates-panel-body" id="fastUpdatesBody">
+                  <div class="fup-item"><div class="fup-item-dot" style="background:rgba(22,163,74,.10)"><i class="fa-solid fa-fingerprint" style="color:#16a34a"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#16a34a;background:rgba(22,163,74,.10)">Corrigido</span><div class="fup-item-text">r82 (03/09/2026): Biometria passa a abrir automaticamente em cada bloqueio vencido no site mobile, FAST instalado, Rotas do Dia e Despesas. Tempos Imediatamente, 1, 2 e 5 minutos revisados e respeitados.</div></div></div>
                   <div class="fup-item"><div class="fup-item-dot" style="background:rgba(79,70,229,.12)"><i class="fa-solid fa-down-left-and-up-right-to-center" style="color:#4f46e5"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#4f46e5;background:rgba(79,70,229,.12)">Melhorado</span><div class="fup-item-text">r81 (03/09/2026): Botões Editar e Excluir das tabelas de Rotas e Despesas reduzidos e alinhados lado a lado, seguindo o padrão compacto de Lugares/Destinos e diminuindo a altura das linhas.</div></div></div>
                   <div class="fup-item"><div class="fup-item-dot" style="background:rgba(79,70,229,.12)"><i class="fa-solid fa-table-list" style="color:#4f46e5"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#4f46e5;background:rgba(79,70,229,.12)">Corrigido</span><div class="fup-item-text">r80 (03/09/2026): Pré-visualizações e listas de sugestões reorganizadas em todo o aplicativo, sem sobrepor campos no celular. Sino e balões automáticos de rotas e sincronização removidos globalmente; processos continuam em segundo plano.</div></div></div>
                   <div class="fup-item"><div class="fup-item-dot" style="background:rgba(220,38,38,.10)"><i class="fa-solid fa-bell-slash" style="color:#dc2626"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#dc2626;background:rgba(220,38,38,.10)">Melhorado</span><div class="fup-item-text">r79: O aplicativo independente Despesas ficou livre de notificações de sincronização e de rotas pendentes. A sincronização continua funcionando silenciosamente em segundo plano.</div></div></div>
@@ -28292,7 +28306,7 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
           });
         `;
         try {
-          navigator.serviceWorker.register('sw.js?v=r81', { scope: './' })
+          navigator.serviceWorker.register('sw.js?v=r82', { scope: './' })
             .then(function(reg) { console.info('SW permanente registrado (r73 network-first).'); })
             .catch(function(e) { console.info('SW: nao registrado neste ambiente (normal).', e.message); });
         } catch (e) { console.info('SW init skip:', e); }
@@ -40147,7 +40161,7 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
       links.forEach(function(el,i){ if(i>0) el.remove(); });
       var link = links[0] || document.createElement('link');
       link.rel = 'manifest';
-      link.href = 'manifest.webmanifest?v=r81';
+      link.href = 'manifest.webmanifest?v=r82';
       if(!link.parentNode) document.head.appendChild(link);
 
       // A mesma logomarca oficial também aparece no gate e na abertura.
