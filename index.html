@@ -1313,11 +1313,11 @@ tbody tr:hover td {
 <script id="r89-notificacoes-base">
 (function(){
   var KEY='fast_notificacoes_config_v1';
-  var defaults={master:true,toast_operacoes:false,toast_avisos:false,toast_erros:false,bell_rotas:true,bell_motoristas:true,bell_pagamentos:true,bell_despesas:false,bell_proximidade:true,bell_sistema:true,browser:false};
+  var defaults={master:true,toast_operacoes:false,toast_avisos:false,toast_erros:false,painel_rotas_multiplas:false,bell_rotas:true,bell_motoristas:true,bell_pagamentos:true,bell_despesas:false,bell_proximidade:true,bell_sistema:true,browser:false};
   window.fastNotifDefaults=defaults;
   window.fastNotifConfig=function(){var c={};try{c=JSON.parse(localStorage.getItem(KEY)||'{}')||{}}catch(e){};return Object.assign({},defaults,c)};
   window.fastNotifSalvar=function(c){try{localStorage.setItem(KEY,JSON.stringify(Object.assign({},defaults,c||{})))}catch(e){}};
-  window.fastNotifPermitida=function(canal,tipo){var c=window.fastNotifConfig();if(!c.master)return false;if(canal==='toast'){if(tipo==='error'||tipo==='erro')return !!c.toast_erros;if(tipo==='warning'||tipo==='aviso')return !!c.toast_avisos;return !!c.toast_operacoes}return c['bell_'+tipo]!==false};
+  window.fastNotifPermitida=function(canal,tipo){var c=window.fastNotifConfig();if(!c.master)return false;if(canal==='toast'){if(tipo==='error'||tipo==='erro')return !!c.toast_erros;if(tipo==='warning'||tipo==='aviso')return !!c.toast_avisos;return !!c.toast_operacoes}if(canal==='painel')return !!c['painel_'+tipo];return c['bell_'+tipo]!==false};
 })();
 </script>
 <link rel="manifest" href="manifest.webmanifest?v=r89"><link rel="apple-touch-icon" href="assets/fast-servicos-icon-192.png?v=r89"><link rel="icon" href="assets/fast-servicos-icon-192.png?v=r89"></head>
@@ -22943,6 +22943,10 @@ tbody tr:hover td {
       <!-- Totalizadores Financeiros (movidos da aba Rotas) -->
       <div class="card" style="margin-bottom: 18px;">
         <div class="card-title"><i class="fa-solid fa-coins"></i> Totalizadores Financeiros</div>
+        <div class="dash-total-filter" style="display:flex;gap:8px;align-items:end;flex-wrap:wrap;margin:0 0 12px;">
+          <div style="min-width:190px;flex:1"><label for="dashFiltroTotalizadores" style="font-size:12px;font-weight:800;display:block;margin-bottom:5px">PERÍODO DOS TOTALIZADORES</label><select id="dashFiltroTotalizadores" onchange="renderizar()"><option value="mes">Mês Atual</option><option value="hoje">Hoje</option><option value="ano">Ano Atual</option><option value="tudo">Todo o Período</option><option value="personalizado">Personalizado</option></select></div>
+          <div id="dashFiltroTotalDatas" style="display:none;gap:8px;flex:2;min-width:260px"><div style="flex:1"><label for="dashFiltroTotalInicio" style="font-size:12px;font-weight:800;display:block;margin-bottom:5px">INÍCIO</label><input type="date" id="dashFiltroTotalInicio" onchange="renderizar()"></div><div style="flex:1"><label for="dashFiltroTotalFim" style="font-size:12px;font-weight:800;display:block;margin-bottom:5px">FIM</label><input type="date" id="dashFiltroTotalFim" onchange="renderizar()"></div></div>
+        </div>
         <div class="metrics-container" style="margin: 0;">
           <div class="metric-card green"><div class="metric-title">Recebido</div><div class="metric-value" id="lblTotalRecebido">R$ 280,00</div></div>
           <div class="metric-card yellow"><div class="metric-title">Pendente</div><div class="metric-value" id="lblTotalPendente">R$ 298,87</div></div>
@@ -23236,7 +23240,7 @@ tbody tr:hover td {
                 <div class="fast-updates-panel-head" onclick="fastToggleUpdatesPanel()">
                   <i class="fa-solid fa-bolt fup-icon"></i>
                   <span class="fup-title">Novidades e correções recentes</span>
-                  <span class="fup-count" id="fastUpdatesCount">5</span>
+                  <span class="fup-count" id="fastUpdatesCount">8</span>
                   <i class="fa-solid fa-chevron-down fup-chevron"></i>
                 </div>
                 <div class="fast-updates-panel-body" id="fastUpdatesBody">
@@ -23245,6 +23249,9 @@ tbody tr:hover td {
                   <div class="fup-item"><div class="fup-item-dot" style="background:rgba(37,99,235,.10)"><i class="fa-solid fa-bell-slash" style="color:#2563eb"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#2563eb;background:rgba(37,99,235,.10)">Melhorado</span><div class="fup-item-text">r89 (03/09/2026): balões de operação, avisos e erros ficam silenciosos por padrão; processos, sincronização e backups continuam em segundo plano.</div></div></div>
                   <div class="fup-item"><div class="fup-item-dot" style="background:rgba(217,119,6,.10)"><i class="fa-solid fa-wrench" style="color:#d97706"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#d97706;background:rgba(217,119,6,.10)">Corrigido</span><div class="fup-item-text">r89 (03/09/2026): corrigida a falha fastObterUltimasAtualizacoes is not defined que gerava vários balões vermelhos repetidos.</div></div></div>
                   <div class="fup-item"><div class="fup-item-dot" style="background:rgba(217,119,6,.10)"><i class="fa-solid fa-fingerprint" style="color:#d97706"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#d97706;background:rgba(217,119,6,.10)">Corrigido</span><div class="fup-item-text">r89 (03/09/2026): Manter conectado não cancela mais a revalidação automática; quando o gate aparece, a biometria tem prioridade e a sessão persistente só é restaurada após a digital.</div></div></div>
+                  <div class="fup-item"><div class="fup-item-dot" style="background:rgba(217,119,6,.10)"><i class="fa-solid fa-route" style="color:#d97706"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#d97706;background:rgba(217,119,6,.10)">Corrigido</span><div class="fup-item-text">r89 (03/09/2026): o painel flutuante de clientes com várias rotas não reaparece mais após cada ação; ele fica desligado por padrão e pode ser controlado nas notificações.</div></div></div>
+                  <div class="fup-item"><div class="fup-item-dot" style="background:rgba(22,163,74,.10)"><i class="fa-solid fa-money-bill-wave" style="color:#16a34a"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#16a34a;background:rgba(22,163,74,.10)">Novo</span><div class="fup-item-text">r89 (03/09/2026): Despesas agora oferece PIX e À Vista entre as formas de pagamento.</div></div></div>
+                  <div class="fup-item"><div class="fup-item-dot" style="background:rgba(22,163,74,.10)"><i class="fa-solid fa-filter" style="color:#16a34a"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#16a34a;background:rgba(22,163,74,.10)">Novo</span><div class="fup-item-text">r89 (03/09/2026): os totalizadores financeiros do Dashboard podem ser filtrados por hoje, mês, ano, todo o período ou intervalo personalizado.</div></div></div>
                   <div hidden aria-hidden="true">
                   <div class="fup-item"><div class="fup-item-dot" style="background:rgba(217,119,6,.10)"><i class="fa-solid fa-fingerprint" style="color:#d97706"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#d97706;background:rgba(217,119,6,.10)">Corrigido</span><div class="fup-item-text">r88 (03/09/2026): ao aparecer o gate depois de sair ou voltar ao aplicativo, o pedido nativo de biometria abre automaticamente, sem tocar no botão.</div></div></div>
                   <div class="fup-item"><div class="fup-item-dot" style="background:rgba(217,119,6,.10)"><i class="fa-solid fa-keyboard" style="color:#d97706"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#d97706;background:rgba(217,119,6,.10)">Corrigido</span><div class="fup-item-text">r88 (03/09/2026): o campo de senha não recebe mais foco automático quando existe biometria cadastrada, evitando que o teclado do Android interrompa o prompt biométrico.</div></div></div>
@@ -24034,6 +24041,7 @@ tbody tr:hover td {
               <label>Forma de Pagamento:</label>
               <select id="deFormaPagamento">
                 <option value="PIX">PIX</option>
+                <option value="À Vista">À Vista</option>
                 <option value="Transferência Bancária">Transferência Bancária</option>
                 <option value="Boleto Bancário">Boleto Bancário</option>
                 <option value="Cartão de Crédito">Cartão de Crédito</option>
@@ -30601,6 +30609,11 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
 
     // Atualiza o botao flutuante "ENVIAR RASTREAMENTO" baseado nas rotas do dia
     function rastAtualizarBotaoFlutuante() {
+      if (window.fastNotifPermitida && !window.fastNotifPermitida('painel', 'rotas_multiplas')) {
+        const oculto = document.getElementById('floatingRastBox');
+        if (oculto) oculto.classList.remove('show');
+        return;
+      }
       const dataSel = document.getElementById('dpDataSequencia');
       if (!dataSel || !dataSel.value) {
         rastOcultarBotaoFlutuante();
@@ -30628,6 +30641,11 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
     function rastOcultarBotaoFlutuante() {
       const box = document.getElementById('floatingRastBox');
       if (box) box.classList.remove('show');
+      try {
+        const cfg = window.fastNotifConfig();
+        cfg.painel_rotas_multiplas = false;
+        window.fastNotifSalvar(cfg);
+      } catch(e) {}
     }
 
     // Calcula a previsao de chegada para TODOS os clientes do dia e mostra no painel do Rastreamento
@@ -38395,12 +38413,25 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
       const agora = new Date();
       const mesAtualRef = `${agora.getFullYear()}-${String(agora.getMonth() + 1).padStart(2, '0')}`;
       
-      // Se o usuário está usando filtro de data (busca ativa), respeita o filtro.
-      // Caso contrário, os totalizadores de valor mostram apenas o mês atual (reset mensal automático).
-      const usandoFiltroData = dtInicio || dtFim;
-      let rotasParaTotalizadoresValor = rotasFiltradas;
-      if (!usandoFiltroData) {
-        rotasParaTotalizadoresValor = rotasFiltradas.filter(r => r.data && r.data.startsWith(mesAtualRef));
+      // O filtro do Dashboard é próprio: não herda silenciosamente a busca da aba Rotas.
+      let rotasParaTotalizadoresValor = (bancoDados.rotas || []).slice();
+      const dashPeriodoEl = document.getElementById('dashFiltroTotalizadores');
+      const dashPeriodo = dashPeriodoEl ? dashPeriodoEl.value : 'mes';
+      const dashDatas = document.getElementById('dashFiltroTotalDatas');
+      if (dashDatas) dashDatas.style.display = dashPeriodo === 'personalizado' ? 'flex' : 'none';
+      if (dashPeriodo !== 'tudo') {
+        const hojeRef = new Date();
+        const dataHojeRef = `${hojeRef.getFullYear()}-${String(hojeRef.getMonth()+1).padStart(2,'0')}-${String(hojeRef.getDate()).padStart(2,'0')}`;
+        const anoRef = String(hojeRef.getFullYear());
+        const iniPersonalizado = (document.getElementById('dashFiltroTotalInicio') || {}).value || '';
+        const fimPersonalizado = (document.getElementById('dashFiltroTotalFim') || {}).value || '';
+        rotasParaTotalizadoresValor = rotasParaTotalizadoresValor.filter(r => {
+          const data = r.data || '';
+          if (dashPeriodo === 'hoje') return data === dataHojeRef;
+          if (dashPeriodo === 'ano') return data.startsWith(anoRef + '-');
+          if (dashPeriodo === 'personalizado') return (!iniPersonalizado || data >= iniPersonalizado) && (!fimPersonalizado || data <= fimPersonalizado);
+          return data.startsWith(mesAtualRef);
+        });
       }
       const recMes = rotasParaTotalizadoresValor.filter(r => r.status === 'Recebido').reduce((a, b) => a + (b.valor || 0), 0);
       const penMes = rotasParaTotalizadoresValor.filter(r => r.status === 'Pendente').reduce((a, b) => a + (b.valor || 0), 0);
@@ -43504,6 +43535,7 @@ window.fastMobileNav = function(ev, abaId, botao) {
       ['toast_operacoes','Confirmações e informações','Balões de sucesso, sincronização e tarefas concluídas','tela'],
       ['toast_avisos','Avisos na tela','Balões amarelos de atenção','tela'],
       ['toast_erros','Erros na tela','Balões vermelhos de erro técnico','tela'],
+      ['painel_rotas_multiplas','Painel de várias rotas','Painel flutuante para envio de clientes com várias rotas','tela'],
       ['bell_rotas','Rotas e entregas','Pendências, andamento, conclusão e motorista ausente','sino'],
       ['bell_motoristas','Motoristas e CNH','CNH vencida, próxima do vencimento ou incompleta','sino'],
       ['bell_pagamentos','Pagamentos','Valores e recebimentos pendentes','sino'],
@@ -43527,7 +43559,7 @@ window.fastMobileNav = function(ev, abaId, botao) {
     function carregarTela(){var c=window.fastNotifConfig();document.querySelectorAll('#fast89NotifModal [data-fast89]').forEach(function(i){i.checked=!!c[i.dataset.fast89]})}
     function salvarTela(){var c=window.fastNotifConfig();document.querySelectorAll('#fast89NotifModal [data-fast89]').forEach(function(i){c[i.dataset.fast89]=i.checked});window.fastNotifSalvar(c);aplicar()}
     function definirTudo(v){var c=window.fastNotifConfig();campos.forEach(function(x){c[x[0]]=v});window.fastNotifSalvar(c);carregarTela();aplicar()}
-    function aplicar(){var tc=document.getElementById('toastContainerV4');if(tc&&!window.fastNotifPermitida('toast','info'))tc.innerHTML='';try{if(typeof atualizarNotificacoes==='function')atualizarNotificacoes()}catch(e){console.warn('Notificações:',e)}}
+    function aplicar(){var tc=document.getElementById('toastContainerV4');if(tc&&!window.fastNotifPermitida('toast','info'))tc.innerHTML='';try{if(typeof atualizarNotificacoes==='function')atualizarNotificacoes()}catch(e){console.warn('Notificações:',e)}try{if(typeof rastAtualizarBotaoFlutuante==='function')rastAtualizarBotaoFlutuante()}catch(e){console.warn('Painel de rotas:',e)}}
     window.fastNotifAbrir=function(e){if(e){e.preventDefault();e.stopPropagation()}criar();carregarTela();document.getElementById('fast89NotifModal').classList.add('show');try{fecharBellPanel()}catch(x){}}
     function instalarLinks(){
       criar();var cfg=document.querySelector('#configuracoes .config-page,#configuracoes .config-topics,#configuracoes');
@@ -43540,6 +43572,9 @@ window.fastMobileNav = function(ev, abaId, botao) {
       {type:'melhorado',text:'r89 (03/09/2026): balões de operação, avisos e erros ficam silenciosos por padrão; processos, sincronização e backups continuam em segundo plano.'},
       {type:'corrigido',text:'r89 (03/09/2026): corrigida a falha fastObterUltimasAtualizacoes is not defined que gerava vários balões vermelhos repetidos.'}
       ,{type:'corrigido',text:'r89 (03/09/2026): Manter conectado não cancela mais a revalidação automática; quando o gate aparece, a biometria tem prioridade e a sessão persistente só é restaurada após a digital.'}
+      ,{type:'corrigido',text:'r89 (03/09/2026): o painel flutuante de clientes com várias rotas não reaparece mais após cada ação; ele fica desligado por padrão e pode ser controlado nas notificações.'}
+      ,{type:'novo',text:'r89 (03/09/2026): Despesas agora oferece PIX e À Vista entre as formas de pagamento.'}
+      ,{type:'novo',text:'r89 (03/09/2026): os totalizadores financeiros do Dashboard podem ser filtrados por hoje, mês, ano, todo o período ou intervalo personalizado.'}
     ];meta.content=JSON.stringify(atual.concat(anteriores));meta.dataset.r89='1';if(window.fastPopularUltimasAtualizacoes)window.fastPopularUltimasAtualizacoes()}
     if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',instalarLinks);else instalarLinks();
   })();
