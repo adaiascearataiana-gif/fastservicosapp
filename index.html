@@ -21,7 +21,7 @@
   <meta name="fast-github-branch" content="main">
   <meta name="fast-github-path" content="index.html">
   <meta name="fast-github-token-env" content="GH_TOKEN">
-  <meta name="fast-app-version" content="2026.09.03-r80">
+  <meta name="fast-app-version" content="2026.09.03-r81">
   <meta name="fast-app-date" content="2026-09-02T21:00:00Z">
   <meta name="fast-latest-update" content="r70: gestão avançada, segurança das fotos, Drive, restauração, usuários do RH, auditoria, fechamento, rentabilidade, OCR, proximidade e atalhos Android">
   <!-- r70.1: lista corrente no HTML inicial; o painel não espera scripts tardios -->
@@ -1310,7 +1310,7 @@ tbody tr:hover td {
 
 </style>
 
-<link rel="manifest" href="manifest.webmanifest?v=r80"><link rel="apple-touch-icon" href="assets/fast-servicos-icon-192.png?v=r80"><link rel="icon" href="assets/fast-servicos-icon-192.png?v=r80"></head>
+<link rel="manifest" href="manifest.webmanifest?v=r81"><link rel="apple-touch-icon" href="assets/fast-servicos-icon-192.png?v=r81"><link rel="icon" href="assets/fast-servicos-icon-192.png?v=r81"></head>
 <body class="fast-pro fast-edition-mobile theme-light fx-executive fx-layout-command" style="">
 
 <!-- ============================================================
@@ -23129,7 +23129,7 @@ tbody tr:hover td {
               <div id="fastDeployInfo" style="background:var(--card-bg-2);border:1px solid var(--border);border-radius:10px;padding:12px;margin:10px 0;font-size:13px;">
                 <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
                   <div>
-                    <div><strong>Versão atual:</strong> <span id="fastVersaoLabel" style="color:var(--accent);font-weight:800;">2026.09.03-r80</span></div>
+                    <div><strong>Versão atual:</strong> <span id="fastVersaoLabel" style="color:var(--accent);font-weight:800;">2026.09.03-r81</span></div>
                     <div id="fastVersaoDateLabel" style="font-size:11.5px;color:var(--text-muted);margin-top:3px;"><i class="fa-solid fa-clock"></i> Lançada em 02/09/2026 18:00</div>
                   </div>
                   <div id="fastVersaoOnlineLabel" style="font-size:12px;color:var(--text-muted);text-align:right;">Online: <strong>2026.09.02-r68</strong> <span style="color:var(--success);">(ok)</span></div>
@@ -23166,10 +23166,11 @@ tbody tr:hover td {
                 <div class="fast-updates-panel-head" onclick="fastToggleUpdatesPanel()">
                   <i class="fa-solid fa-bolt fup-icon"></i>
                   <span class="fup-title">Novidades e correções recentes</span>
-                  <span class="fup-count" id="fastUpdatesCount">15</span>
+                  <span class="fup-count" id="fastUpdatesCount">16</span>
                   <i class="fa-solid fa-chevron-down fup-chevron"></i>
                 </div>
                 <div class="fast-updates-panel-body" id="fastUpdatesBody">
+                  <div class="fup-item"><div class="fup-item-dot" style="background:rgba(79,70,229,.12)"><i class="fa-solid fa-down-left-and-up-right-to-center" style="color:#4f46e5"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#4f46e5;background:rgba(79,70,229,.12)">Melhorado</span><div class="fup-item-text">r81 (03/09/2026): Botões Editar e Excluir das tabelas de Rotas e Despesas reduzidos e alinhados lado a lado, seguindo o padrão compacto de Lugares/Destinos e diminuindo a altura das linhas.</div></div></div>
                   <div class="fup-item"><div class="fup-item-dot" style="background:rgba(79,70,229,.12)"><i class="fa-solid fa-table-list" style="color:#4f46e5"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#4f46e5;background:rgba(79,70,229,.12)">Corrigido</span><div class="fup-item-text">r80 (03/09/2026): Pré-visualizações e listas de sugestões reorganizadas em todo o aplicativo, sem sobrepor campos no celular. Sino e balões automáticos de rotas e sincronização removidos globalmente; processos continuam em segundo plano.</div></div></div>
                   <div class="fup-item"><div class="fup-item-dot" style="background:rgba(220,38,38,.10)"><i class="fa-solid fa-bell-slash" style="color:#dc2626"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#dc2626;background:rgba(220,38,38,.10)">Melhorado</span><div class="fup-item-text">r79: O aplicativo independente Despesas ficou livre de notificações de sincronização e de rotas pendentes. A sincronização continua funcionando silenciosamente em segundo plano.</div></div></div>
                   <div class="fup-item"><div class="fup-item-dot" style="background:rgba(79,70,229,.12)"><i class="fa-solid fa-palette" style="color:#4f46e5"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#4f46e5;background:rgba(79,70,229,.12)">Novo</span><div class="fup-item-text">r78: Central de Aparência adicionada com cinco perfis visuais sem migração de dados: Moderno, Operacional, Executivo, Escuro e Automático.</div></div></div>
@@ -28291,7 +28292,7 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
           });
         `;
         try {
-          navigator.serviceWorker.register('sw.js?v=r80', { scope: './' })
+          navigator.serviceWorker.register('sw.js?v=r81', { scope: './' })
             .then(function(reg) { console.info('SW permanente registrado (r73 network-first).'); })
             .catch(function(e) { console.info('SW: nao registrado neste ambiente (normal).', e.message); });
         } catch (e) { console.info('SW init skip:', e); }
@@ -40146,7 +40147,7 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
       links.forEach(function(el,i){ if(i>0) el.remove(); });
       var link = links[0] || document.createElement('link');
       link.rel = 'manifest';
-      link.href = 'manifest.webmanifest?v=r80';
+      link.href = 'manifest.webmanifest?v=r81';
       if(!link.parentNode) document.head.appendChild(link);
 
       // A mesma logomarca oficial também aparece no gate e na abertura.
@@ -43184,6 +43185,16 @@ window.fastMobileNav = function(ev, abaId, botao) {
     document.addEventListener('DOMContentLoaded',function(){var modal=document.getElementById('modalAgrupar');if(modal){var title=modal.querySelector('.modal-header h3');if(title)title.innerHTML='<i class="fa-solid fa-images"></i> Agrupar somente para Fotos';var labels=modal.querySelectorAll('.agrupar-option-label');labels.forEach(function(x){x.style.display='none'});var info=document.getElementById('agruparContagem');if(info)info.insertAdjacentHTML('afterend','<p class="fast71-note"><b>Importante:</b> nenhuma rota será unida ou apagada. O grupo serve somente para selecionar e enviar as fotos juntas.</p>')}fast75RepararVinculos(true);setTimeout(decorar,500);var render=window.renderizarSequencia;if(typeof render==='function'&&!render.fast75){var w=function(){var r=render.apply(this,arguments);setTimeout(decorar,30);return r};w.fast75=true;window.renderizarSequencia=w}});
   })();
   </script>
+  <style id="r81-compact-table-actions">
+    #tabelaRotasBody .actions-cell,#tabelaDespesasBody .actions-cell{display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:center!important;gap:4px!important;flex-wrap:nowrap!important;width:auto!important}
+    #tabelaRotasBody .actions-cell button,#tabelaDespesasBody .actions-cell button{display:inline-flex!important;align-items:center!important;justify-content:center!important;width:30px!important;min-width:30px!important;max-width:30px!important;height:28px!important;min-height:28px!important;max-height:28px!important;padding:0!important;margin:0!important;border:0!important;border-radius:7px!important;line-height:1!important;flex:0 0 30px!important;box-shadow:none!important;font-size:0!important}
+    #tabelaRotasBody .actions-cell button .lbl,#tabelaDespesasBody .actions-cell button .lbl{display:none!important}
+    #tabelaRotasBody .actions-cell button::before,#tabelaDespesasBody .actions-cell button::before{font-family:"Font Awesome 6 Free"!important;font-weight:900!important;font-size:12px!important;line-height:1!important;color:#fff!important}
+    #tabelaRotasBody .actions-cell button[title="Editar"]::before,#tabelaDespesasBody .actions-cell button[title="Editar"]::before{content:"\f304"}
+    #tabelaRotasBody .actions-cell button[title="Excluir"]::before,#tabelaDespesasBody .actions-cell button[title="Excluir"]::before{content:"\f2ed"}
+    #tabelaRotasBody tr>td:first-child,#tabelaDespesasBody tr>td:first-child{padding:4px 5px!important;vertical-align:middle!important}
+    @media(max-width:600px){#tabelaRotasBody .actions-cell button,#tabelaDespesasBody .actions-cell button{width:34px!important;min-width:34px!important;max-width:34px!important;height:30px!important;min-height:30px!important;max-height:30px!important;flex-basis:34px!important}#tabelaRotasBody .actions-cell button::before,#tabelaDespesasBody .actions-cell button::before{font-size:13px!important}}
+  </style>
   <style id="r80-previews-notifications">
     #bellWrapper,#syncTooltip,#syncToast{display:none!important;visibility:hidden!important;pointer-events:none!important}
     .preview-card{width:100%!important;max-width:100%!important;overflow:hidden!important;border-style:solid!important;box-shadow:0 8px 24px rgba(15,23,42,.08)!important}
