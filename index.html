@@ -21,7 +21,7 @@
   <meta name="fast-github-branch" content="main">
   <meta name="fast-github-path" content="index.html">
   <meta name="fast-github-token-env" content="GH_TOKEN">
-  <meta name="fast-app-version" content="2026.09.03-r82">
+  <meta name="fast-app-version" content="2026.09.03-r83">
   <meta name="fast-app-date" content="2026-09-02T21:00:00Z">
   <meta name="fast-latest-update" content="r70: gestão avançada, segurança das fotos, Drive, restauração, usuários do RH, auditoria, fechamento, rentabilidade, OCR, proximidade e atalhos Android">
   <!-- r70.1: lista corrente no HTML inicial; o painel não espera scripts tardios -->
@@ -6560,6 +6560,7 @@ tbody tr:hover td {
           <div class="nav-section-label nav-section-logistica"><i class="fa-solid fa-truck-fast"></i> Logística <div class="nav-section-bar"></div></div>
           <button class="nav-item nav-grp-logistica ripple" onclick="trocarAba(event, 'rotas')"><i class="fa-solid fa-route"></i><span class="nav-item-text">Rotas</span><span class="nav-item-count has-data" id="navCountRotas">316</span></button>
           <button class="nav-item nav-grp-logistica ripple" onclick="trocarAba(event, 'rotasDia')"><i class="fa-solid fa-calendar-day"></i><span class="nav-item-text">Rotas do Dia</span><span class="nav-item-count has-data" id="navCountRotasDia">9</span></button>
+          <button class="nav-item nav-grp-logistica ripple" onclick="trocarAba(event, 'rastreamento')"><i class="fa-solid fa-location-dot"></i><span class="nav-item-text">Mapas e Rastreamento</span></button>
 
           <!-- GRUPO: EQUIPE & CADASTROS -->
           <div class="nav-section-label nav-section-equipe"><i class="fa-solid fa-people-group"></i> Equipe &amp; Cadastros <div class="nav-section-bar"></div></div>
@@ -23142,7 +23143,7 @@ tbody tr:hover td {
               <div id="fastDeployInfo" style="background:var(--card-bg-2);border:1px solid var(--border);border-radius:10px;padding:12px;margin:10px 0;font-size:13px;">
                 <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
                   <div>
-                    <div><strong>Versão atual:</strong> <span id="fastVersaoLabel" style="color:var(--accent);font-weight:800;">2026.09.03-r82</span></div>
+                    <div><strong>Versão atual:</strong> <span id="fastVersaoLabel" style="color:var(--accent);font-weight:800;">2026.09.03-r83</span></div>
                     <div id="fastVersaoDateLabel" style="font-size:11.5px;color:var(--text-muted);margin-top:3px;"><i class="fa-solid fa-clock"></i> Lançada em 02/09/2026 18:00</div>
                   </div>
                   <div id="fastVersaoOnlineLabel" style="font-size:12px;color:var(--text-muted);text-align:right;">Online: <strong>2026.09.02-r68</strong> <span style="color:var(--success);">(ok)</span></div>
@@ -23183,6 +23184,7 @@ tbody tr:hover td {
                   <i class="fa-solid fa-chevron-down fup-chevron"></i>
                 </div>
                 <div class="fast-updates-panel-body" id="fastUpdatesBody">
+                  <div class="fup-item"><div class="fup-item-dot" style="background:rgba(22,163,74,.10)"><i class="fa-solid fa-layer-group" style="color:#16a34a"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#16a34a;background:rgba(22,163,74,.10)">Melhorado</span><div class="fup-item-text">r83 (03/09/2026): modo Operacional fixado; Temas reposicionados; segurança, fotos, Drive e restauração reunidos na Área Protegida; Logística reorganizada; pré-visualização compactada; capitalização automática e contador de Destinos corrigidos.</div></div></div>
                   <div class="fup-item"><div class="fup-item-dot" style="background:rgba(22,163,74,.10)"><i class="fa-solid fa-fingerprint" style="color:#16a34a"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#16a34a;background:rgba(22,163,74,.10)">Corrigido</span><div class="fup-item-text">r82 (03/09/2026): Biometria passa a abrir automaticamente em cada bloqueio vencido no site mobile, FAST instalado, Rotas do Dia e Despesas. Tempos Imediatamente, 1, 2 e 5 minutos revisados e respeitados.</div></div></div>
                   <div class="fup-item"><div class="fup-item-dot" style="background:rgba(79,70,229,.12)"><i class="fa-solid fa-down-left-and-up-right-to-center" style="color:#4f46e5"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#4f46e5;background:rgba(79,70,229,.12)">Melhorado</span><div class="fup-item-text">r81 (03/09/2026): Botões Editar e Excluir das tabelas de Rotas e Despesas reduzidos e alinhados lado a lado, seguindo o padrão compacto de Lugares/Destinos e diminuindo a altura das linhas.</div></div></div>
                   <div class="fup-item"><div class="fup-item-dot" style="background:rgba(79,70,229,.12)"><i class="fa-solid fa-table-list" style="color:#4f46e5"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#4f46e5;background:rgba(79,70,229,.12)">Corrigido</span><div class="fup-item-text">r80 (03/09/2026): Pré-visualizações e listas de sugestões reorganizadas em todo o aplicativo, sem sobrepor campos no celular. Sino e balões automáticos de rotas e sincronização removidos globalmente; processos continuam em segundo plano.</div></div></div>
@@ -28306,7 +28308,7 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
           });
         `;
         try {
-          navigator.serviceWorker.register('sw.js?v=r82', { scope: './' })
+          navigator.serviceWorker.register('sw.js?v=r83', { scope: './' })
             .then(function(reg) { console.info('SW permanente registrado (r73 network-first).'); })
             .catch(function(e) { console.info('SW: nao registrado neste ambiente (normal).', e.message); });
         } catch (e) { console.info('SW init skip:', e); }
@@ -40161,7 +40163,7 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
       links.forEach(function(el,i){ if(i>0) el.remove(); });
       var link = links[0] || document.createElement('link');
       link.rel = 'manifest';
-      link.href = 'manifest.webmanifest?v=r82';
+      link.href = 'manifest.webmanifest?v=r83';
       if(!link.parentNode) document.head.appendChild(link);
 
       // A mesma logomarca oficial também aparece no gate e na abertura.
@@ -43233,12 +43235,55 @@ window.fastMobileNav = function(ev, abaId, botao) {
   </style>
   <script id="r78-layout-profiles-script">
   (function(){
-    'use strict';var KEY='fast_layout_profile_v1',valid=['moderno','operacional','executivo','escuro','automatico'];
-    function current(){var v=localStorage.getItem(KEY)||'moderno';return valid.indexOf(v)>=0?v:'moderno'}
+    'use strict';var KEY='fast_layout_profile_v1',valid=['operacional'];
+    function current(){return 'operacional'}
     function mark(){document.querySelectorAll('.fast78-layout-btn').forEach(function(b){b.classList.toggle('active',b.dataset.layout===current())})}
     window.fast78SetLayout=function(v){if(valid.indexOf(v)<0)return;localStorage.setItem(KEY,v);document.body.dataset.fastLayout=v;mark();if(window.mostrarToast)mostrarToast('Perfil visual aplicado: '+v.charAt(0).toUpperCase()+v.slice(1)+'. Seus dados não foram alterados.','success')};
-    function install(){document.body.dataset.fastLayout=current();var cfg=document.querySelector('#configuracoes .config-page,#configuracoes .config-topics,#configuracoes');if(!cfg||document.getElementById('fast78Appearance'))return;var box=document.createElement('div');box.id='fast78Appearance';box.className='config-topic';box.innerHTML='<div class="config-topic-header"><div class="config-topic-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></div><div><div class="config-topic-title">Aparência e modo de trabalho</div><div class="config-topic-sub">Mude somente o visual. Rotas, fotos, clientes e despesas permanecem intactos.</div></div></div><div class="config-topic-body"><div class="fast78-layout-grid"><button class="fast78-layout-btn" data-layout="moderno" onclick="fast78SetLayout(\'moderno\')"><i class="fa-solid fa-sparkles"></i>Moderno</button><button class="fast78-layout-btn" data-layout="operacional" onclick="fast78SetLayout(\'operacional\')"><i class="fa-solid fa-motorcycle"></i>Operacional</button><button class="fast78-layout-btn" data-layout="executivo" onclick="fast78SetLayout(\'executivo\')"><i class="fa-solid fa-chart-column"></i>Executivo</button><button class="fast78-layout-btn" data-layout="escuro" onclick="fast78SetLayout(\'escuro\')"><i class="fa-solid fa-moon"></i>Escuro</button><button class="fast78-layout-btn" data-layout="automatico" onclick="fast78SetLayout(\'automatico\')"><i class="fa-solid fa-circle-half-stroke"></i>Automático</button></div></div>';cfg.insertBefore(box,cfg.firstChild);mark()}
+    function install(){localStorage.setItem(KEY,'operacional');document.body.dataset.fastLayout='operacional';var antigo=document.getElementById('fast78Appearance');if(antigo)antigo.remove()}
     if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install);else install();
+  })();
+  </script>
+  <style id="r83-organizacao">
+    /* Segurança compacta e centralizada */
+    #fast70SecurityCard .config-btn-row,.fast83-protected .config-btn-row{display:grid!important;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))!important;gap:7px!important}
+    #fast70SecurityCard .config-btn-row button,.fast83-protected .config-btn-row button{min-height:38px!important;padding:7px 9px!important;font-size:11px!important;justify-content:center!important;margin:0!important}
+    /* Botões de Despesas com o mesmo alinhamento de Rotas */
+    #despesas .fast-install-shortcut,#rotasDia .fast-install-shortcut{display:flex!important;width:max-content!important;max-width:calc(100% - 24px)!important;margin:10px auto 14px!important;justify-content:center!important}
+    #despesas #formDespesa .span-4[style*="display: flex"]{justify-content:center!important;align-items:center!important;flex-wrap:wrap!important}
+    /* Pré-visualizações menores e sem ocupar linhas excessivas */
+    .preview-card{padding:9px 10px!important;margin-top:4px!important;border-radius:10px!important;gap:6px!important}
+    .preview-card h4{font-size:11px!important;padding-bottom:6px!important;line-height:1.25!important}
+    .preview-grid{grid-template-columns:repeat(auto-fit,minmax(135px,1fr))!important;gap:5px!important}
+    .preview-item{padding:6px 8px!important;font-size:11px!important;line-height:1.25!important;border-radius:7px!important}
+    .preview-item span{line-height:1.25!important}
+    @media(max-width:768px){.preview-card{padding:8px!important}.preview-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:5px!important}.preview-item{padding:6px!important}}
+    @media(max-width:390px){.preview-grid{grid-template-columns:1fr!important}}
+  </style>
+  <script id="r83-organizacao-script">
+  (function(){
+    'use strict';
+    function titleCard(nome){return Array.from(document.querySelectorAll('#configuracoes .config-topic')).find(function(card){var t=card.querySelector('.config-topic-title');return t&&t.textContent.trim()===nome})}
+    function organizar(){
+      document.body.dataset.fastLayout='operacional';localStorage.setItem('fast_layout_profile_v1','operacional');
+      var apar=document.getElementById('fast78Appearance');if(apar)apar.remove();
+      var cfg=document.querySelector('#configuracoes .config-page,#configuracoes .config-topics,#configuracoes');
+      var temas=titleCard('Temas');if(cfg&&temas)cfg.insertBefore(temas,cfg.firstElementChild);
+      var alvo=document.getElementById('emptabEmpresa');
+      if(alvo&&!document.getElementById('fast83ProtectedTools')){
+        var grupo=document.createElement('div');grupo.id='fast83ProtectedTools';grupo.className='fast83-protected';
+        grupo.innerHTML='<div class="emp-section"><div class="emp-section-title"><i class="fa-solid fa-shield-heart"></i> Segurança, Fotos e Backups</div><p class="emp-sql-info">Ferramentas críticas reunidas dentro da Área Protegida.</p><div id="fast83ProtectedCards"></div></div>';
+        alvo.appendChild(grupo);var cards=grupo.querySelector('#fast83ProtectedCards');
+        ['Central de Segurança e Continuidade','Armazenamento de Fotos','Backup automático no Google Drive','Backup e Restauração'].forEach(function(n){var c=titleCard(n);if(c)cards.appendChild(c)});
+      }
+      try{if(typeof destRenderizarLista==='function')destRenderizarLista();if(typeof atualizarContadoresHeader==='function')atualizarContadoresHeader()}catch(e){console.warn('Destinos:',e)}
+    }
+    function campoCapitalizavel(el){
+      if(!el||el.tagName!=='INPUT'||String(el.type||'text').toLowerCase()!=='text'||el.readOnly||el.disabled)return false;
+      var id=(el.id||'').toLowerCase(),ac=(el.autocomplete||'').toLowerCase(),ph=(el.placeholder||'').toLowerCase();
+      return !/(email|senha|password|token|clientid|folderid|url|cnpj|cpf|rg|cep|telefone|whatsapp|placa|chave|pix|agencia|conta|codigo|id$)/.test(id+' '+ac+' '+ph);
+    }
+    document.addEventListener('input',function(e){var el=e.target;if(!campoCapitalizavel(el))return;var p=el.selectionStart,v=el.value.replace(/(^|[\s:;,.!?()\-\/])([\p{L}])/gu,function(_,a,b){return a+b.toLocaleUpperCase('pt-BR')});if(v!==el.value){el.value=v;try{el.setSelectionRange(p,p)}catch(x){}}},true);
+    if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){setTimeout(organizar,0)});else setTimeout(organizar,0);
   })();
   </script>
   <style id="r76-no-ninja">#ninja-badge,.ninja-badge,[href*="ninjatech.ai/product/super-ninja"]{display:none!important;visibility:hidden!important;pointer-events:none!important}</style>
