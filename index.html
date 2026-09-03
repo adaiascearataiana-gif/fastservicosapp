@@ -21,9 +21,9 @@
   <meta name="fast-github-branch" content="main">
   <meta name="fast-github-path" content="index.html">
   <meta name="fast-github-token-env" content="GH_TOKEN">
-  <meta name="fast-app-version" content="2026.09.03-r88">
-  <meta name="fast-app-date" content="2026-09-03T11:30:00Z">
-  <meta name="fast-latest-update" content="r88: biometria nativa abre automaticamente junto com o gate, sem tocar no botão">
+  <meta name="fast-app-version" content="2026.09.03-r89">
+  <meta name="fast-app-date" content="2026-09-03T13:34:35Z">
+  <meta name="fast-latest-update" content="r89: Central de Notificações completa e avalanche de erros corrigida">
   <!-- r70.1: lista corrente no HTML inicial; o painel não espera scripts tardios -->
   <meta name="fast-app-changelog-immediate" content="r70.1">
   <meta name="fast-app-changelog" content="[{&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;r64: BIOMETRIA ANDROID/WEBAuthn corrigida. O prompt nativo agora é solicitado de forma obrigatória na tentativa, não fica oculto atrás do campo de senha, a credencial cadastrada mantém o botão disponível e falhas continuam liberando entrada por senha.&quot;},{&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;r63: CONTRASTE GLOBAL DOS CAMPOS corrigido em todos os temas. Texto digitado, senha, preenchimento automático, placeholder, cursor, campos focados e desabilitados mantêm cores visíveis; o gate conserva fundo branco com caracteres escuros.&quot;},{&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;r62: CAMPO DE SENHA DO GATE totalmente visível. Fundo branco, caracteres e marcadores escuros, cursor destacado, placeholder legível, ícones contrastantes e correção do preenchimento automático do Android, sem interferência dos temas globais.&quot;},{&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;r61: CONTRASTE DO FAB DE RASTREAMENTO corrigido. O texto clientes com várias rotas, contador, ícones, botões de WhatsApp e fechar permanecem totalmente visíveis em qualquer tema, com fundo escuro próprio e layout mobile ajustado.&quot;},{&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;r60: ENVIO COMPLETO DE FOTOS AGRUPADAS E AUDITORIA DE DESEMPENHO. Todas as imagens do grupo são compartilhadas juntas em uma única operação. Confirmações fecham imediatamente; Agrupar, Desmembrar, Concluir, mover, QR e fotos usam persistência em segundo plano; tabelas são montadas em uma única inserção, eliminando reconstruções repetidas.&quot;},{&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;r59: CONCLUSÃO INSTANTÂNEA EM ROTAS DO DIA. Ao clicar em Concluir, o cartão muda de estado e vai imediatamente ao final, liberando a próxima rota no topo. Persistência, relatórios, fotos e sincronização são agrupados após os cliques, sem travar a sequência.&quot;},{&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;r58: SALVAMENTO INSTANTÂNEO em Rotas do Dia e Despesas. A confirmação visual ocorre no clique; serialização, cofre local, painéis e sincronização Supabase são agrupados e executados em segundo plano, sem congelar o botão.&quot;},{&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;r57: ACESSO POR USUÁRIO E SENHA RESTAURADO no gate. A biometria permanece como opção, mas falhas ou cancelamentos da digital não impedem mais a entrada normal pela senha.&quot;},{&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;r56: NOVA ABERTURA AMARELA com a logo oficial animada, gate exibido após 2 segundos, entrada normal somente por biometria, recuperação segura solicitada por e-mail, limpeza do título Nova Despesa e carregamento imediato de Últimas Atualizações.&quot;},{&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;r55: FORMATAÇÃO BRASILEIRA DE MOEDA em todos os campos de valor do app. Todos os 13 campos de valor (rotas, despesas, sequências, RH, despesas da empresa, capital social) agora exibem o padrão R$ 0,00 com cifrão, R de real, separador de milhar (ponto) e 2 dígitos decimais (vírgula). Os campos já começam com R$ 0,00 e ao digitar o zero desaparece automaticamente para entrar o número digitado, formatando em tempo real conforme você digita.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r54: CORREÇÃO CRÍTICA — ReferenceError 'fastLockTimeoutChange is not defined' ao selecionar tempo de bloqueio. A causa era exportações inválidas dentro da IIFE do módulo de segurança que abortavam todo o bloco antes de exportar fastLockTimeoutChange. Isso também causava demora na biometria — agora corrigido&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;r53: Barra fixa inferior (dock) — botão Dashboard substituído por Despesas, dando acesso rápido às despesas diretamente da barra de navegação&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r52: CORREÇÃO DA REORGANIZAÇÃO DO MENU — Despesas restaurada para Financeiro (não pertence à Logística); Rotas do Dia restaurada para Logística (não pertence ao Financeiro)&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;r52: DRE movido para a categoria Análises — agora Dashboard e DRE (Demonstrativo de Resultado) estão agrupados como relatórios analíticos&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;r51: PAINEL 'ÚLTIMAS ATUALIZAÇÕES' — histórico compacto e profissional das novidades e correções agora visível na aba Configurações, abaixo de 'Verificar Atualizações'&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;r51: NOVA CATEGORIA 'ANÁLISES' no menu suspenso — Dashboard agora tem sua própria seção dedicada&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;r51: REORGANIZAÇÃO DO MENU — Despesas movida para Logística (ao lado de Rotas); Rotas do Dia movida para Financeiro&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r51: Varredura geral do app — strings de versão estáticas desatualizadas (r49) corrigidas em 4 pontos do código&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r50: OBJETO 'SINCRONIZACAO' INVISIVEL BLOQUEANDO CLIQUES NA BARRA FIXA ELIMINADO. O toast de sincronizacao (#syncToast) ficava invisivel (opacity:0) apos desaparecer, mas continuava capturando todos os cliques (pointer-events:auto, z-index:99999, display:flex) sobre a barra de navegacao inferior - especialmente sobre o botao Dashboard. Ao selecionar esse objeto invisivel, aparecia o nome 'Sincronizacao' (texto do toast). Agora: (1) CSS pointer-events:none no toast quando nao esta visivel (.sync-toast base) e pointer-events:auto apenas quando visivel (.sync-toast.show); (2) apos fechar, o toast recebe display:none apos a transicao de 450ms, removendo-o completamente do fluxo de cliques; (3) ao reabrir, display e resetado para flex. Os botoes da barra fixa agora sao clicaveis livremente sem obstaculo.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r49: BLOQUEIO RESPEITA O TEMPO CONFIGURADO. Ao voltar ao app (PWA instalado), o gate nao aparecia imediatamente se o tempo de bloqueio (1/2/5 min) ainda nao tinha expirado - agora o pageshow handler verifica fastDeveBloquearAgora() antes de exigir reautenticacao. A biometria so e pedida quando o tempo realmente expira.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r49: SALVAMENTO INSTANTANEO SEM TRAVAR. Ao salvar rota ou adicionar despesa, a tela congelava por ~5 segundos esperando a sincronizacao com o Supabase terminar. Agora a sincronizacao roda em background com debounce de 400ms (fastDebounceSincronizar) via Promise - a UI responde imediatamente e os dados sao sincronizados sem bloquear.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r49: BARRA AZUL AO PRESSIONAR BOTOES ELIMINADA. O destaque azul que aparecia ao tocar/pressionar os botoes da navegacao inferior (dock) foi neutralizado com CSS que forca fundo transparente em :active. As bordas retas/curvas originais foram mantidas.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;r49: LOGO FAST SERVICOS. A splash screen e o gate de login agora exibem a logo oficial do Fast Servicos (moto vermelha) com fundo transparente, substituindo o icone generico de caminhao.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;r49: ANIMACAO ZOOM NA SPLASH. A splash screen agora sai com uma animacao de zoom-out suave em direcao ao usuario (scale 1 -&gt; 1.6 com fade) ao inves de simplesmente desaparecer. A versao permanece estatica embaixo.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;r49: AUTOCOMPLETAR EM DESPESAS. Ao digitar a Descricao ou o Local no formulario de despesas (novo OU edicao), aparece uma lista de sugestoes baseada nas despesas ja cadastradas, filtrando pela primeira letra digitada - igual ao autocompletar de clientes em rotas. Toque na sugestao para preencher automaticamente.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;r49: CATEGORIA OUTROS ABRE NOVO CAMPO. Ao selecionar a categoria Outros no formulario de despesas (novo OU edicao), abre automaticamente um campo de texto para digitar uma nova categoria. A nova categoria e salva permanentemente e aparece como opcao em futuros cadastros. Categorias ja usadas em despesas existentes tambem aparecem automaticamente no seletor.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r48: CAIXA AZUL OCULTA/PRESA ELIMINADA EM DEFINITIVO. O botao flutuante arrastavel #syncFloat (bola de 60px) ficava preso numa posicao salva no dispositivo (inset 117px/363px) sobre a aba Rotas do Dia, parado e sem movimento - era a 'caixa azul oculta'. Removido o elemento HTML, o JS de arrasto, a CSS e limpa a posicao persistida (localStorage.syncFloatPos) com failsafe que remove qualquer vestigio do DOM. O status de sincronismo continua acessivel pelo indicador fixo na barra superior (neon SYNC).&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;r48: BIOMETRIA INSTANTANEA. O login por impressao digital/Face ID agora abre muito mais rapido: splash reduzido de 800ms para 220ms, removida a verificacao pre-bloqueante de plataforma (o prompt nativo e disparado imediatamente), removido o spinner de loading antes do prompt (o proprio prompt nativo e o feedback), timeout do WebAuthn reduzido de 60s para 15s e adicionada mediation conditional. Guard anti-disparo-duplo adicionado.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;r48: NAVEGACAO INFERIOR ORGANIZADA. O label 'PAGINA PRINCIPAL' que vazava da caixa do botao no dock foi compactado para 'INICIO' (mantendo aria-label completo para acessibilidade). CSS do dock ajustado para nowrap + ellipsis em todos os 4 botoes, garantindo altura consistente de uma linha e impedindo que qualquer texto vaze/escape do botao.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;r48: AUDITORIA E LIMPEZA. Corrigidos os links quebrados do manifest PWA (blob: -&gt; data: URI) que geravam erros de console. Removida a animacao @keyframes iaFabPulse do botao flutuante extinto. Configuracao Supabase (5 tabelas) e sincronismo GitHub Pages verificados e intactos.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r47: CORRECAO DEFINITIVA DA BARRA AZUL / BOTAO OCULTO. A 'barra azul' que aparecia sobre a navegacao inferior era o menu nativo de selecao de texto do Android ('Copiar / Compartilhar / Selecionar tudo'), disparado ao tocar/arrastar sobre a bottom-nav. Solucao raiz: (1) user-select:none em TODA a chrome do app (nav, dock, header, barras flutuantes, botoes, labels, icones), (2) bloqueio JS do selectstart/contextmenu/touch na chrome, (3) ::selection neutra (sem roxo/azul), (4) failsafe CSS que forca fundo transparente em toda a bottom-nav em qualquer estado. O menu nativo nunca mais aparece sobre a barra.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;r47: REPAGINACAO TOTAL 2026 baseada em pesquisa profunda (Calm UX + glassmorphism funcional + microinteracoes funcionais + profundidade espacial + bento + dark-mode-ready + acessibilidade WCAG 2.2). Tokens r47 (raios, espacamentos, sombras em camadas, vidro calibrado), cards com hover suave, botoes com gradiente premium e press, topbar/sidebar/dock em vidro fosco real (backdrop-filter), barras flutuantes com shadow-pop, modal e toast com animacoes de entrada, badge de sync com pulse, tabelas zebra + hover, scrollbar roxo-ciano, skeleton shimmer, prefers-reduced-motion respeitado, alvos de toque &gt;=44px no mobile. Mais fluido, bonito, limpo e profissional - sem perder nenhuma funcao.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;r46: REPAGINACAO COMPLETA - Novo design system 2026 com glassmorphism, paleta premium roxo/ciano, gradientes animados, cards 3D com hover, sidebar com gradiente escuro, topbar com efeito vidro, botoes com brilho, scrollbar estilizada, modal e toast com animacoes suaves, login gate com vidro fosco, indicadores de sincronismo pulsantes. Versao para Linux (.deb + AppImage), Windows (.exe NSIS + portable) e Android (PWA instalavel). Tudo sincronizado com Supabase (5 tabelas) e GitHub Pages. Nenhuma funcao ou dado perdido - todas as 678 funcoes e 13 secoes mantidas.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r45: Lugares/Destinos agora aparece tambem na sidebar do desktop. Antes essa secao so existia no menu mobile (dropdown) e ficava invisivel no desktop, dando a impressao de perda de dados. Agora o desktop tem TODAS as secoes do mobile sem nenhuma excecao. Corrigido tambem o sincronismo de estado ativo: ao navegar por qualquer caminho (sidebar, dropdown ou dock), o botao correspondente na sidebar desktop marca como ativo corretamente.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;r44: Sincronizacao com a agenda telefonica do celular. No cadastro de clientes, botao 'Importar da Agenda (Telefone/WhatsApp)' abre o seletor nativo de contatos (Contact Picker API) — voce escolhe qual contato compartilhar e o app puxa automaticamente o Nome e o Telefone (com mascara BR), preenchendo os campos Telefone e WhatsApp do cadastro. O app NAO tem acesso livre a agenda: o usuario seleciona contato por contato. Funciona no Android Chrome 80+ e iOS Safari 18+. Em navegadores sem suporte, o botao fica indisponivel e voce digita manualmente. Adicionado tambem atalho para copiar Telefone -&gt; WhatsApp.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r43: (1) REMOVIDO em definitivo o botao azul/roxo flutuante de voz (microfone) que aparecia atras e sobre a barra de navegacao do Dashboard. O botao flutuante (#iaFab / .voz-fab) foi eliminado do HTML e bloqueado por CSS failsafe para nunca reaparecer, mesmo se uma posicao antiga ficar salva no dispositivo. As tentativas anteriores (r40/r41) apenas tentavam reposicionar o botao; agora ele nao existe mais. (2) Sincronizacao com GitHub revisada e confirmada: o app publica o index.html no GitHub Pages via API (token protegido no dispositivo). (3) Sincronizacao com Supabase revisada e confirmada: 5 tabelas (rotas, despesas, sequencias_itens, dados_empresa, destinos) verificadas com dedup e blacklist de itens excluidos.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;r42: Botao 'Sincronizar com GitHub' dentro da Area Protegida. Agora voce pode publicar o app diretamente no GitHub Pages a partir do celular/computador, sem precisar fazer upload manual. O token do GitHub fica salvo apenas no seu dispositivo (protegido pela senha da Area Protegida), nunca no codigo publico. O app detecta automaticamente se houve mudanca, envia o index.html atualizado via API do GitHub e confirma 'Sincronizacao concluida! Site no ar'.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r41: (1) Colunas Nome e Endereco da aba Destinos agora sao flexiveis - crescem automaticamente quando ha um nome/endereco maior, sem forcar largura fixa. (2) Barra azul atras do botao Dashboard REMOVIDA em definitivo: os botoes flutuantes de scroll/voz agora sao cinza-escuro neutro (nao azul/indigo) e nunca descem sobre a barra de navegacao inferior; adicionado failsafe CSS que forca fundo transparente em toda a bottom-nav. (3) Contador de Rotas do Dia corrigido: agora usa a data do calendario (date picker) e filtra itens excluidos (blacklist), entao o numero do menu suspenso sempre bate com as rotas exibidas na aba. (4) Biometria (impressao digital/Face ID/Windows Hello) disponivel na Area Protegida - agora mostra uma dica quando o dispositivo suporta biometria mas ela ainda nao foi ativada.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r40 CORRECAO RAIZ: o Service Worker usava cache-first e servia uma versao antiga (r37/r38) em cache mesmo apos o GitHub Pages ser atualizado, fazendo as rotas excluidas voltarem. Reescrito para NETWORK-FIRST em navegacoes/HTML + auto-cura que remove Service Workers e caches obsoletos no arranque. Agora o usuario sempre roda a versao mais recente publicada. CORRECAO DA BARRA AZUL atras do botao Dashboard: removido o fundo azul (accent-soft) do botao de navegacao ativo — agora apenas a cor do texto/icone muda, sem barra azul. Auto-atualizacao com fallback no-cors para contornar Service Worker/CORS.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;CORREÇÃO DEFINITIVA: Rotas do Dia excluídas NUNCA mais reaparecem. O problema era duplicatas na nuvem (cada \&quot;Carregar\&quot; gerava um ID novo, acumulando dezenas de cópias). Agora: (1) IDs estáveis por rota, (2) blacklist por rotaId bloqueia TODAS as cópias, (3) dedup automático, (4) 41 duplicatas limpas da nuvem.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;Rotas do Dia excluídas não voltam mais ao recarregar a página ou sincronizar — adicionada blacklist de itens de sequência (seqItensExcluidos) respeitada no merge com a nuvem (Supabase).&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;URL fixa migrada para GitHub Pages — endereço permanente do app.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;Indicadores ONLINE e SYNC fixos na barra superior com ícones próprios.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;Recuperação de senha por e-mail na Área Protegida e no login da plataforma — mesmo e-mail para ambos.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;Tempo de bloqueio configurável após sair do app: imediato, 1, 2 ou 5 minutos.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;Box de novidades após cada atualização, com a nova versão e data/hora do lançamento.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;Tema simplificado: apenas Light Moderno e Ocean Blue. Seção renomeada para \&quot;Temas\&quot;.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;Verificação de atualização com confirmação e barra de progresso ao atualizar.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;Textos da Área Protegida reorganizados em parágrafos limpos e alinhados.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;Performance otimizada: bibliotecas externalizadas para CDN (~800KB a menos).&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;Removidos botões redundantes (Atualizar, Status, Abrir Versão Oficial, Atualizar Agora).&quot;}]">
@@ -1310,7 +1310,17 @@ tbody tr:hover td {
 
 </style>
 
-<link rel="manifest" href="manifest.webmanifest?v=r88"><link rel="apple-touch-icon" href="assets/fast-servicos-icon-192.png?v=r88"><link rel="icon" href="assets/fast-servicos-icon-192.png?v=r88"></head>
+<script id="r89-notificacoes-base">
+(function(){
+  var KEY='fast_notificacoes_config_v1';
+  var defaults={master:true,toast_operacoes:false,toast_avisos:false,toast_erros:false,bell_rotas:true,bell_motoristas:true,bell_pagamentos:true,bell_despesas:false,bell_proximidade:true,bell_sistema:true,browser:false};
+  window.fastNotifDefaults=defaults;
+  window.fastNotifConfig=function(){var c={};try{c=JSON.parse(localStorage.getItem(KEY)||'{}')||{}}catch(e){};return Object.assign({},defaults,c)};
+  window.fastNotifSalvar=function(c){try{localStorage.setItem(KEY,JSON.stringify(Object.assign({},defaults,c||{})))}catch(e){}};
+  window.fastNotifPermitida=function(canal,tipo){var c=window.fastNotifConfig();if(!c.master)return false;if(canal==='toast'){if(tipo==='error'||tipo==='erro')return !!c.toast_erros;if(tipo==='warning'||tipo==='aviso')return !!c.toast_avisos;return !!c.toast_operacoes}return c['bell_'+tipo]!==false};
+})();
+</script>
+<link rel="manifest" href="manifest.webmanifest?v=r89"><link rel="apple-touch-icon" href="assets/fast-servicos-icon-192.png?v=r89"><link rel="icon" href="assets/fast-servicos-icon-192.png?v=r89"></head>
 <body class="fast-pro fast-edition-mobile theme-light fx-executive fx-layout-command" style="">
 
 <!-- ============================================================
@@ -1748,7 +1758,14 @@ tbody tr:hover td {
       if (o.exp && o.exp > 0 && Date.now() > o.exp) return false; // expirada
       return true;
     }
-    function isAuthenticated(){ return !!getSession(); }
+    function isAuthenticated(){
+      // r89: quando o retorno ao app exige biometria, a sessão persistente não
+      // pode se restaurar e cancelar o prompt antes de o sensor ser chamado.
+      try {
+        if (bioCredExists() && sessionStorage.getItem('fast_auth_need_bio') === '1') return false;
+      } catch(e){}
+      return !!getSession();
+    }
     function endSession(){
       try { sessionStorage.removeItem(K_SESS); } catch(e){}
       localStorage.removeItem(K_REMEM);
@@ -2407,6 +2424,7 @@ tbody tr:hover td {
           // O "manter conectado" sera respeitado APOS a biometria (nao pedira senha).
           // Limpa a sessao temporaria para forcar o gate + autoBioLogin.
           try { sessionStorage.removeItem(K_SESS); } catch(e){}
+          try { sessionStorage.setItem(K_NEED_BIO, '1'); } catch(e){}
           try { sessionStorage.setItem(K_BOOT_DONE, '1'); } catch(e){}
           // IMPORTANTE: nao remove K_REMEM do localStorage (manter conectado).
           // Apos a biometria, getSession() restaurara a sessao de localStorage.
@@ -2760,6 +2778,8 @@ tbody tr:hover td {
       if (!filtrados.length) return [];
       return filtrados;
     }
+    // r89: exportação explícita para os módulos tardios do painel.
+    window.fastObterUltimasAtualizacoes = fastObterUltimasAtualizacoes;
     function fastVerificarNovidades() {
       try {
         var versaoAtual = fastObterVersao();
@@ -6538,6 +6558,7 @@ tbody tr:hover td {
         <div class="bell-panel" id="bellPanel">
           <div class="bell-panel-header">
             <div class="bell-panel-title"><i class="fa-solid fa-bell"></i> Notificações</div>
+            <button class="bell-panel-clear ripple" onclick="fastNotifAbrir(event)"><i class="fa-solid fa-sliders"></i> Gerenciar</button>
             <button class="bell-panel-clear ripple" onclick="marcarNotificacoesLidas()"><i class="fa-solid fa-check-double"></i> Marcar lidas</button>
           </div>
           <div class="bell-panel-body" id="bellPanelBody">
@@ -23178,7 +23199,7 @@ tbody tr:hover td {
               <div id="fastDeployInfo" style="background:var(--card-bg-2);border:1px solid var(--border);border-radius:10px;padding:12px;margin:10px 0;font-size:13px;">
                 <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
                   <div>
-                    <div><strong>Versão atual:</strong> <span id="fastVersaoLabel" style="color:var(--accent);font-weight:800;">2026.09.03-r88</span></div>
+                    <div><strong>Versão atual:</strong> <span id="fastVersaoLabel" style="color:var(--accent);font-weight:800;">2026.09.03-r89</span></div>
                     <div id="fastVersaoDateLabel" style="font-size:11.5px;color:var(--text-muted);margin-top:3px;"><i class="fa-solid fa-clock"></i> Lançada em 02/09/2026 18:00</div>
                   </div>
                   <div id="fastVersaoOnlineLabel" style="font-size:12px;color:var(--text-muted);text-align:right;">Online: <strong>2026.09.02-r68</strong> <span style="color:var(--success);">(ok)</span></div>
@@ -23215,10 +23236,16 @@ tbody tr:hover td {
                 <div class="fast-updates-panel-head" onclick="fastToggleUpdatesPanel()">
                   <i class="fa-solid fa-bolt fup-icon"></i>
                   <span class="fup-title">Novidades e correções recentes</span>
-                  <span class="fup-count" id="fastUpdatesCount">3</span>
+                  <span class="fup-count" id="fastUpdatesCount">5</span>
                   <i class="fa-solid fa-chevron-down fup-chevron"></i>
                 </div>
                 <div class="fast-updates-panel-body" id="fastUpdatesBody">
+                  <div class="fup-item"><div class="fup-item-dot" style="background:rgba(22,163,74,.10)"><i class="fa-solid fa-sliders" style="color:#16a34a"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#16a34a;background:rgba(22,163,74,.10)">Novo</span><div class="fup-item-text">r89 (03/09/2026): criada a Central de Notificações com controle geral, Marcar tudo, Desmarcar tudo e opções individuais para balões, sino e dispositivo.</div></div></div>
+                  <div class="fup-item"><div class="fup-item-dot" style="background:rgba(22,163,74,.10)"><i class="fa-solid fa-bell" style="color:#16a34a"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#16a34a;background:rgba(22,163,74,.10)">Novo</span><div class="fup-item-text">r89 (03/09/2026): o gerenciamento pode ser aberto por Configurações, pelo menu principal e pelo link Gerenciar dentro do sino.</div></div></div>
+                  <div class="fup-item"><div class="fup-item-dot" style="background:rgba(37,99,235,.10)"><i class="fa-solid fa-bell-slash" style="color:#2563eb"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#2563eb;background:rgba(37,99,235,.10)">Melhorado</span><div class="fup-item-text">r89 (03/09/2026): balões de operação, avisos e erros ficam silenciosos por padrão; processos, sincronização e backups continuam em segundo plano.</div></div></div>
+                  <div class="fup-item"><div class="fup-item-dot" style="background:rgba(217,119,6,.10)"><i class="fa-solid fa-wrench" style="color:#d97706"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#d97706;background:rgba(217,119,6,.10)">Corrigido</span><div class="fup-item-text">r89 (03/09/2026): corrigida a falha fastObterUltimasAtualizacoes is not defined que gerava vários balões vermelhos repetidos.</div></div></div>
+                  <div class="fup-item"><div class="fup-item-dot" style="background:rgba(217,119,6,.10)"><i class="fa-solid fa-fingerprint" style="color:#d97706"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#d97706;background:rgba(217,119,6,.10)">Corrigido</span><div class="fup-item-text">r89 (03/09/2026): Manter conectado não cancela mais a revalidação automática; quando o gate aparece, a biometria tem prioridade e a sessão persistente só é restaurada após a digital.</div></div></div>
+                  <div hidden aria-hidden="true">
                   <div class="fup-item"><div class="fup-item-dot" style="background:rgba(217,119,6,.10)"><i class="fa-solid fa-fingerprint" style="color:#d97706"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#d97706;background:rgba(217,119,6,.10)">Corrigido</span><div class="fup-item-text">r88 (03/09/2026): ao aparecer o gate depois de sair ou voltar ao aplicativo, o pedido nativo de biometria abre automaticamente, sem tocar no botão.</div></div></div>
                   <div class="fup-item"><div class="fup-item-dot" style="background:rgba(217,119,6,.10)"><i class="fa-solid fa-keyboard" style="color:#d97706"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#d97706;background:rgba(217,119,6,.10)">Corrigido</span><div class="fup-item-text">r88 (03/09/2026): o campo de senha não recebe mais foco automático quando existe biometria cadastrada, evitando que o teclado do Android interrompa o prompt biométrico.</div></div></div>
                   <div class="fup-item"><div class="fup-item-dot" style="background:rgba(37,99,235,.10)"><i class="fa-solid fa-clock" style="color:#2563eb"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#2563eb;background:rgba(37,99,235,.10)">Melhorado</span><div class="fup-item-text">r88 (03/09/2026): o disparo aguarda somente a primeira pintura visível do gate, impede pedidos duplicados e continua respeitando os tempos Imediatamente, 1, 2 ou 5 minutos.</div></div></div>
@@ -23252,7 +23279,7 @@ tbody tr:hover td {
                   <div class="fup-item"><div class="fup-item-dot" style="background:rgba(37,99,235,.10)"><i class="fa-solid fa-arrow-up" style="color:#2563eb"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#2563eb;background:rgba(37,99,235,.10)">Melhorado</span><div class="fup-item-text">r70: Segurança das fotos, Google Drive preparado, fila offline, restauração, lixeira e comprovante de entrega.</div></div></div>
                   <div class="fup-item"><div class="fup-item-dot" style="background:rgba(37,99,235,.10)"><i class="fa-solid fa-arrow-up" style="color:#2563eb"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#2563eb;background:rgba(37,99,235,.10)">Melhorado</span><div class="fup-item-text">r70: Nova logo, login redimensionado, atalhos Android e compatibilidade PWA para Android, Windows e Linux.</div></div></div>
                   <div class="fup-item"><div class="fup-item-dot" style="background:rgba(217,119,6,.10)"><i class="fa-solid fa-wrench" style="color:#d97706"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#d97706;background:rgba(217,119,6,.10)">Corrigido</span><div class="fup-item-text">r70.1: Últimas Atualizações agora aparece imediatamente, sem esperar o carregamento dos módulos finais.</div></div></div>
-                  </div></div></div>
+                  </div></div></div></div>
                 </div>
               </div>
             </div>
@@ -28362,7 +28389,7 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
           });
         `;
         try {
-          navigator.serviceWorker.register('sw.js?v=r88', { scope: './' })
+          navigator.serviceWorker.register('sw.js?v=r89', { scope: './' })
             .then(function(reg) { console.info('SW permanente registrado (r73 network-first).'); })
             .catch(function(e) { console.info('SW: nao registrado neste ambiente (normal).', e.message); });
         } catch (e) { console.info('SW init skip:', e); }
@@ -30763,7 +30790,7 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
     function fastPopularUltimasAtualizacoes() {
       var body = document.getElementById('fastUpdatesBody');
       if (!body) return;
-      var items = fastObterUltimasAtualizacoes();
+      var items = typeof window.fastObterUltimasAtualizacoes === 'function' ? window.fastObterUltimasAtualizacoes() : [];
       var countEl = document.getElementById('fastUpdatesCount');
       if (countEl) countEl.textContent = items.length;
       if (!items.length) {
@@ -38955,6 +38982,9 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
 
     // --- Toast genérico (usa o estilo do sync-toast existente) ---
     function mostrarToast(mensagem, tipo = 'info') {
+      // r89: balões obedecem à Central de Notificações. Por padrão ficam
+      // silenciosos, sem interromper o trabalho; a operação continua normal.
+      if (window.fastNotifPermitida && !window.fastNotifPermitida('toast', tipo)) return;
       let container = document.getElementById('toastContainerV4');
       if (!container) {
         container = document.createElement('div');
@@ -39293,7 +39323,16 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
         });
       }
 
-      return notifs;
+      function categoria(n){
+        var t=String((n&&n.titulo)||'').toLowerCase(),tipo=String((n&&n.tipo)||'').toLowerCase();
+        if(tipo==='geofence'||tipo==='proximidade'||/proximidade|localiza/.test(t))return 'proximidade';
+        if(/pagamento|receber|recebimento/.test(t))return 'pagamentos';
+        if(/despesa/.test(t))return 'despesas';
+        if(/cnh|motorista/.test(t))return 'motoristas';
+        if(/rota|entrega/.test(t))return 'rotas';
+        return 'sistema';
+      }
+      return notifs.filter(function(n){return !window.fastNotifPermitida||window.fastNotifPermitida('bell',categoria(n))});
     }
 
     function atualizarNotificacoes() {
@@ -40216,7 +40255,7 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
       links.forEach(function(el,i){ if(i>0) el.remove(); });
       var link = links[0] || document.createElement('link');
       link.rel = 'manifest';
-      link.href = 'manifest.webmanifest?v=r88';
+      link.href = 'manifest.webmanifest?v=r89';
       if(!link.parentNode) document.head.appendChild(link);
 
       // A mesma logomarca oficial também aparece no gate e na abertura.
@@ -40954,6 +40993,7 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
 
     /* --- 6. Notificações Nativas --- */
     function notifSolicitarPermissao() {
+      var cfg=window.fastNotifConfig?window.fastNotifConfig():null;if(cfg){cfg.browser=true;window.fastNotifSalvar(cfg)}
       if (!('Notification' in window)) { mostrarToast('Seu navegador não suporta notificações.', 'warning'); return; }
       Notification.requestPermission().then(perm => {
         if (perm === 'granted') {
@@ -40968,6 +41008,7 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
     }
 
     function notifEnviar(titulo, corpo) {
+      if (window.fastNotifConfig && !window.fastNotifConfig().browser) return;
       if (!('Notification' in window) || Notification.permission !== 'granted') return;
       try { new Notification(titulo, { body: corpo, icon: 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Crect width=%22100%22 height=%22100%22 rx=%2222%22 fill=%22%234f46e5%22/%3E%3Ctext x=%2250%22 y=%2272%22 font-size=%2260%22 text-anchor=%22middle%22 fill=%22white%22%3E%E2%9A%A1%3C/text%3E%3C/svg%3E' }); } catch(e) {}
     }
@@ -40975,6 +41016,7 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
     function atualizarBannerNotif() {
       const banner = document.getElementById('notifBanner');
       if (!banner) return;
+      if (window.fastNotifConfig && !window.fastNotifConfig().browser) { banner.style.display = 'none'; return; }
       if (localStorage.getItem('fast_notif_dismissed') === 'true') { banner.style.display = 'none'; return; }
       const ativada = localStorage.getItem('fast_notif_ativada') === 'true' || (Notification && Notification.permission === 'granted');
       if (ativada) { banner.style.display = 'none'; }
@@ -43441,6 +43483,65 @@ window.fastMobileNav = function(ev, abaId, botao) {
     ];
     meta.content=JSON.stringify(atual.concat(anteriores));meta.dataset.r88='1';
     if(window.fastPopularUltimasAtualizacoes)window.fastPopularUltimasAtualizacoes();
+  })();
+  </script>
+  <style id="r89-central-notificacoes-style">
+    .fast89-notif-modal{position:fixed;inset:0;z-index:120000;background:rgba(15,23,42,.68);display:none;align-items:center;justify-content:center;padding:14px;backdrop-filter:blur(5px)}
+    .fast89-notif-modal.show{display:flex}.fast89-notif-box{width:min(620px,100%);max-height:90dvh;overflow:auto;background:var(--card-bg,#fff);color:var(--text-main);border:1px solid var(--border);border-radius:18px;box-shadow:0 24px 70px rgba(0,0,0,.35)}
+    .fast89-notif-head{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:10px;padding:15px;background:var(--card-bg,#fff);border-bottom:1px solid var(--border)}.fast89-notif-head h2{font-size:18px;flex:1;margin:0}.fast89-notif-head button{width:38px;height:38px;border:0;border-radius:10px;background:var(--card-bg-2);color:var(--text-main)}
+    .fast89-notif-body{padding:14px}.fast89-notif-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}.fast89-notif-actions button{min-height:40px;border-radius:10px;font-weight:800}
+    .fast89-notif-group{border:1px solid var(--border);border-radius:12px;margin:10px 0;overflow:hidden}.fast89-notif-group h3{font-size:13px;margin:0;padding:10px 12px;background:var(--card-bg-2)}
+    .fast89-notif-option{display:flex;align-items:center;gap:10px;padding:11px 12px;border-top:1px solid var(--border);cursor:pointer}.fast89-notif-option:first-of-type{border-top:0}.fast89-notif-option span{flex:1;font-size:13px;font-weight:700}.fast89-notif-option small{display:block;font-weight:500;color:var(--text-muted);margin-top:2px}.fast89-notif-option input{width:20px;height:20px;accent-color:var(--accent)}
+    .fast89-notif-master{background:rgba(99,102,241,.08)}.fast89-notif-note{font-size:12px;line-height:1.5;color:var(--text-muted);padding:6px 2px}
+    #bellPanel .bell-panel-header{gap:5px;flex-wrap:wrap}#bellPanel .bell-panel-clear{font-size:10px;padding:5px 7px}
+    @media(max-width:520px){.fast89-notif-box{border-radius:14px}.fast89-notif-body{padding:10px}.fast89-notif-option{padding:10px}.fast89-notif-actions{grid-template-columns:1fr 1fr}}
+  </style>
+  <script id="r89-central-notificacoes-script">
+  (function(){
+    'use strict';
+    var campos=[
+      ['master','Ativar notificações','Controle geral de todos os avisos do aplicativo','geral'],
+      ['toast_operacoes','Confirmações e informações','Balões de sucesso, sincronização e tarefas concluídas','tela'],
+      ['toast_avisos','Avisos na tela','Balões amarelos de atenção','tela'],
+      ['toast_erros','Erros na tela','Balões vermelhos de erro técnico','tela'],
+      ['bell_rotas','Rotas e entregas','Pendências, andamento, conclusão e motorista ausente','sino'],
+      ['bell_motoristas','Motoristas e CNH','CNH vencida, próxima do vencimento ou incompleta','sino'],
+      ['bell_pagamentos','Pagamentos','Valores e recebimentos pendentes','sino'],
+      ['bell_despesas','Despesas','Resumo mensal de despesas','sino'],
+      ['bell_proximidade','Proximidade e localização','Chegada perto do destino e geolocalização','sino'],
+      ['bell_sistema','Sistema','Boas-vindas e informações gerais no sino','sino'],
+      ['browser','Notificações do dispositivo','Avisos nativos fora da tela do aplicativo','dispositivo']
+    ];
+    function fechar(){var m=document.getElementById('fast89NotifModal');if(m)m.classList.remove('show')}
+    function htmlOpcao(c){return '<label class="fast89-notif-option '+(c[0]==='master'?'fast89-notif-master':'')+'"><input type="checkbox" data-fast89="'+c[0]+'"><span>'+c[1]+'<small>'+c[2]+'</small></span></label>'}
+    function criar(){
+      if(document.getElementById('fast89NotifModal'))return;
+      var m=document.createElement('div');m.id='fast89NotifModal';m.className='fast89-notif-modal';m.onclick=function(e){if(e.target===m)fechar()};
+      var grupos=[['geral','Controle geral'],['tela','Balões na tela'],['sino','Categorias do sino'],['dispositivo','Dispositivo']];
+      m.innerHTML='<div class="fast89-notif-box"><div class="fast89-notif-head"><i class="fa-solid fa-bell"></i><h2>Central de Notificações</h2><button type="button" aria-label="Fechar"><i class="fa-solid fa-xmark"></i></button></div><div class="fast89-notif-body"><div class="fast89-notif-actions"><button type="button" class="btn-primary" id="fast89MarcarTudo"><i class="fa-solid fa-check-double"></i> Marcar tudo</button><button type="button" class="btn-secondary" id="fast89DesmarcarTudo"><i class="fa-solid fa-bell-slash"></i> Desmarcar tudo</button></div>'+grupos.map(function(g){return '<section class="fast89-notif-group"><h3>'+g[1]+'</h3>'+campos.filter(function(c){return c[3]===g[0]}).map(htmlOpcao).join('')+'</section>'}).join('')+'<p class="fast89-notif-note">As opções afetam apenas avisos visuais. Sincronização, backups e demais processos continuam funcionando silenciosamente em segundo plano.</p></div></div>';
+      document.body.appendChild(m);m.querySelector('.fast89-notif-head button').onclick=fechar;
+      m.querySelectorAll('[data-fast89]').forEach(function(i){i.onchange=salvarTela});
+      document.getElementById('fast89MarcarTudo').onclick=function(){definirTudo(true)};
+      document.getElementById('fast89DesmarcarTudo').onclick=function(){definirTudo(false)};
+    }
+    function carregarTela(){var c=window.fastNotifConfig();document.querySelectorAll('#fast89NotifModal [data-fast89]').forEach(function(i){i.checked=!!c[i.dataset.fast89]})}
+    function salvarTela(){var c=window.fastNotifConfig();document.querySelectorAll('#fast89NotifModal [data-fast89]').forEach(function(i){c[i.dataset.fast89]=i.checked});window.fastNotifSalvar(c);aplicar()}
+    function definirTudo(v){var c=window.fastNotifConfig();campos.forEach(function(x){c[x[0]]=v});window.fastNotifSalvar(c);carregarTela();aplicar()}
+    function aplicar(){var tc=document.getElementById('toastContainerV4');if(tc&&!window.fastNotifPermitida('toast','info'))tc.innerHTML='';try{if(typeof atualizarNotificacoes==='function')atualizarNotificacoes()}catch(e){console.warn('Notificações:',e)}}
+    window.fastNotifAbrir=function(e){if(e){e.preventDefault();e.stopPropagation()}criar();carregarTela();document.getElementById('fast89NotifModal').classList.add('show');try{fecharBellPanel()}catch(x){}}
+    function instalarLinks(){
+      criar();var cfg=document.querySelector('#configuracoes .config-page,#configuracoes .config-topics,#configuracoes');
+      if(cfg&&!document.getElementById('fast89NotifCard')){var card=document.createElement('div');card.id='fast89NotifCard';card.className='config-topic';card.innerHTML='<div class="config-topic-header"><div class="config-topic-icon ico-backup"><i class="fa-solid fa-bell"></i></div><div><div class="config-topic-title">Notificações</div><div class="config-topic-sub">Escolha exatamente o que pode aparecer no app e no sino</div></div></div><div class="config-topic-body"><button type="button" class="btn-primary" onclick="fastNotifAbrir(event)"><i class="fa-solid fa-sliders"></i> Gerenciar Notificações</button><p class="config-desc" style="margin-top:8px">Balões operacionais ficam silenciosos por padrão. Você pode reativá-los quando quiser.</p></div>';var area=Array.from(cfg.querySelectorAll('.config-topic')).find(function(x){var t=x.querySelector('.config-topic-title');return t&&t.textContent.trim()==='Área Protegida'});cfg.insertBefore(card,area||cfg.firstChild)}
+      var menu=document.querySelector('.nav-dropdown-menu');if(menu&&!document.getElementById('fast89NotifMenu')){var b=document.createElement('button');b.id='fast89NotifMenu';b.className='nav-item nav-grp-sistema ripple';b.innerHTML='<i class="fa-solid fa-bell"></i> <span class="nav-item-text">Notificações</span>';b.onclick=function(e){try{fecharNavDropdown()}catch(x){}window.fastNotifAbrir(e)};var conf=Array.from(menu.querySelectorAll('.nav-item')).find(function(x){return /Configurações/i.test(x.textContent)});if(conf)conf.insertAdjacentElement('afterend',b);else menu.appendChild(b)}
+    }
+    var meta=document.querySelector('meta[name="fast-app-changelog"]');if(meta&&!meta.dataset.r89){var anteriores=[];try{anteriores=JSON.parse(meta.content||'[]')}catch(e){}var atual=[
+      {type:'novo',text:'r89 (03/09/2026): criada a Central de Notificações com controle geral, Marcar tudo, Desmarcar tudo e opções individuais para balões, sino e dispositivo.'},
+      {type:'novo',text:'r89 (03/09/2026): o gerenciamento pode ser aberto por Configurações, pelo menu principal e pelo link Gerenciar dentro do sino.'},
+      {type:'melhorado',text:'r89 (03/09/2026): balões de operação, avisos e erros ficam silenciosos por padrão; processos, sincronização e backups continuam em segundo plano.'},
+      {type:'corrigido',text:'r89 (03/09/2026): corrigida a falha fastObterUltimasAtualizacoes is not defined que gerava vários balões vermelhos repetidos.'}
+      ,{type:'corrigido',text:'r89 (03/09/2026): Manter conectado não cancela mais a revalidação automática; quando o gate aparece, a biometria tem prioridade e a sessão persistente só é restaurada após a digital.'}
+    ];meta.content=JSON.stringify(atual.concat(anteriores));meta.dataset.r89='1';if(window.fastPopularUltimasAtualizacoes)window.fastPopularUltimasAtualizacoes()}
+    if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',instalarLinks);else instalarLinks();
   })();
   </script>
   <style id="r76-no-ninja">#ninja-badge,.ninja-badge,[href*="ninjatech.ai/product/super-ninja"]{display:none!important;visibility:hidden!important;pointer-events:none!important}</style>
