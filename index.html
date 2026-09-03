@@ -21,9 +21,9 @@
   <meta name="fast-github-branch" content="main">
   <meta name="fast-github-path" content="index.html">
   <meta name="fast-github-token-env" content="GH_TOKEN">
-  <meta name="fast-app-version" content="2026.09.03-r84">
-  <meta name="fast-app-date" content="2026-09-02T21:00:00Z">
-  <meta name="fast-latest-update" content="r70: gestão avançada, segurança das fotos, Drive, restauração, usuários do RH, auditoria, fechamento, rentabilidade, OCR, proximidade e atalhos Android">
+  <meta name="fast-app-version" content="2026.09.03-r85">
+  <meta name="fast-app-date" content="2026-09-03T11:30:00Z">
+  <meta name="fast-latest-update" content="r85: sessão persistente, tempos de bloqueio corrigidos, destinos antes do sync e check-up geral">
   <!-- r70.1: lista corrente no HTML inicial; o painel não espera scripts tardios -->
   <meta name="fast-app-changelog-immediate" content="r70.1">
   <meta name="fast-app-changelog" content="[{&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;r64: BIOMETRIA ANDROID/WEBAuthn corrigida. O prompt nativo agora é solicitado de forma obrigatória na tentativa, não fica oculto atrás do campo de senha, a credencial cadastrada mantém o botão disponível e falhas continuam liberando entrada por senha.&quot;},{&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;r63: CONTRASTE GLOBAL DOS CAMPOS corrigido em todos os temas. Texto digitado, senha, preenchimento automático, placeholder, cursor, campos focados e desabilitados mantêm cores visíveis; o gate conserva fundo branco com caracteres escuros.&quot;},{&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;r62: CAMPO DE SENHA DO GATE totalmente visível. Fundo branco, caracteres e marcadores escuros, cursor destacado, placeholder legível, ícones contrastantes e correção do preenchimento automático do Android, sem interferência dos temas globais.&quot;},{&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;r61: CONTRASTE DO FAB DE RASTREAMENTO corrigido. O texto clientes com várias rotas, contador, ícones, botões de WhatsApp e fechar permanecem totalmente visíveis em qualquer tema, com fundo escuro próprio e layout mobile ajustado.&quot;},{&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;r60: ENVIO COMPLETO DE FOTOS AGRUPADAS E AUDITORIA DE DESEMPENHO. Todas as imagens do grupo são compartilhadas juntas em uma única operação. Confirmações fecham imediatamente; Agrupar, Desmembrar, Concluir, mover, QR e fotos usam persistência em segundo plano; tabelas são montadas em uma única inserção, eliminando reconstruções repetidas.&quot;},{&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;r59: CONCLUSÃO INSTANTÂNEA EM ROTAS DO DIA. Ao clicar em Concluir, o cartão muda de estado e vai imediatamente ao final, liberando a próxima rota no topo. Persistência, relatórios, fotos e sincronização são agrupados após os cliques, sem travar a sequência.&quot;},{&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;r58: SALVAMENTO INSTANTÂNEO em Rotas do Dia e Despesas. A confirmação visual ocorre no clique; serialização, cofre local, painéis e sincronização Supabase são agrupados e executados em segundo plano, sem congelar o botão.&quot;},{&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;r57: ACESSO POR USUÁRIO E SENHA RESTAURADO no gate. A biometria permanece como opção, mas falhas ou cancelamentos da digital não impedem mais a entrada normal pela senha.&quot;},{&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;r56: NOVA ABERTURA AMARELA com a logo oficial animada, gate exibido após 2 segundos, entrada normal somente por biometria, recuperação segura solicitada por e-mail, limpeza do título Nova Despesa e carregamento imediato de Últimas Atualizações.&quot;},{&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;r55: FORMATAÇÃO BRASILEIRA DE MOEDA em todos os campos de valor do app. Todos os 13 campos de valor (rotas, despesas, sequências, RH, despesas da empresa, capital social) agora exibem o padrão R$ 0,00 com cifrão, R de real, separador de milhar (ponto) e 2 dígitos decimais (vírgula). Os campos já começam com R$ 0,00 e ao digitar o zero desaparece automaticamente para entrar o número digitado, formatando em tempo real conforme você digita.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r54: CORREÇÃO CRÍTICA — ReferenceError 'fastLockTimeoutChange is not defined' ao selecionar tempo de bloqueio. A causa era exportações inválidas dentro da IIFE do módulo de segurança que abortavam todo o bloco antes de exportar fastLockTimeoutChange. Isso também causava demora na biometria — agora corrigido&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;r53: Barra fixa inferior (dock) — botão Dashboard substituído por Despesas, dando acesso rápido às despesas diretamente da barra de navegação&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r52: CORREÇÃO DA REORGANIZAÇÃO DO MENU — Despesas restaurada para Financeiro (não pertence à Logística); Rotas do Dia restaurada para Logística (não pertence ao Financeiro)&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;r52: DRE movido para a categoria Análises — agora Dashboard e DRE (Demonstrativo de Resultado) estão agrupados como relatórios analíticos&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;r51: PAINEL 'ÚLTIMAS ATUALIZAÇÕES' — histórico compacto e profissional das novidades e correções agora visível na aba Configurações, abaixo de 'Verificar Atualizações'&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;r51: NOVA CATEGORIA 'ANÁLISES' no menu suspenso — Dashboard agora tem sua própria seção dedicada&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;r51: REORGANIZAÇÃO DO MENU — Despesas movida para Logística (ao lado de Rotas); Rotas do Dia movida para Financeiro&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r51: Varredura geral do app — strings de versão estáticas desatualizadas (r49) corrigidas em 4 pontos do código&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r50: OBJETO 'SINCRONIZACAO' INVISIVEL BLOQUEANDO CLIQUES NA BARRA FIXA ELIMINADO. O toast de sincronizacao (#syncToast) ficava invisivel (opacity:0) apos desaparecer, mas continuava capturando todos os cliques (pointer-events:auto, z-index:99999, display:flex) sobre a barra de navegacao inferior - especialmente sobre o botao Dashboard. Ao selecionar esse objeto invisivel, aparecia o nome 'Sincronizacao' (texto do toast). Agora: (1) CSS pointer-events:none no toast quando nao esta visivel (.sync-toast base) e pointer-events:auto apenas quando visivel (.sync-toast.show); (2) apos fechar, o toast recebe display:none apos a transicao de 450ms, removendo-o completamente do fluxo de cliques; (3) ao reabrir, display e resetado para flex. Os botoes da barra fixa agora sao clicaveis livremente sem obstaculo.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r49: BLOQUEIO RESPEITA O TEMPO CONFIGURADO. Ao voltar ao app (PWA instalado), o gate nao aparecia imediatamente se o tempo de bloqueio (1/2/5 min) ainda nao tinha expirado - agora o pageshow handler verifica fastDeveBloquearAgora() antes de exigir reautenticacao. A biometria so e pedida quando o tempo realmente expira.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r49: SALVAMENTO INSTANTANEO SEM TRAVAR. Ao salvar rota ou adicionar despesa, a tela congelava por ~5 segundos esperando a sincronizacao com o Supabase terminar. Agora a sincronizacao roda em background com debounce de 400ms (fastDebounceSincronizar) via Promise - a UI responde imediatamente e os dados sao sincronizados sem bloquear.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r49: BARRA AZUL AO PRESSIONAR BOTOES ELIMINADA. O destaque azul que aparecia ao tocar/pressionar os botoes da navegacao inferior (dock) foi neutralizado com CSS que forca fundo transparente em :active. As bordas retas/curvas originais foram mantidas.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;r49: LOGO FAST SERVICOS. A splash screen e o gate de login agora exibem a logo oficial do Fast Servicos (moto vermelha) com fundo transparente, substituindo o icone generico de caminhao.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;r49: ANIMACAO ZOOM NA SPLASH. A splash screen agora sai com uma animacao de zoom-out suave em direcao ao usuario (scale 1 -&gt; 1.6 com fade) ao inves de simplesmente desaparecer. A versao permanece estatica embaixo.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;r49: AUTOCOMPLETAR EM DESPESAS. Ao digitar a Descricao ou o Local no formulario de despesas (novo OU edicao), aparece uma lista de sugestoes baseada nas despesas ja cadastradas, filtrando pela primeira letra digitada - igual ao autocompletar de clientes em rotas. Toque na sugestao para preencher automaticamente.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;r49: CATEGORIA OUTROS ABRE NOVO CAMPO. Ao selecionar a categoria Outros no formulario de despesas (novo OU edicao), abre automaticamente um campo de texto para digitar uma nova categoria. A nova categoria e salva permanentemente e aparece como opcao em futuros cadastros. Categorias ja usadas em despesas existentes tambem aparecem automaticamente no seletor.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r48: CAIXA AZUL OCULTA/PRESA ELIMINADA EM DEFINITIVO. O botao flutuante arrastavel #syncFloat (bola de 60px) ficava preso numa posicao salva no dispositivo (inset 117px/363px) sobre a aba Rotas do Dia, parado e sem movimento - era a 'caixa azul oculta'. Removido o elemento HTML, o JS de arrasto, a CSS e limpa a posicao persistida (localStorage.syncFloatPos) com failsafe que remove qualquer vestigio do DOM. O status de sincronismo continua acessivel pelo indicador fixo na barra superior (neon SYNC).&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;r48: BIOMETRIA INSTANTANEA. O login por impressao digital/Face ID agora abre muito mais rapido: splash reduzido de 800ms para 220ms, removida a verificacao pre-bloqueante de plataforma (o prompt nativo e disparado imediatamente), removido o spinner de loading antes do prompt (o proprio prompt nativo e o feedback), timeout do WebAuthn reduzido de 60s para 15s e adicionada mediation conditional. Guard anti-disparo-duplo adicionado.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;r48: NAVEGACAO INFERIOR ORGANIZADA. O label 'PAGINA PRINCIPAL' que vazava da caixa do botao no dock foi compactado para 'INICIO' (mantendo aria-label completo para acessibilidade). CSS do dock ajustado para nowrap + ellipsis em todos os 4 botoes, garantindo altura consistente de uma linha e impedindo que qualquer texto vaze/escape do botao.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;r48: AUDITORIA E LIMPEZA. Corrigidos os links quebrados do manifest PWA (blob: -&gt; data: URI) que geravam erros de console. Removida a animacao @keyframes iaFabPulse do botao flutuante extinto. Configuracao Supabase (5 tabelas) e sincronismo GitHub Pages verificados e intactos.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r47: CORRECAO DEFINITIVA DA BARRA AZUL / BOTAO OCULTO. A 'barra azul' que aparecia sobre a navegacao inferior era o menu nativo de selecao de texto do Android ('Copiar / Compartilhar / Selecionar tudo'), disparado ao tocar/arrastar sobre a bottom-nav. Solucao raiz: (1) user-select:none em TODA a chrome do app (nav, dock, header, barras flutuantes, botoes, labels, icones), (2) bloqueio JS do selectstart/contextmenu/touch na chrome, (3) ::selection neutra (sem roxo/azul), (4) failsafe CSS que forca fundo transparente em toda a bottom-nav em qualquer estado. O menu nativo nunca mais aparece sobre a barra.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;r47: REPAGINACAO TOTAL 2026 baseada em pesquisa profunda (Calm UX + glassmorphism funcional + microinteracoes funcionais + profundidade espacial + bento + dark-mode-ready + acessibilidade WCAG 2.2). Tokens r47 (raios, espacamentos, sombras em camadas, vidro calibrado), cards com hover suave, botoes com gradiente premium e press, topbar/sidebar/dock em vidro fosco real (backdrop-filter), barras flutuantes com shadow-pop, modal e toast com animacoes de entrada, badge de sync com pulse, tabelas zebra + hover, scrollbar roxo-ciano, skeleton shimmer, prefers-reduced-motion respeitado, alvos de toque &gt;=44px no mobile. Mais fluido, bonito, limpo e profissional - sem perder nenhuma funcao.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;r46: REPAGINACAO COMPLETA - Novo design system 2026 com glassmorphism, paleta premium roxo/ciano, gradientes animados, cards 3D com hover, sidebar com gradiente escuro, topbar com efeito vidro, botoes com brilho, scrollbar estilizada, modal e toast com animacoes suaves, login gate com vidro fosco, indicadores de sincronismo pulsantes. Versao para Linux (.deb + AppImage), Windows (.exe NSIS + portable) e Android (PWA instalavel). Tudo sincronizado com Supabase (5 tabelas) e GitHub Pages. Nenhuma funcao ou dado perdido - todas as 678 funcoes e 13 secoes mantidas.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r45: Lugares/Destinos agora aparece tambem na sidebar do desktop. Antes essa secao so existia no menu mobile (dropdown) e ficava invisivel no desktop, dando a impressao de perda de dados. Agora o desktop tem TODAS as secoes do mobile sem nenhuma excecao. Corrigido tambem o sincronismo de estado ativo: ao navegar por qualquer caminho (sidebar, dropdown ou dock), o botao correspondente na sidebar desktop marca como ativo corretamente.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;r44: Sincronizacao com a agenda telefonica do celular. No cadastro de clientes, botao 'Importar da Agenda (Telefone/WhatsApp)' abre o seletor nativo de contatos (Contact Picker API) — voce escolhe qual contato compartilhar e o app puxa automaticamente o Nome e o Telefone (com mascara BR), preenchendo os campos Telefone e WhatsApp do cadastro. O app NAO tem acesso livre a agenda: o usuario seleciona contato por contato. Funciona no Android Chrome 80+ e iOS Safari 18+. Em navegadores sem suporte, o botao fica indisponivel e voce digita manualmente. Adicionado tambem atalho para copiar Telefone -&gt; WhatsApp.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r43: (1) REMOVIDO em definitivo o botao azul/roxo flutuante de voz (microfone) que aparecia atras e sobre a barra de navegacao do Dashboard. O botao flutuante (#iaFab / .voz-fab) foi eliminado do HTML e bloqueado por CSS failsafe para nunca reaparecer, mesmo se uma posicao antiga ficar salva no dispositivo. As tentativas anteriores (r40/r41) apenas tentavam reposicionar o botao; agora ele nao existe mais. (2) Sincronizacao com GitHub revisada e confirmada: o app publica o index.html no GitHub Pages via API (token protegido no dispositivo). (3) Sincronizacao com Supabase revisada e confirmada: 5 tabelas (rotas, despesas, sequencias_itens, dados_empresa, destinos) verificadas com dedup e blacklist de itens excluidos.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;r42: Botao 'Sincronizar com GitHub' dentro da Area Protegida. Agora voce pode publicar o app diretamente no GitHub Pages a partir do celular/computador, sem precisar fazer upload manual. O token do GitHub fica salvo apenas no seu dispositivo (protegido pela senha da Area Protegida), nunca no codigo publico. O app detecta automaticamente se houve mudanca, envia o index.html atualizado via API do GitHub e confirma 'Sincronizacao concluida! Site no ar'.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r41: (1) Colunas Nome e Endereco da aba Destinos agora sao flexiveis - crescem automaticamente quando ha um nome/endereco maior, sem forcar largura fixa. (2) Barra azul atras do botao Dashboard REMOVIDA em definitivo: os botoes flutuantes de scroll/voz agora sao cinza-escuro neutro (nao azul/indigo) e nunca descem sobre a barra de navegacao inferior; adicionado failsafe CSS que forca fundo transparente em toda a bottom-nav. (3) Contador de Rotas do Dia corrigido: agora usa a data do calendario (date picker) e filtra itens excluidos (blacklist), entao o numero do menu suspenso sempre bate com as rotas exibidas na aba. (4) Biometria (impressao digital/Face ID/Windows Hello) disponivel na Area Protegida - agora mostra uma dica quando o dispositivo suporta biometria mas ela ainda nao foi ativada.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r40 CORRECAO RAIZ: o Service Worker usava cache-first e servia uma versao antiga (r37/r38) em cache mesmo apos o GitHub Pages ser atualizado, fazendo as rotas excluidas voltarem. Reescrito para NETWORK-FIRST em navegacoes/HTML + auto-cura que remove Service Workers e caches obsoletos no arranque. Agora o usuario sempre roda a versao mais recente publicada. CORRECAO DA BARRA AZUL atras do botao Dashboard: removido o fundo azul (accent-soft) do botao de navegacao ativo — agora apenas a cor do texto/icone muda, sem barra azul. Auto-atualizacao com fallback no-cors para contornar Service Worker/CORS.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;CORREÇÃO DEFINITIVA: Rotas do Dia excluídas NUNCA mais reaparecem. O problema era duplicatas na nuvem (cada \&quot;Carregar\&quot; gerava um ID novo, acumulando dezenas de cópias). Agora: (1) IDs estáveis por rota, (2) blacklist por rotaId bloqueia TODAS as cópias, (3) dedup automático, (4) 41 duplicatas limpas da nuvem.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;Rotas do Dia excluídas não voltam mais ao recarregar a página ou sincronizar — adicionada blacklist de itens de sequência (seqItensExcluidos) respeitada no merge com a nuvem (Supabase).&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;URL fixa migrada para GitHub Pages — endereço permanente do app.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;Indicadores ONLINE e SYNC fixos na barra superior com ícones próprios.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;Recuperação de senha por e-mail na Área Protegida e no login da plataforma — mesmo e-mail para ambos.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;Tempo de bloqueio configurável após sair do app: imediato, 1, 2 ou 5 minutos.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;Box de novidades após cada atualização, com a nova versão e data/hora do lançamento.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;Tema simplificado: apenas Light Moderno e Ocean Blue. Seção renomeada para \&quot;Temas\&quot;.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;Verificação de atualização com confirmação e barra de progresso ao atualizar.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;Textos da Área Protegida reorganizados em parágrafos limpos e alinhados.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;Performance otimizada: bibliotecas externalizadas para CDN (~800KB a menos).&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;Removidos botões redundantes (Atualizar, Status, Abrir Versão Oficial, Atualizar Agora).&quot;}]">
@@ -1310,7 +1310,7 @@ tbody tr:hover td {
 
 </style>
 
-<link rel="manifest" href="manifest.webmanifest?v=r82"><link rel="apple-touch-icon" href="assets/fast-servicos-icon-192.png?v=r82"><link rel="icon" href="assets/fast-servicos-icon-192.png?v=r82"></head>
+<link rel="manifest" href="manifest.webmanifest?v=r85"><link rel="apple-touch-icon" href="assets/fast-servicos-icon-192.png?v=r85"><link rel="icon" href="assets/fast-servicos-icon-192.png?v=r85"></head>
 <body class="fast-pro fast-edition-mobile theme-light fx-executive fx-layout-command" style="">
 
 <!-- ============================================================
@@ -1405,7 +1405,7 @@ tbody tr:hover td {
             <button type="button" class="fg-toggle ripple" onclick="fastGateTogglePwd('fastGatePwd',this)" aria-label="Mostrar senha"><i class="fa-solid fa-eye"></i></button>
           </div>
         </div>
-        <label class="fast-gate-check"><input type="checkbox" id="fastGateRemember"> Manter conectado neste dispositivo</label>
+        <label class="fast-gate-check"><input type="checkbox" id="fastGateRemember" checked> Manter conectado neste dispositivo</label>
         <div class="fast-gate-err" id="fastGateErr"></div>
         <button type="button" class="fast-gate-btn ripple" id="fastGateLoginBtn" onclick="fastGateDoLogin()">
           <i class="fa-solid fa-right-to-bracket"></i> Entrar com senha
@@ -1805,6 +1805,8 @@ tbody tr:hover td {
         splash.classList.add('blur');
       }
       gate.classList.add('show');
+      // r85: esta é a opção padrão em todos os acessos e também na biometria.
+      var lembrar = $('fastGateRemember'); if (lembrar) lembrar.checked = true;
       document.body.style.overflow = 'hidden';
       if (isLocked()){ showLockout(); return; } else { hideLockout(); }
       if (credExists()){
@@ -2396,9 +2398,10 @@ tbody tr:hover td {
         var deveBloquearBoot = true;
         try {
           var marcouSaidaBoot = !!parseInt(localStorage.getItem('fast_lock_left_at')||'0',10);
+          var retornoAindaLiberado = fastLockGraceAtiva();
           // Abertura realmente nova, sem marca de saída, sempre autentica.
           // Se houve saída recente, respeita exatamente o tempo configurado.
-          deveBloquearBoot = !marcouSaidaBoot || fastDeveBloquearAgora();
+          deveBloquearBoot = retornoAindaLiberado ? false : (!marcouSaidaBoot || fastDeveBloquearAgora());
         } catch(e){}
         if (hasBio && !bootDone && deveBloquearBoot){
           // r16: PRIMEIRO carregamento (aba nova) com biometria registrada.
@@ -2510,7 +2513,7 @@ tbody tr:hover td {
           // para decidir o tempo de exibicao. Se login ativado + biometria,
           // a splash precisa ser curta para a digital aparecer IMEDIATAMENTE.
           var loginAtivado = false;
-          try { loginAtivado = localStorage.getItem('fastSecEnabled') === '1'; } catch(e){}
+          try { loginAtivado = localStorage.getItem(K_ENABLED) === '1'; } catch(e){}
           var temBio = false;
           try { temBio = bioCredExists(); } catch(e){}
           // Se tem login + biometria: splash rapida (800ms) para a digital pedir logo.
@@ -2565,14 +2568,15 @@ tbody tr:hover td {
     // ---- R2-5: Tempo de bloqueio configuravel apos sair do app ----
     var FAST_LOCK_TIMEOUT_KEY = 'fast_lock_timeout'; // valor em minutos (0=imediato)
     var FAST_LOCK_LEFT_AT_KEY = 'fast_lock_left_at'; // timestamp de quando saiu (ms)
+    var FAST_LOCK_GRACE_KEY = 'fast_lock_grace_until'; // tolerância preservada entre eventos duplicados
     function fastObterLockTimeoutMin() {
-      try { var v = localStorage.getItem(FAST_LOCK_TIMEOUT_KEY); return v ? parseInt(v,10) : 0; } catch(e){ return 0; }
+      try { var v = localStorage.getItem(FAST_LOCK_TIMEOUT_KEY); return v !== null ? parseInt(v,10) : 2; } catch(e){ return 2; }
     }
     function fastObterLockTimeoutMs() {
       return fastObterLockTimeoutMin() * 60 * 1000;
     }
     function fastLockTimeoutChange(minutos) {
-      try { localStorage.setItem(FAST_LOCK_TIMEOUT_KEY, String(minutos)); } catch(e){}
+      try { localStorage.setItem(FAST_LOCK_TIMEOUT_KEY, String(minutos)); localStorage.removeItem(FAST_LOCK_LEFT_AT_KEY); localStorage.removeItem(FAST_LOCK_GRACE_KEY); } catch(e){}
       fastLockTimeoutUpdateUI();
       if (typeof mostrarToast === 'function') {
         var lbl = minutos === 0 ? 'imediatamente' : (minutos + ' minuto' + (minutos>1?'s':''));
@@ -2593,6 +2597,7 @@ tbody tr:hover td {
     function fastDeveBloquearAgora() {
       var timeoutMs = fastObterLockTimeoutMs();
       if (timeoutMs <= 0) return true; // imediato
+      if (fastLockGraceAtiva()) return false;
       try {
         var leftAt = parseInt(localStorage.getItem(FAST_LOCK_LEFT_AT_KEY)||'0',10);
         // Sem marca de saída, não bloqueia neste listener. A abertura inicial é
@@ -2605,8 +2610,16 @@ tbody tr:hover td {
     }
     // R2-5: marca o timestamp de saida (em vez de limpar sessao imediatamente)
     function fastMarcarSaida() {
-      try { localStorage.setItem(FAST_LOCK_LEFT_AT_KEY, String(Date.now())); } catch(e){}
+      try { localStorage.setItem(FAST_LOCK_LEFT_AT_KEY, String(Date.now())); localStorage.removeItem(FAST_LOCK_GRACE_KEY); } catch(e){}
     }
+    function fastLockGraceAtiva(){
+      try { var ate=parseInt(localStorage.getItem(FAST_LOCK_GRACE_KEY)||'0',10);if(ate>Date.now())return true;if(ate)localStorage.removeItem(FAST_LOCK_GRACE_KEY); } catch(e){}
+      return false;
+    }
+    function fastRegistrarRetornoLiberado(){
+      try { var saiu=parseInt(localStorage.getItem(FAST_LOCK_LEFT_AT_KEY)||'0',10),limite=saiu+fastObterLockTimeoutMs();if(saiu&&limite>Date.now())localStorage.setItem(FAST_LOCK_GRACE_KEY,String(limite)); } catch(e){}
+    }
+    function fastLimparGrace(){ try { localStorage.removeItem(FAST_LOCK_GRACE_KEY); } catch(e){} }
     function fastLimparSaida() {
       try { localStorage.removeItem(FAST_LOCK_LEFT_AT_KEY); } catch(e){}
     }
@@ -2651,6 +2664,7 @@ tbody tr:hover td {
           revalidarEAutenticar();
         } else {
           // Dentro do tempo de tolerancia: NAO bloqueia, apenas limpa a marcacao
+          fastRegistrarRetornoLiberado();
           fastLimparSaida();
         }
       }
@@ -2683,8 +2697,10 @@ tbody tr:hover td {
     window.addEventListener('pageshow', function(event){
       try {
         if (fastDeveBloquearAgora()) {
+          fastLimparGrace();
           revalidarEAutenticar();
         } else {
+          fastRegistrarRetornoLiberado();
           fastLimparSaida();
         }
       } catch(e) {
@@ -2803,6 +2819,12 @@ tbody tr:hover td {
     window.verifyCred               = verifyCred;
     window.credExists               = credExists;
     window.refreshSecCard           = refreshSecCard;
+    // Sessão unificada para logins de funcionários: mantém a mesma tolerância,
+    // biometria e opção "Manter conectado" do gate principal.
+    window.fastAuthStartRememberedSession = function(){
+      startSession(true);
+      try { sessionStorage.setItem(K_BOOT_DONE,'1'); sessionStorage.removeItem(K_NEED_BIO); } catch(e){}
+    };
     // R2-7: exporta funcoes do modal "Novidades" para que os handlers HTML (onclick) funcionem
     window.fastFecharNovidades      = fastFecharNovidades;
     window.fastVerificarNovidades   = fastVerificarNovidades;
@@ -23143,7 +23165,7 @@ tbody tr:hover td {
               <div id="fastDeployInfo" style="background:var(--card-bg-2);border:1px solid var(--border);border-radius:10px;padding:12px;margin:10px 0;font-size:13px;">
                 <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
                   <div>
-                    <div><strong>Versão atual:</strong> <span id="fastVersaoLabel" style="color:var(--accent);font-weight:800;">2026.09.03-r84</span></div>
+                    <div><strong>Versão atual:</strong> <span id="fastVersaoLabel" style="color:var(--accent);font-weight:800;">2026.09.03-r85</span></div>
                     <div id="fastVersaoDateLabel" style="font-size:11.5px;color:var(--text-muted);margin-top:3px;"><i class="fa-solid fa-clock"></i> Lançada em 02/09/2026 18:00</div>
                   </div>
                   <div id="fastVersaoOnlineLabel" style="font-size:12px;color:var(--text-muted);text-align:right;">Online: <strong>2026.09.02-r68</strong> <span style="color:var(--success);">(ok)</span></div>
@@ -23184,6 +23206,7 @@ tbody tr:hover td {
                   <i class="fa-solid fa-chevron-down fup-chevron"></i>
                 </div>
                 <div class="fast-updates-panel-body" id="fastUpdatesBody">
+                  <div class="fup-item"><div class="fup-item-dot" style="background:rgba(22,163,74,.10)"><i class="fa-solid fa-shield-halved" style="color:#16a34a"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#16a34a;background:rgba(22,163,74,.10)">Corrigido</span><div class="fup-item-text">r85 (03/09/2026): “Manter conectado” marcado por padrão; retorno ao app respeita exatamente Imediatamente, 1, 2 ou 5 minutos mesmo com eventos duplicados do Android; sessão de funcionários unificada; check-up geral executado.</div></div></div>
                   <div class="fup-item"><div class="fup-item-dot" style="background:rgba(22,163,74,.10)"><i class="fa-brands fa-google-drive" style="color:#16a34a"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#16a34a;background:rgba(22,163,74,.10)">Corrigido</span><div class="fup-item-text">r84 (03/09/2026): backup do Drive reorganizado em Cliente → Data da rota → Destino → fotos renomeadas; filas antigas pendentes recuperam os dados da rota; WM permanece automaticamente em caixa alta.</div></div></div>
                   <div class="fup-item"><div class="fup-item-dot" style="background:rgba(22,163,74,.10)"><i class="fa-solid fa-layer-group" style="color:#16a34a"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#16a34a;background:rgba(22,163,74,.10)">Melhorado</span><div class="fup-item-text">r83 (03/09/2026): modo Operacional fixado; Temas reposicionados; segurança, fotos, Drive e restauração reunidos na Área Protegida; Logística reorganizada; pré-visualização compactada; capitalização automática e contador de Destinos corrigidos.</div></div></div>
                   <div class="fup-item"><div class="fup-item-dot" style="background:rgba(22,163,74,.10)"><i class="fa-solid fa-fingerprint" style="color:#16a34a"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#16a34a;background:rgba(22,163,74,.10)">Corrigido</span><div class="fup-item-text">r82 (03/09/2026): Biometria passa a abrir automaticamente em cada bloqueio vencido no site mobile, FAST instalado, Rotas do Dia e Despesas. Tempos Imediatamente, 1, 2 e 5 minutos revisados e respeitados.</div></div></div>
@@ -28309,7 +28332,7 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
           });
         `;
         try {
-          navigator.serviceWorker.register('sw.js?v=r84', { scope: './' })
+          navigator.serviceWorker.register('sw.js?v=r85', { scope: './' })
             .then(function(reg) { console.info('SW permanente registrado (r73 network-first).'); })
             .catch(function(e) { console.info('SW: nao registrado neste ambiente (normal).', e.message); });
         } catch (e) { console.info('SW init skip:', e); }
@@ -28929,6 +28952,13 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
       try { limparRotasTeste(); } catch(e) { console.warn('limparRotasTeste:', e); }
 
       // === INICIALIZAÇÃO DA SINCRONIZAÇÃO NA NUVEM (Supabase) ===
+      // r85: destinos precisam existir localmente ANTES da primeira sincronização.
+      // Antes, o sync começava com a lista vazia e somente depois reescaneava as rotas,
+      // deixando a tabela destinos com contador zero na nuvem.
+      try {
+        destReescanearRotas();
+        destRenderizarLista();
+      } catch(e) { console.warn('Varredura inicial de destinos:', e); }
       carregarConfigSync();
       carregarDadosEmpresa();
       // A sincronização inicial é disparada por carregarConfigSync() -> verificarSupabase()
@@ -28938,14 +28968,6 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
 
       // === INICIALIZAÇÃO DO RASTREAMENTO ===
       rastInicializar();
-
-      // === VARREDURA INICIAL DE DESTINOS ===
-      // Sempre percorre todas as rotas/sequencias e garante que TODOS os destinos
-      // estejam na base (adiciona os que faltam, sem duplicar os existentes).
-      try {
-        destReescanearRotas();
-        destRenderizarLista();
-      } catch(e) { console.warn('Varredura inicial de destinos:', e); }
 
       // Inicializa drag do box flutuante ENVIAR RASTREAMENTO (reaproveita restaurarPosicao)
       try { initDragRastBox(); } catch(e) {}
@@ -40164,7 +40186,7 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
       links.forEach(function(el,i){ if(i>0) el.remove(); });
       var link = links[0] || document.createElement('link');
       link.rel = 'manifest';
-      link.href = 'manifest.webmanifest?v=r84';
+      link.href = 'manifest.webmanifest?v=r85';
       if(!link.parentNode) document.head.appendChild(link);
 
       // A mesma logomarca oficial também aparece no gate e na abertura.
@@ -43143,7 +43165,7 @@ window.fastMobileNav = function(ev, abaId, botao) {
     window.fastUserRevoke=function(id){var a=jget(USERS,[]),u=a.find(function(x){return x.id===id});if(!u)return;u.sessionVersion++;jset(USERS,a);fastAuditar('encerrou sessões','usuario',id);renderUsers();alert('Sessões locais deste usuário foram revogadas. A revogação entre aparelhos será ativada quando o backend seguro estiver conectado.')};
     window.fastAuditOpen=function(){var a=jget(AUDIT,[]).slice().reverse(),rows=a.map(function(x){return '<tr><td>'+new Date(x.quando).toLocaleString('pt-BR')+'</td><td>'+esc(x.usuario.nome)+'</td><td>'+esc(x.acao)+'</td><td>'+esc(x.entidade)+'</td><td>'+esc(x.detalhe)+'</td></tr>'}).join('');modal('Registro de auditoria','<div style="overflow:auto"><table class="fast71-table"><thead><tr><th>Data</th><th>Usuário</th><th>Ação</th><th>Item</th><th>Detalhes</th></tr></thead><tbody>'+rows+'</tbody></table></div>')};
 
-    async function employeeLogin(user,pwd){var u=jget(USERS,[]).find(function(x){return x.username===String(user).trim().toLowerCase()});if(!u)return false;if(!u.active)throw new Error('Usuário bloqueado pelo administrador.');if(await hash(pwd,u.salt)!==u.hash)throw new Error('Usuário ou senha inválidos.');jset(SESSION,{userId:u.id,name:u.name,role:u.role,version:u.sessionVersion,loggedAt:new Date().toISOString()});fastAuditar('entrou','sessão',u.id);var g=document.getElementById('fastLoginGate');if(g)g.classList.remove('show');document.body.style.overflow='';var sp=document.getElementById('fastSplash');if(sp)sp.style.display='none';applyRole(u.role);document.dispatchEvent(new Event('fast-login-success'));return true}
+    async function employeeLogin(user,pwd){var u=jget(USERS,[]).find(function(x){return x.username===String(user).trim().toLowerCase()});if(!u)return false;if(!u.active)throw new Error('Usuário bloqueado pelo administrador.');if(await hash(pwd,u.salt)!==u.hash)throw new Error('Usuário ou senha inválidos.');jset(SESSION,{userId:u.id,name:u.name,role:u.role,version:u.sessionVersion,loggedAt:new Date().toISOString()});if(window.fastAuthStartRememberedSession)window.fastAuthStartRememberedSession();fastAuditar('entrou','sessão',u.id);var g=document.getElementById('fastLoginGate');if(g)g.classList.remove('show');document.body.style.overflow='';var sp=document.getElementById('fastSplash');if(sp)sp.style.display='none';applyRole(u.role);document.dispatchEvent(new Event('fast-login-success'));return true}
     function applyRole(role){document.body.dataset.fastRole=role||'administrador';if(!role||role==='administrador')return;var allowed=role==='entregador'?['rotasDia','rastreamento','paginaPrincipal']:['paginaPrincipal','rotas','rotasDia','clientes','destinos','despesas','dashboard'];document.querySelectorAll('[onclick*="proIr("],[onclick*="trocarAba("]').forEach(function(e){var m=(e.getAttribute('onclick')||'').match(/["']([A-Za-z]+)["']/);if(m)e.style.display=allowed.indexOf(m[1])>=0?'':'none'})}
 
     window.fastOcrRota=function(){var inp=document.getElementById('fast71OcrInput');if(inp)inp.click()};
@@ -43157,7 +43179,7 @@ window.fastMobileNav = function(ev, abaId, botao) {
       var card=document.getElementById('fast70SecurityCard'),row=card&&card.querySelector('.config-btn-row');if(row&&!document.getElementById('fast71AuditBtn')){var b=document.createElement('button');b.id='fast71AuditBtn';b.className='btn-secondary';b.innerHTML='<i class="fa-solid fa-clipboard-list"></i> Auditoria';b.onclick=fastAuditOpen;row.appendChild(b)}
       var meta=document.querySelector('meta[name="fast-app-changelog"]');if(meta){var old=[];try{old=JSON.parse(meta.content||'[]')}catch(e){}var news=[{type:'novo',text:'r70: Fechamento diário automático e painel de rentabilidade por cliente, destino, motorista e rota.'},{type:'novo',text:'r70: Alertas de pagamentos pendentes aparecem exclusivamente no sino de notificações.'},{type:'novo',text:'r70: Usuários vinculados ao RH, perfis Administrador, Atendimento e Entregador, senhas PBKDF2 e revogação de sessões preparada.'},{type:'novo',text:'r70: Registro de auditoria identifica quem criou, alterou, excluiu ou acessou itens do aplicativo.'},{type:'melhorado',text:'r70: Lixeira preserva rotas e referências das fotos para recuperação; biometria mantida na Área Protegida.'},{type:'novo',text:'r70: Leitura de nome do cliente e endereço pela câmera com OCR e confirmação humana.'},{type:'melhorado',text:'r70: Alertas de proximidade do destino e geofence revisados para acompanhamento da entrega.'},{type:'melhorado',text:'r70: Logo oficial aplicada ao ícone Android e tela de login redimensionada; atalhos Android para Rotas do Dia e Despesas.'},{type:'melhorado',text:'r70: Android, Windows e Linux usam a mesma PWA responsiva e recebem as próximas versões pelo endereço oficial, sem substituir o armazenamento local.'},{type:'melhorado',text:'r70: Backup de fotos, fila offline, Google Drive, comprovante, modo entregador e histórico do cliente preparados.'},{type:'melhorado',text:'r70: API do WhatsApp permanece suspensa e desativada até configuração posterior do backend seguro.'},{type:'corrigido',text:'r70: Check-up geral de sintaxe, armazenamento, navegação, segurança e compatibilidade executado antes da publicação.'}];meta.content=JSON.stringify(news.concat(old));if(window.fastPopularUltimasAtualizacoes)fastPopularUltimasAtualizacoes()}
     }
-    document.addEventListener('DOMContentLoaded',function(){install();var s=jget(SESSION,null);if(s){var u=jget(USERS,[]).find(function(x){return x.id===s.userId});if(!u||!u.active||u.sessionVersion!==s.version){localStorage.removeItem(SESSION)}else applyRole(u.role)}var original=window.fastGateDoLogin;if(typeof original==='function'&&!original.fast71){var wrap=async function(){var user=(document.getElementById('fastGateUser')||{}).value||'',pwd=(document.getElementById('fastGatePwd')||{}).value||'';try{if(await employeeLogin(user,pwd))return}catch(e){var er=document.getElementById('fastGateErro');if(er){er.textContent=e.message;er.style.display='block'}return}return original.apply(this,arguments)};wrap.fast71=true;window.fastGateDoLogin=wrap}
+    document.addEventListener('DOMContentLoaded',function(){install();var s=jget(SESSION,null);if(s){var u=jget(USERS,[]).find(function(x){return x.id===s.userId});if(!u||!u.active||u.sessionVersion!==s.version){localStorage.removeItem(SESSION)}else applyRole(u.role)}var original=window.fastGateDoLogin;if(typeof original==='function'&&!original.fast71){var wrap=async function(){var user=(document.getElementById('fastGateUser')||{}).value||'',pwd=(document.getElementById('fastGatePwd')||{}).value||'';try{if(await employeeLogin(user,pwd))return}catch(e){var er=document.getElementById('fastGateErr');if(er){er.textContent=e.message;er.style.display='block'}return}return original.apply(this,arguments)};wrap.fast71=true;window.fastGateDoLogin=wrap}
       ['salvarRota','salvarDespesa','salvarItemSeq','salvarRh','deletarRota','deletarDespesa','removerSeq','deletarRh'].forEach(function(n){var fn=window[n];if(typeof fn!=='function'||fn.fast71)return;var w=function(){var args=[].slice.call(arguments),r=fn.apply(this,args);fastAuditar(/^deletar|^remover/.test(n)?'excluiu':'salvou',n.replace(/^(salvar|deletar|remover)/,''),args[0]&&args[0].id||args[0]||'');return r};w.fast71=true;window[n]=w})
     });
     setInterval(function(){var s=jget(SESSION,null);if(!s)return;var u=jget(USERS,[]).find(function(x){return x.id===s.userId});if(!u||!u.active||u.sessionVersion!==s.version){localStorage.removeItem(SESSION);location.reload()}},30000);
