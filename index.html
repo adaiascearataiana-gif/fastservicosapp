@@ -21,7 +21,7 @@
   <meta name="fast-github-branch" content="main">
   <meta name="fast-github-path" content="index.html">
   <meta name="fast-github-token-env" content="GH_TOKEN">
-  <meta name="fast-app-version" content="2026.09.03-r83">
+  <meta name="fast-app-version" content="2026.09.03-r84">
   <meta name="fast-app-date" content="2026-09-02T21:00:00Z">
   <meta name="fast-latest-update" content="r70: gestão avançada, segurança das fotos, Drive, restauração, usuários do RH, auditoria, fechamento, rentabilidade, OCR, proximidade e atalhos Android">
   <!-- r70.1: lista corrente no HTML inicial; o painel não espera scripts tardios -->
@@ -23143,7 +23143,7 @@ tbody tr:hover td {
               <div id="fastDeployInfo" style="background:var(--card-bg-2);border:1px solid var(--border);border-radius:10px;padding:12px;margin:10px 0;font-size:13px;">
                 <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
                   <div>
-                    <div><strong>Versão atual:</strong> <span id="fastVersaoLabel" style="color:var(--accent);font-weight:800;">2026.09.03-r83</span></div>
+                    <div><strong>Versão atual:</strong> <span id="fastVersaoLabel" style="color:var(--accent);font-weight:800;">2026.09.03-r84</span></div>
                     <div id="fastVersaoDateLabel" style="font-size:11.5px;color:var(--text-muted);margin-top:3px;"><i class="fa-solid fa-clock"></i> Lançada em 02/09/2026 18:00</div>
                   </div>
                   <div id="fastVersaoOnlineLabel" style="font-size:12px;color:var(--text-muted);text-align:right;">Online: <strong>2026.09.02-r68</strong> <span style="color:var(--success);">(ok)</span></div>
@@ -23184,6 +23184,7 @@ tbody tr:hover td {
                   <i class="fa-solid fa-chevron-down fup-chevron"></i>
                 </div>
                 <div class="fast-updates-panel-body" id="fastUpdatesBody">
+                  <div class="fup-item"><div class="fup-item-dot" style="background:rgba(22,163,74,.10)"><i class="fa-brands fa-google-drive" style="color:#16a34a"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#16a34a;background:rgba(22,163,74,.10)">Corrigido</span><div class="fup-item-text">r84 (03/09/2026): backup do Drive reorganizado em Cliente → Data da rota → Destino → fotos renomeadas; filas antigas pendentes recuperam os dados da rota; WM permanece automaticamente em caixa alta.</div></div></div>
                   <div class="fup-item"><div class="fup-item-dot" style="background:rgba(22,163,74,.10)"><i class="fa-solid fa-layer-group" style="color:#16a34a"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#16a34a;background:rgba(22,163,74,.10)">Melhorado</span><div class="fup-item-text">r83 (03/09/2026): modo Operacional fixado; Temas reposicionados; segurança, fotos, Drive e restauração reunidos na Área Protegida; Logística reorganizada; pré-visualização compactada; capitalização automática e contador de Destinos corrigidos.</div></div></div>
                   <div class="fup-item"><div class="fup-item-dot" style="background:rgba(22,163,74,.10)"><i class="fa-solid fa-fingerprint" style="color:#16a34a"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#16a34a;background:rgba(22,163,74,.10)">Corrigido</span><div class="fup-item-text">r82 (03/09/2026): Biometria passa a abrir automaticamente em cada bloqueio vencido no site mobile, FAST instalado, Rotas do Dia e Despesas. Tempos Imediatamente, 1, 2 e 5 minutos revisados e respeitados.</div></div></div>
                   <div class="fup-item"><div class="fup-item-dot" style="background:rgba(79,70,229,.12)"><i class="fa-solid fa-down-left-and-up-right-to-center" style="color:#4f46e5"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#4f46e5;background:rgba(79,70,229,.12)">Melhorado</span><div class="fup-item-text">r81 (03/09/2026): Botões Editar e Excluir das tabelas de Rotas e Despesas reduzidos e alinhados lado a lado, seguindo o padrão compacto de Lugares/Destinos e diminuindo a altura das linhas.</div></div></div>
@@ -23365,7 +23366,7 @@ tbody tr:hover td {
                 <button type="button" class="btn-secondary ripple" onclick="fastDriveDesconectar()"><i class="fa-solid fa-link-slash"></i> Desconectar</button>
               </div>
               <div id="fastDriveStatus" style="margin-top:12px;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-weight:700;">Google Drive ainda não conectado.</div>
-              <p class="config-desc" style="margin-top:10px;font-size:12px;">Nome automático: <strong>02-09-2026 - Destino - Foto 01.jpg</strong>. A senha da sua conta Google nunca é armazenada no aplicativo.</p>
+              <p class="config-desc" style="margin-top:10px;font-size:12px;">Organização automática: <strong>Cliente → Data da rota → Destino → Data - Destino - Foto 01.jpg</strong>. A senha da sua conta Google nunca é armazenada no aplicativo.</p>
             </div>
           </div>
 
@@ -28308,7 +28309,7 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
           });
         `;
         try {
-          navigator.serviceWorker.register('sw.js?v=r83', { scope: './' })
+          navigator.serviceWorker.register('sw.js?v=r84', { scope: './' })
             .then(function(reg) { console.info('SW permanente registrado (r73 network-first).'); })
             .catch(function(e) { console.info('SW: nao registrado neste ambiente (normal).', e.message); });
         } catch (e) { console.info('SW init skip:', e); }
@@ -40163,7 +40164,7 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
       links.forEach(function(el,i){ if(i>0) el.remove(); });
       var link = links[0] || document.createElement('link');
       link.rel = 'manifest';
-      link.href = 'manifest.webmanifest?v=r83';
+      link.href = 'manifest.webmanifest?v=r84';
       if(!link.parentNode) document.head.appendChild(link);
 
       // A mesma logomarca oficial também aparece no gate e na abertura.
@@ -42824,6 +42825,19 @@ window.fastMobileNav = function(ev, abaId, botao) {
       function limparNome(s){
         return String(s||'Sem destino').replace(/[\\/:*?"<>|\u0000-\u001f]/g,'-').replace(/\s+/g,' ').trim().slice(0,90)||'Sem destino';
       }
+      function siglas(s){return String(s||'').replace(/\bwm\b/gi,'WM');}
+      function localizarRota(itemId){
+        var id=String(itemId==null?'':itemId),achado=null;
+        Object.keys((window.bancoDados&&bancoDados.sequencias)||{}).some(function(data){return (bancoDados.sequencias[data]||[]).some(function(item){if(String(item.id)===id){achado={item:item,data:data};return true}return false})});
+        if(!achado){var r=((window.bancoDados&&bancoDados.rotas)||[]).find(function(x){return String(x.id)===id||String(x.rotaId||'')===id});if(r)achado={item:r,data:r.data||r.dataRota||''}}
+        return achado;
+      }
+      function metadados(item,dataSel,itemId,criadoEm){
+        var achado=localizarRota(itemId||(item&&item.id)),base=(item&&typeof item==='object')?item:(achado&&achado.item)||{};
+        if(achado&&achado.item)base=Object.assign({},achado.item,base);
+        var data=dataSel||base.data||base.dataRota||(achado&&achado.data)||String(criadoEm||'').slice(0,10);
+        return {cliente:limparNome(siglas(base.cliente||base.nomeCliente||'Cliente não informado')),data:dataNome(data),destino:limparNome(siglas(base.destino||'Destino não informado'))};
+      }
       function extensao(file){
         var tipo=(file&&file.type)||'image/jpeg';
         if(tipo.indexOf('png')>=0)return 'png'; if(tipo.indexOf('webp')>=0)return 'webp'; if(tipo.indexOf('heic')>=0)return 'heic';
@@ -42836,17 +42850,17 @@ window.fastMobileNav = function(ev, abaId, botao) {
       }
       window.fastDriveEnfileirarArquivos=async function(files,item,dataSel){
         files=Array.from(files||[]); if(!files.length)return;
-        var destino=limparNome(item&&item.destino);
+        var metaRota=metadados(item,dataSel,item&&item.id,new Date().toISOString()), destino=metaRota.destino;
         var totalFotos=item&&Array.isArray(item.fotos)?item.fotos.length:files.length;
         var inicio=Math.max(1,totalFotos-files.length+1);
         for(var i=0;i<files.length;i++){
           var arq=files[i];
           var numero=String(inicio+i).padStart(2,'0');
-          var nome=dataNome(dataSel)+' - '+destino+' - Foto '+numero+'.'+extensao(arq);
+          var nome=metaRota.data+' - '+destino+' - Foto '+numero+'.'+extensao(arq);
           await filaPut({
             id:'drive_'+Date.now()+'_'+i+'_'+Math.random().toString(36).slice(2),
             nome:nome, blob:arq, tipo:arq.type||'image/jpeg', criadoEm:new Date().toISOString(),
-            itemId:item&&item.id!=null?String(item.id):'', dataPasta:dataNome(dataSel),
+            itemId:item&&item.id!=null?String(item.id):'', clientePasta:metaRota.cliente, dataPasta:metaRota.data,
             destinoPasta:destino, fotoNumero:numero, tentativas:0, ultimoErro:''
           });
         }
@@ -42865,8 +42879,16 @@ window.fastMobileNav = function(ev, abaId, botao) {
         return (await cria.json()).id;
       }
       async function pastaFinal(reg){
-        var cfg=config(), data=reg.dataPasta||'Sem data', destino=reg.destinoPasta||'Sem destino';
-        var pastaData=await pastaDrive(data,cfg.folderId);
+        var cfg=config(),m=metadados(null,reg.dataPasta,reg.itemId,reg.criadoEm);
+        var invalido=function(v){return !v||/^sem\s|não informado/i.test(String(v))};
+        var cliente=invalido(reg.clientePasta)?m.cliente:reg.clientePasta;
+        var data=invalido(reg.dataPasta)?m.data:reg.dataPasta;
+        var destino=invalido(reg.destinoPasta)?m.destino:reg.destinoPasta;
+        reg.clientePasta=cliente;reg.dataPasta=data;reg.destinoPasta=destino;
+        var ex=(String(reg.nome||'').match(/\.([a-z0-9]+)$/i)||[])[1]||'jpg';
+        reg.nome=data+' - '+destino+' - Foto '+String(reg.fotoNumero||'01').padStart(2,'0')+'.'+ex;
+        var pastaCliente=await pastaDrive(cliente,cfg.folderId);
+        var pastaData=await pastaDrive(data,pastaCliente);
         return pastaDrive(destino,pastaData);
       }
       async function enviar(reg){
@@ -42894,7 +42916,7 @@ window.fastMobileNav = function(ev, abaId, botao) {
             status('Enviando '+(i+1)+' de '+fila.length+': '+fila[i].nome,'');
             try{
               var enviado=await enviar(fila[i]);
-              await ledgerPut({id:fila[i].id,itemId:fila[i].itemId||'',nome:fila[i].nome,driveId:enviado.id||'',link:enviado.webViewLink||'',enviadoEm:new Date().toISOString(),dataPasta:fila[i].dataPasta||'',destinoPasta:fila[i].destinoPasta||''});
+              await ledgerPut({id:fila[i].id,itemId:fila[i].itemId||'',nome:fila[i].nome,driveId:enviado.id||'',link:enviado.webViewLink||'',enviadoEm:new Date().toISOString(),clientePasta:fila[i].clientePasta||'',dataPasta:fila[i].dataPasta||'',destinoPasta:fila[i].destinoPasta||''});
               await filaDelete(fila[i].id);ok++;
             }
             catch(e){fila[i].tentativas=(fila[i].tentativas||0)+1;fila[i].ultimoErro=String(e.message||e);await filaPut(fila[i]);console.warn('Drive:',e);if(!token())break;}
@@ -43282,7 +43304,7 @@ window.fastMobileNav = function(ev, abaId, botao) {
       var id=(el.id||'').toLowerCase(),ac=(el.autocomplete||'').toLowerCase(),ph=(el.placeholder||'').toLowerCase();
       return !/(email|senha|password|token|clientid|folderid|url|cnpj|cpf|rg|cep|telefone|whatsapp|placa|chave|pix|agencia|conta|codigo|id$)/.test(id+' '+ac+' '+ph);
     }
-    document.addEventListener('input',function(e){var el=e.target;if(!campoCapitalizavel(el))return;var p=el.selectionStart,v=el.value.replace(/(^|[\s:;,.!?()\-\/])([\p{L}])/gu,function(_,a,b){return a+b.toLocaleUpperCase('pt-BR')});if(v!==el.value){el.value=v;try{el.setSelectionRange(p,p)}catch(x){}}},true);
+    document.addEventListener('input',function(e){var el=e.target;if(!campoCapitalizavel(el))return;var p=el.selectionStart,v=el.value.replace(/(^|[\s:;,.!?()\-\/])([\p{L}])/gu,function(_,a,b){return a+b.toLocaleUpperCase('pt-BR')}).replace(/\bwm\b/gi,'WM');if(v!==el.value){el.value=v;try{el.setSelectionRange(p,p)}catch(x){}}},true);
     if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){setTimeout(organizar,0)});else setTimeout(organizar,0);
   })();
   </script>
