@@ -21,9 +21,9 @@
   <meta name="fast-github-branch" content="main">
   <meta name="fast-github-path" content="index.html">
   <meta name="fast-github-token-env" content="GH_TOKEN">
-  <meta name="fast-app-version" content="2026.09.03-r96">
-  <meta name="fast-app-date" content="2026-09-03T23:32:00-03:00">
-  <meta name="fast-latest-update" content="r96: corrigida tabela de Despesas que estava desconfigurada; ordenamento por data com setinhas (igual Rotas) nos cabecalhos da tabela de Despesas; removido dropdown de ordenamento. | r95: ordenamento (mais recente / mais antigo) nas Despesas igual ao das Rotas; app abre na pagina correta conforme o atalho (principal=central, rotas=rotasDia, despesas=despesas); biometria dispara automaticamente ao abrir a Area Protegida; forma de pagamento (PIX, A Vista, Cartao Debito, Cartao Credito com nome do cartao) nas Despesas. | r94: pré-visualização (autocomplete) que aparecia sozinha corrigida em todos os campos; atualização automática sem precisar clicar em nada ao detectar nova versão; dados locais preservados via checkpoint">
+  <meta name="fast-app-version" content="2026.09.04-r97">
+  <meta name="fast-app-date" content="2026-09-04T02:08:46-03:00">
+  <meta name="fast-latest-update" content="r97: corrigido problema onde o app abria direto na Area Protegida em vez da pagina correta; o overlay da Area Protegida nao abre mais automaticamente no carregamento; apos o login abre na aba certa (FAST=pagina inicial, ROTAS=rotas do dia, DESPESAS=despesas). | r96: corrigida tabela de Despesas que estava desconfigurada; ordenamento por data com setinhas (igual Rotas) nos cabecalhos da tabela de Despesas; removido dropdown de ordenamento. | r95: ordenamento (mais recente / mais antigo) nas Despesas igual ao das Rotas; app abre na pagina correta conforme o atalho (principal=central, rotas=rotasDia, despesas=despesas); biometria dispara automaticamente ao abrir a Area Protegida; forma de pagamento (PIX, A Vista, Cartao Debito, Cartao Credito com nome do cartao) nas Despesas. | r94: pré-visualização (autocomplete) que aparecia sozinha corrigida em todos os campos; atualização automática sem precisar clicar em nada ao detectar nova versão; dados locais preservados via checkpoint">
   <!-- r92: verificação automática de nova versão ao abrir; Verificar Atualizações com cache-busting e sem fallback no-cors inválido. -->
   <!-- r70.1: lista corrente no HTML inicial; o painel não espera scripts tardios -->
   <meta name="fast-app-changelog-immediate" content="r70.1">
@@ -1358,7 +1358,7 @@ window.fastNotifPermitida=function(canal,tipo,mensagem){
       </div>
       <div class="fast-splash-name">FAST SERVIÇOS</div>
       <div class="fast-splash-tag">SOLUÇÕES EM LOGÍSTICA</div>
-      <div class="fast-splash-version">Versão <span id="fastSplashVersion">2026.09.03-r96</span></div>
+      <div class="fast-splash-version">Versão <span id="fastSplashVersion">2026.09.04-r97</span></div>
     </div>
     <div class="fast-splash-loader"><span></span></div>
   </div>
@@ -1375,7 +1375,7 @@ window.fastNotifPermitida=function(canal,tipo,mensagem){
         <div class="fast-gate-logo"><img src="assets/fast-servicos-icon-512.png?v=r69" alt="Fast Serviços" style="width:100%;height:100%;object-fit:contain;padding:6px;"></div>
         <h1 id="fastGateTitle">FAST Serviços</h1>
         <p id="fastGateSubtitle">SOLUÇÕES EM LOGÍSTICA</p>
-        <p class="fast-gate-version" id="fastGateVersion">Versão <span id="fastGateVersionNum">2026.09.03-r96</span></p>
+        <p class="fast-gate-version" id="fastGateVersion">Versão <span id="fastGateVersionNum">2026.09.04-r97</span></p>
       </div>
 
       <!-- Bloqueio por tentativas -->
@@ -1898,7 +1898,13 @@ window.fastNotifPermitida=function(canal,tipo,mensagem){
           }
         }
       } catch(e){ if (window.console) console.log('r95 hideGate nav erro:', e); }
-    }
+      // r97: Garante que o overlay da Area Protegida (empOverlay) NUNCA fica
+      // visivel apos o login. Ele so deve aparecer quando o usuario clica
+      // explicitamente em "Acessar Area Protegida".
+      try {
+        var _empOv = document.getElementById('empOverlay');
+        if (_empOv) _empOv.classList.remove('show');
+      } catch(e){}
     }
 
     function showCreateMode(){
@@ -6691,7 +6697,7 @@ window.fastNotifPermitida=function(canal,tipo,mensagem){
           <!-- Rodapé do menu: nome do app + versão -->
           <div class="nav-menu-footer">
             <div class="nav-menu-footer-app"><i class="fa-solid fa-bolt"></i> APP FAST SERVIÇOS</div>
-            <div class="nav-menu-footer-ver" id="navMenuVersao">Versão 2026.09.03-r96</div>
+            <div class="nav-menu-footer-ver" id="navMenuVersao">Versão 2026.09.04-r97</div>
           </div>
         </div>
       </div>
@@ -23835,10 +23841,10 @@ window.fastNotifPermitida=function(canal,tipo,mensagem){
               <div id="fastDeployInfo" style="background:var(--card-bg-2);border:1px solid var(--border);border-radius:10px;padding:12px;margin:10px 0;font-size:13px;">
                 <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
                   <div>
-                    <div><strong>Versão atual:</strong> <span id="fastVersaoLabel" style="color:var(--accent);font-weight:800;">2026.09.03-r96</span></div>
+                    <div><strong>Versão atual:</strong> <span id="fastVersaoLabel" style="color:var(--accent);font-weight:800;">2026.09.04-r97</span></div>
                     <div id="fastVersaoDateLabel" style="font-size:11.5px;color:var(--text-muted);margin-top:3px;"><i class="fa-solid fa-clock"></i> Lançada em 03/09/2026 15:35</div>
                   </div>
-                  <div id="fastVersaoOnlineLabel" style="font-size:12px;color:var(--text-muted);text-align:right;">Online: <strong>2026.09.03-r96</strong> <span style="color:var(--success);">(ok)</span></div>
+                  <div id="fastVersaoOnlineLabel" style="font-size:12px;color:var(--text-muted);text-align:right;">Online: <strong>2026.09.04-r97</strong> <span style="color:var(--success);">(ok)</span></div>
                 </div>
                 <div style="font-size:12px;color:var(--text-muted);word-break:break-all;margin-bottom:10px;"><i class="fa-solid fa-link"></i> <span id="fastUrlLabel">https://adaiascearataiana-gif.github.io/fastservicosapp/</span></div>
                 <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
@@ -42149,7 +42155,7 @@ CREATE POLICY "dest_del"   ON destinos FOR DELETE USING (true);
   <!-- ============================================================
        OVERLAY: Acesso protegido aos Dados da Empresa + Banco de Dados (SQL/Supabase)
        ============================================================ -->
-  <div id="empOverlay" class="emp-overlay show" role="dialog" aria-modal="true" aria-label="Dados da Empresa e Banco de Dados protegidos">
+  <div id="empOverlay" class="emp-overlay" role="dialog" aria-modal="true" aria-label="Dados da Empresa e Banco de Dados protegidos">
     <!-- Caixa de senha (criar/entrar) -->
     <div id="empPwdBox" class="emp-pwd-box" style="display: none;">
       <div class="emp-pwd-icon"><i class="fa-solid fa-lock"></i></div>
@@ -44091,12 +44097,16 @@ window.fastMobileNav = function(ev, abaId, botao) {
       var aba = '';
       try { aba = sessionStorage.getItem('fast_atalho_android_pendente') || abaDoAtalho(); } catch(e) { aba = abaDoAtalho(); }
       var destino = aba || 'central';
+      // r97: Garante que o overlay da Area Protegida esta fechado ao retomar.
+      try { var _eo = document.getElementById('empOverlay'); if (_eo) _eo.classList.remove('show'); } catch(e){}
       try {
         if (typeof window.proIr === 'function') { window.proIr(destino); }
       } catch(e){}
       try { sessionStorage.removeItem('fast_atalho_android_pendente'); } catch(e) {}
     }
     document.addEventListener('DOMContentLoaded', function(){
+      // r97: Esconde o overlay da Area Protegida no carregamento (seguranca extra).
+      try { var _eo0 = document.getElementById('empOverlay'); if (_eo0) _eo0.classList.remove('show'); } catch(e){}
       setTimeout(abrirAtalho, 350);
       setTimeout(retomarAtalho, 1400);
     });
@@ -44482,7 +44492,7 @@ window.fastMobileNav = function(ev, abaId, botao) {
 (function(){
   try {
     var m=document.querySelector('meta[name="fast-app-version"]');
-    if(m) m.content='2026.09.03-r96';
+    if(m) m.content='2026.09.04-r97';
     var d=document.querySelector('meta[name="fast-app-date"]');
     if(d) d.content='2026-09-03T20:19:00-03:00';
     var l=document.querySelector('meta[name="fast-latest-update"]');
