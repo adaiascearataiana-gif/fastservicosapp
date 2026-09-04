@@ -1,6 +1,6 @@
-const CACHE='fast-servicos-r89';
+const CACHE='fast-servicos-r101';
 const BASE='./';
-const CORE=[BASE,BASE+'manifest.webmanifest',BASE+'assets/fast-servicos-icon-192.png',BASE+'assets/fast-servicos-icon-512.png'];
+const CORE=[BASE,BASE+'manifest.webmanifest',BASE+'motorista.html',BASE+'manifest-motorista.webmanifest',BASE+'assets/fast-servicos-icon-192.png',BASE+'assets/fast-servicos-icon-512.png'];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE).catch(()=>{})));self.skipWaiting()});
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
 self.addEventListener('fetch',event=>{if(event.request.method!=='GET')return;const nav=event.request.mode==='navigate'||(event.request.headers.get('accept')||'').includes('text/html');if(nav){event.respondWith(fetch(event.request,{cache:'no-store'}).then(r=>{if(r.ok)caches.open(CACHE).then(c=>c.put(event.request,r.clone()));return r}).catch(()=>caches.match(event.request).then(r=>r||caches.match(BASE))));return}event.respondWith(caches.match(event.request).then(hit=>hit||fetch(event.request).then(r=>{if(r.ok&&new URL(event.request.url).origin===location.origin)caches.open(CACHE).then(c=>c.put(event.request,r.clone()));return r}))) });
