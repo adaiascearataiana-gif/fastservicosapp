@@ -1,9 +1,14 @@
 {
   "name": "fast-servicos-linux",
-  "version": "1.0.2",
-  "description": "FAST Serviços — gestão de rotas, entregas, despesas e equipe",
+  "version": "2.1.0",
+  "description": "FAST Serviços 2 — central profissional de rotas, entregas, finanças e equipe",
   "main": "src/main.js",
-  "author": "FAST Serviços",
+  "author": {
+    "name": "Adaías — FAST Serviços",
+    "email": "fastservicoslog@gmail.com"
+  },
+  "homepage": "https://adaiascearataiana-gif.github.io/fastservicosapp/",
+  "desktopName": "fast-servicos.desktop",
   "license": "UNLICENSED",
   "private": true,
   "scripts": {
@@ -30,8 +35,10 @@
     "linux": {
       "target": ["AppImage", "deb"],
       "category": "Office",
-      "icon": "build/icon.svg",
-      "synopsis": "Gestão de rotas, entregas, despesas e equipe"
+      "icon": "build/icon.png",
+      "synopsis": "Gestão de rotas, entregas, despesas e equipe",
+      "syncDesktopName": true,
+      "maintainer": "Adaías — FAST Serviços <fastservicoslog@gmail.com>"
     },
     "publish": [{"provider": "github", "owner": "adaiascearataiana-gif", "repo": "fastservicosapp"}]
   }

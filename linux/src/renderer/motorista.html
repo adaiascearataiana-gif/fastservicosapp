@@ -1,25 +1,983 @@
-<!doctype html>
-<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>FAST Motorista</title>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+<meta name="theme-color" content="#4f46e5">
+<meta name="description" content="FAST SERVIÇOS — App do Motorista: rotas do dia, botão CHEGUEI, fotos pela câmera e conclusão de rotas direto do celular do motorista.">
+<meta name="fast-app-version" content="2026.09.04-r101">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Motorista">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https:; img-src 'self' data: blob: https: http:; connect-src 'self' https: data: blob:; font-src 'self' https: data:;">
+<title>FAST SERVIÇOS — Motorista</title>
+<link rel="manifest" href="manifest-motorista.webmanifest?v=r101">
+<link rel="apple-touch-icon" sizes="192x192" href="assets/fast-servicos-icon-192.png?v=r101">
+<link rel="icon" type="image/png" sizes="192x192" href="assets/fast-servicos-icon-192.png?v=r101">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
-:root{font-family:Inter,system-ui,sans-serif;color:#eaf7f5;background:#07111f}*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 80% 0,#134e4a 0,transparent 35%),#07111f}.top{position:sticky;top:0;z-index:4;display:flex;align-items:center;justify-content:space-between;padding:16px 18px;background:rgba(7,17,31,.88);backdrop-filter:blur(18px);border-bottom:1px solid #1f3b4d}.brand{font-weight:900}.brand b{color:#facc15}.pill{padding:6px 10px;border-radius:999px;background:#0f766e;font-size:11px;font-weight:800}.wrap{max-width:760px;margin:auto;padding:20px}.card{background:rgba(15,35,51,.92);border:1px solid #25495c;border-radius:20px;padding:18px;margin-bottom:14px;box-shadow:0 18px 40px #0004}h1{font-size:24px;margin:0 0 5px}h2{font-size:18px}.muted{color:#9bb3c2;font-size:13px}.route .client{font-size:20px;font-weight:900}.route .dest{margin:10px 0;color:#d7e5eb;line-height:1.45}.actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px}button,input{border:0;border-radius:12px;padding:13px 14px;font:700 14px inherit}input{width:100%;margin:6px 0;background:#fff;color:#10202b}button{cursor:pointer;color:#fff;background:#0f766e}button.arrive{background:#d97706}button.done{background:#15803d}button.nav{background:#2563eb}button.photo{background:#7c3aed}.full{grid-column:1/-1}.hidden{display:none!important}.status{padding:10px;border-radius:10px;background:#092f2b;color:#7ef0d6;margin:12px 0}.error{background:#441b24;color:#fecdd3}.empty{text-align:center;padding:42px 16px}.login{max-width:430px;margin:8vh auto}.login .logo{width:68px;height:68px;border-radius:18px;display:grid;place-items:center;background:#facc15;color:#082f49;font-size:32px;font-weight:950}.progress{height:7px;border-radius:9px;background:#233c4c;overflow:hidden}.progress i{display:block;height:100%;width:35%;background:#2dd4bf;animation:move 1s infinite alternate}@keyframes move{to{transform:translateX(180%)}}@media(max-width:520px){.actions{grid-template-columns:1fr}.full{grid-column:auto}.wrap{padding:13px}}
-</style></head><body>
-<header class="top"><div class="brand"><b>FAST</b> MOTORISTA</div><div id="online" class="pill">ONLINE</div></header>
-<main class="wrap"><section id="login" class="card login"><div class="logo">F</div><h1>Acesso do motorista</h1><p class="muted">Entre com o usuário criado pela administração.</p><input id="user" autocomplete="username" placeholder="Usuário"><input id="pwd" type="password" autocomplete="current-password" placeholder="Senha"><button class="full" onclick="login()">Entrar com segurança</button><div id="msg"></div><details><summary class="muted">Configurar conexão</summary><input id="url" placeholder="URL REST do Supabase"><input id="key" type="password" placeholder="Chave anon pública"><button onclick="saveConfig()">Salvar conexão</button></details></section><section id="app" class="hidden"><div class="card"><h1 id="hello">Minhas rotas</h1><p class="muted" id="today"></p><div id="sync"></div></div><div id="routes"></div></section></main>
-<script>
+/* ============================================================
+   APP DO MOTORISTA — r101 · mesmo estilo visual do FAST SERVIÇOS
+   ============================================================ */
+:root{
+  --accent:#4f46e5; --accent2:#6366f1; --accent-soft:#eef2ff;
+  --bg:#eef2f7; --card:#ffffff; --text:#0f172a; --muted:#64748b; --faint:#94a3b8;
+  --border:#e2e8f0; --ok:#059669; --ok-soft:#d1fae5; --warn:#b45309; --warn-soft:#fef3c7;
+  --danger:#dc2626; --danger-soft:#fee2e2; --radius:16px;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.5;overflow-x:hidden}
+button{font-family:inherit;cursor:pointer}
+.hide{display:none !important}
+
+/* ---------- SPLASH (mesma abertura do app principal) ---------- */
+#motSplash{position:fixed;inset:0;z-index:2147483646;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;overflow:hidden;opacity:1;transition:opacity .5s ease}
+#motSplash.hide{opacity:0;pointer-events:none}
+.ms-bg{position:absolute;inset:0;z-index:0;background:radial-gradient(circle at 50% 35%, #1e293b 0%, #0f172a 55%, #020617 100%)}
+.ms-bg::after{content:"";position:absolute;inset:0;background:
+  radial-gradient(circle at 20% 80%, rgba(124,58,237,0.12) 0%, transparent 40%),
+  radial-gradient(circle at 80% 20%, rgba(6,182,212,0.10) 0%, transparent 40%)}
+.ms-content{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;text-align:center;animation:msIn .7s cubic-bezier(0.22,1,0.36,1) both}
+@keyframes msIn{from{opacity:0;transform:translateY(24px) scale(0.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+.ms-logo{width:170px;height:170px;margin-bottom:20px;border-radius:26px;overflow:hidden;
+  box-shadow:0 18px 50px rgba(124,58,237,0.30), 0 0 0 1px rgba(255,255,255,0.06) inset;animation:msFloat 3.2s ease-in-out infinite}
+.ms-logo img{width:100%;height:100%;object-fit:contain;display:block}
+@keyframes msFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.ms-name{font-size:30px;font-weight:900;color:#fff;letter-spacing:2px}
+.ms-tag{font-size:13px;font-weight:800;color:rgba(255,255,255,0.62);letter-spacing:3.5px;margin-top:6px}
+.ms-ver{font-size:11.5px;color:rgba(255,255,255,0.42);font-weight:600;margin-top:14px}
+.ms-ver span{color:rgba(129,140,248,0.9);font-weight:800}
+.ms-loader{position:relative;z-index:2;margin-top:26px;width:180px;height:4px;border-radius:4px;background:rgba(255,255,255,0.12);overflow:hidden}
+.ms-loader span{display:block;height:100%;width:40%;border-radius:4px;background:linear-gradient(90deg,#818cf8,#22d3ee);animation:msLoad 1.2s ease-in-out infinite}
+@keyframes msLoad{0%{transform:translateX(-100%)}100%{transform:translateX(350%)}}
+
+/* ---------- GATE DE LOGIN (mesmo card de vidro do app principal) ---------- */
+#motGate{position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;padding:22px;
+  background:radial-gradient(circle at 50% 30%, #1e293b 0%, #0f172a 55%, #020617 100%)}
+.gate-card{position:relative;width:100%;max-width:410px;background:rgba(30,41,59,0.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border:1px solid rgba(148,163,184,0.18);border-radius:24px;padding:34px 30px 28px;
+  box-shadow:0 30px 80px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.04) inset;color:#fff}
+.gate-brand{text-align:center;margin-bottom:24px}
+.gate-logo{width:60px;height:60px;margin:0 auto 14px;border-radius:17px;background:linear-gradient(135deg,#6366f1,#4f46e5);
+  display:flex;align-items:center;justify-content:center;font-size:28px;color:#fff;box-shadow:0 8px 24px rgba(79,70,229,0.45)}
+.gate-brand h1{font-size:23px;font-weight:900;margin:0;letter-spacing:-0.5px}
+.gate-brand p{font-size:12.5px;color:rgba(255,255,255,0.6);margin:4px 0 0;font-weight:700;letter-spacing:0.4px}
+.gate-version{font-size:11px;color:rgba(255,255,255,0.42);margin:9px 0 0;font-weight:600}
+.gate-version span{color:rgba(129,140,248,0.85);font-weight:800}
+.gate-field{margin-bottom:15px}
+.gate-field label{display:block;font-size:12px;font-weight:800;color:rgba(255,255,255,0.55);margin-bottom:7px;text-transform:uppercase;letter-spacing:0.4px}
+.fg-wrap{position:relative;display:flex;align-items:center}
+.fg-ico{position:absolute;left:14px;font-size:15px;color:rgba(255,255,255,0.4);pointer-events:none}
+.fg-wrap input{width:100%;padding:13px 44px 13px 42px;border-radius:12px;font-size:15px;font-weight:600;
+  background:rgba(15,23,42,0.6);border:1px solid rgba(148,163,184,0.2);color:#fff;transition:border-color .2s, box-shadow .2s}
+.fg-wrap input::placeholder{color:rgba(255,255,255,0.3)}
+.fg-wrap input:focus{outline:none;border-color:#818cf8;box-shadow:0 0 0 3px rgba(129,140,248,0.18)}
+.fg-toggle{position:absolute;right:10px;background:none;border:none;color:rgba(255,255,255,0.4);padding:6px;font-size:15px}
+.fg-toggle:hover{color:rgba(255,255,255,0.75)}
+.gate-check{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:rgba(255,255,255,0.7);cursor:pointer;margin:2px 0 12px}
+.gate-check input{width:17px;height:17px;accent-color:#6366f1;cursor:pointer}
+.gate-err{color:#fca5a5;font-size:12.5px;font-weight:700;min-height:19px;margin-bottom:10px;line-height:1.45}
+.gate-btn{width:100%;padding:14px;border-radius:12px;border:none;font-size:15px;font-weight:800;color:#fff;
+  background:linear-gradient(135deg,#6366f1,#4f46e5);display:flex;align-items:center;justify-content:center;gap:9px;
+  box-shadow:0 6px 20px rgba(79,70,229,0.4);transition:filter .2s, transform .1s}
+.gate-btn:hover{filter:brightness(1.1)}
+.gate-btn:active{transform:scale(0.98)}
+.gate-btn:disabled{opacity:0.6;cursor:not-allowed}
+.gate-foot{text-align:center;margin-top:15px;font-size:12px;font-weight:600;color:rgba(255,255,255,0.5);line-height:1.55}
+.gate-loading{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:rgba(15,23,42,0.7);border-radius:24px;z-index:10}
+.gate-loading.show{display:flex}
+.gate-spinner{width:42px;height:42px;border:4px solid rgba(255,255,255,0.15);border-top-color:#818cf8;border-radius:50%;animation:gateSpin .8s linear infinite}
+@keyframes gateSpin{to{transform:rotate(360deg)}}
+
+/* ---------- APP PRINCIPAL ---------- */
+.mot-header{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:12px;padding:12px 16px;
+  background:linear-gradient(135deg,#4f46e5,#6366f1);color:#fff;box-shadow:0 6px 24px rgba(79,70,229,0.35)}
+.mot-logo{width:42px;height:42px;border-radius:12px;background:#fff;object-fit:contain;padding:3px;box-shadow:0 4px 14px rgba(0,0,0,0.25)}
+.mot-titles{flex:1;min-width:0}
+.mot-h1{font-size:16px;font-weight:900;letter-spacing:0.6px;line-height:1.15}
+.mot-h2{font-size:11px;font-weight:800;color:rgba(255,255,255,0.85);letter-spacing:1.6px;text-transform:uppercase}
+.mh-btn{width:40px;height:40px;border-radius:12px;border:1px solid rgba(255,255,255,0.28);background:rgba(255,255,255,0.12);
+  color:#fff;font-size:15px;display:flex;align-items:center;justify-content:center;transition:background .2s, transform .1s}
+.mh-btn:hover{background:rgba(255,255,255,0.22)}
+.mh-btn:active{transform:scale(0.94)}
+.mot-statusbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:9px 16px;background:#fff;border-bottom:1px solid var(--border)}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:20px;font-size:11.5px;font-weight:800;letter-spacing:0.2px}
+.chip-on{background:var(--ok-soft);color:var(--ok)}
+.chip-off{background:#f1f5f9;color:var(--muted)}
+.chip-wait{background:var(--warn-soft);color:var(--warn)}
+.chip-erro{background:var(--danger-soft);color:var(--danger)}
+.mot-main{max-width:760px;margin:0 auto;padding:18px 16px 28px}
+.mot-greet{margin-bottom:14px}
+.mot-ola{font-size:21px;font-weight:900;letter-spacing:-0.3px}
+.mot-ola b{color:var(--accent)}
+.mot-data{font-size:13px;font-weight:700;color:var(--muted);margin-top:2px;text-transform:capitalize}
+.mot-banner{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border-radius:13px;background:var(--warn-soft);
+  color:var(--warn);font-size:13px;font-weight:700;line-height:1.5;margin-bottom:14px;border:1px solid rgba(180,83,9,0.22)}
+.mot-banner-erro{background:var(--danger-soft);color:var(--danger);border-color:rgba(220,38,38,0.22)}
+.mb-x{margin-left:auto;background:none;border:none;font-size:18px;font-weight:900;color:inherit;line-height:1;padding:0 2px}
+.mot-resumo{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px}
+.mr-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:13px 14px;box-shadow:0 2px 10px rgba(15,23,42,0.05)}
+.mr-num{font-size:26px;font-weight:900;letter-spacing:-0.5px;line-height:1.05}
+.mr-lbl{font-size:11.5px;font-weight:800;color:var(--muted);margin-top:4px;display:flex;align-items:center;gap:6px}
+.mr-card.ok .mr-num{color:var(--ok)} .mr-card.ok .mr-lbl i{color:var(--ok)}
+.mr-card.pend .mr-num{color:var(--warn)} .mr-card.pend .mr-lbl i{color:var(--warn)}
+.mr-card.foto .mr-num{color:var(--accent2)} .mr-card.foto .mr-lbl i{color:var(--accent2)}
+.mot-databar{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:13px;padding:9px 10px;margin-bottom:10px}
+.mot-databar input[type=date]{flex:1;border:1px solid var(--border);border-radius:10px;padding:9px 10px;font-family:inherit;font-size:14px;font-weight:700;color:var(--text);background:#f8fafc}
+.mot-databar input[type=date]:focus{outline:none;border-color:var(--accent2);box-shadow:0 0 0 3px rgba(99,102,241,0.15)}
+.db-nav{width:38px;height:38px;border-radius:10px;border:1px solid var(--border);background:#f8fafc;color:var(--muted);font-size:13px;display:flex;align-items:center;justify-content:center}
+.db-nav:active{background:var(--accent-soft);color:var(--accent)}
+.db-hj{padding:9px 14px;border-radius:10px;border:none;background:var(--accent-soft);color:var(--accent);font-size:12.5px;font-weight:800}
+.mot-chips{display:flex;gap:8px;overflow-x:auto;padding:2px 1px 8px;scrollbar-width:none}
+.mot-chips::-webkit-scrollbar{display:none}
+.d-chip{flex-shrink:0;padding:7px 13px;border-radius:20px;border:1px solid var(--border);background:var(--card);
+  color:var(--muted);font-size:12px;font-weight:800;white-space:nowrap}
+.d-chip.ativo{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 4px 12px rgba(79,70,229,0.35)}
+.mot-lista{display:flex;flex-direction:column;gap:12px}
+.mot-card{background:var(--card);border:1px solid var(--border);border-left:5px solid var(--accent2);border-radius:var(--radius);
+  padding:15px 15px 13px;box-shadow:0 3px 14px rgba(15,23,42,0.06);animation:cardIn .35s ease both}
+@keyframes cardIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.mot-card.done{border-left-color:var(--ok);opacity:0.94}
+.mc-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:9px}
+.mc-badge{display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:20px;font-size:10.5px;font-weight:900;letter-spacing:0.6px;text-transform:uppercase}
+.st-ok{background:var(--ok-soft);color:var(--ok)}
+.st-rota{background:var(--accent-soft);color:var(--accent)}
+.st-wait{background:var(--warn-soft);color:var(--warn)}
+.mc-id{font-size:11.5px;font-weight:800;color:var(--faint)}
+.mc-linha{display:flex;align-items:flex-start;gap:9px;font-size:14px;font-weight:700;color:var(--text);margin-top:5px;line-height:1.4}
+.mc-linha i{width:17px;margin-top:3px;font-size:13px;color:var(--faint);text-align:center;flex-shrink:0}
+.mc-linha.cli span{font-weight:900}
+.mc-linha.dest span{color:#334155}
+.mc-obs{margin-top:7px;padding:9px 11px;border-radius:10px;background:#f8fafc;border:1px dashed var(--border);
+  font-size:12.5px;font-weight:700;color:var(--muted);line-height:1.45}
+.mc-obs i{margin-right:5px;color:var(--faint)}
+.mc-chegou{margin-top:9px;display:flex;align-items:center;gap:8px;padding:8px 11px;border-radius:10px;
+  background:var(--accent-soft);color:var(--accent);font-size:12.5px;font-weight:900;letter-spacing:0.3px}
+.mc-feita{margin-top:7px;display:flex;align-items:center;gap:8px;padding:8px 11px;border-radius:10px;
+  background:var(--ok-soft);color:var(--ok);font-size:12.5px;font-weight:900;letter-spacing:0.3px}
+.mc-fotos{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+.mc-fotos:empty{display:none}
+.mc-thumb{width:54px;height:54px;border-radius:10px;object-fit:cover;border:2px solid var(--accent-soft);background:#f1f5f9}
+.mc-fotos-label{align-self:center;font-size:11.5px;font-weight:800;color:var(--muted)}
+.mc-btns{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.mbtn{flex:1;min-width:105px;padding:12px 10px;border-radius:12px;border:none;font-size:12.5px;font-weight:900;
+  letter-spacing:0.4px;display:flex;align-items:center;justify-content:center;gap:7px;transition:filter .15s, transform .1s}
+.mbtn:active{transform:scale(0.97)}
+.mbtn:disabled{opacity:0.55;cursor:not-allowed}
+.b-cheguei{background:var(--warn-soft);color:var(--warn)}
+.b-cheguei:hover:not(:disabled){filter:brightness(0.97)}
+.b-cheguei.off{background:#f1f5f9;color:var(--faint)}
+.b-foto{background:var(--ok-soft);color:var(--ok)}
+.b-foto:hover{filter:brightness(0.97)}
+.b-concluir{background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;box-shadow:0 5px 16px rgba(79,70,229,0.35)}
+.b-concluir:hover{filter:brightness(1.08)}
+.mot-vazio{text-align:center;padding:46px 22px;background:var(--card);border:1px dashed var(--border);border-radius:var(--radius);color:var(--muted)}
+.mot-vazio i{font-size:44px;color:var(--faint);margin-bottom:12px;display:block}
+.mv-t{font-size:16px;font-weight:900;color:var(--text)}
+.mv-s{font-size:13px;font-weight:600;color:var(--muted);margin-top:6px;line-height:1.6}
+.mot-footer{text-align:center;padding:20px 16px 30px;font-size:11.5px;font-weight:700;color:var(--faint);line-height:1.7}
+
+/* ---------- MODAL DE CONFIRMAÇÃO ---------- */
+#motModal{position:fixed;inset:0;z-index:2147483000;display:flex;align-items:center;justify-content:center;padding:22px;background:rgba(15,23,42,0.6);backdrop-filter:blur(4px)}
+.mot-modal-card{width:100%;max-width:360px;background:#fff;border-radius:20px;padding:24px 22px;text-align:center;
+  box-shadow:0 30px 80px rgba(0,0,0,0.4);animation:cardIn .28s ease both}
+.mm-icon{width:58px;height:58px;margin:0 auto 14px;border-radius:18px;background:var(--accent-soft);color:var(--accent);
+  display:flex;align-items:center;justify-content:center;font-size:25px}
+.mm-t{font-size:18px;font-weight:900;letter-spacing:-0.3px}
+.mm-s{font-size:13.5px;font-weight:600;color:var(--muted);margin-top:7px;line-height:1.55}
+.mm-btns{display:flex;gap:10px;margin-top:20px}
+.mm-cancel{flex:1;padding:12px;border-radius:12px;border:1px solid var(--border);background:#f8fafc;color:var(--muted);font-size:13.5px;font-weight:800}
+.mm-ok{flex:1;padding:12px;border-radius:12px;border:none;background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;font-size:13.5px;font-weight:800;box-shadow:0 5px 16px rgba(79,70,229,0.35)}
+
+/* ---------- TOASTS ---------- */
+#motToasts{position:fixed;left:50%;transform:translateX(-50%);bottom:18px;z-index:2147483600;display:flex;flex-direction:column;gap:8px;width:min(92vw,420px);pointer-events:none}
+.mtoast{display:flex;align-items:center;gap:10px;padding:13px 15px;border-radius:13px;background:rgba(15,23,42,0.92);
+  color:#fff;font-size:13px;font-weight:700;line-height:1.45;box-shadow:0 14px 40px rgba(0,0,0,0.4);animation:toastIn .3s ease both}
+@keyframes toastIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.mtoast.ok{border-left:4px solid #10b981}
+.mtoast.erro{border-left:4px solid #ef4444}
+.mtoast.info{border-left:4px solid #818cf8}
+.mtoast.saindo{opacity:0;transform:translateY(10px);transition:all .35s ease}
+
+.ff-wrap{position:relative;width:54px;height:54px}
+.ff-badge{position:absolute;right:-6px;bottom:-6px;width:22px;height:22px;border-radius:50%;
+  background:#fff;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px}
+.ff-pend{color:var(--warn)} .ff-env{color:var(--accent2)} .ff-ok{color:var(--ok)}
+@media (min-width:520px){
+  .mot-resumo{grid-template-columns:repeat(4,1fr)}
+  .mr-num{font-size:30px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:0.001s !important;transition-duration:0.001s !important}
+}
+</style>
+<script src="https://sites.super.myninja.ai/_assets/ninja-daytona-script.js"></script>
+</head>
+<body>
+
+<!-- ============ SPLASH ============ -->
+<div id="motSplash">
+  <div class="ms-bg"></div>
+  <div class="ms-content">
+    <div class="ms-logo"><img src="assets/fast-servicos-icon-512.png?v=r101" alt="Fast Serviços"></div>
+    <div class="ms-name">FAST SERVIÇOS</div>
+    <div class="ms-tag">APP DO MOTORISTA</div>
+    <div class="ms-ver">Versão <span id="motSplashVersion">2026.09.04-r101</span></div>
+  </div>
+  <div class="ms-loader"><span></span></div>
+</div>
+
+<!-- ============ GATE DE LOGIN ============ -->
+<div id="motGate" class="hide">
+  <div class="gate-card">
+    <div class="gate-loading" id="motGateLoading"><div class="gate-spinner"></div></div>
+    <div class="gate-brand">
+      <div class="gate-logo"><i class="fa-solid fa-motorcycle"></i></div>
+      <h1>App do Motorista</h1>
+      <p>FAST SERVIÇOS · SOLUÇÕES EM LOGÍSTICA</p>
+      <div class="gate-version">Versão <span>2026.09.04-r101</span></div>
+    </div>
+    <div class="gate-field">
+      <label for="motUser">Usuário</label>
+      <div class="fg-wrap"><i class="fa-solid fa-user fg-ico"></i>
+        <input id="motUser" type="text" autocomplete="username" inputmode="email" placeholder="ex.: joao.silva" autocapitalize="none" autocorrect="off" spellcheck="false">
+      </div>
+    </div>
+    <div class="gate-field">
+      <label for="motPwd">Senha</label>
+      <div class="fg-wrap"><i class="fa-solid fa-lock fg-ico"></i>
+        <input id="motPwd" type="password" autocomplete="current-password" placeholder="••••••••">
+        <button type="button" class="fg-toggle" id="motPwdEye" tabindex="-1" aria-label="Mostrar senha"><i class="fa-solid fa-eye"></i></button>
+      </div>
+    </div>
+    <label class="gate-check"><input type="checkbox" id="motLembrar" checked> Manter conectado neste dispositivo</label>
+    <div class="gate-err" id="motGateErr"></div>
+    <button type="button" class="gate-btn" id="motEntrarBtn" onclick="motEntrar()"><i class="fa-solid fa-right-to-bracket"></i> ENTRAR</button>
+    <div class="gate-foot">O acesso é criado pelo patrão no app do FAST SERVIÇOS:<br>RH › Usuários e Acessos › App do Motorista.</div>
+  </div>
+</div>
+
+<!-- ============ APP ============ -->
+<div id="motApp" class="hide">
+  <header class="mot-header">
+    <img src="assets/fast-servicos-icon-192.png?v=r101" class="mot-logo" alt="Fast Serviços">
+    <div class="mot-titles">
+      <div class="mot-h1">FAST SERVIÇOS</div>
+      <div class="mot-h2">App do Motorista</div>
+    </div>
+    <button class="mh-btn" id="motInstallBtn" onclick="motInstalar()" title="Instalar aplicativo" style="display:none"><i class="fa-solid fa-download"></i></button>
+    <button class="mh-btn" onclick="motAtualizar()" title="Atualizar rotas"><i class="fa-solid fa-rotate"></i></button>
+    <button class="mh-btn" onclick="motSair()" title="Sair"><i class="fa-solid fa-right-from-bracket"></i></button>
+  </header>
+
+  <div class="mot-statusbar">
+    <span id="motGpsChip" class="chip chip-wait"><i class="fa-solid fa-satellite-dish"></i> GPS iniciando…</span>
+    <span id="motNetChip" class="chip chip-off"><i class="fa-solid fa-wifi"></i> —</span>
+    <span id="motSessChip" class="chip chip-on"><i class="fa-solid fa-user-check"></i> —</span>
+  </div>
+
+  <main class="mot-main">
+    <div class="mot-greet">
+      <div class="mot-ola">Olá, <b id="motNome">—</b> 👋</div>
+      <div class="mot-data" id="motDataHoje">—</div>
+    </div>
+
+    <div id="motBannerOffline" class="mot-banner hide"></div>
+    <div id="motBannerSQL" class="mot-banner mot-banner-erro hide"></div>
+
+    <div class="mot-resumo">
+      <div class="mr-card"><div class="mr-num" id="mrTotal">0</div><div class="mr-lbl"><i class="fa-solid fa-route"></i> Rotas</div></div>
+      <div class="mr-card ok"><div class="mr-num" id="mrFeitas">0</div><div class="mr-lbl"><i class="fa-solid fa-circle-check"></i> Concluídas</div></div>
+      <div class="mr-card pend"><div class="mr-num" id="mrPend">0</div><div class="mr-lbl"><i class="fa-solid fa-clock"></i> Pendentes</div></div>
+      <div class="mr-card foto"><div class="mr-num" id="mrFotos">0</div><div class="mr-lbl"><i class="fa-solid fa-camera"></i> Fotos</div></div>
+    </div>
+
+    <div class="mot-databar">
+      <button class="db-nav" onclick="motMoverDia(-1)" aria-label="Dia anterior"><i class="fa-solid fa-chevron-left"></i></button>
+      <input type="date" id="motData" onchange="motTrocarData(this.value)">
+      <button class="db-hj" onclick="motIrHoje()">Hoje</button>
+      <button class="db-nav" onclick="motMoverDia(1)" aria-label="Próximo dia"><i class="fa-solid fa-chevron-right"></i></button>
+    </div>
+
+    <div class="mot-chips" id="motChipsDatas"></div>
+
+    <div id="motLista" class="mot-lista"></div>
+
+    <div id="motVazio" class="mot-vazio hide">
+      <i class="fa-solid fa-mug-hot"></i>
+      <div class="mv-t">Nenhuma rota nesta data</div>
+      <div class="mv-s">Quando o patrão atribuir rotas para você (campo Motorista), elas aparecem aqui automaticamente. Toque em ↻ para atualizar.</div>
+    </div>
+  </main>
+
+  <footer class="mot-footer">
+    FAST SERVIÇOS · App do Motorista · <span id="motVersaoRodape">2026.09.04-r101</span><br>
+    Rotas · CHEGUEI · Fotos · Conclusão — tudo sincronizado com o patrão 🏍️
+  </footer>
+</div>
+
+<!-- ============ MODAL DE CONFIRMAÇÃO ============ -->
+<div id="motModal" class="hide" onclick="if(event.target===this)motModalFechar()">
+  <div class="mot-modal-card">
+    <div class="mm-icon"><i class="fa-solid fa-circle-check"></i></div>
+    <div class="mm-t" id="motModalTitulo">Concluir rota?</div>
+    <div class="mm-s" id="motModalTexto"></div>
+    <div class="mm-btns">
+      <button class="mm-cancel" onclick="motModalFechar()">Cancelar</button>
+      <button class="mm-ok" id="motModalOk">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="motInputFoto" accept="image/*" capture="environment" multiple style="display:none">
+<div id="motToasts"></div>
+<script id="r101-motorista-app">
+/* ============================================================
+   APP DO MOTORISTA — r101 · NÚCLEO (login, dados, datas)
+   Escopo global (top-level) para compartilhar com o bloco de ações
+   ============================================================ */
 'use strict';
-const $=id=>document.getElementById(id), state={access:null,routes:[],watch:null};
-const cfg=()=>({url:localStorage.getItem('fast_motorista_sb_url')||'',key:localStorage.getItem('fast_motorista_sb_key')||''});
-const hdr=extra=>Object.assign({apikey:cfg().key,Authorization:'Bearer '+cfg().key,'Content-Type':'application/json'},extra||{});
-const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-function saveConfig(){localStorage.setItem('fast_motorista_sb_url',$('url').value.trim().replace(/\/$/,''));localStorage.setItem('fast_motorista_sb_key',$('key').value.trim());note('Conexão salva.','ok')}
-function note(text,type){$('msg').className='status '+(type==='error'?'error':'');$('msg').textContent=text}
-async function digest(text){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(text));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
-async function login(){try{const c=cfg();if(!c.url||!c.key)throw Error('Configure o Supabase primeiro.');const u=$('user').value.trim().toLowerCase(),p=$('pwd').value;if(!u||!p)throw Error('Informe usuário e senha.');note('Validando acesso...');const r=await fetch(c.url+'/motorista_acessos?usuario=eq.'+encodeURIComponent(u)+'&ativo=eq.true&select=*',{headers:hdr()});if(!r.ok)throw Error('Falha de conexão ('+r.status+').');const rows=await r.json(),a=rows[0];if(!a)throw Error('Usuário não encontrado ou bloqueado.');const candidates=[await digest(p+(a.salt||'')),await digest((a.salt||'')+p),await digest(p)];if(a.senha_hash&&!candidates.includes(String(a.senha_hash).toLowerCase()))throw Error('Senha inválida.');state.access=a;sessionStorage.setItem('fast_motorista_session',JSON.stringify({id:a.id,motorista_id:a.motorista_id,nome:a.nome||u}));$('login').classList.add('hidden');$('app').classList.remove('hidden');$('hello').textContent='Olá, '+(a.nome||u);startGps();await loadRoutes()}catch(e){note(e.message,'error')}}
-async function loadRoutes(){const c=cfg(),id=state.access.motorista_id,today=new Date().toISOString().slice(0,10);$('today').textContent=new Date().toLocaleDateString('pt-BR',{dateStyle:'full'});$('sync').innerHTML='<div class="progress"><i></i></div>';try{const q='/sequencias_itens?motorista_id=eq.'+encodeURIComponent(id)+'&data=eq.'+today+'&select=*&order=id.asc';const r=await fetch(c.url+q,{headers:hdr()});if(!r.ok)throw Error('Não foi possível carregar as rotas.');state.routes=await r.json();render()}catch(e){$('routes').innerHTML='<div class="card error">'+esc(e.message)+'</div>'}finally{$('sync').innerHTML=''}}
-function render(){const host=$('routes');if(!state.routes.length){host.innerHTML='<div class="card empty"><h2>✅ Nenhuma rota atribuída hoje</h2><p class="muted">Novas rotas aparecerão após sincronizar.</p><button onclick="loadRoutes()">Sincronizar</button></div>';return}host.innerHTML=state.routes.map((r,i)=>`<article class="card route"><span class="pill">ROTA ${i+1}</span><div class="client">${esc(r.cliente||'Cliente')}</div><div class="dest"><b>Destino</b><br>${esc(r.destino||'-')}</div><div class="muted">${r.chegou_em?'🟠 Cheguei: '+new Date(r.chegou_em).toLocaleTimeString('pt-BR'):''} ${r.concluida_em?' · ✅ Concluída':''}</div><div class="actions"><button class="nav" onclick="navigate('${encodeURIComponent(r.destino||'')}')">Navegar</button><button class="arrive" onclick="mark('${esc(r.id)}','chegou_em')">Cheguei</button><label><input class="hidden" type="file" accept="image/*" capture="environment" onchange="photo('${esc(r.id)}',this)"><span style="display:block;text-align:center" class="photo">📷 Tirar foto</span></label><button class="done" onclick="mark('${esc(r.id)}','concluida_em')">Concluir rota</button></div></article>`).join('')}
-function navigate(d){open('https://www.google.com/maps/search/?api=1&query='+d,'_blank')}
-async function mark(id,field){const now=new Date().toISOString();const r=await fetch(cfg().url+'/sequencias_itens?id=eq.'+encodeURIComponent(id),{method:'PATCH',headers:hdr({Prefer:'return=minimal'}),body:JSON.stringify({[field]:now})});if(!r.ok)return alert('Não foi possível atualizar.');const item=state.routes.find(x=>String(x.id)===String(id));if(item)item[field]=now;render()}
-async function photo(routeId,input){const file=input.files[0];if(!file)return;const data=await new Promise((ok,no)=>{const x=new FileReader;x.onload=()=>ok(x.result);x.onerror=no;x.readAsDataURL(file)});const body={motorista_id:state.access.motorista_id,rota_id:routeId,nome_arquivo:file.name||('foto-'+Date.now()+'.jpg'),mime_type:file.type||'image/jpeg',dados_base64:data,processado:false,created_at:new Date().toISOString()};const r=await fetch(cfg().url+'/motorista_fotos',{method:'POST',headers:hdr({Prefer:'return=minimal'}),body:JSON.stringify(body)});alert(r.ok?'Foto enviada para a fila do Google Drive.':'A foto não foi enviada. Tente novamente.')}
-function startGps(){if(!navigator.geolocation)return;state.watch=navigator.geolocation.watchPosition(async p=>{const body={motorista_id:state.access.motorista_id,latitude:p.coords.latitude,longitude:p.coords.longitude,precisao:p.coords.accuracy,atualizado_em:new Date().toISOString()};await fetch(cfg().url+'/rastreamento?motorista_id=eq.'+encodeURIComponent(state.access.motorista_id),{method:'POST',headers:hdr({Prefer:'resolution=merge-duplicates,return=minimal'}),body:JSON.stringify(body)}).catch(()=>{})},()=>{},{enableHighAccuracy:true,maximumAge:15000,timeout:12000})}
-addEventListener('online',()=>{$('online').textContent='ONLINE';loadRoutes()});addEventListener('offline',()=>{$('online').textContent='OFFLINE'});$('url').value=cfg().url;$('key').value=cfg().key;
-</script><script src="desktop-bridge.js"></script></body></html>
+var SB_URL='https://jizoedwnyfcjokoqgfmn.supabase.co/rest/v1';
+var SB_KEY='sb_publishable_mXMGOmMueyVWcS8UdQHP-w_sa13m9B4';
+var VER='2026.09.04-r101';
+var K_SESSAO='mot_sessao_v1';
+var K_FILA='mot_fila_fotos_v1';
+var K_ACOES='mot_acoes_pendentes_v1';
+var K_CACHE='mot_cache_rotas_v1';
+var ESTADO={
+  sessao:null,        // {id, username, employee_name, motorista_id}
+  dataSel:'',         // YYYY-MM-DD em foco
+  rotas:[],           // linhas do dia selecionado (formato servidor)
+  indiceDatas:[],     // datas com rotas minhas
+  fotosLocais:{},     // itemId -> [{blobUrl,status,hora,recId}]
+  sqlPendente:false,  // tabela/coluna r101 ausente na nuvem
+  gps:{watch:null, ultima:0, ativo:false, rastOk:true, lat:null, lng:null, precisao:0, vel:null}
+};
+
+/* ---------- helpers ---------- */
+function $(id){return document.getElementById(id)}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function jget(k,d){try{return JSON.parse(localStorage.getItem(k)||JSON.stringify(d))}catch(e){return d}}
+function jset(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+function hdrs(extra){var h={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'};if(extra)Object.assign(h,extra);return h}
+function hojeISO(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function fmtDataBR(iso){if(!iso)return '—';var p=String(iso).split('-');return p.length===3?p[2]+'/'+p[1]+'/'+p[0]:iso}
+function fmtDataLonga(iso){try{var d=new Date(iso+'T12:00:00');var dias=['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
+  var meses=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+  return dias[d.getDay()]+', '+d.getDate()+' de '+meses[d.getMonth()]+' de '+d.getFullYear()}catch(e){return fmtDataBR(iso)}}
+function fmtHora(iso){try{var d=new Date(iso);return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}catch(e){return '—'}}
+function fmtMoeda(v){var n=Number(v);if(!n||isNaN(n))return '';try{return n.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}catch(e){return 'R$ '+n.toFixed(2).replace('.',',')}}
+function strEq(a,b){return String(a==null?'':a).trim().toUpperCase()===String(b==null?'':b).trim().toUpperCase()}
+
+/* ---------- toasts ---------- */
+function toast(msg,tipo){
+  var box=$('motToasts');if(!box)return;
+  var el=document.createElement('div');
+  el.className='mtoast '+(tipo||'info');
+  var ico=tipo==='ok'?'fa-circle-check':(tipo==='erro'?'fa-triangle-exclamation':'fa-circle-info');
+  el.innerHTML='<i class="fa-solid '+ico+'" style="font-size:16px"></i><span>'+esc(msg)+'</span>';
+  box.appendChild(el);
+  setTimeout(function(){el.classList.add('saindo');setTimeout(function(){el.remove()},400)},3400);
+}
+
+/* ---------- hash PBKDF2 (mesmos parâmetros do patrão: 600k / SHA-256 / 256 bits) ---------- */
+function hash(p,salt){
+  var te=new TextEncoder();
+  return crypto.subtle.importKey('raw',te.encode(p),'PBKDF2',false,['deriveBits']).then(function(k){
+    return crypto.subtle.deriveBits({name:'PBKDF2',salt:te.encode(salt),iterations:600000,hash:'SHA-256'},k,256);
+  }).then(function(buf){return btoa(String.fromCharCode.apply(null,new Uint8Array(buf)))});
+}
+
+/* ---------- erros Supabase ---------- */
+function msgErro(resp,corpo){
+  try{var j=JSON.parse(corpo||'{}');if(j&&j.message)return j.message+(j.code?' ('+j.code+')':'')}catch(e){}
+  return 'HTTP '+resp.status;
+}
+function ehErroColuna(resp,corpo){
+  var c=String(corpo||'');
+  return resp.status===400&&(c.indexOf('PGRST204')>=0||c.indexOf('schema cache')>=0);
+}
+function ehErroTabela(resp,corpo){
+  var c=String(corpo||'');
+  return resp.status===404&&(c.indexOf('PGRST205')>=0||c.indexOf('does not exist')>=0);
+}
+function marcarSQLPendente(msg){
+  ESTADO.sqlPendente=true;
+  var b=$('motBannerSQL');
+  if(b){
+    b.innerHTML='<i class="fa-solid fa-database" style="margin-top:2px"></i><span>As tabelas do App do Motorista ainda não existem na nuvem. Peça ao <b>patrão</b> para abrir o FAST SERVIÇOS › Área Protegida › <b>Passo a Passo SQL</b> e executar o script da versão r101 — cria as tabelas motorista_acessos, motorista_fotos, rastreamento e as colunas de motorista nas rotas do dia.</span>'+(msg?'<br><small style="opacity:.75">'+esc(msg)+'</small>':'')+'<button class="mb-x" onclick="this.parentElement.classList.add(\'hide\')">&times;</button>';
+    b.classList.remove('hide');
+  }
+}
+
+/* ---------- LOGIN ---------- */
+function mostrarGate(){
+  $('motSplash').classList.add('hide');
+  $('motGate').classList.remove('hide');
+  setTimeout(function(){try{$('motUser').focus()}catch(e){}},260);
+}
+function abrirApp(){
+  $('motGate').classList.add('hide');
+  $('motApp').classList.remove('hide');
+  $('motNome').textContent=(ESTADO.sessao.employee_name||ESTADO.sessao.username||'Motorista').split(' ')[0];
+  $('motSessChip').innerHTML='<i class="fa-solid fa-user-check"></i> '+esc((ESTADO.sessao.employee_name||'').split(' ')[0]||ESTADO.sessao.username);
+  if(!ESTADO.dataSel){ESTADO.dataSel=hojeISO();$('motData').value=ESTADO.dataSel}
+  $('motDataHoje').textContent=fmtDataLonga(ESTADO.dataSel);
+  restaurarCache();
+  motAtualizar();
+  iniciarGPS();
+  setInterval(function(){tentarEnvios();tentarEnviosFotos()},30000);
+  setInterval(function(){if(navigator.onLine&&ESTADO.sessao)motAtualizar(true)},60000);
+  window.addEventListener('online',function(){atualizarChips();toast('Conexão voltou — enviando o que estava na fila…','info');tentarEnvios();tentarEnviosFotos();motAtualizar(true)});
+  window.addEventListener('offline',function(){atualizarChips();toast('Sem conexão — CHEGUEI, conclusões e fotos ficam na fila e enviam sozinhos.','info')});
+  atualizarChips();
+}
+function motEntrar(){
+  var user=($('motUser').value||'').trim().toLowerCase();
+  var pwd=$('motPwd').value||'';
+  var errEl=$('motGateErr');
+  errEl.textContent='';
+  if(!user||!pwd){errEl.textContent='Informe usuário e senha.';return}
+  if(!navigator.onLine){errEl.textContent='Sem internet agora — conecte-se para entrar na primeira vez.';return}
+  var btn=$('motEntrarBtn');btn.disabled=true;$('motGateLoading').classList.add('show');
+  fetch(SB_URL+'/motorista_acessos?select=*&username=eq.'+encodeURIComponent(user),{headers:hdrs()})
+    .then(function(r){return r.text().then(function(t){return {r:r,t:t}})})
+    .then(function(par){
+      var r=par.r,t=par.t;
+      if(!r.ok){
+        if(ehErroTabela(r,t)){errEl.innerHTML='As tabelas do App do Motorista ainda não foram criadas.<br>Peça ao patrão para executar o SQL r101 (Área Protegida › Passo a Passo SQL).'}
+        else errEl.textContent='Não foi possível validar o acesso ('+msgErro(r,t)+').';
+        return null;
+      }
+      var rows=JSON.parse(t||'[]');
+      if(!rows.length){errEl.textContent='Usuário não encontrado. Confira com o patrão (RH › Usuários e Acessos).';return null}
+      var reg=rows[0];
+      if(reg.active===false){errEl.textContent='Este acesso foi desativado pelo patrão. Fale com ele.';return null}
+      return hash(pwd,reg.salt||'').then(function(dig){
+        if(dig!==(reg.hash||'')){errEl.textContent='Senha incorreta.';return null}
+        var mid=reg.motorista_id!=null?reg.motorista_id:null;
+        if(mid==null&&reg.employee_id!=null&&!isNaN(Number(reg.employee_id)))mid=Number(reg.employee_id);
+        ESTADO.sessao={id:reg.id,username:reg.username,employee_name:reg.employee_name||reg.motorista_nome||reg.username,motorista_id:mid,ts:Date.now()};
+        if($('motLembrar').checked)jset(K_SESSAO,ESTADO.sessao);
+        else localStorage.removeItem(K_SESSAO);
+        abrirApp();
+        toast('Bem-vindo, '+ESTADO.sessao.employee_name.split(' ')[0]+'! 🏍️','ok');
+        return true;
+      });
+    })
+    .catch(function(e){errEl.textContent='Falha de conexão: '+e.message})
+    .then(function(){btn.disabled=false;$('motGateLoading').classList.remove('show')});
+}
+window.motEntrar=motEntrar;
+function motSair(){
+  motModalAbrir('Sair do app?','Você pode entrar de novo com o mesmo usuário e senha. As ações pendentes continuam enviando em segundo plano.',function(){
+    localStorage.removeItem(K_SESSAO);
+    ESTADO.sessao=null;
+    pararGPS();
+    $('motApp').classList.add('hide');
+    $('motGate').classList.remove('hide');
+    $('motPwd').value='';
+  });
+}
+window.motSair=motSair;
+
+/* ---------- NAVEGAÇÃO DE DATAS ---------- */
+function motTrocarData(v){if(!v)return;ESTADO.dataSel=v;$('motData').value=v;$('motDataHoje').textContent=fmtDataLonga(v);renderizar();tentarCache(v)}
+window.motTrocarData=motTrocarData;
+function motMoverDia(n){var p=ESTADO.dataSel.split('-');var d=new Date(Number(p[0]),Number(p[1])-1,Number(p[2])+n);
+  var iso=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  motTrocarData(iso)}
+window.motMoverDia=motMoverDia;
+function motIrHoje(){motTrocarData(hojeISO())}
+window.motIrHoje=motIrHoje;
+
+/* ---------- FILTRO: a rota é minha? ---------- */
+function ehMinha(row){
+  if(!ESTADO.sessao)return false;
+  var mid=ESTADO.sessao.motorista_id;
+  if(mid!=null&&row.motorista_id!=null&&String(row.motorista_id)===String(mid))return true;
+  var nome=ESTADO.sessao.employee_name;
+  if(nome&&row.motorista&&strEq(row.motorista,nome))return true;
+  return false;
+}
+
+/* ---------- BAIXAR DADOS (índice + dia) ---------- */
+function baixarIndice(){
+  return fetch(SB_URL+'/sequencias_itens?select=id,data_seq,motorista,motorista_id,status&order=data_seq.desc&limit=1500',{headers:hdrs()})
+    .then(function(r){return r.text().then(function(t){return {r:r,t:t}})})
+    .then(function(par){
+      if(!par.r.ok){
+        if(ehErroColuna(par.r,par.t)){
+          marcarSQLPendente(msgErro(par.r,par.t));
+          return {rows:[],semColunas:true};
+        }
+        throw new Error(msgErro(par.r,par.t));
+      }
+      var rows=JSON.parse(par.t||'[]');
+      var minhas=(rows||[]).filter(ehMinha);
+      var datas={};minhas.forEach(function(x){if(x.data_seq)datas[x.data_seq]=true});
+      ESTADO.indiceDatas=Object.keys(datas).sort().reverse();
+      return {rows:rows||[],semColunas:false};
+    });
+}
+function baixarDia(dataISO){
+  return fetch(SB_URL+'/sequencias_itens?data_seq=eq.'+encodeURIComponent(dataISO)+'&order=id.asc&select=*',{headers:hdrs()})
+    .then(function(r){return r.text().then(function(t){
+      if(!r.ok)throw new Error(msgErro(r,t));
+      return JSON.parse(t||'[]');
+    })});
+}
+function motAtualizar(silencioso){
+  if(!ESTADO.sessao)return;
+  if(!navigator.onLine){atualizarChips();renderizar();return}
+  if(!silencioso)toast('Atualizando rotas…','info');
+  baixarIndice()
+    .then(function(ind){
+      if(ind.semColunas){ESTADO.rotas=[];renderizar();renderChipsDatas();return null}
+      return baixarDia(ESTADO.dataSel).then(function(rows){
+        ESTADO.rotas=(rows||[]).filter(ehMinha);
+        jset(K_CACHE,{data:ESTADO.dataSel,rows:ESTADO.rotas,ts:Date.now()});
+        renderizar();renderChipsDatas();
+        if(!silencioso)toast('Rotas atualizadas ✓','ok');
+        return true;
+      });
+    })
+    .catch(function(e){
+      console.warn('motAtualizar:',e);
+      if(!silencioso)toast('Não deu para atualizar agora — mostrando as últimas salvas.','erro');
+      renderizar();
+    });
+}
+window.motAtualizar=motAtualizar;
+function restaurarCache(){
+  var c=jget(K_CACHE,null);
+  if(c&&c.data===ESTADO.dataSel&&Array.isArray(c.rows)){ESTADO.rotas=c.rows;renderizar()}
+  var f=jget(K_FILA,[]);
+  (f||[]).forEach(function(x){
+    if(x.status!=='ok'&&x.foto){
+      if(!ESTADO.fotosLocais[x.itemId])ESTADO.fotosLocais[x.itemId]=[];
+      ESTADO.fotosLocais[x.itemId].push({blobUrl:x.foto,status:x.status==='enviando'?'enviando':'pendente',hora:x.criado_em,recId:x.id});
+    }
+  });
+}
+function tentarCache(dataISO){
+  var c=jget(K_CACHE,null);
+  if(c&&c.data===dataISO&&Array.isArray(c.rows)){ESTADO.rotas=c.rows;renderizar()}
+  else{ESTADO.rotas=[];renderizar()}
+}
+
+/* ============================================================
+   APP DO MOTORISTA — r101 · AÇÕES (CHEGUEI, concluir, fotos, GPS)
+   Continuação do núcleo — mesmo escopo global (sem IIFE)
+   ============================================================ */
+
+/* ---------- MODAL ---------- */
+var motModalCb=null;
+function motModalAbrir(titulo,texto,cb){
+  $('motModalTitulo').textContent=titulo;
+  $('motModalTexto').innerHTML=texto;
+  motModalCb=cb;
+  $('motModal').classList.remove('hide');
+}
+function motModalFechar(){$('motModal').classList.add('hide');motModalCb=null}
+window.motModalFechar=motModalFechar;
+(function(){
+  var ok=$('motModalOk');
+  if(ok)ok.addEventListener('click',function(){var cb=motModalCb;motModalFechar();if(cb)cb()});
+})();
+
+/* ---------- AÇÕES CHEGUEI / CONCLUIR (PATCH direto no sequencias_itens do patrão) ---------- */
+function acaoPendenteAdd(tipo,item){
+  var fila=jget(K_ACOES,[]);
+  fila.push({tipo:tipo,item:{id:item.id,data_seq:item.data_seq,cliente:item.cliente,destino:item.destino,chegada_em:item.chegada_em||''},ts:new Date().toISOString()});
+  jset(K_ACOES,fila);
+}
+function ehErroColunaMsg(m){var s=String(m||'');return s.indexOf('PGRST204')>=0||s.indexOf('does not exist')>=0||s.indexOf('schema cache')>=0}
+function patchRota(item,patchObj){
+  // PATCH id=eq.<id> — atualiza a linha do patrão na nuvem (mesma tabela sequencias_itens)
+  return fetch(SB_URL+'/sequencias_itens?id=eq.'+encodeURIComponent(item.id)+'&data_seq=eq.'+encodeURIComponent(item.data_seq),{
+    method:'PATCH',headers:hdrs({'Prefer':'return=minimal'}),body:JSON.stringify(patchObj)
+  }).then(function(r){return r.text().then(function(t){
+    if(!r.ok)throw new Error(msgErro(r,t));
+    return true;
+  })});
+}
+function motCheguei(item){
+  if(item.chegada_em){
+    motModalAbrir('Marcar chegada de novo?','Já existe uma chegada registrada às <b>'+fmtHora(item.chegada_em)+'</b>. Registrar uma nova por cima?',function(){motChegueiExec(item)});
+    return;
+  }
+  motChegueiExec(item);
+}
+function motChegueiExec(item){
+  var agora=new Date().toISOString();
+  var patch={chegada_em:agora,updated_at:agora};
+  var linha=ESTADO.rotas.find(function(x){return String(x.id)===String(item.id)});
+  if(linha)linha.chegada_em=agora;
+  renderizar();
+  toast('📍 CHEGUEI registrado às '+fmtHora(agora)+'!','ok');
+  patchRota(item,patch)
+    .then(function(){if(ESTADO.sessao)motAtualizar(true)})
+    .catch(function(e){
+      if(ehErroColunaMsg(e.message)){acaoPendenteAdd('cheguei',item);marcarSQLPendente(e.message);return}
+      acaoPendenteAdd('cheguei',item);
+      toast('Sem sinal agora — sua chegada ficou salva e vai sozinha quando a internet voltar.','info');
+    });
+}
+window.motCheguei=motCheguei;
+function motConcluir(item){
+  motModalAbrir('Concluir rota?', 'A rota <b>'+esc(item.cliente||item.destino||('#'+item.id))+'</b> vai virar <b>CONCLUÍDA</b> para o patrão'+(item.chegada_em?' (chegada às '+fmtHora(item.chegada_em)+')':'')+'. Confirmar?', function(){motConcluirExec(item)});
+}
+function motConcluirExec(item){
+  var agora=new Date().toISOString();
+  var patch={status:'CONCLUÍDA',data_conclusao:agora,updated_at:agora};
+  if(!item.chegada_em)patch.chegada_em=agora;
+  var linha=ESTADO.rotas.find(function(x){return String(x.id)===String(item.id)});
+  if(linha){linha.status='CONCLUÍDA';linha.data_conclusao=agora;if(!linha.chegada_em)linha.chegada_em=agora}
+  renderizar();
+  toast('✅ ROTA CONCLUÍDA às '+fmtHora(agora)+'! O patrão já vai ver.','ok');
+  patchRota(item,patch)
+    .then(function(){if(ESTADO.sessao)motAtualizar(true)})
+    .catch(function(e){
+      acaoPendenteAdd('concluir',item);
+      if(ehErroColunaMsg(e.message))marcarSQLPendente(e.message);
+      toast('Concluída no app — a sincronização termina sozinha quando houver sinal.','info');
+    });
+}
+window.motConcluir=motConcluir;
+
+/* ---------- FILA DE AÇÕES OFFLINE (cheguei/concluir) ---------- */
+function tentarEnvios(){
+  if(!navigator.onLine||!ESTADO.sessao)return;
+  var fila=jget(K_ACOES,[]);
+  if(!fila.length)return Promise.resolve();
+  var restantes=[];
+  var chain=Promise.resolve();
+  fila.forEach(function(a){
+    chain=chain.then(function(){
+      var patch = a.tipo==='cheguei'
+        ? {chegada_em:a.ts,updated_at:a.ts}
+        : {status:'CONCLUÍDA',data_conclusao:a.ts,updated_at:a.ts};
+      if(a.tipo==='concluir'&&!a.item.chegada_em)patch.chegada_em=a.ts;
+      return patchRota(a.item,patch)
+        .then(function(){toast('Ação "'+(a.tipo==='cheguei'?'CHEGUEI':'CONCLUIR')+'" enviada ✓','ok')})
+        .catch(function(){restantes.push(a)});
+    });
+  });
+  chain.then(function(){jset(K_ACOES,restantes);atualizarChips()});
+  return chain;
+}
+
+/* ---------- CÂMERA / FOTOS ---------- */
+var motFotoItemId=null;
+function motTirarFoto(itemId){
+  var input=$('motInputFoto');
+  motFotoItemId=itemId;
+  input.value='';
+  input.click();
+}
+window.motTirarFoto=motTirarFoto;
+(function(){
+  var inp=$('motInputFoto');
+  if(inp)inp.addEventListener('change',function(ev){
+    var files=Array.prototype.slice.call(ev.target.files||[]);
+    if(!files.length)return;
+    var itemId=motFotoItemId;
+    var item=acharItem(itemId);
+    if(!item){toast('Rota não encontrada para anexar a foto.','erro');return}
+    toast(files.length>1?(files.length+' fotos na fila! 📸'):'Foto capturada! 📸','ok');
+    files.forEach(function(f){
+      comprimir(f,720,0.72).then(function(b64){
+        enfileirarFoto(itemId,b64);
+      }).catch(function(e){console.warn('foto:',e);toast('Não deu para processar a foto.','erro')});
+    });
+    inp.value='';
+  });
+})();
+function comprimir(file,maxLado,qual){
+  return new Promise(function(res,rej){
+    var url=URL.createObjectURL(file);
+    var img=new Image();
+    img.onload=function(){
+      try{
+        var w=img.naturalWidth,h=img.naturalHeight,escala=1;
+        if(Math.max(w,h)>maxLado)escala=maxLado/Math.max(w,h);
+        var cw=Math.max(1,Math.round(w*escala)),ch=Math.max(1,Math.round(h*escala));
+        var cv=document.createElement('canvas');cv.width=cw;cv.height=ch;
+        var cx=cv.getContext('2d');cx.drawImage(img,0,0,cw,ch);
+        var b64=cv.toDataURL('image/jpeg',qual||0.72);
+        URL.revokeObjectURL(url);
+        res(b64);
+      }catch(e){URL.revokeObjectURL(url);rej(e)}
+    };
+    img.onerror=function(){URL.revokeObjectURL(url);rej(new Error('imagem inválida'))};
+    img.src=url;
+  });
+}
+function acharItem(itemId){
+  for(var i=0;i<ESTADO.rotas.length;i++){if(String(ESTADO.rotas[i].id)===String(itemId))return ESTADO.rotas[i]}
+  return null;
+}
+function enfileirarFoto(itemId,b64){
+  var item=acharItem(itemId);
+  if(!item)return;
+  var fila=jget(K_FILA,[]);
+  var agora=new Date().toISOString();
+  var rec={id:Date.now()+fila.length,itemId:item.id,data_seq:item.data_seq,cliente:item.cliente||'',destino:item.destino||'',
+    foto:b64,criado_em:agora,status:'pendente',tentativas:0};
+  fila.push(rec);jset(K_FILA,fila);
+  if(!ESTADO.fotosLocais[item.id])ESTADO.fotosLocais[item.id]=[];
+  ESTADO.fotosLocais[item.id].push({blobUrl:b64,status:'pendente',hora:agora,recId:rec.id});
+  renderizar();
+  enviarFotoPendente(rec);
+}
+function enviarFotoPendente(rec){
+  if(!navigator.onLine||!ESTADO.sessao)return;
+  var fila=jget(K_FILA,[]);
+  var ix=-1;
+  for(var i=0;i<fila.length;i++){if(fila[i].id===rec.id){ix=i;break}}
+  if(ix<0)return;
+  if(fila[ix].status!=='pendente')return;
+  fila[ix].status='enviando';jset(K_FILA,fila);
+  renderFotosCard(acharItem(rec.itemId));
+  var reg={
+    id:rec.id, motorista_id:ESTADO.sessao.motorista_id,
+    motorista_nome:ESTADO.sessao.employee_name,
+    item_id:Number(rec.itemId), data_seq:rec.data_seq,
+    cliente:rec.cliente, destino:rec.destino,
+    foto:rec.foto, criado_em:rec.criado_em, processado:false
+  };
+  fetch(SB_URL+'/motorista_fotos',{method:'POST',headers:hdrs({'Prefer':'return=minimal'}),body:JSON.stringify(reg)})
+    .then(function(r){return r.text().then(function(t){
+      if(!r.ok){
+        if(ehErroTabela(r,t)){marcarSQLPendente(msgErro(r,t));fila[ix].status='pendente';jset(K_FILA,fila);renderFotosCard(acharItem(rec.itemId));return}
+        throw new Error(msgErro(r,t));
+      }
+      fila[ix].status='ok';fila[ix].ts_ok=new Date().toISOString();jset(K_FILA,fila);
+      var ixLocal=-1;
+      var arr=ESTADO.fotosLocais[rec.itemId]||[];
+      for(var j=0;j<arr.length;j++){if(arr[j].recId===rec.id)arr[j].status='ok'}
+      renderFotosCard(acharItem(rec.itemId));
+      toast('Foto enviada! O patrão vai receber no Drive dele. ✅','ok');
+    })})
+    .catch(function(e){
+      fila[ix].tentativas=(fila[ix].tentativas||0)+1;
+      fila[ix].status='pendente';jset(K_FILA,fila);
+      var arr2=ESTADO.fotosLocais[rec.itemId]||[];
+      for(var k=0;k<arr2.length;k++){if(arr2[k].recId===rec.id)arr2[k].status='pendente'}
+      renderFotosCard(acharItem(rec.itemId));
+      if(fila[ix].tentativas<=1)toast('Foto na fila — envia sozinha quando houver sinal.','info');
+      console.warn('foto pendente:',e.message);
+    });
+}
+function tentarEnviosFotos(){
+  if(!navigator.onLine||!ESTADO.sessao)return;
+  var fila=jget(K_FILA,[]);
+  var pend=fila.filter(function(x){return x.status==='pendente'});
+  pend.forEach(enviarFotoPendente);
+}
+function renderFotosCard(item){
+  if(!item)return;
+  var arr=ESTADO.fotosLocais[item.id]||[];
+  var box=document.querySelector('[data-fotos-id="'+CSS.escape(String(item.id))+'"]');
+  if(!box)return;
+  var html='';
+  arr.forEach(function(f){
+    var badge=f.status==='ok'?'✅':(f.status==='enviando'?'📤':'⏳');
+    html+='<div class="ff-wrap" data-rec="'+esc(String(f.recId||''))+'">'+
+      '<img src="'+f.blobUrl+'" class="mc-thumb" onclick="motVerFoto(this.src)">'+
+      '<span class="ff-badge">'+badge+'</span></div>';
+  });
+  if(!html){box.innerHTML='<span class="mc-fotos-label">Nenhuma foto ainda</span>';return}
+  box.innerHTML=html;
+}
+window.motVerFoto=function(src){
+  try{
+    var w=window.open('','_blank');
+    if(w){w.document.write('<title>Foto</title><style>body{margin:0;background:#0f172a;display:flex;align-items:center;justify-content:center;height:100vh}img{max-width:96vw;max-height:96vh}</style><img src="'+src+'">');w.document.close();return}
+  }catch(e){}
+  toast('Não foi possível abrir a foto em tela cheia.','info');
+};
+
+/* ---------- GPS / RASTREAMENTO (mesmo padrão do app do patrão: GET -> PATCH/POST) ---------- */
+function iniciarGPS(){
+  if(!navigator.geolocation){$('motGpsChip').innerHTML='<i class="fa-solid fa-satellite-dish"></i> GPS indisponível';return}
+  try{
+    ESTADO.gps.watch=navigator.geolocation.watchPosition(function(pos){
+      var c=pos.coords;
+      ESTADO.gps.lat=c.latitude;ESTADO.gps.lng=c.longitude;ESTADO.gps.precisao=c.accuracy||0;
+      ESTADO.gps.vel=(c.speed!=null&&c.speed>=0)?c.speed*3.6:null;
+      ESTADO.gps.ativo=true;
+      atualizarChips();
+      enviarRastreamento(false);
+    },function(err){
+      ESTADO.gps.ativo=false;
+      var m=err.code===1?'Permissão negada':(err.code===2?'GPS indisponível':'Timeout');
+      $('motGpsChip').className='chip chip-erro';
+      $('motGpsChip').innerHTML='<i class="fa-solid fa-satellite-dish"></i> GPS: '+m;
+      if(err.code===1)toast('Ative a permissão de localização para o patrão te ver no mapa.','info');
+    },{enableHighAccuracy:true,maximumAge:5000,timeout:20000});
+  }catch(e){console.warn('gps:',e)}
+}
+function pararGPS(){if(ESTADO.gps.watch!=null){navigator.geolocation.clearWatch(ESTADO.gps.watch);ESTADO.gps.watch=null}ESTADO.gps.ativo=false}
+function enviarRastreamento(){
+  if(!ESTADO.sessao||!ESTADO.gps.ativo)return;
+  var agora=Date.now();
+  if((agora-(ESTADO.gps.ultima||0))<8000)return;
+  ESTADO.gps.ultima=agora;
+  var mid=String(ESTADO.sessao.motorista_id);
+  var corpo={lat:ESTADO.gps.lat,lng:ESTADO.gps.lng,precisao:ESTADO.gps.precisao,velocidade:ESTADO.gps.vel,updated_at:new Date().toISOString()};
+  // Mesmo padrão comprovado do app principal: GET -> se existe PATCH, senão POST
+  fetch(SB_URL+'/rastreamento?motorista_id=eq.'+encodeURIComponent(mid)+'&select=motorista_id',{headers:hdrs()})
+    .then(function(r){return r.text().then(function(t){
+      if(!r.ok){
+        if(ehErroTabela(r,t)){ESTADO.gps.rastOk=false;marcarSQLPendente(msgErro(r,t));return null}
+        throw new Error(msgErro(r,t));
+      }
+      var rows=JSON.parse(t||'[]');
+      if(rows&&rows.length){
+        return fetch(SB_URL+'/rastreamento?motorista_id=eq.'+encodeURIComponent(mid),{method:'PATCH',headers:hdrs({'Prefer':'return=minimal'}),body:JSON.stringify(corpo)})
+          .then(function(r2){return r2.text().then(function(t2){
+            if(!r2.ok)throw new Error(msgErro(r2,t2));
+            ESTADO.gps.rastOk=true;atualizarChips();
+          })});
+      }
+      return fetch(SB_URL+'/rastreamento',{method:'POST',headers:hdrs({'Prefer':'return=minimal'}),body:JSON.stringify({
+        motorista_id:mid,motorista_nome:ESTADO.sessao.employee_name,
+        lat:corpo.lat,lng:corpo.lng,precisao:corpo.precisao,velocidade:corpo.velocidade,updated_at:corpo.updated_at
+      })}).then(function(r3){return r3.text().then(function(t3){
+        if(!r3.ok)throw new Error(msgErro(r3,t3));
+        ESTADO.gps.rastOk=true;atualizarChips();
+      })});
+    })})
+    .catch(function(e){console.warn('rastreamento:',e)});
+}
+
+/* ---------- CHIPS ---------- */
+function atualizarChips(){
+  var g=$('motGpsChip'),n=$('motNetChip');
+  if(!g||!n)return;
+  if(navigator.onLine){n.className='chip chip-on';n.innerHTML='<i class="fa-solid fa-wifi"></i> Online'}
+  else{n.className='chip chip-off';n.innerHTML='<i class="fa-solid fa-plane-slash"></i> Offline'}
+  var off=$('motBannerOffline');
+  if(!navigator.onLine){
+    var pend=(jget(K_FILA,[]).filter(function(x){return x.status!=='ok'}).length)+(jget(K_ACOES,[]).length);
+    off.innerHTML='<i class="fa-solid fa-cloud-arrow-down"></i><span><b>Offline:</b> '+pend+' item(ns) na fila — CHEGUEI, conclusões e fotos enviam sozinhos quando a internet voltar.</span><button class="mb-x" onclick="this.parentElement.classList.add(\'hide\')">&times;</button>';
+    off.classList.remove('hide');
+  }else off.classList.add('hide');
+  if(ESTADO.gps.ativo&&ESTADO.gps.rastOk){
+    g.className='chip chip-on';
+    g.innerHTML='<i class="fa-solid fa-location-dot"></i> 🏍️ No mapa do patrão · ±'+Math.round(ESTADO.gps.precisao)+'m';
+  }else if(ESTADO.gps.ativo){
+    g.className='chip chip-wait';
+    g.innerHTML='<i class="fa-solid fa-location-dot"></i> GPS ativo · enviando em segundo plano';
+  }else if(!navigator.geolocation){
+    g.className='chip chip-off';
+    g.innerHTML='<i class="fa-solid fa-satellite-dish"></i> GPS indisponível';
+  }else{
+    g.className='chip chip-wait';
+    g.innerHTML='<i class="fa-solid fa-satellite-dish"></i> GPS iniciando…';
+  }
+}
+
+/* ---------- RENDER ---------- */
+function ehConcluida(item){return item.status==='CONCLUÍDA'||item.status==='Concluído'}
+function renderizar(){
+  var lista=ESTADO.rotas||[];
+  var feitas=lista.filter(ehConcluida).length;
+  var totalFotos=0;
+  Object.keys(ESTADO.fotosLocais).forEach(function(k){totalFotos+=(ESTADO.fotosLocais[k]||[]).length});
+  $('mrTotal').textContent=lista.length;
+  $('mrFeitas').textContent=feitas;
+  $('mrPend').textContent=lista.length-feitas;
+  $('mrFotos').textContent=totalFotos;
+  var box=$('motLista'),vazio=$('motVazio');
+  if(!lista.length){box.innerHTML='';vazio.classList.remove('hide');return}
+  vazio.classList.add('hide');
+  var pendentes=lista.filter(function(x){return !ehConcluida(x)});
+  var concluidas=lista.filter(ehConcluida);
+  var html='';
+  pendentes.forEach(function(it){html+=cardHTML(it,false)});
+  concluidas.forEach(function(it){html+=cardHTML(it,true)});
+  box.innerHTML=html;
+  lista.forEach(renderFotosCard);
+}
+function itemArg(item){
+  // objeto seguro p/ onclick inline (id como string; campos essenciais)
+  return '{id:'+JSON.stringify(String(item.id))+',data_seq:'+JSON.stringify(item.data_seq||ESTADO.dataSel)+
+    ',cliente:'+JSON.stringify(item.cliente||'')+',destino:'+JSON.stringify(item.destino||'')+
+    ',chegada_em:'+JSON.stringify(item.chegada_em||'')+',status:'+JSON.stringify(item.status||'')+'}';
+}
+function cardHTML(item,done){
+  var chegou=item.chegada_em;
+  var concluida=ehConcluida(item);
+  var badge=concluida
+    ? '<span class="mc-badge st-ok"><i class="fa-solid fa-circle-check"></i> CONCLUÍDA'+(item.data_conclusao?' · '+fmtHora(item.data_conclusao):'')+'</span>'
+    : '<span class="mc-badge st-rota"><i class="fa-solid fa-route"></i> EM ROTA</span>';
+  var html='<div class="mot-card'+(done?' done':'')+'" data-item="'+esc(String(item.id))+'">'+
+    '<div class="mc-top">'+badge+'<span class="mc-id">#'+esc(String(item.id))+'</span></div>'+
+    (item.cliente?'<div class="mc-linha cli"><i class="fa-solid fa-user"></i><span>'+esc(item.cliente)+'</span></div>':'')+
+    (item.origem?'<div class="mc-linha"><i class="fa-solid fa-location-dot"></i><span>'+esc(item.origem)+'</span></div>':'')+
+    (item.destino?'<div class="mc-linha dest"><i class="fa-solid fa-flag-checkered"></i><span>'+esc(item.destino)+'</span></div>':'')+
+    (item.valor?'<div class="mc-linha"><i class="fa-solid fa-money-bill-wave"></i><span>'+fmtMoeda(item.valor)+'</span></div>':'')+
+    (item.obs?'<div class="mc-obs"><i class="fa-solid fa-note-sticky"></i>'+esc(item.obs)+'</div>':'')+
+    (chegou?'<div class="mc-chegou"><i class="fa-solid fa-location-dot"></i> CHEGOU às '+fmtHora(chegou)+'</div>':'')+
+    (concluida?'<div class="mc-feita"><i class="fa-solid fa-circle-check"></i> ROTA CONCLUÍDA'+(item.data_conclusao?' às '+fmtHora(item.data_conclusao):'')+' — visível para o patrão</div>':'')+
+    '<div class="mc-fotos" data-fotos-id="'+esc(String(item.id))+'"></div>';
+  if(!concluida){
+    html+='<div class="mc-btns">'+
+      (chegou
+        ? '<button class="mbtn b-cheguei off" disabled><i class="fa-solid fa-location-dot"></i> CHEGUEI '+fmtHora(chegou)+'</button>'
+        : '<button class="mbtn b-cheguei" onclick="motCheguei('+itemArg(item)+')"><i class="fa-solid fa-location-dot"></i> CHEGUEI</button>')+
+      '<button class="mbtn b-foto" onclick="motTirarFoto(\''+esc(String(item.id))+'\')"><i class="fa-solid fa-camera"></i> FOTO</button>'+
+      '<button class="mbtn b-concluir" onclick="motConcluir('+itemArg(item)+')"><i class="fa-solid fa-circle-check"></i> CONCLUIR</button>'+
+    '</div>';
+  }
+  html+='</div>';
+  return html;
+}
+function renderChipsDatas(){
+  var box=$('motChipsDatas');
+  if(!box)return;
+  var datas=ESTADO.indiceDatas||[];
+  if(datas.length<=1){box.innerHTML='';return}
+  var html=datas.slice(0,14).map(function(d){
+    var classe=d===ESTADO.dataSel?'d-chip ativo':'d-chip';
+    return '<button class="'+classe+'" onclick="motTrocarData(\''+d+'\')">'+fmtDataBR(d)+'</button>';
+  }).join('');
+  box.innerHTML=html;
+}
+
+/* ---------- INSTALAR PWA ---------- */
+var motInstallEvt=null;
+window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();motInstallEvt=e;var b=$('motInstallBtn');if(b)b.style.display='flex'});
+function motInstalar(){
+  if(!motInstallEvt){toast('Para instalar: menu do navegador › Adicionar à tela inicial.','info');return}
+  motInstallEvt.prompt();
+  motInstallEvt.userChoice.then(function(){motInstallEvt=null;var b=$('motInstallBtn');if(b)b.style.display='none'});
+}
+window.motInstalar=motInstalar;
+
+/* ---------- BOOT ---------- */
+(function boot(){
+  $('motVersaoRodape').textContent=VER;
+  $('motSplashVersion').textContent=VER;
+  var s=jget(K_SESSAO,null);
+  var pronto=function(){
+    if(s){ESTADO.sessao=s;abrirApp()}
+    else mostrarGate();
+  };
+  if('serviceWorker' in navigator){
+    try{navigator.serviceWorker.register('sw.js?v=r101',{scope:'./'}).catch(function(e){console.warn('sw:',e)})}catch(e){}
+  }
+  setTimeout(pronto,1500);
+})();
+
+</script>
+</body>
+</html>
