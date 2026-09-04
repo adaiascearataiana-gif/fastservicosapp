@@ -1,4 +1,4 @@
-const CACHE='fast-servicos-v2-0-1';
+const CACHE='fast-servicos-v2-0-2';
 const BASE='./';
 const CORE=[BASE,BASE+'manifest.webmanifest',BASE+'v2-ui.css',BASE+'v2-ui.js',BASE+'motorista.html',BASE+'manifest-motorista.webmanifest',BASE+'assets/fast-servicos-icon-192.png',BASE+'assets/fast-servicos-icon-512.png'];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE).catch(()=>{})));self.skipWaiting()});

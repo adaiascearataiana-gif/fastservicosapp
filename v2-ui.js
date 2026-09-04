@@ -1,6 +1,6 @@
 (function(){
   'use strict';
-  var VERSION='2.0.1',MIGRATION_KEY='fast_v2_migration_complete',CHECKPOINT_KEY='fast_v2_pre_migration_checkpoint';
+  var VERSION='2.0.2',MIGRATION_KEY='fast_v2_migration_complete',CHECKPOINT_KEY='fast_v2_pre_migration_checkpoint';
   var commands=[
     ['central','Centro de Operações','Visão geral e prioridades','fa-table-cells-large'],
     ['rotasDia','Rotas do Dia','Execução, fotos e conclusão','fa-calendar-day'],
@@ -37,8 +37,9 @@
     document.addEventListener('click',function(e){var g=e.target.closest('[data-v2-go]'),a=e.target.closest('[data-v2-action]');if(g)go(g.dataset.v2Go);if(a&&a.dataset.v2Action==='density'){document.body.classList.toggle('fast-v2-compact');localStorage.setItem('fast_v2_density',document.body.classList.contains('fast-v2-compact')?'compact':'comfortable');toast('Densidade da interface atualizada.')}if(a&&a.dataset.v2Action==='focus'){document.body.classList.toggle('fast-v2-focus');closePalette();toast(document.body.classList.contains('fast-v2-focus')?'Modo foco ativado.':'Modo foco desativado.')}if(e.target.id==='fastV2Palette')closePalette()});
     document.addEventListener('keydown',function(e){if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();openPalette()}if(e.key==='Escape')closePalette()});
     var meta=document.querySelector('meta[name="fast-app-version"]');if(meta)meta.content=VERSION;
-    var latest=document.querySelector('meta[name="fast-latest-update"]');if(latest)latest.content='FAST Serviços 2.0.1: lugares repetidos consolidados automaticamente, com backup preventivo e sincronização corrigida.';
+    var latest=document.querySelector('meta[name="fast-latest-update"]');if(latest)latest.content='FAST Serviços 2.0.2: barra superior fixa restaurada no desktop e no celular.';
     var changes=document.querySelector('meta[name="fast-app-changelog"]');if(changes)changes.content=JSON.stringify([
+      {type:'corrigido',text:'2.0.2: barra superior permanece fixa no topo durante a rolagem, sem deslocamento ou margem duplicada.'},
       {type:'melhorado',text:'2.0.1: histórico e Rotas do Dia atribuídos ao motorista ADAÍAS, com backup preventivo dos registros anteriores.'},
       {type:'corrigido',text:'2.0.1: lugares repetidos são consolidados pelo nome mesmo quando chegam do Supabase com IDs diferentes.'},
       {type:'melhorado',text:'2.0.1: limpeza preserva endereço, bairro, telefone, histórico de uso e cria backup preventivo local.'},
@@ -49,11 +50,11 @@
       {type:'melhorado',text:'2.0.0: migração preserva dados existentes e cria ponto de restauração local antes da primeira abertura.'},
       {type:'corrigido',text:'2.0.0: mantém a correção do fechamento e layout da Central de Notificações da r102.'}
     ]);
-    var menu=document.getElementById('navMenuVersao');if(menu)menu.textContent='Versão 2.0.1';
-    var splash=document.getElementById('fastSplashVersion');if(splash)splash.textContent='2.0.1';
-    var gate=document.getElementById('fastGateVersionNum');if(gate)gate.textContent='2.0.1';
+    var menu=document.getElementById('navMenuVersao');if(menu)menu.textContent='Versão 2.0.2';
+    var splash=document.getElementById('fastSplashVersion');if(splash)splash.textContent='2.0.2';
+    var gate=document.getElementById('fastGateVersionNum');if(gate)gate.textContent='2.0.2';
     window.fastV2={version:VERSION,open:openPalette,restoreCheckpoint:function(){var c=JSON.parse(localStorage.getItem(CHECKPOINT_KEY)||'null');if(!c||!c.data)return false;Object.keys(c.data).forEach(function(k){localStorage.setItem(k,c.data[k])});location.reload();return true}};
-    setTimeout(function(){toast('FAST Serviços 2.0.1 pronto para operar.')},900);
+    setTimeout(function(){toast('FAST Serviços 2.0.2 pronto para operar.')},900);
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install,{once:true});else install();
 })();

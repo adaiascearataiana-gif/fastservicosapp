@@ -21,7 +21,7 @@
   <meta name="fast-github-branch" content="main">
   <meta name="fast-github-path" content="index.html">
   <meta name="fast-github-token-env" content="GH_TOKEN">
-  <meta name="fast-app-version" content="2.0.1">
+  <meta name="fast-app-version" content="2.0.2">
   <meta name="fast-app-date" content="2026-09-04T16:40:00-03:00">
   <meta name="fast-latest-update" content="r101: NOVO App do Motorista (motorista.html) — o patrão cria o login do motorista no RH (Usuários e Acessos), o motorista instala pelo link/QR, recebe as rotas do dia atribuídas a ele, usa o botão CHEGUEI ao chegar no destino, tira fotos pela câmera (caem no Google Drive do patrão) e conclui as rotas; patrão vê CHEGOU/ROTA CONCLUÍDA com hora, rastreamento GPS ao vivo com ETA até o destino no mapa e na lista de motoristas; NOVO painel visual da fila do Google Drive (contagem de pendentes, barra de progresso, tabela por foto com ⏳/🔄/✅/❌ em tempo real); SQL r101 adiciona 3 tabelas (rastreamento, motorista_acessos, motorista_fotos) e 5 colunas em sequencias_itens — execute na aba Passo a Passo SQL | r100: exclusão de rotas corrigida em todos os caminhos; botões −/+ de R$ 5,00 no valor de rotas | r99: palavras duplicadas no ditado por voz corrigidas"
   <!-- r92: verificação automática de nova versão ao abrir; Verificar Atualizações com cache-busting e sem fallback no-cors inválido. -->
@@ -34,10 +34,10 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="FAST Serviços">
   <meta name="application-name" content="FAST Serviços">
-  <link rel="apple-touch-icon" sizes="192x192" href="assets/fast-servicos-icon-192.png?v=2.0.1">
+  <link rel="apple-touch-icon" sizes="192x192" href="assets/fast-servicos-icon-192.png?v=2.0.2">
   <title>⚡ FAST SERVIÇOS — Mobile</title>
-  <link rel="icon" type="image/png" sizes="192x192" href="assets/fast-servicos-icon-192.png?v=2.0.1">
-  <link rel="stylesheet" href="v2-ui.css?v=2.0.1">
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/fast-servicos-icon-192.png?v=2.0.2">
+  <link rel="stylesheet" href="v2-ui.css?v=2.0.2">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet">
@@ -1343,7 +1343,7 @@ window.fastNotifPermitida=function(canal,tipo,mensagem){
 };
 })();
 </script>
-<link rel="manifest" href="manifest.webmanifest?v=2.0.1"><link rel="apple-touch-icon" href="assets/fast-servicos-icon-192.png?v=2.0.1"><link rel="icon" href="assets/fast-servicos-icon-192.png?v=2.0.1"><script id="fast-google-gis" src="https://accounts.google.com/gsi/client" async="" defer=""></script><style id="googleidentityservice_button_styles">.qJTHM{-moz-user-select:none;-webkit-user-select:none;-ms-user-select:none;color:#202124;direction:ltr;-webkit-touch-callout:none;font-family:Roboto-Regular,arial,sans-serif;-webkit-font-smoothing:antialiased;font-weight:400;margin:0;overflow:hidden;-webkit-text-size-adjust:100%}.ynRLnc{left:-9999px;position:absolute;top:-9999px}.L6cTce{display:none}.bltWBb{overflow-wrap:break-word;word-break:break-word}.hSRGPd{color:#1a73e8;cursor:pointer;font-weight:500;text-decoration:none}.Bz112c-W3lGp{height:16px;width:16px}.Bz112c-E3DyYd{height:20px;width:20px}.Bz112c-r9oPif{height:24px;width:24px}.Bz112c-u2z5K{height:36px;width:36px}.Bz112c-uaxL4e{border-radius:10px}.LgbsSe-Bz112c{display:block}.S9gUrf-YoZ4jf{border:none;margin:0;padding:0}.S9gUrf-YoZ4jf *{border:none;margin:0;padding:0}.fFW7wc-ibnC6b>.aZ2wEe>div{border-color:#4285f4}.P1ekSe-ZMv3u{-webkit-transition:height .2s linear;transition:height .2s linear}.P1ekSe-ZMv3u>div:first-child{background-color:#1a73e8!important;-webkit-transition:width .3s linear;transition:width .3s linear}.P1ekSe-ZMv3u>div:nth-child(2){background-image:-webkit-gradient(linear,left top,right top,from(rgba(255,255,255,.7)),to(rgba(255,255,255,.7))),-webkit-gradient(linear,left top,right top,from(#1a73e8),to(#1a73e8))!important;background-image:-webkit-linear-gradient(left,rgba(255,255,255,.7),rgba(255,255,255,.7)),-webkit-linear-gradient(left,#1a73e8,#1a73e8)!important;background-image:linear-gradient(90deg,rgba(255,255,255,.7),rgba(255,255,255,.7)),linear-gradient(90deg,#1a73e8,#1a73e8)!important}.P1ekSe-ZMv3u>div:nth-child(3){background-image:-webkit-gradient(linear,left top,right top,from(rgba(255,255,255,.7)),to(rgba(255,255,255,.7))),-webkit-gradient(linear,left top,right top,from(#1a73e8),to(#1a73e8))!important;background-image:-webkit-linear-gradient(left,rgba(255,255,255,.7),rgba(255,255,255,.7)),-webkit-linear-gradient(left,#1a73e8,#1a73e8)!important;background-image:linear-gradient(90deg,rgba(255,255,255,.7),rgba(255,255,255,.7)),linear-gradient(90deg,#1a73e8,#1a73e8)!important}.haAclf{display:inline-block}.nsm7Bb-HzV7m-LgbsSe{border-radius:4px;box-sizing:border-box;-webkit-transition:background-color .218s,border-color .218s;transition:background-color .218s,border-color .218s;-moz-user-select:none;-webkit-user-select:none;-ms-user-select:none;-webkit-appearance:none;background-color:#fff;background-image:none;border:1px solid #dadce0;color:#3c4043;cursor:pointer;font-family:Google Sans,arial,sans-serif;font-size:.875rem;height:40px;letter-spacing:.25px;outline:none;overflow:hidden;padding:0 12px;position:relative;text-align:center;vertical-align:middle;white-space:nowrap;width:auto}@media screen and (-ms-high-contrast:active){.nsm7Bb-HzV7m-LgbsSe{border:2px solid windowText;color:windowText}}@media screen and (preferes-contrast:more){.nsm7Bb-HzV7m-LgbsSe{color:#000}}.nsm7Bb-HzV7m-LgbsSe.pSzOP-SxQuSe{font-size:.875rem;height:32px;letter-spacing:.25px;padding:0 10px}.nsm7Bb-HzV7m-LgbsSe.purZT-SxQuSe{font-size:.6875rem;height:20px;letter-spacing:.3px;padding:0 8px}.nsm7Bb-HzV7m-LgbsSe.Bz112c-LgbsSe{padding:0;width:40px}.nsm7Bb-HzV7m-LgbsSe.Bz112c-LgbsSe.pSzOP-SxQuSe{width:32px}.nsm7Bb-HzV7m-LgbsSe.Bz112c-LgbsSe.purZT-SxQuSe{width:20px}.nsm7Bb-HzV7m-LgbsSe.JGcpL-RbRzK{border-radius:20px}.nsm7Bb-HzV7m-LgbsSe.JGcpL-RbRzK.pSzOP-SxQuSe{border-radius:16px}.nsm7Bb-HzV7m-LgbsSe.JGcpL-RbRzK.purZT-SxQuSe{border-radius:10px}.nsm7Bb-HzV7m-LgbsSe.i5vt6e-to915-Ia7Qfc{border:1px solid #8e918f;background-color:#131314;color:#e3e3e3}.nsm7Bb-HzV7m-LgbsSe.MFS4be-Ia7Qfc{border:none;color:#fff}.nsm7Bb-HzV7m-LgbsSe.MFS4be-v3pZbf-Ia7Qfc{background-color:#1a73e8}.nsm7Bb-HzV7m-LgbsSe.MFS4be-JaPV2b-Ia7Qfc{background-color:#202124;color:#e8eaed}@media screen and (prefers-contrast:more){.nsm7Bb-HzV7m-LgbsSe.MFS4be-JaPV2b-Ia7Qfc{color:#fff}}.nsm7Bb-HzV7m-LgbsSe .nsm7Bb-HzV7m-LgbsSe-Bz112c{height:18px;margin-right:8px;min-width:18px;width:18px}.nsm7Bb-HzV7m-LgbsSe.pSzOP-SxQuSe .nsm7Bb-HzV7m-LgbsSe-Bz112c{height:14px;min-width:14px;width:14px}.nsm7Bb-HzV7m-LgbsSe.purZT-SxQuSe .nsm7Bb-HzV7m-LgbsSe-Bz112c{height:10px;min-width:10px;width:10px}.nsm7Bb-HzV7m-LgbsSe.jVeSEe .nsm7Bb-HzV7m-LgbsSe-Bz112c{margin-left:8px;margin-right:-4px}.nsm7Bb-HzV7m-LgbsSe.Bz112c-LgbsSe .nsm7Bb-HzV7m-LgbsSe-Bz112c{margin:0;padding:10px}.nsm7Bb-HzV7m-LgbsSe.Bz112c-LgbsSe.pSzOP-SxQuSe .nsm7Bb-HzV7m-LgbsSe-Bz112c{padding:8px}.nsm7Bb-HzV7m-LgbsSe.Bz112c-LgbsSe.purZT-SxQuSe .nsm7Bb-HzV7m-LgbsSe-Bz112c{padding:4px}.nsm7Bb-HzV7m-LgbsSe .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{border-top-left-radius:3px;border-bottom-left-radius:3px;display:-webkit-box;display:-webkit-flex;display:flex;-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center;-webkit-box-align:center;-webkit-align-items:center;align-items:center;background-color:#fff;height:36px;margin-left:-10px;margin-right:12px;min-width:36px;width:36px}.nsm7Bb-HzV7m-LgbsSe .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf .nsm7Bb-HzV7m-LgbsSe-Bz112c,.nsm7Bb-HzV7m-LgbsSe.Bz112c-LgbsSe .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf .nsm7Bb-HzV7m-LgbsSe-Bz112c{margin:0;padding:0}.nsm7Bb-HzV7m-LgbsSe.pSzOP-SxQuSe .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{height:28px;margin-left:-8px;margin-right:10px;min-width:28px;width:28px}.nsm7Bb-HzV7m-LgbsSe.purZT-SxQuSe .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{height:16px;margin-left:-6px;margin-right:8px;min-width:16px;width:16px}.nsm7Bb-HzV7m-LgbsSe.Bz112c-LgbsSe .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{border-radius:3px;margin-left:2px;margin-right:0;padding:0}.nsm7Bb-HzV7m-LgbsSe.JGcpL-RbRzK .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{border-radius:18px}.nsm7Bb-HzV7m-LgbsSe.pSzOP-SxQuSe.JGcpL-RbRzK .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{border-radius:14px}.nsm7Bb-HzV7m-LgbsSe.purZT-SxQuSe.JGcpL-RbRzK .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{border-radius:8px}.nsm7Bb-HzV7m-LgbsSe .nsm7Bb-HzV7m-LgbsSe-bN97Pc-sM5MNb{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-align-items:center;-webkit-box-align:center;align-items:center;-webkit-flex-direction:row;-webkit-box-orient:horizontal;-webkit-box-direction:normal;flex-direction:row;-webkit-box-pack:justify;-webkit-justify-content:space-between;justify-content:space-between;-webkit-flex-wrap:nowrap;flex-wrap:nowrap;height:100%;position:relative;width:100%}.nsm7Bb-HzV7m-LgbsSe .oXtfBe-l4eHX{-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center}.nsm7Bb-HzV7m-LgbsSe .nsm7Bb-HzV7m-LgbsSe-BPrWId{-webkit-flex-grow:1;-webkit-box-flex:1;flex-grow:1;font-family:Google Sans,arial,sans-serif;font-weight:500;overflow:hidden;text-overflow:ellipsis;vertical-align:top}.nsm7Bb-HzV7m-LgbsSe.purZT-SxQuSe .nsm7Bb-HzV7m-LgbsSe-BPrWId{font-weight:300}.nsm7Bb-HzV7m-LgbsSe .oXtfBe-l4eHX .nsm7Bb-HzV7m-LgbsSe-BPrWId{-webkit-flex-grow:0;-webkit-box-flex:0;flex-grow:0}.nsm7Bb-HzV7m-LgbsSe .nsm7Bb-HzV7m-LgbsSe-MJoBVe{-webkit-transition:background-color .218s;transition:background-color .218s;bottom:0;left:0;position:absolute;right:0;top:0}.nsm7Bb-HzV7m-LgbsSe:focus,.nsm7Bb-HzV7m-LgbsSe:hover{box-shadow:none;border-color:rgb(210,227,252);outline:none}.nsm7Bb-HzV7m-LgbsSe:focus-within{outline:2px solid #00639b;border-color:transparent}.nsm7Bb-HzV7m-LgbsSe:hover .nsm7Bb-HzV7m-LgbsSe-MJoBVe{background:rgba(66,133,244,.08)}.nsm7Bb-HzV7m-LgbsSe:active .nsm7Bb-HzV7m-LgbsSe-MJoBVe,.nsm7Bb-HzV7m-LgbsSe:focus .nsm7Bb-HzV7m-LgbsSe-MJoBVe{background:rgba(66,133,244,.1)}.nsm7Bb-HzV7m-LgbsSe.i5vt6e-to915-Ia7Qfc:hover .nsm7Bb-HzV7m-LgbsSe-MJoBVe{background:rgba(255,255,255,.08)}.nsm7Bb-HzV7m-LgbsSe.i5vt6e-to915-Ia7Qfc:active .nsm7Bb-HzV7m-LgbsSe-MJoBVe,.nsm7Bb-HzV7m-LgbsSe.i5vt6e-to915-Ia7Qfc:focus .nsm7Bb-HzV7m-LgbsSe-MJoBVe{background:rgba(255,255,255,.12)}.nsm7Bb-HzV7m-LgbsSe.MFS4be-Ia7Qfc:hover .nsm7Bb-HzV7m-LgbsSe-MJoBVe{background:rgba(255,255,255,.24)}.nsm7Bb-HzV7m-LgbsSe.MFS4be-Ia7Qfc:active .nsm7Bb-HzV7m-LgbsSe-MJoBVe,.nsm7Bb-HzV7m-LgbsSe.MFS4be-Ia7Qfc:focus .nsm7Bb-HzV7m-LgbsSe-MJoBVe{background:rgba(255,255,255,.32)}.nsm7Bb-HzV7m-LgbsSe .n1UuX-DkfjY{border-radius:50%;display:-webkit-box;display:-webkit-flex;display:flex;height:20px;margin-left:-4px;margin-right:8px;min-width:20px;width:20px}.nsm7Bb-HzV7m-LgbsSe.jVeSEe .nsm7Bb-HzV7m-LgbsSe-BPrWId{font-family:Roboto;font-size:12px;text-align:left}.nsm7Bb-HzV7m-LgbsSe.jVeSEe .nsm7Bb-HzV7m-LgbsSe-BPrWId .K4efff .fmcmS,.nsm7Bb-HzV7m-LgbsSe.jVeSEe .nsm7Bb-HzV7m-LgbsSe-BPrWId .ssJRIf{overflow:hidden;text-overflow:ellipsis}.nsm7Bb-HzV7m-LgbsSe.jVeSEe .nsm7Bb-HzV7m-LgbsSe-BPrWId .K4efff{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-align-items:center;-webkit-box-align:center;align-items:center;color:#5f6368;fill:#5f6368;font-size:11px;font-weight:400}.nsm7Bb-HzV7m-LgbsSe.jVeSEe.i5vt6e-to915-Ia7Qfc .nsm7Bb-HzV7m-LgbsSe-BPrWId .K4efff{color:#c4c7c5;fill:#c4c7c5}.nsm7Bb-HzV7m-LgbsSe.jVeSEe.MFS4be-Ia7Qfc .nsm7Bb-HzV7m-LgbsSe-BPrWId .K4efff{color:#e8eaed;fill:#e8eaed}@media screen and (prefers-contrast:more){.nsm7Bb-HzV7m-LgbsSe.jVeSEe .nsm7Bb-HzV7m-LgbsSe-BPrWId .K4efff,.nsm7Bb-HzV7m-LgbsSe.jVeSEe.MFS4be-Ia7Qfc .nsm7Bb-HzV7m-LgbsSe-BPrWId .K4efff{color:#000;fill:#000}}.nsm7Bb-HzV7m-LgbsSe.jVeSEe .nsm7Bb-HzV7m-LgbsSe-BPrWId .K4efff .Bz112c{height:18px;margin:-3px -3px -3px 2px;min-width:18px;width:18px}.nsm7Bb-HzV7m-LgbsSe.jVeSEe .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{border-top-left-radius:0;border-bottom-left-radius:0;border-top-right-radius:3px;border-bottom-right-radius:3px;margin-left:12px;margin-right:-10px}.nsm7Bb-HzV7m-LgbsSe.jVeSEe.JGcpL-RbRzK .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{border-radius:18px}.L5Fo6c-sM5MNb{border:0;display:block;left:0;position:relative;top:0}.L5Fo6c-bF1uUb{border-radius:4px;bottom:0;cursor:pointer;left:0;position:absolute;right:0;top:0}.L5Fo6c-bF1uUb:focus{border:none;outline:none}sentinel{}</style></head>
+<link rel="manifest" href="manifest.webmanifest?v=2.0.2"><link rel="apple-touch-icon" href="assets/fast-servicos-icon-192.png?v=2.0.2"><link rel="icon" href="assets/fast-servicos-icon-192.png?v=2.0.2"><script id="fast-google-gis" src="https://accounts.google.com/gsi/client" async="" defer=""></script><style id="googleidentityservice_button_styles">.qJTHM{-moz-user-select:none;-webkit-user-select:none;-ms-user-select:none;color:#202124;direction:ltr;-webkit-touch-callout:none;font-family:Roboto-Regular,arial,sans-serif;-webkit-font-smoothing:antialiased;font-weight:400;margin:0;overflow:hidden;-webkit-text-size-adjust:100%}.ynRLnc{left:-9999px;position:absolute;top:-9999px}.L6cTce{display:none}.bltWBb{overflow-wrap:break-word;word-break:break-word}.hSRGPd{color:#1a73e8;cursor:pointer;font-weight:500;text-decoration:none}.Bz112c-W3lGp{height:16px;width:16px}.Bz112c-E3DyYd{height:20px;width:20px}.Bz112c-r9oPif{height:24px;width:24px}.Bz112c-u2z5K{height:36px;width:36px}.Bz112c-uaxL4e{border-radius:10px}.LgbsSe-Bz112c{display:block}.S9gUrf-YoZ4jf{border:none;margin:0;padding:0}.S9gUrf-YoZ4jf *{border:none;margin:0;padding:0}.fFW7wc-ibnC6b>.aZ2wEe>div{border-color:#4285f4}.P1ekSe-ZMv3u{-webkit-transition:height .2s linear;transition:height .2s linear}.P1ekSe-ZMv3u>div:first-child{background-color:#1a73e8!important;-webkit-transition:width .3s linear;transition:width .3s linear}.P1ekSe-ZMv3u>div:nth-child(2){background-image:-webkit-gradient(linear,left top,right top,from(rgba(255,255,255,.7)),to(rgba(255,255,255,.7))),-webkit-gradient(linear,left top,right top,from(#1a73e8),to(#1a73e8))!important;background-image:-webkit-linear-gradient(left,rgba(255,255,255,.7),rgba(255,255,255,.7)),-webkit-linear-gradient(left,#1a73e8,#1a73e8)!important;background-image:linear-gradient(90deg,rgba(255,255,255,.7),rgba(255,255,255,.7)),linear-gradient(90deg,#1a73e8,#1a73e8)!important}.P1ekSe-ZMv3u>div:nth-child(3){background-image:-webkit-gradient(linear,left top,right top,from(rgba(255,255,255,.7)),to(rgba(255,255,255,.7))),-webkit-gradient(linear,left top,right top,from(#1a73e8),to(#1a73e8))!important;background-image:-webkit-linear-gradient(left,rgba(255,255,255,.7),rgba(255,255,255,.7)),-webkit-linear-gradient(left,#1a73e8,#1a73e8)!important;background-image:linear-gradient(90deg,rgba(255,255,255,.7),rgba(255,255,255,.7)),linear-gradient(90deg,#1a73e8,#1a73e8)!important}.haAclf{display:inline-block}.nsm7Bb-HzV7m-LgbsSe{border-radius:4px;box-sizing:border-box;-webkit-transition:background-color .218s,border-color .218s;transition:background-color .218s,border-color .218s;-moz-user-select:none;-webkit-user-select:none;-ms-user-select:none;-webkit-appearance:none;background-color:#fff;background-image:none;border:1px solid #dadce0;color:#3c4043;cursor:pointer;font-family:Google Sans,arial,sans-serif;font-size:.875rem;height:40px;letter-spacing:.25px;outline:none;overflow:hidden;padding:0 12px;position:relative;text-align:center;vertical-align:middle;white-space:nowrap;width:auto}@media screen and (-ms-high-contrast:active){.nsm7Bb-HzV7m-LgbsSe{border:2px solid windowText;color:windowText}}@media screen and (preferes-contrast:more){.nsm7Bb-HzV7m-LgbsSe{color:#000}}.nsm7Bb-HzV7m-LgbsSe.pSzOP-SxQuSe{font-size:.875rem;height:32px;letter-spacing:.25px;padding:0 10px}.nsm7Bb-HzV7m-LgbsSe.purZT-SxQuSe{font-size:.6875rem;height:20px;letter-spacing:.3px;padding:0 8px}.nsm7Bb-HzV7m-LgbsSe.Bz112c-LgbsSe{padding:0;width:40px}.nsm7Bb-HzV7m-LgbsSe.Bz112c-LgbsSe.pSzOP-SxQuSe{width:32px}.nsm7Bb-HzV7m-LgbsSe.Bz112c-LgbsSe.purZT-SxQuSe{width:20px}.nsm7Bb-HzV7m-LgbsSe.JGcpL-RbRzK{border-radius:20px}.nsm7Bb-HzV7m-LgbsSe.JGcpL-RbRzK.pSzOP-SxQuSe{border-radius:16px}.nsm7Bb-HzV7m-LgbsSe.JGcpL-RbRzK.purZT-SxQuSe{border-radius:10px}.nsm7Bb-HzV7m-LgbsSe.i5vt6e-to915-Ia7Qfc{border:1px solid #8e918f;background-color:#131314;color:#e3e3e3}.nsm7Bb-HzV7m-LgbsSe.MFS4be-Ia7Qfc{border:none;color:#fff}.nsm7Bb-HzV7m-LgbsSe.MFS4be-v3pZbf-Ia7Qfc{background-color:#1a73e8}.nsm7Bb-HzV7m-LgbsSe.MFS4be-JaPV2b-Ia7Qfc{background-color:#202124;color:#e8eaed}@media screen and (prefers-contrast:more){.nsm7Bb-HzV7m-LgbsSe.MFS4be-JaPV2b-Ia7Qfc{color:#fff}}.nsm7Bb-HzV7m-LgbsSe .nsm7Bb-HzV7m-LgbsSe-Bz112c{height:18px;margin-right:8px;min-width:18px;width:18px}.nsm7Bb-HzV7m-LgbsSe.pSzOP-SxQuSe .nsm7Bb-HzV7m-LgbsSe-Bz112c{height:14px;min-width:14px;width:14px}.nsm7Bb-HzV7m-LgbsSe.purZT-SxQuSe .nsm7Bb-HzV7m-LgbsSe-Bz112c{height:10px;min-width:10px;width:10px}.nsm7Bb-HzV7m-LgbsSe.jVeSEe .nsm7Bb-HzV7m-LgbsSe-Bz112c{margin-left:8px;margin-right:-4px}.nsm7Bb-HzV7m-LgbsSe.Bz112c-LgbsSe .nsm7Bb-HzV7m-LgbsSe-Bz112c{margin:0;padding:10px}.nsm7Bb-HzV7m-LgbsSe.Bz112c-LgbsSe.pSzOP-SxQuSe .nsm7Bb-HzV7m-LgbsSe-Bz112c{padding:8px}.nsm7Bb-HzV7m-LgbsSe.Bz112c-LgbsSe.purZT-SxQuSe .nsm7Bb-HzV7m-LgbsSe-Bz112c{padding:4px}.nsm7Bb-HzV7m-LgbsSe .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{border-top-left-radius:3px;border-bottom-left-radius:3px;display:-webkit-box;display:-webkit-flex;display:flex;-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center;-webkit-box-align:center;-webkit-align-items:center;align-items:center;background-color:#fff;height:36px;margin-left:-10px;margin-right:12px;min-width:36px;width:36px}.nsm7Bb-HzV7m-LgbsSe .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf .nsm7Bb-HzV7m-LgbsSe-Bz112c,.nsm7Bb-HzV7m-LgbsSe.Bz112c-LgbsSe .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf .nsm7Bb-HzV7m-LgbsSe-Bz112c{margin:0;padding:0}.nsm7Bb-HzV7m-LgbsSe.pSzOP-SxQuSe .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{height:28px;margin-left:-8px;margin-right:10px;min-width:28px;width:28px}.nsm7Bb-HzV7m-LgbsSe.purZT-SxQuSe .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{height:16px;margin-left:-6px;margin-right:8px;min-width:16px;width:16px}.nsm7Bb-HzV7m-LgbsSe.Bz112c-LgbsSe .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{border-radius:3px;margin-left:2px;margin-right:0;padding:0}.nsm7Bb-HzV7m-LgbsSe.JGcpL-RbRzK .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{border-radius:18px}.nsm7Bb-HzV7m-LgbsSe.pSzOP-SxQuSe.JGcpL-RbRzK .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{border-radius:14px}.nsm7Bb-HzV7m-LgbsSe.purZT-SxQuSe.JGcpL-RbRzK .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{border-radius:8px}.nsm7Bb-HzV7m-LgbsSe .nsm7Bb-HzV7m-LgbsSe-bN97Pc-sM5MNb{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-align-items:center;-webkit-box-align:center;align-items:center;-webkit-flex-direction:row;-webkit-box-orient:horizontal;-webkit-box-direction:normal;flex-direction:row;-webkit-box-pack:justify;-webkit-justify-content:space-between;justify-content:space-between;-webkit-flex-wrap:nowrap;flex-wrap:nowrap;height:100%;position:relative;width:100%}.nsm7Bb-HzV7m-LgbsSe .oXtfBe-l4eHX{-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center}.nsm7Bb-HzV7m-LgbsSe .nsm7Bb-HzV7m-LgbsSe-BPrWId{-webkit-flex-grow:1;-webkit-box-flex:1;flex-grow:1;font-family:Google Sans,arial,sans-serif;font-weight:500;overflow:hidden;text-overflow:ellipsis;vertical-align:top}.nsm7Bb-HzV7m-LgbsSe.purZT-SxQuSe .nsm7Bb-HzV7m-LgbsSe-BPrWId{font-weight:300}.nsm7Bb-HzV7m-LgbsSe .oXtfBe-l4eHX .nsm7Bb-HzV7m-LgbsSe-BPrWId{-webkit-flex-grow:0;-webkit-box-flex:0;flex-grow:0}.nsm7Bb-HzV7m-LgbsSe .nsm7Bb-HzV7m-LgbsSe-MJoBVe{-webkit-transition:background-color .218s;transition:background-color .218s;bottom:0;left:0;position:absolute;right:0;top:0}.nsm7Bb-HzV7m-LgbsSe:focus,.nsm7Bb-HzV7m-LgbsSe:hover{box-shadow:none;border-color:rgb(210,227,252);outline:none}.nsm7Bb-HzV7m-LgbsSe:focus-within{outline:2px solid #00639b;border-color:transparent}.nsm7Bb-HzV7m-LgbsSe:hover .nsm7Bb-HzV7m-LgbsSe-MJoBVe{background:rgba(66,133,244,.08)}.nsm7Bb-HzV7m-LgbsSe:active .nsm7Bb-HzV7m-LgbsSe-MJoBVe,.nsm7Bb-HzV7m-LgbsSe:focus .nsm7Bb-HzV7m-LgbsSe-MJoBVe{background:rgba(66,133,244,.1)}.nsm7Bb-HzV7m-LgbsSe.i5vt6e-to915-Ia7Qfc:hover .nsm7Bb-HzV7m-LgbsSe-MJoBVe{background:rgba(255,255,255,.08)}.nsm7Bb-HzV7m-LgbsSe.i5vt6e-to915-Ia7Qfc:active .nsm7Bb-HzV7m-LgbsSe-MJoBVe,.nsm7Bb-HzV7m-LgbsSe.i5vt6e-to915-Ia7Qfc:focus .nsm7Bb-HzV7m-LgbsSe-MJoBVe{background:rgba(255,255,255,.12)}.nsm7Bb-HzV7m-LgbsSe.MFS4be-Ia7Qfc:hover .nsm7Bb-HzV7m-LgbsSe-MJoBVe{background:rgba(255,255,255,.24)}.nsm7Bb-HzV7m-LgbsSe.MFS4be-Ia7Qfc:active .nsm7Bb-HzV7m-LgbsSe-MJoBVe,.nsm7Bb-HzV7m-LgbsSe.MFS4be-Ia7Qfc:focus .nsm7Bb-HzV7m-LgbsSe-MJoBVe{background:rgba(255,255,255,.32)}.nsm7Bb-HzV7m-LgbsSe .n1UuX-DkfjY{border-radius:50%;display:-webkit-box;display:-webkit-flex;display:flex;height:20px;margin-left:-4px;margin-right:8px;min-width:20px;width:20px}.nsm7Bb-HzV7m-LgbsSe.jVeSEe .nsm7Bb-HzV7m-LgbsSe-BPrWId{font-family:Roboto;font-size:12px;text-align:left}.nsm7Bb-HzV7m-LgbsSe.jVeSEe .nsm7Bb-HzV7m-LgbsSe-BPrWId .K4efff .fmcmS,.nsm7Bb-HzV7m-LgbsSe.jVeSEe .nsm7Bb-HzV7m-LgbsSe-BPrWId .ssJRIf{overflow:hidden;text-overflow:ellipsis}.nsm7Bb-HzV7m-LgbsSe.jVeSEe .nsm7Bb-HzV7m-LgbsSe-BPrWId .K4efff{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-align-items:center;-webkit-box-align:center;align-items:center;color:#5f6368;fill:#5f6368;font-size:11px;font-weight:400}.nsm7Bb-HzV7m-LgbsSe.jVeSEe.i5vt6e-to915-Ia7Qfc .nsm7Bb-HzV7m-LgbsSe-BPrWId .K4efff{color:#c4c7c5;fill:#c4c7c5}.nsm7Bb-HzV7m-LgbsSe.jVeSEe.MFS4be-Ia7Qfc .nsm7Bb-HzV7m-LgbsSe-BPrWId .K4efff{color:#e8eaed;fill:#e8eaed}@media screen and (prefers-contrast:more){.nsm7Bb-HzV7m-LgbsSe.jVeSEe .nsm7Bb-HzV7m-LgbsSe-BPrWId .K4efff,.nsm7Bb-HzV7m-LgbsSe.jVeSEe.MFS4be-Ia7Qfc .nsm7Bb-HzV7m-LgbsSe-BPrWId .K4efff{color:#000;fill:#000}}.nsm7Bb-HzV7m-LgbsSe.jVeSEe .nsm7Bb-HzV7m-LgbsSe-BPrWId .K4efff .Bz112c{height:18px;margin:-3px -3px -3px 2px;min-width:18px;width:18px}.nsm7Bb-HzV7m-LgbsSe.jVeSEe .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{border-top-left-radius:0;border-bottom-left-radius:0;border-top-right-radius:3px;border-bottom-right-radius:3px;margin-left:12px;margin-right:-10px}.nsm7Bb-HzV7m-LgbsSe.jVeSEe.JGcpL-RbRzK .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{border-radius:18px}.L5Fo6c-sM5MNb{border:0;display:block;left:0;position:relative;top:0}.L5Fo6c-bF1uUb{border-radius:4px;bottom:0;cursor:pointer;left:0;position:absolute;right:0;top:0}.L5Fo6c-bF1uUb:focus{border:none;outline:none}sentinel{}</style></head>
 <body class="fast-pro fast-edition-mobile theme-ocean fx-executive fx-layout-command" style="" data-fast-layout="operacional">
 <script id="r99-ime-guard">
 /* r99: Guarda IME (teclado de voz do Google / Gboard e teclados CJK).
@@ -1429,11 +1429,11 @@ window.fastNotifPermitida=function(canal,tipo,mensagem){
     <div class="fast-splash-bg"></div>
     <div class="fast-splash-content">
       <div class="fast-splash-logo-wrap">
-        <img src="assets/fast-servicos-icon-512.png?v=2.0.1" alt="Fast Serviços" style="width:100%;height:auto;display:block;object-fit:contain;">
+        <img src="assets/fast-servicos-icon-512.png?v=2.0.2" alt="Fast Serviços" style="width:100%;height:auto;display:block;object-fit:contain;">
       </div>
       <div class="fast-splash-name">FAST SERVIÇOS</div>
       <div class="fast-splash-tag">SOLUÇÕES EM LOGÍSTICA</div>
-      <div class="fast-splash-version">Versão <span id="fastSplashVersion">2.0.1</span></div>
+      <div class="fast-splash-version">Versão <span id="fastSplashVersion">2.0.2</span></div>
     </div>
     <div class="fast-splash-loader"><span></span></div>
   </div>
@@ -1447,10 +1447,10 @@ window.fastNotifPermitida=function(canal,tipo,mensagem){
       <div class="fast-gate-loading" id="fastGateLoading"><div class="fast-gate-spinner"></div></div>
 
       <div class="fast-gate-brand">
-        <div class="fast-gate-logo"><img src="assets/fast-servicos-icon-512.png?v=2.0.1" alt="Fast Serviços" style="width:100%;height:100%;object-fit:contain;padding:6px;"></div>
+        <div class="fast-gate-logo"><img src="assets/fast-servicos-icon-512.png?v=2.0.2" alt="Fast Serviços" style="width:100%;height:100%;object-fit:contain;padding:6px;"></div>
         <h1 id="fastGateTitle">FAST Serviços</h1>
         <p id="fastGateSubtitle">SOLUÇÕES EM LOGÍSTICA</p>
-        <p class="fast-gate-version" id="fastGateVersion">Versão <span id="fastGateVersionNum">2.0.1</span></p>
+        <p class="fast-gate-version" id="fastGateVersion">Versão <span id="fastGateVersionNum">2.0.2</span></p>
       </div>
 
       <!-- Bloqueio por tentativas -->
@@ -6803,7 +6803,7 @@ window.fastNotifPermitida=function(canal,tipo,mensagem){
           <!-- Rodapé do menu: nome do app + versão -->
           <div class="nav-menu-footer">
             <div class="nav-menu-footer-app"><i class="fa-solid fa-bolt"></i> APP FAST SERVIÇOS</div>
-            <div class="nav-menu-footer-ver" id="navMenuVersao">Versão 2.0.1</div>
+            <div class="nav-menu-footer-ver" id="navMenuVersao">Versão 2.0.2</div>
           </div>
         </div>
       </div>
@@ -23951,10 +23951,10 @@ window.fastNotifPermitida=function(canal,tipo,mensagem){
               <div id="fastDeployInfo" style="background:var(--card-bg-2);border:1px solid var(--border);border-radius:10px;padding:12px;margin:10px 0;font-size:13px;">
                 <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
                   <div>
-                    <div><strong>Versão atual:</strong> <span id="fastVersaoLabel" style="color:var(--accent);font-weight:800;">2.0.1</span></div>
+                    <div><strong>Versão atual:</strong> <span id="fastVersaoLabel" style="color:var(--accent);font-weight:800;">2.0.2</span></div>
                     <div id="fastVersaoDateLabel" style="font-size:11.5px;color:var(--text-muted);margin-top:3px;"><i class="fa-solid fa-clock"></i> Lançada em 04/09/2026 16:40</div>
                   </div>
-                  <div id="fastVersaoOnlineLabel" style="font-size:12px;color:var(--text-muted);text-align:right;">Online: <strong>2.0.1</strong> <span style="color:var(--success);">(ok)</span></div>
+                  <div id="fastVersaoOnlineLabel" style="font-size:12px;color:var(--text-muted);text-align:right;">Online: <strong>2.0.2</strong> <span style="color:var(--success);">(ok)</span></div>
                 </div>
                 <div style="font-size:12px;color:var(--text-muted);word-break:break-all;margin-bottom:10px;"><i class="fa-solid fa-link"></i> <span id="fastUrlLabel">https://adaiascearataiana-gif.github.io/fastservicosapp/</span></div>
                 <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
@@ -23991,7 +23991,7 @@ window.fastNotifPermitida=function(canal,tipo,mensagem){
                   <span class="fup-count" id="fastUpdatesCount">0</span>
                   <i class="fa-solid fa-chevron-down fup-chevron"></i>
                 </div>
-                <div class="fast-updates-panel-body" id="fastUpdatesBody"><div class="fup-version-header"><div class="fup-version-row"><i class="fa-solid fa-sparkles"></i> <span>Versão 2.0.1</span></div><div class="fup-date-row"><i class="fa-solid fa-clock"></i> <span>Lançada em 04/09/2026 16:40</span></div></div><div class="fup-item"><div class="fup-item-dot" style="background:rgba(34,197,94,0.10);"><i class="fa-solid fa-gift" style="color:#22c55e;"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#22c55e;background:rgba(34,197,94,0.10);">Novo</span><div class="fup-item-text">r101 (04/09/2026): NOVO APP DO MOTORISTA — o patrão cria o login do motorista no RH (Usuários e Acessos), gera link/QR de instalação, e o motorista recebe no app dele as rotas do dia atribuídas a ele: botão CHEGUEI, fotos pela câmera em tempo real (vão direto para o Google Drive do patrão), CONCLUIR ROTAS e GPS ao vivo. Patrão vê ROTA CONCLUÍDA com hora e recebe notificações.</div></div></div><div class="fup-item"><div class="fup-item-dot" style="background:rgba(34,197,94,0.10);"><i class="fa-solid fa-map-location-dot" style="color:#22c55e;"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#22c55e;background:rgba(34,197,94,0.10);">Novo</span><div class="fup-item-text">r101 (04/09/2026): RASTREAMENTO COM ETA — mapa ao vivo do motorista com tempo estimado de chegada até o próximo destino, na lista de motoristas e no balão do marcador. Notificações CHEGUEI e ROTA CONCLUÍDA na sincronização.</div></div></div><div class="fup-item"><div class="fup-item-dot" style="background:rgba(34,197,94,0.10);"><i class="fa-solid fa-cloud-arrow-up" style="color:#22c55e;"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#22c55e;background:rgba(34,197,94,0.10);">Novo</span><div class="fup-item-text">r101 (04/09/2026): PAINEL DA FILA DO GOOGLE DRIVE — contagem de imagens pendentes, selo SINCRONIZADO, barra de progresso ao vivo e tabela por foto: ⏳ pendente, 🔄 enviando, ✅ verde no Drive, ❌ com erro. Mostra também as fotos recebidas dos motoristas.</div></div></div><div class="fup-item"><div class="fup-item-dot" style="background:rgba(217,119,6,0.10);"><i class="fa-solid fa-wrench" style="color:#d97706;"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#d97706;background:rgba(217,119,6,0.10);">Corrigido</span><div class="fup-item-text">r100 (04/09/2026): corrigida a exclusão de rotas em todos os caminhos (botão Excluir de cada rota, rotas agrupadas e botão Excluir do balão flutuante). O Confirmar estava desabilitado por um HTML duplicado no código e não executava a exclusão; agora remove a rota do relatório, do armazenamento local e da nuvem (Supabase).</div></div></div><div class="fup-item"><div class="fup-item-dot" style="background:rgba(34,197,94,0.10);"><i class="fa-solid fa-gift" style="color:#22c55e;"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#22c55e;background:rgba(34,197,94,0.10);">Novo</span><div class="fup-item-text">r100 (04/09/2026): botões − e + ao lado do campo de Valor em Rotas, Rotas do Dia e Editar Rota. Cada toque soma ou subtrai R$ 5,00 (R$ 20,00 → R$ 25,00 no +, → R$ 15,00 no −), sem ficar negativo; a digitação manual continua funcionando por cima.</div></div></div></div>
+                <div class="fast-updates-panel-body" id="fastUpdatesBody"><div class="fup-version-header"><div class="fup-version-row"><i class="fa-solid fa-sparkles"></i> <span>Versão 2.0.2</span></div><div class="fup-date-row"><i class="fa-solid fa-clock"></i> <span>Lançada em 04/09/2026 16:40</span></div></div><div class="fup-item"><div class="fup-item-dot" style="background:rgba(34,197,94,0.10);"><i class="fa-solid fa-gift" style="color:#22c55e;"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#22c55e;background:rgba(34,197,94,0.10);">Novo</span><div class="fup-item-text">r101 (04/09/2026): NOVO APP DO MOTORISTA — o patrão cria o login do motorista no RH (Usuários e Acessos), gera link/QR de instalação, e o motorista recebe no app dele as rotas do dia atribuídas a ele: botão CHEGUEI, fotos pela câmera em tempo real (vão direto para o Google Drive do patrão), CONCLUIR ROTAS e GPS ao vivo. Patrão vê ROTA CONCLUÍDA com hora e recebe notificações.</div></div></div><div class="fup-item"><div class="fup-item-dot" style="background:rgba(34,197,94,0.10);"><i class="fa-solid fa-map-location-dot" style="color:#22c55e;"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#22c55e;background:rgba(34,197,94,0.10);">Novo</span><div class="fup-item-text">r101 (04/09/2026): RASTREAMENTO COM ETA — mapa ao vivo do motorista com tempo estimado de chegada até o próximo destino, na lista de motoristas e no balão do marcador. Notificações CHEGUEI e ROTA CONCLUÍDA na sincronização.</div></div></div><div class="fup-item"><div class="fup-item-dot" style="background:rgba(34,197,94,0.10);"><i class="fa-solid fa-cloud-arrow-up" style="color:#22c55e;"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#22c55e;background:rgba(34,197,94,0.10);">Novo</span><div class="fup-item-text">r101 (04/09/2026): PAINEL DA FILA DO GOOGLE DRIVE — contagem de imagens pendentes, selo SINCRONIZADO, barra de progresso ao vivo e tabela por foto: ⏳ pendente, 🔄 enviando, ✅ verde no Drive, ❌ com erro. Mostra também as fotos recebidas dos motoristas.</div></div></div><div class="fup-item"><div class="fup-item-dot" style="background:rgba(217,119,6,0.10);"><i class="fa-solid fa-wrench" style="color:#d97706;"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#d97706;background:rgba(217,119,6,0.10);">Corrigido</span><div class="fup-item-text">r100 (04/09/2026): corrigida a exclusão de rotas em todos os caminhos (botão Excluir de cada rota, rotas agrupadas e botão Excluir do balão flutuante). O Confirmar estava desabilitado por um HTML duplicado no código e não executava a exclusão; agora remove a rota do relatório, do armazenamento local e da nuvem (Supabase).</div></div></div><div class="fup-item"><div class="fup-item-dot" style="background:rgba(34,197,94,0.10);"><i class="fa-solid fa-gift" style="color:#22c55e;"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#22c55e;background:rgba(34,197,94,0.10);">Novo</span><div class="fup-item-text">r100 (04/09/2026): botões − e + ao lado do campo de Valor em Rotas, Rotas do Dia e Editar Rota. Cada toque soma ou subtrai R$ 5,00 (R$ 20,00 → R$ 25,00 no +, → R$ 15,00 no −), sem ficar negativo; a digitação manual continua funcionando por cima.</div></div></div></div>
               </div>
             </div>
           </div>
@@ -29289,7 +29289,7 @@ CREATE POLICY "mfot_upd"   ON motorista_fotos FOR UPDATE USING (true) WITH CHECK
           });
         `;
         try {
-          navigator.serviceWorker.register('sw.js?v=2.0.1', { scope: './' })
+          navigator.serviceWorker.register('sw.js?v=2.0.2', { scope: './' })
             .then(function(reg) { console.info('SW permanente registrado (r73 network-first).'); })
             .catch(function(e) { console.info('SW: nao registrado neste ambiente (normal).', e.message); });
         } catch (e) { console.info('SW init skip:', e); }
@@ -29847,7 +29847,7 @@ CREATE POLICY "mfot_upd"   ON motorista_fotos FOR UPDATE USING (true) WITH CHECK
           console.warn('FAST Data Vault: dados recuperados automaticamente de', cargaSegura.fonte);
           setTimeout(() => mostrarToastSync('Dados recuperados com segurança do backup local (' + cargaSegura.fonte + ').', 'success'), 700);
         }
-        // Solicitação do proprietário (v2.0.1): atribuir o histórico atual ao
+        // Solicitação do proprietário (v2.0.2): atribuir o histórico atual ao
         // motorista ADAÍAS antes da primeira sincronização desta versão.
         const rotasAtribuidasAdaia = fast201AtribuirRotasAdaia();
         if (rotasAtribuidasAdaia > 0) {
@@ -30981,7 +30981,7 @@ CREATE POLICY "mfot_upd"   ON motorista_fotos FOR UPDATE USING (true) WITH CHECK
       if (alteradas > 0) {
         try {
           localStorage.setItem('fast_rotas_backup_pre_adaias_v201', JSON.stringify({
-            criadoEm: new Date().toISOString(), versao: '2.0.1', rotas: rotas, sequencias: sequencias
+            criadoEm: new Date().toISOString(), versao: '2.0.2', rotas: rotas, sequencias: sequencias
           }));
         } catch (e) { console.warn('[rotas] backup preventivo não disponível:', e); }
         rotas.forEach(function(rota) {
@@ -31050,7 +31050,7 @@ CREATE POLICY "mfot_upd"   ON motorista_fotos FOR UPDATE USING (true) WITH CHECK
         if (!localStorage.getItem(chaveBackup)) {
           localStorage.setItem(chaveBackup, JSON.stringify({
             criadoEm: new Date().toISOString(),
-            versao: '2.0.1',
+            versao: '2.0.2',
             destinos: antes
           }));
         }
@@ -41529,12 +41529,12 @@ CREATE POLICY "mfot_upd"   ON motorista_fotos FOR UPDATE USING (true) WITH CHECK
       links.forEach(function(el,i){ if(i>0) el.remove(); });
       var link = links[0] || document.createElement('link');
       link.rel = 'manifest';
-      link.href = 'manifest.webmanifest?v=2.0.1';
+      link.href = 'manifest.webmanifest?v=2.0.2';
       if(!link.parentNode) document.head.appendChild(link);
 
       // A mesma logomarca oficial também aparece no gate e na abertura.
       document.querySelectorAll('#fastSplash img, #fastLoginGate .fast-gate-logo img').forEach(function(img){
-        img.src = 'assets/fast-servicos-icon-512.png?v=2.0.1';
+        img.src = 'assets/fast-servicos-icon-512.png?v=2.0.2';
         img.alt = 'Fast Serviços';
       });
     }
@@ -44173,7 +44173,7 @@ window.fastMobileNav = function(ev, abaId, botao) {
           <div style="width:42px;height:42px;border-radius:11px;background:rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px);"><i class="fa-solid fa-sparkles" style="font-size:18px;"></i></div>
           <div>
             <div style="font-size:12px;font-weight:600;opacity:.9;letter-spacing:.5px;text-transform:uppercase;">Novidades</div>
-            <div id="fastWhatsNewVer" style="font-size:19px;font-weight:800;line-height:1.2;">Versao 2.0.1</div>
+            <div id="fastWhatsNewVer" style="font-size:19px;font-weight:800;line-height:1.2;">Versao 2.0.2</div>
           </div>
         </div>
         <div id="fastWhatsNewDate" style="font-size:12.5px;opacity:.9;display:flex;align-items:center;gap:6px;"><i class="fa-solid fa-clock"></i> <span>Lançada em 04/09/2026 16:40</span></div>
@@ -45729,7 +45729,7 @@ window.fastMobileNav = function(ev, abaId, botao) {
 (function(){
   try {
     var m=document.querySelector('meta[name="fast-app-version"]');
-    if(m) m.content='2.0.1';
+    if(m) m.content='2.0.2';
     var d=document.querySelector('meta[name="fast-app-date"]');
     if(d) d.content='2026-09-04T16:40:00-03:00';
     var l=document.querySelector('meta[name="fast-latest-update"]');
@@ -45860,5 +45860,37 @@ try{
   });
 })();
 </script>
-<script src="v2-ui.js?v=2.0.1"></script>
+<style id="fast-v202-fixed-topbar">
+/* v2.0.2 — barra superior realmente fixa, sem soma da margem desktop antiga. */
+body.fast-v2.fast-pro .top-nav,
+body.fast-v2.fast-edition-desktop.fast-pro .top-nav,
+body.fast-v2.fast-edition-mobile.fast-pro .top-nav {
+  position: fixed !important;
+  top: 0 !important;
+  bottom: auto !important;
+  left: 264px !important;
+  right: 0 !important;
+  width: auto !important;
+  max-width: none !important;
+  margin: 0 !important;
+  transform: none !important;
+  box-sizing: border-box !important;
+  z-index: 10000 !important;
+}
+body.fast-v2.fast-v2-focus .top-nav {
+  left: 0 !important;
+}
+@media (max-width: 900px), (hover: none) and (pointer: coarse) {
+  body.fast-v2.fast-pro .top-nav,
+  body.fast-v2.fast-edition-desktop.fast-pro .top-nav,
+  body.fast-v2.fast-edition-mobile.fast-pro .top-nav {
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    margin: 0 !important;
+  }
+}
+</style>
+<script src="v2-ui.js?v=2.0.2"></script>
 </body></html>
