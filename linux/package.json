@@ -1,0 +1,38 @@
+{
+  "name": "fast-servicos-linux",
+  "version": "1.0.2",
+  "description": "FAST Serviços — gestão de rotas, entregas, despesas e equipe",
+  "main": "src/main.js",
+  "author": "FAST Serviços",
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "check": "node --check src/main.js && node --check src/preload.js && node --check src/renderer/desktop-bridge.js && node scripts/audit-html.js",
+    "dist": "npm run check && electron-builder --linux AppImage deb",
+    "dist:appimage": "npm run check && electron-builder --linux AppImage",
+    "dist:deb": "npm run check && electron-builder --linux deb"
+  },
+  "dependencies": {
+    "electron-updater": "^6.6.2"
+  },
+  "devDependencies": {
+    "electron": "^37.4.0",
+    "electron-builder": "^26.0.12"
+  },
+  "build": {
+    "appId": "br.com.fastservicos.desktop",
+    "productName": "FAST Serviços",
+    "asar": true,
+    "artifactName": "FAST-Servicos-${version}-${arch}.${ext}",
+    "files": ["src/**/*", "package.json"],
+    "directories": {"output": "dist", "buildResources": "build"},
+    "linux": {
+      "target": ["AppImage", "deb"],
+      "category": "Office",
+      "icon": "build/icon.svg",
+      "synopsis": "Gestão de rotas, entregas, despesas e equipe"
+    },
+    "publish": [{"provider": "github", "owner": "adaiascearataiana-gif", "repo": "fastservicosapp"}]
+  }
+}

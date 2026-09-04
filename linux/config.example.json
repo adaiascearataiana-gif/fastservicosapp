@@ -1,0 +1,6 @@
+{
+  "supabaseUrl": "https://SEU-PROJETO.supabase.co/rest/v1",
+  "supabaseAnonKey": "SUA_CHAVE_ANON_PUBLICA",
+  "googleClientId": "SEU_CLIENT_ID.apps.googleusercontent.com",
+  "updateChannel": "latest"
+}

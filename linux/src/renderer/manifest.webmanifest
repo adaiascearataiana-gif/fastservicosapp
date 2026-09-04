@@ -1,0 +1,9 @@
+{
+  "name": "FAST Serviços",
+  "short_name": "FAST",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#07111f",
+  "theme_color": "#0f766e",
+  "icons": [{"src":"assets/fast-servicos-icon.svg","sizes":"any","type":"image/svg+xml"}]
+}
