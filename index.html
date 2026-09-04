@@ -32508,7 +32508,10 @@ CREATE POLICY "mfot_upd"   ON motorista_fotos FOR UPDATE USING (true) WITH CHECK
     // --- IndexedDB genérico para handles e fotos base64 ---
     function abrirDBFotos() {
       return new Promise((resolve, reject) => {
-        const req = indexedDB.open('app_fast_fotos', 4);
+        // (r101) v5: corrige bancos v4 antigos criados SEM object stores
+        // (upgrade nunca rodava pois a versao ja era 4). v5 obriga o
+        // onupgradeneeded a rodar e criar as lojas que faltam.
+        const req = indexedDB.open('app_fast_fotos', 5);
         req.onupgradeneeded = function(e) {
           const db = e.target.result;
           if (!db.objectStoreNames.contains('dirHandles')) {
@@ -44719,14 +44722,11 @@ window.fastMobileNav = function(ev, abaId, botao) {
   function el(id){return document.getElementById(id)}
   var filaGet=null, ledgerRecentes=null, ultimoSnapshot='', recebidasMotoristas=0;
 
-  // A fila vive no IndexedDB 'app_fast_fotos' (store driveQueue). Abre o mesmo
-  // banco (v4) de forma independente e sem criar stores novos.
+  // A fila vive no IndexedDB 'app_fast_fotos' (store driveQueue). Usa a mesma
+  // abertura central abrirDBFotos() (r101 v5) — garante lojas criadas mesmo em
+  // bancos antigos v4 sem stores, e uma unica versao de esquema no app.
   function abrirDB(){
-    return new Promise(function(res,rej){
-      var rq=indexedDB.open('app_fast_fotos',4);
-      rq.onsuccess=function(e){res(e.target.result)};
-      rq.onerror=function(e){rej(e.target.error)};
-    });
+    return abrirDBFotos();
   }
   function storeTodos(nome){
     return abrirDB().then(function(db){
@@ -45077,18 +45077,17 @@ window.fastMobileNav = function(ev, abaId, botao) {
   }
 
   // Guarda base64 no IndexedDB local (mesma base 'app_fast_fotos') e devolve a ref
+  // (r101) usa a abertura central abrirDBFotos() (v5) para nao depender de
+  // versao de esquema propria e herdar a correcao de bancos antigos.
   function guardarBase64(base64){
-    return new Promise(function(res,rej){
-      var rq=indexedDB.open('app_fast_fotos',4);
-      rq.onsuccess=function(ev){
-        var db=ev.target.result;
+    return abrirDBFotos().then(function(db){
+      return new Promise(function(res,rej){
         var tx=db.transaction('fotosBase64','readwrite');
         var chave='mot_'+Date.now()+'_'+Math.random().toString(36).slice(2,8);
         tx.objectStore('fotosBase64').put({chave:chave,foto:base64});
         tx.oncomplete=function(){res('idb:'+chave)};
         tx.onerror=function(e){rej(e.target.error)};
-      };
-      rq.onerror=function(e){rej(e.target.error)};
+      });
     });
   }
 
@@ -45540,9 +45539,17 @@ window.fastMobileNav = function(ev, abaId, botao) {
     function aplicar(){try{if(typeof atualizarNotificacoes==='function')atualizarNotificacoes()}catch(e){console.warn('Notificações:',e)}try{if(typeof rastAtualizarBotaoFlutuante==='function')rastAtualizarBotaoFlutuante()}catch(e){console.warn('Painel de rotas:',e)}}
     window.fastNotifAbrir=function(e){if(e){e.preventDefault();e.stopPropagation()}criar();carregarTela();document.getElementById('fast89NotifModal').classList.add('show');try{fecharBellPanel()}catch(x){}}
     function instalarLinks(){
+      // (r101) blindado com try/catch: em telas onde a Area Protegida nao e'
+      // filha direta do container (bug pre-existente do r100), o insertBefore
+      // lancava NotFoundError e abortava a instalacao do menu. Agora cada etapa
+      // e' isolada — o que der para instalar, instala.
+      try{
       criar();var cfg=document.querySelector('#configuracoes .config-page,#configuracoes .config-topics,#configuracoes');
-      if(cfg&&!document.getElementById('fast89NotifCard')){var card=document.createElement('div');card.id='fast89NotifCard';card.className='config-topic';card.innerHTML='<div class="config-topic-header"><div class="config-topic-icon ico-backup"><i class="fa-solid fa-bell"></i></div><div><div class="config-topic-title">Notificações</div><div class="config-topic-sub">Escolha exatamente o que pode aparecer no app e no sino</div></div></div><div class="config-topic-body"><button type="button" class="btn-primary" onclick="fastNotifAbrir(event)"><i class="fa-solid fa-sliders"></i> Gerenciar Notificações</button><p class="config-desc" style="margin-top:8px">Balões operacionais ficam silenciosos por padrão. Você pode reativá-los quando quiser.</p></div>';var area=Array.from(cfg.querySelectorAll('.config-topic')).find(function(x){var t=x.querySelector('.config-topic-title');return t&&t.textContent.trim()==='Área Protegida'});cfg.insertBefore(card,area||cfg.firstChild)}
+      if(cfg&&!document.getElementById('fast89NotifCard')){var card=document.createElement('div');card.id='fast89NotifCard';card.className='config-topic';card.innerHTML='<div class="config-topic-header"><div class="config-topic-icon ico-backup"><i class="fa-solid fa-bell"></i></div><div><div class="config-topic-title">Notificações</div><div class="config-topic-sub">Escolha exatamente o que pode aparecer no app e no sino</div></div></div><div class="config-topic-body"><button type="button" class="btn-primary" onclick="fastNotifAbrir(event)"><i class="fa-solid fa-sliders"></i> Gerenciar Notificações</button><p class="config-desc" style="margin-top:8px">Balões operacionais ficam silenciosos por padrão. Você pode reativá-los quando quiser.</p></div>';var area=Array.from(cfg.querySelectorAll('.config-topic')).find(function(x){var t=x.querySelector('.config-topic-title');return t&&t.textContent.trim()==='Área Protegida'});try{cfg.insertBefore(card,area||cfg.firstChild)}catch(e1){cfg.appendChild(card)}}
+      }catch(e0){console.warn('Notificacoes card:',e0)}
+      try{
       var menu=document.querySelector('.nav-dropdown-menu');if(menu&&!document.getElementById('fast89NotifMenu')){var b=document.createElement('button');b.id='fast89NotifMenu';b.className='nav-item nav-grp-sistema ripple';b.innerHTML='<i class="fa-solid fa-bell"></i> <span class="nav-item-text">Notificações</span>';b.onclick=function(e){try{fecharNavDropdown()}catch(x){}window.fastNotifAbrir(e)};var conf=Array.from(menu.querySelectorAll('.nav-item')).find(function(x){return /Configurações/i.test(x.textContent)});if(conf)conf.insertAdjacentElement('afterend',b);else menu.appendChild(b)}
+      }catch(e2){console.warn('Notificacoes menu:',e2)}
     }
     var meta=document.querySelector('meta[name="fast-app-changelog"]');if(meta&&!meta.dataset.r89){var anteriores=[];try{anteriores=JSON.parse(meta.content||'[]')}catch(e){}var atual=[
       {type:'corrigido',text:'r91 (03/09/2026): botão Verificar Atualizações corrigido e exportado para funcionar também nos handlers inline e Android/PWA.'},
