@@ -21,8 +21,8 @@
   <meta name="fast-github-branch" content="main">
   <meta name="fast-github-path" content="index.html">
   <meta name="fast-github-token-env" content="GH_TOKEN">
-  <meta name="fast-app-version" content="2.3.2">
-  <meta name="fast-app-date" content="2026-09-05T14:05:00-03:00">
+  <meta name="fast-app-version" content="2.3.3">
+  <meta name="fast-app-date" content="2026-09-05T17:25:00-03:00">
   <meta name="fast-latest-update" content="2.2.0: MODO MOBILE GARANTIDO — celular e tablet agora abrem direto na versão mobile com barra inferior em qualquer largura de tela (antes tablets em paisagem e celulares com site-desktop caíam no modo Desktop); botões ROTAS e DESPESAS da barra inferior corrigidos: respondem ao toque imediatamente com trava anti-duplo-disparo e seguem as permissões do usuário; modal de Novidades fecha ao tocar fora ou ESC; bloco Subir/Descer nunca mais cobre a barra inferior | 2.1.0: LOGIN POR SETOR — logins dedicados por setor no RH (Usuários e Acessos): Administrador, Financeiro, Atendimento/Cadastros, Logística/Entregador e Motorista — cada um só vê as áreas do seu setor; corrigido o botão Lixeira de Rotas duplicado; varredura geral: 35 blocos JS (0 erros), 250 handlers e 566 IDs verificados; pacote oficial Linux (AppImage + DEB) | 2.0.2: barra superior fixa durante a rolagem | 2.0.1: lugares duplicados consolidados na sincronização, rotas atribuídas ao motorista ADAÍAS | 2.0.0: nova interface central de operações, Central Rápida Ctrl+K, modo foco e densidade ajustável; migração com ponto de restauração | r101: App do Motorista (CHEGUEI, fotos para o Drive, rastreamento GPS com ETA) | r100: exclusão de rotas corrigida | r99: ditado por voz corrigido">
   <!-- r92: verificação automática de nova versão ao abrir; Verificar Atualizações com cache-busting e sem fallback no-cors inválido. -->
   <!-- r70.1: lista corrente no HTML inicial; o painel não espera scripts tardios -->
@@ -29639,7 +29639,7 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
           });
         `;
         try {
-          navigator.serviceWorker.register('sw.js?v=2.3.2-r108', { scope: './' })
+          navigator.serviceWorker.register('sw.js?v=2.3.3-r109', { scope: './' })
             .then(function(reg) { console.info('SW permanente registrado (r73 network-first).'); })
             .catch(function(e) { console.info('SW: nao registrado neste ambiente (normal).', e.message); });
         } catch (e) { console.info('SW init skip:', e); }
@@ -32326,8 +32326,10 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
                 mostrarToast('Nova versão detectada (' + versaoLocal + ' → ' + versaoOnline + '). Atualizando automaticamente…', 'info');
               }
             } catch(e){}
-            fastExecutarAtualizacao(urlDeploy);
-            return { atualizado: true, versaoLocal, versaoOnline, urlDeploy, auto: true };
+            // r109: a verificação automática apenas informa. Recarregar aqui
+            // criava um ciclo infinito quando scripts tardios ou o cache
+            // apresentavam números de versão diferentes.
+            return { atualizado: true, versaoLocal, versaoOnline, urlDeploy, auto: false };
           }
           // Modo manual: mostra o aviso para o usuário confirmar.
           fastMostrarConfirmAtualizacao(versaoOnline, urlDeploy, versaoLocal);
@@ -46238,9 +46240,9 @@ window.fastMobileNav = function(ev, abaId, botao) {
 (function(){
   try {
     var m=document.querySelector('meta[name="fast-app-version"]');
-    if(m) m.content='2.2.0';
+    if(m) m.content='2.3.3';
     var d=document.querySelector('meta[name="fast-app-date"]');
-    if(d) d.content='2026-09-05T08:10:00-03:00';
+    if(d) d.content='2026-09-05T17:25:00-03:00';
     var l=document.querySelector('meta[name="fast-latest-update"]');
     if(l) l.content='2.2.0: MODO MOBILE GARANTIDO — celular e tablet agora abrem direto na versão mobile com barra inferior em qualquer largura de tela (antes tablets em paisagem e celulares com site-desktop caíam no modo Desktop); botões ROTAS e DESPESAS da barra inferior corrigidos: respondem ao toque imediatamente com trava anti-duplo-disparo e seguem as permissões do usuário; modal de Novidades fecha ao tocar fora ou ESC; bloco Subir/Descer nunca mais cobre a barra inferior | 2.1.0: LOGIN POR SETOR — logins dedicados por setor no RH (Usuários e Acessos): Administrador, Financeiro, Atendimento/Cadastros, Logística/Entregador e Motorista — cada um só vê as áreas do seu setor; corrigido o botão Lixeira de Rotas duplicado; varredura geral: 35 blocos JS (0 erros), 250 handlers e 566 IDs verificados; pacote oficial Linux (AppImage + DEB) | 2.0.2: barra superior fixa durante a rolagem | 2.0.1: lugares duplicados consolidados na sincronização, rotas atribuídas ao motorista ADAÍAS | 2.0.0: nova interface central de operações, Central Rápida Ctrl+K, modo foco e densidade ajustável; migração com ponto de restauração | r101: App do Motorista (CHEGUEI, fotos para o Drive, rastreamento GPS com ETA) | r100: exclusão de rotas corrigida | r99: ditado por voz corrigido';
   } catch(e){}
@@ -46583,7 +46585,7 @@ body.fast-touch-ui #scrollNavBox { bottom: 130px !important; top: auto !importan
   }, true);
 })();
 </script>
-<script src="v2-ui.js?v=2.2.1-r104"></script>
+<script src="v2-ui.js?v=2.3.3-r109"></script>
 <script id="r103c-v2-toast-fix">
 /* r103-c: o toast do v2-ui ("FAST Serviços 2.2.0 pronto para operar.") ficava
    com opacity:0 depois de esconder, mas SEM pointer-events:none — seguia
