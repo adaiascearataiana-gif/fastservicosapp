@@ -21,8 +21,8 @@
   <meta name="fast-github-branch" content="main">
   <meta name="fast-github-path" content="index.html">
   <meta name="fast-github-token-env" content="GH_TOKEN">
-  <meta name="fast-app-version" content="2.3.0">
-  <meta name="fast-app-date" content="2026-09-05T13:20:00-03:00">
+  <meta name="fast-app-version" content="2.3.1">
+  <meta name="fast-app-date" content="2026-09-05T13:45:00-03:00">
   <meta name="fast-latest-update" content="2.2.0: MODO MOBILE GARANTIDO — celular e tablet agora abrem direto na versão mobile com barra inferior em qualquer largura de tela (antes tablets em paisagem e celulares com site-desktop caíam no modo Desktop); botões ROTAS e DESPESAS da barra inferior corrigidos: respondem ao toque imediatamente com trava anti-duplo-disparo e seguem as permissões do usuário; modal de Novidades fecha ao tocar fora ou ESC; bloco Subir/Descer nunca mais cobre a barra inferior | 2.1.0: LOGIN POR SETOR — logins dedicados por setor no RH (Usuários e Acessos): Administrador, Financeiro, Atendimento/Cadastros, Logística/Entregador e Motorista — cada um só vê as áreas do seu setor; corrigido o botão Lixeira de Rotas duplicado; varredura geral: 35 blocos JS (0 erros), 250 handlers e 566 IDs verificados; pacote oficial Linux (AppImage + DEB) | 2.0.2: barra superior fixa durante a rolagem | 2.0.1: lugares duplicados consolidados na sincronização, rotas atribuídas ao motorista ADAÍAS | 2.0.0: nova interface central de operações, Central Rápida Ctrl+K, modo foco e densidade ajustável; migração com ponto de restauração | r101: App do Motorista (CHEGUEI, fotos para o Drive, rastreamento GPS com ETA) | r100: exclusão de rotas corrigida | r99: ditado por voz corrigido">
   <!-- r92: verificação automática de nova versão ao abrir; Verificar Atualizações com cache-busting e sem fallback no-cors inválido. -->
   <!-- r70.1: lista corrente no HTML inicial; o painel não espera scripts tardios -->
@@ -2204,6 +2204,9 @@ window.fastNotifPermitida=function(canal,tipo,mensagem){
     };
 
     // ---- Ação: Login por biometria (WebAuthn / Windows Hello / Touch ID / Face ID) ----
+    var _fastBioInProgress = false;
+    var _fastAuthCooldownUntil = 0;
+    function fastAuthEmCooldown(){ return Date.now() < _fastAuthCooldownUntil; }
     window.fastGateBioLogin = async function(){
       setErr('fastGateErr','');
       if (isLocked()){ showLockout(); return; }
@@ -2216,6 +2219,10 @@ window.fastNotifPermitida=function(canal,tipo,mensagem){
       // adicionar um spinner por cima só atrasa e esconde o gate. Mostramos
       // loading apenas como fallback se algo falhar antes do prompt.
       try {
+        // O prompt nativo pode disparar visibilitychange/pagehide no Android.
+        // Enquanto a digital estiver aberta, esses eventos não significam que
+        // o usuário saiu do aplicativo e não podem rearmar o gate.
+        _fastBioInProgress = true;
         var ok = await fastBioAuthenticate();
         if (btn) btn.disabled = false;
         if (icon) icon.classList.remove('pulse');
@@ -2238,14 +2245,21 @@ window.fastNotifPermitida=function(canal,tipo,mensagem){
             startSession(rem ? rem.checked : false);
             try { sessionStorage.setItem(K_BOOT_DONE, '1'); } catch(e){}
           }
-          // Limpa flag de revalidacao
+          // Limpa flag de revalidacao e abre uma curta janela de estabilidade.
+          // Alguns Androids emitem visibilitychange/pageshow logo APÓS a
+          // autenticação; sem esta proteção o gate fechava e abria em loop.
           try { sessionStorage.removeItem(K_NEED_BIO); } catch(e){}
+          _fastBioInProgress = false;
+          _fastAuthCooldownUntil = Date.now() + 5000;
+          try { localStorage.removeItem('fast_lock_left_at'); localStorage.removeItem('fast_lock_grace_until'); } catch(e){}
           hideGate();
           refreshSecCard();
         } else {
+          _fastBioInProgress = false;
           setErr('fastGateErr','Biometria não reconhecida. Tente novamente ou use a senha.');
         }
       } catch(e){
+        _fastBioInProgress = false;
         if (btn) btn.disabled = false;
         if (icon) icon.classList.remove('pulse');
         _fastBioAutoFired = false; // permite tentar novamente após erro
@@ -2642,6 +2656,7 @@ window.fastNotifPermitida=function(canal,tipo,mensagem){
     // r16: Revalidar e pedir biometria ao voltar (mostra gate + dispara auto-bio).
     // Sempre exige biometria ao retornar, mesmo com "manter conectado".
     function revalidarEAutenticar(){
+      if (_fastBioInProgress || fastAuthEmCooldown()) return;
       if (isEnabled()){
         // r16: Se tem biometria registrada, sempre exige re-autenticacao ao voltar.
         // Limpa apenas a sessao temporaria (sessionStorage), mantem "manter conectado".
@@ -2791,6 +2806,13 @@ window.fastNotifPermitida=function(canal,tipo,mensagem){
     // a biometria e sempre exigida ao retornar para sua seguranca.
     // Se NAO tem biometria, respeita o "manter conectado" (sessao em localStorage por 12h).
     document.addEventListener('visibilitychange', function(){
+      if (_fastBioInProgress || fastAuthEmCooldown()) {
+        if (document.visibilityState === 'visible') {
+          fastLimparSaida(); fastLimparGrace();
+          try { sessionStorage.removeItem(K_NEED_BIO); } catch(e){}
+        }
+        return;
+      }
       if (document.visibilityState === 'hidden'){
         try {
           var hasBio = bioCredExists();
@@ -2835,6 +2857,7 @@ window.fastNotifPermitida=function(canal,tipo,mensagem){
     // r16: pagehide — disparado quando a pagina e escondida (PWA instalado: trocar de app,
     // minimizar, etc). Marca que precisa revalidar biometria ao voltar.
     window.addEventListener('pagehide', function(){
+      if (_fastBioInProgress || fastAuthEmCooldown()) return;
       try {
         var hasBio = bioCredExists();
         var rem = localStorage.getItem(K_REMEM);
@@ -2857,6 +2880,11 @@ window.fastNotifPermitida=function(canal,tipo,mensagem){
     // visibilitychange 'visible'. Isso resolve o bug onde o gate aparecia sempre,
     // ignorando o tempo configurado pelo usuário.
     window.addEventListener('pageshow', function(event){
+      if (_fastBioInProgress || fastAuthEmCooldown()) {
+        fastLimparSaida(); fastLimparGrace();
+        try { sessionStorage.removeItem(K_NEED_BIO); } catch(e){}
+        return;
+      }
       try {
         if (fastDeveBloquearAgora()) {
           fastLimparGrace();
