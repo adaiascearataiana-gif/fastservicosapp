@@ -36,6 +36,41 @@ body.fast-v2 .pro-side-status strong{color:var(--v2-lime)!important}
 /* Work surface */
 body.fast-v2 main{margin-left:264px!important;padding-top:88px!important;min-height:100vh!important}
 body.fast-v2 .tab-content{padding:0 28px 42px!important;max-width:1680px!important;margin:0 auto!important}
+/* r104: no modo mobile do app (marcado por JS), a superficie vira largura total
+   compacta — nunca deixa a aba crescer alem da tela (o layout desktop acima
+   vale apenas para desktop de verdade). */
+body.fast-v2.fast-edition-mobile main,
+body.fast-v2.fast-touch-ui main,
+body.fast-v2.fast-edition-mobile .tab-content,
+body.fast-v2.fast-touch-ui .tab-content{max-width:100%!important;width:100%!important;margin:0 auto!important;min-width:0!important;box-sizing:border-box!important}
+body.fast-v2.fast-edition-mobile .tab-content,
+body.fast-v2.fast-touch-ui .tab-content{padding:0 8px 110px!important}
+body.fast-v2.fast-edition-mobile .card,
+body.fast-v2.fast-touch-ui .card,
+body.fast-v2.fast-edition-mobile .form-card,
+body.fast-v2.fast-touch-ui .form-card{width:100%!important;max-width:100%!important;min-width:0!important;box-sizing:border-box!important;padding:14px!important}
+body.fast-v2.fast-edition-mobile .table-container,
+body.fast-v2.fast-touch-ui .table-container{width:100%!important;max-width:100%!important;min-width:0!important;overflow-x:auto!important;-webkit-overflow-scrolling:touch}
+body.fast-v2.fast-edition-mobile .grid-form,
+body.fast-v2.fast-touch-ui .grid-form{grid-template-columns:1fr!important;gap:10px!important;min-width:0!important;max-width:100%!important}
+body.fast-v2.fast-edition-mobile input,
+body.fast-v2.fast-touch-ui input,
+body.fast-v2.fast-edition-mobile select,
+body.fast-v2.fast-touch-ui select,
+body.fast-v2.fast-edition-mobile textarea,
+body.fast-v2.fast-touch-ui textarea{width:100%!important;max-width:100%!important;min-width:0!important;font-size:16px!important;box-sizing:border-box!important}
+body.fast-v2.fast-edition-mobile .card-title,
+body.fast-v2.fast-touch-ui .card-title{flex-wrap:wrap!important;gap:8px!important;font-size:13px!important}
+body.fast-v2.fast-edition-mobile .card-title > div,
+body.fast-v2.fast-touch-ui .card-title > div{flex-wrap:wrap!important;gap:6px!important}
+body.fast-v2.fast-edition-mobile .btn-secondary,
+body.fast-v2.fast-touch-ui .btn-secondary,
+body.fast-v2.fast-edition-mobile .btn-primary,
+body.fast-v2.fast-touch-ui .btn-primary,
+body.fast-v2.fast-edition-mobile .btn-success,
+body.fast-v2.fast-touch-ui .btn-success{min-width:0!important;flex:0 1 auto!important;font-size:12.5px!important;padding:9px 12px!important}
+body.fast-v2.fast-edition-mobile .fast-dock-items,
+body.fast-v2.fast-touch-ui .fast-dock-items{grid-template-columns:repeat(4,minmax(0,1fr))!important}
 body.fast-v2 .pro-page-head{padding:12px 0 22px!important;align-items:flex-end!important}
 body.fast-v2 .pro-eyebrow{color:#338190!important;font-size:11px!important;letter-spacing:.13em!important}
 body.fast-v2 .pro-page-title,body.fast-v2 .section-title,body.fast-v2 h1{color:var(--v2-ink)!important;letter-spacing:-.035em!important}
@@ -75,6 +110,6 @@ body.fast-v2 .seq-item{border-radius:17px!important;border:1px solid var(--v2-li
 body.fast-v2.fast-v2-compact .card,body.fast-v2.fast-v2-compact .form-card{padding:12px!important}body.fast-v2.fast-v2-compact .seq-item{padding:10px!important}body.fast-v2.fast-v2-focus .pro-sidebar{transform:translateX(-100%)}body.fast-v2.fast-v2-focus .top-nav{left:0!important}body.fast-v2.fast-v2-focus main{margin-left:0!important}
 
 @media(max-width:900px){
-  body.fast-v2 .pro-sidebar{display:none!important}body.fast-v2 .top-nav{left:0!important;height:62px!important;padding:0 12px!important;background:rgba(7,17,31,.95)!important}body.fast-v2 .top-nav-brand{color:#fff!important}body.fast-v2 main{margin-left:0!important;padding-top:72px!important}body.fast-v2 .tab-content{padding:0 12px 100px!important}body.fast-v2 .pro-page-head{display:block!important}body.fast-v2 .pro-page-title{font-size:28px!important}body.fast-v2 .pro-page-sub{font-size:13px!important}body.fast-v2 .pro-date-chip{display:inline-flex!important;margin-top:12px!important}body.fast-v2 .global-search-wrapper,body.fast-v2 .conn-status,body.fast-v2 .sync-neon{display:none!important}.fast-v2-launcher{right:14px;bottom:88px;width:50px;height:50px;border-radius:16px}.fast-v2-palette{padding:8px;align-items:flex-end}.fast-v2-palette-box{border-radius:20px 20px 12px 12px}.fast-v2-command-list{max-height:65vh}body.fast-v2 .fast-dock{background:rgba(7,17,31,.96)!important;border:1px solid rgba(255,255,255,.08)!important;box-shadow:0 -12px 40px rgba(7,17,31,.20)!important}body.fast-v2 .fast-dock-btn{color:#8ba2b6!important}body.fast-v2 .fast-dock-btn.active{color:var(--v2-cyan)!important}
+  body.fast-v2 .pro-sidebar{display:none!important}body.fast-v2 .top-nav{left:0!important;height:62px!important;padding:0 12px!important;background:rgba(7,17,31,.95)!important}body.fast-v2 .top-nav-brand{color:#fff!important}body.fast-v2 main{margin-left:0!important;padding-top:72px!important;max-width:100%!important;width:100%!important}body.fast-v2 .tab-content{padding:0 12px 100px!important;max-width:100%!important;width:100%!important;min-width:0!important}body.fast-v2 .pro-page-head{display:block!important}body.fast-v2 .pro-page-title{font-size:28px!important}body.fast-v2 .pro-page-sub{font-size:13px!important}body.fast-v2 .pro-date-chip{display:inline-flex!important;margin-top:12px!important}body.fast-v2 .global-search-wrapper,body.fast-v2 .conn-status,body.fast-v2 .sync-neon{display:none!important}.fast-v2-launcher{right:14px;bottom:88px;width:50px;height:50px;border-radius:16px}.fast-v2-palette{padding:8px;align-items:flex-end}.fast-v2-palette-box{border-radius:20px 20px 12px 12px}.fast-v2-command-list{max-height:65vh}body.fast-v2 .fast-dock{background:rgba(7,17,31,.96)!important;border:1px solid rgba(255,255,255,.08)!important;box-shadow:0 -12px 40px rgba(7,17,31,.20)!important}body.fast-v2 .fast-dock-btn{color:#8ba2b6!important}body.fast-v2 .fast-dock-btn.active{color:var(--v2-cyan)!important}
 }
 @media(prefers-reduced-motion:reduce){body.fast-v2 *,body.fast-v2 *::before,body.fast-v2 *::after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}

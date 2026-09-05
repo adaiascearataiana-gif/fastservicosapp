@@ -1,6 +1,6 @@
 {
   "name": "fast-servicos-linux",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "FAST Serviços 2 — central profissional de rotas, entregas, finanças e equipe",
   "main": "src/main.js",
   "author": {
