@@ -1,6 +1,6 @@
 (function(){
   'use strict';
-  var VERSION='2.3.3',MIGRATION_KEY='fast_v2_migration_complete',CHECKPOINT_KEY='fast_v2_pre_migration_checkpoint';
+  var VERSION='2.3.4',MIGRATION_KEY='fast_v2_migration_complete',CHECKPOINT_KEY='fast_v2_pre_migration_checkpoint';
   var commands=[
     ['central','Centro de Operações','Visão geral e prioridades','fa-table-cells-large'],
     ['rotasDia','Rotas do Dia','Execução, fotos e conclusão','fa-calendar-day'],
