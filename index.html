@@ -21,8 +21,8 @@
   <meta name="fast-github-branch" content="main">
   <meta name="fast-github-path" content="index.html">
   <meta name="fast-github-token-env" content="GH_TOKEN">
-  <meta name="fast-app-version" content="2.3.1">
-  <meta name="fast-app-date" content="2026-09-05T13:45:00-03:00">
+  <meta name="fast-app-version" content="2.3.2">
+  <meta name="fast-app-date" content="2026-09-05T14:05:00-03:00">
   <meta name="fast-latest-update" content="2.2.0: MODO MOBILE GARANTIDO — celular e tablet agora abrem direto na versão mobile com barra inferior em qualquer largura de tela (antes tablets em paisagem e celulares com site-desktop caíam no modo Desktop); botões ROTAS e DESPESAS da barra inferior corrigidos: respondem ao toque imediatamente com trava anti-duplo-disparo e seguem as permissões do usuário; modal de Novidades fecha ao tocar fora ou ESC; bloco Subir/Descer nunca mais cobre a barra inferior | 2.1.0: LOGIN POR SETOR — logins dedicados por setor no RH (Usuários e Acessos): Administrador, Financeiro, Atendimento/Cadastros, Logística/Entregador e Motorista — cada um só vê as áreas do seu setor; corrigido o botão Lixeira de Rotas duplicado; varredura geral: 35 blocos JS (0 erros), 250 handlers e 566 IDs verificados; pacote oficial Linux (AppImage + DEB) | 2.0.2: barra superior fixa durante a rolagem | 2.0.1: lugares duplicados consolidados na sincronização, rotas atribuídas ao motorista ADAÍAS | 2.0.0: nova interface central de operações, Central Rápida Ctrl+K, modo foco e densidade ajustável; migração com ponto de restauração | r101: App do Motorista (CHEGUEI, fotos para o Drive, rastreamento GPS com ETA) | r100: exclusão de rotas corrigida | r99: ditado por voz corrigido">
   <!-- r92: verificação automática de nova versão ao abrir; Verificar Atualizações com cache-busting e sem fallback no-cors inválido. -->
   <!-- r70.1: lista corrente no HTML inicial; o painel não espera scripts tardios -->
@@ -1856,6 +1856,9 @@ window.fastNotifPermitida=function(canal,tipo,mensagem){
       return true;
     }
     function isAuthenticated(){
+      // Após uma autenticação biométrica válida, eventos tardios do Android não
+      // podem invalidar a entrada enquanto a sessão recém-criada estabiliza.
+      if (typeof fastAuthEmCooldown === 'function' && fastAuthEmCooldown()) return true;
       // r89: quando o retorno ao app exige biometria, a sessão persistente não
       // pode se restaurar e cancelar o prompt antes de o sensor ser chamado.
       try {
@@ -2231,20 +2234,12 @@ window.fastNotifPermitida=function(canal,tipo,mensagem){
           // r16: Se ja existe "manter conectado" em localStorage, restaura essa sessao
           // (nao pede senha novamente). Caso contrario, usa o checkbox "manter conectado".
           clearFails();
-          var remExisting = false;
-          try { remExisting = !!localStorage.getItem(K_REMEM); } catch(e){}
-          if (remExisting){
-            // r16: "Manter conectado" ativo — restaura sessao de localStorage
-            try {
-              var r = localStorage.getItem(K_REMEM);
-              if (r){ sessionStorage.setItem(K_SESS, r); }
-            } catch(e){}
-            try { sessionStorage.setItem(K_BOOT_DONE, '1'); } catch(e){}
-          } else {
-            var rem = $('fastGateRemember');
-            startSession(rem ? rem.checked : false);
-            try { sessionStorage.setItem(K_BOOT_DONE, '1'); } catch(e){}
-          }
+          // Sempre cria uma sessão NOVA após a digital. Antes, a mera presença
+          // de fast_auth_remember fazia o app copiar um token possivelmente
+          // vencido; hideGate fechava a tela e a checagem seguinte a reabria.
+          var rem = $('fastGateRemember');
+          startSession(rem ? rem.checked : true);
+          try { sessionStorage.setItem(K_BOOT_DONE, '1'); } catch(e){}
           // Limpa flag de revalidacao e abre uma curta janela de estabilidade.
           // Alguns Androids emitem visibilitychange/pageshow logo APÓS a
           // autenticação; sem esta proteção o gate fechava e abria em loop.
@@ -29644,7 +29639,7 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
           });
         `;
         try {
-          navigator.serviceWorker.register('sw.js?v=2.2.1-r103', { scope: './' })
+          navigator.serviceWorker.register('sw.js?v=2.3.2-r108', { scope: './' })
             .then(function(reg) { console.info('SW permanente registrado (r73 network-first).'); })
             .catch(function(e) { console.info('SW: nao registrado neste ambiente (normal).', e.message); });
         } catch (e) { console.info('SW init skip:', e); }
