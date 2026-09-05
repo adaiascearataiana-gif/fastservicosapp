@@ -21,8 +21,8 @@
   <meta name="fast-github-branch" content="main">
   <meta name="fast-github-path" content="index.html">
   <meta name="fast-github-token-env" content="GH_TOKEN">
-  <meta name="fast-app-version" content="2.3.3">
-  <meta name="fast-app-date" content="2026-09-05T17:25:00-03:00">
+  <meta name="fast-app-version" content="2.3.4">
+  <meta name="fast-app-date" content="2026-09-05T18:10:00-03:00">
   <meta name="fast-latest-update" content="2.2.0: MODO MOBILE GARANTIDO — celular e tablet agora abrem direto na versão mobile com barra inferior em qualquer largura de tela (antes tablets em paisagem e celulares com site-desktop caíam no modo Desktop); botões ROTAS e DESPESAS da barra inferior corrigidos: respondem ao toque imediatamente com trava anti-duplo-disparo e seguem as permissões do usuário; modal de Novidades fecha ao tocar fora ou ESC; bloco Subir/Descer nunca mais cobre a barra inferior | 2.1.0: LOGIN POR SETOR — logins dedicados por setor no RH (Usuários e Acessos): Administrador, Financeiro, Atendimento/Cadastros, Logística/Entregador e Motorista — cada um só vê as áreas do seu setor; corrigido o botão Lixeira de Rotas duplicado; varredura geral: 35 blocos JS (0 erros), 250 handlers e 566 IDs verificados; pacote oficial Linux (AppImage + DEB) | 2.0.2: barra superior fixa durante a rolagem | 2.0.1: lugares duplicados consolidados na sincronização, rotas atribuídas ao motorista ADAÍAS | 2.0.0: nova interface central de operações, Central Rápida Ctrl+K, modo foco e densidade ajustável; migração com ponto de restauração | r101: App do Motorista (CHEGUEI, fotos para o Drive, rastreamento GPS com ETA) | r100: exclusão de rotas corrigida | r99: ditado por voz corrigido">
   <!-- r92: verificação automática de nova versão ao abrir; Verificar Atualizações com cache-busting e sem fallback no-cors inválido. -->
   <!-- r70.1: lista corrente no HTML inicial; o painel não espera scripts tardios -->
@@ -23979,10 +23979,10 @@ window.fastNotifPermitida=function(canal,tipo,mensagem){
               <div id="fastDeployInfo" style="background:var(--card-bg-2);border:1px solid var(--border);border-radius:10px;padding:12px;margin:10px 0;font-size:13px;">
                 <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
                   <div>
-                    <div><strong>Versão atual:</strong> <span id="fastVersaoLabel" style="color:var(--accent);font-weight:800;">2.2.1</span></div>
-                    <div id="fastVersaoDateLabel" style="font-size:11.5px;color:var(--text-muted);margin-top:3px;"><i class="fa-solid fa-clock"></i> Lançada em 04/09/2026 22:10</div>
+                    <div><strong>Versão atual:</strong> <span id="fastVersaoLabel" style="color:var(--accent);font-weight:800;">2.3.4</span></div>
+                    <div id="fastVersaoDateLabel" style="font-size:11.5px;color:var(--text-muted);margin-top:3px;"><i class="fa-solid fa-clock"></i> Lançada em 05/09/2026 18:10</div>
                   </div>
-                  <div id="fastVersaoOnlineLabel" style="font-size:12px;color:var(--text-muted);text-align:right;">Online: <strong>2.2.1</strong> <span style="color:var(--success);">(ok)</span></div>
+                  <div id="fastVersaoOnlineLabel" style="font-size:12px;color:var(--text-muted);text-align:right;">Online: <strong>verificar</strong></div>
                 </div>
                 <div style="font-size:12px;color:var(--text-muted);word-break:break-all;margin-bottom:10px;"><i class="fa-solid fa-link"></i> <span id="fastUrlLabel">https://adaiascearataiana-gif.github.io/fastservicosapp/</span></div>
                 <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
@@ -29639,7 +29639,7 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
           });
         `;
         try {
-          navigator.serviceWorker.register('sw.js?v=2.3.3-r109', { scope: './' })
+          navigator.serviceWorker.register('sw.js?v=2.3.4-r111', { scope: './' })
             .then(function(reg) { console.info('SW permanente registrado (r73 network-first).'); })
             .catch(function(e) { console.info('SW: nao registrado neste ambiente (normal).', e.message); });
         } catch (e) { console.info('SW init skip:', e); }
@@ -32153,6 +32153,8 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
     }
     // Popula o label de data/hora do lancamento na aba de configuracoes
     function fastPopularDataLancamento() {
+      var verLbl = document.getElementById('fastVersaoLabel');
+      if (verLbl) verLbl.textContent = fastObterVersao();
       var lbl = document.getElementById('fastVersaoDateLabel');
       if (!lbl) return;
       var iso = fastObterDataLancamento();
@@ -32245,19 +32247,24 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
 
     // R2-4: Executa a atualizacao — mostra barra de progresso e redireciona.
     async function fastExecutarAtualizacao(urlDeploy) {
-      // r70: antes de trocar o código, preserva um ponto restaurável dos dados.
-      if (typeof window.fast70CriarCheckpoint === 'function') {
-        var checkpointOk = await window.fast70CriarCheckpoint(true);
-        if (!checkpointOk) {
-          alert('A atualização foi interrompida porque não foi possível criar o ponto de restauração. Seus dados atuais permanecem intactos.');
-          return;
-        }
-      }
       var prog = document.getElementById('fastUpdateProgress');
       var bar = document.getElementById('fastUpdateProgressBar');
       var txt = document.getElementById('fastUpdateProgressTxt');
       if (prog) prog.style.display = 'block';
-      var pct = 0;
+      if (bar) bar.style.width = '8%';
+      if (txt) txt.textContent = 'Preparando atualização… 8%';
+      // r70: antes de trocar o código, preserva um ponto restaurável dos dados.
+      if (typeof window.fast70CriarCheckpoint === 'function') {
+        var checkpointOk = await window.fast70CriarCheckpoint(true);
+        if (!checkpointOk) {
+          if (prog) prog.style.display = 'none';
+          if (bar) bar.style.width = '0%';
+          alert('A atualização foi interrompida porque não foi possível criar o ponto de restauração. Seus dados atuais permanecem intactos.');
+          return;
+        }
+      }
+      if (txt) txt.textContent = 'Baixando nova versão… 15%';
+      var pct = 15;
       var step = function(){
         pct += Math.random()*18 + 7;
         if (pct > 92) pct = 92;
@@ -32331,9 +32338,13 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
             // apresentavam números de versão diferentes.
             return { atualizado: true, versaoLocal, versaoOnline, urlDeploy, auto: false };
           }
-          // Modo manual: mostra o aviso para o usuário confirmar.
-          fastMostrarConfirmAtualizacao(versaoOnline, urlDeploy, versaoLocal);
-          return { atualizado: true, versaoLocal, versaoOnline, urlDeploy };
+          try {
+            if (typeof mostrarToast === 'function') {
+              mostrarToast('Nova versão ' + versaoOnline + ' encontrada. Atualizando agora…', 'info');
+            }
+          } catch(e){}
+          fastExecutarAtualizacao(urlDeploy);
+          return { atualizado: true, versaoLocal, versaoOnline, urlDeploy, auto: true };
         }
         if (!silencioso) mostrarToast('App já está atualizado (v' + versaoLocal + ').', 'success');
         return { atualizado: false, versaoLocal, versaoOnline };
@@ -46240,11 +46251,19 @@ window.fastMobileNav = function(ev, abaId, botao) {
 (function(){
   try {
     var m=document.querySelector('meta[name="fast-app-version"]');
-    if(m) m.content='2.3.3';
+    if(m) m.content='2.3.4';
     var d=document.querySelector('meta[name="fast-app-date"]');
-    if(d) d.content='2026-09-05T17:25:00-03:00';
+    if(d) d.content='2026-09-05T18:10:00-03:00';
     var l=document.querySelector('meta[name="fast-latest-update"]');
     if(l) l.content='2.2.0: MODO MOBILE GARANTIDO — celular e tablet agora abrem direto na versão mobile com barra inferior em qualquer largura de tela (antes tablets em paisagem e celulares com site-desktop caíam no modo Desktop); botões ROTAS e DESPESAS da barra inferior corrigidos: respondem ao toque imediatamente com trava anti-duplo-disparo e seguem as permissões do usuário; modal de Novidades fecha ao tocar fora ou ESC; bloco Subir/Descer nunca mais cobre a barra inferior | 2.1.0: LOGIN POR SETOR — logins dedicados por setor no RH (Usuários e Acessos): Administrador, Financeiro, Atendimento/Cadastros, Logística/Entregador e Motorista — cada um só vê as áreas do seu setor; corrigido o botão Lixeira de Rotas duplicado; varredura geral: 35 blocos JS (0 erros), 250 handlers e 566 IDs verificados; pacote oficial Linux (AppImage + DEB) | 2.0.2: barra superior fixa durante a rolagem | 2.0.1: lugares duplicados consolidados na sincronização, rotas atribuídas ao motorista ADAÍAS | 2.0.0: nova interface central de operações, Central Rápida Ctrl+K, modo foco e densidade ajustável; migração com ponto de restauração | r101: App do Motorista (CHEGUEI, fotos para o Drive, rastreamento GPS com ETA) | r100: exclusão de rotas corrigida | r99: ditado por voz corrigido';
+    if(l) l.content='2.3.4: quadro Últimas Atualizações sincronizado; atualização automática com barra visível; instalador Rotas do Dia corrigido; loops de biometria e carregamento eliminados.';
+    var c=document.querySelector('meta[name="fast-app-changelog"]');
+    if(c) c.content=JSON.stringify([
+      {type:'corrigido',text:'2.3.4 (05/09/2026): o quadro Últimas Atualizações foi sincronizado com a versão instalada e agora mostra exatamente as mudanças desta publicação.'},
+      {type:'melhorado',text:'2.3.4 (05/09/2026): ao clicar em Verificar Atualizações, uma versão nova agora é carregada automaticamente, com barra de progresso visível até o reinício do aplicativo.'},
+      {type:'corrigido',text:'2.3.4 (05/09/2026): o instalador Rotas do Dia foi reconstruído sem carregar o aplicativo inteiro dentro de um iframe; o botão aguarda o instalador ficar pronto e oferece abertura segura sem instalar.'},
+      {type:'corrigido',text:'2.3.4 (05/09/2026): mantidas as correções que eliminam o loop depois da biometria, o recarregamento infinito da página e a falha no carregamento das seções.'}
+    ]);
   } catch(e){}
 })();
 </script>
@@ -46585,7 +46604,7 @@ body.fast-touch-ui #scrollNavBox { bottom: 130px !important; top: auto !importan
   }, true);
 })();
 </script>
-<script src="v2-ui.js?v=2.3.3-r109"></script>
+<script src="v2-ui.js?v=2.3.4-r111"></script>
 <script id="r103c-v2-toast-fix">
 /* r103-c: o toast do v2-ui ("FAST Serviços 2.2.0 pronto para operar.") ficava
    com opacity:0 depois de esconder, mas SEM pointer-events:none — seguia
