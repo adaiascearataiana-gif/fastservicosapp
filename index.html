@@ -21,8 +21,8 @@
   <meta name="fast-github-branch" content="main">
   <meta name="fast-github-path" content="index.html">
   <meta name="fast-github-token-env" content="GH_TOKEN">
-  <meta name="fast-app-version" content="2.2.1">
-  <meta name="fast-app-date" content="2026-09-05T12:30:00-03:00">
+  <meta name="fast-app-version" content="2.3.0">
+  <meta name="fast-app-date" content="2026-09-05T13:20:00-03:00">
   <meta name="fast-latest-update" content="2.2.0: MODO MOBILE GARANTIDO — celular e tablet agora abrem direto na versão mobile com barra inferior em qualquer largura de tela (antes tablets em paisagem e celulares com site-desktop caíam no modo Desktop); botões ROTAS e DESPESAS da barra inferior corrigidos: respondem ao toque imediatamente com trava anti-duplo-disparo e seguem as permissões do usuário; modal de Novidades fecha ao tocar fora ou ESC; bloco Subir/Descer nunca mais cobre a barra inferior | 2.1.0: LOGIN POR SETOR — logins dedicados por setor no RH (Usuários e Acessos): Administrador, Financeiro, Atendimento/Cadastros, Logística/Entregador e Motorista — cada um só vê as áreas do seu setor; corrigido o botão Lixeira de Rotas duplicado; varredura geral: 35 blocos JS (0 erros), 250 handlers e 566 IDs verificados; pacote oficial Linux (AppImage + DEB) | 2.0.2: barra superior fixa durante a rolagem | 2.0.1: lugares duplicados consolidados na sincronização, rotas atribuídas ao motorista ADAÍAS | 2.0.0: nova interface central de operações, Central Rápida Ctrl+K, modo foco e densidade ajustável; migração com ponto de restauração | r101: App do Motorista (CHEGUEI, fotos para o Drive, rastreamento GPS com ETA) | r100: exclusão de rotas corrigida | r99: ditado por voz corrigido">
   <!-- r92: verificação automática de nova versão ao abrir; Verificar Atualizações com cache-busting e sem fallback no-cors inválido. -->
   <!-- r70.1: lista corrente no HTML inicial; o painel não espera scripts tardios -->
@@ -27035,6 +27035,76 @@ CREATE POLICY "mfot_write" ON motorista_fotos FOR INSERT WITH CHECK (true);
 CREATE POLICY "mfot_upd"   ON motorista_fotos FOR UPDATE USING (true) WITH CHECK (true);
 
 -- ============================================================
+-- (r106) TABELAS DAS COLEÇÕES ÓRFÃS — Clientes, Motoristas, RH e
+-- Despesas da Empresa. Antes estas coleções só existiam no
+-- localStorage do aparelho (nunca iam para a nuvem). Agora têm
+-- tabela própria; enquanto não forem criadas, o app usa a tabela-
+-- ponte como cofre provisório (os dados já sincronizam desde já).
+-- Idempotente: pode rodar de novo sem erro.
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS clientes (
+  id         BIGINT PRIMARY KEY,
+  dados      JSONB DEFAULT NULL,
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS motoristas (
+  id         BIGINT PRIMARY KEY,
+  dados      JSONB DEFAULT NULL,
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS rh (
+  id         BIGINT PRIMARY KEY,
+  dados      JSONB DEFAULT NULL,
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS despesas_empresa (
+  id         BIGINT PRIMARY KEY,
+  dados      JSONB DEFAULT NULL,
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+ALTER TABLE clientes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE motoristas ENABLE ROW LEVEL SECURITY;
+ALTER TABLE rh ENABLE ROW LEVEL SECURITY;
+ALTER TABLE despesas_empresa ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "cli_read"  ON clientes;
+DROP POLICY IF EXISTS "cli_write" ON clientes;
+CREATE POLICY "cli_read"  ON clientes FOR SELECT USING (true);
+CREATE POLICY "cli_write" ON clientes FOR INSERT WITH CHECK (true);
+CREATE POLICY "cli_upd"   ON clientes FOR UPDATE USING (true) WITH CHECK (true);
+CREATE POLICY "cli_del"   ON clientes FOR DELETE USING (true);
+
+DROP POLICY IF EXISTS "mot_read"  ON motoristas;
+DROP POLICY IF EXISTS "mot_write" ON motoristas;
+CREATE POLICY "mot_read"  ON motoristas FOR SELECT USING (true);
+CREATE POLICY "mot_write" ON motoristas FOR INSERT WITH CHECK (true);
+CREATE POLICY "mot_upd"   ON motoristas FOR UPDATE USING (true) WITH CHECK (true);
+CREATE POLICY "mot_del"   ON motoristas FOR DELETE USING (true);
+
+DROP POLICY IF EXISTS "rh_read"  ON rh;
+DROP POLICY IF EXISTS "rh_write" ON rh;
+CREATE POLICY "rh_read"  ON rh FOR SELECT USING (true);
+CREATE POLICY "rh_write" ON rh FOR INSERT WITH CHECK (true);
+CREATE POLICY "rh_upd"   ON rh FOR UPDATE USING (true) WITH CHECK (true);
+CREATE POLICY "rh_del"   ON rh FOR DELETE USING (true);
+
+DROP POLICY IF EXISTS "demp_read"  ON despesas_empresa;
+DROP POLICY IF EXISTS "demp_write" ON despesas_empresa;
+CREATE POLICY "demp_read"  ON despesas_empresa FOR SELECT USING (true);
+CREATE POLICY "demp_write" ON despesas_empresa FOR INSERT WITH CHECK (true);
+CREATE POLICY "demp_upd"   ON despesas_empresa FOR UPDATE USING (true) WITH CHECK (true);
+CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
+
+-- (r106) Depois que as tabelas reais estiverem criadas e povoadas,
+-- a tabela-ponte provisória pode ser limpa com:
+-- DELETE FROM "FAST SERVICOS" WHERE id >= 910600001 AND id <= 910600004;
+
+-- ============================================================
 -- PRONTO! As tabelas foram criadas e o acesso via API está liberado.
 -- Volte ao app, abra a aba "Banco de Dados" e clique em
 -- "Verificar Status do Banco" — deve ficar verde (Online).
@@ -28187,6 +28257,214 @@ CREATE POLICY "mfot_upd"   ON motorista_fotos FOR UPDATE USING (true) WITH CHECK
       }
     }
 
+
+    // ============================================================
+    // (r106) SYNC DAS COLEÇÕES ÓRFÃS: clientes / motoristas / rh /
+    // despesasEmpresa. Estas 4 coleções ANTES só existiam no
+    // localStorage do aparelho (nunca iam para a nuvem — perda total
+    // se o aparelho fosse limpo). Agora são sincronizadas em toda
+    // rodada: preferindo a tabela REAL no Supabase (criada pelo SQL
+    // r106) e, enquanto ela não existir, usando a tabela-ponte
+    // "FAST SERVICOS" como cofre JSON (prefixos FASTR106_*).
+    // Tolerante a 404: nunca aborta a sincronização por causa disso.
+    // ============================================================
+    var R106_COLECOES = [
+      { chave: 'clientes',         tabela: 'clientes',         bridge: 'FASTR106_CLIENTES' },
+      { chave: 'motoristas',       tabela: 'motoristas',       bridge: 'FASTR106_MOTORISTAS' },
+      { chave: 'rh',               tabela: 'rh',               bridge: 'FASTR106_RH' },
+      { chave: 'despesasEmpresa',  tabela: 'despesas_empresa', bridge: 'FASTR106_DESPESAS_EMP' }
+    ];
+    // Modo por coleção: 'tabela' (real) | 'bridge' (FAST SERVICOS) | 'off' (nenhum disponível)
+    var r106Modo = { clientes: null, motoristas: null, rh: null, despesasEmpresa: null };
+    var r106BridgeOk = null; // null=desconhecido, true/false=tabela-ponte acessível
+    var r106Avisado = {};
+
+    function r106BridgeTabela() { return 'FAST SERVICOS'; }
+
+    function r106AvisarUmaVez(chave, tipo) {
+      var k = chave + ':' + tipo;
+      if (r106Avisado[k]) return;
+      r106Avisado[k] = true;
+      try { console.warn('r106: ' + chave + ' sem tabela nem bridge no Supabase — sincronização desta coleção pulada.'); } catch(e) {}
+    }
+
+    // Detecta o modo de sync de cada coleção (tabela real > bridge > off).
+    // Executa 1x por sessão (ou após reset de r106Modo).
+    async function r106DetectarModos() {
+      for (var i = 0; i < R106_COLECOES.length; i++) {
+        var cfg = R106_COLECOES[i];
+        if (r106Modo[cfg.chave]) continue; // já detectado
+        try {
+          var respT = await fetch(SUPABASE_URL + '/' + cfg.tabela + '?select=id&limit=1', {
+            method: 'GET', headers: supabaseHeaders()
+          });
+          if (respT.ok) { r106Modo[cfg.chave] = 'tabela'; continue; }
+        } catch (e) {}
+        // Tabela real ausente → tentar bridge
+        if (r106BridgeOk === null) {
+          try {
+            var respB = await fetch(SUPABASE_URL + '/' + encodeURIComponent(r106BridgeTabela()) + '?select=id&limit=1', {
+              method: 'GET', headers: supabaseHeaders()
+            });
+            r106BridgeOk = respB.ok;
+          } catch (e) { r106BridgeOk = false; }
+        }
+        r106Modo[cfg.chave] = r106BridgeOk ? 'bridge' : 'off';
+        if (r106Modo[cfg.chave] === 'off') r106AvisarUmaVez(cfg.chave, 'off');
+      }
+      return r106Modo;
+    }
+
+    // --- Ler uma coleção da nuvem (tabela real ou bridge) ---
+    async function r106GetColecao(cfg) {
+      if (r106Modo[cfg.chave] === 'tabela') {
+        var resp = await fetch(SUPABASE_URL + '/' + cfg.tabela + '?select=*', {
+          method: 'GET', headers: supabaseHeaders()
+        });
+        if (!resp.ok) throw new Error('GET ' + cfg.tabela + ': HTTP ' + resp.status);
+        var rows = await resp.json();
+        // colunas: id, dados JSONB, updated_at
+        return rows.map(function(row) {
+          try {
+            var d = (typeof row.dados === 'string') ? JSON.parse(row.dados) : (row.dados || {});
+            d.id = row.id; // id autoritativo = PK da linha
+            return d;
+          } catch (e) { return null; }
+        }).filter(function(x) { return x !== null; });
+      }
+      if (r106Modo[cfg.chave] === 'bridge') {
+        // Bridge: uma linha por coleção, id fixo, nome = JSON completo
+        var bid = r106BridgeId(cfg);
+        var respB = await fetch(SUPABASE_URL + '/' + encodeURIComponent(r106BridgeTabela()) + '?id=eq.' + bid + '&select=id,nome', {
+          method: 'GET', headers: supabaseHeaders()
+        });
+        if (!respB.ok) throw new Error('GET bridge ' + cfg.chave + ': HTTP ' + respB.status);
+        var rowsB = await respB.json();
+        if (!rowsB.length) return [];
+        try {
+          var obj = JSON.parse(rowsB[0].nome || '[]');
+          return Array.isArray(obj) ? obj : [];
+        } catch (e) { return []; }
+      }
+      return []; // modo off
+    }
+
+    function r106BridgeId(cfg) {
+      // ids de bridge: valores únicos fora da faixa de Date.now() (~1.79e12)
+      if (cfg.bridge === 'FASTR106_CLIENTES') return 910600001;
+      if (cfg.bridge === 'FASTR106_MOTORISTAS') return 910600002;
+      if (cfg.bridge === 'FASTR106_RH') return 910600003;
+      return 910600004; // despesas_empresa
+    }
+
+    // --- Enviar uma coleção para a nuvem (upsert; bridge = 1 linha por coleção) ---
+    async function r106SyncColecao(cfg, listaLocal) {
+      var lista = Array.isArray(listaLocal) ? listaLocal : [];
+      if (r106Modo[cfg.chave] === 'tabela') {
+        var payload = lista.map(function(item) {
+          return {
+            id: Number(item.id) || Date.now(),
+            dados: item, // JSONB aceita objeto direto
+            updated_at: new Date().toISOString()
+          };
+        });
+        if (payload.length > 0) {
+          var resp = await fetch(SUPABASE_URL + '/' + cfg.tabela, {
+            method: 'POST',
+            headers: supabaseHeaders({ 'Prefer': 'resolution=merge-duplicates,return=minimal' }),
+            body: JSON.stringify(payload)
+          });
+          if (!resp.ok) {
+            var errBody = await resp.text();
+            throw new Error('POST ' + cfg.tabela + ' (upsert r106): HTTP ' + resp.status + ' — ' + errBody);
+          }
+        }
+        // mirror-delete: linhas da nuvem sem correspondência local
+        var idsLocais = payload.map(function(p) { return p.id; });
+        var respGet = await fetch(SUPABASE_URL + '/' + cfg.tabela + '?select=id', {
+          method: 'GET', headers: supabaseHeaders()
+        });
+        if (respGet.ok) {
+          var cloudRows = await respGet.json();
+          var orfaos = cloudRows.filter(function(r) { return idsLocais.indexOf(r.id) === -1; }).map(function(r) { return r.id; });
+          if (orfaos.length > 0) {
+            for (var i = 0; i < orfaos.length; i += 50) {
+              var lote = orfaos.slice(i, i + 50);
+              await fetch(SUPABASE_URL + '/' + cfg.tabela + '?id=in.(' + lote.join(',') + ')', {
+                method: 'DELETE',
+                headers: supabaseHeaders({ 'Prefer': 'return=minimal' })
+              });
+            }
+          }
+        }
+        return true;
+      }
+      if (r106Modo[cfg.chave] === 'bridge') {
+        // Bridge: upsert de UMA linha com o array inteiro em `nome`
+        var bid = r106BridgeId(cfg);
+        var corpo = JSON.stringify(lista);
+        // PATCH se a linha existe; POST (insert) caso contrário
+        var respP = await fetch(SUPABASE_URL + '/' + encodeURIComponent(r106BridgeTabela()) + '?id=eq.' + bid, {
+          method: 'PATCH',
+          headers: supabaseHeaders({ 'Prefer': 'return=minimal' }),
+          body: JSON.stringify({ nome: corpo, created_at: new Date().toISOString() })
+        });
+        if (!respP.ok) {
+          // Linha não existe → INSERT
+          var respI = await fetch(SUPABASE_URL + '/' + encodeURIComponent(r106BridgeTabela()), {
+            method: 'POST',
+            headers: supabaseHeaders({ 'Prefer': 'resolution=merge-duplicates,return=minimal' }),
+            body: JSON.stringify({ id: bid, nome: corpo })
+          });
+          if (!respI.ok) {
+            var errB = await respI.text();
+            throw new Error('POST bridge ' + cfg.chave + ': HTTP ' + respI.status + ' — ' + errB);
+          }
+        }
+        return true;
+      }
+      r106AvisarUmaVez(cfg.chave, 'off');
+      return false; // off
+    }
+
+    // --- Sincronizar TODAS as 4 coleções (baixa+envia) — chamado por baixarDaNuvem/enviarParaNuvem ---
+    async function r106SyncColecoes() {
+      var resultado = {};
+      await r106DetectarModos();
+      for (var i = 0; i < R106_COLECOES.length; i++) {
+        var cfg = R106_COLECOES[i];
+        try {
+          resultado[cfg.chave] = await r106GetColecao(cfg);
+        } catch (e) {
+          console.warn('r106: falha ao baixar ' + cfg.chave + ':', e.message);
+          resultado[cfg.chave] = [];
+        }
+      }
+      return resultado;
+    }
+
+    async function r106EnviarColecoes() {
+      await r106DetectarModos();
+      var enviados = 0;
+      for (var i = 0; i < R106_COLECOES.length; i++) {
+        var cfg = R106_COLECOES[i];
+        var listaLocal = (bancoDados && bancoDados[cfg.chave]) || [];
+        // clientes: respeitar blacklist clientesExcluidos (por nome, lowercase)
+        var listaEnvio = listaLocal;
+        if (cfg.chave === 'clientes' && (bancoDados.clientesExcluidos || []).length > 0) {
+          var bl = (bancoDados.clientesExcluidos || []).map(function(n) { return String(n).toLowerCase(); });
+          listaEnvio = listaLocal.filter(function(c) { return bl.indexOf(String(c.nome || '').trim().toLowerCase()) === -1; });
+        }
+        try {
+          var ok = await r106SyncColecao(cfg, listaEnvio);
+          if (ok) enviados++;
+        } catch (e) {
+          console.warn('r106: falha ao enviar ' + cfg.chave + ':', e.message);
+        }
+      }
+      return enviados;
+    }
+
     // --- Merge inteligente: combina dados locais + nuvem sem perda ---
     function mergeDados(local, nuvem) {
       if (!nuvem) return local;
@@ -28315,8 +28593,18 @@ CREATE POLICY "mfot_upd"   ON motorista_fotos FOR UPDATE USING (true) WITH CHECK
       const motoristasMap = new Map();
       [...(nuvem.motoristas || []), ...(local.motoristas || [])].forEach(m => motoristasMap.set(String(m.id), m));
       // Merge clientes por ID
+      // (r106) A blacklist de clientes excluídos (por NOME) também filtra os
+      // clientes vindos da nuvem — mesma regra que já existia para rotas/seqs.
       const clientesMap = new Map();
-      [...(nuvem.clientes || []), ...(local.clientes || [])].forEach(c => clientesMap.set(String(c.id), c));
+      const blNomesCli = new Set([
+        ...((local.clientesExcluidos || []).map(n => String(n).toLowerCase())),
+        ...((nuvem.clientesExcluidos || []).map(n => String(n).toLowerCase()))
+      ]);
+      [...(nuvem.clientes || []), ...(local.clientes || [])].forEach(c => {
+        const nomeCli = String(c.nome || '').trim().toLowerCase();
+        if (nomeCli && blNomesCli.has(nomeCli)) return; // pular cliente excluído
+        clientesMap.set(String(c.id), c);
+      });
       // Merge rh por ID
       const rhMap = new Map();
       [...(nuvem.rh || []), ...(local.rh || [])].forEach(f => rhMap.set(String(f.id), f));
@@ -28371,7 +28659,21 @@ CREATE POLICY "mfot_upd"   ON motorista_fotos FOR UPDATE USING (true) WITH CHECK
         })
       ];
       const [rotas, despesas, sequencias, destinos] = await Promise.all([rotasP, despesasP, sequenciasP, destinosP]);
-      return { rotas, despesas, sequencias, destinos };
+      // (r106) Baixar também as 4 coleções órfãs (clientes/motoristas/rh/despesasEmpresa)
+      // Tolerante a 404/bridge: nunca aborta a sincronização (padrão r31 destinos).
+      let colecoesR106 = { clientes: [], motoristas: [], rh: [], despesasEmpresa: [] };
+      try {
+        colecoesR106 = await r106SyncColecoes();
+      } catch (e) {
+        console.warn('r106: coleções órfãs não baixadas nesta rodada:', e.message);
+      }
+      return {
+        rotas, despesas, sequencias, destinos,
+        clientes: colecoesR106.clientes || [],
+        motoristas: colecoesR106.motoristas || [],
+        rh: colecoesR106.rh || [],
+        despesasEmpresa: colecoesR106.despesasEmpresa || []
+      };
     }
 
     // --- Enviar TODOS os dados locais para o Supabase (upsert) ---
@@ -28379,6 +28681,12 @@ CREATE POLICY "mfot_upd"   ON motorista_fotos FOR UPDATE USING (true) WITH CHECK
       await supabaseSyncRotas();
       await supabaseSyncDespesas();
       await supabaseSyncSequencias();
+      // (r106) Enviar também as 4 coleções órfãs (nunca aborta o resto do sync)
+      try {
+        await r106EnviarColecoes();
+      } catch (e) {
+        console.warn('r106: coleções órfãs não enviadas nesta rodada:', e.message);
+      }
       // r31: destinos é tolerante a tabela ausente (avisa mas não aborta a sync)
       try {
         await supabaseSyncDestinos();
@@ -43491,6 +43799,76 @@ CREATE POLICY "mfot_write" ON motorista_fotos FOR INSERT WITH CHECK (true);
 CREATE POLICY "mfot_upd"   ON motorista_fotos FOR UPDATE USING (true) WITH CHECK (true);
 
 -- ============================================================
+-- (r106) TABELAS DAS COLEÇÕES ÓRFÃS — Clientes, Motoristas, RH e
+-- Despesas da Empresa. Antes estas coleções só existiam no
+-- localStorage do aparelho (nunca iam para a nuvem). Agora têm
+-- tabela própria; enquanto não forem criadas, o app usa a tabela-
+-- ponte como cofre provisório (os dados já sincronizam desde já).
+-- Idempotente: pode rodar de novo sem erro.
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS clientes (
+  id         BIGINT PRIMARY KEY,
+  dados      JSONB DEFAULT NULL,
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS motoristas (
+  id         BIGINT PRIMARY KEY,
+  dados      JSONB DEFAULT NULL,
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS rh (
+  id         BIGINT PRIMARY KEY,
+  dados      JSONB DEFAULT NULL,
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS despesas_empresa (
+  id         BIGINT PRIMARY KEY,
+  dados      JSONB DEFAULT NULL,
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+ALTER TABLE clientes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE motoristas ENABLE ROW LEVEL SECURITY;
+ALTER TABLE rh ENABLE ROW LEVEL SECURITY;
+ALTER TABLE despesas_empresa ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "cli_read"  ON clientes;
+DROP POLICY IF EXISTS "cli_write" ON clientes;
+CREATE POLICY "cli_read"  ON clientes FOR SELECT USING (true);
+CREATE POLICY "cli_write" ON clientes FOR INSERT WITH CHECK (true);
+CREATE POLICY "cli_upd"   ON clientes FOR UPDATE USING (true) WITH CHECK (true);
+CREATE POLICY "cli_del"   ON clientes FOR DELETE USING (true);
+
+DROP POLICY IF EXISTS "mot_read"  ON motoristas;
+DROP POLICY IF EXISTS "mot_write" ON motoristas;
+CREATE POLICY "mot_read"  ON motoristas FOR SELECT USING (true);
+CREATE POLICY "mot_write" ON motoristas FOR INSERT WITH CHECK (true);
+CREATE POLICY "mot_upd"   ON motoristas FOR UPDATE USING (true) WITH CHECK (true);
+CREATE POLICY "mot_del"   ON motoristas FOR DELETE USING (true);
+
+DROP POLICY IF EXISTS "rh_read"  ON rh;
+DROP POLICY IF EXISTS "rh_write" ON rh;
+CREATE POLICY "rh_read"  ON rh FOR SELECT USING (true);
+CREATE POLICY "rh_write" ON rh FOR INSERT WITH CHECK (true);
+CREATE POLICY "rh_upd"   ON rh FOR UPDATE USING (true) WITH CHECK (true);
+CREATE POLICY "rh_del"   ON rh FOR DELETE USING (true);
+
+DROP POLICY IF EXISTS "demp_read"  ON despesas_empresa;
+DROP POLICY IF EXISTS "demp_write" ON despesas_empresa;
+CREATE POLICY "demp_read"  ON despesas_empresa FOR SELECT USING (true);
+CREATE POLICY "demp_write" ON despesas_empresa FOR INSERT WITH CHECK (true);
+CREATE POLICY "demp_upd"   ON despesas_empresa FOR UPDATE USING (true) WITH CHECK (true);
+CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
+
+-- (r106) Depois que as tabelas reais estiverem criadas e povoadas,
+-- a tabela-ponte provisória pode ser limpa com:
+-- DELETE FROM "FAST SERVICOS" WHERE id >= 910600001 AND id <= 910600004;
+
+-- ============================================================
 -- PRONTO! As tabelas foram criadas e o acesso via API está liberado.
 -- Volte ao app, abra a aba "Banco de Dados" e clique em
 -- "Verificar Status do Banco" — deve ficar verde (Online).
@@ -46284,6 +46662,90 @@ body.fast-touch-ui #scrollNavBox { bottom: 130px !important; top: auto !importan
   }
   window.addEventListener('load', segurarOverflow);
   window.addEventListener('resize', function(){ setTimeout(segurarOverflow,150); });
+})();
+</script>
+
+<!-- r107 / 2.3.0: reparo definitivo da Área Protegida e responsividade -->
+<style id="r107-protected-responsive-fix">
+  #empOverlay { padding: clamp(6px, 2vw, 18px) !important; box-sizing: border-box !important; }
+  #empDataBox.emp-data-box {
+    width: min(1180px, calc(100vw - 24px)) !important;
+    max-width: min(1180px, calc(100vw - 24px)) !important;
+    height: min(92dvh, 920px) !important;
+    max-height: 92dvh !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+  }
+  #empDataBox, #empDataBox * { box-sizing: border-box; }
+  #empDataBox .emp-tabs {
+    display: flex !important; flex-wrap: nowrap !important; overflow-x: auto !important;
+    overflow-y: hidden !important; gap: 6px !important; padding: 8px 10px !important;
+    scrollbar-width: thin; -webkit-overflow-scrolling: touch; touch-action: pan-x;
+  }
+  #empDataBox .emp-tab {
+    flex: 0 0 auto !important; min-width: max-content !important; min-height: 42px !important;
+    padding: 9px 12px !important; white-space: nowrap !important; touch-action: manipulation;
+  }
+  #empDataBox .emp-tab-content { display: none !important; width: 100% !important; min-width: 0 !important; overflow: auto !important; }
+  #empDataBox .emp-tab-content.active { display: block !important; flex: 1 1 auto !important; }
+  #empDataBox .grid-form { width: 100% !important; min-width: 0 !important; }
+  #empDataBox input, #empDataBox select, #empDataBox textarea, #empDataBox button { max-width: 100%; }
+  #empDataBox .table-container { width: 100% !important; max-width: 100% !important; overflow-x: auto !important; }
+  #empDataBox .config-btn-row { grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)) !important; }
+  @media (max-width: 900px), (hover: none) and (pointer: coarse) {
+    #empOverlay { align-items: stretch !important; justify-content: stretch !important; padding: 0 !important; }
+    #empDataBox.emp-data-box {
+      width: 100vw !important; max-width: 100vw !important; height: 100dvh !important;
+      max-height: 100dvh !important; border-radius: 0 !important; margin: 0 !important;
+    }
+    #empDataBox .emp-data-header { padding: calc(12px + env(safe-area-inset-top, 0px)) 14px 12px !important; }
+    #empDataBox .emp-tabs { padding: 7px 8px !important; }
+    #empDataBox .emp-tab { min-height: 44px !important; padding: 8px 11px !important; font-size: 11px !important; }
+    #empDataBox .emp-tab-content { padding: 12px 10px calc(24px + env(safe-area-inset-bottom, 0px)) !important; }
+    #empDataBox .grid-form { display: grid !important; grid-template-columns: 1fr !important; gap: 10px !important; }
+    #empDataBox .grid-form > *, #empDataBox .span-2, #empDataBox .span-3, #empDataBox .span-4 { grid-column: 1 !important; min-width: 0 !important; }
+    #empDataBox input, #empDataBox select, #empDataBox textarea { width: 100% !important; min-width: 0 !important; font-size: 16px !important; }
+    #empDataBox .config-btn-row, #empDataBox .fast71-actions, #empDataBox .emp-actions {
+      display: grid !important; grid-template-columns: 1fr !important; gap: 8px !important;
+    }
+    #empDataBox .config-btn-row button, #empDataBox .fast71-actions button, #empDataBox .emp-actions button {
+      width: 100% !important; min-height: 46px !important; margin: 0 !important;
+    }
+    #empDataBox table { min-width: 680px; }
+  }
+</style>
+<script id="r107-protected-tabs-fix">
+(function(){
+  'use strict';
+  var valid = {empresa:'emptabEmpresa',acessos:'emptabAcessos',backups:'emptabBackups',banco:'emptabBanco',publicacao:'emptabPublicacao',sql:'emptabSql'};
+  function activate(tabId, focusTab){
+    if(!valid[tabId] || !document.getElementById(valid[tabId])) tabId='empresa';
+    var box=document.getElementById('empDataBox'); if(!box) return false;
+    box.querySelectorAll('.emp-tab[data-emptab]').forEach(function(btn){
+      var on=btn.getAttribute('data-emptab')===tabId;
+      btn.classList.toggle('active',on); btn.setAttribute('aria-selected',on?'true':'false');
+      btn.setAttribute('role','tab'); if(on && focusTab) btn.scrollIntoView({block:'nearest',inline:'nearest'});
+    });
+    box.querySelectorAll('.emp-tab-content').forEach(function(panel){
+      var on=panel.id===valid[tabId]; panel.classList.toggle('active',on); panel.hidden=!on;
+      panel.setAttribute('role','tabpanel'); if(on) panel.scrollTop=0;
+    });
+    try{sessionStorage.setItem('fast_emp_tab',tabId)}catch(e){}
+    return false;
+  }
+  window.empTrocarTab=function(tabId){ return activate(tabId,true); };
+  function normalize(){
+    var box=document.getElementById('empDataBox'); if(!box) return;
+    activate('empresa',false);
+    var tabs=box.querySelector('.emp-tabs'); if(tabs){tabs.setAttribute('role','tablist'); tabs.setAttribute('aria-label','Seções da Área Protegida');}
+  }
+  document.addEventListener('click',function(e){
+    var btn=e.target && e.target.closest ? e.target.closest('#empDataBox .emp-tab[data-emptab]') : null;
+    if(btn){e.preventDefault();e.stopPropagation();activate(btn.getAttribute('data-emptab'),true);}
+  },true);
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',function(){setTimeout(normalize,30)});
+  else setTimeout(normalize,30);
+  window.addEventListener('resize',function(){var a=document.querySelector('#empDataBox .emp-tab.active');if(a)a.scrollIntoView({block:'nearest',inline:'nearest'});},{passive:true});
 })();
 </script>
 </body></html>
