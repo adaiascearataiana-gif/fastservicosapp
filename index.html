@@ -46800,4 +46800,107 @@ body.fast-touch-ui #scrollNavBox { bottom: 130px !important; top: auto !importan
   window.addEventListener('resize',function(){var a=document.querySelector('#empDataBox .emp-tab.active');if(a)a.scrollIntoView({block:'nearest',inline:'nearest'});},{passive:true});
 })();
 </script>
+<style id="r114-exclusive-app-style">
+body.fast-exclusive-app .top-nav,
+body.fast-exclusive-app .pro-sidebar,
+body.fast-exclusive-app .bottom-nav,
+body.fast-exclusive-app #fastV2Launcher,
+body.fast-exclusive-app #proCmd,
+body.fast-exclusive-app .fast-install-shortcut { display:none !important; }
+body.fast-exclusive-app main { margin:0 !important; padding:12px !important; width:100% !important; max-width:100% !important; }
+body.fast-exclusive-app[data-fast-exclusive="rotasDia"] .tab-content:not(#rotasDia),
+body.fast-exclusive-app[data-fast-exclusive="despesas"] .tab-content:not(#despesas) { display:none !important; }
+body.fast-exclusive-app #rotasDia.active,
+body.fast-exclusive-app #despesas.active { display:block !important; width:100% !important; max-width:100% !important; }
+</style>
+<script id="r114-exclusive-app-controller">
+(function(){
+  'use strict';
+  var params=new URLSearchParams(location.search);
+  var mode=params.get('exclusive');
+  var target=mode==='rotas-dia'?'rotasDia':mode==='despesas'?'despesas':'';
+  if(!target)return;
+  document.body.classList.add('fast-exclusive-app','fast-touch-ui');
+  document.body.dataset.fastExclusive=target;
+  document.title=target==='rotasDia'?'Rotas do Dia - FAST':'Despesas - FAST';
+  function enforce(){
+    document.querySelectorAll('.tab-content').forEach(function(tab){tab.classList.toggle('active',tab.id===target);});
+  }
+  function init(){
+    enforce();
+    if(target==='rotasDia'&&typeof carregarSequenciaDia==='function'){try{carregarSequenciaDia();}catch(e){}}
+    if(target==='despesas'&&typeof renderizar==='function'){try{renderizar();}catch(e){}}
+    var host=document.querySelector('main');
+    if(host&&window.MutationObserver){
+      new MutationObserver(function(mutations){
+        if(mutations.some(function(m){return m.type==='attributes'&&m.attributeName==='class';}))enforce();
+      }).observe(host,{subtree:true,attributes:true,attributeFilter:['class']});
+    }
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
+})();
+</script>
+<script id="r113-android-back-navigation">
+(function(){
+  'use strict';
+  if(window.__fastAndroidBackInstalled)return;
+  window.__fastAndroidBackInstalled=true;
+
+  var internalMove=false;
+  var currentTab='central';
+  var validTabs={central:1,rotas:1,rotasDia:1,despesas:1,despesasEmpresa:1,dashboard:1,dre:1,rastreamento:1,clientes:1,motoristas:1,rh:1,configuracoes:1,lugares:1};
+
+  function activeTab(){
+    var active=document.querySelector('.tab-content.active');
+    return active&&validTabs[active.id]?active.id:'central';
+  }
+  function remember(tab){
+    if(internalMove||!validTabs[tab]||tab===currentTab)return;
+    currentTab=tab;
+    try{history.pushState({fastApp:true,fastTab:tab},'',location.href);}catch(e){}
+  }
+  function wrap(name,index){
+    var original=window[name];
+    if(typeof original!=='function'||original.__fastHistoryWrapped)return;
+    var wrapped=function(){
+      var tab=arguments[index];
+      var result=original.apply(this,arguments);
+      if(validTabs[tab])remember(tab);
+      return result;
+    };
+    wrapped.__fastHistoryWrapped=true;
+    wrapped.__fastHistoryOriginal=original;
+    window[name]=wrapped;
+  }
+  function openWithoutHistory(tab){
+    if(!validTabs[tab])tab='central';
+    internalMove=true;
+    try{
+      if(typeof window.proIr==='function')window.proIr(tab);
+      else if(typeof window.trocarAba==='function')window.trocarAba(null,tab);
+    }finally{
+      currentTab=tab;
+      setTimeout(function(){internalMove=false;},0);
+    }
+  }
+  function install(){
+    currentTab=activeTab();
+    try{history.replaceState({fastApp:true,fastTab:currentTab,fastRoot:currentTab==='central'},'',location.href);}catch(e){}
+    wrap('proIr',0);
+    wrap('trocarAba',1);
+    wrap('fastDockOpen',1);
+    wrap('fastMobileNav',1);
+    window.addEventListener('popstate',function(event){
+      var state=event.state;
+      if(state&&state.fastApp){
+        openWithoutHistory(state.fastTab||'central');
+      }
+      // Sem estado FAST, o navegador/Android segue normalmente e fecha ou
+      // retorna ao aplicativo anterior. INÍCIO é, portanto, o limite do app.
+    });
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install,{once:true});
+  else install();
+})();
+</script>
 </body></html>
