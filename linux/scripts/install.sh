@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# FAST Serviços — instalação e empacotamento para Linux (2.3.9)
+# FAST Serviços — instalação e empacotamento para Linux (2.3.10)
 # Uso: chmod +x scripts/install.sh && ./scripts/install.sh
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -10,26 +10,26 @@ npm install
 npm run dist
 echo 'Instaladores criados na pasta dist/.'
 
-# --- Verificação pós-instalação (r119): confere se o pacote gerado já contém a 2.3.9 ---
+# --- Verificação pós-instalação (r119): confere se o pacote gerado já contém a 2.3.10 ---
 echo
 echo '=== Verificando a versão empacotada ==='
 if [ -d dist/linux-unpacked ]; then
-  if grep -q 'fast-app-version" content="2.3.9"' dist/linux-unpacked/resources/app.asar.unpacked/src/renderer/index.html 2>/dev/null \
-     || grep -q 'fast-app-version" content="2.3.9"' dist/linux-unpacked/resources/app/src/renderer/index.html 2>/dev/null; then
-    echo 'OK: o aplicativo empacotado contém a versão 2.3.9.'
+  if grep -q 'fast-app-version" content="2.3.10"' dist/linux-unpacked/resources/app.asar.unpacked/src/renderer/index.html 2>/dev/null \
+     || grep -q 'fast-app-version" content="2.3.10"' dist/linux-unpacked/resources/app/src/renderer/index.html 2>/dev/null; then
+    echo 'OK: o aplicativo empacotado contém a versão 2.3.10.'
   else
     # asar embutido: extrai em temp e confere
     tmpdir="$(mktemp -d)"
     npx asar extract dist/linux-unpacked/resources/app.asar "$tmpdir/app" 2>/dev/null || true
-    if grep -q 'fast-app-version" content="2.3.9"' "$tmpdir/app/src/renderer/index.html" 2>/dev/null; then
-      echo 'OK: o aplicativo empacotado contém a versão 2.3.9.'
+    if grep -q 'fast-app-version" content="2.3.10"' "$tmpdir/app/src/renderer/index.html" 2>/dev/null; then
+      echo 'OK: o aplicativo empacotado contém a versão 2.3.10.'
     else
-      echo 'AVISO: não achei a marcação 2.3.9 no pacote. Verifique src/renderer/index.html.'
+      echo 'AVISO: não achei a marcação 2.3.10 no pacote. Verifique src/renderer/index.html.'
     fi
     rm -rf "$tmpdir"
   fi
 fi
-for f in dist/FAST-Servicos-2.3.9-*; do
+for f in dist/FAST-Servicos-2.3.10-*; do
   [ -e "$f" ] || continue
   echo "Pacote pronto: $f"
 done

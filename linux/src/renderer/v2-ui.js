@@ -1,6 +1,6 @@
 (function(){
   'use strict';
-  var VERSION='2.3.9',MIGRATION_KEY='fast_v2_migration_complete',CHECKPOINT_KEY='fast_v2_pre_migration_checkpoint';
+  var VERSION='2.3.10',MIGRATION_KEY='fast_v2_migration_complete',CHECKPOINT_KEY='fast_v2_pre_migration_checkpoint';
   var commands=[
     ['central','Centro de Operações','Visão geral e prioridades','fa-table-cells-large'],
     ['rotasDia','Rotas do Dia','Execução, fotos e conclusão','fa-calendar-day'],
@@ -42,13 +42,13 @@
     // Mantém todos os pontos da interface ligados à versão oficial atual.
     // Esta atribuição final neutraliza textos legados 2.2.x ainda presentes
     // no pacote visual sem permitir que eles sobrescrevam o release vigente.
-    if(latest)latest.content='2.3.9: correção definitiva do bug dos Lugares/Clientes que "voltavam" após excluir (chaves canônicas sem acentos em toda a cadeia de exclusão, sync e merge, com migração automática das chaves antigas); Área Protegida reorganizada no HTML (Gestão FAST Motorista agora fica dentro da aba Acessos — não cobre mais nenhuma aba no celular ou desktop); apps Rotas do Dia e Despesas se auto-atualizam sozinhos, sem interação, quando uma nova versão é publicada; Linux atualizado (AppImage/DEB 2.3.9) e backup completo da plataforma sempre disponível na pasta backups/ do site.';
-    if(changes)changes.content=JSON.stringify([
-      {type:'corrigido',text:'2.3.9 (06/09/2026): fim do bug dos Lugares/Clientes excluídos que "voltavam": a lista de excluídos agora grava e compara sempre pela chave canônica (minúsculas, sem acentos, espaços colapsados) — excluir "Jaciará" impede definitivamente o retorno de "Jaciara", "JACIARA", etc., inclusive após sincronizar com a nuvem; chaves antigas com acentos são migradas automaticamente ao abrir o app.'},
-      {type:'corrigido',text:'2.3.9 (06/09/2026): Área Protegida reorganizada direto no HTML: a seção Gestão FAST Motorista agora pertence à aba Acessos e não fica mais sobreposta cobrindo as outras abas (Empresa, Banco, Backups, Publicação e SQL) em celular e desktop.'},
-      {type:'melhorado',text:'2.3.9 (06/09/2026): os apps instaláveis Rotas do Dia e Despesas agora se auto-atualizam sozinhos, sem nenhuma interação: eles verificam a versão real publicada (meta fast-app-version) a cada 5 minutos e recarregam automaticamente quando uma nova versão sai; a versão não fica mais travada em v=2.3.4 dentro do app.'},
-      {type:'melhorado',text:'2.3.9 (06/09/2026): backup completo da plataforma (index.html com tudo embutido) sempre disponível para download na pasta backups/ do site oficial — sem depender de Google Drive; Releases do GitHub continuam trazendo o index.html anexado a cada versão.'},
-      {type:'melhorado',text:'2.3.9 (06/09/2026): pacote Linux (AppImage/DEB) atualizado para 2.3.9 com verificação de versão após a instalação e atualização automática via GitHub Releases.'}
+        if(latest)latest.content="2.3.10: aba Clientes e Lugares/Destinos no mesmo modelo compacto das Rotas/Serviços — uma linha por registro: botões ícone Editar/Excluir idênticos, número do ID do cliente no lugar do PF, nome clicável que abre o Histórico de Rotas do cliente (modal com resumo + tabela de rotas no mesmo modelo), colunas de informação preservadas (Tipo, CPF/CNPJ, Contato, Pagamento, Rotas, Últ. modificação; Bairro, Endereço, Telefone, Usado em); aplica ao modo desktop e ao Linux. E novidade: seleção múltipla em massa em Clientes e Lugares/Destinos — caixinhas de marcação na primeira coluna e balão flutuante com botão Excluir, igual ao Rotas do Dia.";
+        if(changes)changes.content=JSON.stringify([
+      {"type": "novo", "text": "2.3.10 (06/09/2026): seleção múltipla em massa nas abas Clientes e Lugares/Destinos: caixinhas de marcação na primeira coluna (com marcar/desmarcar todos no cabeçalho) e, ao marcar 1 ou mais, sobe o mesmo balão flutuante do Rotas do Dia com o botão Excluir; a exclusão em massa pede confirmação com a lista de nomes, renumera os IDs, salva e sincroniza na nuvem e impede o retorno dos registros excluídos."},
+      {"type": "melhorado", "text": "2.3.10 (06/09/2026): aba Clientes totalmente repaginada no modelo compacto das Rotas/Serviços: agora cada cliente ocupa UMA linha só, começando pelos botões Ícone de Editar e Excluir (idênticos aos das rotas), o número do ID do cliente no lugar do antigo selo PF/PJ, o nome do cliente (clicável), Tipo, CPF/CNPJ, Contato (telefone/WhatsApp clicável), Pagamento, total de Rotas e Última modificação — sem perder nenhuma informação."},
+      {"type": "melhorado", "text": "2.3.10 (06/09/2026): clicar no nome do cliente (ou no total de rotas) abre o Histórico de Rotas dele num modal no mesmo modelo da lista de Rotas: resumo com totais (rotas, concluídas, recebidas, pendentes, volumes, faturamento, origem/destino/pagamento mais frequentes) e a tabela completa das rotas do cliente com botões Editar/Excluir e badges clicáveis de status — tudo em uma linha por rota."},
+      {"type": "melhorado", "text": "2.3.10 (06/09/2026): Lugares/Destinos no mesmo modelo compacto: botões Editar/Excluir ícone idênticos aos das rotas na primeira coluna, mantendo as colunas Nome, Bairro, Endereço, Telefone e Usado em — nada foi perdido."},
+      {"type": "melhorado", "text": "2.3.10 (06/09/2026): as novas tabelas funcionam igual no modo desktop e no modo mobile/touch (Linux desktop incl. — Electron), com ordenação por qualquer coluna (clicando no cabeçalho), filtro por letra A–Z e busca mantidos."},
     ]);
     var menu=document.getElementById('navMenuVersao');if(menu)menu.textContent='Versão '+VERSION;
     var splash=document.getElementById('fastSplashVersion');if(splash)splash.textContent=VERSION;
