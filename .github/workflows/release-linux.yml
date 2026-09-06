@@ -32,3 +32,4 @@ jobs:
           files: |
             linux/dist/*.AppImage
             linux/dist/*.deb
+            linux/dist/latest-linux.yml
