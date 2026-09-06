@@ -1,6 +1,6 @@
-# FAST Serviços 2 para Linux
+# FAST Serviços 2.3.8 para Linux
 
-Aplicativo desktop profissional sincronizado com a mesma base da versão web 2.1. Inclui rotas, Rotas do Dia, clientes, destinos, despesas, equipe, RH, login por setor, dashboards, backups, Supabase, Google Drive, modo offline e atualização pelo GitHub.
+Aplicativo desktop profissional sincronizado com a mesma base da versão web 2.3.8. Inclui rotas, Rotas do Dia, clientes, destinos, despesas, equipe, RH, login por setor, dashboards, backups, Supabase, Google Drive, modo offline e atualização pelo GitHub.
 
 ## Instalação rápida
 
@@ -18,6 +18,36 @@ npm install
 npm start
 ```
 
+## Instalar um pacote pronto
+
+### Ubuntu, Debian, Linux Mint e derivados — recomendado
+
+```bash
+cd ~/Downloads
+sudo apt install ./FAST-Servicos-2.3.8-amd64.deb
+```
+
+Depois, abra **FAST Serviços** pelo menu de aplicativos. Para remover:
+
+```bash
+sudo apt remove fast-servicos-linux
+```
+
+### AppImage — não altera o sistema
+
+```bash
+cd ~/Downloads
+chmod +x FAST-Servicos-2.3.8-x86_64.AppImage
+./FAST-Servicos-2.3.8-x86_64.AppImage
+```
+
+Se o AppImage solicitar FUSE em Ubuntu/Debian:
+
+```bash
+sudo apt update
+sudo apt install libfuse2
+```
+
 ## Integrações seguras
 
 1. Copie `config.example.json` para o diretório de configuração exibido pelo aplicativo/script.
@@ -31,7 +61,7 @@ O app mantém os perfis Administrador, Atendimento e Entregador, com permissões
 
 ## GitHub
 
-Crie uma tag como `v2.1.0`. O workflow da raiz do repositório gera AppImage e DEB e publica os instaladores na Release do GitHub.
+Crie uma tag como `v2.3.8`. O workflow da raiz do repositório gera AppImage e DEB e publica os instaladores na Release do GitHub.
 
 ## Segurança aplicada
 

@@ -1,6 +1,6 @@
 {
   "name": "fast-servicos-linux",
-  "version": "2.2.1",
+  "version": "2.3.8",
   "description": "FAST Serviços 2 — central profissional de rotas, entregas, finanças e equipe",
   "main": "src/main.js",
   "author": {
@@ -30,16 +30,31 @@
     "productName": "FAST Serviços",
     "asar": true,
     "artifactName": "FAST-Servicos-${version}-${arch}.${ext}",
-    "files": ["src/**/*", "package.json"],
-    "directories": {"output": "dist", "buildResources": "build"},
+    "files": [
+      "src/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
     "linux": {
-      "target": ["AppImage", "deb"],
+      "target": [
+        "AppImage",
+        "deb"
+      ],
       "category": "Office",
       "icon": "build/icon.png",
       "synopsis": "Gestão de rotas, entregas, despesas e equipe",
       "syncDesktopName": true,
       "maintainer": "Adaías — FAST Serviços <fastservicoslog@gmail.com>"
     },
-    "publish": [{"provider": "github", "owner": "adaiascearataiana-gif", "repo": "fastservicosapp"}]
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "adaiascearataiana-gif",
+        "repo": "fastservicosapp"
+      }
+    ]
   }
 }

@@ -1,6 +1,6 @@
 (function(){
   'use strict';
-  var VERSION='2.3.7',MIGRATION_KEY='fast_v2_migration_complete',CHECKPOINT_KEY='fast_v2_pre_migration_checkpoint';
+  var VERSION='2.3.8',MIGRATION_KEY='fast_v2_migration_complete',CHECKPOINT_KEY='fast_v2_pre_migration_checkpoint';
   var commands=[
     ['central','Centro de Operações','Visão geral e prioridades','fa-table-cells-large'],
     ['rotasDia','Rotas do Dia','Execução, fotos e conclusão','fa-calendar-day'],
@@ -42,11 +42,14 @@
     // Mantém todos os pontos da interface ligados à versão oficial atual.
     // Esta atribuição final neutraliza textos legados 2.2.x ainda presentes
     // no pacote visual sem permitir que eles sobrescrevam o release vigente.
-    if(latest)latest.content='2.3.7: aviso clicável de nova versão no FAST, Cliente e Motorista; atualização automática em Rotas do Dia e Despesas.';
+    if(latest)latest.content='2.3.8: histórico financeiro no Cliente FAST, rotas individuais, dependentes completos, filtros alfabéticos e correções na Área Protegida e em Lugares.';
     if(changes)changes.content=JSON.stringify([
-      {type:'novo',text:'2.3.7 (06/09/2026): o FAST mostra um aviso clicável quando há nova versão e abre diretamente o quadro de atualização.'},
-      {type:'novo',text:'2.3.7 (06/09/2026): Cliente FAST e FAST Motorista também recebem aviso de versão nova com atualização guiada.'},
-      {type:'melhorado',text:'2.3.7 (06/09/2026): Rotas do Dia e Despesas passam a atualizar automaticamente, sem solicitar confirmação.'}
+      {type:'novo',text:'2.3.8 (06/09/2026): Cliente FAST ganhou histórico de rotas, valores, pagamentos, motorista, previsão e comprovantes.'},
+      {type:'novo',text:'2.3.8 (06/09/2026): solicitações com várias unidades agora viram rotas individuais em Rotas do Dia.'},
+      {type:'novo',text:'2.3.8 (06/09/2026): RH recebeu cadastro individual de dependentes, contador e resumo por funcionário.'},
+      {type:'melhorado',text:'2.3.8 (06/09/2026): filtros A–Z e ordem alfabética uniformizados em Clientes, Lugares, Motoristas e RH.'},
+      {type:'corrigido',text:'2.3.8 (06/09/2026): Lugares excluídos não retornam após sincronizar; Área Protegida e Rotas do Dia foram reorganizadas para mobile e desktop.'},
+      {type:'melhorado',text:'2.3.8 (06/09/2026): tema Ocean Blue removido; Light Moderno é o tema único.'}
     ]);
     var menu=document.getElementById('navMenuVersao');if(menu)menu.textContent='Versão '+VERSION;
     var splash=document.getElementById('fastSplashVersion');if(splash)splash.textContent=VERSION;
