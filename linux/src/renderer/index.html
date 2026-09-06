@@ -21,12 +21,12 @@
   <meta name="fast-github-branch" content="main">
   <meta name="fast-github-path" content="index.html">
   <meta name="fast-github-token-env" content="GH_TOKEN">
-  <meta name="fast-app-version" content="2.3.8">
-  <meta name="fast-app-date" content="2026-09-06T08:35:00-03:00">
+  <meta name="fast-app-version" content="2.3.9">
+  <meta name="fast-app-date" content="2026-09-06T17:18:00-03:00">
   <meta name="fast-latest-update" content="2.2.0: MODO MOBILE GARANTIDO — celular e tablet agora abrem direto na versão mobile com barra inferior em qualquer largura de tela (antes tablets em paisagem e celulares com site-desktop caíam no modo Desktop); botões ROTAS e DESPESAS da barra inferior corrigidos: respondem ao toque imediatamente com trava anti-duplo-disparo e seguem as permissões do usuário; modal de Novidades fecha ao tocar fora ou ESC; bloco Subir/Descer nunca mais cobre a barra inferior | 2.1.0: LOGIN POR SETOR — logins dedicados por setor no RH (Usuários e Acessos): Administrador, Financeiro, Atendimento/Cadastros, Logística/Entregador e Motorista — cada um só vê as áreas do seu setor; corrigido o botão Lixeira de Rotas duplicado; varredura geral: 35 blocos JS (0 erros), 250 handlers e 566 IDs verificados; pacote oficial Linux (AppImage + DEB) | 2.0.2: barra superior fixa durante a rolagem | 2.0.1: lugares duplicados consolidados na sincronização, rotas atribuídas ao motorista ADAÍAS | 2.0.0: nova interface central de operações, Central Rápida Ctrl+K, modo foco e densidade ajustável; migração com ponto de restauração | r101: App do Motorista (CHEGUEI, fotos para o Drive, rastreamento GPS com ETA) | r100: exclusão de rotas corrigida | r99: ditado por voz corrigido">
   <!-- r92: verificação automática de nova versão ao abrir; Verificar Atualizações com cache-busting e sem fallback no-cors inválido. -->
   <!-- r70.1: lista corrente no HTML inicial; o painel não espera scripts tardios -->
-  <meta name="fast-app-changelog-immediate" content="2.3.8">
+  <meta name="fast-app-changelog-immediate" content="2.3.9">
   <meta name="fast-app-changelog" content="[{&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;2.2.1 (05/09/2026): MODO MOBILE COMPACTO RESTAURADO \u2014 na atualizacao anterior, a aba Rotas do Dia estourava a tela no celular (botoes Pasta de Fotos / Recuperar Fotos / Modo Entregador passando da borda, filtros gigantes): um CSS da nova interface permitia a area de trabalho crescer ate 1680px e a tabela interna empurrava tudo para alem da tela. Agora qualquer aparelho de toque (celular ou tablet, em qualquer largura) volta ao layout compacto de coluna unica \u2014 botoes quebram linha, filtros empilham, tabela rola internamente sem estourar \u2014 igual ao modo mobile classico. Desktop com mouse continua com a versao Desktop ampla, sem nenhuma mudanca.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;2.2.0 (05/09/2026): MODO MOBILE GARANTIDO — a plataforma abria em modo Desktop até em celulares e tablets: a detecção de tela só olhava a largura da janela, então tablet em paisagem ou celular com visualização de site-desktop caía na versão Desktop com barra lateral. Agora o app detecta o aparelho de verdade (toque de dedo, tela pequena ou celular/tablet pelo User-Agent) e abre direto na versão mobile com a barra inferior em QUALQUER largura de tela. Desktop com mouse continua na versão Desktop.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;2.2.0 (05/09/2026): os botões ROTAS e DESPESAS da barra inferior (dock) não respondiam ao toque — só funcionava pelo menu suspenso. Corrigido: toque agora dispara imediatamente, com trava anti-duplo-disparo (300ms), fallback de clique para navegadores/teclados antigos, e os contadores são atualizados ao abrir Rotas e Despesas.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;2.2.0 (05/09/2026): a barra inferior agora segue as permissões de cada usuário: funcionário sem acesso a Logística ou Financeiro não vê mais os botões ROTAS/DESPESAS \&quot;visíveis mas mortos\&quot; na barra (antes só o menu suspenso ocultava); se tocar por engano, aparece o mesmo aviso do menu.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;2.2.0 (05/09/2026): o modal de Novidades (Novidades da nova versão) ocupava a tela e só fechava no botão Concluir, bloqueando os botões da barra inferior; agora fecha ao tocar no fundo escuro (fora da caixa) ou com a tecla ESC.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;2.2.0 (05/09/2026): o bloco flutuante de Subir/Descer e os demais botões flutuantes agora ficam sempre ACIMA da barra inferior (nunca mais cobrem os botões ROTAS/DESPESAS), com limites de arrasto recalculados ao girar o aparelho.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;2.1.0 (04/09/2026): LOGIN POR SETOR — novos perfis no RH (Usuários e Acessos): Administrador (acesso total), Financeiro (Despesas, DRE e Dashboard), Atendimento/Cadastros, Logística/Entregador e Motorista. Ao escolher o perfil, as áreas daquele setor já vêm marcadas automaticamente e cada funcionário só vê as áreas do seu setor ao entrar no app.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;2.1.0 (04/09/2026): corrigido o botão Lixeira de Rotas da Central de Segurança: existia um botão duplicado sem função (mesma classe de bug do r100) — agora o botão abre a lixeira normalmente e não há mais duplicação.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;2.1.0 (04/09/2026): varredura geral de erros no código: 35 blocos JavaScript validados (0 erros de sintaxe), 250 botões/handlers e 566 IDs conferidos.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;2.1.0 (04/09/2026): pacotes oficiais para Linux — instaladores AppImage e DEB, atalho de menu, ícone profissional e atualização por Releases do GitHub.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;2.1.0 (04/09/2026): unificação da linha 2.0 com as correções r102 — nova interface (central de operações, Central Rápida Ctrl+K, modo foco, densidade ajustável) junto com LOGIN POR SETOR; painel Últimas Atualizações corrigido para exibir também as versões 2.x.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;2.0.2: barra superior permanece fixa no topo durante a rolagem, sem deslocamento ou margem duplicada, no desktop e no celular.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;2.0.1: lugares repetidos consolidados pelo nome mesmo quando chegam do Supabase com IDs diferentes, com backup preventivo local.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;2.0.1: histórico e Rotas do Dia atribuídos ao motorista ADAÍAS, com backup preventivo dos registros anteriores.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;2.0.1: limpeza preserva endereço, bairro, telefone, histórico de uso e cria backup preventivo local.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;2.0.0: interface completamente redesenhada como central de operações logística.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;2.0.0: Central Rápida com busca de áreas pelo botão flutuante ou Ctrl+K.&quot;}, {&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;2.0.0: modos Foco e Compacto para adaptar o espaço de trabalho.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;2.0.0: navegação, cartões, formulários, tabelas e telas mobile reconstruídos com o novo sistema visual.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;2.0.0: migração preserva dados existentes e cria ponto de restauração local antes da primeira abertura.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;r102 (04/09/2026): o botão X da Central de Notificações volta a fechar imediatamente; toque no fundo e tecla Esc também fecham o painel; removida uma cópia estática antiga do modal que era carregada sem os eventos dos botões; Central reorganizada para celular; histórico de atualizações mostra somente as alterações da versão instalada.&quot;}]" data-r88="1" data-r89="1" data-r87="1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https:; img-src 'self' data: blob: https: http:; connect-src 'self' https: data: blob:; font-src 'self' https: data:;">
   <!-- PWA: Meta tags para app instalavel -->
@@ -1433,7 +1433,7 @@ window.fastNotifPermitida=function(canal,tipo,mensagem){
       </div>
       <div class="fast-splash-name">FAST SERVIÇOS</div>
       <div class="fast-splash-tag">SOLUÇÕES EM LOGÍSTICA</div>
-      <div class="fast-splash-version">Versão <span id="fastSplashVersion">2.3.8</span></div>
+      <div class="fast-splash-version">Versão <span id="fastSplashVersion">2.3.9</span></div>
     </div>
     <div class="fast-splash-loader"><span></span></div>
   </div>
@@ -1450,7 +1450,7 @@ window.fastNotifPermitida=function(canal,tipo,mensagem){
         <div class="fast-gate-logo"><img src="assets/fast-servicos-icon-512.png?v=2.2.1" alt="Fast Serviços" style="width:100%;height:100%;object-fit:contain;padding:6px;"></div>
         <h1 id="fastGateTitle">FAST Serviços</h1>
         <p id="fastGateSubtitle">SOLUÇÕES EM LOGÍSTICA</p>
-        <p class="fast-gate-version" id="fastGateVersion">Versão <span id="fastGateVersionNum">2.3.8</span></p>
+        <p class="fast-gate-version" id="fastGateVersion">Versão <span id="fastGateVersionNum">2.3.9</span></p>
       </div>
 
       <!-- Bloqueio por tentativas -->
@@ -6831,7 +6831,7 @@ window.fastNotifPermitida=function(canal,tipo,mensagem){
           <!-- Rodapé do menu: nome do app + versão -->
           <div class="nav-menu-footer">
             <div class="nav-menu-footer-app"><i class="fa-solid fa-bolt"></i> APP FAST SERVIÇOS</div>
-            <div class="nav-menu-footer-ver" id="navMenuVersao">Versão 2.3.8</div>
+            <div class="nav-menu-footer-ver" id="navMenuVersao">Versão 2.3.9</div>
           </div>
         </div>
       </div>
@@ -23975,7 +23975,7 @@ window.fastNotifPermitida=function(canal,tipo,mensagem){
               <div id="fastDeployInfo" style="background:var(--card-bg-2);border:1px solid var(--border);border-radius:10px;padding:12px;margin:10px 0;font-size:13px;">
                 <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
                   <div>
-                    <div><strong>Versão atual:</strong> <span id="fastVersaoLabel" style="color:var(--accent);font-weight:800;">2.3.8</span></div>
+                    <div><strong>Versão atual:</strong> <span id="fastVersaoLabel" style="color:var(--accent);font-weight:800;">2.3.9</span></div>
                     <div id="fastVersaoDateLabel" style="font-size:11.5px;color:var(--text-muted);margin-top:3px;"><i class="fa-solid fa-clock"></i> Lançada em 06/09/2026 08:35</div>
                   </div>
                   <div id="fastVersaoOnlineLabel" style="font-size:12px;color:var(--text-muted);text-align:right;">Online: <strong>verificar</strong></div>
@@ -25985,6 +25985,11 @@ window.fastNotifPermitida=function(canal,tipo,mensagem){
 
       dataBox.style.display = 'none';
       pwdBox.style.display = 'block';
+      // (r119) Esconde a secao via CLASSE: o r116 usa display:block
+      // !important no mobile, o que anula style.display='none' inline.
+      if (dataBox) dataBox.classList.add('emp-hidden');
+      // (r119) Overlay em modo gate: caixa de senha centralizada.
+      overlay.classList.add('emp-gate');
       erro.textContent = '';
       input.value = '';
       if (recoveryInput) recoveryInput.value = '';
@@ -26261,6 +26266,10 @@ window.fastNotifPermitida=function(canal,tipo,mensagem){
     // Fechar o overlay
     function fecharEmpOverlay() {
       document.getElementById('empOverlay').classList.remove('show');
+      // (r119) Reset do estado do gate ao fechar.
+      document.getElementById('empOverlay').classList.remove('emp-gate');
+      var _db119 = document.getElementById('empDataBox');
+      if (_db119 && _db119.classList) _db119.classList.add('emp-hidden');
       document.getElementById('empSenhaInput').value = '';
       document.getElementById('empPwdErro').textContent = '';
       // Limpa campos de redefinicao e palavra-chave
@@ -26723,6 +26732,11 @@ window.fastNotifPermitida=function(canal,tipo,mensagem){
 
       pwdBox.style.display = 'none';
       dataBox.style.display = 'flex';
+      // (r119) Garante secao visivel em mobile: remove a classe
+      // emp-hidden e tira o overlay do modo gate (pagina de dados).
+      if (dataBox.classList) dataBox.classList.remove('emp-hidden');
+      var _ov119 = document.getElementById('empOverlay');
+      if (_ov119) _ov119.classList.remove('emp-gate');
 
       // Trocar para a aba "empresa" por padrão
       empTrocarTab('empresa');
@@ -28475,8 +28489,8 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
         // clientes: respeitar blacklist clientesExcluidos (por nome, lowercase)
         var listaEnvio = listaLocal;
         if (cfg.chave === 'clientes' && (bancoDados.clientesExcluidos || []).length > 0) {
-          var bl = (bancoDados.clientesExcluidos || []).map(function(n) { return String(n).toLowerCase(); });
-          listaEnvio = listaLocal.filter(function(c) { return bl.indexOf(String(c.nome || '').trim().toLowerCase()) === -1; });
+          var bl = (bancoDados.clientesExcluidos || []).map(function(n) { return destNormalizarNome(n); });
+          listaEnvio = listaLocal.filter(function(c) { return bl.indexOf(destNormalizarNome(c.nome)) === -1; });
         }
         try {
           var ok = await r106SyncColecao(cfg, listaEnvio);
@@ -28620,11 +28634,12 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
       // clientes vindos da nuvem — mesma regra que já existia para rotas/seqs.
       const clientesMap = new Map();
       const blNomesCli = new Set([
-        ...((local.clientesExcluidos || []).map(n => String(n).toLowerCase())),
-        ...((nuvem.clientesExcluidos || []).map(n => String(n).toLowerCase()))
+        // (r119) Normalização canônica também para clientes (sem acentos + lowercase).
+        ...((local.clientesExcluidos || []).map(n => destNormalizarNome(n))),
+        ...((nuvem.clientesExcluidos || []).map(n => destNormalizarNome(n)))
       ]);
       [...(nuvem.clientes || []), ...(local.clientes || [])].forEach(c => {
-        const nomeCli = String(c.nome || '').trim().toLowerCase();
+        const nomeCli = destNormalizarNome(c.nome);
         if (nomeCli && blNomesCli.has(nomeCli)) return; // pular cliente excluído
         clientesMap.set(String(c.id), c);
       });
@@ -28638,19 +28653,21 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
       const dadosEmpresaMerged = (local.dadosEmpresa && Object.keys(local.dadosEmpresa).length > 0) ? local.dadosEmpresa : (nuvem.dadosEmpresa || local.dadosEmpresa || {});
       // Preservar lista de clientes excluídos (unir local + nuvem, sem duplicatas)
       const excluidosSet = new Set([
-        ...((local.clientesExcluidos || []).map(n => String(n).toLowerCase())),
-        ...((nuvem.clientesExcluidos || []).map(n => String(n).toLowerCase()))
+        // (r119) Chaves canônicas (sem acentos) na união das blacklists de clientes.
+        ...((local.clientesExcluidos || []).map(n => destNormalizarNome(n))),
+        ...((nuvem.clientesExcluidos || []).map(n => destNormalizarNome(n)))
       ]);
       // Merge de destinos por nome canônico. IDs diferentes não podem recriar o
       // mesmo lugar após uma sincronização entre navegador e Supabase.
       const destinosExcluidosSet = new Set([
-        ...((local.destinosExcluidos || []).map(n => String(n).trim().toLocaleLowerCase('pt-BR'))),
-        ...((nuvem.destinosExcluidos || []).map(n => String(n).trim().toLocaleLowerCase('pt-BR')))
+        // (r119) Normaliza todas as chaves da blacklist (local + nuvem) com a função canônica.
+        ...((local.destinosExcluidos || []).map(n => destNormalizarNome(n))),
+        ...((nuvem.destinosExcluidos || []).map(n => destNormalizarNome(n)))
       ]);
       const destinosUnificados = destMesclarDuplicados([
         ...(nuvem.destinos || []),
         ...(local.destinos || [])
-      ]).filter(d => !destinosExcluidosSet.has(String(d.nome || '').trim().toLocaleLowerCase('pt-BR')));
+      ]).filter(d => !destinosExcluidosSet.has(destNormalizarNome(d.nome)));
       return {
         rotas: Array.from(rotasMap.values()),
         despesas: Array.from(despMap.values()),
@@ -29644,7 +29661,7 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
           });
         `;
         try {
-          navigator.serviceWorker.register('sw.js?v=2.3.8-r118', { scope: './' })
+          navigator.serviceWorker.register('sw.js?v=2.3.9-r119', { scope: './' })
             .then(function(reg) { console.info('SW permanente registrado (r73 network-first).'); })
             .catch(function(e) { console.info('SW: nao registrado neste ambiente (normal).', e.message); });
         } catch (e) { console.info('SW init skip:', e); }
@@ -31443,8 +31460,11 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
     // Se ja existe (mesmo nome normalizado), NAO duplica - apenas atualiza info faltante.
     function destAdicionarOuAtualizar(nomeDestino, infoExtra) {
       if (!nomeDestino || !String(nomeDestino).trim()) return;
-      const chave = String(nomeDestino).trim().toLocaleLowerCase('pt-BR');
-      if ((bancoDados.destinosExcluidos || []).includes(chave)) return null;
+      // (r119) Chave canônica: sem acentos, minúscula, espaços colapsados.
+      // Antes usava toLocaleLowerCase('pt-BR') (mantinha acentos), então um lugar
+      // excluído como "Jaciará" voltava se uma rota re-inserisse "Jaciara".
+      const chave = destNormalizarNome(nomeDestino);
+      if ((bancoDados.destinosExcluidos || []).some(n => destNormalizarNome(n) === chave)) return null;
       const destinos = destGarantir();
       const existente = destBuscar(nomeDestino);
       if (existente) {
@@ -31749,7 +31769,7 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
       const endereco = document.getElementById('editDestinoEndereco').value.trim();
       const telefone = document.getElementById('editDestinoTelefone').value.trim();
       if (!nome) { mostrarToast('Informe o nome do destino.', 'info'); return; }
-      bancoDados.destinosExcluidos = (bancoDados.destinosExcluidos || []).filter(n => String(n) !== nome.toLocaleLowerCase('pt-BR'));
+      bancoDados.destinosExcluidos = (bancoDados.destinosExcluidos || []).filter(n => destNormalizarNome(n) !== destNormalizarNome(nome));
       if (id) {
         // Edicao
         const d = destGarantir().find(x => String(x.id) === String(id));
@@ -31788,8 +31808,9 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
       const nomeDest = escapeHtml(d.nome || '(sem nome)');
       confirmarDialog('Excluir Destino', `Deseja realmente excluir o destino <strong>${nomeDest}</strong>?<br><br>As rotas existentes nao serao afetadas.`, () => {
         if (!Array.isArray(bancoDados.destinosExcluidos)) bancoDados.destinosExcluidos = [];
-        const chaveExcluida = String(d.nome || '').trim().toLocaleLowerCase('pt-BR');
-        if (chaveExcluida && !bancoDados.destinosExcluidos.includes(chaveExcluida)) bancoDados.destinosExcluidos.push(chaveExcluida);
+        // (r119) Grava a chave canônica (sem acentos) para bater com destAdicionarOuAtualizar e mergeDados.
+        const chaveExcluida = destNormalizarNome(d.nome || '');
+        if (chaveExcluida && !bancoDados.destinosExcluidos.some(n => destNormalizarNome(n) === chaveExcluida)) bancoDados.destinosExcluidos.push(chaveExcluida);
         bancoDados.destinos = destGarantir().filter(x => String(x.id) !== String(id));
         salvarStorage();
         destRenderizarLista();
@@ -36453,8 +36474,9 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
       // Se o cliente foi previamente excluído e agora está sendo re-cadastrado,
       // remover seu nome da lista de excluídos para que a migração automática volte a funcionar
       if (dados.nome && bancoDados.clientesExcluidos) {
-        const nomeLower = dados.nome.trim().toLowerCase();
-        bancoDados.clientesExcluidos = bancoDados.clientesExcluidos.filter(n => n !== nomeLower);
+        // (r119) Compara por chave canônica ao re-cadastrar um cliente antes excluído.
+        const nomeLower = destNormalizarNome(dados.nome);
+        bancoDados.clientesExcluidos = bancoDados.clientesExcluidos.filter(n => destNormalizarNome(n) !== nomeLower);
       }
       // Renumera TODOS os clientes sequencialmente (0001..NNNN) após cada alteração
       renumerarClientesSequencial();
@@ -36487,8 +36509,9 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
         // não o re-crie automaticamente a partir das rotas existentes
         if (nomeCliente) {
           if (!bancoDados.clientesExcluidos) bancoDados.clientesExcluidos = [];
-          const nomeLower = nomeCliente.toLowerCase();
-          if (!bancoDados.clientesExcluidos.includes(nomeLower)) {
+          // (r119) Grava chave canônica (sem acentos) — bate com mergeDados e migrarClientesExistentes.
+          const nomeLower = destNormalizarNome(nomeCliente);
+          if (!bancoDados.clientesExcluidos.some(n => destNormalizarNome(n) === nomeLower)) {
             bancoDados.clientesExcluidos.push(nomeLower);
           }
         }
@@ -36698,13 +36721,13 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
     // Migra clientes existentes (do bancoDados.rotas[].cliente) para bancoDados.clientes[]
     function migrarClientesExistentes() {
       if (!bancoDados.clientes) bancoDados.clientes = [];
-      const nomesExistentes = new Set(bancoDados.clientes.map(c => (c.nome || '').toLowerCase()));
+      const nomesExistentes = new Set(bancoDados.clientes.map(c => destNormalizarNome(c.nome)));
       // Lista de clientes intencionalmente excluídos pelo usuário — não re-criar
-      const excluidos = new Set((bancoDados.clientesExcluidos || []).map(n => String(n).toLowerCase()));
+      const excluidos = new Set((bancoDados.clientesExcluidos || []).map(n => destNormalizarNome(n)));
       let migrados = 0;
       const nomesRotas = [...new Set((bancoDados.rotas || []).map(r => r.cliente).filter(Boolean))];
       nomesRotas.forEach(nome => {
-        const nomeLower = nome.toLowerCase();
+        const nomeLower = destNormalizarNome(nome);
         // Pular se o cliente já existe no cadastro
         if (nomesExistentes.has(nomeLower)) return;
         // Pular se o cliente foi intencionalmente excluído pelo usuário
@@ -43221,7 +43244,7 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
     </div>
 
     <!-- Caixa flutuante protegida: abas Dados da Empresa | Banco de Dados | Passo a Passo SQL -->
-    <div id="empDataBox" class="emp-data-box" style="display: flex;">
+    <div id="empDataBox" class="emp-data-box emp-hidden">
       <div class="emp-data-header">
         <div class="emp-dh-title"><i class="fa-solid fa-building-shield"></i> Área Protegida</div>
         <button type="button" class="emp-close ripple" onclick="fecharEmpOverlay()" aria-label="Fechar" style="user-select: none;"><i class="fa-solid fa-xmark"></i></button>
@@ -43438,7 +43461,7 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
             <i class="fa-solid fa-fingerprint"></i>
             <span id="empBioToggleTxt">Biometria ativada (tocar para remover)</span>
           </button>
-        </div><div id="fast71Users" class="emp-section"><div class="emp-section-title"><i class="fa-solid fa-users-gear"></i> Usuários e Permissões</div><p class="emp-sql-info">Somente o administrador cria acessos. Cada login é vinculado ao cadastro de funcionário do RH e recebe as áreas do seu setor automaticamente: Atendimento/Cadastros, Financeiro, Logística/Entregador, Motorista ou Administrador.</p><div class="grid-form"><div><label>Funcionário do RH</label><select id="fast71Emp"><option value="">Selecione...</option></select></div><div><label>Usuário/e-mail</label><input id="fast71User" autocomplete="off"></div><div><label>Senha temporária</label><input id="fast71Pwd" type="password" autocomplete="new-password"></div><div><label>Perfil</label><select id="fast71Role"><option value="atendimento">Atendimento / Cadastros</option><option value="financeiro">Financeiro</option><option value="entregador">Logística / Entregador</option><option value="motorista">Motorista</option><option value="administrador">Administrador (total)</option></select></div><div id="fast74CreatePerms" class="span-4"><label><b>Áreas permitidas para este funcionário</b></label><div class="fast74-perms"><label class="fast74-perm"><input type="checkbox" data-fast74="create" value="inicio" checked=""><i class="fa-solid fa-house"></i> Página Principal</label><label class="fast74-perm"><input type="checkbox" data-fast74="create" value="logistica" checked=""><i class="fa-solid fa-route"></i> Logística</label><label class="fast74-perm"><input type="checkbox" data-fast74="create" value="financeiro"><i class="fa-solid fa-coins"></i> Financeiro</label><label class="fast74-perm"><input type="checkbox" data-fast74="create" value="cadastros" checked=""><i class="fa-solid fa-address-book"></i> Clientes e Destinos</label><label class="fast74-perm"><input type="checkbox" data-fast74="create" value="equipe"><i class="fa-solid fa-id-card"></i> Motoristas</label><label class="fast74-perm"><input type="checkbox" data-fast74="create" value="rh"><i class="fa-solid fa-users-gear"></i> Recursos Humanos</label><label class="fast74-perm"><input type="checkbox" data-fast74="create" value="analises"><i class="fa-solid fa-chart-line"></i> Dashboard e Análises</label></div><div class="fast74-admin-note">Administrador possui acesso total. Cada setor já vem com as áreas marcadas (Financeiro: Despesas + DRE + Dashboard; Atendimento: Logística + Cadastros; Entregador/Motorista: Logística) — ajuste se precisar.</div></div></div><div class="fast71-actions"><button class="emp-btn-primary ripple" onclick="fastUserCreate()" style="user-select: none;">Criar login</button><button class="emp-btn-secondary ripple" onclick="fastAuditOpen()" style="user-select: none;">Ver auditoria</button></div><div id="fast71UsersList"><p>Nenhum login de funcionário criado.</p></div><p class="fast71-note"><b>Desligamento remoto:</b> contrato de sincronização preparado. A revogação entre aparelhos exige conectar autenticação segura do backend; nenhuma chave administrativa é exposta no HTML.</p><div id="fast74Editor"><hr style="margin:18px 0;border:0;border-top:1px solid var(--border)"><div class="emp-section-title"><i class="fa-solid fa-key"></i> Editar áreas de acesso</div><div class="grid-form"><div class="span-2"><label>Login do funcionário</label><select id="fast74UserEdit" onchange="fast74Load()"><option value="">Selecione um login...</option></select></div></div><div id="fast74EditChecks"><p class="fast71-note">Selecione um funcionário para alterar as áreas.</p></div><button class="emp-btn-primary ripple" type="button" onclick="fast74Save()" style="user-select: none;"><i class="fa-solid fa-floppy-disk"></i> Salvar permissões</button></div></div></div><div id="fast101MotoristaAccess" class="emp-section" style="margin-top:22px;"><div class="emp-section-title"><i class="fa-solid fa-motorcycle"></i> Acesso do Motorista (App do Motorista)</div><p class="emp-sql-info">Crie o usu&aacute;rio e a senha que o motorista usa no <b>App do Motorista</b> (motorista.html). O login &eacute; vinculado ao cadastro de motorista da Equipe; as rotas atribu&iacute;das a ele no <b>Rotas do Dia</b> (campo Motorista) aparecem automaticamente no app dele.</p><div class="grid-form"><div><label>Motorista da Equipe</label><select id="fast101MotSelect"><option value="">Selecione...</option></select></div><div><label>Usu&aacute;rio do motorista</label><input id="fast101MotUser" autocomplete="off" placeholder="ex.: joao.silva"></div><div><label>Senha do motorista (m&iacute;n. 8)</label><input id="fast101MotPwd" type="password" autocomplete="new-password"></div><div><label>Confirmar senha</label><input id="fast101MotPwd2" type="password" autocomplete="new-password"></div></div><div class="fast71-actions" style="margin-top:12px;"><button class="emp-btn-primary ripple" onclick="fast101CriarAcessoMotorista()" style="user-select: none;"><i class="fa-solid fa-user-plus"></i> Criar acesso do motorista</button></div><div id="fast101MotLista"><p class="fast71-note">Nenhum acesso de motorista criado.</p></div><div id="fast101MotInstalar" style="display:none;margin-top:14px;"></div></div><div id="emptabBackups" class="emp-tab-content active"><div id="fast83ProtectedTools" class="fast83-protected"><div class="emp-section"><div class="emp-section-title"><i class="fa-solid fa-shield-heart"></i> Segurança, Fotos e Backups</div><p class="emp-sql-info">Ferramentas críticas reunidas dentro da Área Protegida.</p><div id="fast83ProtectedCards"><div id="fast70SecurityCard" class="config-topic"><div class="config-topic-header"><div class="config-topic-icon ico-backup"><i class="fa-solid fa-shield-heart"></i></div><div><div class="config-topic-title">Central de Segurança e Continuidade</div><div class="config-topic-sub">Fotos, integridade, operação offline e restauração</div></div></div><div class="config-topic-body"><div class="config-btn-row"><button class="btn-primary ripple" onclick="fast70CentralFotos()" style="user-select: none;"><i class="fa-solid fa-images"></i> Segurança das Fotos</button><button class="btn-secondary ripple" onclick="fast70Integridade()" style="user-select: none;"><i class="fa-solid fa-stethoscope"></i> Verificar Integridade</button><button class="btn-secondary ripple" onclick="fast70CriarCheckpoint(false)" style="user-select: none;"><i class="fa-solid fa-camera-rotate"></i> Criar Ponto de Restauração</button><button class="btn-secondary ripple" onclick="fast70RestaurarCheckpoint()" style="user-select: none;"><i class="fa-solid fa-clock-rotate-left"></i> Restaurar Ponto</button><button class="btn-secondary ripple" onclick="fast70HistoricoCliente()" style="user-select: none;"><i class="fa-solid fa-building-user"></i> Histórico do Cliente</button><button class="btn-success ripple" onclick="fast70ModoEntregador()" style="user-select: none;"><i class="fa-solid fa-motorcycle"></i> Modo Entregador</button><button class="btn-secondary ripple" style="user-select: none;" onclick="fast70AbrirLixeira()"><i class="fa-solid fa-trash-arrow-up"></i> Lixeira de Rotas</button><button id="fast71AuditBtn" class="btn-secondary ripple" style="user-select: none;"><i class="fa-solid fa-clipboard-list"></i> Auditoria</button></div><p class="config-desc" style="margin-top:10px">O aplicativo salva primeiro no aparelho. Sem internet, tudo permanece disponível e as filas são retomadas quando a conexão volta.</p></div></div><div class="config-topic">
+        </div><div id="fast71Users" class="emp-section"><div class="emp-section-title"><i class="fa-solid fa-users-gear"></i> Usuários e Permissões</div><p class="emp-sql-info">Somente o administrador cria acessos. Cada login é vinculado ao cadastro de funcionário do RH e recebe as áreas do seu setor automaticamente: Atendimento/Cadastros, Financeiro, Logística/Entregador, Motorista ou Administrador.</p><div class="grid-form"><div><label>Funcionário do RH</label><select id="fast71Emp"><option value="">Selecione...</option></select></div><div><label>Usuário/e-mail</label><input id="fast71User" autocomplete="off"></div><div><label>Senha temporária</label><input id="fast71Pwd" type="password" autocomplete="new-password"></div><div><label>Perfil</label><select id="fast71Role"><option value="atendimento">Atendimento / Cadastros</option><option value="financeiro">Financeiro</option><option value="entregador">Logística / Entregador</option><option value="motorista">Motorista</option><option value="administrador">Administrador (total)</option></select></div><div id="fast74CreatePerms" class="span-4"><label><b>Áreas permitidas para este funcionário</b></label><div class="fast74-perms"><label class="fast74-perm"><input type="checkbox" data-fast74="create" value="inicio" checked=""><i class="fa-solid fa-house"></i> Página Principal</label><label class="fast74-perm"><input type="checkbox" data-fast74="create" value="logistica" checked=""><i class="fa-solid fa-route"></i> Logística</label><label class="fast74-perm"><input type="checkbox" data-fast74="create" value="financeiro"><i class="fa-solid fa-coins"></i> Financeiro</label><label class="fast74-perm"><input type="checkbox" data-fast74="create" value="cadastros" checked=""><i class="fa-solid fa-address-book"></i> Clientes e Destinos</label><label class="fast74-perm"><input type="checkbox" data-fast74="create" value="equipe"><i class="fa-solid fa-id-card"></i> Motoristas</label><label class="fast74-perm"><input type="checkbox" data-fast74="create" value="rh"><i class="fa-solid fa-users-gear"></i> Recursos Humanos</label><label class="fast74-perm"><input type="checkbox" data-fast74="create" value="analises"><i class="fa-solid fa-chart-line"></i> Dashboard e Análises</label></div><div class="fast74-admin-note">Administrador possui acesso total. Cada setor já vem com as áreas marcadas (Financeiro: Despesas + DRE + Dashboard; Atendimento: Logística + Cadastros; Entregador/Motorista: Logística) — ajuste se precisar.</div></div></div><div class="fast71-actions"><button class="emp-btn-primary ripple" onclick="fastUserCreate()" style="user-select: none;">Criar login</button><button class="emp-btn-secondary ripple" onclick="fastAuditOpen()" style="user-select: none;">Ver auditoria</button></div><div id="fast71UsersList"><p>Nenhum login de funcionário criado.</p></div><p class="fast71-note"><b>Desligamento remoto:</b> contrato de sincronização preparado. A revogação entre aparelhos exige conectar autenticação segura do backend; nenhuma chave administrativa é exposta no HTML.</p><div id="fast74Editor"><hr style="margin:18px 0;border:0;border-top:1px solid var(--border)"><div class="emp-section-title"><i class="fa-solid fa-key"></i> Editar áreas de acesso</div><div class="grid-form"><div class="span-2"><label>Login do funcionário</label><select id="fast74UserEdit" onchange="fast74Load()"><option value="">Selecione um login...</option></select></div></div><div id="fast74EditChecks"><p class="fast71-note">Selecione um funcionário para alterar as áreas.</p></div><button class="emp-btn-primary ripple" type="button" onclick="fast74Save()" style="user-select: none;"><i class="fa-solid fa-floppy-disk"></i> Salvar permissões</button></div></div><div id="fast101MotoristaAccess" class="emp-section" style="margin-top:22px;"><div class="emp-section-title"><i class="fa-solid fa-motorcycle"></i> Acesso do Motorista (App do Motorista)</div><p class="emp-sql-info">Crie o usu&aacute;rio e a senha que o motorista usa no <b>App do Motorista</b> (motorista.html). O login &eacute; vinculado ao cadastro de motorista da Equipe; as rotas atribu&iacute;das a ele no <b>Rotas do Dia</b> (campo Motorista) aparecem automaticamente no app dele.</p><div class="grid-form"><div><label>Motorista da Equipe</label><select id="fast101MotSelect"><option value="">Selecione...</option></select></div><div><label>Usu&aacute;rio do motorista</label><input id="fast101MotUser" autocomplete="off" placeholder="ex.: joao.silva"></div><div><label>Senha do motorista (m&iacute;n. 8)</label><input id="fast101MotPwd" type="password" autocomplete="new-password"></div><div><label>Confirmar senha</label><input id="fast101MotPwd2" type="password" autocomplete="new-password"></div></div><div class="fast71-actions" style="margin-top:12px;"><button class="emp-btn-primary ripple" onclick="fast101CriarAcessoMotorista()" style="user-select: none;"><i class="fa-solid fa-user-plus"></i> Criar acesso do motorista</button></div><div id="fast101MotLista"><p class="fast71-note">Nenhum acesso de motorista criado.</p></div><div id="fast101MotInstalar" style="display:none;margin-top:14px;"></div></div></div><div id="emptabBackups" class="emp-tab-content active"><div id="fast83ProtectedTools" class="fast83-protected"><div class="emp-section"><div class="emp-section-title"><i class="fa-solid fa-shield-heart"></i> Segurança, Fotos e Backups</div><p class="emp-sql-info">Ferramentas críticas reunidas dentro da Área Protegida.</p><div id="fast83ProtectedCards"><div id="fast70SecurityCard" class="config-topic"><div class="config-topic-header"><div class="config-topic-icon ico-backup"><i class="fa-solid fa-shield-heart"></i></div><div><div class="config-topic-title">Central de Segurança e Continuidade</div><div class="config-topic-sub">Fotos, integridade, operação offline e restauração</div></div></div><div class="config-topic-body"><div class="config-btn-row"><button class="btn-primary ripple" onclick="fast70CentralFotos()" style="user-select: none;"><i class="fa-solid fa-images"></i> Segurança das Fotos</button><button class="btn-secondary ripple" onclick="fast70Integridade()" style="user-select: none;"><i class="fa-solid fa-stethoscope"></i> Verificar Integridade</button><button class="btn-secondary ripple" onclick="fast70CriarCheckpoint(false)" style="user-select: none;"><i class="fa-solid fa-camera-rotate"></i> Criar Ponto de Restauração</button><button class="btn-secondary ripple" onclick="fast70RestaurarCheckpoint()" style="user-select: none;"><i class="fa-solid fa-clock-rotate-left"></i> Restaurar Ponto</button><button class="btn-secondary ripple" onclick="fast70HistoricoCliente()" style="user-select: none;"><i class="fa-solid fa-building-user"></i> Histórico do Cliente</button><button class="btn-success ripple" onclick="fast70ModoEntregador()" style="user-select: none;"><i class="fa-solid fa-motorcycle"></i> Modo Entregador</button><button class="btn-secondary ripple" style="user-select: none;" onclick="fast70AbrirLixeira()"><i class="fa-solid fa-trash-arrow-up"></i> Lixeira de Rotas</button><button id="fast71AuditBtn" class="btn-secondary ripple" style="user-select: none;"><i class="fa-solid fa-clipboard-list"></i> Auditoria</button></div><p class="config-desc" style="margin-top:10px">O aplicativo salva primeiro no aparelho. Sem internet, tudo permanece disponível e as filas são retomadas quando a conexão volta.</p></div></div><div class="config-topic">
             <div class="config-topic-header">
               <div class="config-topic-icon ico-backup"><i class="fa-solid fa-images"></i></div>
               <div>
@@ -44948,7 +44971,7 @@ window.fastMobileNav = function(ev, abaId, botao) {
           var response = await fetch(RECOVERY_ENDPOINT, {
             method:'POST',
             headers:{ 'Content-Type':'application/json', 'apikey':RECOVERY_PUBLIC_KEY, 'Authorization':'Bearer '+RECOVERY_PUBLIC_KEY },
-            body:JSON.stringify({ email:email.trim(), origem:origem || 'plataforma', versao:'2.3.8' })
+            body:JSON.stringify({ email:email.trim(), origem:origem || 'plataforma', versao:'2.3.9' })
           });
           if (!response.ok) throw new Error('Serviço de recuperação indisponível');
           return { ok:true, message:'Se o e-mail estiver cadastrado, as instruções de recuperação serão enviadas. Verifique também a caixa de spam.' };
@@ -46296,20 +46319,19 @@ window.fastMobileNav = function(ev, abaId, botao) {
 (function(){
   try {
     var m=document.querySelector('meta[name="fast-app-version"]');
-    if(m) m.content='2.3.8';
+    if(m) m.content='2.3.9';
     var d=document.querySelector('meta[name="fast-app-date"]');
-    if(d) d.content='2026-09-06T08:35:00-03:00';
+    if(d) d.content='2026-09-06T17:18:00-03:00';
     var l=document.querySelector('meta[name="fast-latest-update"]');
     if(l) l.content='2.2.0: MODO MOBILE GARANTIDO — celular e tablet agora abrem direto na versão mobile com barra inferior em qualquer largura de tela (antes tablets em paisagem e celulares com site-desktop caíam no modo Desktop); botões ROTAS e DESPESAS da barra inferior corrigidos: respondem ao toque imediatamente com trava anti-duplo-disparo e seguem as permissões do usuário; modal de Novidades fecha ao tocar fora ou ESC; bloco Subir/Descer nunca mais cobre a barra inferior | 2.1.0: LOGIN POR SETOR — logins dedicados por setor no RH (Usuários e Acessos): Administrador, Financeiro, Atendimento/Cadastros, Logística/Entregador e Motorista — cada um só vê as áreas do seu setor; corrigido o botão Lixeira de Rotas duplicado; varredura geral: 35 blocos JS (0 erros), 250 handlers e 566 IDs verificados; pacote oficial Linux (AppImage + DEB) | 2.0.2: barra superior fixa durante a rolagem | 2.0.1: lugares duplicados consolidados na sincronização, rotas atribuídas ao motorista ADAÍAS | 2.0.0: nova interface central de operações, Central Rápida Ctrl+K, modo foco e densidade ajustável; migração com ponto de restauração | r101: App do Motorista (CHEGUEI, fotos para o Drive, rastreamento GPS com ETA) | r100: exclusão de rotas corrigida | r99: ditado por voz corrigido';
-    if(l) l.content='2.3.8: histórico financeiro no Cliente FAST, rotas individuais, dependentes completos, filtros alfabéticos e correções na Área Protegida e em Lugares.';
+    if(l) l.content='2.3.9: correção definitiva do bug dos Lugares/Clientes que "voltavam" após excluir (chaves canônicas sem acentos em toda a cadeia de exclusão, sync e merge, com migração automática das chaves antigas); Área Protegida reorganizada no HTML (Gestão FAST Motorista agora fica dentro da aba Acessos — não cobre mais nenhuma aba no celular ou desktop) e tela de senha (gate) voltou a abrir centralizada na tela, sozinha, como antes; apps Rotas do Dia e Despesas se auto-atualizam sozinhos, sem interação, quando uma nova versão é publicada; Linux atualizado (AppImage/DEB 2.3.9) e backup completo da plataforma sempre disponível na pasta backups/ do site.';
     var c=document.querySelector('meta[name="fast-app-changelog"]');
     if(c) c.content=JSON.stringify([
-      {type:'novo',text:'2.3.8 (06/09/2026): Cliente FAST ganhou histórico de rotas, valores, pagamentos, motorista, previsão e comprovantes.'},
-      {type:'novo',text:'2.3.8 (06/09/2026): solicitações com várias unidades agora viram rotas individuais em Rotas do Dia.'},
-      {type:'novo',text:'2.3.8 (06/09/2026): RH recebeu cadastro individual de dependentes, contador e resumo por funcionário.'},
-      {type:'melhorado',text:'2.3.8 (06/09/2026): filtros A–Z e ordem alfabética uniformizados em Clientes, Lugares, Motoristas e RH.'},
-      {type:'corrigido',text:'2.3.8 (06/09/2026): Lugares excluídos não retornam após sincronizar; Área Protegida e Rotas do Dia foram reorganizadas para mobile e desktop.'},
-      {type:'melhorado',text:'2.3.8 (06/09/2026): tema Ocean Blue removido; Light Moderno é o tema único.'}
+      {type:'corrigido',text:'2.3.9 (06/09/2026): fim do bug dos Lugares/Clientes excluídos que "voltavam": a lista de excluídos agora grava e compara sempre pela chave canônica (minúsculas, sem acentos, espaços colapsados) — excluir "Jaciará" impede definitivamente o retorno de "Jaciara", "JACIARA", etc., inclusive após sincronizar com a nuvem; chaves antigas com acentos são migradas automaticamente ao abrir o app.'},
+      {type:'corrigido',text:'2.3.9 (06/09/2026): Área Protegida reorganizada direto no HTML: a seção Gestão FAST Motorista agora pertence à aba Acessos e não fica mais sobreposta cobrindo as outras abas (Empresa, Banco, Backups, Publicação e SQL) em celular e desktop. A tela de senha (gate) da Área Protegida também voltou a abrir centralizada na tela, sozinha — antes ela aparecia espremida ao lado da seção inteira em coluna no celular.'},
+      {type:'melhorado',text:'2.3.9 (06/09/2026): os apps instaláveis Rotas do Dia e Despesas agora se auto-atualizam sozinhos, sem nenhuma interação: eles verificam a versão real publicada (meta fast-app-version) a cada 5 minutos e recarregam automaticamente quando uma nova versão sai; a versão não fica mais travada em v=2.3.4 dentro do app.'},
+      {type:'melhorado',text:'2.3.9 (06/09/2026): backup completo da plataforma (index.html com tudo embutido) sempre disponível para download na pasta backups/ do site oficial — sem depender de Google Drive; Releases do GitHub continuam trazendo o index.html anexado a cada versão.'},
+      {type:'melhorado',text:'2.3.9 (06/09/2026): pacote Linux (AppImage/DEB) atualizado para 2.3.9 com verificação de versão após a instalação e atualização automática via GitHub Releases.'}
     ]);
   } catch(e){}
 })();
@@ -46651,7 +46673,7 @@ body.fast-touch-ui #scrollNavBox { bottom: 130px !important; top: auto !importan
   }, true);
 })();
 </script>
-<script src="v2-ui.js?v=2.3.8-r118"></script>
+<script src="v2-ui.js?v=2.3.9-r119"></script>
 <script id="r103c-v2-toast-fix">
 /* r103-c: o toast do v2-ui ("FAST Serviços 2.2.0 pronto para operar.") ficava
    com opacity:0 depois de esconder, mas SEM pointer-events:none — seguia
@@ -47122,5 +47144,129 @@ body.fast-edition-desktop #rotasDia .card{padding:16px!important;margin-bottom:1
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
 </script>
+<script id="r119-blacklist-normalizacao">
+(function(){
+  'use strict';
+  // (r119) Migra chaves antigas das blacklists de destinos/clientes para a forma
+  // canônica (sem acentos, minúsculas, espaços colapsados — destNormalizarNome()).
+  // Antes: excluir "Jaciará" gravava "jaciará" (com acento), mas o re-scan das rotas
+  // comparava sem acentos → o lugar "voltava" sozinho. Agora todas as pontas usam
+  // a mesma chave canônica e este script converte o histórico já salvo no aparelho.
+  function normalizarLista(arr){
+    if(!Array.isArray(arr)) return {lista:arr||[],mudou:false};
+    var out=[],vistos={},mudou=false;
+    for(var i=0;i<arr.length;i++){
+      var orig=String(arr[i]==null?'':arr[i]);
+      var nova=(typeof destNormalizarNome==='function')?destNormalizarNome(orig):orig.trim().toLowerCase();
+      if(!nova) continue;
+      if(vistos[nova]) continue;
+      vistos[nova]=1;
+      if(orig!==nova) mudou=true;
+      out.push(nova);
+    }
+    if(out.length!==arr.length) mudou=true;
+    return {lista:out,mudou:mudou};
+  }
+  function aplicar(){
+    if(typeof bancoDados==='undefined'||!bancoDados) return false;
+    var d=normalizarLista(bancoDados.destinosExcluidos);
+    var c=normalizarLista(bancoDados.clientesExcluidos);
+    var mudou=false;
+    if(d.mudou){bancoDados.destinosExcluidos=d.lista;mudou=true}
+    if(c.mudou){bancoDados.clientesExcluidos=c.lista;mudou=true}
+    return mudou;
+  }
+  window.fast119NormalizarBlacklists=function(){
+    var m=aplicar();
+    if(m&&typeof salvarStorage==='function'){try{salvarStorage()}catch(e){}}
+    return m;
+  };
+  // Envelopa salvarStorage: toda gravação (import de backup, sync, edição) salva chaves canônicas.
+  if(typeof salvarStorage==='function'&&!salvarStorage.__r119){
+    var origSave=salvarStorage;
+    var wrapped=function(){aplicar();return origSave.apply(this,arguments)};
+    wrapped.__r119=true;
+    try{window.salvarStorage=wrapped}catch(e){}
+  }
+  // Normaliza na inicialização (dados locais/da nuvem podem conter chaves antigas com acento).
+  function init(){try{window.fast119NormalizarBlacklists()}catch(e){}}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
+})();
+</script>
+
+<!-- (r119) FIX DEFINITIVO: gate de login da Area Protegida centralizado.
+     O r116 força #empDataBox{display:block!important} no mobile, anulando o
+     style.display='none' inline do JS — por isso a seção inteira aparecia ao
+     lado do gate em coluna. Agora a visibilidade é controlada por CLASSE
+     emp-hidden (com !important, depois do r116 na cascade) e o overlay em
+     modo gate centraliza a caixa de senha, como era antes. -->
+<style id="r119-protected-gate-fix">
+  /* Seção de dados oculta por CLASSE (vale em qualquer largura de tela). */
+  #empOverlay #empDataBox.emp-hidden { display: none !important; }
+
+  /* Overlay em modo GATE (login): caixa de senha CENTRALIZADA na tela,
+     com fundo escuro e blur — exatamente como era antes do r116. */
+  #empOverlay.emp-gate {
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 18px !important;
+    background: rgba(2, 6, 23, 0.62) !important;
+    backdrop-filter: blur(4px) !important;
+    -webkit-backdrop-filter: blur(4px) !important;
+    overflow: auto !important;
+  }
+  #empOverlay.emp-gate #empPwdBox {
+    display: block;
+    width: 100%;
+    max-width: 400px;
+    margin: auto;
+  }
+  /* Gate centralizado também no mobile (só a seção de dados vira página). */
+  @media (max-width: 900px), (hover: none) and (pointer: coarse) {
+    #empOverlay.emp-gate {
+      align-items: center !important;
+      justify-content: center !important;
+      padding: 12px !important;
+    }
+    #empOverlay.emp-gate #empPwdBox { max-width: 100% !important; }
+  }
+  /* Modo dados (sem gate): pwdBox sempre oculto. */
+  #empOverlay:not(.emp-gate) #empPwdBox { display: none !important; }
+</style>
+<script id="r119-protected-gate-sync">
+(function(){
+  'use strict';
+  function sync(){
+    var p = document.getElementById('empPwdBox');
+    var d = document.getElementById('empDataBox');
+    var o = document.getElementById('empOverlay');
+    if (!p || !d || !o) return;
+    var gateAberto = (p.style.display === 'block');
+    var dadosAbertos = (d.style.display === 'flex');
+    if (gateAberto && !dadosAbertos) {
+      d.classList.add('emp-hidden');
+      o.classList.add('emp-gate');
+    } else if (dadosAbertos) {
+      o.classList.remove('emp-gate');
+      d.classList.remove('emp-hidden');
+    }
+  }
+  window.fast119GateSync = sync;
+  function init(){
+    sync();
+    try {
+      if (window.MutationObserver) {
+        var mo = new MutationObserver(sync);
+        mo.observe(document.getElementById('empPwdBox'), { attributes: true, attributeFilter: ['style'] });
+        mo.observe(document.getElementById('empDataBox'), { attributes: true, attributeFilter: ['style'] });
+      }
+    } catch(e) {}
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function(){ setTimeout(init, 60); }, { once: true });
+  } else { setTimeout(init, 60); }
+})();
+</script>
+
 <script src="desktop-bridge.js"></script>
 </body></html>
