@@ -1,6 +1,6 @@
 (function(){
   'use strict';
-  var VERSION='2.3.4',MIGRATION_KEY='fast_v2_migration_complete',CHECKPOINT_KEY='fast_v2_pre_migration_checkpoint';
+  var VERSION='2.3.5',MIGRATION_KEY='fast_v2_migration_complete',CHECKPOINT_KEY='fast_v2_pre_migration_checkpoint';
   var commands=[
     ['central','Centro de Operações','Visão geral e prioridades','fa-table-cells-large'],
     ['rotasDia','Rotas do Dia','Execução, fotos e conclusão','fa-calendar-day'],
@@ -42,13 +42,14 @@
     // Mantém todos os pontos da interface ligados à versão oficial atual.
     // Esta atribuição final neutraliza textos legados 2.2.x ainda presentes
     // no pacote visual sem permitir que eles sobrescrevam o release vigente.
-    if(latest)latest.content='2.3.4: identificação da versão corrigida; painel de atualizações sincronizado; atualização automática com barra visível; instalador Rotas do Dia e recuperação de senha da Área Protegida corrigidos.';
+    if(latest)latest.content='2.3.5: Cliente FAST criado; FAST Motorista reformulado; aplicativos separados; botão Voltar do Android e recuperação da Área Protegida corrigidos.';
     if(changes)changes.content=JSON.stringify([
-      {type:'corrigido',text:'2.3.4 (05/09/2026): o quadro Últimas Atualizações foi sincronizado com a versão instalada e agora mostra exatamente as mudanças desta publicação.'},
-      {type:'melhorado',text:'2.3.4 (05/09/2026): ao clicar em Verificar Atualizações, uma versão nova agora é carregada automaticamente, com barra de progresso visível até o reinício do aplicativo.'},
-      {type:'corrigido',text:'2.3.4 (05/09/2026): o instalador Rotas do Dia foi corrigido e não carrega mais o aplicativo inteiro dentro de um iframe.'},
-      {type:'corrigido',text:'2.3.4 (05/09/2026): eliminados os loops de biometria e carregamento das seções.'}
-      ,{type:'corrigido',text:'2.3.4 (06/09/2026): a recuperação da senha da Área Protegida voltou a confirmar o e-mail cadastrado e liberar imediatamente a criação da nova senha, mesmo quando o serviço externo de e-mail estiver indisponível.'}
+      {type:'novo',text:'2.3.5 (06/09/2026): criado o Cliente FAST instalável, com cadastro por e-mail, múltiplos destinos, quantidade por digitação ou botões −/+, resumo, chamada de motorista e acompanhamento.'},
+      {type:'novo',text:'2.3.5 (06/09/2026): solicitações do Cliente FAST entram automaticamente em Rotas do Dia e o cadastro entra na seção Clientes.'},
+      {type:'melhorado',text:'2.3.5 (06/09/2026): App do Motorista renomeado para FAST Motorista, com cadastro próprio, confirmação e recuperação por e-mail; estrutura facial preparada e desativada.'},
+      {type:'novo',text:'2.3.5 (06/09/2026): fotos do motorista podem ser encaminhadas manualmente ao Cliente FAST pela rota correspondente.'},
+      {type:'corrigido',text:'2.3.5 (06/09/2026): botão Voltar do Android navega pelo histórico interno até Início; aplicativos Rotas do Dia e Despesas permanecem exclusivos.'},
+      {type:'corrigido',text:'2.3.5 (06/09/2026): recuperação da senha da Área Protegida restaurada e identificação visual da versão sincronizada.'}
     ]);
     var menu=document.getElementById('navMenuVersao');if(menu)menu.textContent='Versão '+VERSION;
     var splash=document.getElementById('fastSplashVersion');if(splash)splash.textContent=VERSION;

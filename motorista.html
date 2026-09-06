@@ -4,15 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
 <meta name="theme-color" content="#4f46e5">
-<meta name="description" content="FAST SERVIÇOS — App do Motorista: rotas do dia, botão CHEGUEI, fotos pela câmera e conclusão de rotas direto do celular do motorista.">
-<meta name="fast-app-version" content="2026.09.04-r101">
+<meta name="description" content="FAST Motorista — rotas do dia, botão CHEGUEI, fotos pela câmera e conclusão de rotas direto do celular do motorista.">
+<meta name="fast-app-version" content="2.3.5-motorista">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Motorista">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https:; img-src 'self' data: blob: https: http:; connect-src 'self' https: data: blob:; font-src 'self' https: data:;">
-<title>FAST SERVIÇOS — Motorista</title>
-<link rel="manifest" href="manifest-motorista.webmanifest?v=r101">
+<title>FAST Motorista</title>
+<link rel="manifest" href="manifest-motorista.webmanifest?v=r115">
 <link rel="apple-touch-icon" sizes="192x192" href="assets/fast-servicos-icon-192.png?v=r101">
 <link rel="icon" type="image/png" sizes="192x192" href="assets/fast-servicos-icon-192.png?v=r101">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -225,9 +225,9 @@ button{font-family:inherit;cursor:pointer}
   <div class="ms-bg"></div>
   <div class="ms-content">
     <div class="ms-logo"><img src="assets/fast-servicos-icon-512.png?v=r101" alt="Fast Serviços"></div>
-    <div class="ms-name">FAST SERVIÇOS</div>
-    <div class="ms-tag">APP DO MOTORISTA</div>
-    <div class="ms-ver">Versão <span id="motSplashVersion">2026.09.04-r101</span></div>
+    <div class="ms-name">FAST MOTORISTA</div>
+    <div class="ms-tag">ROTAS E ENTREGAS</div>
+    <div class="ms-ver">Versão <span id="motSplashVersion">2.3.5-motorista</span></div>
   </div>
   <div class="ms-loader"><span></span></div>
 </div>
@@ -238,9 +238,9 @@ button{font-family:inherit;cursor:pointer}
     <div class="gate-loading" id="motGateLoading"><div class="gate-spinner"></div></div>
     <div class="gate-brand">
       <div class="gate-logo"><i class="fa-solid fa-motorcycle"></i></div>
-      <h1>App do Motorista</h1>
+      <h1>FAST Motorista</h1>
       <p>FAST SERVIÇOS · SOLUÇÕES EM LOGÍSTICA</p>
-      <div class="gate-version">Versão <span>2026.09.04-r101</span></div>
+      <div class="gate-version">Versão <span>2.3.5-motorista</span></div>
     </div>
     <div class="gate-field">
       <label for="motUser">Usuário</label>
@@ -258,8 +258,22 @@ button{font-family:inherit;cursor:pointer}
     <label class="gate-check"><input type="checkbox" id="motLembrar" checked> Manter conectado neste dispositivo</label>
     <div class="gate-err" id="motGateErr"></div>
     <button type="button" class="gate-btn" id="motEntrarBtn" onclick="motEntrar()"><i class="fa-solid fa-right-to-bracket"></i> ENTRAR</button>
-    <div class="gate-foot">O acesso é criado pelo patrão no app do FAST SERVIÇOS:<br>RH › Usuários e Acessos › App do Motorista.</div>
+    <div class="actions" style="display:flex;gap:8px;margin-top:10px"><button type="button" class="gate-btn" style="background:#0f766e" onclick="motAbrirCadastro()">CRIAR CADASTRO</button><button type="button" class="gate-btn" style="background:#334155" onclick="motRecuperarSenha()">RECUPERAR SENHA</button></div>
+    <div class="gate-foot">O motorista cria a própria conta por e-mail. O cadastro aparece no FAST para gerenciamento e atribuição de rotas.</div>
   </div>
+</div>
+
+<div id="motCadastro" class="hide" style="position:fixed;inset:0;z-index:2147483647;background:#0f172aeF;overflow:auto;padding:18px">
+  <div class="gate-card" style="margin:auto;max-width:520px"><div class="gate-brand"><div class="gate-logo"><i class="fa-solid fa-id-card"></i></div><h1>Cadastro FAST Motorista</h1><p>Crie seu acesso e envie seus dados ao FAST</p></div>
+  <div class="gate-field"><label>Nome completo</label><div class="fg-wrap"><input id="motCadNome" style="padding-left:14px"></div></div>
+  <div class="gate-field"><label>CPF</label><div class="fg-wrap"><input id="motCadCpf" inputmode="numeric" style="padding-left:14px"></div></div>
+  <div class="gate-field"><label>Telefone / WhatsApp</label><div class="fg-wrap"><input id="motCadTel" type="tel" style="padding-left:14px"></div></div>
+  <div class="gate-field"><label>CNH</label><div class="fg-wrap"><input id="motCadCnh" style="padding-left:14px"></div></div>
+  <div class="gate-field"><label>Validade da CNH</label><div class="fg-wrap"><input id="motCadVal" type="date" style="padding-left:14px"></div></div>
+  <div class="gate-field"><label>E-mail</label><div class="fg-wrap"><input id="motCadEmail" type="email" style="padding-left:14px"></div></div>
+  <div class="gate-field"><label>Senha (mínimo 8)</label><div class="fg-wrap"><input id="motCadPwd" type="password" style="padding-left:14px"></div></div>
+  <div style="padding:10px;border:1px dashed #64748b;border-radius:10px;margin-bottom:12px;color:#cbd5e1"><b>Registro facial preparado</b><br><small>Desativado até autorização do administrador.</small></div><div id="motCadMsg" class="gate-err"></div>
+  <div style="display:flex;gap:8px"><button class="gate-btn" style="background:#334155" onclick="motFecharCadastro()">Voltar</button><button class="gate-btn" onclick="motCadastrar()">Cadastrar</button></div></div>
 </div>
 
 <!-- ============ APP ============ -->
@@ -267,8 +281,8 @@ button{font-family:inherit;cursor:pointer}
   <header class="mot-header">
     <img src="assets/fast-servicos-icon-192.png?v=r101" class="mot-logo" alt="Fast Serviços">
     <div class="mot-titles">
-      <div class="mot-h1">FAST SERVIÇOS</div>
-      <div class="mot-h2">App do Motorista</div>
+      <div class="mot-h1">FAST MOTORISTA</div>
+      <div class="mot-h2">Rotas e entregas</div>
     </div>
     <button class="mh-btn" id="motInstallBtn" onclick="motInstalar()" title="Instalar aplicativo" style="display:none"><i class="fa-solid fa-download"></i></button>
     <button class="mh-btn" onclick="motAtualizar()" title="Atualizar rotas"><i class="fa-solid fa-rotate"></i></button>
@@ -316,7 +330,7 @@ button{font-family:inherit;cursor:pointer}
   </main>
 
   <footer class="mot-footer">
-    FAST SERVIÇOS · App do Motorista · <span id="motVersaoRodape">2026.09.04-r101</span><br>
+    FAST MOTORISTA · <span id="motVersaoRodape">2.3.5-motorista</span><br>
     Rotas · CHEGUEI · Fotos · Conclusão — tudo sincronizado com o patrão 🏍️
   </footer>
 </div>
@@ -344,7 +358,7 @@ button{font-family:inherit;cursor:pointer}
 'use strict';
 var SB_URL='https://jizoedwnyfcjokoqgfmn.supabase.co/rest/v1';
 var SB_KEY='sb_publishable_mXMGOmMueyVWcS8UdQHP-w_sa13m9B4';
-var VER='2026.09.04-r101';
+var VER='2.3.5-motorista';
 var K_SESSAO='mot_sessao_v1';
 var K_FILA='mot_fila_fotos_v1';
 var K_ACOES='mot_acoes_pendentes_v1';
@@ -954,6 +968,49 @@ function renderChipsDatas(){
 }
 
 /* ---------- INSTALAR PWA ---------- */
+var AUTH_URL='https://jizoedwnyfcjokoqgfmn.supabase.co/auth/v1';
+function motAbrirCadastro(){$('motGate').classList.add('hide');$('motCadastro').classList.remove('hide')}
+function motFecharCadastro(){$('motCadastro').classList.add('hide');$('motGate').classList.remove('hide')}
+window.motAbrirCadastro=motAbrirCadastro;window.motFecharCadastro=motFecharCadastro;
+async function motSalvarPerfil(dados,token){
+  var row={id:dados.id,dados:dados,updated_at:new Date().toISOString()},h=hdrs({'Prefer':'resolution=merge-duplicates,return=minimal'});if(token)h.Authorization='Bearer '+token;
+  var r=await fetch(SB_URL+'/motoristas',{method:'POST',headers:h,body:JSON.stringify(row)});if(r.ok)return true;if(r.status!==404)throw Error('Não foi possível enviar o cadastro ao FAST.');
+  var bu=SB_URL+'/'+encodeURIComponent('FAST SERVICOS'),br=await fetch(bu+'?id=eq.910600002&select=id,nome',{headers:hdrs()}),rows=br.ok?await br.json():[],lista=[];try{lista=rows.length?JSON.parse(rows[0].nome||'[]'):[]}catch(e){}lista=Array.isArray(lista)?lista:[];var pos=lista.findIndex(function(x){return String(x.email||'').toLowerCase()===dados.email});if(pos>=0)lista[pos]=Object.assign(lista[pos],dados);else lista.push(dados);
+  var wr=await fetch(bu,{method:'POST',headers:hdrs({'Prefer':'resolution=merge-duplicates,return=minimal'}),body:JSON.stringify({id:910600002,nome:JSON.stringify(lista),created_at:new Date().toISOString()})});if(!wr.ok)throw Error('A tabela de motoristas e o cofre provisório não responderam.');return true;
+}
+async function motCarregarPerfil(email,token){
+  var h=hdrs(token?{'Authorization':'Bearer '+token}:{}),r=await fetch(SB_URL+'/motoristas?select=*',{headers:h});
+  if(r.ok){var rows=await r.json(),reg=(rows||[]).map(function(x){return x.dados||x}).find(function(x){return String(x.email||'').toLowerCase()===email});if(reg)return reg}
+  if(r.status!==404&&!r.ok)throw Error('Não foi possível consultar o cadastro do motorista.');
+  var br=await fetch(SB_URL+'/'+encodeURIComponent('FAST SERVICOS')+'?id=eq.910600002&select=id,nome',{headers:hdrs()}),lista=[];
+  if(br.ok){var b=await br.json();try{lista=b.length?JSON.parse(b[0].nome||'[]'):[]}catch(e){lista=[]}}
+  return (Array.isArray(lista)?lista:[]).find(function(x){return String(x.email||'').toLowerCase()===email})||null;
+}
+async function motCadastrar(){
+  var nome=$('motCadNome').value.trim(),cpf=$('motCadCpf').value.trim(),tel=$('motCadTel').value.trim(),cnh=$('motCadCnh').value.trim(),val=$('motCadVal').value,email=$('motCadEmail').value.trim().toLowerCase(),pwd=$('motCadPwd').value,msg=$('motCadMsg');msg.textContent='';
+  if(!nome||!cpf||!tel||!cnh||!val||!email){msg.textContent='Preencha todos os campos.';return}if(pwd.length<8){msg.textContent='A senha precisa ter pelo menos 8 caracteres.';return}
+  try{
+    var ar=await fetch(AUTH_URL+'/signup',{method:'POST',headers:hdrs(),body:JSON.stringify({email:email,password:pwd,data:{nome:nome,telefone:tel,tipo:'motorista'}})}),aj=await ar.json();if(!ar.ok)throw Error(aj.msg||aj.message||'Cadastro não concluído');
+    var id=Date.now(),dados={id:id,nome:nome,cpf:cpf,telefone:tel,whatsapp:tel,cnh:cnh,cnhValidade:val,email:email,status:'Aguardando aprovação',authUserId:aj.user&&aj.user.id,facialAtivo:false,origem:'FAST Motorista',createdAt:new Date().toISOString()};
+    await motSalvarPerfil(dados,aj.access_token);
+    msg.style.color='#86efac';msg.textContent='Cadastro enviado ao FAST. Confirme o e-mail recebido e depois entre. A liberação das rotas será feita pelo administrador.';
+  }catch(e){msg.style.color='#fca5a5';msg.textContent=e.message}
+}
+window.motCadastrar=motCadastrar;
+async function motRecuperarSenha(){var email=prompt('Digite o e-mail cadastrado no FAST Motorista:');if(!email)return;try{var r=await fetch(AUTH_URL+'/recover',{method:'POST',headers:hdrs(),body:JSON.stringify({email:email.trim().toLowerCase()})});if(!r.ok)throw Error('Falha no serviço de e-mail.');alert('Recuperação solicitada. Confira o e-mail e a caixa de spam.')}catch(e){alert(e.message)}}
+window.motRecuperarSenha=motRecuperarSenha;
+var motEntrarLegado=window.motEntrar;
+window.motEntrar=async function(){
+  var email=($('motUser').value||'').trim().toLowerCase(),pwd=$('motPwd').value||'',err=$('motGateErr');
+  if(email.indexOf('@')<0)return motEntrarLegado();
+  err.textContent='';$('motEntrarBtn').disabled=true;$('motGateLoading').classList.add('show');
+  try{
+    var r=await fetch(AUTH_URL+'/token?grant_type=password',{method:'POST',headers:hdrs(),body:JSON.stringify({email:email,password:pwd})}),j=await r.json();if(!r.ok)throw Error(j.error_description||j.msg||'E-mail ou senha inválidos.');
+    var reg=await motCarregarPerfil(email,j.access_token);if(!reg)throw Error('Cadastro de motorista ainda não apareceu no FAST.');
+    ESTADO.sessao={id:j.user.id,username:email,employee_name:reg.nome,motorista_id:Number(reg.id)||null,ts:Date.now(),access_token:j.access_token};if($('motLembrar').checked)jset(K_SESSAO,ESTADO.sessao);abrirApp();toast('Bem-vindo, '+reg.nome.split(' ')[0]+'!','ok');
+  }catch(e){err.textContent=e.message}finally{$('motEntrarBtn').disabled=false;$('motGateLoading').classList.remove('show')}
+};
+
 var motInstallEvt=null;
 window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();motInstallEvt=e;var b=$('motInstallBtn');if(b)b.style.display='flex'});
 function motInstalar(){
@@ -973,7 +1030,7 @@ window.motInstalar=motInstalar;
     else mostrarGate();
   };
   if('serviceWorker' in navigator){
-    try{navigator.serviceWorker.register('sw.js?v=r101',{scope:'./'}).catch(function(e){console.warn('sw:',e)})}catch(e){}
+    try{navigator.serviceWorker.register('sw.js?v=r115',{scope:'./'}).catch(function(e){console.warn('sw:',e)})}catch(e){}
   }
   setTimeout(pronto,1500);
 })();
