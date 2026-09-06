@@ -42,12 +42,13 @@
     // Mantém todos os pontos da interface ligados à versão oficial atual.
     // Esta atribuição final neutraliza textos legados 2.2.x ainda presentes
     // no pacote visual sem permitir que eles sobrescrevam o release vigente.
-    if(latest)latest.content='2.3.4: painel de atualizações sincronizado; atualização automática com barra visível; instalador Rotas do Dia corrigido.';
+    if(latest)latest.content='2.3.4: identificação da versão corrigida; painel de atualizações sincronizado; atualização automática com barra visível; instalador Rotas do Dia e recuperação de senha da Área Protegida corrigidos.';
     if(changes)changes.content=JSON.stringify([
       {type:'corrigido',text:'2.3.4 (05/09/2026): o quadro Últimas Atualizações foi sincronizado com a versão instalada e agora mostra exatamente as mudanças desta publicação.'},
       {type:'melhorado',text:'2.3.4 (05/09/2026): ao clicar em Verificar Atualizações, uma versão nova agora é carregada automaticamente, com barra de progresso visível até o reinício do aplicativo.'},
       {type:'corrigido',text:'2.3.4 (05/09/2026): o instalador Rotas do Dia foi corrigido e não carrega mais o aplicativo inteiro dentro de um iframe.'},
       {type:'corrigido',text:'2.3.4 (05/09/2026): eliminados os loops de biometria e carregamento das seções.'}
+      ,{type:'corrigido',text:'2.3.4 (06/09/2026): a recuperação da senha da Área Protegida voltou a confirmar o e-mail cadastrado e liberar imediatamente a criação da nova senha, mesmo quando o serviço externo de e-mail estiver indisponível.'}
     ]);
     var menu=document.getElementById('navMenuVersao');if(menu)menu.textContent='Versão '+VERSION;
     var splash=document.getElementById('fastSplashVersion');if(splash)splash.textContent=VERSION;

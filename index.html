@@ -44897,6 +44897,10 @@ window.fastMobileNav = function(ev, abaId, botao) {
       var RECOVERY_ENDPOINT = 'https://jizoedwnyfcjokoqgfmn.supabase.co/functions/v1/fast-password-recovery';
       var RECOVERY_PUBLIC_KEY = 'sb_publishable_mXMGOmMueyVWcS8UdQHP-w_sa13m9B4';
       var recoveryBusy = false;
+      // Preserva a recuperação nativa da Área Protegida. Ela confirma o e-mail
+      // cadastrado localmente e libera a criação da nova senha sem depender de
+      // rede, Edge Function ou serviço de e-mail externo.
+      var empConfirmarResetLocal = (typeof empConfirmarReset === 'function') ? empConfirmarReset : window.empConfirmarReset;
 
       async function solicitarRecuperacao(email, origem){
         if (recoveryBusy) return { ok:false, message:'A solicitação já está sendo enviada.' };
@@ -44906,7 +44910,7 @@ window.fastMobileNav = function(ev, abaId, botao) {
           var response = await fetch(RECOVERY_ENDPOINT, {
             method:'POST',
             headers:{ 'Content-Type':'application/json', 'apikey':RECOVERY_PUBLIC_KEY, 'Authorization':'Bearer '+RECOVERY_PUBLIC_KEY },
-            body:JSON.stringify({ email:email.trim(), origem:origem || 'plataforma', versao:'2026.09.02-r68' })
+            body:JSON.stringify({ email:email.trim(), origem:origem || 'plataforma', versao:'2.3.4' })
           });
           if (!response.ok) throw new Error('Serviço de recuperação indisponível');
           return { ok:true, message:'Se o e-mail estiver cadastrado, as instruções de recuperação serão enviadas. Verifique também a caixa de spam.' };
@@ -44928,13 +44932,16 @@ window.fastMobileNav = function(ev, abaId, botao) {
         if (btn) { btn.disabled=false; btn.innerHTML='<i class="fa-solid fa-paper-plane"></i> Enviar recuperação por e-mail'; }
       };
 
-      window.empConfirmarReset = async function(){
-        var input = document.getElementById('empResetInput');
+      window.empConfirmarReset = function(){
         var err = document.getElementById('empResetErro') || document.getElementById('empPwdErro');
-        if (err) err.textContent='Enviando solicitação segura...';
-        var result = await solicitarRecuperacao(input ? input.value.trim() : '', 'area-protegida');
-        if (err) { err.textContent=result.message; err.style.color=result.ok?'#16a34a':'#dc2626'; }
-        if (result.ok && input) input.value='';
+        if (err) { err.textContent='Confirmando e-mail cadastrado…'; err.style.color='var(--text-muted,#64748b)'; }
+        if (typeof empConfirmarResetLocal === 'function') {
+          return empConfirmarResetLocal();
+        }
+        if (err) {
+          err.textContent='Não foi possível abrir a redefinição neste dispositivo. Feche e abra o aplicativo e tente novamente.';
+          err.style.color='#dc2626';
+        }
       };
 
       function renderUpdatesNow(){
@@ -46263,6 +46270,7 @@ window.fastMobileNav = function(ev, abaId, botao) {
       {type:'melhorado',text:'2.3.4 (05/09/2026): ao clicar em Verificar Atualizações, uma versão nova agora é carregada automaticamente, com barra de progresso visível até o reinício do aplicativo.'},
       {type:'corrigido',text:'2.3.4 (05/09/2026): o instalador Rotas do Dia foi reconstruído sem carregar o aplicativo inteiro dentro de um iframe; o botão aguarda o instalador ficar pronto e oferece abertura segura sem instalar.'},
       {type:'corrigido',text:'2.3.4 (05/09/2026): mantidas as correções que eliminam o loop depois da biometria, o recarregamento infinito da página e a falha no carregamento das seções.'}
+      ,{type:'corrigido',text:'2.3.4 (06/09/2026): a recuperação da senha da Área Protegida voltou a confirmar o e-mail cadastrado e liberar imediatamente a criação da nova senha, mesmo quando o serviço externo de e-mail estiver indisponível.'}
     ]);
   } catch(e){}
 })();
