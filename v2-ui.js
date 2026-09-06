@@ -1,6 +1,6 @@
 (function(){
   'use strict';
-  var VERSION='2.3.5',MIGRATION_KEY='fast_v2_migration_complete',CHECKPOINT_KEY='fast_v2_pre_migration_checkpoint';
+  var VERSION='2.3.6',MIGRATION_KEY='fast_v2_migration_complete',CHECKPOINT_KEY='fast_v2_pre_migration_checkpoint';
   var commands=[
     ['central','Centro de Operações','Visão geral e prioridades','fa-table-cells-large'],
     ['rotasDia','Rotas do Dia','Execução, fotos e conclusão','fa-calendar-day'],
@@ -42,14 +42,11 @@
     // Mantém todos os pontos da interface ligados à versão oficial atual.
     // Esta atribuição final neutraliza textos legados 2.2.x ainda presentes
     // no pacote visual sem permitir que eles sobrescrevam o release vigente.
-    if(latest)latest.content='2.3.5: Cliente FAST criado; FAST Motorista reformulado; aplicativos separados; botão Voltar do Android e recuperação da Área Protegida corrigidos.';
+    if(latest)latest.content='2.3.6: Área Protegida mobile restaurada como página normal, com botões em grade e rolagem vertical completa.';
     if(changes)changes.content=JSON.stringify([
-      {type:'novo',text:'2.3.5 (06/09/2026): criado o Cliente FAST instalável, com cadastro por e-mail, múltiplos destinos, quantidade por digitação ou botões −/+, resumo, chamada de motorista e acompanhamento.'},
-      {type:'novo',text:'2.3.5 (06/09/2026): solicitações do Cliente FAST entram automaticamente em Rotas do Dia e o cadastro entra na seção Clientes.'},
-      {type:'melhorado',text:'2.3.5 (06/09/2026): App do Motorista renomeado para FAST Motorista, com cadastro próprio, confirmação e recuperação por e-mail; estrutura facial preparada e desativada.'},
-      {type:'novo',text:'2.3.5 (06/09/2026): fotos do motorista podem ser encaminhadas manualmente ao Cliente FAST pela rota correspondente.'},
-      {type:'corrigido',text:'2.3.5 (06/09/2026): botão Voltar do Android navega pelo histórico interno até Início; aplicativos Rotas do Dia e Despesas permanecem exclusivos.'},
-      {type:'corrigido',text:'2.3.5 (06/09/2026): recuperação da senha da Área Protegida restaurada e identificação visual da versão sincronizada.'}
+      {type:'corrigido',text:'2.3.6 (06/09/2026): removido o quadro gigante e travado da Área Protegida no celular; a área voltou a ocupar uma página mobile normal.'},
+      {type:'corrigido',text:'2.3.6 (06/09/2026): as seções Backup, Fotos, Banco e demais opções voltaram a ser botões compactos em grade, sem barra horizontal.'},
+      {type:'corrigido',text:'2.3.6 (06/09/2026): o conteúdo selecionado aparece abaixo dos botões e toda a tela pode ser rolada normalmente para cima e para baixo.'}
     ]);
     var menu=document.getElementById('navMenuVersao');if(menu)menu.textContent='Versão '+VERSION;
     var splash=document.getElementById('fastSplashVersion');if(splash)splash.textContent=VERSION;
