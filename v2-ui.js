@@ -1,6 +1,6 @@
 (function(){
   'use strict';
-  var VERSION='2.3.6',MIGRATION_KEY='fast_v2_migration_complete',CHECKPOINT_KEY='fast_v2_pre_migration_checkpoint';
+  var VERSION='2.3.7',MIGRATION_KEY='fast_v2_migration_complete',CHECKPOINT_KEY='fast_v2_pre_migration_checkpoint';
   var commands=[
     ['central','Centro de Operações','Visão geral e prioridades','fa-table-cells-large'],
     ['rotasDia','Rotas do Dia','Execução, fotos e conclusão','fa-calendar-day'],
@@ -42,11 +42,11 @@
     // Mantém todos os pontos da interface ligados à versão oficial atual.
     // Esta atribuição final neutraliza textos legados 2.2.x ainda presentes
     // no pacote visual sem permitir que eles sobrescrevam o release vigente.
-    if(latest)latest.content='2.3.6: Área Protegida mobile restaurada como página normal, com botões em grade e rolagem vertical completa.';
+    if(latest)latest.content='2.3.7: aviso clicável de nova versão no FAST, Cliente e Motorista; atualização automática em Rotas do Dia e Despesas.';
     if(changes)changes.content=JSON.stringify([
-      {type:'corrigido',text:'2.3.6 (06/09/2026): removido o quadro gigante e travado da Área Protegida no celular; a área voltou a ocupar uma página mobile normal.'},
-      {type:'corrigido',text:'2.3.6 (06/09/2026): as seções Backup, Fotos, Banco e demais opções voltaram a ser botões compactos em grade, sem barra horizontal.'},
-      {type:'corrigido',text:'2.3.6 (06/09/2026): o conteúdo selecionado aparece abaixo dos botões e toda a tela pode ser rolada normalmente para cima e para baixo.'}
+      {type:'novo',text:'2.3.7 (06/09/2026): o FAST mostra um aviso clicável quando há nova versão e abre diretamente o quadro de atualização.'},
+      {type:'novo',text:'2.3.7 (06/09/2026): Cliente FAST e FAST Motorista também recebem aviso de versão nova com atualização guiada.'},
+      {type:'melhorado',text:'2.3.7 (06/09/2026): Rotas do Dia e Despesas passam a atualizar automaticamente, sem solicitar confirmação.'}
     ]);
     var menu=document.getElementById('navMenuVersao');if(menu)menu.textContent='Versão '+VERSION;
     var splash=document.getElementById('fastSplashVersion');if(splash)splash.textContent=VERSION;

@@ -1,7 +1,7 @@
 {
   "name": "FAST Serviços - Gestão de Rotas",
   "short_name": "FAST Serviços",
-  "description": "FAST Serviços 2.3.6 — Operações, rotas, clientes, equipe e finanças",
+  "description": "FAST Serviços 2.3.7 — Operações, rotas, clientes, equipe e finanças",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
