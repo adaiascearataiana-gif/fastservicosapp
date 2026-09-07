@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="fast-linux-desktop" data-fast-version="2.3.12"><head>
+<html lang="pt-BR" class="fast-linux-desktop" data-fast-version="2.3.13"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
   <meta name="theme-color" content="#4f46e5">
@@ -21,7 +21,7 @@
   <meta name="fast-github-branch" content="main">
   <meta name="fast-github-path" content="index.html">
   <meta name="fast-github-token-env" content="GH_TOKEN">
-  <meta name="fast-app-version" content="2.3.12">
+  <meta name="fast-app-version" content="2.3.13">
   <meta name="fast-app-date" content="2026-09-07T04:00:00-03:00">
   <meta name="fast-latest-update" content="2.3.12: barra de botões inferior REMOVIDA dos apps Despesas e Rotas do Dia (modo exclusivo agora ativa em qualquer abertura com atalho — antes só funcionava quando o atalho abria em modo instalado/standalone) | biometria disponível na Área Protegida: após digitar a senha correta o app oferece cadastrar digital/rosto na hora, botão Ativar biometria direto na tela de acesso e erros de leitura agora mostram mensagem clara (antes falhava em silêncio)">
   <!-- r92: verificação automática de nova versão ao abrir; Verificar Atualizações com cache-busting e sem fallback no-cors inválido. -->
@@ -22345,16 +22345,21 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
           // bioWrap so fica visivel quando ha senha existente + biometria.
           // Dispara apos um pequeno delay para o overlay terminar de aparecer
           // e nao competir com a animacao/foco do campo.
+          /* v2.3.13 (r129): o prompt nativo precisa acontecer DENTRO do gesto
+             do usuario (toque em "Acessar Area Protegida"). O setTimeout de
+             450ms perdia a ativacao e o Chrome/Android recusava a biometria em
+             silencio (NotAllowedError). Agora dispara IMEDIATAMENTE. */
           if (!window.__fastEmpBioAutoDisparado) {
             window.__fastEmpBioAutoDisparado = true;
-            setTimeout(function(){
-              window.__fastEmpBioAutoDisparado = false;
-              if (typeof empBioEntrar === 'function') {
-                empBioEntrar();
-              } else if (typeof window.empBioEntrar === 'function') {
-                window.empBioEntrar();
-              }
-            }, 450);
+            var _libBio = function(){ window.__fastEmpBioAutoDisparado = false; };
+            var _fnBio = (typeof empBioEntrar === 'function') ? empBioEntrar : window.empBioEntrar;
+            if (typeof _fnBio === 'function') {
+              try {
+                var _rBio = _fnBio();
+                if (_rBio && typeof _rBio.then === 'function') _rBio.then(_libBio, _libBio);
+                else _libBio();
+              } catch(e){ _libBio(); }
+            } else { _libBio(); }
           }
         }
       } catch(e){ if (window.console) console.log('r95 emp bio auto erro:', e); }
@@ -44154,4 +44159,55 @@ body.fast-edition-desktop #rotasDia .card{padding:16px!important;margin-bottom:1
   setTimeout(fix,1500);
 })();
 </script>
-<div id="fastLinuxBadge">● FAST LINUX · SEGURO</div></body></html>
+<div id="fastLinuxBadge">● FAST LINUX · SEGURO</div>
+<style id="r129-exclusive-no-dock">
+/* v2.3.13 (r129): apps DESPESAS e ROTAS DO DIA sem barra de botoes inferior —
+   eles ja abrem direto no proprio app e os botoes nao tinham utilidade. */
+body.fast-exclusive-app .bottom-nav,
+body.fast-exclusive-app .bottom-nav.fast-dock,
+body.fast-exclusive-app .fast-dock,
+body.fast-exclusive-app .fast-bottom-nav,
+body.fast-exclusive-app .bottom-nav-items,
+body.fast-exclusive-app .bottom-nav-item,
+body.fast-exclusive-app .nav-bottom,
+body.fast-exclusive-app .mobile-nav,
+body.fast-exclusive-app .fast-dock-btn,
+body.fast-exclusive-app #fastDock,
+body.fast-exclusive-app #bottomNav {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+body.fast-exclusive-app main { padding-bottom: 12px !important; }
+</style>
+<script id="r129-exclusive-no-dock-js">
+(function(){
+  'use strict';
+  var params = new URLSearchParams(location.search);
+  var atalho = (params.get('atalho') || '').toLowerCase();
+  var modo = (params.get('exclusive') || '').toLowerCase();
+  var alvo = (modo === 'rotas-dia' || modo === 'rotasdia' || atalho === 'rotas-dia' || atalho === 'rotasdia') ? 'rotasDia'
+           : (modo === 'despesas' || atalho === 'despesas') ? 'despesas' : '';
+  try {
+    if (alvo) sessionStorage.setItem('fast_app_exclusivo', alvo);
+    else alvo = sessionStorage.getItem('fast_app_exclusivo') || '';
+  } catch(e){}
+  if (!alvo) return;
+  var SEL = '.bottom-nav,.fast-dock,.fast-bottom-nav,.bottom-nav-items,.nav-bottom,.mobile-nav,#fastDock,#bottomNav';
+  function limpar(){
+    if (!document.body) return;
+    document.body.classList.add('fast-exclusive-app');
+    document.body.dataset.fastExclusive = alvo;
+    document.querySelectorAll(SEL).forEach(function(el){
+      if (el.parentNode) el.parentNode.removeChild(el);
+    });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', limpar, {once:true});
+  else limpar();
+  window.addEventListener('load', limpar);
+  if (window.MutationObserver && document.documentElement) {
+    new MutationObserver(function(){ limpar(); }).observe(document.documentElement, {childList:true, subtree:true});
+  }
+})();
+</script>
+</body></html>
