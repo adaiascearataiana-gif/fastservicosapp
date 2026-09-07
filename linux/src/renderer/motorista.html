@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
 <meta name="theme-color" content="#4f46e5">
 <meta name="description" content="FAST Motorista — rotas do dia, botão CHEGUEI, fotos pela câmera e conclusão de rotas direto do celular do motorista.">
-<meta name="fast-app-version" content="2.3.11-motorista">
+<meta name="fast-app-version" content="2.3.12-motorista">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -227,7 +227,7 @@ button{font-family:inherit;cursor:pointer}
     <div class="ms-logo"><img src="assets/fast-servicos-icon-512.png?v=r101" alt="Fast Serviços"></div>
     <div class="ms-name">FAST MOTORISTA</div>
     <div class="ms-tag">ROTAS E ENTREGAS</div>
-    <div class="ms-ver">Versão <span id="motSplashVersion">2.3.11-motorista</span></div>
+    <div class="ms-ver">Versão <span id="motSplashVersion">2.3.12-motorista</span></div>
   </div>
   <div class="ms-loader"><span></span></div>
 </div>
@@ -240,7 +240,7 @@ button{font-family:inherit;cursor:pointer}
       <div class="gate-logo"><i class="fa-solid fa-motorcycle"></i></div>
       <h1>FAST Motorista</h1>
       <p>FAST SERVIÇOS · SOLUÇÕES EM LOGÍSTICA</p>
-      <div class="gate-version">Versão <span>2.3.11-motorista</span></div>
+      <div class="gate-version">Versão <span>2.3.12-motorista</span></div>
     </div>
     <div class="gate-field">
       <label for="motUser">Usuário</label>
@@ -330,7 +330,7 @@ button{font-family:inherit;cursor:pointer}
   </main>
 
   <footer class="mot-footer">
-    FAST MOTORISTA · <span id="motVersaoRodape">2.3.11-motorista</span><br>
+    FAST MOTORISTA · <span id="motVersaoRodape">2.3.12-motorista</span><br>
     Rotas · CHEGUEI · Fotos · Conclusão — tudo sincronizado com o patrão 🏍️
   </footer>
 </div>
@@ -358,7 +358,7 @@ button{font-family:inherit;cursor:pointer}
 'use strict';
 var SB_URL='https://jizoedwnyfcjokoqgfmn.supabase.co/rest/v1';
 var SB_KEY='sb_publishable_mXMGOmMueyVWcS8UdQHP-w_sa13m9B4';
-var VER='2.3.11-motorista';
+var VER='2.3.12-motorista';
 var K_SESSAO='mot_sessao_v1';
 var K_FILA='mot_fila_fotos_v1';
 var K_ACOES='mot_acoes_pendentes_v1';
@@ -1039,6 +1039,6 @@ window.motInstalar=motInstalar;
 <style>.mot-update-balloon{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:999;width:min(92vw,390px);border:1px solid #ffffff55;border-radius:15px;padding:12px 14px;background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;box-shadow:0 14px 38px #312e8166;display:none;align-items:center;gap:10px;text-align:left;font:inherit}.mot-update-balloon b{display:block;font-size:13px}.mot-update-balloon small{opacity:.9}.mot-update-panel{position:fixed;inset:0;z-index:1000;background:#0f172acc;display:none;place-items:center;padding:18px}.mot-update-panel.show{display:grid}.mot-update-box{width:min(100%,390px);background:#fff;color:#0f172a;border-radius:20px;padding:20px}.mot-update-progress{height:9px;background:#e2e8f0;border-radius:99px;overflow:hidden;margin:14px 0}.mot-update-progress span{display:block;width:0;height:100%;background:linear-gradient(90deg,#4f46e5,#7c3aed);transition:width .35s}</style>
 <button id="motUpdateBalloon" class="mot-update-balloon" type="button" onclick="motAbrirAtualizacao()"><span style="font-size:22px">⇩</span><span style="flex:1"><b>NOVA VERSÃO DISPONÍVEL</b><small id="motUpdateVer">Toque para atualizar</small></span><span>›</span></button>
 <div id="motUpdatePanel" class="mot-update-panel"><div class="mot-update-box"><h2>Atualizar FAST Motorista</h2><p id="motUpdateText">Uma nova versão está pronta.</p><div class="mot-update-progress"><span id="motUpdateBar"></span></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><button class="gate-btn secondary" onclick="document.getElementById('motUpdatePanel').classList.remove('show')">Agora não</button><button class="gate-btn" onclick="motAtualizarAgora()">Atualizar agora</button></div></div></div>
-<script>(function(){var ATUAL='2.3.11';window.motAbrirAtualizacao=function(){document.getElementById('motUpdatePanel').classList.add('show')};window.motAtualizarAgora=async function(){var b=document.getElementById('motUpdateBar'),t=document.getElementById('motUpdateText');b.style.width='18%';t.textContent='Preparando atualização…';try{var regs=await navigator.serviceWorker.getRegistrations();await Promise.all(regs.map(function(r){return r.update()}));b.style.width='72%';t.textContent='Instalando nova versão…';setTimeout(function(){b.style.width='100%';location.replace(location.pathname+'?v='+Date.now())},700)}catch(e){location.replace(location.pathname+'?v='+Date.now())}};setTimeout(async function(){try{var h=await fetch('./?fast_check='+Date.now(),{cache:'no-store'}).then(function(r){return r.text()}),m=h.match(/name=["']fast-app-version["']\s+content=["']([^"']+)/i),nova=m&&m[1];if(nova&&nova!==ATUAL){document.getElementById('motUpdateVer').textContent=ATUAL+' → '+nova+' · Toque para atualizar';document.getElementById('motUpdateBalloon').style.display='flex'}}catch(e){}},2200)})();</script>
+<script>(function(){var ATUAL='2.3.12';window.motAbrirAtualizacao=function(){document.getElementById('motUpdatePanel').classList.add('show')};window.motAtualizarAgora=async function(){var b=document.getElementById('motUpdateBar'),t=document.getElementById('motUpdateText');b.style.width='18%';t.textContent='Preparando atualização…';try{var regs=await navigator.serviceWorker.getRegistrations();await Promise.all(regs.map(function(r){return r.update()}));b.style.width='72%';t.textContent='Instalando nova versão…';setTimeout(function(){b.style.width='100%';location.replace(location.pathname+'?v='+Date.now())},700)}catch(e){location.replace(location.pathname+'?v='+Date.now())}};setTimeout(async function(){try{var h=await fetch('./?fast_check='+Date.now(),{cache:'no-store'}).then(function(r){return r.text()}),m=h.match(/name=["']fast-app-version["']\s+content=["']([^"']+)/i),nova=m&&m[1];if(nova&&nova!==ATUAL){document.getElementById('motUpdateVer').textContent=ATUAL+' → '+nova+' · Toque para atualizar';document.getElementById('motUpdateBalloon').style.display='flex'}}catch(e){}},2200)})();</script>
 </body>
 </html>

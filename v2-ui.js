@@ -1,6 +1,6 @@
 (function(){
   'use strict';
-  var VERSION='2.3.11',MIGRATION_KEY='fast_v2_migration_complete',CHECKPOINT_KEY='fast_v2_pre_migration_checkpoint';
+  var VERSION='2.3.12',MIGRATION_KEY='fast_v2_migration_complete',CHECKPOINT_KEY='fast_v2_pre_migration_checkpoint';
   var commands=[
     ['central','Centro de Operações','Visão geral e prioridades','fa-table-cells-large'],
     ['rotasDia','Rotas do Dia','Execução, fotos e conclusão','fa-calendar-day'],
@@ -47,14 +47,10 @@
     // Mantém todos os pontos da interface ligados à versão oficial atual.
     // Esta atribuição final neutraliza textos legados 2.2.x ainda presentes
     // no pacote visual sem permitir que eles sobrescrevam o release vigente.
-        if(latest)latest.content="2.3.11: botao Central Rapida duplicado eliminado (copia travada no canto esquerdo removida) | bloco Subir/Descer arrastavel novamente com posicao salva | menu NOTIFICACOES reabre com todos os controles funcionando | biometria no login, Area Protegida, Despesas e Rotas (oferta de cadastro apos login por senha) | apps Despesas e Rotas do Dia instalados abrem sem a barra fixa (modo exclusivo) | tabela Lugares/Destinos com cabecalho centralizado, ENDERECO compacto e colunas flexiveis";
+        if(latest)latest.content="2.3.12: barra de botoes inferior REMOVIDA dos apps Despesas e Rotas do Dia (modo exclusivo ativa em qualquer abertura com atalho - antes so funcionava instalado/standalone) | biometria na Area Protegida: apos senha correta o app oferece cadastrar digital/rosto na hora, botao Ativar biometria na tela de acesso e erros com mensagem clara";
         if(changes)changes.content=JSON.stringify([
-      {"type": "corrigido", "text": "2.3.11 (07/09/2026): botão da Central Rápida (⚡) duplicado eliminado — existia uma cópia estática presa no canto esquerdo da tela, atrás da barra inferior, sem funcionar; agora existe um único botão fixo à direita, acima da barra, abrindo a Central Rápida normalmente (com dupla proteção contra cópias antigas salvas em cache)."},
-      {"type": "corrigido", "text": "2.3.11 (07/09/2026): o bloco de botões Subir/Descer (lateral direita) voltou a ser arrastável — um CSS antigo travava a posição fixa e impedia subir/descer; agora o arrasto tem prioridade e a posição escolhida continua salva ao reabrir o app."},
-      {"type": "corrigido", "text": "2.3.11 (07/09/2026): menu NOTIFICAÇÕES voltou a abrir — a Central de Notificações carregava uma cópia estática sem os eventos dos botões e o item do menu estava travado; agora a Central é recriada com todos os controles funcionando (marcar/desmarcar, X, fundo e Esc fecham) e o item Notificações do menu responde ao toque."},
-      {"type": "melhorado", "text": "2.3.11 (07/09/2026): biometria (digital/rosto) presente no login principal, na Área Protegida e nos aplicativos Despesas e Rotas do Dia — agora, após entrar com senha pela primeira vez, o app oferece cadastrar a biometria para entrar só com digital/rosto (pode ativar depois em Configurações > Segurança)."},
-      {"type": "melhorado", "text": "2.3.11 (07/09/2026): aplicativos Despesas e Rotas do Dia instalados na tela inicial abrem SEM a barra fixa inferior e sem o restante da plataforma — apenas a aba do próprio aplicativo, em tela cheia, como um app independente (mantendo a biometria de segurança)."},
-      {"type": "melhorado", "text": "2.3.11 (07/09/2026): tabela de Lugares/Destinos com títulos das colunas centralizados, coluna ENDEREÇO mais compacta (endereços longos encurtam com reticências) e colunas flexíveis que crescem conforme o maior nome de cada coluna."}
+      {"type": "corrigido", "text": "2.3.12 (07/09/2026): barra de botões inferior REMOVIDA dos apps Despesas e Rotas do Dia — o modo exclusivo (tela cheia, só a aba do próprio app) agora ativa em QUALQUER abertura com atalho (instalado na tela inicial, ícone do launcher, atalho do sistema ou link direto); antes só funcionava quando o atalho abria em modo instalado (standalone), então quem abria pelo navegador ou por um cache antigo via a barra INÍCIO/Rotas/Rotas do Dia/Despesas e o botão de instalar por cima do app."},
+      {"type": "corrigido", "text": "2.3.12 (07/09/2026): Área Protegida com biometria funcionando — após digitar a senha correta o app oferece cadastrar a digital/rosto na hora (sem pedir a senha de novo); novo botão \"Ativar biometria neste dispositivo\" direto na tela de acesso; erros de leitura (cancelamento, sensor falhou) agora mostram mensagem clara em vez de falhar em silêncio."}
     ]);
     var menu=document.getElementById('navMenuVersao');if(menu)menu.textContent='Versão '+VERSION;
     var splash=document.getElementById('fastSplashVersion');if(splash)splash.textContent=VERSION;
