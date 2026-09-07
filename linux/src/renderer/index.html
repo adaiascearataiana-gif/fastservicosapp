@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="fast-linux-desktop" data-fast-version="2.3.17"><head>
+<html lang="pt-BR" class="fast-linux-desktop" data-fast-version="2.3.18"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
   <meta name="theme-color" content="#4f46e5">
@@ -21,23 +21,23 @@
   <meta name="fast-github-branch" content="main">
   <meta name="fast-github-path" content="index.html">
   <meta name="fast-github-token-env" content="GH_TOKEN">
-  <meta name="fast-app-version" content="2.3.17">
-  <meta name="fast-app-date" content="2026-09-07T21:45:00-03:00">
-  <meta name="fast-latest-update" content="2.3.17: sino de notificacoes compactado no cabecalho &mdash; icone reduzido (16px desktop / 15px celular), botao 30x30px, badge menor e exclusao do min-height do perfil operacional; alinhado aos demais icones da barra topo.">
+  <meta name="fast-app-version" content="2.3.18">
+  <meta name="fast-app-date" content="2026-09-07T22:50:00-03:00">
+  <meta name="fast-latest-update" content="2.3.18: fim do LOOP de sincroniza&ccedil;&atilde;o com o GitHub &mdash; compara&ccedil;&atilde;o por SHA de blob (a API do GitHub devolve conte&uacute;do vazio para arquivos maiores que 1MB e o app fazia commit infinito achando que sempre havia mudan&ccedil;a); envio pelo c&odigo-fonte limpo em vez do DOM vivo; vers&atilde;o incrementada automaticamente a cada publica&ccedil;&atilde;o real, para o detector de atualiza&ccedil;&atilde;o dos aparelhos enxergar a novidade e o Service Worker renovar o cache.">
   <!-- r92: verificação automática de nova versão ao abrir; Verificar Atualizações com cache-busting e sem fallback no-cors inválido. -->
   <!-- r70.1: lista corrente no HTML inicial; o painel não espera scripts tardios -->
-  <meta name="fast-app-changelog-immediate" content="2.3.17">
-  <meta name="fast-app-changelog" content="[{&quot;type&quot;: &quot;melhorado&quot;,&quot;text&quot;: &quot;2.3.17 (07/09/2026): sino de notificações compactado no cabeçalho — ícone reduzido para 16px (15px no celular), botão 30×30px e badge menor, alinhado aos demais ícones da barra; o sino não é mais esticado pelo perfil operacional.&quot;},{&quot;type&quot;: &quot;melhorado&quot;,&quot;text&quot;: &quot;2.3.16 (07/09/2026): varredura geral de código — removidos o bloco de estilo r103c duplicado e dois links de ícone redundantes no cabeçalho (os links oficiais com tamanhos permanecem); validação de todos os 50 blocos de script sem nenhum erro de sintaxe.&quot;},{&quot;type&quot;: &quot;novo&quot;,&quot;text&quot;: &quot;2.3.16 (07/09/2026): novo link CONFIGURAÇÕES DE NOTIFICAÇÕES no rodapé do sino — um clique abre direto o menu de configuração de notificações, sem passar por outras telas.&quot;},{&quot;type&quot;: &quot;novo&quot;,&quot;text&quot;: &quot;2.3.16 (07/09/2026): SINCRONIZAR DO WHATSAPP agora é AUTOMÁTICO — o app detecta novas mensagens sozinho (ao abrir o app, ao voltar o foco da janela e a cada 30 segundos) e captura os dados imediatamente, sem precisar clicar em nada.&quot;},{&quot;type&quot;: &quot;novo&quot;,&quot;text&quot;: &quot;2.3.16 (07/09/2026): os dados capturados do WhatsApp são transferidos na hora para cada seção correspondente conforme a regra vigente de cada uma: Clientes (cadastro sem duplicar, respeita excluídos, renumera os códigos), Lugares/Destinos (auto-inserção de origem e destino sem duplicar, respeita excluídos), Rotas (cadastro com deduplicação por mensagem) e Rotas do Dia (sequência do dia da rota com id estável).&quot;},{&quot;type&quot;: &quot;novo&quot;,&quot;text&quot;: &quot;2.3.16 (07/09/2026): nova categoria WhatsApp nas Configurações de Notificações — controle separado para as notificações do sino e os balões de aviso da captura automática do WhatsApp.&quot;},{&quot;type&quot;: &quot;melhorado&quot;,&quot;text&quot;: &quot;2.3.16 (07/09/2026): Central de Notificações renomeada para Configurações de Notificações (título do modal, item do menu e card das Configurações); detecção de campos das mensagens do WhatsApp ampliada (padrão de X para Y, telefone em qualquer posição, nome do contato).&quot;},{&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;2.3.15 (07/09/2026): campos de LOGIN e SENHA totalmente livres — removida qualquer regra automática de letra maiúscula na primeira palavra em todo o app (acesso principal, FAST Motorista, app do Cliente e criação de logins de funcionários/motoristas).&quot;},{&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;2.3.15 (07/09/2026): link do e-mail de cadastro do Cliente FAST corrigido — antes apontava para localhost; agora o link de confirmação leva direto ao site oficial do app.&quot;},{&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;2.3.15 (07/09/2026): balão NOVA VERSÃO DISPONÍVEL ganhou botão X para fechar (não volta sozinho até surgir outra versão); a atualização agora limpa cache e Service Worker antes de recarregar, concluindo a instalação de verdade.&quot;},{&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;2.3.15 (07/09/2026): tema Light embutido no sistema — o card de Temas foi removido das Configurações; o visual fica sempre aplicado, sem opção para mexer.&quot;},{&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;2.3.15 (07/09/2026): todas as referências de versão unificadas em 2.3.15 — FAST Motorista e app do Cliente marcavam 2.3.12 e cache-busts antigos de 2.2.1 (CSS, manifest e ícones) atualizados.&quot;},{&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;2.3.14 (07/09/2026): abas RH (Recursos Humanos) e Despesas da Empresa desaninhadas de Configurações — antes os dois blocos estavam DENTRO da aba Configurações e abrir RH ou Despesas da Empresa mostrava tela branca; agora são abas independentes e funcionam pelo menu, pela Central Rápida (Ctrl+K) e pela barra.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;2.3.14 (07/09/2026): Central de Segurança e Continuidade (r70 — Segurança das Fotos, Verificar Integridade, Ponto de Restauração, Lixeira, Comprovante, Modo Entregador), a barra de modo offline e o selo FAST LINUX estavam presos DENTRO do modal de Novidades que nunca era fechado no HTML — nada disso conseguia aparecer; o modal agora fecha corretamente e todos os recursos voltaram a funcionar.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;2.3.14 (07/09/2026): permissões por setor corrigidas — o sistema usava o ID &#x27;destinos&#x27; (que não existe; a aba real é &#x27;lugares&#x27;), então funcionários de Atendimento/Cadastros perdiam o menu Clientes e Destinos; &#x27;paginaPrincipal&#x27; (inexistente) trocado por &#x27;central&#x27;.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;2.3.14 (07/09/2026): balão NOVA VERSÃO DISPONÍVEL gravado no HTML com display:flex não aparece mais sozinho ao abrir o app — o aviso agora só surge quando existe mesmo uma versão nova online.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;2.3.14 (07/09/2026): Central de Notificações salva de novo as marcações — o script de segurança r127 chamava salvarTela() fora de escopo (ReferenceError silencioso) e os botões Marcar/Desmarcar tudo do modal gravado não respondiam; ambos reescritos e rebindados.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;2.3.14 (07/09/2026): limpeza de código — bloco de estilo r104 duplicado removido, script desktop-bridge.js inexistente (erro 404 no console) removido, e verificação de atualização com cabeçalhos que quebravam CORS em hospedagens fora do GitHub Pages corrigida.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;2.3.12 (07/09/2026): barra de botões inferior REMOVIDA dos apps Despesas e Rotas do Dia — o modo exclusivo (tela cheia, só a aba do próprio app) agora ativa em QUALQUER abertura com atalho (instalado na tela inicial, ícone do launcher, atalho do sistema ou link direto); antes só funcionava quando o atalho abria em modo instalado (standalone), então quem abria pelo navegador ou por um cache antigo via a barra INÍCIO/Rotas/Rotas do Dia/Despesas e o botão de instalar por cima do app.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;2.3.12 (07/09/2026): Área Protegida com biometria funcionando — após digitar a senha correta o app oferece cadastrar a digital/rosto na hora (sem pedir a senha de novo); novo botão \&quot;Ativar biometria neste dispositivo\&quot; direto na tela de acesso; erros de leitura (cancelamento, sensor falhou) agora mostram mensagem clara em vez de falhar em silêncio.&quot;}]" data-r88="1" data-r89="1" data-r87="1" data-r127="1">
+  <meta name="fast-app-changelog-immediate" content="2.3.18">
+  <meta name="fast-app-changelog" content="[{&quot;type&quot;: &quot;corrigido&quot;,&quot;text&quot;: &quot;2.3.18 (07/09/2026): FIM DO LOOP DE SINCRONIZA&Ccedil;&Atilde;O COM O GITHUB &mdash; a compara&ccedil;&atilde;o passou a usar o SHA do arquivo (a API do GitHub devolve o conte&uacute;do vazio para arquivos acima de 1MB, e o app fazia commit infinito achando que sempre havia mudan&ccedil;a); o envio agora usa o c&oacute;digo-fonte limpo em vez da p&aacute;gina viva (linhas de log e estado de bot&otilde;es deixaram de ser gravados no site oficial); a vers&atilde;o incrementa sozinha a cada publica&ccedil;&atilde;o real, ent&atilde;o o detector de atualiza&ccedil;&atilde;o dos aparelhos enxerga a novidade e o Service Worker renova o cache.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;,&quot;text&quot;: &quot;2.3.17 (07/09/2026): sino de notificações compactado no cabeçalho — ícone reduzido para 16px (15px no celular), botão 30×30px e badge menor, alinhado aos demais ícones da barra; o sino não é mais esticado pelo perfil operacional.&quot;},{&quot;type&quot;: &quot;melhorado&quot;,&quot;text&quot;: &quot;2.3.16 (07/09/2026): varredura geral de código — removidos o bloco de estilo r103c duplicado e dois links de ícone redundantes no cabeçalho (os links oficiais com tamanhos permanecem); validação de todos os 50 blocos de script sem nenhum erro de sintaxe.&quot;},{&quot;type&quot;: &quot;novo&quot;,&quot;text&quot;: &quot;2.3.16 (07/09/2026): novo link CONFIGURAÇÕES DE NOTIFICAÇÕES no rodapé do sino — um clique abre direto o menu de configuração de notificações, sem passar por outras telas.&quot;},{&quot;type&quot;: &quot;novo&quot;,&quot;text&quot;: &quot;2.3.16 (07/09/2026): SINCRONIZAR DO WHATSAPP agora é AUTOMÁTICO — o app detecta novas mensagens sozinho (ao abrir o app, ao voltar o foco da janela e a cada 30 segundos) e captura os dados imediatamente, sem precisar clicar em nada.&quot;},{&quot;type&quot;: &quot;novo&quot;,&quot;text&quot;: &quot;2.3.16 (07/09/2026): os dados capturados do WhatsApp são transferidos na hora para cada seção correspondente conforme a regra vigente de cada uma: Clientes (cadastro sem duplicar, respeita excluídos, renumera os códigos), Lugares/Destinos (auto-inserção de origem e destino sem duplicar, respeita excluídos), Rotas (cadastro com deduplicação por mensagem) e Rotas do Dia (sequência do dia da rota com id estável).&quot;},{&quot;type&quot;: &quot;novo&quot;,&quot;text&quot;: &quot;2.3.16 (07/09/2026): nova categoria WhatsApp nas Configurações de Notificações — controle separado para as notificações do sino e os balões de aviso da captura automática do WhatsApp.&quot;},{&quot;type&quot;: &quot;melhorado&quot;,&quot;text&quot;: &quot;2.3.16 (07/09/2026): Central de Notificações renomeada para Configurações de Notificações (título do modal, item do menu e card das Configurações); detecção de campos das mensagens do WhatsApp ampliada (padrão de X para Y, telefone em qualquer posição, nome do contato).&quot;},{&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;2.3.15 (07/09/2026): campos de LOGIN e SENHA totalmente livres — removida qualquer regra automática de letra maiúscula na primeira palavra em todo o app (acesso principal, FAST Motorista, app do Cliente e criação de logins de funcionários/motoristas).&quot;},{&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;2.3.15 (07/09/2026): link do e-mail de cadastro do Cliente FAST corrigido — antes apontava para localhost; agora o link de confirmação leva direto ao site oficial do app.&quot;},{&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;2.3.15 (07/09/2026): balão NOVA VERSÃO DISPONÍVEL ganhou botão X para fechar (não volta sozinho até surgir outra versão); a atualização agora limpa cache e Service Worker antes de recarregar, concluindo a instalação de verdade.&quot;},{&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;2.3.15 (07/09/2026): tema Light embutido no sistema — o card de Temas foi removido das Configurações; o visual fica sempre aplicado, sem opção para mexer.&quot;},{&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;2.3.15 (07/09/2026): todas as referências de versão unificadas em 2.3.15 — FAST Motorista e app do Cliente marcavam 2.3.12 e cache-busts antigos de 2.2.1 (CSS, manifest e ícones) atualizados.&quot;},{&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;2.3.14 (07/09/2026): abas RH (Recursos Humanos) e Despesas da Empresa desaninhadas de Configurações — antes os dois blocos estavam DENTRO da aba Configurações e abrir RH ou Despesas da Empresa mostrava tela branca; agora são abas independentes e funcionam pelo menu, pela Central Rápida (Ctrl+K) e pela barra.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;2.3.14 (07/09/2026): Central de Segurança e Continuidade (r70 — Segurança das Fotos, Verificar Integridade, Ponto de Restauração, Lixeira, Comprovante, Modo Entregador), a barra de modo offline e o selo FAST LINUX estavam presos DENTRO do modal de Novidades que nunca era fechado no HTML — nada disso conseguia aparecer; o modal agora fecha corretamente e todos os recursos voltaram a funcionar.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;2.3.14 (07/09/2026): permissões por setor corrigidas — o sistema usava o ID &#x27;destinos&#x27; (que não existe; a aba real é &#x27;lugares&#x27;), então funcionários de Atendimento/Cadastros perdiam o menu Clientes e Destinos; &#x27;paginaPrincipal&#x27; (inexistente) trocado por &#x27;central&#x27;.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;2.3.14 (07/09/2026): balão NOVA VERSÃO DISPONÍVEL gravado no HTML com display:flex não aparece mais sozinho ao abrir o app — o aviso agora só surge quando existe mesmo uma versão nova online.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;2.3.14 (07/09/2026): Central de Notificações salva de novo as marcações — o script de segurança r127 chamava salvarTela() fora de escopo (ReferenceError silencioso) e os botões Marcar/Desmarcar tudo do modal gravado não respondiam; ambos reescritos e rebindados.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;2.3.14 (07/09/2026): limpeza de código — bloco de estilo r104 duplicado removido, script desktop-bridge.js inexistente (erro 404 no console) removido, e verificação de atualização com cabeçalhos que quebravam CORS em hospedagens fora do GitHub Pages corrigida.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;2.3.12 (07/09/2026): barra de botões inferior REMOVIDA dos apps Despesas e Rotas do Dia — o modo exclusivo (tela cheia, só a aba do próprio app) agora ativa em QUALQUER abertura com atalho (instalado na tela inicial, ícone do launcher, atalho do sistema ou link direto); antes só funcionava quando o atalho abria em modo instalado (standalone), então quem abria pelo navegador ou por um cache antigo via a barra INÍCIO/Rotas/Rotas do Dia/Despesas e o botão de instalar por cima do app.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;2.3.12 (07/09/2026): Área Protegida com biometria funcionando — após digitar a senha correta o app oferece cadastrar a digital/rosto na hora (sem pedir a senha de novo); novo botão \&quot;Ativar biometria neste dispositivo\&quot; direto na tela de acesso; erros de leitura (cancelamento, sensor falhou) agora mostram mensagem clara em vez de falhar em silêncio.&quot;}]" data-r88="1" data-r89="1" data-r87="1" data-r127="1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https:; img-src 'self' data: blob: https: http:; connect-src 'self' https: data: blob:; font-src 'self' https: data:;">
   <!-- PWA: Meta tags para app instalavel -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="FAST Serviços">
   <meta name="application-name" content="FAST Serviços">
-  <link rel="apple-touch-icon" sizes="192x192" href="assets/fast-servicos-icon-192.png?v=2.3.17">
+  <link rel="apple-touch-icon" sizes="192x192" href="assets/fast-servicos-icon-192.png?v=2.3.18">
   <title>⚡ FAST SERVIÇOS — Mobile</title>
-  <link rel="icon" type="image/png" sizes="192x192" href="assets/fast-servicos-icon-192.png?v=2.3.17">
-  <link rel="stylesheet" href="v2-ui.css?v=2.3.17-r131">
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/fast-servicos-icon-192.png?v=2.3.18">
+  <link rel="stylesheet" href="v2-ui.css?v=2.3.18">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet">
@@ -1344,7 +1344,7 @@ window.fastNotifPermitida=function(canal,tipo,mensagem){
 };
 })();
 </script>
-<link rel="manifest" href="manifest.webmanifest?v=2.3.17"><script id="fast-google-gis" src="https://accounts.google.com/gsi/client" async="" defer=""></script><style id="googleidentityservice_button_styles">.qJTHM{-moz-user-select:none;-webkit-user-select:none;-ms-user-select:none;color:#202124;direction:ltr;-webkit-touch-callout:none;font-family:Roboto-Regular,arial,sans-serif;-webkit-font-smoothing:antialiased;font-weight:400;margin:0;overflow:hidden;-webkit-text-size-adjust:100%}.ynRLnc{left:-9999px;position:absolute;top:-9999px}.L6cTce{display:none}.bltWBb{overflow-wrap:break-word;word-break:break-word}.hSRGPd{color:#1a73e8;cursor:pointer;font-weight:500;text-decoration:none}.Bz112c-W3lGp{height:16px;width:16px}.Bz112c-E3DyYd{height:20px;width:20px}.Bz112c-r9oPif{height:24px;width:24px}.Bz112c-u2z5K{height:36px;width:36px}.Bz112c-uaxL4e{border-radius:10px}.LgbsSe-Bz112c{display:block}.S9gUrf-YoZ4jf{border:none;margin:0;padding:0}.S9gUrf-YoZ4jf *{border:none;margin:0;padding:0}.fFW7wc-ibnC6b>.aZ2wEe>div{border-color:#4285f4}.P1ekSe-ZMv3u{-webkit-transition:height .2s linear;transition:height .2s linear}.P1ekSe-ZMv3u>div:first-child{background-color:#1a73e8!important;-webkit-transition:width .3s linear;transition:width .3s linear}.P1ekSe-ZMv3u>div:nth-child(2){background-image:-webkit-gradient(linear,left top,right top,from(rgba(255,255,255,.7)),to(rgba(255,255,255,.7))),-webkit-gradient(linear,left top,right top,from(#1a73e8),to(#1a73e8))!important;background-image:-webkit-linear-gradient(left,rgba(255,255,255,.7),rgba(255,255,255,.7)),-webkit-linear-gradient(left,#1a73e8,#1a73e8)!important;background-image:linear-gradient(90deg,rgba(255,255,255,.7),rgba(255,255,255,.7)),linear-gradient(90deg,#1a73e8,#1a73e8)!important}.P1ekSe-ZMv3u>div:nth-child(3){background-image:-webkit-gradient(linear,left top,right top,from(rgba(255,255,255,.7)),to(rgba(255,255,255,.7))),-webkit-gradient(linear,left top,right top,from(#1a73e8),to(#1a73e8))!important;background-image:-webkit-linear-gradient(left,rgba(255,255,255,.7),rgba(255,255,255,.7)),-webkit-linear-gradient(left,#1a73e8,#1a73e8)!important;background-image:linear-gradient(90deg,rgba(255,255,255,.7),rgba(255,255,255,.7)),linear-gradient(90deg,#1a73e8,#1a73e8)!important}.haAclf{display:inline-block}.nsm7Bb-HzV7m-LgbsSe{border-radius:4px;box-sizing:border-box;-webkit-transition:background-color .218s,border-color .218s;transition:background-color .218s,border-color .218s;-moz-user-select:none;-webkit-user-select:none;-ms-user-select:none;-webkit-appearance:none;background-color:#fff;background-image:none;border:1px solid #dadce0;color:#3c4043;cursor:pointer;font-family:Google Sans,arial,sans-serif;font-size:.875rem;height:40px;letter-spacing:.25px;outline:none;overflow:hidden;padding:0 12px;position:relative;text-align:center;vertical-align:middle;white-space:nowrap;width:auto}@media screen and (-ms-high-contrast:active){.nsm7Bb-HzV7m-LgbsSe{border:2px solid windowText;color:windowText}}@media screen and (preferes-contrast:more){.nsm7Bb-HzV7m-LgbsSe{color:#000}}.nsm7Bb-HzV7m-LgbsSe.pSzOP-SxQuSe{font-size:.875rem;height:32px;letter-spacing:.25px;padding:0 10px}.nsm7Bb-HzV7m-LgbsSe.purZT-SxQuSe{font-size:.6875rem;height:20px;letter-spacing:.3px;padding:0 8px}.nsm7Bb-HzV7m-LgbsSe.Bz112c-LgbsSe{padding:0;width:40px}.nsm7Bb-HzV7m-LgbsSe.Bz112c-LgbsSe.pSzOP-SxQuSe{width:32px}.nsm7Bb-HzV7m-LgbsSe.Bz112c-LgbsSe.purZT-SxQuSe{width:20px}.nsm7Bb-HzV7m-LgbsSe.JGcpL-RbRzK{border-radius:20px}.nsm7Bb-HzV7m-LgbsSe.JGcpL-RbRzK.pSzOP-SxQuSe{border-radius:16px}.nsm7Bb-HzV7m-LgbsSe.JGcpL-RbRzK.purZT-SxQuSe{border-radius:10px}.nsm7Bb-HzV7m-LgbsSe.i5vt6e-to915-Ia7Qfc{border:1px solid #8e918f;background-color:#131314;color:#e3e3e3}.nsm7Bb-HzV7m-LgbsSe.MFS4be-Ia7Qfc{border:none;color:#fff}.nsm7Bb-HzV7m-LgbsSe.MFS4be-v3pZbf-Ia7Qfc{background-color:#1a73e8}.nsm7Bb-HzV7m-LgbsSe.MFS4be-JaPV2b-Ia7Qfc{background-color:#202124;color:#e8eaed}@media screen and (prefers-contrast:more){.nsm7Bb-HzV7m-LgbsSe.MFS4be-JaPV2b-Ia7Qfc{color:#fff}}.nsm7Bb-HzV7m-LgbsSe .nsm7Bb-HzV7m-LgbsSe-Bz112c{height:18px;margin-right:8px;min-width:18px;width:18px}.nsm7Bb-HzV7m-LgbsSe.pSzOP-SxQuSe .nsm7Bb-HzV7m-LgbsSe-Bz112c{height:14px;min-width:14px;width:14px}.nsm7Bb-HzV7m-LgbsSe.purZT-SxQuSe .nsm7Bb-HzV7m-LgbsSe-Bz112c{height:10px;min-width:10px;width:10px}.nsm7Bb-HzV7m-LgbsSe.jVeSEe .nsm7Bb-HzV7m-LgbsSe-Bz112c{margin-left:8px;margin-right:-4px}.nsm7Bb-HzV7m-LgbsSe.Bz112c-LgbsSe .nsm7Bb-HzV7m-LgbsSe-Bz112c{margin:0;padding:10px}.nsm7Bb-HzV7m-LgbsSe.Bz112c-LgbsSe.pSzOP-SxQuSe .nsm7Bb-HzV7m-LgbsSe-Bz112c{padding:8px}.nsm7Bb-HzV7m-LgbsSe.Bz112c-LgbsSe.purZT-SxQuSe .nsm7Bb-HzV7m-LgbsSe-Bz112c{padding:4px}.nsm7Bb-HzV7m-LgbsSe .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{border-top-left-radius:3px;border-bottom-left-radius:3px;display:-webkit-box;display:-webkit-flex;display:flex;-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center;-webkit-box-align:center;-webkit-align-items:center;align-items:center;background-color:#fff;height:36px;margin-left:-10px;margin-right:12px;min-width:36px;width:36px}.nsm7Bb-HzV7m-LgbsSe .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf .nsm7Bb-HzV7m-LgbsSe-Bz112c,.nsm7Bb-HzV7m-LgbsSe.Bz112c-LgbsSe .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf .nsm7Bb-HzV7m-LgbsSe-Bz112c{margin:0;padding:0}.nsm7Bb-HzV7m-LgbsSe.pSzOP-SxQuSe .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{height:28px;margin-left:-8px;margin-right:10px;min-width:28px;width:28px}.nsm7Bb-HzV7m-LgbsSe.purZT-SxQuSe .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{height:16px;margin-left:-6px;margin-right:8px;min-width:16px;width:16px}.nsm7Bb-HzV7m-LgbsSe.Bz112c-LgbsSe .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{border-radius:3px;margin-left:2px;margin-right:0;padding:0}.nsm7Bb-HzV7m-LgbsSe.JGcpL-RbRzK .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{border-radius:18px}.nsm7Bb-HzV7m-LgbsSe.pSzOP-SxQuSe.JGcpL-RbRzK .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{border-radius:14px}.nsm7Bb-HzV7m-LgbsSe.purZT-SxQuSe.JGcpL-RbRzK .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{border-radius:8px}.nsm7Bb-HzV7m-LgbsSe .nsm7Bb-HzV7m-LgbsSe-bN97Pc-sM5MNb{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-align-items:center;-webkit-box-align:center;align-items:center;-webkit-flex-direction:row;-webkit-box-orient:horizontal;-webkit-box-direction:normal;flex-direction:row;-webkit-box-pack:justify;-webkit-justify-content:space-between;justify-content:space-between;-webkit-flex-wrap:nowrap;flex-wrap:nowrap;height:100%;position:relative;width:100%}.nsm7Bb-HzV7m-LgbsSe .oXtfBe-l4eHX{-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center}.nsm7Bb-HzV7m-LgbsSe .nsm7Bb-HzV7m-LgbsSe-BPrWId{-webkit-flex-grow:1;-webkit-box-flex:1;flex-grow:1;font-family:Google Sans,arial,sans-serif;font-weight:500;overflow:hidden;text-overflow:ellipsis;vertical-align:top}.nsm7Bb-HzV7m-LgbsSe.purZT-SxQuSe .nsm7Bb-HzV7m-LgbsSe-BPrWId{font-weight:300}.nsm7Bb-HzV7m-LgbsSe .oXtfBe-l4eHX .nsm7Bb-HzV7m-LgbsSe-BPrWId{-webkit-flex-grow:0;-webkit-box-flex:0;flex-grow:0}.nsm7Bb-HzV7m-LgbsSe .nsm7Bb-HzV7m-LgbsSe-MJoBVe{-webkit-transition:background-color .218s;transition:background-color .218s;bottom:0;left:0;position:absolute;right:0;top:0}.nsm7Bb-HzV7m-LgbsSe:focus,.nsm7Bb-HzV7m-LgbsSe:hover{box-shadow:none;border-color:rgb(210,227,252);outline:none}.nsm7Bb-HzV7m-LgbsSe:focus-within{outline:2px solid #00639b;border-color:transparent}.nsm7Bb-HzV7m-LgbsSe:hover .nsm7Bb-HzV7m-LgbsSe-MJoBVe{background:rgba(66,133,244,.08)}.nsm7Bb-HzV7m-LgbsSe:active .nsm7Bb-HzV7m-LgbsSe-MJoBVe,.nsm7Bb-HzV7m-LgbsSe:focus .nsm7Bb-HzV7m-LgbsSe-MJoBVe{background:rgba(66,133,244,.1)}.nsm7Bb-HzV7m-LgbsSe.i5vt6e-to915-Ia7Qfc:hover .nsm7Bb-HzV7m-LgbsSe-MJoBVe{background:rgba(255,255,255,.08)}.nsm7Bb-HzV7m-LgbsSe.i5vt6e-to915-Ia7Qfc:active .nsm7Bb-HzV7m-LgbsSe-MJoBVe,.nsm7Bb-HzV7m-LgbsSe.i5vt6e-to915-Ia7Qfc:focus .nsm7Bb-HzV7m-LgbsSe-MJoBVe{background:rgba(255,255,255,.12)}.nsm7Bb-HzV7m-LgbsSe.MFS4be-Ia7Qfc:hover .nsm7Bb-HzV7m-LgbsSe-MJoBVe{background:rgba(255,255,255,.24)}.nsm7Bb-HzV7m-LgbsSe.MFS4be-Ia7Qfc:active .nsm7Bb-HzV7m-LgbsSe-MJoBVe,.nsm7Bb-HzV7m-LgbsSe.MFS4be-Ia7Qfc:focus .nsm7Bb-HzV7m-LgbsSe-MJoBVe{background:rgba(255,255,255,.32)}.nsm7Bb-HzV7m-LgbsSe .n1UuX-DkfjY{border-radius:50%;display:-webkit-box;display:-webkit-flex;display:flex;height:20px;margin-left:-4px;margin-right:8px;min-width:20px;width:20px}.nsm7Bb-HzV7m-LgbsSe.jVeSEe .nsm7Bb-HzV7m-LgbsSe-BPrWId{font-family:Roboto;font-size:12px;text-align:left}.nsm7Bb-HzV7m-LgbsSe.jVeSEe .nsm7Bb-HzV7m-LgbsSe-BPrWId .K4efff .fmcmS,.nsm7Bb-HzV7m-LgbsSe.jVeSEe .nsm7Bb-HzV7m-LgbsSe-BPrWId .ssJRIf{overflow:hidden;text-overflow:ellipsis}.nsm7Bb-HzV7m-LgbsSe.jVeSEe .nsm7Bb-HzV7m-LgbsSe-BPrWId .K4efff{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-align-items:center;-webkit-box-align:center;align-items:center;color:#5f6368;fill:#5f6368;font-size:11px;font-weight:400}.nsm7Bb-HzV7m-LgbsSe.jVeSEe.i5vt6e-to915-Ia7Qfc .nsm7Bb-HzV7m-LgbsSe-BPrWId .K4efff{color:#c4c7c5;fill:#c4c7c5}.nsm7Bb-HzV7m-LgbsSe.jVeSEe.MFS4be-Ia7Qfc .nsm7Bb-HzV7m-LgbsSe-BPrWId .K4efff{color:#e8eaed;fill:#e8eaed}@media screen and (prefers-contrast:more){.nsm7Bb-HzV7m-LgbsSe.jVeSEe .nsm7Bb-HzV7m-LgbsSe-BPrWId .K4efff,.nsm7Bb-HzV7m-LgbsSe.jVeSEe.MFS4be-Ia7Qfc .nsm7Bb-HzV7m-LgbsSe-BPrWId .K4efff{color:#000;fill:#000}}.nsm7Bb-HzV7m-LgbsSe.jVeSEe .nsm7Bb-HzV7m-LgbsSe-BPrWId .K4efff .Bz112c{height:18px;margin:-3px -3px -3px 2px;min-width:18px;width:18px}.nsm7Bb-HzV7m-LgbsSe.jVeSEe .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{border-top-left-radius:0;border-bottom-left-radius:0;border-top-right-radius:3px;border-bottom-right-radius:3px;margin-left:12px;margin-right:-10px}.nsm7Bb-HzV7m-LgbsSe.jVeSEe.JGcpL-RbRzK .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{border-radius:18px}.L5Fo6c-sM5MNb{border:0;display:block;left:0;position:relative;top:0}.L5Fo6c-bF1uUb{border-radius:4px;bottom:0;cursor:pointer;left:0;position:absolute;right:0;top:0}.L5Fo6c-bF1uUb:focus{border:none;outline:none}sentinel{}</style><style id="r103c-toast-pointer-fix">
+<link rel="manifest" href="manifest.webmanifest?v=2.3.18"><script id="fast-google-gis" src="https://accounts.google.com/gsi/client" async="" defer=""></script><style id="googleidentityservice_button_styles">.qJTHM{-moz-user-select:none;-webkit-user-select:none;-ms-user-select:none;color:#202124;direction:ltr;-webkit-touch-callout:none;font-family:Roboto-Regular,arial,sans-serif;-webkit-font-smoothing:antialiased;font-weight:400;margin:0;overflow:hidden;-webkit-text-size-adjust:100%}.ynRLnc{left:-9999px;position:absolute;top:-9999px}.L6cTce{display:none}.bltWBb{overflow-wrap:break-word;word-break:break-word}.hSRGPd{color:#1a73e8;cursor:pointer;font-weight:500;text-decoration:none}.Bz112c-W3lGp{height:16px;width:16px}.Bz112c-E3DyYd{height:20px;width:20px}.Bz112c-r9oPif{height:24px;width:24px}.Bz112c-u2z5K{height:36px;width:36px}.Bz112c-uaxL4e{border-radius:10px}.LgbsSe-Bz112c{display:block}.S9gUrf-YoZ4jf{border:none;margin:0;padding:0}.S9gUrf-YoZ4jf *{border:none;margin:0;padding:0}.fFW7wc-ibnC6b>.aZ2wEe>div{border-color:#4285f4}.P1ekSe-ZMv3u{-webkit-transition:height .2s linear;transition:height .2s linear}.P1ekSe-ZMv3u>div:first-child{background-color:#1a73e8!important;-webkit-transition:width .3s linear;transition:width .3s linear}.P1ekSe-ZMv3u>div:nth-child(2){background-image:-webkit-gradient(linear,left top,right top,from(rgba(255,255,255,.7)),to(rgba(255,255,255,.7))),-webkit-gradient(linear,left top,right top,from(#1a73e8),to(#1a73e8))!important;background-image:-webkit-linear-gradient(left,rgba(255,255,255,.7),rgba(255,255,255,.7)),-webkit-linear-gradient(left,#1a73e8,#1a73e8)!important;background-image:linear-gradient(90deg,rgba(255,255,255,.7),rgba(255,255,255,.7)),linear-gradient(90deg,#1a73e8,#1a73e8)!important}.P1ekSe-ZMv3u>div:nth-child(3){background-image:-webkit-gradient(linear,left top,right top,from(rgba(255,255,255,.7)),to(rgba(255,255,255,.7))),-webkit-gradient(linear,left top,right top,from(#1a73e8),to(#1a73e8))!important;background-image:-webkit-linear-gradient(left,rgba(255,255,255,.7),rgba(255,255,255,.7)),-webkit-linear-gradient(left,#1a73e8,#1a73e8)!important;background-image:linear-gradient(90deg,rgba(255,255,255,.7),rgba(255,255,255,.7)),linear-gradient(90deg,#1a73e8,#1a73e8)!important}.haAclf{display:inline-block}.nsm7Bb-HzV7m-LgbsSe{border-radius:4px;box-sizing:border-box;-webkit-transition:background-color .218s,border-color .218s;transition:background-color .218s,border-color .218s;-moz-user-select:none;-webkit-user-select:none;-ms-user-select:none;-webkit-appearance:none;background-color:#fff;background-image:none;border:1px solid #dadce0;color:#3c4043;cursor:pointer;font-family:Google Sans,arial,sans-serif;font-size:.875rem;height:40px;letter-spacing:.25px;outline:none;overflow:hidden;padding:0 12px;position:relative;text-align:center;vertical-align:middle;white-space:nowrap;width:auto}@media screen and (-ms-high-contrast:active){.nsm7Bb-HzV7m-LgbsSe{border:2px solid windowText;color:windowText}}@media screen and (preferes-contrast:more){.nsm7Bb-HzV7m-LgbsSe{color:#000}}.nsm7Bb-HzV7m-LgbsSe.pSzOP-SxQuSe{font-size:.875rem;height:32px;letter-spacing:.25px;padding:0 10px}.nsm7Bb-HzV7m-LgbsSe.purZT-SxQuSe{font-size:.6875rem;height:20px;letter-spacing:.3px;padding:0 8px}.nsm7Bb-HzV7m-LgbsSe.Bz112c-LgbsSe{padding:0;width:40px}.nsm7Bb-HzV7m-LgbsSe.Bz112c-LgbsSe.pSzOP-SxQuSe{width:32px}.nsm7Bb-HzV7m-LgbsSe.Bz112c-LgbsSe.purZT-SxQuSe{width:20px}.nsm7Bb-HzV7m-LgbsSe.JGcpL-RbRzK{border-radius:20px}.nsm7Bb-HzV7m-LgbsSe.JGcpL-RbRzK.pSzOP-SxQuSe{border-radius:16px}.nsm7Bb-HzV7m-LgbsSe.JGcpL-RbRzK.purZT-SxQuSe{border-radius:10px}.nsm7Bb-HzV7m-LgbsSe.i5vt6e-to915-Ia7Qfc{border:1px solid #8e918f;background-color:#131314;color:#e3e3e3}.nsm7Bb-HzV7m-LgbsSe.MFS4be-Ia7Qfc{border:none;color:#fff}.nsm7Bb-HzV7m-LgbsSe.MFS4be-v3pZbf-Ia7Qfc{background-color:#1a73e8}.nsm7Bb-HzV7m-LgbsSe.MFS4be-JaPV2b-Ia7Qfc{background-color:#202124;color:#e8eaed}@media screen and (prefers-contrast:more){.nsm7Bb-HzV7m-LgbsSe.MFS4be-JaPV2b-Ia7Qfc{color:#fff}}.nsm7Bb-HzV7m-LgbsSe .nsm7Bb-HzV7m-LgbsSe-Bz112c{height:18px;margin-right:8px;min-width:18px;width:18px}.nsm7Bb-HzV7m-LgbsSe.pSzOP-SxQuSe .nsm7Bb-HzV7m-LgbsSe-Bz112c{height:14px;min-width:14px;width:14px}.nsm7Bb-HzV7m-LgbsSe.purZT-SxQuSe .nsm7Bb-HzV7m-LgbsSe-Bz112c{height:10px;min-width:10px;width:10px}.nsm7Bb-HzV7m-LgbsSe.jVeSEe .nsm7Bb-HzV7m-LgbsSe-Bz112c{margin-left:8px;margin-right:-4px}.nsm7Bb-HzV7m-LgbsSe.Bz112c-LgbsSe .nsm7Bb-HzV7m-LgbsSe-Bz112c{margin:0;padding:10px}.nsm7Bb-HzV7m-LgbsSe.Bz112c-LgbsSe.pSzOP-SxQuSe .nsm7Bb-HzV7m-LgbsSe-Bz112c{padding:8px}.nsm7Bb-HzV7m-LgbsSe.Bz112c-LgbsSe.purZT-SxQuSe .nsm7Bb-HzV7m-LgbsSe-Bz112c{padding:4px}.nsm7Bb-HzV7m-LgbsSe .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{border-top-left-radius:3px;border-bottom-left-radius:3px;display:-webkit-box;display:-webkit-flex;display:flex;-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center;-webkit-box-align:center;-webkit-align-items:center;align-items:center;background-color:#fff;height:36px;margin-left:-10px;margin-right:12px;min-width:36px;width:36px}.nsm7Bb-HzV7m-LgbsSe .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf .nsm7Bb-HzV7m-LgbsSe-Bz112c,.nsm7Bb-HzV7m-LgbsSe.Bz112c-LgbsSe .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf .nsm7Bb-HzV7m-LgbsSe-Bz112c{margin:0;padding:0}.nsm7Bb-HzV7m-LgbsSe.pSzOP-SxQuSe .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{height:28px;margin-left:-8px;margin-right:10px;min-width:28px;width:28px}.nsm7Bb-HzV7m-LgbsSe.purZT-SxQuSe .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{height:16px;margin-left:-6px;margin-right:8px;min-width:16px;width:16px}.nsm7Bb-HzV7m-LgbsSe.Bz112c-LgbsSe .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{border-radius:3px;margin-left:2px;margin-right:0;padding:0}.nsm7Bb-HzV7m-LgbsSe.JGcpL-RbRzK .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{border-radius:18px}.nsm7Bb-HzV7m-LgbsSe.pSzOP-SxQuSe.JGcpL-RbRzK .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{border-radius:14px}.nsm7Bb-HzV7m-LgbsSe.purZT-SxQuSe.JGcpL-RbRzK .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{border-radius:8px}.nsm7Bb-HzV7m-LgbsSe .nsm7Bb-HzV7m-LgbsSe-bN97Pc-sM5MNb{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-align-items:center;-webkit-box-align:center;align-items:center;-webkit-flex-direction:row;-webkit-box-orient:horizontal;-webkit-box-direction:normal;flex-direction:row;-webkit-box-pack:justify;-webkit-justify-content:space-between;justify-content:space-between;-webkit-flex-wrap:nowrap;flex-wrap:nowrap;height:100%;position:relative;width:100%}.nsm7Bb-HzV7m-LgbsSe .oXtfBe-l4eHX{-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center}.nsm7Bb-HzV7m-LgbsSe .nsm7Bb-HzV7m-LgbsSe-BPrWId{-webkit-flex-grow:1;-webkit-box-flex:1;flex-grow:1;font-family:Google Sans,arial,sans-serif;font-weight:500;overflow:hidden;text-overflow:ellipsis;vertical-align:top}.nsm7Bb-HzV7m-LgbsSe.purZT-SxQuSe .nsm7Bb-HzV7m-LgbsSe-BPrWId{font-weight:300}.nsm7Bb-HzV7m-LgbsSe .oXtfBe-l4eHX .nsm7Bb-HzV7m-LgbsSe-BPrWId{-webkit-flex-grow:0;-webkit-box-flex:0;flex-grow:0}.nsm7Bb-HzV7m-LgbsSe .nsm7Bb-HzV7m-LgbsSe-MJoBVe{-webkit-transition:background-color .218s;transition:background-color .218s;bottom:0;left:0;position:absolute;right:0;top:0}.nsm7Bb-HzV7m-LgbsSe:focus,.nsm7Bb-HzV7m-LgbsSe:hover{box-shadow:none;border-color:rgb(210,227,252);outline:none}.nsm7Bb-HzV7m-LgbsSe:focus-within{outline:2px solid #00639b;border-color:transparent}.nsm7Bb-HzV7m-LgbsSe:hover .nsm7Bb-HzV7m-LgbsSe-MJoBVe{background:rgba(66,133,244,.08)}.nsm7Bb-HzV7m-LgbsSe:active .nsm7Bb-HzV7m-LgbsSe-MJoBVe,.nsm7Bb-HzV7m-LgbsSe:focus .nsm7Bb-HzV7m-LgbsSe-MJoBVe{background:rgba(66,133,244,.1)}.nsm7Bb-HzV7m-LgbsSe.i5vt6e-to915-Ia7Qfc:hover .nsm7Bb-HzV7m-LgbsSe-MJoBVe{background:rgba(255,255,255,.08)}.nsm7Bb-HzV7m-LgbsSe.i5vt6e-to915-Ia7Qfc:active .nsm7Bb-HzV7m-LgbsSe-MJoBVe,.nsm7Bb-HzV7m-LgbsSe.i5vt6e-to915-Ia7Qfc:focus .nsm7Bb-HzV7m-LgbsSe-MJoBVe{background:rgba(255,255,255,.12)}.nsm7Bb-HzV7m-LgbsSe.MFS4be-Ia7Qfc:hover .nsm7Bb-HzV7m-LgbsSe-MJoBVe{background:rgba(255,255,255,.24)}.nsm7Bb-HzV7m-LgbsSe.MFS4be-Ia7Qfc:active .nsm7Bb-HzV7m-LgbsSe-MJoBVe,.nsm7Bb-HzV7m-LgbsSe.MFS4be-Ia7Qfc:focus .nsm7Bb-HzV7m-LgbsSe-MJoBVe{background:rgba(255,255,255,.32)}.nsm7Bb-HzV7m-LgbsSe .n1UuX-DkfjY{border-radius:50%;display:-webkit-box;display:-webkit-flex;display:flex;height:20px;margin-left:-4px;margin-right:8px;min-width:20px;width:20px}.nsm7Bb-HzV7m-LgbsSe.jVeSEe .nsm7Bb-HzV7m-LgbsSe-BPrWId{font-family:Roboto;font-size:12px;text-align:left}.nsm7Bb-HzV7m-LgbsSe.jVeSEe .nsm7Bb-HzV7m-LgbsSe-BPrWId .K4efff .fmcmS,.nsm7Bb-HzV7m-LgbsSe.jVeSEe .nsm7Bb-HzV7m-LgbsSe-BPrWId .ssJRIf{overflow:hidden;text-overflow:ellipsis}.nsm7Bb-HzV7m-LgbsSe.jVeSEe .nsm7Bb-HzV7m-LgbsSe-BPrWId .K4efff{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-align-items:center;-webkit-box-align:center;align-items:center;color:#5f6368;fill:#5f6368;font-size:11px;font-weight:400}.nsm7Bb-HzV7m-LgbsSe.jVeSEe.i5vt6e-to915-Ia7Qfc .nsm7Bb-HzV7m-LgbsSe-BPrWId .K4efff{color:#c4c7c5;fill:#c4c7c5}.nsm7Bb-HzV7m-LgbsSe.jVeSEe.MFS4be-Ia7Qfc .nsm7Bb-HzV7m-LgbsSe-BPrWId .K4efff{color:#e8eaed;fill:#e8eaed}@media screen and (prefers-contrast:more){.nsm7Bb-HzV7m-LgbsSe.jVeSEe .nsm7Bb-HzV7m-LgbsSe-BPrWId .K4efff,.nsm7Bb-HzV7m-LgbsSe.jVeSEe.MFS4be-Ia7Qfc .nsm7Bb-HzV7m-LgbsSe-BPrWId .K4efff{color:#000;fill:#000}}.nsm7Bb-HzV7m-LgbsSe.jVeSEe .nsm7Bb-HzV7m-LgbsSe-BPrWId .K4efff .Bz112c{height:18px;margin:-3px -3px -3px 2px;min-width:18px;width:18px}.nsm7Bb-HzV7m-LgbsSe.jVeSEe .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{border-top-left-radius:0;border-bottom-left-radius:0;border-top-right-radius:3px;border-bottom-right-radius:3px;margin-left:12px;margin-right:-10px}.nsm7Bb-HzV7m-LgbsSe.jVeSEe.JGcpL-RbRzK .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{border-radius:18px}.L5Fo6c-sM5MNb{border:0;display:block;left:0;position:relative;top:0}.L5Fo6c-bF1uUb{border-radius:4px;bottom:0;cursor:pointer;left:0;position:absolute;right:0;top:0}.L5Fo6c-bF1uUb:focus{border:none;outline:none}sentinel{}</style><style id="r103c-toast-pointer-fix">
 #fastV2Toast{pointer-events:none!important}
 @media (hover:none) and (pointer:coarse){
   #fastV2Toast{bottom:calc(96px + env(safe-area-inset-bottom,0px))!important}
@@ -1487,7 +1487,7 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
     <div class="fast-splash-bg"></div>
     <div class="fast-splash-content">
       <div class="fast-splash-logo-wrap">
-        <img src="assets/fast-servicos-icon-512.png?v=2.3.17" alt="Fast Serviços" style="width:100%;height:auto;display:block;object-fit:contain;">
+        <img src="assets/fast-servicos-icon-512.png?v=2.3.18" alt="Fast Serviços" style="width:100%;height:auto;display:block;object-fit:contain;">
       </div>
       <div class="fast-splash-name">FAST SERVIÇOS</div>
       <div class="fast-splash-tag">SOLUÇÕES EM LOGÍSTICA</div>
@@ -1505,7 +1505,7 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
       <div class="fast-gate-loading" id="fastGateLoading"><div class="fast-gate-spinner"></div></div>
 
       <div class="fast-gate-brand">
-        <div class="fast-gate-logo"><img src="assets/fast-servicos-icon-512.png?v=2.3.17" alt="Fast Serviços" style="width:100%;height:100%;object-fit:contain;padding:6px;"></div>
+        <div class="fast-gate-logo"><img src="assets/fast-servicos-icon-512.png?v=2.3.18" alt="Fast Serviços" style="width:100%;height:100%;object-fit:contain;padding:6px;"></div>
         <h1 id="fastGateTitle">FAST Serviços</h1>
         <p id="fastGateSubtitle">SOLUÇÕES EM LOGÍSTICA</p>
         <p class="fast-gate-version" id="fastGateVersion">Versão <span id="fastGateVersionNum">2.3.17</span></p>
@@ -7013,7 +7013,7 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
           <!-- Rodapé do menu: nome do app + versão -->
           <div class="nav-menu-footer">
             <div class="nav-menu-footer-app"><i class="fa-solid fa-bolt"></i> APP FAST SERVIÇOS</div>
-            <div class="nav-menu-footer-ver" id="navMenuVersao">Versão 2.3.17</div>
+            <div class="nav-menu-footer-ver" id="navMenuVersao">Versão 2.3.18</div>
           </div>
         </div>
       </div>
@@ -23127,7 +23127,7 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
                   <span class="fup-count" id="fastUpdatesCount">2</span>
                   <i class="fa-solid fa-chevron-down fup-chevron"></i>
                 </div>
-                <div class="fast-updates-panel-body" id="fastUpdatesBody"><div class="fup-version-header"><div class="fup-version-row"><i class="fa-solid fa-sparkles"></i> <span>Versão 2.3.17</span></div><div class="fup-date-row"><i class="fa-solid fa-clock"></i> <span>Lançada em 07/09/2026 15:45</span></div></div><div class="fup-item"><div class="fup-item-dot" style="background:rgba(217,119,6,0.10);"><i class="fa-solid fa-wrench" style="color:#d97706;"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#d97706;background:rgba(217,119,6,0.10);">Corrigido</span><div class="fup-item-text">2.3.12 (07/09/2026): barra de botões inferior REMOVIDA dos apps Despesas e Rotas do Dia — o modo exclusivo (tela cheia, só a aba do próprio app) agora ativa em QUALQUER abertura com atalho (instalado na tela inicial, ícone do launcher, atalho do sistema ou link direto); antes só funcionava quando o atalho abria em modo instalado (standalone), então quem abria pelo navegador ou por um cache antigo via a barra INÍCIO/Rotas/Rotas do Dia/Despesas e o botão de instalar por cima do app.</div></div></div><div class="fup-item"><div class="fup-item-dot" style="background:rgba(217,119,6,0.10);"><i class="fa-solid fa-wrench" style="color:#d97706;"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#d97706;background:rgba(217,119,6,0.10);">Corrigido</span><div class="fup-item-text">2.3.12 (07/09/2026): Área Protegida com biometria funcionando — após digitar a senha correta o app oferece cadastrar a digital/rosto na hora (sem pedir a senha de novo); novo botão "Ativar biometria neste dispositivo" direto na tela de acesso; erros de leitura (cancelamento, sensor falhou) agora mostram mensagem clara em vez de falhar em silêncio.</div></div></div></div>
+                <div class="fast-updates-panel-body" id="fastUpdatesBody"><div class="fup-version-header"><div class="fup-version-row"><i class="fa-solid fa-sparkles"></i> <span>Versão 2.3.18</span></div><div class="fup-date-row"><i class="fa-solid fa-clock"></i> <span>Lançada em 07/09/2026 15:45</span></div></div><div class="fup-item"><div class="fup-item-dot" style="background:rgba(217,119,6,0.10);"><i class="fa-solid fa-wrench" style="color:#d97706;"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#d97706;background:rgba(217,119,6,0.10);">Corrigido</span><div class="fup-item-text">2.3.12 (07/09/2026): barra de botões inferior REMOVIDA dos apps Despesas e Rotas do Dia — o modo exclusivo (tela cheia, só a aba do próprio app) agora ativa em QUALQUER abertura com atalho (instalado na tela inicial, ícone do launcher, atalho do sistema ou link direto); antes só funcionava quando o atalho abria em modo instalado (standalone), então quem abria pelo navegador ou por um cache antigo via a barra INÍCIO/Rotas/Rotas do Dia/Despesas e o botão de instalar por cima do app.</div></div></div><div class="fup-item"><div class="fup-item-dot" style="background:rgba(217,119,6,0.10);"><i class="fa-solid fa-wrench" style="color:#d97706;"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#d97706;background:rgba(217,119,6,0.10);">Corrigido</span><div class="fup-item-text">2.3.12 (07/09/2026): Área Protegida com biometria funcionando — após digitar a senha correta o app oferece cadastrar a digital/rosto na hora (sem pedir a senha de novo); novo botão "Ativar biometria neste dispositivo" direto na tela de acesso; erros de leitura (cancelamento, sensor falhou) agora mostram mensagem clara em vez de falhar em silêncio.</div></div></div></div>
             </div>
           </div>
 
@@ -25818,7 +25818,91 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
       }
     }
 
-    // Sincronizar: fazer upload do index.html atual para o GitHub
+    /* ============================================================
+       r132/v2.3.18 — SINCRONIZACAO COM GITHUB REESCRITA (fim do loop)
+       Corrigido em 07/09/2026:
+       (a) A comparacao anterior usava o campo `content` da API Contents,
+           que vem VAZIO para arquivos maiores que 1MB (encoding: none).
+           Resultado: o app sempre achava que havia mudanca e fazia commit
+           em loop infinito, sem nunca atualizar de verdade.
+           Agora a comparacao e feita pelo SHA do blob (git hash-object),
+           que funciona para qualquer tamanho de arquivo.
+       (b) O conteudo enviado agora e a FONTE LIMPA da pagina (baixada via
+           raw.githubusercontent.com com cache-bust), nao o DOM vivo. Antes,
+           o outerHTML levava logs de tela, estado de botao desabilitado,
+           metas mutadas em runtime etc. para o commit (poluicao assada no
+           arquivo publicado). Ainda existe um sanitizador de seguranca
+           que remove qualquer vestigio de estado runtime antes do envio,
+           usado somente se a fonte limpa nao puder ser obtida.
+       (c) A versao e incrementada automaticamente (2.3.18, 2.3.19, ...) a
+           cada sincronizacao com mudanca real. Sem isso o detector de
+           atualizacao dos dispositivos nunca via versao nova e o app
+           "nao atualizava", forcando novas sincronizacoes (o loop).
+       ============================================================ */
+    // Calcula o SHA-1 de blob Git (header "blob <len>\0" + conteudo) — mesmo
+    // hash que a API Contents usa. Permite comparar local x remoto sem baixar
+    // o conteudo do arquivo (que a API nao devolve quando > 1MB).
+    async function ghSyncGitBlobSha(conteudoStr) {
+      // UTF-8 string -> bytes
+      var bytes = new TextEncoder().encode(conteudoStr);
+      var header = new TextEncoder().encode('blob ' + bytes.length + '\0');
+      var buf = new Uint8Array(header.length + bytes.length);
+      buf.set(header, 0); buf.set(bytes, header.length);
+      var digest = await crypto.subtle.digest('SHA-1', buf);
+      var arr = Array.prototype.slice.call(new Uint8Array(digest));
+      return arr.map(function(b){ return ('0' + b.toString(16)).slice(-2); }).join('');
+    }
+    // Incrementa a versao semantica (2.3.18 -> 2.3.19) aplicando em TODOS os
+    // pontos do documento que marcam a versao corrente (metas do head, labels,
+    // cache-busts ?v= e o script r91-finalize), para o detector de atualizacao
+    // e o Service Worker perceberem a nova versao.
+    function ghSyncBumpVersao(conteudoStr) {
+      var m = conteudoStr.match(/name="fast-app-version" content="([0-9]+)\.([0-9]+)\.([0-9]+)"/);
+      if (!m) return { conteudo: conteudoStr, versao: null };
+      var major = m[1], minor = m[2], patch = (parseInt(m[3], 10) + 1);
+      var nova = major + '.' + minor + '.' + patch;
+      var antiga = major + '.' + minor + '.' + m[3];
+      var antes = conteudoStr;
+      // 1) metas centrais de versao
+      conteudoStr = conteudoStr.replace(/name="fast-app-version" content="[0-9]+\.[0-9]+\.[0-9]+"/g, 'name="fast-app-version" content="' + nova + '"');
+      conteudoStr = conteudoStr.replace(/name="fast-app-changelog-immediate" content="[0-9]+\.[0-9]+\.[0-9]+"/g, 'name="fast-app-changelog-immediate" content="' + nova + '"');
+      // 2) atributo data-fast-version do <html>
+      conteudoStr = conteudoStr.replace(/data-fast-version="[0-9]+\.[0-9]+\.[0-9]+"/g, 'data-fast-version="' + nova + '"');
+      // 3) cache-busts ?v=2.3.18 e ?v=2.3.18-rXXX (renova cache do SW/clientes)
+      conteudoStr = conteudoStr.replace(/\?v=2\.[0-9]+\.[0-9]+(-r[0-9]+)?/g, '?v=' + nova);
+      // 4) labels visiveis "Versao X.Y.Z" e "Versão X.Y.Z"
+      conteudoStr = conteudoStr.replace(/>Vers\u00e3o 2\.[0-9]+\.[0-9]+</g, '>Vers\u00e3o ' + nova + '<');
+      conteudoStr = conteudoStr.replace(/>Versao 2\.[0-9]+\.[0-9]+</g, '>Versao ' + nova + '<');
+      // 5) script r91-finalize: regravava a versao ANTIGA no meta em runtime,
+      //    sabotando qualquer bump (o meta voltava atras apos o carregamento).
+      conteudoStr = conteudoStr.replace(/if\(m\) m\.content='2\.[0-9]+\.[0-9]+';/g, "if(m) m.content='" + nova + "';");
+      // 6) versao enviada no cadastro do cliente (telemetria de origem)
+      conteudoStr = conteudoStr.replace(/versao:'2\.[0-9]+\.[0-9]+'/g, "versao:'" + nova + "'");
+      return { conteudo: conteudoStr, versao: nova, antiga: antiga };
+    }
+    // Sanitizador de seguranca: remove do HTML qualquer estado de runtime que
+    // por ventura ainda esteja presente (defesa extra caso a fonte limpa nao
+    // esteja disponivel e seja necessario usar o DOM como ultima instancia).
+    function ghSyncSanitizarDom(html) {
+      var out = html;
+      // 1) linhas de log da propria sincronizacao
+      out = out.replace(/<div class="gh-sync-log-line[^"]*"[^>]*>\[?[0-9:]*\]?[^<]*<\/div>/g, '');
+      // 2) container de log com conteudo residual
+      out = out.replace(/(<div class="gh-sync-log[^"]*" id="ghSyncLog")[^>]*>[\s\S]*?<\/div>/g, '$1></div>');
+      // 3) estado congelado de status/progresso
+      out = out.replace(/(<div class="gh-sync-status)(?:[^"]*)(" id="ghSyncStatus")>[\s\S]*?(<\/div>\s*<\/div>)/g, '$1$2><div class="gh-sync-status-content" id="ghSyncStatusContent"><i class="fa-solid fa-circle-info"></i><span>Configure o token e clique em "Sincronizar Agora" para publicar o app no GitHub Pages.</span></div>$4');
+      out = out.replace(/(<div class="gh-sync-progress" id="ghSyncProgress") style="display: ?[^"]*">[\s\S]*?<\/div>\s*<\/div>/g, '$1 style="display:none;"><div class="gh-sync-progress-bar" id="ghSyncProgressBar"></div></div>');
+      out = out.replace(/(<div class="gh-sync-progress-bar" id="ghSyncProgressBar")([^>]*)( width: ?[^"]*)/g, '$1$2');
+      // 4) botao Sincronizar congelado como disabled
+      out = out.replace(/(id="ghSyncBtnSincronizar"[^>]*?) disabled(?:="")?/g, '$1');
+      // 5) atributos de estado assados por scripts (checkboxes marcados pelo
+      //    editor de permissoes, selects sincronizados etc.)
+      out = out.replace(/ data-fast74-sync(?:="")?/g, '');
+      // 6) modais/aviso de atualizacao que podem ter ficado visiveis
+      out = out.replace(/(<div id="fastUpdateAvailableBalloon")([^>]*?)( style="display: ?)[^"]*(")/g, '$1$2$3none$4');
+      return out;
+    }
+    // Sincronizar: fazer upload do index.html atual para o GitHub (versao corrigida)
     async function ghSyncSincronizar() {
       var cfg = ghSyncObterConfig();
       var token = (document.getElementById('ghSyncToken').value || '').trim() || cfg.token;
@@ -25850,19 +25934,19 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
       };
 
       try {
-        // Passo 1: Obter o arquivo remoto atual (sha + conteudo) para comparar
+        // Passo 1: Obter o arquivo remoto atual (sha do blob) para comparar.
+        // r132: nao usamos mais o campo `content` da resposta — ele vem vazio
+        // para arquivos > 1MB e era a causa raiz do loop de commits infinitos.
         ghSyncStatus('progress', 'Verificando a versão atual no GitHub...');
         ghSyncProgress(15);
         ghSyncLog('warn', 'Buscando arquivo remoto: ' + path + ' (branch ' + branch + ')...');
-        var getUrl = apiBase + filePath + '?ref=' + encodeURIComponent(branch);
+        var getUrl = apiBase + filePath + '?ref=' + encodeURIComponent(branch) + '&t=' + Date.now();
         var getResp = await fetch(getUrl, { headers: headers });
         var shaRemoto = null;
-        var conteudoRemotoB64 = null;
 
         if (getResp.status === 200) {
           var fileData = await getResp.json();
           shaRemoto = fileData.sha;
-          conteudoRemotoB64 = fileData.content || '';
           ghSyncLog('ok', 'Arquivo remoto encontrado (sha: ' + (shaRemoto || '').substring(0, 7) + ').');
         } else if (getResp.status === 404) {
           ghSyncLog('warn', 'Arquivo ainda não existe no repositório. Será criado.');
@@ -25870,32 +25954,89 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
           throw new Error('HTTP ' + getResp.status + ' ao buscar arquivo remoto.');
         }
 
-        // Passo 2: Obter o conteudo LOCAL (o index.html atual da pagina)
-        ghSyncStatus('progress', 'Lendo o conteúdo atual do aplicativo...');
+        // Passo 2: Obter a FONTE LIMPA da pagina atual (r132).
+        // Antes usavamos document.documentElement.outerHTML (DOM vivo, com
+        // estado de tela). Isso gravava logs/botoes/estado no arquivo
+        // publicado e fazia o conteudo nunca ficar estavel (loop).
+        ghSyncStatus('progress', 'Lendo o código-fonte atual do aplicativo...');
         ghSyncProgress(30);
-        var conteudoLocal = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-        // Garantir que comeca com DOCTYPE (outerHTML nao inclui DOCTYPE)
-        ghSyncLog('ok', 'Conteúdo local lido: ' + (conteudoLocal.length / 1024).toFixed(1) + ' KB.');
-
-        // Passo 3: Comparar — ja esta atualizado?
-        ghSyncStatus('progress', 'Comparando versão local com a versão do GitHub...');
-        ghSyncProgress(45);
-        var localB64 = ghSyncToBase64(conteudoLocal);
-        var remotoNormalizado = conteudoRemotoB64 ? conteudoRemotoB64.replace(/\s/g, '') : '';
-        var localNormalizado = localB64.replace(/\s/g, '');
-        if (shaRemoto && remotoNormalizado === localNormalizado) {
+        var conteudoLocal = null;
+        // r132b: a fonte limpa e a PROPRIA PAGINA em execucao, servida por
+        // HTTP (o navegador entrega o codigo-fonte original do arquivo, sem
+        // estado de runtime). Assim as edicoes feitas nesta instalacao sao
+        // realmente publicadas. Cache-bust garante a versao do disco.
+        if (location.protocol === 'http:' || location.protocol === 'https:') {
+          try {
+            var srcUrl = location.origin + location.pathname + '?fast_source=' + Date.now();
+            var srcResp = await fetch(srcUrl, { cache: 'no-store', credentials: 'same-origin' });
+            if (srcResp && srcResp.ok) {
+              var txt = await srcResp.text();
+              // sanidade: precisa ser um HTML FAST com DOCTYPE e meta de versao
+              if (txt && txt.indexOf('<!DOCTYPE html>') === 0 && /name="fast-app-version"/.test(txt)) {
+                conteudoLocal = txt;
+                ghSyncLog('ok', 'Código-fonte limpo obtido da própria página (' + (conteudoLocal.length / 1024).toFixed(1) + ' KB).');
+              } else {
+                ghSyncLog('warn', 'A resposta da página não parece o código-fonte do app; tentando raw.githubusercontent...');
+              }
+            }
+          } catch (eSrc) { ghSyncLog('warn', 'Leitura da própria página falhou (' + (eSrc.message || eSrc) + ').'); }
+        }
+        // Fallback 1: raw.githubusercontent (fonte publica do repo, CORS ok).
+        if (!conteudoLocal) {
+          try {
+            var rawUrl = 'https://raw.githubusercontent.com/' + encodeURIComponent(owner) + '/' + encodeURIComponent(repo) + '/' + encodeURIComponent(branch) + '/' + path.replace(/^\/+/, '') + '?t=' + Date.now();
+            var rawResp = await fetch(rawUrl, { cache: 'no-store' });
+            if (rawResp && rawResp.ok) {
+              var txt2 = await rawResp.text();
+              if (txt2 && txt2.indexOf('<!DOCTYPE html>') === 0 && /name="fast-app-version"/.test(txt2)) {
+                conteudoLocal = txt2;
+                ghSyncLog('ok', 'Fonte limpa obtida do raw.githubusercontent (' + (conteudoLocal.length / 1024).toFixed(1) + ' KB).');
+              }
+            }
+          } catch (eRaw) { ghSyncLog('err', 'raw.githubusercontent indisponível: ' + (eRaw.message || eRaw)); }
+        }
+        // Fallback 2 (politica anti-loop, r132b): ABORTAR. Publicar o DOM vivo
+        // — mesmo sanitizado — foi o que criou o loop infinito de commits e a
+        // poluicao do site oficial. Sem fonte limpa confiavel, nao publica.
+        if (!conteudoLocal) {
           ghSyncProgress(100);
-          ghSyncStatus('success', 'O app já está atualizado no GitHub! Nenhuma mudança detectada. O site no ar já é a versão mais recente.');
-          ghSyncLog('ok', 'Conteúdo idêntico — nenhuma alteração necessária.');
+          ghSyncStatus('error', 'Não foi possível obter o código-fonte limpo do aplicativo. Sincronização abortada para proteger o site oficial de poluição (causa do antigo loop infinito).');
+          ghSyncLog('err', 'Abortado: nenhuma fonte limpa disponível. Abra o app pela URL oficial (https://) e tente de novo.');
           ghSyncDesabilitarBtn(false);
           return;
         }
-        ghSyncLog('warn', shaRemoto ? 'Mudança detectada! Atualizando arquivo...' : 'Criando novo arquivo no repositório...');
+
+        // Passo 3: Comparar pelo SHA do blob (r132). O SHA-1 de blob Git e
+        // exatamente o que a API Contents devolve em `sha` — comparacao
+        // confiavel mesmo para arquivos grandes (> 1MB), sem baixar nada.
+        ghSyncStatus('progress', 'Comparando código local com a versão do GitHub...');
+        ghSyncProgress(45);
+        var shaLocal = await ghSyncGitBlobSha(conteudoLocal);
+        ghSyncLog('ok', 'SHA local: ' + shaLocal.substring(0, 7) + ' | SHA remoto: ' + (shaRemoto ? shaRemoto.substring(0, 7) : '(novo arquivo)'));
+        if (shaRemoto && shaLocal === shaRemoto) {
+          ghSyncProgress(100);
+          ghSyncStatus('success', 'O app já está atualizado no GitHub! Nenhuma mudança detectada. O site no ar já é a versão mais recente.');
+          ghSyncLog('ok', 'Conteúdo idêntico — nenhuma alteração necessária (comparação por SHA de blob).');
+          ghSyncDesabilitarBtn(false);
+          return;
+        }
+        ghSyncLog('warn', shaRemoto ? 'Mudança real detectada! Atualizando arquivo...' : 'Criando novo arquivo no repositório...');
+
+        // Passo 3.5 (r132): AUTO-BUMP DE VERSAO. Sem isto a versao publicada
+        // nunca mudava, o detector de atualizacao dos aparelhos nao via nada
+        // novo e o usuario sincronizava de novo — o loop relatado.
+        var bump = ghSyncBumpVersao(conteudoLocal);
+        if (bump.versao) {
+          conteudoLocal = bump.conteudo;
+          ghSyncLog('ok', 'Versão publicada incrementada: ' + (bump.antiga || '?') + ' → ' + bump.versao + ' (detector de atualização + Service Worker).');
+        }
 
         // Passo 4: Fazer o upload (PUT /contents/{path})
         ghSyncStatus('progress', 'Enviando arquivo para o GitHub...');
         ghSyncProgress(65);
-        var commitMsg = 'Atualização automática via app — ' + new Date().toLocaleString('pt-BR') + ' (' + (typeof fastObterVersao === 'function' ? fastObterVersao() : '') + ')';
+        var versaoCommit = bump.versao || (typeof fastObterVersao === 'function' ? fastObterVersao() : '');
+        var commitMsg = 'v' + versaoCommit + ' (r132): publicação via app — ' + new Date().toLocaleString('pt-BR') + ' — comparação por SHA, fonte limpa e auto-bump de versão';
+        var localB64 = ghSyncToBase64(conteudoLocal);
         var putBody = {
           message: commitMsg,
           content: localB64,
@@ -25924,8 +26065,14 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
           ghSyncLog('warn', 'Aguarde 1-2 minutos para a mudança aparecer no ar.');
 
           ghSyncProgress(100);
-          ghSyncStatus('success', '✅ Sincronização concluída com sucesso! O app foi enviado ao GitHub. O site estará no ar em 1-2 minutos em: ' + pagesUrl);
+          ghSyncStatus('success', '✅ Sincronização concluída com sucesso! Versão ' + versaoCommit + ' publicada. O site estará no ar em 1-2 minutos em: ' + pagesUrl);
           ghSyncLog('ok', 'Sincronização finalizada com sucesso.');
+          // r132: reexibe a nova versao no painel local imediatamente
+          try {
+            var vm = document.querySelector('meta[name="fast-app-version"]');
+            if (vm && bump.versao) { vm.content = bump.versao; }
+            if (typeof fastPopularDataLancamento === 'function') fastPopularDataLancamento();
+          } catch(e){}
         } else {
           var errData = null;
           try { errData = await putResp.json(); } catch(e) {}
@@ -25937,7 +26084,7 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
           } else if (putResp.status === 404) {
             ghSyncLog('err', 'Repositório ou branch não encontrado. Verifique dono, repo e branch. O token precisa de permissão "repo".');
           } else if (putResp.status === 409) {
-            ghSyncLog('err', 'Conflito de branch. Verifique se a branch "' + branch + '" existe no repositório.');
+            ghSyncLog('err', 'Conflito de branch (409). O arquivo mudou no GitHub enquanto sincronizava. Sincronize novamente — desta vez a comparação por SHA evita sobrescrever sem querer.');
           }
         }
       } catch(e) {
@@ -28948,7 +29095,7 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
           });
         `;
         try {
-          navigator.serviceWorker.register('sw.js?v=2.3.17-r131', { scope: './' })
+          navigator.serviceWorker.register('sw.js?v=2.3.18', { scope: './' })
             .then(function(reg) { console.info('SW permanente registrado (r73 network-first).'); })
             .catch(function(e) { console.info('SW: nao registrado neste ambiente (normal).', e.message); });
         } catch (e) { console.info('SW init skip:', e); }
@@ -41663,12 +41810,12 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
       links.forEach(function(el,i){ if(i>0) el.remove(); });
       var link = links[0] || document.createElement('link');
       link.rel = 'manifest';
-      link.href = 'manifest.webmanifest?v=2.3.17';
+      link.href = 'manifest.webmanifest?v=2.3.18';
       if(!link.parentNode) document.head.appendChild(link);
 
       // A mesma logomarca oficial também aparece no gate e na abertura.
       document.querySelectorAll('#fastSplash img, #fastLoginGate .fast-gate-logo img').forEach(function(img){
-        img.src = 'assets/fast-servicos-icon-512.png?v=2.3.17';
+        img.src = 'assets/fast-servicos-icon-512.png?v=2.3.18';
         img.alt = 'Fast Serviços';
       });
     }
@@ -43364,7 +43511,7 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
             <i class="fa-solid fa-fingerprint"></i>
             <span id="empBioToggleTxt">Biometria ativada (tocar para remover)</span>
           </button>
-        </div><div id="fast101MotoristaAccess" class="emp-section" style="margin-top:22px;"><div class="emp-section-title"><i class="fa-solid fa-motorcycle"></i> Gestão FAST Motorista</div><p class="emp-sql-info">O motorista cria o próprio acesso com e-mail no <b>FAST Motorista</b>. O cadastro cai na seção Motoristas para conferência e as rotas atribuídas aparecem automaticamente no aplicativo dele.</p><div id="fast115MotNovo" class="config-btn-row" style="margin-bottom: 14px;"><button class="btn-primary ripple" onclick="window.open('motorista.html','_blank')" style="user-select: none;"><i class="fa-solid fa-up-right-from-square"></i> Abrir FAST Motorista</button><button class="btn-secondary ripple" onclick="navigator.clipboard?navigator.clipboard.writeText(location.origin+location.pathname.replace(/[^/]*$/,'')+'motorista.html').then(function(){alert('Link do FAST Motorista copiado!')}):prompt('Copie o link:',location.origin+location.pathname.replace(/[^/]*$/,'')+'motorista.html')" style="user-select: none;"><i class="fa-solid fa-copy"></i> Copiar link de instalação</button></div><p class="fast71-note"><b>Acessos antigos:</b> continuam válidos abaixo para não bloquear motoristas já cadastrados. Novos cadastros devem usar e-mail e senha no FAST Motorista.</p><div class="grid-form"><div><label>Motorista da Equipe</label><select id="fast101MotSelect"><option value="">Selecione...</option></select></div><div><label>Usuário do motorista</label><input id="fast101MotUser" autocomplete="off" placeholder="ex.: joao.silva" autocapitalize="off" autocorrect="off" spellcheck="false" style="text-transform: none;"></div><div><label>Senha do motorista (mín. 8)</label><input id="fast101MotPwd" type="password" autocomplete="new-password" style="text-transform: none;"></div><div><label>Confirmar senha</label><input id="fast101MotPwd2" type="password" autocomplete="new-password" style="text-transform: none;"></div></div><div class="fast71-actions" style="margin-top:12px;"><button class="emp-btn-primary ripple" onclick="fast101CriarAcessoMotorista()" style="user-select: none;"><i class="fa-solid fa-user-plus"></i> Criar acesso do motorista</button></div><div id="fast101MotLista"><p class="fast71-note">Nenhum acesso de motorista criado.</p></div><div id="fast101MotInstalar" style="display:none;margin-top:14px;"></div></div><div id="fast71Users" class="emp-section"><div class="emp-section-title"><i class="fa-solid fa-users-gear"></i> Usuários e Permissões</div><p class="emp-sql-info">Somente o administrador cria acessos. Cada login é vinculado ao cadastro de funcionário do RH e recebe as áreas do seu setor automaticamente: Atendimento/Cadastros, Financeiro, Logística/Entregador, Motorista ou Administrador.</p><div class="grid-form"><div><label>Funcionário do RH</label><select id="fast71Emp"><option value="">Selecione...</option></select></div><div><label>Usuário/e-mail</label><input id="fast71User" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" style="text-transform:none;"></div><div><label>Senha temporária</label><input id="fast71Pwd" type="password" autocomplete="new-password"></div><div><label>Perfil</label><select id="fast71Role" data-fast74-sync="1"><option value="atendimento">Atendimento / Cadastros</option><option value="financeiro">Financeiro</option><option value="entregador">Logística / Entregador</option><option value="motorista">Motorista</option><option value="administrador">Administrador (total)</option></select></div><div id="fast74CreatePerms" class="span-4"><label><b>Áreas permitidas para este funcionário</b></label><div class="fast74-perms"><label class="fast74-perm"><input type="checkbox" data-fast74="create" value="inicio" checked=""><i class="fa-solid fa-house"></i> Página Principal</label><label class="fast74-perm"><input type="checkbox" data-fast74="create" value="logistica" checked=""><i class="fa-solid fa-route"></i> Logística</label><label class="fast74-perm"><input type="checkbox" data-fast74="create" value="financeiro"><i class="fa-solid fa-coins"></i> Financeiro</label><label class="fast74-perm"><input type="checkbox" data-fast74="create" value="cadastros" checked=""><i class="fa-solid fa-address-book"></i> Clientes e Destinos</label><label class="fast74-perm"><input type="checkbox" data-fast74="create" value="equipe"><i class="fa-solid fa-id-card"></i> Motoristas</label><label class="fast74-perm"><input type="checkbox" data-fast74="create" value="rh"><i class="fa-solid fa-users-gear"></i> Recursos Humanos</label><label class="fast74-perm"><input type="checkbox" data-fast74="create" value="analises"><i class="fa-solid fa-chart-line"></i> Dashboard e Análises</label></div><div class="fast74-admin-note">Administrador possui acesso total. Cada setor já vem com as áreas marcadas (Financeiro: Despesas + DRE + Dashboard; Atendimento: Logística + Cadastros; Entregador/Motorista: Logística) — ajuste se precisar.</div></div></div><div class="fast71-actions"><button class="emp-btn-primary ripple" onclick="fastUserCreate()" style="user-select: none;">Criar login</button><button class="emp-btn-secondary ripple" onclick="fastAuditOpen()" style="user-select: none;">Ver auditoria</button></div><div id="fast71UsersList"><p>Nenhum login de funcionário criado.</p></div><p class="fast71-note"><b>Desligamento remoto:</b> contrato de sincronização preparado. A revogação entre aparelhos exige conectar autenticação segura do backend; nenhuma chave administrativa é exposta no HTML.</p><div id="fast74Editor"><hr style="margin:18px 0;border:0;border-top:1px solid var(--border)"><div class="emp-section-title"><i class="fa-solid fa-key"></i> Editar áreas de acesso</div><div class="grid-form"><div class="span-2"><label>Login do funcionário</label><select id="fast74UserEdit" onchange="fast74Load()"><option value="">Selecione um login...</option></select></div></div><div id="fast74EditChecks"><p class="fast71-note">Selecione um funcionário para alterar as áreas.</p></div><button class="emp-btn-primary ripple" type="button" onclick="fast74Save()" style="user-select: none;"><i class="fa-solid fa-floppy-disk"></i> Salvar permissões</button></div></div></div><div id="emptabBackups" class="emp-tab-content active" role="tabpanel"><div id="fast83ProtectedTools" class="fast83-protected"><div class="emp-section"><div class="emp-section-title"><i class="fa-solid fa-shield-heart"></i> Segurança, Fotos e Backups</div><p class="emp-sql-info">Ferramentas críticas reunidas dentro da Área Protegida.</p><div id="fast83ProtectedCards"><div id="fast70SecurityCard" class="config-topic"><div class="config-topic-header"><div class="config-topic-icon ico-backup"><i class="fa-solid fa-shield-heart"></i></div><div><div class="config-topic-title">Central de Segurança e Continuidade</div><div class="config-topic-sub">Fotos, integridade, operação offline e restauração</div></div></div><div class="config-topic-body"><div class="config-btn-row"><button class="btn-primary ripple" onclick="fast70CentralFotos()" style="user-select: none;"><i class="fa-solid fa-images"></i> Segurança das Fotos</button><button class="btn-secondary ripple" onclick="fast70Integridade()" style="user-select: none;"><i class="fa-solid fa-stethoscope"></i> Verificar Integridade</button><button class="btn-secondary ripple" onclick="fast70CriarCheckpoint(false)" style="user-select: none;"><i class="fa-solid fa-camera-rotate"></i> Criar Ponto de Restauração</button><button class="btn-secondary ripple" onclick="fast70RestaurarCheckpoint()" style="user-select: none;"><i class="fa-solid fa-clock-rotate-left"></i> Restaurar Ponto</button><button class="btn-secondary ripple" onclick="fast70HistoricoCliente()" style="user-select: none;"><i class="fa-solid fa-building-user"></i> Histórico do Cliente</button><button class="btn-success ripple" onclick="fast70ModoEntregador()" style="user-select: none;"><i class="fa-solid fa-motorcycle"></i> Modo Entregador</button><button class="btn-secondary ripple" style="user-select: none;" onclick="fast70AbrirLixeira()"><i class="fa-solid fa-trash-arrow-up"></i> Lixeira de Rotas</button><button id="fast71AuditBtn" class="btn-secondary ripple" style="user-select: none;"><i class="fa-solid fa-clipboard-list"></i> Auditoria</button></div><p class="config-desc" style="margin-top:10px">O aplicativo salva primeiro no aparelho. Sem internet, tudo permanece disponível e as filas são retomadas quando a conexão volta.</p></div></div><div class="config-topic">
+        </div><div id="fast101MotoristaAccess" class="emp-section" style="margin-top:22px;"><div class="emp-section-title"><i class="fa-solid fa-motorcycle"></i> Gestão FAST Motorista</div><p class="emp-sql-info">O motorista cria o próprio acesso com e-mail no <b>FAST Motorista</b>. O cadastro cai na seção Motoristas para conferência e as rotas atribuídas aparecem automaticamente no aplicativo dele.</p><div id="fast115MotNovo" class="config-btn-row" style="margin-bottom: 14px;"><button class="btn-primary ripple" onclick="window.open('motorista.html','_blank')" style="user-select: none;"><i class="fa-solid fa-up-right-from-square"></i> Abrir FAST Motorista</button><button class="btn-secondary ripple" onclick="navigator.clipboard?navigator.clipboard.writeText(location.origin+location.pathname.replace(/[^/]*$/,'')+'motorista.html').then(function(){alert('Link do FAST Motorista copiado!')}):prompt('Copie o link:',location.origin+location.pathname.replace(/[^/]*$/,'')+'motorista.html')" style="user-select: none;"><i class="fa-solid fa-copy"></i> Copiar link de instalação</button></div><p class="fast71-note"><b>Acessos antigos:</b> continuam válidos abaixo para não bloquear motoristas já cadastrados. Novos cadastros devem usar e-mail e senha no FAST Motorista.</p><div class="grid-form"><div><label>Motorista da Equipe</label><select id="fast101MotSelect"><option value="">Selecione...</option></select></div><div><label>Usuário do motorista</label><input id="fast101MotUser" autocomplete="off" placeholder="ex.: joao.silva" autocapitalize="off" autocorrect="off" spellcheck="false" style="text-transform: none;"></div><div><label>Senha do motorista (mín. 8)</label><input id="fast101MotPwd" type="password" autocomplete="new-password" style="text-transform: none;"></div><div><label>Confirmar senha</label><input id="fast101MotPwd2" type="password" autocomplete="new-password" style="text-transform: none;"></div></div><div class="fast71-actions" style="margin-top:12px;"><button class="emp-btn-primary ripple" onclick="fast101CriarAcessoMotorista()" style="user-select: none;"><i class="fa-solid fa-user-plus"></i> Criar acesso do motorista</button></div><div id="fast101MotLista"><p class="fast71-note">Nenhum acesso de motorista criado.</p></div><div id="fast101MotInstalar" style="display:none;margin-top:14px;"></div></div><div id="fast71Users" class="emp-section"><div class="emp-section-title"><i class="fa-solid fa-users-gear"></i> Usuários e Permissões</div><p class="emp-sql-info">Somente o administrador cria acessos. Cada login é vinculado ao cadastro de funcionário do RH e recebe as áreas do seu setor automaticamente: Atendimento/Cadastros, Financeiro, Logística/Entregador, Motorista ou Administrador.</p><div class="grid-form"><div><label>Funcionário do RH</label><select id="fast71Emp"><option value="">Selecione...</option></select></div><div><label>Usuário/e-mail</label><input id="fast71User" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" style="text-transform:none;"></div><div><label>Senha temporária</label><input id="fast71Pwd" type="password" autocomplete="new-password"></div><div><label>Perfil</label><select id="fast71Role"><option value="atendimento">Atendimento / Cadastros</option><option value="financeiro">Financeiro</option><option value="entregador">Logística / Entregador</option><option value="motorista">Motorista</option><option value="administrador">Administrador (total)</option></select></div><div id="fast74CreatePerms" class="span-4"><label><b>Áreas permitidas para este funcionário</b></label><div class="fast74-perms"><label class="fast74-perm"><input type="checkbox" data-fast74="create" value="inicio" checked=""><i class="fa-solid fa-house"></i> Página Principal</label><label class="fast74-perm"><input type="checkbox" data-fast74="create" value="logistica" checked=""><i class="fa-solid fa-route"></i> Logística</label><label class="fast74-perm"><input type="checkbox" data-fast74="create" value="financeiro"><i class="fa-solid fa-coins"></i> Financeiro</label><label class="fast74-perm"><input type="checkbox" data-fast74="create" value="cadastros" checked=""><i class="fa-solid fa-address-book"></i> Clientes e Destinos</label><label class="fast74-perm"><input type="checkbox" data-fast74="create" value="equipe"><i class="fa-solid fa-id-card"></i> Motoristas</label><label class="fast74-perm"><input type="checkbox" data-fast74="create" value="rh"><i class="fa-solid fa-users-gear"></i> Recursos Humanos</label><label class="fast74-perm"><input type="checkbox" data-fast74="create" value="analises"><i class="fa-solid fa-chart-line"></i> Dashboard e Análises</label></div><div class="fast74-admin-note">Administrador possui acesso total. Cada setor já vem com as áreas marcadas (Financeiro: Despesas + DRE + Dashboard; Atendimento: Logística + Cadastros; Entregador/Motorista: Logística) — ajuste se precisar.</div></div></div><div class="fast71-actions"><button class="emp-btn-primary ripple" onclick="fastUserCreate()" style="user-select: none;">Criar login</button><button class="emp-btn-secondary ripple" onclick="fastAuditOpen()" style="user-select: none;">Ver auditoria</button></div><div id="fast71UsersList"><p>Nenhum login de funcionário criado.</p></div><p class="fast71-note"><b>Desligamento remoto:</b> contrato de sincronização preparado. A revogação entre aparelhos exige conectar autenticação segura do backend; nenhuma chave administrativa é exposta no HTML.</p><div id="fast74Editor"><hr style="margin:18px 0;border:0;border-top:1px solid var(--border)"><div class="emp-section-title"><i class="fa-solid fa-key"></i> Editar áreas de acesso</div><div class="grid-form"><div class="span-2"><label>Login do funcionário</label><select id="fast74UserEdit" onchange="fast74Load()"><option value="">Selecione um login...</option></select></div></div><div id="fast74EditChecks"><p class="fast71-note">Selecione um funcionário para alterar as áreas.</p></div><button class="emp-btn-primary ripple" type="button" onclick="fast74Save()" style="user-select: none;"><i class="fa-solid fa-floppy-disk"></i> Salvar permissões</button></div></div></div><div id="emptabBackups" class="emp-tab-content active" role="tabpanel"><div id="fast83ProtectedTools" class="fast83-protected"><div class="emp-section"><div class="emp-section-title"><i class="fa-solid fa-shield-heart"></i> Segurança, Fotos e Backups</div><p class="emp-sql-info">Ferramentas críticas reunidas dentro da Área Protegida.</p><div id="fast83ProtectedCards"><div id="fast70SecurityCard" class="config-topic"><div class="config-topic-header"><div class="config-topic-icon ico-backup"><i class="fa-solid fa-shield-heart"></i></div><div><div class="config-topic-title">Central de Segurança e Continuidade</div><div class="config-topic-sub">Fotos, integridade, operação offline e restauração</div></div></div><div class="config-topic-body"><div class="config-btn-row"><button class="btn-primary ripple" onclick="fast70CentralFotos()" style="user-select: none;"><i class="fa-solid fa-images"></i> Segurança das Fotos</button><button class="btn-secondary ripple" onclick="fast70Integridade()" style="user-select: none;"><i class="fa-solid fa-stethoscope"></i> Verificar Integridade</button><button class="btn-secondary ripple" onclick="fast70CriarCheckpoint(false)" style="user-select: none;"><i class="fa-solid fa-camera-rotate"></i> Criar Ponto de Restauração</button><button class="btn-secondary ripple" onclick="fast70RestaurarCheckpoint()" style="user-select: none;"><i class="fa-solid fa-clock-rotate-left"></i> Restaurar Ponto</button><button class="btn-secondary ripple" onclick="fast70HistoricoCliente()" style="user-select: none;"><i class="fa-solid fa-building-user"></i> Histórico do Cliente</button><button class="btn-success ripple" onclick="fast70ModoEntregador()" style="user-select: none;"><i class="fa-solid fa-motorcycle"></i> Modo Entregador</button><button class="btn-secondary ripple" style="user-select: none;" onclick="fast70AbrirLixeira()"><i class="fa-solid fa-trash-arrow-up"></i> Lixeira de Rotas</button><button id="fast71AuditBtn" class="btn-secondary ripple" style="user-select: none;"><i class="fa-solid fa-clipboard-list"></i> Auditoria</button></div><p class="config-desc" style="margin-top:10px">O aplicativo salva primeiro no aparelho. Sem internet, tudo permanece disponível e as filas são retomadas quando a conexão volta.</p></div></div><div class="config-topic">
             <div class="config-topic-header">
               <div class="config-topic-icon ico-backup"><i class="fa-solid fa-images"></i></div>
               <div>
@@ -43523,19 +43670,22 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
             <button type="button" class="emp-btn-secondary ripple" onclick="ghSyncSalvarConfig()" style="user-select: none;"><i class="fa-solid fa-floppy-disk"></i> Salvar Configuração</button>
             <button type="button" class="emp-btn-secondary ripple" onclick="ghSyncTestarToken()" style="user-select: none;"><i class="fa-solid fa-plug-circle-check"></i> Testar Conexão</button>
             <button type="button" class="emp-btn-danger ripple" onclick="ghSyncLimparToken()" style="user-select: none;"><i class="fa-solid fa-trash-can"></i> Limpar Token</button>
-            <button type="button" class="emp-btn-success ripple" id="ghSyncBtnSincronizar" onclick="ghSyncSincronizar()" style="user-select: none;" disabled=""><i class="fa-brands fa-github"></i> Sincronizar Agora</button>
+            <button type="button" class="emp-btn-success ripple" id="ghSyncBtnSincronizar" onclick="ghSyncSincronizar()" style="user-select: none;"><i class="fa-brands fa-github"></i> Sincronizar Agora</button>
           </div>
 
           <!-- Área de status/feedback -->
-          <div class="gh-sync-status progress" id="ghSyncStatus">
-            <div class="gh-sync-status-content" id="ghSyncStatusContent"><i class="fa-solid fa-arrows-rotate fa-spin"></i><span>Lendo o conteúdo atual do aplicativo...</span></div>
+          <div class="gh-sync-status" id="ghSyncStatus">
+            <div class="gh-sync-status-content" id="ghSyncStatusContent">
+              <i class="fa-solid fa-circle-info"></i>
+              <span>Configure o token e clique em "Sincronizar Agora" para publicar o app no GitHub Pages.</span>
+            </div>
           </div>
 
           <!-- Barra de progresso -->
-          <div class="gh-sync-progress" id="ghSyncProgress" style="display: block;">
-            <div class="gh-sync-progress-bar" id="ghSyncProgressBar" style="width: 30%;"></div>
+          <div class="gh-sync-progress" id="ghSyncProgress" style="display:none;">
+            <div class="gh-sync-progress-bar" id="ghSyncProgressBar"></div>
           </div>
-          <div class="gh-sync-log show" id="ghSyncLog"><div class="gh-sync-log-line warn">[16:21:19] Iniciando sincronização com GitHub...</div><div class="gh-sync-log-line warn">[16:21:19] Buscando arquivo remoto: index.html (branch main)...</div><div class="gh-sync-log-line ok">[16:21:20] Arquivo remoto encontrado (sha: 18c7b4a).</div></div>
+          <div class="gh-sync-log" id="ghSyncLog"></div>
         </div></div><div class="emp-tab-content" id="emptabSql" hidden="" role="tabpanel">
         <div class="emp-section">
           <div class="emp-section-title"><i class="fa-solid fa-list-ol"></i> Passo a Passo: Criar o Banco de Dados no SQL (Supabase)</div>
@@ -44598,7 +44748,7 @@ window.fastMobileNav = function(ev, abaId, botao) {
           <div style="width:42px;height:42px;border-radius:11px;background:rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px);"><i class="fa-solid fa-sparkles" style="font-size:18px;"></i></div>
           <div>
             <div style="font-size:12px;font-weight:600;opacity:.9;letter-spacing:.5px;text-transform:uppercase;">Novidades</div>
-            <div id="fastWhatsNewVer" style="font-size:19px;font-weight:800;line-height:1.2;">Versão 2.3.17</div>
+            <div id="fastWhatsNewVer" style="font-size:19px;font-weight:800;line-height:1.2;">Versão 2.3.18</div>
           </div>
         </div>
         <div id="fastWhatsNewDate" style="font-size:12.5px;opacity:.9;display:flex;align-items:center;gap:6px;"><i class="fa-solid fa-clock"></i> <span>Lançada em 07/09/2026 16:30</span></div>
@@ -44872,7 +45022,7 @@ window.fastMobileNav = function(ev, abaId, botao) {
           var response = await fetch(RECOVERY_ENDPOINT, {
             method:'POST',
             headers:{ 'Content-Type':'application/json', 'apikey':RECOVERY_PUBLIC_KEY, 'Authorization':'Bearer '+RECOVERY_PUBLIC_KEY },
-            body:JSON.stringify({ email:email.trim(), origem:origem || 'plataforma', versao:'2.3.17' })
+            body:JSON.stringify({ email:email.trim(), origem:origem || 'plataforma', versao:'2.3.18' })
           });
           if (!response.ok) throw new Error('Serviço de recuperação indisponível');
           return { ok:true, message:'Se o e-mail estiver cadastrado, as instruções de recuperação serão enviadas. Verifique também a caixa de spam.' };
@@ -46235,11 +46385,11 @@ window.fastMobileNav = function(ev, abaId, botao) {
 (function(){
   try {
     var m=document.querySelector('meta[name="fast-app-version"]');
-    if(m) m.content='2.3.17';
+    if(m) m.content='2.3.18';
     var d=document.querySelector('meta[name="fast-app-date"]');
-    if(d) d.content='2026-09-07T15:45:00-03:00';
+    if(d) d.content='2026-09-07T22:50:00-03:00';
     var l=document.querySelector('meta[name="fast-latest-update"]');
-    if(l) l.content='2.3.17: link CONFIGURACOES DE NOTIFICACOES no rodape do sino; captura automatica do WhatsApp (deteccao imediata ao abrir/focar e a cada 30s) distribuindo os dados para Clientes, Lugares/Destinos, Rotas e Rotas do Dia; nova categoria WhatsApp nas notificacoes.';
+    if(l) l.content='2.3.18: fim do LOOP de sincronizacao com o GitHub — a comparacao agora usa SHA de blob (a API devolve conteudo vazio para arquivos > 1MB, e o app fazia commit infinito achando que sempre havia mudanca); o envio passou a usar o codigo-fonte limpo em vez do DOM vivo (logs de tela e estado de botoes deixavam de ser gravados no site); a versao agora incrementa automaticamente a cada publicacao real, entao o detector de atualizacao dos aparelhos enxerga a novidade e o Service Worker renova o cache.';
     /* r129/2.3.14: changelog e data ja vem corretos do <head>; nao regravar. */
   } catch(e){}
 })();
@@ -46581,7 +46731,7 @@ body.fast-touch-ui #scrollNavBox { bottom: 130px !important; top: auto !importan
   }, true);
 })();
 </script>
-<script src="v2-ui.js?v=2.3.17-r130"></script>
+<script src="v2-ui.js?v=2.3.18"></script>
 <script id="r103c-v2-toast-fix">
 /* r103-c: o toast do v2-ui ("FAST Serviços 2.2.0 pronto para operar.") ficava
    com opacity:0 depois de esconder, mas SEM pointer-events:none — seguia
