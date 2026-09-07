@@ -1,6 +1,6 @@
 (function(){
   'use strict';
-  var VERSION='2.3.10',MIGRATION_KEY='fast_v2_migration_complete',CHECKPOINT_KEY='fast_v2_pre_migration_checkpoint';
+  var VERSION='2.3.11',MIGRATION_KEY='fast_v2_migration_complete',CHECKPOINT_KEY='fast_v2_pre_migration_checkpoint';
   var commands=[
     ['central','Centro de Operações','Visão geral e prioridades','fa-table-cells-large'],
     ['rotasDia','Rotas do Dia','Execução, fotos e conclusão','fa-calendar-day'],
@@ -30,8 +30,13 @@
   function install(){
     safeSnapshot();document.body.classList.add('fast-v2');document.documentElement.dataset.fastVersion=VERSION;
     var old=localStorage.getItem('fast_v2_density');if(old==='compact')document.body.classList.add('fast-v2-compact');
+    /* r127/v2.3.11: nunca duplicar - se o launcher/palette/toast ja existirem no DOM
+       (snapshot assado ou injecao anterior), apenas rebinda em vez de injetar outra copia. */
+    var existing=document.getElementById('fastV2Launcher');
+    if(!existing){
     document.body.insertAdjacentHTML('beforeend','<button class="fast-v2-launcher" id="fastV2Launcher" aria-label="Abrir central rápida" title="Central rápida (Ctrl+K)"><i class="fa-solid fa-bolt"></i></button><div class="fast-v2-palette" id="fastV2Palette" role="dialog" aria-modal="true" aria-label="Central rápida"><div class="fast-v2-palette-box"><div class="fast-v2-palette-head"><i class="fa-solid fa-magnifying-glass"></i><input id="fastV2Query" placeholder="Ir para uma área ou executar uma ação..."><kbd>ESC</kbd></div><div class="fast-v2-command-list" id="fastV2Commands"></div><div style="display:flex;gap:8px;padding:10px 14px;border-top:1px solid #dbe4ef"><button class="btn-secondary" data-v2-action="density"><i class="fa-solid fa-table-cells"></i> Alternar densidade</button><button class="btn-secondary" data-v2-action="focus"><i class="fa-solid fa-expand"></i> Modo foco</button><button class="btn-secondary" data-v2-go="configuracoes"><i class="fa-solid fa-shield-halved"></i> Segurança</button></div></div></div><div class="fast-v2-toast" id="fastV2Toast" style="pointer-events:none;"></div>');
     renderCommands('');
+    } /* fim if(!existing) */
     document.getElementById('fastV2Launcher').onclick=openPalette;
     document.getElementById('fastV2Query').oninput=function(){renderCommands(this.value)};
     document.addEventListener('click',function(e){var g=e.target.closest('[data-v2-go]'),a=e.target.closest('[data-v2-action]');if(g)go(g.dataset.v2Go);if(a&&a.dataset.v2Action==='density'){document.body.classList.toggle('fast-v2-compact');localStorage.setItem('fast_v2_density',document.body.classList.contains('fast-v2-compact')?'compact':'comfortable');toast('Densidade da interface atualizada.')}if(a&&a.dataset.v2Action==='focus'){document.body.classList.toggle('fast-v2-focus');closePalette();toast(document.body.classList.contains('fast-v2-focus')?'Modo foco ativado.':'Modo foco desativado.')}if(e.target.id==='fastV2Palette')closePalette()});
@@ -42,13 +47,14 @@
     // Mantém todos os pontos da interface ligados à versão oficial atual.
     // Esta atribuição final neutraliza textos legados 2.2.x ainda presentes
     // no pacote visual sem permitir que eles sobrescrevam o release vigente.
-        if(latest)latest.content="2.3.10: aba Clientes e Lugares/Destinos no mesmo modelo compacto das Rotas/Serviços — uma linha por registro: botões ícone Editar/Excluir idênticos, número do ID do cliente no lugar do PF, nome clicável que abre o Histórico de Rotas do cliente (modal com resumo + tabela de rotas no mesmo modelo), colunas de informação preservadas (Tipo, CPF/CNPJ, Contato, Pagamento, Rotas, Últ. modificação; Bairro, Endereço, Telefone, Usado em); aplica ao modo desktop e ao Linux. E novidade: seleção múltipla em massa em Clientes e Lugares/Destinos — caixinhas de marcação na primeira coluna e balão flutuante com botão Excluir, igual ao Rotas do Dia.";
+        if(latest)latest.content="2.3.11: botao Central Rapida duplicado eliminado (copia travada no canto esquerdo removida) | bloco Subir/Descer arrastavel novamente com posicao salva | menu NOTIFICACOES reabre com todos os controles funcionando | biometria no login, Area Protegida, Despesas e Rotas (oferta de cadastro apos login por senha) | apps Despesas e Rotas do Dia instalados abrem sem a barra fixa (modo exclusivo) | tabela Lugares/Destinos com cabecalho centralizado, ENDERECO compacto e colunas flexiveis";
         if(changes)changes.content=JSON.stringify([
-      {"type": "novo", "text": "2.3.10 (06/09/2026): seleção múltipla em massa nas abas Clientes e Lugares/Destinos: caixinhas de marcação na primeira coluna (com marcar/desmarcar todos no cabeçalho) e, ao marcar 1 ou mais, sobe o mesmo balão flutuante do Rotas do Dia com o botão Excluir; a exclusão em massa pede confirmação com a lista de nomes, renumera os IDs, salva e sincroniza na nuvem e impede o retorno dos registros excluídos."},
-      {"type": "melhorado", "text": "2.3.10 (06/09/2026): aba Clientes totalmente repaginada no modelo compacto das Rotas/Serviços: agora cada cliente ocupa UMA linha só, começando pelos botões Ícone de Editar e Excluir (idênticos aos das rotas), o número do ID do cliente no lugar do antigo selo PF/PJ, o nome do cliente (clicável), Tipo, CPF/CNPJ, Contato (telefone/WhatsApp clicável), Pagamento, total de Rotas e Última modificação — sem perder nenhuma informação."},
-      {"type": "melhorado", "text": "2.3.10 (06/09/2026): clicar no nome do cliente (ou no total de rotas) abre o Histórico de Rotas dele num modal no mesmo modelo da lista de Rotas: resumo com totais (rotas, concluídas, recebidas, pendentes, volumes, faturamento, origem/destino/pagamento mais frequentes) e a tabela completa das rotas do cliente com botões Editar/Excluir e badges clicáveis de status — tudo em uma linha por rota."},
-      {"type": "melhorado", "text": "2.3.10 (06/09/2026): Lugares/Destinos no mesmo modelo compacto: botões Editar/Excluir ícone idênticos aos das rotas na primeira coluna, mantendo as colunas Nome, Bairro, Endereço, Telefone e Usado em — nada foi perdido."},
-      {"type": "melhorado", "text": "2.3.10 (06/09/2026): as novas tabelas funcionam igual no modo desktop e no modo mobile/touch (Linux desktop incl. — Electron), com ordenação por qualquer coluna (clicando no cabeçalho), filtro por letra A–Z e busca mantidos."},
+      {"type": "corrigido", "text": "2.3.11 (07/09/2026): botão da Central Rápida (⚡) duplicado eliminado — existia uma cópia estática presa no canto esquerdo da tela, atrás da barra inferior, sem funcionar; agora existe um único botão fixo à direita, acima da barra, abrindo a Central Rápida normalmente (com dupla proteção contra cópias antigas salvas em cache)."},
+      {"type": "corrigido", "text": "2.3.11 (07/09/2026): o bloco de botões Subir/Descer (lateral direita) voltou a ser arrastável — um CSS antigo travava a posição fixa e impedia subir/descer; agora o arrasto tem prioridade e a posição escolhida continua salva ao reabrir o app."},
+      {"type": "corrigido", "text": "2.3.11 (07/09/2026): menu NOTIFICAÇÕES voltou a abrir — a Central de Notificações carregava uma cópia estática sem os eventos dos botões e o item do menu estava travado; agora a Central é recriada com todos os controles funcionando (marcar/desmarcar, X, fundo e Esc fecham) e o item Notificações do menu responde ao toque."},
+      {"type": "melhorado", "text": "2.3.11 (07/09/2026): biometria (digital/rosto) presente no login principal, na Área Protegida e nos aplicativos Despesas e Rotas do Dia — agora, após entrar com senha pela primeira vez, o app oferece cadastrar a biometria para entrar só com digital/rosto (pode ativar depois em Configurações > Segurança)."},
+      {"type": "melhorado", "text": "2.3.11 (07/09/2026): aplicativos Despesas e Rotas do Dia instalados na tela inicial abrem SEM a barra fixa inferior e sem o restante da plataforma — apenas a aba do próprio aplicativo, em tela cheia, como um app independente (mantendo a biometria de segurança)."},
+      {"type": "melhorado", "text": "2.3.11 (07/09/2026): tabela de Lugares/Destinos com títulos das colunas centralizados, coluna ENDEREÇO mais compacta (endereços longos encurtam com reticências) e colunas flexíveis que crescem conforme o maior nome de cada coluna."}
     ]);
     var menu=document.getElementById('navMenuVersao');if(menu)menu.textContent='Versão '+VERSION;
     var splash=document.getElementById('fastSplashVersion');if(splash)splash.textContent=VERSION;

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="fast-linux-desktop" data-fast-version="2.3.10"><head>
+<html lang="pt-BR" class="fast-linux-desktop" data-fast-version="2.3.11"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
   <meta name="theme-color" content="#4f46e5">
@@ -21,13 +21,13 @@
   <meta name="fast-github-branch" content="main">
   <meta name="fast-github-path" content="index.html">
   <meta name="fast-github-token-env" content="GH_TOKEN">
-  <meta name="fast-app-version" content="2.3.10">
-  <meta name="fast-app-date" content="2026-09-06T22:30:00-03:00">
-  <meta name="fast-latest-update" content="2.3.10: aba Clientes e Lugares/Destinos no mesmo modelo compacto das Rotas/Serviços — uma linha por registro: botões ícone Editar/Excluir idênticos, número do ID do cliente no lugar do PF, nome clicável que abre o Histórico de Rotas do cliente (modal com resumo + tabela de rotas no mesmo modelo), colunas de informação preservadas (Tipo, CPF/CNPJ, Contato, Pagamento, Rotas, Últ. modificação; Bairro, Endereço, Telefone, Usado em); aplica ao modo desktop e ao Linux. E novidade: seleção múltipla em massa em Clientes e Lugares/Destinos — caixinhas de marcação na primeira coluna e balão flutuante com botão Excluir, igual ao Rotas do Dia.">
+  <meta name="fast-app-version" content="2.3.11">
+  <meta name="fast-app-date" content="2026-09-07T01:30:00-03:00">
+  <meta name="fast-latest-update" content="2.3.11: botão Central Rápida duplicado eliminado (cópia travada no canto esquerdo removida) | bloco Subir/Descer arrastável novamente com posição salva | menu NOTIFICAÇÕES reabre com todos os controles funcionando | biometria no login, Área Protegida, Despesas e Rotas (oferta de cadastro após login por senha) | apps Despesas e Rotas do Dia instalados abrem sem a barra fixa (modo exclusivo) | tabela Lugares/Destinos com cabeçalho centralizado, ENDEREÇO compacto e colunas flexíveis">
   <!-- r92: verificação automática de nova versão ao abrir; Verificar Atualizações com cache-busting e sem fallback no-cors inválido. -->
   <!-- r70.1: lista corrente no HTML inicial; o painel não espera scripts tardios -->
-  <meta name="fast-app-changelog-immediate" content="2.3.10">
-  <meta name="fast-app-changelog" content="[{&quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;2.3.10 (06/09/2026): seleção múltipla em massa nas abas Clientes e Lugares/Destinos: caixinhas de marcação na primeira coluna (com marcar/desmarcar todos no cabeçalho) e, ao marcar 1 ou mais, sobe o mesmo balão flutuante do Rotas do Dia com o botão Excluir; a exclusão em massa pede confirmação com a lista de nomes, renumera os IDs, salva e sincroniza na nuvem e impede o retorno dos registros excluídos.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;2.3.10 (06/09/2026): aba Clientes totalmente repaginada no modelo compacto das Rotas/Serviços: agora cada cliente ocupa UMA linha só, começando pelos botões Ícone de Editar e Excluir (idênticos aos das rotas), o número do ID do cliente no lugar do antigo selo PF/PJ, o nome do cliente (clicável), Tipo, CPF/CNPJ, Contato (telefone/WhatsApp clicável), Pagamento, total de Rotas e Última modificação — sem perder nenhuma informação.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;2.3.10 (06/09/2026): clicar no nome do cliente (ou no total de rotas) abre o Histórico de Rotas dele num modal no mesmo modelo da lista de Rotas: resumo com totais (rotas, concluídas, recebidas, pendentes, volumes, faturamento, origem/destino/pagamento mais frequentes) e a tabela completa das rotas do cliente com botões Editar/Excluir e badges clicáveis de status — tudo em uma linha por rota.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;2.3.10 (06/09/2026): Lugares/Destinos no mesmo modelo compacto: botões Editar/Excluir ícone idênticos aos das rotas na primeira coluna, mantendo as colunas Nome, Bairro, Endereço, Telefone e Usado em — nada foi perdido.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;2.3.10 (06/09/2026): as novas tabelas funcionam igual no modo desktop e no modo mobile/touch (Linux desktop incl. — Electron), com ordenação por qualquer coluna (clicando no cabeçalho), filtro por letra A–Z e busca mantidos.&quot;}]" data-r88="1" data-r89="1" data-r87="1">
+  <meta name="fast-app-changelog-immediate" content="2.3.11">
+  <meta name="fast-app-changelog" content="[{&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;2.3.11 (07/09/2026): botão da Central Rápida (⚡) duplicado eliminado — existia uma cópia estática presa no canto esquerdo da tela, atrás da barra inferior, sem funcionar; agora existe um único botão fixo à direita, acima da barra, abrindo a Central Rápida normalmente (com dupla proteção contra cópias antigas salvas em cache).&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;2.3.11 (07/09/2026): o bloco de botões Subir/Descer (lateral direita) voltou a ser arrastável — um CSS antigo travava a posição fixa e impedia subir/descer; agora o arrasto tem prioridade e a posição escolhida continua salva ao reabrir o app.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;2.3.11 (07/09/2026): menu NOTIFICAÇÕES voltou a abrir — a Central de Notificações carregava uma cópia estática sem os eventos dos botões e o item do menu estava travado; agora a Central é recriada com todos os controles funcionando (marcar/desmarcar, X, fundo e Esc fecham) e o item Notificações do menu responde ao toque.&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;2.3.11 (07/09/2026): biometria (digital/rosto) presente no login principal, na Área Protegida e nos aplicativos Despesas e Rotas do Dia — agora, após entrar com senha pela primeira vez, o app oferece cadastrar a biometria para entrar só com digital/rosto (pode ativar depois em Configurações > Segurança).&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;2.3.11 (07/09/2026): aplicativos Despesas e Rotas do Dia instalados na tela inicial abrem SEM a barra fixa inferior e sem o restante da plataforma — apenas a aba do próprio aplicativo, em tela cheia, como um app independente (mantendo a biometria de segurança).&quot;}, {&quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;2.3.11 (07/09/2026): tabela de Lugares/Destinos com títulos das colunas centralizados, coluna ENDEREÇO mais compacta (endereços longos encurtam com reticências) e colunas flexíveis que crescem conforme o maior nome de cada coluna.&quot;}]" data-r88="1" data-r89="1" data-r87="1" data-r127="1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https:; img-src 'self' data: blob: https: http:; connect-src 'self' https: data: blob:; font-src 'self' https: data:;">
   <!-- PWA: Meta tags para app instalavel -->
   <meta name="mobile-web-app-capable" content="yes">
@@ -1483,7 +1483,7 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
       </div>
       <div class="fast-splash-name">FAST SERVIÇOS</div>
       <div class="fast-splash-tag">SOLUÇÕES EM LOGÍSTICA</div>
-      <div class="fast-splash-version">Versão <span id="fastSplashVersion">2.3.10</span></div>
+      <div class="fast-splash-version">Versão <span id="fastSplashVersion">2.3.11</span></div>
     </div>
     <div class="fast-splash-loader"><span></span></div>
   </div>
@@ -1500,7 +1500,7 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
         <div class="fast-gate-logo"><img src="assets/fast-servicos-icon-512.png?v=2.2.1" alt="Fast Serviços" style="width:100%;height:100%;object-fit:contain;padding:6px;"></div>
         <h1 id="fastGateTitle">FAST Serviços</h1>
         <p id="fastGateSubtitle">SOLUÇÕES EM LOGÍSTICA</p>
-        <p class="fast-gate-version" id="fastGateVersion">Versão <span id="fastGateVersionNum">2.3.10</span></p>
+        <p class="fast-gate-version" id="fastGateVersion">Versão <span id="fastGateVersionNum">2.3.11</span></p>
       </div>
 
       <!-- Bloqueio por tentativas -->
@@ -2238,6 +2238,9 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
           try { sessionStorage.setItem(K_BOOT_DONE, '1'); } catch(e){}
           try { sessionStorage.removeItem(K_NEED_BIO); } catch(e){}
           hideGate();
+          // r127/v2.3.11: oferece (1x) cadastrar biometria após entrar com senha,
+          // para o login principal, a Área Protegida e os apps usarem digital/face.
+          try { setTimeout(fastBioOferecerCadastro, 1200); } catch(e0){}
         } else {
           var f = recordFail();
           var left = MAX_FAIL - (f.count||0);
@@ -2664,6 +2667,33 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
     //      esconder o botão se o dispositivo não suportar (mas não atrasa o auto-login).
     var _fastBioAutoFired = false; // evita disparar 2x na mesma sessão de gate
     var _fastBioAutoFrame = 0;
+    /* r127/v2.3.11: Oferta única (opt-in) de cadastro biométrico após login por senha.
+       Pergunta 1x por usuário; se recusar, só volta a perguntar se o usuário ativar
+       em Configurações > Segurança > Ativar biometria. */
+    var FAST_BIO_OFFER_KEY = 'fast_bio_offer_done';
+    function fastBioOferecerCadastro(){
+      try {
+        if (bioCredExists()) return;                    // já tem biometria
+        if (!fastBioIsSupported()) return;              // aparelho sem suporte
+        var cred = getCred();
+        if (!cred) return;                              // sem usuário criado
+        if (localStorage.getItem(FAST_BIO_OFFER_KEY) === '1') return; // já ofereceu
+        fastBioPlatformAvailable().then(function(avail){
+          if (!avail) return;                            // sem autenticador de plataforma
+          localStorage.setItem(FAST_BIO_OFFER_KEY, '1'); // marca como oferecido
+          setTimeout(function(){
+            var msg = 'Ativar biometria neste dispositivo?\n\n' +
+                      'Com a digital ou o rosto, você entra no app (e desbloqueia a Área Protegida, ' +
+                      'Despesas e Rotas) sem digitar a senha.\n\n' +
+                      'Você também pode ativar depois em Configurações > Segurança.';
+            if (confirm(msg)){
+              window.fastSecBioToggle();
+            }
+          }, 300);
+        }).catch(function(){ /* silencioso */ });
+      } catch(e){ /* silencioso */ }
+    }
+
     function autoBioLogin(){
       if (!bioCredExists() || !fastBioIsSupported() || isLocked()) return;
       if (_fastBioAutoFired) return; // já disparou neste gate — não repete
@@ -3892,18 +3922,24 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
     #destinosTable { width: auto !important; min-width: 0 !important; table-layout: auto; }
     #destinosTable thead, #destinosTable tbody { width: auto; }
     #destinosTable thead th { padding: 8px 12px; font-size: 10px; vertical-align: middle; text-align: center; white-space: nowrap; }
-    #tabelaDestinosBody td { padding: 7px 12px; font-size: 12px; line-height: 1.3; vertical-align: middle; white-space: nowrap; overflow: visible; }
+    /* r127/v2.3.11: células centralizadas para coincidir com o cabeçalho */
+    #tabelaDestinosBody td { padding: 7px 12px; font-size: 12px; line-height: 1.3; vertical-align: middle; white-space: nowrap; overflow: visible; text-align: center; }
+    #tabelaDestinosBody td div.dest-actions { justify-content: center; }
     /* Coluna Ações — compacta, só os botões de ícone */
     /* (r125) Coluna SELEÇÃO — caixinha de marcação na primeira coluna */
     #destinosTable thead th:nth-child(1), #tabelaDestinosBody td:nth-child(1) { width: auto; min-width: 34px; max-width: 46px; white-space: nowrap; text-align: center; padding: 4px 3px; }
     /* Coluna Ações — compacta, só os botões de ícone */
     #destinosTable thead th:nth-child(2), #tabelaDestinosBody td:nth-child(2) { width: auto; min-width: 72px; white-space: nowrap; text-align: center; }
     /* Coluna Nome — flexível (r41): cresce com o maior nome, sem forçar largura mínima alta */
-    #destinosTable thead th:nth-child(3), #tabelaDestinosBody td:nth-child(3) { width: auto; min-width: 40px; max-width: 260px; white-space: nowrap; text-align: left; }
+    /* r127/v2.3.11: coluna Nome flexível, cabeçalho e células centralizados */
+    #destinosTable thead th:nth-child(3), #tabelaDestinosBody td:nth-child(3) { width: auto; min-width: 40px; max-width: 260px; white-space: nowrap; text-align: center; }
     /* Coluna Bairro — flexível: largura do maior bairro, sem quebra */
-    #destinosTable thead th:nth-child(4), #tabelaDestinosBody td:nth-child(4) { width: auto; min-width: 60px; white-space: nowrap; text-align: left; }
+    /* r127/v2.3.11: coluna Bairro flexível, centralizada */
+    #destinosTable thead th:nth-child(4), #tabelaDestinosBody td:nth-child(4) { width: auto; min-width: 60px; white-space: nowrap; text-align: center; }
     /* Coluna Endereço — flexível: largura do maior endereço, sem quebra */
-    #destinosTable thead th:nth-child(5), #tabelaDestinosBody td:nth-child(5) { width: auto; min-width: 60px; white-space: nowrap; text-align: left; }
+    /* r127/v2.3.11: coluna Endereço COMPACTA (max-width 170px) com ellipsis
+       quando o endereço é longo; cabeçalho e células centralizados */
+    #destinosTable thead th:nth-child(5), #tabelaDestinosBody td:nth-child(5) { width: auto; min-width: 60px; max-width: 170px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; }
     /* Coluna Telefone — nowrap, centralizado */
     #destinosTable thead th:nth-child(6), #tabelaDestinosBody td:nth-child(6) { width: auto; min-width: 70px; white-space: nowrap; text-align: center; }
     /* Coluna Usado em — nowrap, centralizado (número) */
@@ -6917,12 +6953,12 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
 
           <!-- GRUPO: SISTEMA -->
           <div class="nav-section-label nav-section-sistema"><i class="fa-solid fa-screwdriver-wrench"></i> Sistema <div class="nav-section-bar"></div></div>
-          <button class="nav-item nav-grp-sistema ripple active" onclick="trocarAba(event, 'configuracoes')"><i class="fa-solid fa-gear"></i> Configurações</button><button id="fast89NotifMenu" class="nav-item nav-grp-sistema ripple" style="user-select: none;"><i class="fa-solid fa-bell"></i> <span class="nav-item-text">Notificações</span></button>
+          <button class="nav-item nav-grp-sistema ripple active" onclick="trocarAba(event, 'configuracoes')"><i class="fa-solid fa-gear"></i> Configurações</button>
 
           <!-- Rodapé do menu: nome do app + versão -->
           <div class="nav-menu-footer">
             <div class="nav-menu-footer-app"><i class="fa-solid fa-bolt"></i> APP FAST SERVIÇOS</div>
-            <div class="nav-menu-footer-ver" id="navMenuVersao">Versão 2.3.10</div>
+            <div class="nav-menu-footer-ver" id="navMenuVersao">Versão 2.3.11</div>
           </div>
         </div>
       </div>
@@ -20163,10 +20199,10 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
               <div id="fastDeployInfo" style="background:var(--card-bg-2);border:1px solid var(--border);border-radius:10px;padding:12px;margin:10px 0;font-size:13px;">
                 <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
                   <div>
-                    <div><strong>Versão atual:</strong> <span id="fastVersaoLabel" style="color:var(--accent);font-weight:800;">2.3.10</span></div>
+                    <div><strong>Versão atual:</strong> <span id="fastVersaoLabel" style="color:var(--accent);font-weight:800;">2.3.11</span></div>
                     <div id="fastVersaoDateLabel" style="font-size:11.5px;color:var(--text-muted);margin-top:3px;"><i class="fa-solid fa-clock"></i> Lançada em 06/09/2026 17:18</div>
                   </div>
-                  <div id="fastVersaoOnlineLabel" style="font-size:12px;color:var(--text-muted);text-align:right;">Online: <strong>2.3.10</strong> <span style="color:var(--success);">(ok)</span></div>
+                  <div id="fastVersaoOnlineLabel" style="font-size:12px;color:var(--text-muted);text-align:right;">Online: <strong>2.3.11</strong> <span style="color:var(--success);">(ok)</span></div>
                 </div>
                 <div style="font-size:12px;color:var(--text-muted);word-break:break-all;margin-bottom:10px;"><i class="fa-solid fa-link"></i> <span id="fastUrlLabel">https://adaiascearataiana-gif.github.io/fastservicosapp/</span></div>
                 <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
@@ -20203,7 +20239,7 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
                   <span class="fup-count" id="fastUpdatesCount">5</span>
                   <i class="fa-solid fa-chevron-down fup-chevron"></i>
                 </div>
-                <div class="fast-updates-panel-body" id="fastUpdatesBody"><div class="fup-version-header"><div class="fup-version-row"><i class="fa-solid fa-sparkles"></i> <span>Versão 2.3.10</span></div><div class="fup-date-row"><i class="fa-solid fa-clock"></i> <span>Lançada em 06/09/2026 22:30</span></div></div><div class="fup-item"><div class="fup-item-dot" style="background:rgba(37,99,235,0.10);"><i class="fa-solid fa-arrow-up" style="color:#2563eb;"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#2563eb;background:rgba(37,99,235,0.10);">Melhorado</span><div class="fup-item-text">2.3.10 (06/09/2026): aba Clientes totalmente repaginada no modelo compacto das Rotas/Serviços: agora cada cliente ocupa UMA linha só, começando pelos botões ícone de Editar e Excluir (idênticos aos das rotas), o número do ID do cliente no lugar do antigo selo PF/PJ, o nome do cliente (clicável), Tipo, CPF/CNPJ, Contato (telefone/WhatsApp clicável), Pagamento, total de Rotas e Última modificação — sem perder nenhuma informação.</div></div></div><div class="fup-item"><div class="fup-item-dot" style="background:rgba(37,99,235,0.10);"><i class="fa-solid fa-arrow-up" style="color:#2563eb;"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#2563eb;background:rgba(37,99,235,0.10);">Melhorado</span><div class="fup-item-text">2.3.10 (06/09/2026): clicar no nome do cliente (ou no total de rotas) abre o Histórico de Rotas dele num modal no mesmo modelo da lista de Rotas: resumo com totais e a tabela completa das rotas do cliente com botões Editar/Excluir e badges clicáveis de status — tudo em uma linha por rota.</div></div></div><div class="fup-item"><div class="fup-item-dot" style="background:rgba(37,99,235,0.10);"><i class="fa-solid fa-arrow-up" style="color:#2563eb;"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#2563eb;background:rgba(37,99,235,0.10);">Melhorado</span><div class="fup-item-text">2.3.10 (06/09/2026): Lugares/Destinos no mesmo modelo compacto: botões Editar/Excluir ícone idênticos aos das rotas na primeira coluna, mantendo as colunas Nome, Bairro, Endereço, Telefone e Usado em — nada foi perdido.</div></div></div><div class="fup-item"><div class="fup-item-dot" style="background:rgba(37,99,235,0.10);"><i class="fa-solid fa-arrow-up" style="color:#2563eb;"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#2563eb;background:rgba(37,99,235,0.10);">Melhorado</span><div class="fup-item-text">2.3.10 (06/09/2026): as novas tabelas funcionam igual no modo desktop e no modo mobile/touch (Linux desktop incl. — Electron), com ordenação por qualquer coluna, filtro por letra A–Z e busca mantidos.</div></div></div></div>
+                <div class="fast-updates-panel-body" id="fastUpdatesBody"><div class="fup-version-header"><div class="fup-version-row"><i class="fa-solid fa-sparkles"></i> <span>Versão 2.3.11</span></div><div class="fup-date-row"><i class="fa-solid fa-clock"></i> <span>Lançada em 07/09/2026 01:30</span></div></div><div class="fup-item"><div class="fup-item-dot" style="background:rgba(217,119,6,0.10);"><i class="fa-solid fa-wrench" style="color:#d97706;"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#d97706;background:rgba(217,119,6,0.10);">Corrigido</span><div class="fup-item-text">2.3.11 (07/09/2026): botão da Central Rápida (⚡) duplicado eliminado — existia uma cópia estática presa no canto esquerdo da tela, atrás da barra inferior, sem funcionar; agora existe um único botão fixo à direita, acima da barra, abrindo a Central Rápida normalmente (com dupla proteção contra cópias antigas salvas em cache).</div></div></div><div class="fup-item"><div class="fup-item-dot" style="background:rgba(217,119,6,0.10);"><i class="fa-solid fa-wrench" style="color:#d97706;"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#d97706;background:rgba(217,119,6,0.10);">Corrigido</span><div class="fup-item-text">2.3.11 (07/09/2026): o bloco de botões Subir/Descer (lateral direita) voltou a ser arrastável — um CSS antigo travava a posição fixa e impedia subir/descer; agora o arrasto tem prioridade e a posição escolhida continua salva ao reabrir o app.</div></div></div><div class="fup-item"><div class="fup-item-dot" style="background:rgba(217,119,6,0.10);"><i class="fa-solid fa-wrench" style="color:#d97706;"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#d97706;background:rgba(217,119,6,0.10);">Corrigido</span><div class="fup-item-text">2.3.11 (07/09/2026): menu NOTIFICAÇÕES voltou a abrir — a Central de Notificações carregava uma cópia estática sem os eventos dos botões e o item do menu estava travado; agora a Central é recriada com todos os controles funcionando (marcar/desmarcar, X, fundo e Esc fecham) e o item Notificações do menu responde ao toque.</div></div></div><div class="fup-item"><div class="fup-item-dot" style="background:rgba(37,99,235,0.10);"><i class="fa-solid fa-arrow-up" style="color:#2563eb;"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#2563eb;background:rgba(37,99,235,0.10);">Melhorado</span><div class="fup-item-text">2.3.11 (07/09/2026): biometria (digital/rosto) presente no login principal, na Área Protegida e nos aplicativos Despesas e Rotas do Dia — agora, após entrar com senha pela primeira vez, o app oferece cadastrar a biometria para entrar só com digital/rosto (pode ativar depois em Configurações &gt; Segurança).</div></div></div><div class="fup-item"><div class="fup-item-dot" style="background:rgba(37,99,235,0.10);"><i class="fa-solid fa-arrow-up" style="color:#2563eb;"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#2563eb;background:rgba(37,99,235,0.10);">Melhorado</span><div class="fup-item-text">2.3.11 (07/09/2026): aplicativos Despesas e Rotas do Dia instalados na tela inicial abrem SEM a barra fixa inferior e sem o restante da plataforma — apenas a aba do próprio aplicativo, em tela cheia, como um app independente (mantendo a biometria de segurança).</div></div></div><div class="fup-item"><div class="fup-item-dot" style="background:rgba(37,99,235,0.10);"><i class="fa-solid fa-arrow-up" style="color:#2563eb;"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#2563eb;background:rgba(37,99,235,0.10);">Melhorado</span><div class="fup-item-text">2.3.11 (07/09/2026): tabela de Lugares/Destinos com títulos das colunas centralizados, coluna ENDEREÇO mais compacta (endereços longos encurtam com reticências) e colunas flexíveis que crescem conforme o maior nome de cada coluna.</div></div></div>
               </div>
             </div>
           </div>
@@ -20333,7 +20369,7 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
 
         </div>
       </div>
-    <div id="fast89NotifCard" class="config-topic"><div class="config-topic-header"><div class="config-topic-icon ico-backup"><i class="fa-solid fa-bell"></i></div><div><div class="config-topic-title">Notificações</div><div class="config-topic-sub">Escolha exatamente o que pode aparecer no app e no sino</div></div></div><div class="config-topic-body"><button type="button" class="btn-primary ripple" onclick="fastNotifAbrir(event)" style="user-select: none;"><i class="fa-solid fa-sliders"></i> Gerenciar Notificações</button><p class="config-desc" style="margin-top:8px">Balões operacionais ficam silenciosos por padrão. Você pode reativá-los quando quiser.</p></div></div></div>
+    </div>
     <!-- ABA 10: RH (Recursos Humanos) -->
     <div id="rh" class="tab-content">
       <div class="card">
@@ -23800,8 +23836,9 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
             var boxH = box.offsetHeight || 110;
             /* (r41/r103) Nunca deixar os botoes flutuantes descer sobre a bottom-nav. */
             y = Math.max(10, Math.min(y, h - boxH - scrollNavReservaFundo()));
-            box.style.top = y + 'px';
-            box.style.bottom = 'auto';
+            // r127/v2.3.11: prioridade !important para vencer o CSS do r103/r104
+            box.style.setProperty('top', y + 'px', 'important');
+            box.style.setProperty('bottom', 'auto', 'important');
           }
         }
       } catch(e) { console.warn('Erro ao restaurar posicao scrollNavBox:', e); }
@@ -23833,8 +23870,10 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
         var rect = box.getBoundingClientRect();
         boxStartY = rect.top;
         // Fixa posicao em top antes de arrastar (garante consistencia)
-        box.style.top = boxStartY + 'px';
-        box.style.bottom = 'auto';
+        // r127/v2.3.11: setProperty com prioridade para vencer o CSS
+        // #scrollNavBox { bottom:130px !important; top:auto !important } do r103/r104
+        box.style.setProperty('top', boxStartY + 'px', 'important');
+        box.style.setProperty('bottom', 'auto', 'important');
         // Nao previne default aqui: permite que o click do botao seja detectado
         // se o usuario apenas tocar sem arrastar
       }
@@ -23855,8 +23894,9 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
           // Limites verticais: nao sai do topo nem do fundo (r103: nunca
           // desce sobre a barra inferior / dock)
           newY = Math.max(10, Math.min(newY, h - boxH - scrollNavReservaFundo()));
-          box.style.top = newY + 'px';
-          box.style.bottom = 'auto';
+          // r127/v2.3.11: prioridade !important para vencer o CSS do r103/r104
+          box.style.setProperty('top', newY + 'px', 'important');
+          box.style.setProperty('bottom', 'auto', 'important');
         }
       }
 
@@ -25883,7 +25923,7 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
           });
         `;
         try {
-          navigator.serviceWorker.register('sw.js?v=2.3.10-r124', { scope: './' })
+          navigator.serviceWorker.register('sw.js?v=2.3.11-r127', { scope: './' })
             .then(function(reg) { console.info('SW permanente registrado (r73 network-first).'); })
             .catch(function(e) { console.info('SW: nao registrado neste ambiente (normal).', e.message); });
         } catch (e) { console.info('SW init skip:', e); }
@@ -39741,7 +39781,7 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
   </button>
 
   <!-- Bloco unico: Subir + Descer (arrastavel verticalmente na lateral direita) -->
-  <div id="scrollNavBox" class="scroll-nav-box show" style="top: 583px; bottom: auto; user-select: none;">
+  <div id="scrollNavBox" class="scroll-nav-box show">
     <button id="backToTop" class="scroll-nav-btn scroll-nav-up ripple hidden-btn" onclick="voltarAoTopo()" title="Voltar ao topo" style="user-select: none;">
       <i class="fa-solid fa-arrow-up"></i>
     </button>
@@ -39812,7 +39852,7 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
   <!-- ============================================================
        OVERLAY: Acesso protegido aos Dados da Empresa + Banco de Dados (SQL/Supabase)
        ============================================================ -->
-  <div id="empOverlay" class="emp-overlay show" role="dialog" aria-modal="true" aria-label="Dados da Empresa e Banco de Dados protegidos">
+  <div id="empOverlay" class="emp-overlay" role="dialog" aria-modal="true" aria-label="Dados da Empresa e Banco de Dados protegidos">
     <!-- Caixa de senha (criar/entrar) -->
     <div id="empPwdBox" class="emp-pwd-box" style="display: none;">
       <div class="emp-pwd-icon"><i class="fa-solid fa-lock"></i></div>
@@ -41317,12 +41357,12 @@ window.fastMobileNav = function(ev, abaId, botao) {
           <div style="width:42px;height:42px;border-radius:11px;background:rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px);"><i class="fa-solid fa-sparkles" style="font-size:18px;"></i></div>
           <div>
             <div style="font-size:12px;font-weight:600;opacity:.9;letter-spacing:.5px;text-transform:uppercase;">Novidades</div>
-            <div id="fastWhatsNewVer" style="font-size:19px;font-weight:800;line-height:1.2;">Versão 2.3.10</div>
+            <div id="fastWhatsNewVer" style="font-size:19px;font-weight:800;line-height:1.2;">Versão 2.3.11</div>
           </div>
         </div>
-        <div id="fastWhatsNewDate" style="font-size:12.5px;opacity:.9;display:flex;align-items:center;gap:6px;"><i class="fa-solid fa-clock"></i> <span>Lançada em 06/09/2026 17:18</span></div>
+        <div id="fastWhatsNewDate" style="font-size:12.5px;opacity:.9;display:flex;align-items:center;gap:6px;"><i class="fa-solid fa-clock"></i> <span>Lan&ccedil;ada em 07/09/2026 01:30</span></div>
       </div>
-      <div id="fastWhatsNewList" style="padding:18px 24px;overflow-y:auto;flex:1;"><div style="display:flex;align-items:flex-start;gap:11px;padding:11px 0;border-bottom:1px solid var(--border,#f0f0f0);"><div style="flex:0 0 auto;width:30px;height:30px;border-radius:8px;background:rgba(37,99,235,0.10);display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-arrow-up" style="color:#2563eb;font-size:13px;"></i></div><div style="flex:1;min-width:0;"><span style="display:inline-block;font-size:10.5px;font-weight:700;color:#2563eb;background:rgba(37,99,235,0.10);padding:2px 8px;border-radius:999px;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;">Melhorado</span><div style="font-size:13.5px;color:var(--text-main,#374151);line-height:1.5;margin-top:2px;">2.3.10 (06/09/2026): aba Clientes totalmente repaginada no modelo compacto das Rotas/Serviços: agora cada cliente ocupa UMA linha só, começando pelos botões ícone de Editar e Excluir (idênticos aos das rotas), o número do ID do cliente no lugar do antigo selo PF/PJ, o nome do cliente (clicável), Tipo, CPF/CNPJ, Contato (telefone/WhatsApp clicável), Pagamento, total de Rotas e Última modificação — sem perder nenhuma informação.</div></div></div><div style="display:flex;align-items:flex-start;gap:11px;padding:11px 0;border-bottom:1px solid var(--border,#f0f0f0);"><div style="flex:0 0 auto;width:30px;height:30px;border-radius:8px;background:rgba(37,99,235,0.10);display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-arrow-up" style="color:#2563eb;font-size:13px;"></i></div><div style="flex:1;min-width:0;"><span style="display:inline-block;font-size:10.5px;font-weight:700;color:#2563eb;background:rgba(37,99,235,0.10);padding:2px 8px;border-radius:999px;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;">Melhorado</span><div style="font-size:13.5px;color:var(--text-main,#374151);line-height:1.5;margin-top:2px;">2.3.10 (06/09/2026): clicar no nome do cliente (ou no total de rotas) abre o Histórico de Rotas dele num modal no mesmo modelo da lista de Rotas: resumo com totais e a tabela completa das rotas do cliente com botões Editar/Excluir e badges clicáveis de status — tudo em uma linha por rota.</div></div></div><div style="display:flex;align-items:flex-start;gap:11px;padding:11px 0;border-bottom:1px solid var(--border,#f0f0f0);"><div style="flex:0 0 auto;width:30px;height:30px;border-radius:8px;background:rgba(37,99,235,0.10);display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-arrow-up" style="color:#2563eb;font-size:13px;"></i></div><div style="flex:1;min-width:0;"><span style="display:inline-block;font-size:10.5px;font-weight:700;color:#2563eb;background:rgba(37,99,235,0.10);padding:2px 8px;border-radius:999px;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;">Melhorado</span><div style="font-size:13.5px;color:var(--text-main,#374151);line-height:1.5;margin-top:2px;">2.3.10 (06/09/2026): Lugares/Destinos no mesmo modelo compacto: botões Editar/Excluir ícone idênticos aos das rotas na primeira coluna, mantendo as colunas Nome, Bairro, Endereço, Telefone e Usado em — nada foi perdido.</div></div></div><div style="display:flex;align-items:flex-start;gap:11px;padding:11px 0;border-bottom:1px solid var(--border,#f0f0f0);"><div style="flex:0 0 auto;width:30px;height:30px;border-radius:8px;background:rgba(37,99,235,0.10);display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-arrow-up" style="color:#2563eb;font-size:13px;"></i></div><div style="flex:1;min-width:0;"><span style="display:inline-block;font-size:10.5px;font-weight:700;color:#2563eb;background:rgba(37,99,235,0.10);padding:2px 8px;border-radius:999px;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;">Melhorado</span><div style="font-size:13.5px;color:var(--text-main,#374151);line-height:1.5;margin-top:2px;">2.3.10 (06/09/2026): as novas tabelas funcionam igual no modo desktop e no modo mobile/touch (Linux desktop incl. — Electron), com ordenação por qualquer coluna, filtro por letra A–Z e busca mantidos.</div></div></div></div>
+      <div id="fastWhatsNewList" style="padding:18px 24px;overflow-y:auto;flex:1;"><div style="display:flex;align-items:flex-start;gap:11px;padding:11px 0;border-bottom:1px solid var(--border,#f0f0f0);"><div style="flex:0 0 auto;width:30px;height:30px;border-radius:8px;background:rgba(217,119,6,0.10);display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-wrench" style="color:#d97706;font-size:13px;"></i></div><div style="flex:1;min-width:0;"><span style="display:inline-block;font-size:10.5px;font-weight:700;color:#d97706;background:rgba(217,119,6,0.10);padding:2px 8px;border-radius:999px;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;">Corrigido</span><div style="font-size:13.5px;color:var(--text-main,#374151);line-height:1.5;margin-top:2px;">2.3.11 (07/09/2026): botão da Central Rápida (⚡) duplicado eliminado — existia uma cópia estática presa no canto esquerdo da tela, atrás da barra inferior, sem funcionar; agora existe um único botão fixo à direita, acima da barra, abrindo a Central Rápida normalmente (com dupla proteção contra cópias antigas salvas em cache).</div></div></div><div style="display:flex;align-items:flex-start;gap:11px;padding:11px 0;border-bottom:1px solid var(--border,#f0f0f0);"><div style="flex:0 0 auto;width:30px;height:30px;border-radius:8px;background:rgba(217,119,6,0.10);display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-wrench" style="color:#d97706;font-size:13px;"></i></div><div style="flex:1;min-width:0;"><span style="display:inline-block;font-size:10.5px;font-weight:700;color:#d97706;background:rgba(217,119,6,0.10);padding:2px 8px;border-radius:999px;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;">Corrigido</span><div style="font-size:13.5px;color:var(--text-main,#374151);line-height:1.5;margin-top:2px;">2.3.11 (07/09/2026): o bloco de botões Subir/Descer (lateral direita) voltou a ser arrastável — um CSS antigo travava a posição fixa e impedia subir/descer; agora o arrasto tem prioridade e a posição escolhida continua salva ao reabrir o app.</div></div></div><div style="display:flex;align-items:flex-start;gap:11px;padding:11px 0;border-bottom:1px solid var(--border,#f0f0f0);"><div style="flex:0 0 auto;width:30px;height:30px;border-radius:8px;background:rgba(217,119,6,0.10);display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-wrench" style="color:#d97706;font-size:13px;"></i></div><div style="flex:1;min-width:0;"><span style="display:inline-block;font-size:10.5px;font-weight:700;color:#d97706;background:rgba(217,119,6,0.10);padding:2px 8px;border-radius:999px;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;">Corrigido</span><div style="font-size:13.5px;color:var(--text-main,#374151);line-height:1.5;margin-top:2px;">2.3.11 (07/09/2026): menu NOTIFICAÇÕES voltou a abrir — a Central de Notificações carregava uma cópia estática sem os eventos dos botões e o item do menu estava travado; agora a Central é recriada com todos os controles funcionando (marcar/desmarcar, X, fundo e Esc fecham) e o item Notificações do menu responde ao toque.</div></div></div><div style="display:flex;align-items:flex-start;gap:11px;padding:11px 0;border-bottom:1px solid var(--border,#f0f0f0);"><div style="flex:0 0 auto;width:30px;height:30px;border-radius:8px;background:rgba(37,99,235,0.10);display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-arrow-up" style="color:#2563eb;font-size:13px;"></i></div><div style="flex:1;min-width:0;"><span style="display:inline-block;font-size:10.5px;font-weight:700;color:#2563eb;background:rgba(37,99,235,0.10);padding:2px 8px;border-radius:999px;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;">Melhorado</span><div style="font-size:13.5px;color:var(--text-main,#374151);line-height:1.5;margin-top:2px;">2.3.11 (07/09/2026): biometria (digital/rosto) presente no login principal, na Área Protegida e nos aplicativos Despesas e Rotas do Dia — agora, após entrar com senha pela primeira vez, o app oferece cadastrar a biometria para entrar só com digital/rosto (pode ativar depois em Configurações &gt; Segurança).</div></div></div><div style="display:flex;align-items:flex-start;gap:11px;padding:11px 0;border-bottom:1px solid var(--border,#f0f0f0);"><div style="flex:0 0 auto;width:30px;height:30px;border-radius:8px;background:rgba(37,99,235,0.10);display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-arrow-up" style="color:#2563eb;font-size:13px;"></i></div><div style="flex:1;min-width:0;"><span style="display:inline-block;font-size:10.5px;font-weight:700;color:#2563eb;background:rgba(37,99,235,0.10);padding:2px 8px;border-radius:999px;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;">Melhorado</span><div style="font-size:13.5px;color:var(--text-main,#374151);line-height:1.5;margin-top:2px;">2.3.11 (07/09/2026): aplicativos Despesas e Rotas do Dia instalados na tela inicial abrem SEM a barra fixa inferior e sem o restante da plataforma — apenas a aba do próprio aplicativo, em tela cheia, como um app independente (mantendo a biometria de segurança).</div></div></div><div style="display:flex;align-items:flex-start;gap:11px;padding:11px 0;border-bottom:1px solid var(--border,#f0f0f0);"><div style="flex:0 0 auto;width:30px;height:30px;border-radius:8px;background:rgba(37,99,235,0.10);display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-arrow-up" style="color:#2563eb;font-size:13px;"></i></div><div style="flex:1;min-width:0;"><span style="display:inline-block;font-size:10.5px;font-weight:700;color:#2563eb;background:rgba(37,99,235,0.10);padding:2px 8px;border-radius:999px;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;">Melhorado</span><div style="font-size:13.5px;color:var(--text-main,#374151);line-height:1.5;margin-top:2px;">2.3.11 (07/09/2026): tabela de Lugares/Destinos com títulos das colunas centralizados, coluna ENDEREÇO mais compacta (endereços longos encurtam com reticências) e colunas flexíveis que crescem conforme o maior nome de cada coluna.</div></div></div></div></div></div></div>
       <div style="padding:14px 24px 22px;border-top:1px solid var(--border,#e5e7eb);display:flex;justify-content:flex-end;">
         <button type="button" id="fastWhatsNewDone" onclick="fastFecharNovidades()" style="padding: 11px 28px; border-radius: 11px; border-width: medium; border-style: none; border-color: currentcolor; border-image: none; background: linear-gradient(135deg,var(--accent,#6366f1),var(--accent-2,#818cf8)); color: rgb(255, 255, 255); font-weight: 700; font-size: 14px; cursor: pointer; box-shadow: rgba(99, 102, 241, 0.35) 0px 4px 14px; user-select: none;" class="ripple">Concluir</button>
       </div>
@@ -41590,7 +41630,7 @@ window.fastMobileNav = function(ev, abaId, botao) {
           var response = await fetch(RECOVERY_ENDPOINT, {
             method:'POST',
             headers:{ 'Content-Type':'application/json', 'apikey':RECOVERY_PUBLIC_KEY, 'Authorization':'Bearer '+RECOVERY_PUBLIC_KEY },
-            body:JSON.stringify({ email:email.trim(), origem:origem || 'plataforma', versao:'2.3.10' })
+            body:JSON.stringify({ email:email.trim(), origem:origem || 'plataforma', versao:'2.3.11' })
           });
           if (!response.ok) throw new Error('Serviço de recuperação indisponível');
           return { ok:true, message:'Se o e-mail estiver cadastrado, as instruções de recuperação serão enviadas. Verifique também a caixa de spam.' };
@@ -42938,14 +42978,13 @@ window.fastMobileNav = function(ev, abaId, botao) {
 (function(){
   try {
     var m=document.querySelector('meta[name="fast-app-version"]');
-    if(m) m.content='2.3.10';
+    if(m) m.content='2.3.11';
     var d=document.querySelector('meta[name="fast-app-date"]');
-    if(d) d.content='2026-09-06T22:30:00-03:00';
+    if(d) d.content='2026-09-07T01:30:00-03:00';
     var l=document.querySelector('meta[name="fast-latest-update"]');
-    if(l) l.content='2.2.0: MODO MOBILE GARANTIDO — celular e tablet agora abrem direto na versão mobile com barra inferior em qualquer largura de tela (antes tablets em paisagem e celulares com site-desktop caíam no modo Desktop); botões ROTAS e DESPESAS da barra inferior corrigidos: respondem ao toque imediatamente com trava anti-duplo-disparo e seguem as permissões do usuário; modal de Novidades fecha ao tocar fora ou ESC; bloco Subir/Descer nunca mais cobre a barra inferior | 2.1.0: LOGIN POR SETOR — logins dedicados por setor no RH (Usuários e Acessos): Administrador, Financeiro, Atendimento/Cadastros, Logística/Entregador e Motorista — cada um só vê as áreas do seu setor; corrigido o botão Lixeira de Rotas duplicado; varredura geral: 35 blocos JS (0 erros), 250 handlers e 566 IDs verificados; pacote oficial Linux (AppImage + DEB) | 2.0.2: barra superior fixa durante a rolagem | 2.0.1: lugares duplicados consolidados na sincronização, rotas atribuídas ao motorista ADAÍAS | 2.0.0: nova interface central de operações, Central Rápida Ctrl+K, modo foco e densidade ajustável; migração com ponto de restauração | r101: App do Motorista (CHEGUEI, fotos para o Drive, rastreamento GPS com ETA) | r100: exclusão de rotas corrigida | r99: ditado por voz corrigido';
-    if(l) l.content='2.3.10: aba Clientes e Lugares/Destinos no mesmo modelo compacto das Rotas/Serviços — uma linha por registro: botões ícone Editar/Excluir idênticos, número do ID do cliente no lugar do PF, nome clicável que abre o Histórico de Rotas do cliente (modal com resumo + tabela de rotas no mesmo modelo), colunas de informação preservadas (Tipo, CPF/CNPJ, Contato, Pagamento, Rotas, Últ. modificação; Bairro, Endereço, Telefone, Usado em); aplica ao modo desktop e ao Linux. E novidade: seleção múltipla em massa em Clientes e Lugares/Destinos — caixinhas de marcação na primeira coluna e balão flutuante com botão Excluir, igual ao Rotas do Dia.';
+    if(l) l.content='2.3.11: botão Central Rápida duplicado eliminado (cópia travada no canto esquerdo removida) | bloco Subir/Descer arrastável novamente com posição salva | menu NOTIFICAÇÕES reabre com todos os controles funcionando | biometria no login, Área Protegida, Despesas e Rotas (oferta de cadastro após login por senha) | apps Despesas e Rotas do Dia instalados abrem sem a barra fixa (modo exclusivo) | tabela Lugares/Destinos com cabeçalho centralizado, ENDEREÇO compacto e colunas flexíveis';
     var c=document.querySelector('meta[name="fast-app-changelog"]');
-    if(c) c.content=JSON.stringify([{"type": "novo", "text": "2.3.10 (06/09/2026): seleção múltipla em massa nas abas Clientes e Lugares/Destinos: caixinhas de marcação na primeira coluna (com marcar/desmarcar todos no cabeçalho) e, ao marcar 1 ou mais, sobe o mesmo balão flutuante do Rotas do Dia com o botão Excluir; a exclusão em massa pede confirmação com a lista de nomes, renumera os IDs, salva e sincroniza na nuvem e impede o retorno dos registros excluídos."}, {"type": "melhorado", "text": "2.3.10 (06/09/2026): aba Clientes totalmente repaginada no modelo compacto das Rotas/Serviços: agora cada cliente ocupa UMA linha só, começando pelos botões Ícone de Editar e Excluir (idênticos aos das rotas), o número do ID do cliente no lugar do antigo selo PF/PJ, o nome do cliente (clicável), Tipo, CPF/CNPJ, Contato (telefone/WhatsApp clicável), Pagamento, total de Rotas e Última modificação — sem perder nenhuma informação."}, {"type": "melhorado", "text": "2.3.10 (06/09/2026): clicar no nome do cliente (ou no total de rotas) abre o Histórico de Rotas dele num modal no mesmo modelo da lista de Rotas: resumo com totais (rotas, concluídas, recebidas, pendentes, volumes, faturamento, origem/destino/pagamento mais frequentes) e a tabela completa das rotas do cliente com botões Editar/Excluir e badges clicáveis de status — tudo em uma linha por rota."}, {"type": "melhorado", "text": "2.3.10 (06/09/2026): Lugares/Destinos no mesmo modelo compacto: botões Editar/Excluir ícone idênticos aos das rotas na primeira coluna, mantendo as colunas Nome, Bairro, Endereço, Telefone e Usado em — nada foi perdido."}, {"type": "melhorado", "text": "2.3.10 (06/09/2026): as novas tabelas funcionam igual no modo desktop e no modo mobile/touch (Linux desktop incl. — Electron), com ordenação por qualquer coluna (clicando no cabeçalho), filtro por letra A–Z e busca mantidos."}]);
+    if(c) c.content="[{\"type\": \"corrigido\", \"text\": \"2.3.11 (07/09/2026): bot\u00e3o da Central R\u00e1pida (\u26a1) duplicado eliminado \u2014 existia uma c\u00f3pia est\u00e1tica presa no canto esquerdo da tela, atr\u00e1s da barra inferior, sem funcionar; agora existe um \u00fanico bot\u00e3o fixo \u00e0 direita, acima da barra, abrindo a Central R\u00e1pida normalmente (com dupla prote\u00e7\u00e3o contra c\u00f3pias antigas salvas em cache).\"}, {\"type\": \"corrigido\", \"text\": \"2.3.11 (07/09/2026): o bloco de bot\u00f5es Subir/Descer (lateral direita) voltou a ser arrast\u00e1vel \u2014 um CSS antigo travava a posi\u00e7\u00e3o fixa e impedia subir/descer; agora o arrasto tem prioridade e a posi\u00e7\u00e3o escolhida continua salva ao reabrir o app.\"}, {\"type\": \"corrigido\", \"text\": \"2.3.11 (07/09/2026): menu NOTIFICA\u00c7\u00d5ES voltou a abrir \u2014 a Central de Notifica\u00e7\u00f5es carregava uma c\u00f3pia est\u00e1tica sem os eventos dos bot\u00f5es e o item do menu estava travado; agora a Central \u00e9 recriada com todos os controles funcionando (marcar/desmarcar, X, fundo e Esc fecham) e o item Notifica\u00e7\u00f5es do menu responde ao toque.\"}, {\"type\": \"melhorado\", \"text\": \"2.3.11 (07/09/2026): biometria (digital/rosto) presente no login principal, na \u00c1rea Protegida e nos aplicativos Despesas e Rotas do Dia \u2014 agora, ap\u00f3s entrar com senha pela primeira vez, o app oferece cadastrar a biometria para entrar s\u00f3 com digital/rosto (pode ativar depois em Configura\u00e7\u00f5es > Seguran\u00e7a).\"}, {\"type\": \"melhorado\", \"text\": \"2.3.11 (07/09/2026): aplicativos Despesas e Rotas do Dia instalados na tela inicial abrem SEM a barra fixa inferior e sem o restante da plataforma \u2014 apenas a aba do pr\u00f3prio aplicativo, em tela cheia, como um app independente (mantendo a biometria de seguran\u00e7a).\"}, {\"type\": \"melhorado\", \"text\": \"2.3.11 (07/09/2026): tabela de Lugares/Destinos com t\u00edtulos das colunas centralizados, coluna ENDERE\u00c7O mais compacta (endere\u00e7os longos encurtam com retic\u00eancias) e colunas flex\u00edveis que crescem conforme o maior nome de cada coluna.\"}]";
   } catch(e){}
 })();
 </script>
@@ -43286,7 +43325,7 @@ body.fast-touch-ui #scrollNavBox { bottom: 130px !important; top: auto !importan
   }, true);
 })();
 </script>
-<script src="v2-ui.js?v=2.3.10-r124"></script>
+<script src="v2-ui.js?v=2.3.11-r127"></script>
 <script id="r103c-v2-toast-fix">
 /* r103-c: o toast do v2-ui ("FAST Serviços 2.2.0 pronto para operar.") ficava
    com opacity:0 depois de esconder, mas SEM pointer-events:none — seguia
@@ -43630,6 +43669,14 @@ body.fast-exclusive-app #despesas.active { display:block !important; width:100% 
   'use strict';
   var params=new URLSearchParams(location.search);
   var mode=params.get('exclusive');
+  /* r127/v2.3.11: PWAs instalados abrem com start_url ?atalho= (sem exclusive=).
+     Em display-mode standalone (app instalado), atalho= rotas-dia/despesas/rotasDia
+     tambem ativa o modo exclusivo: sem dock, sem sidebar, so a aba do app. */
+  if(!mode){
+    var atalho=params.get('atalho');
+    var standalone=window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;
+    if(atalho&&standalone)mode=(atalho==='rotas-dia'||atalho==='rotasDia')?'rotas-dia':(atalho==='despesas')?'despesas':'';
+  }
   var target=mode==='rotas-dia'?'rotasDia':mode==='despesas'?'despesas':'';
   if(!target)return;
   document.body.classList.add('fast-exclusive-app','fast-touch-ui');
@@ -43882,4 +43929,58 @@ body.fast-edition-desktop #rotasDia .card{padding:16px!important;margin-bottom:1
 </script>
 
 <script src="desktop-bridge.js"></script>
-<div id="fast89NotifModal" class="fast89-notif-modal"><div class="fast89-notif-box"><div class="fast89-notif-head"><i class="fa-solid fa-bell"></i><h2>Central de Notificações</h2><button type="button" aria-label="Fechar" data-fast89-close="1" data-fast89-runtime-bound="1" style="user-select: none;" class="ripple"><i class="fa-solid fa-xmark"></i></button></div><div class="fast89-notif-body"><div class="fast89-notif-actions"><button type="button" class="btn-primary ripple" id="fast89MarcarTudo" style="user-select: none;"><i class="fa-solid fa-check-double"></i> Marcar tudo</button><button type="button" class="btn-secondary ripple" id="fast89DesmarcarTudo" style="user-select: none;"><i class="fa-solid fa-bell-slash"></i> Desmarcar tudo</button></div><section class="fast89-notif-group"><h3>Controle geral</h3><label class="fast89-notif-option fast89-notif-master"><input type="checkbox" data-fast89="master"><span>Ativar notificações<small>Controle geral de todos os avisos do aplicativo</small></span></label></section><section class="fast89-notif-group"><h3>Balões na tela</h3><label class="fast89-notif-option "><input type="checkbox" data-fast89="toast_operacoes"><span>Confirmações gerais<small>Mensagens de operação que não pertencem a uma categoria específica</small></span></label><label class="fast89-notif-option "><input type="checkbox" data-fast89="toast_avisos"><span>Avisos na tela<small>Balões amarelos de atenção</small></span></label><label class="fast89-notif-option "><input type="checkbox" data-fast89="toast_erros"><span>Erros na tela<small>Balões vermelhos de erro técnico</small></span></label><label class="fast89-notif-option "><input type="checkbox" data-fast89="toast_atualizacoes"><span>Atualizações do aplicativo<small>Novas versões, verificação e publicação</small></span></label><label class="fast89-notif-option "><input type="checkbox" data-fast89="toast_sincronizacao"><span>Sincronização e backups<small>Supabase, Google Drive, nuvem e backups</small></span></label><label class="fast89-notif-option "><input type="checkbox" data-fast89="toast_rotas"><span>Rotas e entregas<small>Operações, conclusão, agrupamento e reabertura de rotas</small></span></label><label class="fast89-notif-option "><input type="checkbox" data-fast89="toast_despesas"><span>Despesas e financeiro<small>Despesas, pagamentos, recebimentos e DRE</small></span></label><label class="fast89-notif-option "><input type="checkbox" data-fast89="toast_rastreamento"><span>Rastreamento e localização<small>Rastreamento, geofence, proximidade e mapas</small></span></label><label class="fast89-notif-option "><input type="checkbox" data-fast89="toast_camera_qr"><span>Câmera, fotos e QR<small>Câmera, documentos, fotos e QR Code</small></span></label><label class="fast89-notif-option "><input type="checkbox" data-fast89="toast_instalacao"><span>Instalação e PWA<small>Instalação e orientações da aplicação</small></span></label><label class="fast89-notif-option "><input type="checkbox" data-fast89="painel_rotas_multiplas"><span>Painel de várias rotas<small>Painel flutuante para envio de clientes com várias rotas</small></span></label></section><section class="fast89-notif-group"><h3>Categorias do sino</h3><label class="fast89-notif-option "><input type="checkbox" data-fast89="bell_rotas"><span>Rotas e entregas<small>Pendências, andamento, conclusão e motorista ausente</small></span></label><label class="fast89-notif-option "><input type="checkbox" data-fast89="bell_motoristas"><span>Motoristas e CNH<small>CNH vencida, próxima do vencimento ou incompleta</small></span></label><label class="fast89-notif-option "><input type="checkbox" data-fast89="bell_pagamentos"><span>Pagamentos<small>Valores e recebimentos pendentes</small></span></label><label class="fast89-notif-option "><input type="checkbox" data-fast89="bell_despesas"><span>Despesas<small>Resumo mensal de despesas</small></span></label><label class="fast89-notif-option "><input type="checkbox" data-fast89="bell_proximidade"><span>Proximidade e localização<small>Chegada perto do destino e geolocalização</small></span></label><label class="fast89-notif-option "><input type="checkbox" data-fast89="bell_sistema"><span>Sistema<small>Boas-vindas e informações gerais no sino</small></span></label></section><section class="fast89-notif-group"><h3>Dispositivo</h3><label class="fast89-notif-option "><input type="checkbox" data-fast89="browser"><span>Notificações do dispositivo<small>Avisos nativos fora da tela do aplicativo</small></span></label></section><p class="fast89-notif-note">As opções afetam apenas avisos visuais. Sincronização, backups e demais processos continuam funcionando silenciosamente em segundo plano.</p></div></div></div><button class="fast-v2-launcher ripple" id="fastV2Launcher" aria-label="Abrir central rápida" title="Central rápida (Ctrl+K)" style="user-select: none;"><i class="fa-solid fa-bolt"></i></button><div class="fast-v2-palette" id="fastV2Palette" role="dialog" aria-modal="true" aria-label="Central rápida"><div class="fast-v2-palette-box"><div class="fast-v2-palette-head"><i class="fa-solid fa-magnifying-glass"></i><input id="fastV2Query" placeholder="Ir para uma área ou executar uma ação..."><kbd style="user-select: none;">ESC</kbd></div><div class="fast-v2-command-list" id="fastV2Commands"><button class="fast-v2-command" data-v2-go="central" style="user-select: none;"><i class="fa-solid fa-table-cells-large"></i><span>Centro de Operações<small>Visão geral e prioridades</small></span><i class="fa-solid fa-arrow-right"></i></button><button class="fast-v2-command" data-v2-go="rotasDia" style="user-select: none;"><i class="fa-solid fa-calendar-day"></i><span>Rotas do Dia<small>Execução, fotos e conclusão</small></span><i class="fa-solid fa-arrow-right"></i></button><button class="fast-v2-command" data-v2-go="rotas" style="user-select: none;"><i class="fa-solid fa-route"></i><span>Rotas e Serviços<small>Histórico geral de viagens</small></span><i class="fa-solid fa-arrow-right"></i></button><button class="fast-v2-command" data-v2-go="rastreamento" style="user-select: none;"><i class="fa-solid fa-location-dot"></i><span>Mapa e Rastreamento<small>Motoristas e ETA ao vivo</small></span><i class="fa-solid fa-arrow-right"></i></button><button class="fast-v2-command" data-v2-go="clientes" style="user-select: none;"><i class="fa-solid fa-building-user"></i><span>Clientes<small>Cadastros e histórico</small></span><i class="fa-solid fa-arrow-right"></i></button><button class="fast-v2-command" data-v2-go="motoristas" style="user-select: none;"><i class="fa-solid fa-id-card"></i><span>Motoristas<small>Equipe de entrega</small></span><i class="fa-solid fa-arrow-right"></i></button><button class="fast-v2-command" data-v2-go="despesas" style="user-select: none;"><i class="fa-solid fa-receipt"></i><span>Despesas<small>Lançamentos financeiros</small></span><i class="fa-solid fa-arrow-right"></i></button><button class="fast-v2-command" data-v2-go="dashboard" style="user-select: none;"><i class="fa-solid fa-chart-pie"></i><span>Dashboard<small>Indicadores e análises</small></span><i class="fa-solid fa-arrow-right"></i></button><button class="fast-v2-command" data-v2-go="dre" style="user-select: none;"><i class="fa-solid fa-chart-line"></i><span>DRE<small>Resultado financeiro</small></span><i class="fa-solid fa-arrow-right"></i></button><button class="fast-v2-command" data-v2-go="configuracoes" style="user-select: none;"><i class="fa-solid fa-sliders"></i><span>Configurações<small>Integrações, segurança e backup</small></span><i class="fa-solid fa-arrow-right"></i></button></div><div style="display:flex;gap:8px;padding:10px 14px;border-top:1px solid #dbe4ef"><button class="btn-secondary ripple" data-v2-action="density" style="user-select: none;"><i class="fa-solid fa-table-cells"></i> Alternar densidade</button><button class="btn-secondary ripple" data-v2-action="focus" style="user-select: none;"><i class="fa-solid fa-expand"></i> Modo foco</button><button class="btn-secondary ripple" data-v2-go="configuracoes" style="user-select: none;"><i class="fa-solid fa-shield-halved"></i> Segurança</button></div></div></div><div class="fast-v2-toast" id="fastV2Toast" style="pointer-events:none;">FAST Serviços 2.3.10 pronto para operar.</div><div id="fastLinuxBadge">● FAST LINUX · SEGURO</div></body></html>
+<script id="r127-v2311-safety">
+(function(){
+  'use strict';
+  /* r127 / v2.3.11 — Seguranca contra snapshots DOM assados:
+     1) Remove duplicatas de elementos de runtime (launcher, modal, menu, card).
+     2) Rebinda o item de menu NOTIFICACOES e o sino do topo. */
+  function fix(){
+    try{
+      /* 1) Launcher da Central Rapida: so pode existir 1 */
+      var launchers=document.querySelectorAll('#fastV2Launcher');
+      for(var i=1;i<launchers.length;i++)launchers[i].remove();
+
+      /* 2) Modal de Notificacoes: dedupe */
+      var mods=document.querySelectorAll('#fast89NotifModal');
+      for(var j=1;j<mods.length;j++)mods[j].remove();
+
+      /* 3) Menu NOTIFICACOES: dedupe + rebind */
+      var menus=document.querySelectorAll('#fast89NotifMenu');
+      for(var k=1;k<menus.length;k++)menus[k].remove();
+      menus=document.querySelectorAll('#fast89NotifMenu');
+      if(menus.length===1){
+        menus[0].onclick=function(e){
+          try{if(typeof fecharNavDropdown==='function')fecharNavDropdown()}catch(x){}
+          if(window.fastNotifAbrir)window.fastNotifAbrir(e);
+        };
+      }
+
+      /* 4) Card de Notificacoes em Configuracoes: dedupe */
+      var cards=document.querySelectorAll('#fast89NotifCard');
+      for(var l=1;l<cards.length;l++)cards[l].remove();
+
+      /* 5) Sino do topo: rebind defensivo */
+      var sino=document.getElementById('notifSinoBtn');
+      if(sino&&!sino.onclick&&!sino.dataset.r127){
+        sino.dataset.r127='1';
+        sino.onclick=function(e){if(window.fastNotifAbrir)window.fastNotifAbrir(e)};
+      }
+
+      /* 6) Rebind de salvamento dos checkboxes do modal (se modal existe e sem onchange) */
+      var modal=document.getElementById('fast89NotifModal');
+      if(modal){
+        modal.querySelectorAll('[data-fast89]').forEach(function(cb){
+          if(!cb.onchange&&window.fastNotifSalvar){
+            cb.onchange=function(){try{salvarTela()}catch(x){}};
+          }
+        });
+      }
+    }catch(e){console.warn('[r127]',e)}
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){setTimeout(fix,400)},{once:true});
+  else setTimeout(fix,400);
+  setTimeout(fix,1500);
+})();
+</script>
+<div id="fastLinuxBadge">● FAST LINUX · SEGURO</div></body></html>
