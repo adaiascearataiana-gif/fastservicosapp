@@ -12,7 +12,7 @@
      ========================================================================== */
   function currentVersion(){
     var m=document.querySelector('meta[name="fast-app-version"]');
-    return (m && m.content) ? m.content : '2.3.20';
+    return (m && m.content) ? m.content : '2.3.21';
   }
   var MIGRATION_KEY='fast_v2_migration_complete',CHECKPOINT_KEY='fast_v2_pre_migration_checkpoint';
   var commands=[
