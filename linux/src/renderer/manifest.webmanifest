@@ -1,7 +1,8 @@
 {
   "name": "FAST Serviços - Gestão de Rotas",
   "short_name": "FAST Serviços",
-  "description": "FAST Serviços 2.3.8 — Operações, rotas, clientes, equipe e finanças",
+  "version": "2.3.19",
+  "description": "FAST Serviços 2.3.19 — Operações, rotas, clientes, equipe e finanças",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

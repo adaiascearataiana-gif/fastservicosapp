@@ -31,6 +31,14 @@ ul.pontos{margin:10px 0 0 18px;color:#cbd5e1;font-size:13px;line-height:1.8}
   <p class="sub">C&oacute;pia integral e verificada da plataforma FAST Servi&ccedil;os &mdash; o mesmo <b>index.html</b> &uacute;nico que roda no site, com todos os aplicativos embutidos (Gest&atilde;o, Cliente FAST, Motorista, Rotas do Dia, Despesas). Baixe e guarde: se um dia precisar restaurar ou publicar em outro endere&ccedil;o, basta abrir este arquivo.</p>
 
   <div class="card">
+    <h2>&#128230; FAST Servi&ccedil;os 2.3.19 &mdash; 07/09/2026 23:05</h2>
+    <div class="meta">
+      Vers&atilde;o corrente publicada no site. ATUALIZA&Ccedil;&Atilde;O DEFINITIVA do problema &quot;fica na 12&quot;: o pacote visual v2-ui.js publicado ainda marcava VERSION 2.3.12 e regravava a vers&atilde;o do aplicativo em toda abertura, rebaixando o app ap&oacute;s cada atualiza&ccedil;&atilde;o (loop infinito de atualiza&ccedil;&atilde;o). O v2-ui.js foi reescrito para respeitar a vers&atilde;o real do HTML, o Service Worker externo (sw.js) foi desativado e o bot&atilde;o Verificar Atualiza&ccedil;&otilde;es ganhou trava anti-loop que avisa o usu&aacute;rio em vez de recarregar para sempre.
+    </div>
+    <a class="dl" href="fast-servicos-2.3.19-2026-09-07.html" download>&#8962; Baixar index.html completo (2.3.19)</a>
+  </div>
+
+  <div class="card">
     <h2>&#128230; FAST Servi&ccedil;os 2.3.18 &mdash; 07/09/2026</h2>
     <div class="meta">
       Vers&atilde;o corrente publicada no site. Corrige de vez o LOOP de sincroniza&ccedil;&atilde;o com o GitHub: a compara&ccedil;&atilde;o agora &eacute; pelo SHA do arquivo (a API do GitHub devolve o conte&uacute;do vazio para arquivos acima de 1MB, e o app fazia commit infinito achando que sempre havia mudan&ccedil;a); o envio usa o c&oacute;digo-fonte limpo em vez da p&aacute;gina viva; e a vers&atilde;o incrementa sozinha a cada publica&ccedil;&atilde;o real, para o detector de atualiza&ccedil;&atilde;o dos aparelhos enxergar a novidade e o Service Worker renovar o cache.
