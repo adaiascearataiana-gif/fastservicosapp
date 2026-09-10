@@ -1,6 +1,7 @@
 {
   "id":"./?app=despesas",
   "name":"FAST - Despesas",
+  "version": "2.3.32",
   "short_name":"Despesas",
   "description":"Acesso direto às Despesas da FAST Serviços",
   "start_url":"./?exclusive=despesas&atalho=despesas",
@@ -8,6 +9,18 @@
   "display":"standalone",
   "background_color":"#dc2626",
   "theme_color":"#dc2626",
+  "file_handlers":[
+    {
+      "action":"app-despesas/",
+      "accept":{
+        "application/pdf":[".pdf"],
+        "image/png":[".png"],
+        "image/jpeg":[".jpg",".jpeg"],
+        "image/webp":[".webp"]
+      },
+      "launch_type":"single-client"
+    }
+  ],
   "share_target":{
     "action":"app-despesas/",
     "method":"POST",

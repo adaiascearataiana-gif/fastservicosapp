@@ -1,8 +1,10 @@
 /* FAST Servicos - app Despesas - Service Worker persistente
-   (r134; r144 = novos icones; r145 (2.3.30) = SHARE TARGET: o app Despesas
-   aparece na folha de compartilhamento do Android; ao compartilhar um PDF
-   (boleto/comprovante) ou imagem (JPG/PNG) de dentro de qualquer app, o
-   arquivo e entregue ao formulario de despesa, anexado e lido por OCR/IA.)
+   (r134; r144 = novos icones; r145 = SHARE TARGET unico arquivo;
+    r146 (2.3.32) = SHARE TARGET MULTI-ARQUIVO: o app Despesas aparece na
+    folha de compartilhamento do Android; ao compartilhar um ou VARIOS
+    PDFs (boleto/comprovante) ou imagens (JPG/PNG) de dentro de qualquer
+    app, TODOS os arquivos sao entregues ao formulario de despesa,
+    anexados e lidos por OCR/IA com preenchimento automatico.)
    ==========================================================================
    RESTAURA a instalabilidade do mini-app: o Chrome so dispara o
    beforeinstallprompt (botao "Instalar Despesas") quando existe uma
@@ -12,26 +14,31 @@
    Modelo network-first (igual ao r128 que sempre funcionou):
    - recursos: rede primeiro (cache:'no-store'); cache so como fallback
      quando a rede falha (offline).
-   - activate: apaga caches antigos (fast-despesas-r128 e anteriores).
+   - activate: apaga caches antigos (fast-despesas-r145 e anteriores).
    - SEM self.unregister e SEM clients.navigate (nada de reload em loop).
 
-   r145 SHARE TARGET (como funciona):
+   r146 SHARE TARGET (como funciona):
    1. Android compartilha -> POST multipart na action "./" do manifest.
-   2. O SW extrai o arquivo do formData, guarda {nome,mime,tamanho,b64,ts}
-      em cache de uso unico (fast-despesas-share-r145) e responde 303 para
-      "./?share=1".
-   3. O wrapper (index.html) carrega, ve ?share=1, busca o arquivo em
+   2. O SW extrai TODOS os arquivos do formData, guarda
+      {files:[{nome,mime,tamanho,b64}],ts} em cache de uso unico
+      (fast-despesas-share-r146) e responde 303 para "./?share=1".
+   3. O wrapper (index.html) carrega, ve ?share=1, busca a lista em
       fetch('./__fast-share-get__') (interceptado aqui) e repassa ao app
-      principal dentro do iframe via postMessage.
-   4. O app anexa o comprovante na despesa e roda OCR/IA imediatamente
-      (RECEBEDOR->LOCAL, VALOR->valor, DATA->data).
-   - O POST nunca vai a rede (GitHub Pages nao aceita POST). */
-const CACHE='fast-despesas-r145';
-const CORE=['./','./index.html','./manifest.webmanifest','../assets/atalho-despesas-192.png?v=r145','../assets/atalho-despesas-512.png?v=r145'];
-const SHARE_CACHE='fast-despesas-share-r145';
+      principal dentro do iframe via postMessage (lista completa).
+   4. O app anexa TODOS os comprovantes na despesa, roda OCR/IA
+      imediatamente no principal e preenche os campos sozinho
+      (RECEBEDOR->LOCAL, VALOR->valor, DATA->data) - so conferir e salvar.
+   - O POST nunca vai a rede (GitHub Pages nao aceita POST).
+   - Compat r145: se o wrapper antigo pedir, o item antigo (arquivo unico)
+     continua disponivel no mesmo payload (campo "item" = primeiro arquivo). */
+const CACHE='fast-despesas-r146';
+const CORE=['./','./index.html','./manifest.webmanifest','../assets/atalho-despesas-192.png?v=r146','../assets/atalho-despesas-512.png?v=r146'];
+const SHARE_CACHE='fast-despesas-share-r146';
 const SHARE_KEY='/fastservicosapp/app-despesas/__fast-share__';
 const SHARE_GET_URL='/fastservicosapp/app-despesas/__fast-share-get__';
-const SHARE_TTL=120000; /* 2 minutos de validade */
+const SHARE_TTL=300000; /* 5 minutos de validade (rede lenta / primeiro acesso) */
+const SHARE_MAX_ARQ=10;   /* ate 10 comprovantes por compartilhamento */
+const SHARE_MAX_MB=12;    /* 12MB por arquivo (limite do Android share) */
 
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE).catch(()=>{})));self.skipWaiting()});
 self.addEventListener('activate',e=>{e.waitUntil(
@@ -42,17 +49,17 @@ self.addEventListener('activate',e=>{e.waitUntil(
 
 function cacheShareAberto(){return caches.open(SHARE_CACHE)}
 
-/* Guarda o comprovante compartilhado (uso unico, com TTL de 2 min). */
-function guardarShare(item){
-  return cacheShareAberto().then(c=>c.put(SHARE_KEY,new Response(JSON.stringify(item),{headers:{'Content-Type':'application/json'}})));
+/* Guarda a LISTA de comprovantes compartilhados (uso unico, TTL 5 min). */
+function guardarShare(pacote){
+  return cacheShareAberto().then(c=>c.put(SHARE_KEY,new Response(JSON.stringify(pacote),{headers:{'Content-Type':'application/json'}})));
 }
-/* Devolve o comprovante guardado (ou null se expirou/nao existe). */
+/* Devolve o pacote guardado (ou null se expirou/nao existe). */
 function lerShare(){
   return cacheShareAberto().then(c=>c.match(SHARE_KEY).then(function(res){
     if(!res)return null;
-    return res.json().then(function(item){
-      if(!item||!item.ts||Date.now()-item.ts>SHARE_TTL)return null;
-      return item;
+    return res.json().then(function(pacote){
+      if(!pacote||!pacote.ts||Date.now()-pacote.ts>SHARE_TTL)return null;
+      return pacote;
     }).catch(()=>null);
   }));
 }
@@ -67,20 +74,26 @@ self.addEventListener('fetch',function(event){
   try{u=new URL(event.request.url)}catch(e){return}
   var caminho=u.pathname.replace(/\/+$/,'');
 
-  /* (3) Wrapper pede o comprovante guardado (GET especial, uso unico). */
+  /* (3) Wrapper pede a lista guardada (GET especial, uso unico). */
   if(event.request.method==='GET'&&caminho===SHARE_GET_URL){
     event.respondWith(
-      lerShare().then(function(item){
-        var corpo=JSON.stringify({ok:!!item,item:item?{nome:item.nome,mime:item.mime,tamanho:item.tamanho,b64:item.b64}:null});
+      lerShare().then(function(pacote){
+        var corpo;
+        if(pacote&&pacote.files&&pacote.files.length){
+          /* formato novo r146 (lista) + campo "item" de compat r145 */
+          corpo=JSON.stringify({ok:true,ts:pacote.ts,files:pacote.files,item:pacote.files[0]||null});
+        }else{
+          corpo=JSON.stringify({ok:false,item:null,files:[]});
+        }
         return new Response(corpo,{status:200,headers:{'Content-Type':'application/json','Cache-Control':'no-store'}});
       }).catch(function(){
-        return new Response('{"ok":false,"item":null}',{status:200,headers:{'Content-Type':'application/json'}});
+        return new Response('{"ok":false,"item":null,"files":[]}',{status:200,headers:{'Content-Type':'application/json'}});
       })
     );
     return;
   }
 
-  /* (1)+(2) POST do Android: guarda arquivo + redireciona com ?share=1 */
+  /* (1)+(2) POST do Android: guarda TODOS os arquivos + redireciona ?share=1 */
   if(event.request.method==='POST'&&(caminho==='/fastservicosapp/app-despesas'||u.searchParams.get('share')==='post')){
     event.respondWith(
       event.request.formData().then(function(data){
@@ -89,17 +102,24 @@ self.addEventListener('fetch',function(event){
           var fs=data.getAll('comprovante')||[];
           for(var i=0;i<fs.length;i++){if(fs[i]&&fs[i].size>0)arquivos.push(fs[i]);}
           if(!arquivos.length){
-            data.forEach(function(v,k){if(v&&typeof v==='object'&&v.size>0&&v.name&&v.size<12*1024*1024)arquivos.push(v);});
+            data.forEach(function(v,k){if(v&&typeof v==='object'&&v.size>0&&v.name&&v.size<SHARE_MAX_MB*1024*1024)arquivos.push(v);});
           }
         }catch(e){}
+        arquivos=arquivos.slice(0,SHARE_MAX_ARQ);
         if(!arquivos.length){
           return Response.redirect(urlDe(event.request,'./?share=1'),303);
         }
-        var f=arquivos[0];
-        var item={nome:f.name||'comprovante',mime:f.type||'application/octet-stream',tamanho:f.size,ts:Date.now(),b64:''};
-        return blobParaBase64(f).then(function(b64){
-          item.b64=b64;
-          return guardarShare(item);
+        var pacote={ts:Date.now(),files:[]};
+        var seq=Promise.resolve();
+        arquivos.forEach(function(f){
+          seq=seq.then(function(){
+            return blobParaBase64(f).then(function(b64){
+              pacote.files.push({nome:f.name||'comprovante',mime:f.type||'application/octet-stream',tamanho:f.size,b64:b64});
+            });
+          });
+        });
+        return seq.then(function(){
+          return guardarShare(pacote);
         }).then(function(){
           return Response.redirect(urlDe(event.request,'./?share=1'),303);
         }).catch(function(){
