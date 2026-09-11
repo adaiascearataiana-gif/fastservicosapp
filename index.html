@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="fast-linux-desktop" data-fast-version="2.3.36"><head>
+<html lang="pt-BR" class="fast-linux-desktop" data-fast-version="2.3.37"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
   <meta name="theme-color" content="#4f46e5">
@@ -21,13 +21,13 @@
   <meta name="fast-github-branch" content="main">
   <meta name="fast-github-path" content="index.html">
   <meta name="fast-github-token-env" content="GH_TOKEN">
-  <meta name="fast-app-version" content="2.3.36">
+  <meta name="fast-app-version" content="2.3.37">
   <meta name="fast-app-date" content="2026-09-11T09:30:00-03:00">
-  <meta name="fast-latest-update" content="2.3.36: corrigido o virar de dia de ROTAS DO DIA — o dia agora vira de verdade à meia-noite do fuso do aparelho (antes virava às 21:00 por causa do fuso UTC); ao virar o dia, só as rotas PENDENTES do dia anterior entram na lista do dia novo, rotas concluídas de dias anteriores não aparecem mais; rotas concluídas na lista do dia atual que pertencem a dias anteriores são limpas automaticamente.">
+  <meta name="fast-latest-update" content="2.3.37: recuperação real de senha por e-mail com Supabase Auth e SMTP Brevo, link seguro, nova senha unificada e preservação total dos dados.">
   <!-- r92: verificação automática de nova versão ao abrir; Verificar Atualizações com cache-busting e sem fallback no-cors inválido. -->
   <!-- r70.1: lista corrente no HTML inicial; o painel não espera scripts tardios -->
-  <meta name="fast-app-changelog-immediate" content="2.3.36">
-  <meta name="fast-app-changelog" content="[{&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;2.3.36 (11/09/2026): corrigido o virar de dia de ROTAS DO DIA — o dia agora vira à meia-noite do fuso do aparelho (antes virava às 21:00 no Brasil por causa do fuso UTC, e rotas trabalhadas à noite caíam na lista do dia seguinte); ao virar o dia, somente as rotas PENDENTES do dia anterior entram na lista do dia novo; rotas CONCLUÍDAS de dias anteriores não aparecem mais em ROTAS DO DIA (ficam no histórico da data delas, visíveis pelo filtro de data); rotas concluídas de dias anteriores que estavam paradas na lista do dia atual são removidas automaticamente.&quot;},{&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;2.3.36 (11/09/2026): corrigida a divergência de status entre a rota cadastrada e o card de ROTAS DO DIA — marcar rota como CONCLUÍDA na aba ROTAS agora atualiza o card em qualquer data em que ele esteja; antes, se o card tinha sido movido de dia, ele ficava EM ROTA enquanto a rota era CONCLUÍDA e reaparecia no dia seguinte.&quot;},{&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;2.3.35 (11/09/2026): quadro de NOVIDADES abre sozinho ao abrir o app sempre que houver atualização, mostrando todas as melhorias e correções da versão; a seção ÚLTIMAS ATUALIZAÇÕES nasce sempre preenchida e nunca mais fica vazia.&quot;},{&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;2.3.34 (10/09/2026): guia passo a passo do ID AUTH do Google Drive — como criar o Client ID OAuth no Google Cloud, a origem exata autorizada e onde colar no app para conectar o backup de fotos no Drive.&quot;},{&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;2.3.34 (10/09/2026): painel ADICIONAR ROTAS agora embutido direto na tela ROTAS DO DIA — o botão antigo foi removido; a nova rota é lançada na data selecionada no filtro, com aviso da data sempre visível.&quot;},{&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;2.3.34 (10/09/2026): campos Destino, Qtd e Valor na MESMA linha, com botões + e − ao lado do valor que ajustam R$ 5 por toque; no celular tudo cabe na mesma linha, sem cortar.&quot;},{&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;2.3.34 (10/09/2026): botões Subir e Descer de volta no lado direito dos cards de rota — o primeiro não deixa subir e o último não deixa descer, exatamente como no relatório.&quot;},{&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;2.3.34 (10/09/2026): botão de comando rápido ⚡ agora é arrastável — mova para qualquer canto da tela; a posição fica salva e ele nunca sai da tela.&quot;},{&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;2.3.34 (10/09/2026): barra fixa inferior maior — os 4 botões agora têm ícones e textos maiores e ficam proporcionais dentro da barra, no celular e no computador.&quot;},{&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;2.3.34 (10/09/2026): corrigido erro de programação nos botões Subir/Descer que podia travar o aplicativo ao abrir as rotas; e ajustes de tamanho da barra e dos campos no celular.&quot;},{&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;2.3.33 (10/09/2026): versão unificada em telas, manifesto, recursos, atualização e recuperação; referências ativas antigas não comandam mais o aplicativo.&quot;},{&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;2.3.33 (10/09/2026): blocos CSS idênticos e inúteis foram removidos sem alterar o visual.&quot;},{&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;2.3.33 (10/09/2026): Centro de Diagnóstico verifica armazenamento, fotos, rede, compartilhamento, atualização, Service Worker e integridade básica.&quot;},{&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;2.3.33 (10/09/2026): backup de emergência pode ser baixado diretamente pelo diagnóstico antes de manutenção ou troca de aparelho.&quot;},{&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;2.3.33 (10/09/2026): proteção contra textos longos foi ampliada para todos os elementos dos cards das Rotas do Dia.&quot;},{&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;2.3.33 (10/09/2026): limpeza de atualização remove somente caches e Service Workers; rotas, despesas, fotos e configurações permanecem intactas.&quot;},{&quot;type&quot;:&quot;seguranca&quot;,&quot;text&quot;:&quot;2.3.33 (10/09/2026): diagnóstico alerta sobre token de publicação salvo e oferece remoção imediata em aparelhos compartilhados.&quot;},{&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;2.3.33 (10/09/2026): agrupamento total, borda verde de conclusão e envio conjunto de fotos renomeadas continuam protegidos pelo último módulo carregado.&quot;}]" data-r88="1" data-r89="1" data-r87="1" data-r127="1">
+  <meta name="fast-app-changelog-immediate" content="2.3.37">
+  <meta name="fast-app-changelog" content="[{&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;2.3.36 (11/09/2026): corrigido o virar de dia de ROTAS DO DIA — o dia agora vira à meia-noite do fuso do aparelho (antes virava às 21:00 no Brasil por causa do fuso UTC, e rotas trabalhadas à noite caíam na lista do dia seguinte); ao virar o dia, somente as rotas PENDENTES do dia anterior entram na lista do dia novo; rotas CONCLUÍDAS de dias anteriores não aparecem mais em ROTAS DO DIA (ficam no histórico da data delas, visíveis pelo filtro de data); rotas concluídas de dias anteriores que estavam paradas na lista do dia atual são removidas automaticamente.&quot;},{&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;2.3.36 (11/09/2026): corrigida a divergência de status entre a rota cadastrada e o card de ROTAS DO DIA — marcar rota como CONCLUÍDA na aba ROTAS agora atualiza o card em qualquer data em que ele esteja; antes, se o card tinha sido movido de dia, ele ficava EM ROTA enquanto a rota era CONCLUÍDA e reaparecia no dia seguinte.&quot;},{&quot;type&quot;:&quot;novo&quot;,&quot;:&quot;2.3.35 (11/09/2026): quadro de NOVIDADES abre sozinho ao abrir o app sempre que houver atualização, mostrando todas as melhorias e correções da versão; a seção ÚLTIMAS ATUALIZAÇÕES nasce sempre preenchida e nunca mais fica vazia.&quot;},{&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;2.3.34 (10/09/2026): guia passo a passo do ID AUTH do Google Drive — como criar o Client ID OAuth no Google Cloud, a origem exata autorizada e onde colar no app para conectar o backup de fotos no Drive.&quot;},{&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;2.3.34 (10/09/2026): painel ADICIONAR ROTAS agora embutido direto na tela ROTAS DO DIA — o botão antigo foi removido; a nova rota é lançada na data selecionada no filtro, com aviso da data sempre visível.&quot;},{&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;2.3.34 (10/09/2026): campos Destino, Qtd e Valor na MESMA linha, com botões + e − ao lado do valor que ajustam R$ 5 por toque; no celular tudo cabe na mesma linha, sem cortar.&quot;},{&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;2.3.34 (10/09/2026): botões Subir e Descer de volta no lado direito dos cards de rota — o primeiro não deixa subir e o último não deixa descer, exatamente como no relatório.&quot;},{&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;2.3.34 (10/09/2026): botão de comando rápido ⚡ agora é arrastável — mova para qualquer canto da tela; a posição fica salva e ele nunca sai da tela.&quot;},{&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;2.3.34 (10/09/2026): barra fixa inferior maior — os 4 botões agora têm ícones e textos maiores e ficam proporcionais dentro da barra, no celular e no computador.&quot;},{&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;2.3.34 (10/09/2026): corrigido erro de programação nos botões Subir/Descer que podia travar o aplicativo ao abrir as rotas; e ajustes de tamanho da barra e dos campos no celular.&quot;},{&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;2.3.33 (10/09/2026): versão unificada em telas, manifesto, recursos, atualização e recuperação; referências ativas antigas não comandam mais o aplicativo.&quot;},{&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;2.3.33 (10/09/2026): blocos CSS idênticos e inúteis foram removidos sem alterar o visual.&quot;},{&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;2.3.33 (10/09/2026): Centro de Diagnóstico verifica armazenamento, fotos, rede, compartilhamento, atualização, Service Worker e integridade básica.&quot;},{&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;2.3.33 (10/09/2026): backup de emergência pode ser baixado diretamente pelo diagnóstico antes de manutenção ou troca de aparelho.&quot;},{&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;2.3.33 (10/09/2026): proteção contra textos longos foi ampliada para todos os elementos dos cards das Rotas do Dia.&quot;},{&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;2.3.33 (10/09/2026): limpeza de atualização remove somente caches e Service Workers; rotas, despesas, fotos e configurações permanecem intactas.&quot;},{&quot;type&quot;:&quot;seguranca&quot;,&quot;text&quot;:&quot;2.3.33 (10/09/2026): diagnóstico alerta sobre token de publicação salvo e oferece remoção imediata em aparelhos compartilhados.&quot;},{&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;2.3.33 (10/09/2026): agrupamento total, borda verde de conclusão e envio conjunto de fotos renomeadas continuam protegidos pelo último módulo carregado.&quot;}]" data-r88="1" data-r89="1" data-r87="1" data-r127="1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https:; img-src 'self' data: blob: https: http:; connect-src 'self' https: data: blob:; font-src 'self' https: data:;">
   <!-- PWA: Meta tags para app instalavel -->
   <meta name="mobile-web-app-capable" content="yes">
@@ -60631,4 +60631,204 @@ body.fast-exclusive-app main { padding-bottom: 12px !important; }
 </script>
 
 
+<!-- FAST 2.3.37 — recuperação real por e-mail com Supabase Auth + SMTP -->
+<style id="fast-237-auth-recovery-style">
+  #fastGateResetPassword{display:none}
+  #fastGateResetPassword .fast-reset-help{color:rgba(255,255,255,.78);font-size:13.5px;font-weight:600;line-height:1.55;text-align:center;margin:0 0 14px}
+  #fastGateRecoverErr.fast-ok{color:#86efac!important}
+  #fastGateRecoverErr.fast-error{color:#fca5a5!important}
+</style>
+<script id="fast-237-auth-recovery">
+(function(){
+  'use strict';
+  var VERSION='2.3.37';
+  var PROJECT_URL='https://jizoedwnyfcjokoqgfmn.supabase.co';
+  var PUBLIC_KEY='sb_publishable_mXMGOmMueyVWcS8UdQHP-w_sa13m9B4';
+  var REDIRECT_URL='https://adaiascearataiana-gif.github.io/fastservicosapp/?recuperar-senha=1';
+  var busy=false;
+
+  function el(id){return document.getElementById(id)}
+  function validEmail(value){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value||'').trim())}
+  function companyEmail(){
+    try{
+      var data=JSON.parse(localStorage.getItem('fast_dados_empresa')||'{}');
+      return String(data.empEmail||'').trim();
+    }catch(e){return ''}
+  }
+  function authHeaders(token){
+    var headers={'Content-Type':'application/json','apikey':PUBLIC_KEY};
+    if(token)headers.Authorization='Bearer '+token;
+    return headers;
+  }
+  async function authRequest(path,options){
+    options=options||{};
+    var response=await fetch(PROJECT_URL+'/auth/v1'+path,{
+      method:options.method||'POST',
+      headers:authHeaders(options.token||''),
+      body:options.body===undefined?undefined:JSON.stringify(options.body)
+    });
+    var payload={};
+    try{payload=await response.json()}catch(e){}
+    if(!response.ok){
+      var message=payload.msg||payload.message||payload.error_description||payload.error||'Não foi possível concluir a solicitação.';
+      var error=new Error(message);error.status=response.status;error.payload=payload;throw error;
+    }
+    return payload;
+  }
+  function genericSentMessage(){return 'Se o e-mail estiver cadastrado, você receberá um link para criar uma nova senha. Verifique também a caixa de spam.'}
+
+  async function requestRecovery(email){
+    email=String(email||'').trim().toLowerCase();
+    if(!validEmail(email))throw new Error('Digite um e-mail válido.');
+    await authRequest('/recover?redirect_to='+encodeURIComponent(REDIRECT_URL),{body:{email:email}});
+    return genericSentMessage();
+  }
+  window.fastSolicitarRecuperacaoEmail=async function(email){
+    try{return {ok:true,message:await requestRecovery(email)}}
+    catch(e){
+      if(e&&e.status===429)return {ok:false,message:'Foram feitas muitas tentativas. Aguarde alguns minutos e tente novamente.'};
+      return {ok:false,message:'Não foi possível enviar o e-mail agora. Confira a conexão e tente novamente.'};
+    }
+  };
+
+  window.fastGateConfirmRecover=async function(){
+    if(busy)return;
+    var input=el('fastGateRecoverEmail'),err=el('fastGateRecoverErr'),btn=el('fastGateRecoverBtn');
+    var email=input?input.value.trim():'';
+    if(err){err.textContent='';err.classList.remove('fast-ok','fast-error')}
+    if(!validEmail(email)){
+      if(err){err.textContent='Digite um e-mail válido.';err.classList.add('fast-error')}
+      if(input)input.focus();return;
+    }
+    busy=true;if(btn){btn.disabled=true;btn.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> Enviando...'}
+    try{
+      await requestRecovery(email);
+      if(err){err.textContent=genericSentMessage();err.classList.add('fast-ok')}
+      if(input)input.value='';
+    }catch(e){
+      var msg=(e&&e.status===429)?'Foram feitas muitas tentativas. Aguarde alguns minutos e tente novamente.':'Não foi possível enviar o e-mail. Confira a configuração SMTP e tente novamente.';
+      if(err){err.textContent=msg;err.classList.add('fast-error')}
+    }finally{
+      busy=false;if(btn){btn.disabled=false;btn.innerHTML='<i class="fa-solid fa-paper-plane"></i> Enviar recuperação por e-mail'}
+    }
+  };
+
+  function recoveryToken(){
+    var hash=new URLSearchParams(location.hash.replace(/^#/,''));
+    return hash.get('type')==='recovery'?hash.get('access_token')||'':'';
+  }
+  function installResetForm(){
+    var recover=el('fastGateRecover');if(!recover||el('fastGateResetPassword'))return;
+    var box=document.createElement('div');box.id='fastGateResetPassword';
+    box.innerHTML='<p class="fast-reset-help"><strong style="color:#86efac">E-mail confirmado.</strong><br>Crie uma nova senha para acessar a plataforma e a Área Protegida.</p>'+
+      '<div class="fast-gate-field"><label style="color:rgba(255,255,255,.85)">Nova senha</label><div class="fg-wrap"><i class="fa-solid fa-lock fg-ico"></i><input type="password" id="fastGateNewPassword" placeholder="Mínimo 8 caracteres" autocomplete="new-password"><button type="button" class="fg-toggle ripple" onclick="fastGateTogglePwd(\'fastGateNewPassword\',this)" aria-label="Mostrar senha"><i class="fa-solid fa-eye"></i></button></div></div>'+
+      '<div class="fast-gate-field"><label style="color:rgba(255,255,255,.85)">Confirmar nova senha</label><div class="fg-wrap"><i class="fa-solid fa-lock fg-ico"></i><input type="password" id="fastGateNewPassword2" placeholder="Repita a nova senha" autocomplete="new-password"><button type="button" class="fg-toggle ripple" onclick="fastGateTogglePwd(\'fastGateNewPassword2\',this)" aria-label="Mostrar senha"><i class="fa-solid fa-eye"></i></button></div></div>'+
+      '<div class="fast-gate-err" id="fastGateNewPasswordErr"></div><button type="button" class="fast-gate-btn ripple" id="fastGateNewPasswordBtn" onclick="fastGateSaveRecoveredPassword()"><i class="fa-solid fa-shield-check"></i> Salvar nova senha</button>';
+    recover.appendChild(box);
+  }
+  function showResetForm(){
+    installResetForm();
+    var gate=el('fastLoginGate');if(gate)gate.classList.add('show');
+    document.body.style.overflow='hidden';
+    var splash=el('fastSplash');if(splash){splash.style.display='flex';splash.classList.remove('hide');splash.classList.add('blur')}
+    if(el('fastGateCreate'))el('fastGateCreate').style.display='none';
+    if(el('fastGateLogin'))el('fastGateLogin').style.display='none';
+    if(el('fastGateRecover'))el('fastGateRecover').style.display='block';
+    Array.prototype.forEach.call(el('fastGateRecover').children,function(child){child.style.display=child.id==='fastGateResetPassword'?'block':'none'});
+    setTimeout(function(){var input=el('fastGateNewPassword');if(input)input.focus()},150);
+  }
+  async function localCredential(password){
+    var old={};try{old=JSON.parse(localStorage.getItem('fast_auth_cred')||'{}')}catch(e){}
+    var user=String(old.user||'admin');
+    var salt=crypto.getRandomValues(new Uint8Array(16));
+    var key=await crypto.subtle.importKey('raw',new TextEncoder().encode(password),{name:'PBKDF2'},false,['deriveBits']);
+    var bits=await crypto.subtle.deriveBits({name:'PBKDF2',salt:salt,iterations:600000,hash:'SHA-256'},key,256);
+    function b64(value){var bytes=new Uint8Array(value),str='';for(var i=0;i<bytes.length;i++)str+=String.fromCharCode(bytes[i]);return btoa(str)}
+    localStorage.setItem('fast_auth_cred',JSON.stringify({user:user,saltB64:b64(salt),hashB64:b64(bits),iter:600000,created:Date.now()}));
+    localStorage.setItem('fast_auth_enabled','1');
+    localStorage.removeItem('fast_auth_bio');
+    localStorage.removeItem('fast_auth_fails');
+    localStorage.removeItem('fast_empresa_senha_hash');
+  }
+  window.fastGateSaveRecoveredPassword=async function(){
+    if(busy)return;
+    var p1=(el('fastGateNewPassword')||{}).value||'',p2=(el('fastGateNewPassword2')||{}).value||'';
+    var err=el('fastGateNewPasswordErr'),btn=el('fastGateNewPasswordBtn'),token=recoveryToken();
+    if(err)err.textContent='';
+    if(!token){if(err)err.textContent='Este link expirou ou já foi usado. Solicite uma nova recuperação.';return}
+    if(p1.length<8){if(err)err.textContent='A nova senha deve ter no mínimo 8 caracteres.';return}
+    if(p1!==p2){if(err)err.textContent='As senhas não coincidem.';return}
+    busy=true;if(btn){btn.disabled=true;btn.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> Salvando...'}
+    try{
+      await authRequest('/user',{method:'PUT',token:token,body:{password:p1}});
+      await localCredential(p1);
+      try{history.replaceState({},document.title,location.pathname)}catch(e){}
+      alert('Senha atualizada com sucesso. A biometria deverá ser cadastrada novamente por segurança.');
+      location.reload();
+    }catch(e){
+      if(err)err.textContent='Não foi possível atualizar a senha. O link pode ter expirado; solicite um novo.';
+      busy=false;if(btn){btn.disabled=false;btn.innerHTML='<i class="fa-solid fa-shield-check"></i> Salvar nova senha'}
+    }
+  };
+
+  async function ensureAuthAccount(email,password,user){
+    if(!validEmail(email)||!password)return;
+    try{
+      await authRequest('/token?grant_type=password',{body:{email:email,password:password}});
+      return;
+    }catch(e){}
+    try{
+      await authRequest('/signup',{body:{email:email,password:password,data:{fast_user:user||'admin',app:'FAST Serviços'}}});
+    }catch(e){}
+  }
+  function wrapLoginForMigration(){
+    var previous=window.fastGateDoLogin;if(typeof previous!=='function'||previous.fast237)return;
+    var wrapped=async function(){
+      var user=(el('fastGateUser')||{}).value||'',password=(el('fastGatePwd')||{}).value||'';
+      var result=await previous.apply(this,arguments);
+      var gate=el('fastLoginGate');
+      if(password&&gate&&!gate.classList.contains('show'))ensureAuthAccount(companyEmail(),password,user);
+      return result;
+    };wrapped.fast237=true;window.fastGateDoLogin=wrapped;
+  }
+  function wrapCreateForMigration(){
+    var previous=window.fastGateDoCreate;if(typeof previous!=='function'||previous.fast237)return;
+    var wrapped=async function(){
+      var user=(el('fastGateCreateUser')||{}).value||'',password=(el('fastGateCreatePwd')||{}).value||'';
+      var result=await previous.apply(this,arguments);
+      var gate=el('fastLoginGate');
+      if(password&&gate&&!gate.classList.contains('show'))ensureAuthAccount(companyEmail(),password,user);
+      return result;
+    };wrapped.fast237=true;window.fastGateDoCreate=wrapped;
+  }
+
+  window.empConfirmarReset=async function(){
+    var input=el('empResetInput'),err=el('empResetErro')||el('empPwdErro'),email=input?input.value.trim():'';
+    if(err){err.textContent='';err.style.color='#64748b'}
+    if(!validEmail(email)){if(err){err.textContent='Digite um e-mail válido.';err.style.color='#dc2626'}return}
+    try{
+      await requestRecovery(email);
+      if(err){err.textContent=genericSentMessage();err.style.color='#16a34a'}
+      if(input)input.value='';
+    }catch(e){if(err){err.textContent='Não foi possível enviar o e-mail agora. Tente novamente.';err.style.color='#dc2626'}}
+  };
+
+  function boot(){
+    document.documentElement.setAttribute('data-fast-version',VERSION);
+    var versionMeta=document.querySelector('meta[name="fast-app-version"]');if(versionMeta)versionMeta.content=VERSION;
+    var immediateMeta=document.querySelector('meta[name="fast-app-changelog-immediate"]');if(immediateMeta)immediateMeta.content=VERSION;
+    var changeMeta=document.querySelector('meta[name="fast-app-changelog"]');
+    var currentChanges=[{type:'seguranca',text:'2.3.37 (11/09/2026): recuperação real de senha por e-mail com Supabase Auth e SMTP Brevo; o link seguro permite criar uma nova senha para a plataforma e a Área Protegida sem apagar rotas, despesas, fotos ou configurações.'}];
+    if(changeMeta)changeMeta.content=JSON.stringify(currentChanges);
+    ['fastSplashVersion','fastGateVersionNum','fastVersaoLabel'].forEach(function(id){var node=el(id);if(node)node.textContent=VERSION});
+    var menuVersion=el('navMenuVersao');if(menuVersion)menuVersion.textContent='Versão '+VERSION;
+    window.fastUltimoModuloNovidades=currentChanges;
+    wrapLoginForMigration();
+    wrapCreateForMigration();
+    try{if(typeof window.fastPopularUltimasAtualizacoes==='function')window.fastPopularUltimasAtualizacoes()}catch(e){}
+    if(recoveryToken())showResetForm();
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+})();
+</script>
 </body></html>
