@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="fast-linux-desktop" data-fast-version="2.3.37"><head>
+<html lang="pt-BR" class="fast-linux-desktop" data-fast-version="2.3.39"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
   <meta name="theme-color" content="#4f46e5">
@@ -21,12 +21,12 @@
   <meta name="fast-github-branch" content="main">
   <meta name="fast-github-path" content="index.html">
   <meta name="fast-github-token-env" content="GH_TOKEN">
-  <meta name="fast-app-version" content="2.3.37">
+  <meta name="fast-app-version" content="2.3.39">
   <meta name="fast-app-date" content="2026-09-11T09:30:00-03:00">
-  <meta name="fast-latest-update" content="2.3.37: recuperação real de senha por e-mail com Supabase Auth e SMTP Brevo, link seguro, nova senha unificada e preservação total dos dados.">
+  <meta name="fast-latest-update" content="2.3.39: Modo Entregador removido e Lixeira de Rotas corrigida para armazenar, persistir e restaurar rotas excluídas com vínculos e fotos.">
   <!-- r92: verificação automática de nova versão ao abrir; Verificar Atualizações com cache-busting e sem fallback no-cors inválido. -->
   <!-- r70.1: lista corrente no HTML inicial; o painel não espera scripts tardios -->
-  <meta name="fast-app-changelog-immediate" content="2.3.37">
+  <meta name="fast-app-changelog-immediate" content="2.3.39">
   <meta name="fast-app-changelog" content="[{&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;2.3.36 (11/09/2026): corrigido o virar de dia de ROTAS DO DIA — o dia agora vira à meia-noite do fuso do aparelho (antes virava às 21:00 no Brasil por causa do fuso UTC, e rotas trabalhadas à noite caíam na lista do dia seguinte); ao virar o dia, somente as rotas PENDENTES do dia anterior entram na lista do dia novo; rotas CONCLUÍDAS de dias anteriores não aparecem mais em ROTAS DO DIA (ficam no histórico da data delas, visíveis pelo filtro de data); rotas concluídas de dias anteriores que estavam paradas na lista do dia atual são removidas automaticamente.&quot;},{&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;2.3.36 (11/09/2026): corrigida a divergência de status entre a rota cadastrada e o card de ROTAS DO DIA — marcar rota como CONCLUÍDA na aba ROTAS agora atualiza o card em qualquer data em que ele esteja; antes, se o card tinha sido movido de dia, ele ficava EM ROTA enquanto a rota era CONCLUÍDA e reaparecia no dia seguinte.&quot;},{&quot;type&quot;:&quot;novo&quot;,&quot;:&quot;2.3.35 (11/09/2026): quadro de NOVIDADES abre sozinho ao abrir o app sempre que houver atualização, mostrando todas as melhorias e correções da versão; a seção ÚLTIMAS ATUALIZAÇÕES nasce sempre preenchida e nunca mais fica vazia.&quot;},{&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;2.3.34 (10/09/2026): guia passo a passo do ID AUTH do Google Drive — como criar o Client ID OAuth no Google Cloud, a origem exata autorizada e onde colar no app para conectar o backup de fotos no Drive.&quot;},{&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;2.3.34 (10/09/2026): painel ADICIONAR ROTAS agora embutido direto na tela ROTAS DO DIA — o botão antigo foi removido; a nova rota é lançada na data selecionada no filtro, com aviso da data sempre visível.&quot;},{&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;2.3.34 (10/09/2026): campos Destino, Qtd e Valor na MESMA linha, com botões + e − ao lado do valor que ajustam R$ 5 por toque; no celular tudo cabe na mesma linha, sem cortar.&quot;},{&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;2.3.34 (10/09/2026): botões Subir e Descer de volta no lado direito dos cards de rota — o primeiro não deixa subir e o último não deixa descer, exatamente como no relatório.&quot;},{&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;2.3.34 (10/09/2026): botão de comando rápido ⚡ agora é arrastável — mova para qualquer canto da tela; a posição fica salva e ele nunca sai da tela.&quot;},{&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;2.3.34 (10/09/2026): barra fixa inferior maior — os 4 botões agora têm ícones e textos maiores e ficam proporcionais dentro da barra, no celular e no computador.&quot;},{&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;2.3.34 (10/09/2026): corrigido erro de programação nos botões Subir/Descer que podia travar o aplicativo ao abrir as rotas; e ajustes de tamanho da barra e dos campos no celular.&quot;},{&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;2.3.33 (10/09/2026): versão unificada em telas, manifesto, recursos, atualização e recuperação; referências ativas antigas não comandam mais o aplicativo.&quot;},{&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;2.3.33 (10/09/2026): blocos CSS idênticos e inúteis foram removidos sem alterar o visual.&quot;},{&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;2.3.33 (10/09/2026): Centro de Diagnóstico verifica armazenamento, fotos, rede, compartilhamento, atualização, Service Worker e integridade básica.&quot;},{&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;2.3.33 (10/09/2026): backup de emergência pode ser baixado diretamente pelo diagnóstico antes de manutenção ou troca de aparelho.&quot;},{&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;2.3.33 (10/09/2026): proteção contra textos longos foi ampliada para todos os elementos dos cards das Rotas do Dia.&quot;},{&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;2.3.33 (10/09/2026): limpeza de atualização remove somente caches e Service Workers; rotas, despesas, fotos e configurações permanecem intactas.&quot;},{&quot;type&quot;:&quot;seguranca&quot;,&quot;text&quot;:&quot;2.3.33 (10/09/2026): diagnóstico alerta sobre token de publicação salvo e oferece remoção imediata em aparelhos compartilhados.&quot;},{&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;2.3.33 (10/09/2026): agrupamento total, borda verde de conclusão e envio conjunto de fotos renomeadas continuam protegidos pelo último módulo carregado.&quot;}]" data-r88="1" data-r89="1" data-r87="1" data-r127="1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https:; img-src 'self' data: blob: https: http:; connect-src 'self' https: data: blob:; font-src 'self' https: data:;">
   <!-- PWA: Meta tags para app instalavel -->
@@ -47162,6 +47162,11 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
         : `Deseja realmente remover o item de <strong>${nomeCliente}</strong> das Rotas do Dia?`;
 
       confirmarDialog('Excluir das Rotas do Dia', msg, () => {
+        // Registra dentro da confirmação, antes de qualquer remoção.
+        if (typeof window.fastLixeiraGuardar === 'function') {
+          const rotaSnapshot = rotaIdStr ? (bancoDados.rotas || []).find(r => String(r.id) === rotaIdStr) : null;
+          window.fastLixeiraGuardar(dataSel, item, rotaSnapshot || null);
+        }
         // 0. (r37) Registrar o ID do item excluído na blacklist de sequências.
         //    Assim, ao recarregar/sincronizar, mergeDados() não o re-adiciona a partir da nuvem.
         if (!bancoDados.seqItensExcluidos) bancoDados.seqItensExcluidos = [];
@@ -48477,6 +48482,10 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
         'Excluir ' + total + ' Rota' + (total > 1 ? 's' : ''),
         'Deseja realmente excluir <strong>' + total + '</strong> rota' + (total > 1 ? 's' : '') + ' selecionada' + (total > 1 ? 's' : '') + '?<br><br>' + resumo + extra + '<br><br>Valor total destas rotas: <strong>R$ ' + valorTotal.toFixed(2).replace('.', ',') + '</strong><br><br>As rotas serão removidas do relatório, das sequências do dia e também da nuvem (Supabase).<br><br><strong>Esta ação não pode ser desfeita.</strong>',
         function() {
+          // Guardar uma cópia completa ANTES de excluir.
+          rotasSel.forEach(r => {
+            if (typeof window.fastLixeiraGuardar === 'function') window.fastLixeiraGuardar(r.data || '', null, r);
+          });
           // 1. Blacklist: impede que o merge da nuvem re-crie as rotas excluídas
           if (!Array.isArray(bancoDados.rotasExcluidas)) bancoDados.rotasExcluidas = [];
           if (!Array.isArray(bancoDados.seqRotasExcluidas)) bancoDados.seqRotasExcluidas = [];
@@ -49319,6 +49328,8 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
       const nomeCliente = escapeHtml(r.cliente || '(sem nome)');
       const dataFmt = formatarDataBR(r.data);
       confirmarDialog('Excluir Rota', `Deseja realmente excluir a rota de <strong>${nomeCliente}</strong> (Data: ${dataFmt})?<br><br>A rota será removida do relatório e também da nuvem (Supabase).`, () => {
+        // A cópia precisa ser criada dentro da confirmação e antes da remoção.
+        if (typeof window.fastLixeiraGuardar === 'function') window.fastLixeiraGuardar(r.data || '', null, r);
         // 1. Registrar o ID na lista de rotas excluídas (blacklist) para que
         //    mergeDados() não a re-adicione a partir da nuvem durante a sincronização
         if (!bancoDados.rotasExcluidas) bancoDados.rotasExcluidas = [];
@@ -55784,7 +55795,7 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
       <div class="emp-tabs" role="tablist" aria-label="Seções da Área Protegida">
         <button type="button" class="emp-tab ripple" data-emptab="empresa" onclick="empTrocarTab('empresa')" style="user-select: none;" aria-selected="false" role="tab"><i class="fa-solid fa-building"></i> Empresa</button>
         <button type="button" class="emp-tab ripple" data-emptab="acessos" onclick="empTrocarTab('acessos')" style="user-select: none;" aria-selected="false" role="tab"><i class="fa-solid fa-users-gear"></i> Usuários e Acessos</button><button type="button" class="emp-tab ripple active" data-emptab="backups" onclick="empTrocarTab('backups')" style="user-select: none;" aria-selected="true" role="tab"><i class="fa-solid fa-images"></i> Fotos e Backups</button><button type="button" class="emp-tab ripple" data-emptab="banco" onclick="empTrocarTab('banco')" style="user-select: none;" aria-selected="false" role="tab"><i class="fa-solid fa-database"></i> Banco de Dados</button>
-        <button type="button" class="emp-tab ripple" data-emptab="publicacao" onclick="empTrocarTab('publicacao')" style="user-select: none;" aria-selected="false" role="tab"><i class="fa-brands fa-github"></i> Publicação</button><button type="button" class="emp-tab ripple" data-emptab="sql" onclick="empTrocarTab('sql')" style="user-select: none;" aria-selected="false" role="tab"><i class="fa-solid fa-circle-question"></i> Ajuda SQL</button>
+        <button type="button" class="emp-tab ripple" data-emptab="brevo" onclick="empTrocarTab('brevo')" style="user-select: none;" aria-selected="false" role="tab"><i class="fa-solid fa-envelope-circle-check"></i> E-mail Brevo</button><button type="button" class="emp-tab ripple" data-emptab="publicacao" onclick="empTrocarTab('publicacao')" style="user-select: none;" aria-selected="false" role="tab"><i class="fa-brands fa-github"></i> Publicação</button><button type="button" class="emp-tab ripple" data-emptab="sql" onclick="empTrocarTab('sql')" style="user-select: none;" aria-selected="false" role="tab"><i class="fa-solid fa-circle-question"></i> Ajuda SQL</button>
       </div>
 
       <!-- ABA 1: DADOS DA EMPRESA (edição + visualização) -->
@@ -56116,7 +56127,7 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
                 <button type="button" class="btn-secondary ripple" style="padding: 12px 22px; font-size: 14px; user-select: none;" onclick="exportarBackupCompletoCodigo()"><i class="fa-solid fa-file-code"></i> Baixar HTML Completo (.html)</button>
               </div>
             </div>
-          </div></div></div></div></div><div id="emptabPublicacao" class="emp-tab-content" role="tabpanel" hidden=""><div class="emp-section">
+      </div></div></div></div></div><div id="emptabBrevo" class="emp-tab-content" role="tabpanel" hidden=""></div><div id="emptabPublicacao" class="emp-tab-content" role="tabpanel" hidden=""><div class="emp-section">
           <div class="emp-section-title"><i class="fa-brands fa-github"></i> Sincronização com GitHub (Publicar App)</div>
           <p class="emp-sql-info">Publique o aplicativo diretamente no GitHub Pages a partir daqui. O token não é inserido no código público; quando salvo, permanece no armazenamento deste navegador e deve ser removido em dispositivos compartilhados. Em outros editores, use a variável segura <code>GH_TOKEN</code>. Ao sincronizar, o <code>index.html</code> atual é enviado ao repositório e o GitHub Pages publica automaticamente.</p>
 
@@ -57862,9 +57873,26 @@ window.fastMobileNav = function(ev, abaId, botao) {
     function trash(){try{return JSON.parse(localStorage.getItem(TRASH_KEY)||'[]')}catch(e){return []}}
     function saveTrash(a){localStorage.setItem(TRASH_KEY,JSON.stringify(a.slice(-100)))}
     function achar(data,id){return (((window.bancoDados||{}).sequencias||{})[data]||[]).find(function(x){return String(x.id)===String(id)})}
-    function guardarLixeira(data,item){if(!item)return;var a=trash();if(a.some(function(x){return String(x.item.id)===String(item.id)}))return;a.push({id:'trash_'+Date.now(),apagadoEm:new Date().toISOString(),data:data,item:JSON.parse(JSON.stringify(item))});saveTrash(a)}
+    function guardarLixeira(data,item){return window.fastLixeiraGuardar(data,item,null)}
+    window.fastLixeiraGuardar=function(data,item,rota){
+      var base=rota||item;if(!base)return false;var a=trash(),baseId=String(base.id),tipo=rota?'rota':'sequencia';
+      if(a.some(function(x){return (x.tipo||'sequencia')===tipo&&String((x.rota||x.item||{}).id)===baseId}))return false;
+      var vinculadas=[];
+      if(rota&&typeof bancoDados!=='undefined'&&bancoDados.sequencias){Object.keys(bancoDados.sequencias).forEach(function(dt){(bancoDados.sequencias[dt]||[]).forEach(function(seq){if(String(seq.rotaId)===baseId)vinculadas.push({data:dt,item:JSON.parse(JSON.stringify(seq))})})})}
+      a.push({id:'trash_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),tipo:tipo,apagadoEm:new Date().toISOString(),data:data||(base.data||''),item:JSON.parse(JSON.stringify(item||base)),rota:rota?JSON.parse(JSON.stringify(rota)):null,sequencias:vinculadas});saveTrash(a);return true;
+    }
     window.fast70AbrirLixeira=function(){var a=trash(),rows=a.slice().reverse().map(function(x){return '<tr><td>'+new Date(x.apagadoEm).toLocaleString('pt-BR')+'</td><td>'+esc(x.item.cliente||'-')+'</td><td>'+esc(x.item.destino||'-')+'</td><td><button class="btn-success" onclick="fast70RestaurarLixeira(\''+x.id+'\')">Restaurar</button></td></tr>'}).join('');document.getElementById('fast70Titulo').textContent='Lixeira de Rotas';document.getElementById('fast70Conteudo').innerHTML=a.length?'<p>Itens ficam disponíveis para recuperação. As fotos locais vinculadas não são apagadas.</p><div style="overflow:auto"><table class="fast70-table"><thead><tr><th>Exclusão</th><th>Cliente</th><th>Destino</th><th>Ação</th></tr></thead><tbody>'+rows+'</tbody></table></div>':'<p>A lixeira está vazia.</p>';document.getElementById('fast70Modal').classList.add('show')};
-    window.fast70RestaurarLixeira=function(id){var a=trash(),n=a.find(function(x){return x.id===id});if(!n)return;if(!bancoDados.sequencias[n.data])bancoDados.sequencias[n.data]=[];if(!achar(n.data,n.item.id))bancoDados.sequencias[n.data].push(n.item);saveTrash(a.filter(function(x){return x.id!==id}));salvarStorage();if(typeof renderizarSequencia==='function')renderizarSequencia();fast70AbrirLixeira();mostrarToast('Rota restaurada com as referências das fotos.','sucesso')};
+    window.fast70RestaurarLixeira=function(id){
+      var a=trash(),n=a.find(function(x){return x.id===id});if(!n)return;
+      var rota=n.rota||null,item=n.item||null,rotaId=String((rota&&rota.id)||(item&&item.rotaId)||'');
+      if(rota&&!(bancoDados.rotas||[]).some(function(r){return String(r.id)===String(rota.id)}))bancoDados.rotas.push(JSON.parse(JSON.stringify(rota)));
+      var seqs=Array.isArray(n.sequencias)&&n.sequencias.length?n.sequencias:(item?[{data:n.data,item:item}]:[]);
+      seqs.forEach(function(s){if(!s||!s.item)return;var dt=s.data||n.data||s.item.data;if(!bancoDados.sequencias[dt])bancoDados.sequencias[dt]=[];if(!bancoDados.sequencias[dt].some(function(x){return String(x.id)===String(s.item.id)}))bancoDados.sequencias[dt].push(JSON.parse(JSON.stringify(s.item)))});
+      if(Array.isArray(bancoDados.rotasExcluidas)&&rotaId)bancoDados.rotasExcluidas=bancoDados.rotasExcluidas.filter(function(x){return String(x)!==rotaId});
+      if(Array.isArray(bancoDados.seqRotasExcluidas)&&rotaId)bancoDados.seqRotasExcluidas=bancoDados.seqRotasExcluidas.filter(function(x){return String(x)!==rotaId});
+      var seqIds=new Set(seqs.map(function(s){return String((s.item||{}).id)}));if(Array.isArray(bancoDados.seqItensExcluidos))bancoDados.seqItensExcluidos=bancoDados.seqItensExcluidos.filter(function(x){return !seqIds.has(String(x))});
+      saveTrash(a.filter(function(x){return x.id!==id}));salvarStorage();if(typeof renderizar==='function')renderizar();if(typeof renderizarSequencia==='function')renderizarSequencia();if(typeof sincronizarAgora==='function')setTimeout(function(){try{sincronizarAgora()}catch(e){}},100);fast70AbrirLixeira();mostrarToast('Rota restaurada com seus dados e referências das fotos.','sucesso');
+    };
 
     function assinaturaCanvas(){var c=document.getElementById('fast70Sign'),ctx=c&&c.getContext('2d');if(!c||!ctx)return;var down=false,last=null;function pos(e){var r=c.getBoundingClientRect(),p=e.touches?e.touches[0]:e;return{x:(p.clientX-r.left)*(c.width/r.width),y:(p.clientY-r.top)*(c.height/r.height)}}function start(e){down=true;last=pos(e);e.preventDefault()}function move(e){if(!down)return;var p=pos(e);ctx.strokeStyle='#111827';ctx.lineWidth=3;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(last.x,last.y);ctx.lineTo(p.x,p.y);ctx.stroke();last=p;e.preventDefault()}function end(){down=false;last=null}c.addEventListener('pointerdown',start);c.addEventListener('pointermove',move);window.addEventListener('pointerup',end);c.addEventListener('touchstart',start,{passive:false});c.addEventListener('touchmove',move,{passive:false});c.addEventListener('touchend',end)}
     window.fast70LimparAssinatura=function(){var c=document.getElementById('fast70Sign');if(c)c.getContext('2d').clearRect(0,0,c.width,c.height)};
@@ -57881,7 +57909,7 @@ window.fastMobileNav = function(ev, abaId, botao) {
         var data=(document.getElementById('dpDataSequencia')||{}).value||new Date().toISOString().slice(0,10),lista=(((bancoDados||{}).sequencias||{})[data]||[]),item=lista.find(function(x){return !(x.concluido||x.concluida||String(x.status||'').toLowerCase().indexOf('conclu')>=0)}),acoes=document.querySelector('#fast70Conteudo .fast70-driver-actions');
         if(item&&acoes){var c=document.createElement('button');c.className='btn-primary';c.innerHTML='<i class="fa-solid fa-signature"></i> Comprovante';c.onclick=function(){fast70Comprovante(data,item.id)};acoes.insertBefore(c,acoes.children[2]||null);var w=document.createElement('button');w.className='btn-secondary';w.innerHTML='<i class="fa-brands fa-whatsapp"></i> WhatsApp';w.onclick=function(){fast70WhatsAppCliente(data,item.id)};acoes.appendChild(w)}
       };
-      var original=window.removerSeq;if(typeof original==='function'){window.removerSeq=function(data,index){var lista=(((bancoDados||{}).sequencias||{})[data]||[]),antes=lista[index]&&JSON.parse(JSON.stringify(lista[index]));original.apply(this,arguments);setTimeout(function(){if(antes&&!achar(data,antes.id))guardarLixeira(data,antes)},900)}}
+      // A lixeira agora é acionada dentro da confirmação de exclusão, antes de remover os dados.
       var card=document.getElementById('fast70SecurityCard'),row=card&&card.querySelector('.config-btn-row');if(row&&!row.querySelector('[data-fast-lixeira],button[onclick*=fast70AbrirLixeira]')){var b=document.createElement('button');b.className='btn-secondary';b.dataset.fastLixeira='1';b.innerHTML='<i class="fa-solid fa-trash-arrow-up"></i> Lixeira de Rotas';b.onclick=fast70AbrirLixeira;row.appendChild(b)}
       // O envio direto via API da Meta permanece desativado até as credenciais do backend serem configuradas.
       localStorage.setItem('fast_whatsapp_auto_preparado','1');
@@ -59651,7 +59679,7 @@ body.fast-touch-ui #scrollNavBox { bottom: 130px !important; top: auto !importan
 <script id="r107-protected-tabs-fix">
 (function(){
   'use strict';
-  var valid = {empresa:'emptabEmpresa',acessos:'emptabAcessos',backups:'emptabBackups',banco:'emptabBanco',publicacao:'emptabPublicacao',sql:'emptabSql'};
+  var valid = {empresa:'emptabEmpresa',acessos:'emptabAcessos',backups:'emptabBackups',banco:'emptabBanco',brevo:'emptabBrevo',publicacao:'emptabPublicacao',sql:'emptabSql'};
   function activate(tabId, focusTab){
     if(!valid[tabId] || !document.getElementById(valid[tabId])) tabId='empresa';
     var box=document.getElementById('empDataBox'); if(!box) return false;
@@ -60829,6 +60857,85 @@ body.fast-exclusive-app main { padding-bottom: 12px !important; }
     if(recoveryToken())showResetForm();
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+})();
+</script>
+<!-- FAST 2.3.38 — painel seguro da integração de e-mail -->
+<style id="fast-238-brevo-style">
+  #emptabBrevo{padding-bottom:28px}
+  .fast-brevo-hero{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px;border:1px solid var(--border,#dbe4ef);border-radius:16px;background:linear-gradient(135deg,rgba(37,99,235,.10),rgba(124,58,237,.08));margin-bottom:14px}
+  .fast-brevo-title{display:flex;align-items:center;gap:12px;min-width:0}.fast-brevo-logo{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;background:#0b996e;color:#fff;font-size:23px;box-shadow:0 8px 20px rgba(11,153,110,.22)}
+  .fast-brevo-title h3{margin:0;color:var(--text-main,#0f172a);font-size:18px}.fast-brevo-title p{margin:4px 0 0;color:var(--text-muted,#64748b);font-size:13px;line-height:1.45}
+  .fast-brevo-status{display:inline-flex;align-items:center;gap:7px;padding:8px 11px;border-radius:999px;background:var(--card-bg,#fff);border:1px solid var(--border,#dbe4ef);font-size:12px;font-weight:800;white-space:nowrap}.fast-brevo-dot{width:9px;height:9px;border-radius:50%;background:#f59e0b}.fast-brevo-status.ok .fast-brevo-dot{background:#16a34a}.fast-brevo-status.error .fast-brevo-dot{background:#dc2626}
+  .fast-brevo-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.fast-brevo-card{border:1px solid var(--border,#dbe4ef);border-radius:14px;padding:14px;background:var(--card-bg,#fff);min-width:0}.fast-brevo-card.full{grid-column:1/-1}
+  .fast-brevo-card label{display:block;font-size:12px;font-weight:800;color:var(--text-muted,#64748b);margin:0 0 6px}.fast-brevo-card input{width:100%;min-height:43px;border:1px solid var(--border,#cbd5e1);border-radius:10px;padding:9px 11px;background:var(--input-bg,#fff);box-sizing:border-box;font-size:14px}.fast-brevo-card input[readonly]{opacity:.82;background:rgba(148,163,184,.10)}
+  .fast-brevo-note{display:flex;gap:9px;align-items:flex-start;margin-top:14px;padding:12px 14px;border-radius:12px;background:rgba(22,163,74,.08);border:1px solid rgba(22,163,74,.24);color:var(--text-main,#0f172a);font-size:13px;line-height:1.5}.fast-brevo-note i{color:#16a34a;margin-top:2px}
+  .fast-brevo-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:14px}.fast-brevo-actions button{min-height:44px;height:auto;white-space:normal}
+  .fast-brevo-result{display:none;margin-top:12px;padding:11px 13px;border-radius:11px;font-size:13px;font-weight:700;line-height:1.45}.fast-brevo-result.show{display:block}.fast-brevo-result.ok{color:#166534;background:#dcfce7;border:1px solid #86efac}.fast-brevo-result.error{color:#991b1b;background:#fee2e2;border:1px solid #fca5a5}.fast-brevo-result.info{color:#1e40af;background:#dbeafe;border:1px solid #93c5fd}
+  @media(max-width:680px){.fast-brevo-hero{align-items:flex-start;flex-direction:column}.fast-brevo-grid{grid-template-columns:1fr}.fast-brevo-card.full{grid-column:auto}.fast-brevo-actions{display:grid;grid-template-columns:1fr}.fast-brevo-actions button{width:100%}}
+</style>
+<script id="fast-238-brevo-panel">
+(function(){
+  'use strict';
+  var VERSION='2.3.39',CONFIG_KEY='fast_brevo_config',STATUS_KEY='fast_brevo_last_status';
+  var PROJECT='https://jizoedwnyfcjokoqgfmn.supabase.co',KEY='sb_publishable_mXMGOmMueyVWcS8UdQHP-w_sa13m9B4';
+  var SITE='https://adaiascearataiana-gif.github.io/fastservicosapp/',REDIRECT=SITE+'?recuperar-senha=1';
+  function byId(id){return document.getElementById(id)}
+  function esc(v){return String(v||'').replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+  function emailOk(v){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v||'').trim())}
+  function readCompany(){try{return JSON.parse(localStorage.getItem('fast_dados_empresa')||'{}')}catch(e){return {}}}
+  function readConfig(){try{return JSON.parse(localStorage.getItem(CONFIG_KEY)||'{}')}catch(e){return {}}}
+  function result(message,type){var box=byId('fastBrevoResult');if(!box)return;box.textContent=message;box.className='fast-brevo-result show '+(type||'info')}
+  function setStatus(label,type){var box=byId('fastBrevoStatus');if(!box)return;box.className='fast-brevo-status '+(type||'');box.innerHTML='<span class="fast-brevo-dot"></span><span>'+esc(label)+'</span>'}
+  function setBusy(button,on,label){if(!button)return;if(on){button.dataset.old=button.innerHTML;button.disabled=true;button.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> '+label}else{button.disabled=false;if(button.dataset.old)button.innerHTML=button.dataset.old}}
+  function render(){
+    var panel=byId('emptabBrevo');if(!panel||panel.dataset.ready)return;panel.dataset.ready='1';
+    var company=readCompany(),cfg=readConfig(),recovery=cfg.recoveryEmail||company.empEmail||'fastservicoslog@gmail.com',sender=cfg.senderEmail||'fastservicoslog@gmail.com';
+    panel.innerHTML='<div class="fast-brevo-hero"><div class="fast-brevo-title"><div class="fast-brevo-logo"><i class="fa-solid fa-envelope-open-text"></i></div><div><h3>Serviço de E-mail Brevo</h3><p>Recuperação de senhas enviada pelo Supabase Auth através do SMTP Brevo.</p></div></div><div class="fast-brevo-status" id="fastBrevoStatus"><span class="fast-brevo-dot"></span><span>Aguardando verificação</span></div></div>'+
+      '<div class="fast-brevo-grid"><div class="fast-brevo-card"><label>Provedor de envio</label><input value="Brevo — E-mail transacional" readonly></div><div class="fast-brevo-card"><label>Servidor SMTP</label><input value="smtp-relay.brevo.com · Porta 587" readonly></div><div class="fast-brevo-card"><label for="fastBrevoSender">E-mail remetente verificado</label><input type="email" id="fastBrevoSender" value="'+esc(sender)+'" placeholder="remetente@empresa.com"></div><div class="fast-brevo-card"><label for="fastBrevoRecovery">E-mail de recuperação da empresa</label><input type="email" id="fastBrevoRecovery" value="'+esc(recovery)+'" placeholder="contato@empresa.com"></div><div class="fast-brevo-card full"><label>Endereço oficial do aplicativo</label><input value="'+SITE+'" readonly></div><div class="fast-brevo-card full"><label>Retorno seguro para criar nova senha</label><input value="'+REDIRECT+'" readonly></div></div>'+
+      '<div class="fast-brevo-note"><i class="fa-solid fa-shield-halved"></i><div><strong>Credenciais protegidas.</strong> A senha SMTP e a chave do Brevo permanecem somente no Supabase e nunca são gravadas neste HTML.</div></div>'+
+      '<div class="fast-brevo-actions"><button type="button" class="emp-btn-primary ripple" onclick="fastBrevoSalvar(this)"><i class="fa-solid fa-cloud-arrow-up"></i> Salvar e sincronizar</button><button type="button" class="emp-btn-secondary ripple" onclick="fastBrevoVerificar(this)"><i class="fa-solid fa-plug-circle-check"></i> Verificar integração</button><button type="button" class="emp-btn-success ripple" onclick="fastBrevoTestar(this)"><i class="fa-solid fa-paper-plane"></i> Enviar e-mail de teste</button></div><div class="fast-brevo-result" id="fastBrevoResult"></div>';
+    var last={};try{last=JSON.parse(localStorage.getItem(STATUS_KEY)||'{}')}catch(e){}if(last.ok)setStatus('Verificado em '+last.when,'ok');
+  }
+  window.fastBrevoSalvar=async function(button){
+    var sender=(byId('fastBrevoSender')||{}).value||'',recovery=(byId('fastBrevoRecovery')||{}).value||'';
+    sender=sender.trim();recovery=recovery.trim();if(!emailOk(sender)||!emailOk(recovery)){result('Preencha os dois endereços de e-mail corretamente.','error');return}
+    setBusy(button,true,'Sincronizando...');
+    try{
+      localStorage.setItem(CONFIG_KEY,JSON.stringify({provider:'Brevo',senderEmail:sender,recoveryEmail:recovery,host:'smtp-relay.brevo.com',port:587,siteUrl:SITE,redirectUrl:REDIRECT,updatedAt:new Date().toISOString()}));
+      var company=readCompany();company.empEmail=recovery;localStorage.setItem('fast_dados_empresa',JSON.stringify(company));
+      var field=byId('empEmail');if(field)field.value=recovery;
+      if(typeof window.salvarDadosEmpresa==='function')window.salvarDadosEmpresa();
+      result('Configuração salva. O e-mail de recuperação foi sincronizado com os Dados da Empresa.','ok');
+    }catch(e){result('Não foi possível salvar a configuração: '+(e.message||e),'error')}finally{setBusy(button,false,'')}
+  };
+  window.fastBrevoVerificar=async function(button){
+    setBusy(button,true,'Verificando...');setStatus('Verificando conexão','');result('Consultando o serviço de autenticação do Supabase…','info');
+    try{
+      var response=await fetch(PROJECT+'/auth/v1/health',{headers:{apikey:KEY}});if(!response.ok)throw new Error('HTTP '+response.status);
+      var when=new Date().toLocaleString('pt-BR');localStorage.setItem(STATUS_KEY,JSON.stringify({ok:true,when:when}));setStatus('Supabase Auth online','ok');result('Conexão com o Supabase Auth confirmada. Para confirmar também o SMTP Brevo, use “Enviar e-mail de teste”.','ok');
+    }catch(e){setStatus('Integração indisponível','error');result('Não foi possível acessar o Supabase Auth. Confira a internet e a configuração do projeto.','error')}finally{setBusy(button,false,'')}
+  };
+  window.fastBrevoTestar=async function(button){
+    var email=((byId('fastBrevoRecovery')||{}).value||'').trim();if(!emailOk(email)){result('Informe um e-mail de recuperação válido antes do teste.','error');return}
+    if(typeof window.fastSolicitarRecuperacaoEmail!=='function'){result('O módulo de recuperação não está disponível. Reabra o aplicativo e tente novamente.','error');return}
+    setBusy(button,true,'Enviando teste...');result('Enviando mensagem de recuperação para '+email+'…','info');
+    try{
+      var response=await window.fastSolicitarRecuperacaoEmail(email,'teste-brevo');
+      if(response&&response.ok){setStatus('Teste enviado','ok');result('Solicitação enviada. Verifique a caixa de entrada e também o spam. O e-mail somente chegará se este endereço já estiver cadastrado no Supabase Auth.','ok')}
+      else throw new Error((response&&response.message)||'Falha no envio');
+    }catch(e){setStatus('Falha no teste','error');result('Não foi possível enviar o teste. Confira o SMTP Brevo no Supabase e tente novamente.','error')}finally{setBusy(button,false,'')}
+  };
+  function boot(){
+    document.documentElement.setAttribute('data-fast-version',VERSION);var meta=document.querySelector('meta[name="fast-app-version"]');if(meta)meta.content=VERSION;
+    var immediate=document.querySelector('meta[name="fast-app-changelog-immediate"]');if(immediate)immediate.content=VERSION;
+    var changes=[{type:'corrigido',text:'2.3.39 (11/09/2026): Lixeira de Rotas agora registra a exclusão somente após a confirmação e antes de remover os dados; rotas individuais, exclusões em massa e itens das Rotas do Dia são armazenados com seus vínculos e referências de fotos.'},{type:'melhorado',text:'2.3.39 (11/09/2026): restauração remove as marcas de exclusão, devolve a rota e seus itens às datas originais e sincroniza novamente com o Supabase.'},{type:'removido',text:'2.3.39 (11/09/2026): botão e acesso ao Modo Entregador removidos da Central de Segurança.'},{type:'novo',text:'2.3.38 (11/09/2026): nova aba E-mail Brevo na Área Protegida com status da autenticação, configuração segura, sincronização do e-mail de recuperação e envio de teste sem expor a senha SMTP.'}];
+    var log=document.querySelector('meta[name="fast-app-changelog"]');if(log)log.content=JSON.stringify(changes);window.fastUltimoModuloNovidades=changes;
+    ['fastSplashVersion','fastGateVersionNum','fastVersaoLabel'].forEach(function(id){var node=byId(id);if(node)node.textContent=VERSION});var menu=byId('navMenuVersao');if(menu)menu.textContent='Versão '+VERSION;
+    document.querySelectorAll('[onclick*="fast70ModoEntregador"]').forEach(function(button){button.remove()});
+    try{delete window.fast70ModoEntregador}catch(e){window.fast70ModoEntregador=undefined}
+    render();try{if(typeof window.fastPopularUltimasAtualizacoes==='function')window.fastPopularUltimasAtualizacoes()}catch(e){}
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){setTimeout(boot,60)});else setTimeout(boot,60);
 })();
 </script>
 </body></html>
