@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="fast-linux-desktop" data-fast-version="2.3.39"><head>
+<html lang="pt-BR" class="fast-linux-desktop" data-fast-version="2.3.41"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
   <meta name="theme-color" content="#4f46e5">
@@ -21,9 +21,9 @@
   <meta name="fast-github-branch" content="main">
   <meta name="fast-github-path" content="index.html">
   <meta name="fast-github-token-env" content="GH_TOKEN">
-  <meta name="fast-app-version" content="2.3.39">
+  <meta name="fast-app-version" content="2.3.41">
   <meta name="fast-app-date" content="2026-09-11T09:30:00-03:00">
-  <meta name="fast-latest-update" content="2.3.39: Modo Entregador removido e Lixeira de Rotas corrigida para armazenar, persistir e restaurar rotas excluídas com vínculos e fotos.">
+  <meta name="fast-latest-update" content="2.3.41: Google Drive persistente, migração automática das fotos locais, acesso aos arquivos dentro do FAST e filtros compactos.">
   <!-- r92: verificação automática de nova versão ao abrir; Verificar Atualizações com cache-busting e sem fallback no-cors inválido. -->
   <!-- r70.1: lista corrente no HTML inicial; o painel não espera scripts tardios -->
   <meta name="fast-app-changelog-immediate" content="2.3.39">
@@ -61061,6 +61061,68 @@ body.fast-exclusive-app main { padding-bottom: 12px !important; }
     var type=hash().get('type');if(type==='signup'||type==='email')showConfirmed();
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){setTimeout(boot,100)});else setTimeout(boot,100);
+})();
+</script>
+
+<!-- FAST 2.3.41 — Drive persistente, migração de fotos e filtros compactos -->
+<style id="fast-241-drive-layout">
+  #rotasDia>.card:first-child .grid-form{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;gap:8px!important;margin-bottom:5px!important}
+  #rotasDia>.card:first-child .grid-form>div{margin:0!important;min-width:0}
+  #rotasDia>.card:first-child .grid-form>div:nth-child(1){grid-column:1;grid-row:1}
+  #rotasDia>.card:first-child .grid-form>div:nth-child(5){grid-column:2;grid-row:1}
+  #rotasDia>.card:first-child .grid-form>div:nth-child(2){grid-column:1/-1;grid-row:2}
+  #rotasDia>.card:first-child .grid-form>div:nth-child(3){grid-column:1;grid-row:3}
+  #rotasDia>.card:first-child .grid-form>div:nth-child(4){grid-column:2;grid-row:3}
+  #rotasDia>.card:first-child .grid-form>div:nth-child(6){grid-column:1/-1;grid-row:4}
+  #rotasDia>.card:first-child .grid-form label{font-size:10px!important;margin:0 0 3px!important;line-height:1.15!important}
+  #rotasDia>.card:first-child .grid-form input,#rotasDia>.card:first-child .grid-form select{height:39px!important;min-height:39px!important;padding:7px 10px!important;font-size:13px!important;border-radius:10px!important}
+  #rotasDia>.card:first-child .rd-actions-grid{gap:6px!important}
+  #rotasDia>.card:first-child .rd-actions-grid button{min-height:38px!important;padding:7px 8px!important;font-size:12px!important}
+  #fastDriveExplorerGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:10px;margin-top:12px}
+  .fast-drive-entry{border:1px solid var(--border);border-radius:12px;background:var(--bg-card);padding:10px;min-height:92px;display:flex;flex-direction:column;gap:7px;justify-content:center;overflow:hidden;cursor:pointer}
+  .fast-drive-entry i{font-size:25px;color:#16a34a}.fast-drive-entry img{width:100%;height:92px;object-fit:cover;border-radius:8px}.fast-drive-entry span{font-size:11px;font-weight:750;overflow-wrap:anywhere}
+  @media(max-width:430px){#rotasDia>.card:first-child{padding:12px!important}#rotasDia>.card:first-child .card-title{margin-bottom:8px!important}#rotasDia>.card:first-child .grid-form input,#rotasDia>.card:first-child .grid-form select{font-size:12px!important;padding:6px 8px!important}.rd-drive-label{display:none}}
+</style>
+<script id="fast-241-drive-controller">
+(function(){
+  'use strict';
+  var VERSION='2.3.41', CLIENT='fast_drive_client_id', FOLDER='fast_drive_folder_id', TOKEN='fast_drive_access_token';
+  function el(id){return document.getElementById(id)}
+  function esc(v){var d=document.createElement('div');d.textContent=String(v==null?'':v);return d.innerHTML}
+  function db(){return typeof abrirDBFotos==='function'?abrirDBFotos():Promise.reject(new Error('Armazenamento de fotos indisponível'))}
+  function all(store){return db().then(function(d){return new Promise(function(ok,no){var t=d.transaction(store,'readonly'),r=t.objectStore(store).getAll();r.onsuccess=function(){ok(r.result||[])};r.onerror=function(){no(r.error)}})})}
+  function put(store,value){return db().then(function(d){return new Promise(function(ok,no){var t=d.transaction(store,'readwrite');t.objectStore(store).put(value);t.oncomplete=function(){ok(true)};t.onerror=function(){no(t.error)}})})}
+  function dataBlob(data){var p=String(data||'').split(','),mime=((p[0]||'').match(/data:([^;]+)/)||[])[1]||'image/jpeg',raw=atob(p[1]||''),u=new Uint8Array(raw.length);for(var i=0;i<raw.length;i++)u[i]=raw.charCodeAt(i);return new Blob([u],{type:mime})}
+  function persistConfig(){
+    var c=(el('fastDriveClientId')||{}).value||localStorage.getItem(CLIENT)||'',f=(el('fastDriveFolderId')||{}).value||localStorage.getItem(FOLDER)||'';
+    if(c)localStorage.setItem(CLIENT,c.trim());if(f)localStorage.setItem(FOLDER,f.trim());
+    if(window.bancoDados){bancoDados.integracoes=bancoDados.integracoes||{};bancoDados.integracoes.googleDrive={clientId:c.trim(),folderId:f.trim(),atualizadoEm:new Date().toISOString()};try{if(typeof salvarStorage==='function')salvarStorage()}catch(e){}try{if(typeof sincronizarAgora==='function')setTimeout(sincronizarAgora,100)}catch(e){}}
+  }
+  function restoreConfig(){
+    var cloud=window.bancoDados&&bancoDados.integracoes&&bancoDados.integracoes.googleDrive||{},c=localStorage.getItem(CLIENT)||cloud.clientId||'',f=localStorage.getItem(FOLDER)||cloud.folderId||'';
+    if(c)localStorage.setItem(CLIENT,c);if(f)localStorage.setItem(FOLDER,f);if(el('fastDriveClientId')&&!el('fastDriveClientId').value)el('fastDriveClientId').value=c;if(el('fastDriveFolderId')&&!el('fastDriveFolderId').value)el('fastDriveFolderId').value=f;
+  }
+  async function migratePhotos(){
+    if(!window.bancoDados)return;var regs=await all('fotosBase64'),queued=await all('driveQueue'),sent=await all('driveLedger'),known=new Set(queued.concat(sent).map(function(x){return String(x.id)})),routes=[];
+    Object.keys(bancoDados.sequencias||{}).forEach(function(date){(bancoDados.sequencias[date]||[]).forEach(function(item){routes.push({date:date,item:item})})});var added=0;
+    for(var n=0;n<routes.length;n++){var r=routes[n],photos=Array.isArray(r.item.fotos)?r.item.fotos:(r.item.foto?[r.item.foto]:[]);for(var i=0;i<photos.length;i++){var ref=String(photos[i]||'');if(ref.indexOf('idb:')!==0)continue;var key=ref.slice(4),id='drive_migrated_'+key;if(known.has(id))continue;var rec=regs.find(function(x){return String(x.chave)===key}),base=rec&&(rec.base64||rec.foto);if(!base)continue;var blob=dataBlob(base),date=String(r.date||'').split('-').reverse().join('-')||'Sem data',dest=String(r.item.destino||'Destino não informado'),client=String(r.item.cliente||'Cliente não informado');await put('driveQueue',{id:id,nome:date+' - '+dest+' - Foto '+String(i+1).padStart(2,'0')+'.jpg',blob:blob,tipo:blob.type,criadoEm:new Date().toISOString(),itemId:String(r.item.id||''),clientePasta:client,dataPasta:date,destinoPasta:dest,fotoNumero:String(i+1).padStart(2,'0'),tentativas:0,ultimoErro:''});known.add(id);added++}}
+    if(added&&sessionStorage.getItem(TOKEN)&&window.fastDriveSincronizarPendentes)window.fastDriveSincronizarPendentes();return added;
+  }
+  async function listDrive(parent,name){
+    var token=sessionStorage.getItem(TOKEN)||'',box=el('fastDriveExplorerGrid'),title=el('fastDriveExplorerPath');if(!box)return;if(!token){box.innerHTML='<p>Conecte o Google Drive nas Configurações para visualizar os arquivos.</p>';return}title.textContent=name||'APP FAST';box.innerHTML='<p>Carregando arquivos…</p>';
+    try{var q="'"+String(parent).replace(/'/g,"\\'")+"' in parents and trashed=false",url='https://www.googleapis.com/drive/v3/files?orderBy=folder,name&fields=files(id,name,mimeType,thumbnailLink,webViewLink)&pageSize=200&q='+encodeURIComponent(q),res=await fetch(url,{headers:{Authorization:'Bearer '+token}});if(res.status===401)throw new Error('A autorização expirou. Conecte o Drive novamente.');if(!res.ok)throw new Error('Não foi possível consultar o Drive.');var files=(await res.json()).files||[];box.innerHTML=files.length?'':'<p>A pasta está vazia.</p>';files.forEach(function(x){var b=document.createElement('button');b.type='button';b.className='fast-drive-entry';var folder=x.mimeType==='application/vnd.google-apps.folder';b.innerHTML=folder?'<i class="fa-solid fa-folder"></i><span>'+esc(x.name)+'</span>':(x.thumbnailLink?'<img alt="" src="'+esc(x.thumbnailLink)+'"><span>'+esc(x.name)+'</span>':'<i class="fa-solid fa-file-image"></i><span>'+esc(x.name)+'</span>');b.onclick=function(){folder?listDrive(x.id,x.name):(x.webViewLink?window.open(x.webViewLink,'_blank'):null)};box.appendChild(b)})}catch(e){box.innerHTML='<p style="color:#b91c1c">'+esc(e.message||e)+'</p>'}
+  }
+  window.fastDriveAbrirArquivos=function(){var modal=el('fast70Modal'),title=el('fast70Titulo'),body=el('fast70Conteudo'),folder=localStorage.getItem(FOLDER)||'1IH_EujjBX57aQxC1moMlv695vqc-OY-p';if(!modal||!body)return;title.textContent='Arquivos do Google Drive';body.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;gap:8px"><strong id="fastDriveExplorerPath">APP FAST</strong><button class="btn-secondary" onclick="fastDriveAbrirArquivos()"><i class="fa-solid fa-rotate"></i> Atualizar</button></div><div id="fastDriveExplorerGrid"></div>';modal.classList.add('show');listDrive(folder,'APP FAST')};
+  function install(){
+    document.documentElement.setAttribute('data-fast-version',VERSION);var meta=document.querySelector('meta[name="fast-app-version"]');if(meta)meta.content=VERSION;['fastSplashVersion','fastGateVersionNum','fastVersaoLabel'].forEach(function(id){if(el(id))el(id).textContent=VERSION});if(el('navMenuVersao'))el('navMenuVersao').textContent='Versão '+VERSION;
+    ['btnConfigPastaFoto','btnRecuperarFotos','statusPastaFoto'].forEach(function(id){var x=el(id);if(x)x.remove()});
+    var head=document.querySelector('#rotasDia>.card:first-child .card-title>div');if(head&&!el('fastDriveFilesBtn')){var b=document.createElement('button');b.id='fastDriveFilesBtn';b.className='btn-secondary no-print ripple';b.innerHTML='<i class="fa-brands fa-google-drive"></i> <span class="rd-drive-label">Google Drive</span>';b.onclick=window.fastDriveAbrirArquivos;head.insertBefore(b,head.firstChild)}
+    restoreConfig();setTimeout(restoreConfig,1500);setTimeout(restoreConfig,5000);
+    var original=window.fastDriveSalvarEConectar;if(typeof original==='function'&&!original.fast241){window.fastDriveSalvarEConectar=function(){persistConfig();return original.apply(this,arguments)};window.fastDriveSalvarEConectar.fast241=true}
+    migratePhotos().catch(function(e){console.warn('Migração segura das fotos:',e)});
+    var changes=[{type:'corrigido',text:'2.3.41 (12/09/2026): ID OAuth e pasta do Google Drive passam a acompanhar os dados sincronizados da plataforma e são restaurados automaticamente após atualização.'},{type:'melhorado',text:'2.3.41 (12/09/2026): fotos locais existentes entram na fila do Google Drive sem apagar a cópia de segurança; novos envios continuam automáticos quando o Drive está conectado.'},{type:'novo',text:'2.3.41 (12/09/2026): arquivos e pastas do APP FAST podem ser consultados pelo botão Google Drive dentro de Rotas do Dia.'},{type:'melhorado',text:'2.3.41 (12/09/2026): filtro de Rotas do Dia compactado, com Data e Motorista lado a lado e Origem e Destino lado a lado.'}];window.fastUltimoModuloNovidades=changes;var c=document.querySelector('meta[name="fast-app-changelog"]');if(c)c.content=JSON.stringify(changes)
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){setTimeout(install,180)});else setTimeout(install,180);
 })();
 </script>
 </body></html>
