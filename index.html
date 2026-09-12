@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="fast-linux-desktop" data-fast-version="2.3.49"><head>
+<html lang="pt-BR" class="fast-linux-desktop" data-fast-version="2.3.50"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
   <meta name="theme-color" content="#4f46e5">
@@ -21,9 +21,9 @@
   <meta name="fast-github-branch" content="main">
   <meta name="fast-github-path" content="index.html">
   <meta name="fast-github-token-env" content="GH_TOKEN">
-  <meta name="fast-app-version" content="2.3.49">
+  <meta name="fast-app-version" content="2.3.50">
   <meta name="fast-app-date" content="2026-09-11T09:30:00-03:00">
-  <meta name="fast-latest-update" content="2.3.49: ações das Rotas do Dia movidas para o final do formulário, no lugar do antigo botão Fechar / Concluir.">
+  <meta name="fast-latest-update" content="2.3.50: agrupamento exclusivo das Rotas do Dia, exclusão definitiva de fotos e deduplicação do sincronismo.">
   <!-- r92: verificação automática de nova versão ao abrir; Verificar Atualizações com cache-busting e sem fallback no-cors inválido. -->
   <!-- r70.1: lista corrente no HTML inicial; o painel não espera scripts tardios -->
   <meta name="fast-app-changelog-immediate" content="2.3.39">
@@ -36226,7 +36226,7 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
   </div>
 
   <script>
-    let bancoDados = { rotas: [], despesas: [], sequencias: {}, motoristas: [], clientes: [], rh: [], despesasEmpresa: [], rotasExcluidas: [], seqItensExcluidos: [], seqRotasExcluidas: [], clientesExcluidos: [], destinosExcluidos: [], destinos: [] };
+    let bancoDados = { rotas: [], despesas: [], sequencias: {}, motoristas: [], clientes: [], rh: [], despesasEmpresa: [], rotasExcluidas: [], fotosExcluidas: [], seqItensExcluidos: [], seqRotasExcluidas: [], clientesExcluidos: [], destinosExcluidos: [], destinos: [] };
 
     /* ============================================================
        FAST SERVIÇOS v9.0.0 Enterprise — JAVASCRIPT PRINCIPAL
@@ -36322,6 +36322,7 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
         clientesExcluidos: Array.isArray(b.clientesExcluidos) ? b.clientesExcluidos : [],
         destinosExcluidos: Array.isArray(b.destinosExcluidos) ? b.destinosExcluidos : [],
         rotasExcluidas: Array.isArray(b.rotasExcluidas) ? b.rotasExcluidas : [],
+        fotosExcluidas: Array.isArray(b.fotosExcluidas) ? b.fotosExcluidas : [],
         // Blacklist de itens de sequencia (Rotas do Dia) excluidos pelo usuario.
         // Impede que itens apagados reaparecam ao mesclar com a nuvem (mergeDados).
         // (r37) — antes esta lista nao existia, entao rotas do dia apagadas voltavam ao recarregar/sincronizar.
@@ -39051,6 +39052,16 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
         (sequencias[dataSeq] || []).forEach(item => {
           // Garantir normalização de fotos antes de exportar
           normalizarFotosItem(item);
+          const extrasPersistidos = Array.isArray(item.extras) ? item.extras.slice() : [];
+          extrasPersistidos.push({ __fastMeta: {
+            agrupado: !!item.agrupado,
+            itensAgrupados: item.itensAgrupados || [],
+            rotasOriginais: item.rotasOriginais || [],
+            itensOriginais: item.itensOriginais || [],
+            fotosExcluidas: item.fotosExcluidas || [],
+            qtdMercadorias: Number(item.qtdMercadorias) || 1,
+            campoAgrupamento: item.campoAgrupamento || ''
+          }});
           rows.push({
             id: Math.floor(Number(item.id)) || Date.now(),
             data_seq: dataSeq,
@@ -39062,7 +39073,7 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
             obs: item.obs || '',
             foto: item.foto || '',
             fotos: JSON.stringify(item.fotos || []),
-            extras: JSON.stringify(item.extras || []),
+            extras: JSON.stringify(extrasPersistidos),
             motorista: item.motorista || '',
             motorista_id: item.motoristaId ? Math.floor(Number(item.motoristaId)) : null,
             chegada_em: item.chegadaEm || '',
@@ -39086,6 +39097,9 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
           try { extrasArr = typeof row.extras === 'string' ? JSON.parse(row.extras) : (row.extras || []); }
           catch(e) { extrasArr = []; }
         }
+        const metaEntry = extrasArr.find(x => x && x.__fastMeta);
+        const fastMeta = metaEntry ? metaEntry.__fastMeta : {};
+        extrasArr = extrasArr.filter(x => !(x && x.__fastMeta));
         // Suporte a fotos (array) com fallback para foto única
         let fotosArr = [];
         if (row.fotos) {
@@ -39112,7 +39126,14 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
           motoristaId: row.motorista_id != null ? Number(row.motorista_id) : null,
           chegadaEm: row.chegada_em || '',
           valor: Number(row.valor) || 0,
-          dataConclusao: row.data_conclusao || ''
+          dataConclusao: row.data_conclusao || '',
+          qtdMercadorias: Number(fastMeta.qtdMercadorias) || 1,
+          agrupado: !!fastMeta.agrupado,
+          itensAgrupados: fastMeta.itensAgrupados || [],
+          rotasOriginais: fastMeta.rotasOriginais || [],
+          itensOriginais: fastMeta.itensOriginais || [],
+          fotosExcluidas: fastMeta.fotosExcluidas || [],
+          campoAgrupamento: fastMeta.campoAgrupamento || ''
         });
       });
       return seq;
@@ -39754,6 +39775,12 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
         ...((local.rotasExcluidas || []).map(id => String(id))),
         ...((nuvem.rotasExcluidas || []).map(id => String(id)))
       ]);
+      // Fotos removidas tambem precisam de uma lápide local. Sem isto, o merge
+      // unia o array antigo vindo da nuvem e a foto apagada reaparecia.
+      const fotosExcluidasSet = new Set([
+        ...((local.fotosExcluidas || []).map(f => String(f))),
+        ...((nuvem.fotosExcluidas || []).map(f => String(f)))
+      ]);
       // Blacklist de itens de sequência (Rotas do Dia) excluídos (r37).
       // Impede que itens apagados reapareçam ao mesclar com a nuvem.
       const seqItensExcluidosSet = new Set([
@@ -39863,14 +39890,17 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
               if (!item.chegadaEm && existente.chegadaEm) merged.chegadaEm = existente.chegadaEm;
             } catch(eMergeStatus) { console.warn('merge status r101:', eMergeStatus); }
             // Preservar foto e extras do item que os tiver (priorizar local)
-            if (!merged.foto && existente.foto) merged.foto = existente.foto;
+            if (!merged.foto && existente.foto && !fotosExcluidasSet.has(String(existente.foto))) merged.foto = existente.foto;
             if ((!merged.extras || merged.extras.length === 0) && existente.extras && existente.extras.length > 0) merged.extras = existente.extras;
-            if (!merged.foto && item.foto) merged.foto = item.foto;
+            if (!merged.foto && item.foto && !fotosExcluidasSet.has(String(item.foto))) merged.foto = item.foto;
             if ((!merged.extras || merged.extras.length === 0) && item.extras && item.extras.length > 0) merged.extras = item.extras;
             // Preservar array fotos (múltiplas) — unir e remover duplicatas
             const fotosExistente = Array.isArray(existente.fotos) ? existente.fotos : [];
             const fotosItem = Array.isArray(item.fotos) ? item.fotos : [];
-            merged.fotos = [...fotosExistente, ...fotosItem].filter((f, i, arr) => f && arr.indexOf(f) === i);
+            const fotosBloqueadasItem = new Set([...(existente.fotosExcluidas || []), ...(item.fotosExcluidas || [])].map(String));
+            merged.fotosExcluidas = Array.from(fotosBloqueadasItem);
+            merged.fotos = [...fotosExistente, ...fotosItem].filter((f, i, arr) => f && !fotosExcluidasSet.has(String(f)) && !fotosBloqueadasItem.has(String(f)) && arr.indexOf(f) === i);
+            if (merged.foto && (fotosExcluidasSet.has(String(merged.foto)) || fotosBloqueadasItem.has(String(merged.foto)))) merged.foto = '';
             if (merged.fotos.length === 0 && merged.foto) merged.fotos = [merged.foto];
             if (merged.fotos.length > 0 && !merged.foto) merged.foto = merged.fotos[0];
             itemMap.set(idStr, merged);
@@ -39878,8 +39908,10 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
             const copia = { ...item };
             // Normalizar fotos ao carregar do merge
             if (!Array.isArray(copia.fotos)) copia.fotos = [];
-            if (copia.foto && !copia.fotos.includes(copia.foto)) copia.fotos.unshift(copia.foto);
-            copia.fotos = copia.fotos.filter((f, i, arr) => f && arr.indexOf(f) === i);
+            if (copia.foto && !fotosExcluidasSet.has(String(copia.foto)) && !copia.fotos.includes(copia.foto)) copia.fotos.unshift(copia.foto);
+            const bloqueadasCopia = new Set((copia.fotosExcluidas || []).map(String));
+            copia.fotos = copia.fotos.filter((f, i, arr) => f && !fotosExcluidasSet.has(String(f)) && !bloqueadasCopia.has(String(f)) && arr.indexOf(f) === i);
+            if (copia.foto && (fotosExcluidasSet.has(String(copia.foto)) || bloqueadasCopia.has(String(copia.foto)))) copia.foto = '';
             if (copia.fotos.length > 0) copia.foto = copia.fotos[0]; else copia.foto = copia.foto || '';
             itemMap.set(idStr, copia);
           }
@@ -39940,6 +39972,7 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
         clientesExcluidos: Array.from(excluidosSet),
         destinosExcluidos: Array.from(destinosExcluidosSet),
         rotasExcluidas: Array.from(rotasExcluidasSet),
+        fotosExcluidas: Array.from(fotosExcluidasSet),
         seqItensExcluidos: Array.from(seqItensExcluidosSet),
         seqRotasExcluidas: Array.from(seqRotasExcluidasSet),
         destinos: destinosUnificados
@@ -40085,6 +40118,35 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
         var r101PreMerge = (typeof bancoDados !== 'undefined' && bancoDados) ? { sequencias: (bancoDados.sequencias || {}) } : null;
         // 2. Fazer merge (local + nuvem) sem perda
         const dadosMesclados = mergeDados(bancoDados, dadosNuvem);
+        // Deduplicação lógica das rotas. Sincronizações antigas podiam criar IDs
+        // diferentes para a mesma rota; consolidamos somente registros idênticos
+        // em data, cliente, origem, destino, quantidade e valor.
+        if (Array.isArray(dadosMesclados.rotas) && dadosMesclados.rotas.length > 1) {
+          const normalizaChave = v => String(v == null ? '' : v).trim().toLocaleLowerCase('pt-BR').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ');
+          const porChave = new Map();
+          const remapIds = new Map();
+          const carimbo = r => Date.parse(r.statusUpdatedAt || r.updatedAt || r.updated_at || '') || 0;
+          dadosMesclados.rotas.forEach(r => {
+            const chave = [r.data, r.cliente, r.origem, r.destino, Number(r.qtdMercadorias || 1), Number(r.valor || 0)].map(normalizaChave).join('|');
+            const anterior = porChave.get(chave);
+            if (!anterior) { porChave.set(chave, r); return; }
+            const manterNovo = carimbo(r) > carimbo(anterior);
+            const mantida = manterNovo ? r : anterior;
+            const removida = manterNovo ? anterior : r;
+            porChave.set(chave, mantida);
+            remapIds.set(String(removida.id), mantida.id);
+          });
+          dadosMesclados.rotas = Array.from(porChave.values());
+          Object.keys(dadosMesclados.sequencias || {}).forEach(data => {
+            (dadosMesclados.sequencias[data] || []).forEach(item => {
+              if (item.rotaId != null && remapIds.has(String(item.rotaId))) item.rotaId = remapIds.get(String(item.rotaId));
+              if (Array.isArray(item.rotasOriginais)) item.rotasOriginais = item.rotasOriginais.map(id => remapIds.get(String(id)) || id);
+              if (Array.isArray(item.itensOriginais)) item.itensOriginais.forEach(original => {
+                if (original.rotaId != null && remapIds.has(String(original.rotaId))) original.rotaId = remapIds.get(String(original.rotaId));
+              });
+            });
+          });
+        }
         try { r101DetectarNovidadesMotorista(r101PreMerge, dadosMesclados); } catch(e) {}
         // (r39) DEDUP PÓS-MERGE: remover duplicatas de sequência por rotaId.
         // O merge pode trazer múltiplas cópias da nuvem (ids diferentes, mesmo rotaId)
@@ -41704,7 +41766,7 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
           limparNuvem = confirm("Deseja também limpar os dados da NUVEM (Supabase)?\n\nClique OK para limpar local + nuvem.\nClique Cancelar para limpar apenas local (a nuvem manterá os dados).");
         }
         localStorage.removeItem("banco_gestao_local");
-        bancoDados = { rotas: [], despesas: [], sequencias: {}, motoristas: [], clientes: [], rh: [], despesasEmpresa: [], rotasExcluidas: [], seqItensExcluidos: [], seqRotasExcluidas: [], clientesExcluidos: [], destinosExcluidos: [], destinos: [] };
+        bancoDados = { rotas: [], despesas: [], sequencias: {}, motoristas: [], clientes: [], rh: [], despesasEmpresa: [], rotasExcluidas: [], fotosExcluidas: [], seqItensExcluidos: [], seqRotasExcluidas: [], clientesExcluidos: [], destinosExcluidos: [], destinos: [] };
         renderizar();
         carregarSequenciaDia();
         if (limparNuvem) {
@@ -44496,6 +44558,15 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
       normalizarFotosItem(itemEncontrado);
       // Remover a foto do índice
       if (Array.isArray(itemEncontrado.fotos) && fotoIdx >= 0 && fotoIdx < itemEncontrado.fotos.length) {
+        const fotoRemovida = itemEncontrado.fotos[fotoIdx];
+        if (!Array.isArray(bancoDados.fotosExcluidas)) bancoDados.fotosExcluidas = [];
+        if (fotoRemovida && !bancoDados.fotosExcluidas.includes(String(fotoRemovida))) {
+          bancoDados.fotosExcluidas.push(String(fotoRemovida));
+        }
+        if (!Array.isArray(itemEncontrado.fotosExcluidas)) itemEncontrado.fotosExcluidas = [];
+        if (fotoRemovida && !itemEncontrado.fotosExcluidas.includes(String(fotoRemovida))) {
+          itemEncontrado.fotosExcluidas.push(String(fotoRemovida));
+        }
         itemEncontrado.fotos.splice(fotoIdx, 1);
       }
       // Atualizar item.foto para compatibilidade
@@ -44507,6 +44578,8 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
       }
       salvarStorage();
       renderizarSequencia();
+      // Envia o registro já sem a foto; o próximo merge respeitará a lápide acima.
+      fastSalvarSemBloquear(120);
     }
 
     /* ============================================================
@@ -45826,7 +45899,9 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
         // Montar o item agrupado
         const itemAgrupado = {
           id: Date.now() + Math.floor(Math.random() * 1000),
-          rotaId: base.rotaId || null,
+          // Agrupamento existe exclusivamente em Rotas do Dia. As rotas
+          // individuais da tabela Rotas continuam intactas e vinculadas abaixo.
+          rotaId: null,
           cliente: base.cliente || '',
           origem: origens.length > 0 ? origens.join(', ') : (base.origem || ''),
           destino: destinos.length > 0 ? destinos.join(', ') : (base.destino || ''),
@@ -45840,6 +45915,8 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
           foto: todasFotos.length > 0 ? todasFotos[0] : '',
           agrupado: true,
           itensAgrupados: idsOriginais,
+          rotasOriginais: itensDoGrupo.map(item => item.rotaId).filter(id => id != null),
+          itensOriginais: itensDoGrupo.map(item => JSON.parse(JSON.stringify(item))),
           campoAgrupamento: campo
         };
 
@@ -45859,67 +45936,8 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
       // Reconstruir a lista: itens antes + novos itens agrupados + itens depois
       bancoDados.sequencias[dataSel] = [...antes, ...novosItens, ...depois];
 
-      // 3) Remover as ROTAS ORIGINAIS da 1a aba (bancoDados.rotas) para que
-      //    nao fiquem como linhas individuais — so o item agrupado deve aparecer.
-      //    Coletamos todos os rotaId dos itens originais que foram agrupados.
-      const idsRotasParaRemover = new Set();
-      indicesSel.forEach(idx => {
-        const itemOrig = lista[idx];
-        if (itemOrig && itemOrig.rotaId) idsRotasParaRemover.add(String(itemOrig.rotaId));
-      });
-      // Tambem coletar dos itensAgrupados (ids dos itens originais)
-      novosItens.forEach(item => {
-        if (item.agrupado && item.itensAgrupados) {
-          // Os itensAgrupados sao ids dos itens da sequencia, nao das rotas.
-          // Mas o rotaId do base ja esta em idsRotasParaRemover.
-        }
-      });
-      // Remover as rotas originais da 1a aba (exceto a que sera reutilizada como base)
-      if (idsRotasParaRemover.size > 0 && bancoDados.rotas) {
-        // O primeiro item do grupo (base) tera seu rotaId reutilizado via sincronizarComCadastroRotas
-        // Entao preservamos o rotaId do primeiro item de cada grupo, removemos os demais.
-        const idsRotasPreservar = new Set();
-        ordemGrupos.forEach(chave => {
-          const itensDoGrupo = grupos[chave];
-          if (itensDoGrupo.length > 1 && itensDoGrupo[0].rotaId) {
-            idsRotasPreservar.add(String(itensDoGrupo[0].rotaId));
-          }
-        });
-        // Registrar os IDs removidos na blacklist (rotasExcluidas) para que o
-        // mergeDados() nao os re-adicione a partir da nuvem durante a sincronizacao.
-        if (!bancoDados.rotasExcluidas) bancoDados.rotasExcluidas = [];
-        bancoDados.rotas = bancoDados.rotas.filter(r => {
-          const idStr = String(r.id);
-          // Se esta rota esta entre as originais agrupadas E nao e a preservada, remover
-          if (idsRotasParaRemover.has(idStr) && !idsRotasPreservar.has(idStr)) {
-            if (!bancoDados.rotasExcluidas.includes(idStr)) {
-              bancoDados.rotasExcluidas.push(idStr);
-            }
-            return false; // remove da 1a aba
-          }
-          return true;
-        });
-      }
-
-      // 4) Sincronizar com rotas cadastradas (criar/atualizar rota vinculada para o item agrupado)
-      //    O destino concatenado (ex: "Brasil, Japao") e o valor TOTAL ja vêm do item agrupado.
-      novosItens.forEach(item => {
-        if (item.agrupado) {
-          const idRota = sincronizarComCadastroRotas(item.cliente, item.origem, item.destino, item.obs, dataSel, item.rotaId, item.valor);
-          item.rotaId = idRota;
-          // Sincronizar fotos na rota vinculada
-          if (idRota) {
-            const rotaVinc = (bancoDados.rotas || []).find(r => String(r.id) === String(idRota));
-            if (rotaVinc) {
-              rotaVinc.fotos = item.fotos.slice();
-              rotaVinc.foto = item.foto;
-              // Marcar como agrupado na 1a aba tambem
-              rotaVinc.agrupado = true;
-              rotaVinc.itensAgrupados = item.itensAgrupados;
-            }
-          }
-        }
-      });
+      // A tabela principal não é alterada: nela cada destino permanece como
+      // uma rota individual. Somente a sequência visual do dia é agrupada.
 
       fecharModalAgrupar();
       const totalItensAgrupados = indicesSel.length;
@@ -46032,6 +46050,32 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
     }
 
     function executarDesmembramento(dataSel, lista, itensParaDesmembrar, indicesParaDesmembrar) {
+      // Grupos novos guardam uma fotografia dos itens individuais. Restaurá-los
+      // altera somente Rotas do Dia; não cria, exclui nem agrupa a tabela Rotas.
+      if (itensParaDesmembrar.every(item => Array.isArray(item.itensOriginais) && item.itensOriginais.length)) {
+        const restaurados = [];
+        itensParaDesmembrar.forEach(item => {
+          item.itensOriginais.forEach(original => {
+            const copia = JSON.parse(JSON.stringify(original));
+            copia.agrupado = false;
+            delete copia.itensOriginais;
+            delete copia.rotasOriginais;
+            restaurados.push(copia);
+          });
+        });
+        const remover = new Set(indicesParaDesmembrar);
+        const restante = lista.filter((_, idx) => !remover.has(idx));
+        let pos = 0;
+        const primeiro = indicesParaDesmembrar.length ? Math.min(...indicesParaDesmembrar) : 0;
+        for (let i = 0; i < primeiro; i++) if (!remover.has(i)) pos++;
+        bancoDados.sequencias[dataSel] = [
+          ...restante.slice(0, pos), ...restaurados, ...restante.slice(pos)
+        ];
+        mostrarToast('Rotas do dia desmembradas. A tabela Rotas permaneceu individual.', 'success');
+        fastSalvarSemBloquear(180);
+        fastAgendarRenderizacaoCompleta(true, 260);
+        return;
+      }
       // Coletar destinos que ja existem como rotas individuais (nao agrupadas)
       // para evitar duplicatas. A verificacao e por CLIENTE: so pula se ja
       // existir uma rota individual do MESMO cliente com o MESMO destino.
@@ -47352,8 +47396,12 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
         }
       }
 
+      // Garante ID único mesmo quando vários destinos são adicionados no mesmo milissegundo.
+      let novoId = Date.now();
+      const idsExistentes = new Set((bancoDados.rotas || []).map(r => String(r.id)));
+      while (idsExistentes.has(String(novoId))) novoId++;
       const novaRota = {
-        id: Date.now(),
+        id: novoId,
         cliente: cliente,
         origem: origem,
         destino: destino,
@@ -58818,7 +58866,7 @@ window.fastMobileNav = function(ev, abaId, botao) {
     function grupoId(){return 'fotos_'+Date.now()+'_'+Math.random().toString(36).slice(2,7)}
     function salvar(){if(typeof fastSalvarSemBloquear==='function')fastSalvarSemBloquear(80);else if(typeof salvarStorage==='function')salvarStorage();if(typeof fastAgendarRenderizacaoCompleta==='function')fastAgendarRenderizacaoCompleta(true,120);else if(typeof renderizarSequencia==='function')renderizarSequencia()}
     function sincronizarIndividual(item,data,forcarNovo){if(typeof sincronizarComCadastroRotas!=='function')return;var rid=forcarNovo?null:item.rotaId,id=sincronizarComCadastroRotas(item.cliente||'',item.origem||'',item.destino||'',item.obs||'',data,rid,Number(item.valor)||0,Number(item.qtdMercadorias)||1);item.rotaId=id;var r=(bancoDados.rotas||[]).find(function(x){return String(x.id)===String(id)});if(r){r.statusExecucao=item.status||r.statusExecucao||'EM ROTA';if(item.fotos)r.fotos=item.fotos.slice();if(item.foto)r.foto=item.foto}}
-    window.fast75RepararVinculos=function(silencioso){var usados={},corrigidos=0;/* (r138) blindagem 'rotas voltando': nao recriar vinculo/rota para itens excluidos */var blRotas=new Set(((bancoDados||{}).rotasExcluidas||[]).map(String).concat(((bancoDados||{}).seqRotasExcluidas||[]).map(String)));var blItens=new Set(((bancoDados||{}).seqItensExcluidos||[]).map(String));Object.keys((bancoDados||{}).sequencias||{}).forEach(function(data){(bancoDados.sequencias[data]||[]).forEach(function(item){var key=item.rotaId?String(item.rotaId):'';if(blItens.has(String(item.id))||(key&&blRotas.has(key))){return}var duplicado=key&&usados[key];if(!key||!(bancoDados.rotas||[]).some(function(r){return String(r.id)===key})||duplicado){sincronizarIndividual(item,data,!!duplicado);corrigidos++}else{usados[key]=true;sincronizarIndividual(item,data,false)}})});if(corrigidos){salvar();if(!silencioso&&window.mostrarToast)mostrarToast(corrigidos+' vínculo(s) individual(is) corrigido(s).','success')}return corrigidos};
+    window.fast75RepararVinculos=function(silencioso){var usados={},corrigidos=0;/* (r138) blindagem 'rotas voltando': nao recriar vinculo/rota para itens excluidos */var blRotas=new Set(((bancoDados||{}).rotasExcluidas||[]).map(String).concat(((bancoDados||{}).seqRotasExcluidas||[]).map(String)));var blItens=new Set(((bancoDados||{}).seqItensExcluidos||[]).map(String));Object.keys((bancoDados||{}).sequencias||{}).forEach(function(data){(bancoDados.sequencias[data]||[]).forEach(function(item){if(item&&item.agrupado)return;var key=item.rotaId?String(item.rotaId):'';if(blItens.has(String(item.id))||(key&&blRotas.has(key))){return}var duplicado=key&&usados[key];if(!key||!(bancoDados.rotas||[]).some(function(r){return String(r.id)===key})||duplicado){sincronizarIndividual(item,data,!!duplicado);corrigidos++}else{usados[key]=true;sincronizarIndividual(item,data,false)}})});if(corrigidos){salvar();if(!silencioso&&window.mostrarToast)mostrarToast(corrigidos+' vínculo(s) individual(is) corrigido(s).','success')}return corrigidos};
     window.confirmarAgrupamento=function(){var c=lista(),ids=selecionados(c);if(ids.length<2){mostrarToast('Selecione pelo menos 2 rotas para agrupar as fotos.','warning');return}var gid=grupoId(),membros=ids.map(function(i){return String(c.itens[i].id)});ids.forEach(function(i){var x=c.itens[i];x.grupoFotosId=gid;x.grupoFotosMembros=membros.slice();x.agrupadoFotos=true;delete x.agrupado;delete x.itensAgrupados;sincronizarIndividual(x,c.data,false)});if(typeof fecharModalAgrupar==='function')fecharModalAgrupar();salvar();var somaVals=ids.reduce(function(a,i){return a+(Number(c.itens[i].valor)||0)},0);mostrarToast(ids.length+' rotas agrupadas somente para envio de fotos. Cada rota continua individual em Rotas. Valor somado do grupo: '+(typeof fmtMoedaBR==='function'?fmtMoedaBR(somaVals):'R$ '+somaVals.toFixed(2)),'success')};
     window.desmembrarRotas=function(){var c=lista(),ids=selecionados(c),alvos=ids.length?ids.map(function(i){return c.itens[i]}):c.itens.filter(function(x){return x.grupoFotosId});if(!alvos.length){mostrarToast('Não há grupos de fotos para desfazer.','info');return}var gids={};alvos.forEach(function(x){if(x.grupoFotosId)gids[x.grupoFotosId]=true});c.itens.forEach(function(x){if(gids[x.grupoFotosId]){delete x.grupoFotosId;delete x.grupoFotosMembros;delete x.agrupadoFotos}});salvar();mostrarToast('Agrupamento de fotos desfeito. As rotas individuais foram mantidas.','success')};
     function decorar(){var c=lista();document.querySelectorAll('.seq-item[data-item-id]').forEach(function(card){var x=c.itens.find(function(i){return String(i.id)===String(card.dataset.itemId)});if(!x||!x.grupoFotosId||card.querySelector('.fast75-photo-group'))return;var h=card.querySelector('.seq-header-top');if(h){var b=document.createElement('span');b.className='fast75-photo-group';var gi=c.itens.filter(function(i2){return i2.grupoFotosId===x.grupoFotosId});var soma=gi.reduce(function(a,i2){return a+(Number(i2.valor)||0)},0);var sq=gi.reduce(function(a,i2){return a+(parseInt(i2.qtdMercadorias)||1)},0);b.innerHTML='<i class="fa-solid fa-images"></i> GRUPO DE FOTOS ('+(x.grupoFotosMembros||[]).length+') • º '+sq+'x • '+(typeof fmtMoedaBR==='function'?fmtMoedaBR(soma):'R$ '+soma.toFixed(2));h.appendChild(b)}})}
@@ -61143,7 +61191,7 @@ body.fast-exclusive-app main { padding-bottom: 12px !important; }
 <script id="fast-241-drive-controller">
 (function(){
   'use strict';
-  var VERSION='2.3.49', CLIENT='fast_drive_client_id', FOLDER='fast_drive_folder_id', TOKEN='fast_drive_access_token';
+  var VERSION='2.3.50', CLIENT='fast_drive_client_id', FOLDER='fast_drive_folder_id', TOKEN='fast_drive_access_token';
   function el(id){return document.getElementById(id)}
   function esc(v){var d=document.createElement('div');d.textContent=String(v==null?'':v);return d.innerHTML}
   function db(){return typeof abrirDBFotos==='function'?abrirDBFotos():Promise.reject(new Error('Armazenamento de fotos indisponível'))}
@@ -61194,7 +61242,7 @@ body.fast-exclusive-app main { padding-bottom: 12px !important; }
     restoreConfig();setTimeout(restoreConfig,1500);setTimeout(restoreConfig,5000);
     var original=window.fastDriveSalvarEConectar;if(typeof original==='function'&&!original.fast241){window.fastDriveSalvarEConectar=function(){persistConfig();return original.apply(this,arguments)};window.fastDriveSalvarEConectar.fast241=true}
     migratePhotos().catch(function(e){console.warn('Migração segura das fotos:',e)});
-    var changes=[{type:'melhorado',text:'2.3.49 (12/09/2026): botões Carregar, Marcar Todos, Agrupar, Limpar e Desmembrar Rotas foram retirados do filtro e colocados no final do formulário, no lugar de Fechar / Concluir.'},{type:'corrigido',text:'2.3.49 (12/09/2026): mensagens e compartilhamentos agrupados mostram somente o nome do destino, sem o rótulo Destino antes do nome.'},{type:'removido',text:'2.3.48 (12/09/2026): botão Fechar / Concluir removido do formulário Adicionar Rotas.'}];window.fastUltimoModuloNovidades=changes;var c=document.querySelector('meta[name="fast-app-changelog"]');if(c)c.content=JSON.stringify(changes)
+    var changes=[{type:'corrigido',text:'2.3.50 (12/09/2026): Agrupar agora atua somente em Rotas do Dia; a tabela Rotas mantém cada destino como rota individual.'},{type:'corrigido',text:'2.3.50 (12/09/2026): fotos excluídas recebem bloqueio permanente no merge e não voltam após sincronizar com o Supabase.'},{type:'corrigido',text:'2.3.50 (12/09/2026): sincronismo consolida rotas realmente idênticas e novos destinos recebem IDs únicos, evitando duplicações.'},{type:'melhorado',text:'2.3.49 (12/09/2026): botões Carregar, Marcar Todos, Agrupar, Limpar e Desmembrar Rotas foram retirados do filtro e colocados no final do formulário, no lugar de Fechar / Concluir.'},{type:'corrigido',text:'2.3.49 (12/09/2026): mensagens e compartilhamentos agrupados mostram somente o nome do destino, sem o rótulo Destino antes do nome.'}];window.fastUltimoModuloNovidades=changes;var c=document.querySelector('meta[name="fast-app-changelog"]');if(c)c.content=JSON.stringify(changes)
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){setTimeout(install,180)});else setTimeout(install,180);
 })();
