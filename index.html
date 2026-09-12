@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="fast-linux-desktop" data-fast-version="2.3.50"><head>
+<html lang="pt-BR" class="fast-linux-desktop" data-fast-version="2.3.51"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
   <meta name="theme-color" content="#4f46e5">
@@ -21,9 +21,9 @@
   <meta name="fast-github-branch" content="main">
   <meta name="fast-github-path" content="index.html">
   <meta name="fast-github-token-env" content="GH_TOKEN">
-  <meta name="fast-app-version" content="2.3.50">
+  <meta name="fast-app-version" content="2.3.51">
   <meta name="fast-app-date" content="2026-09-11T09:30:00-03:00">
-  <meta name="fast-latest-update" content="2.3.50: agrupamento exclusivo das Rotas do Dia, exclusão definitiva de fotos e deduplicação do sincronismo.">
+  <meta name="fast-latest-update" content="2.3.51: pré-visualização inteligente e preenchimento pela última rota do cliente ou última despesa.">
   <!-- r92: verificação automática de nova versão ao abrir; Verificar Atualizações com cache-busting e sem fallback no-cors inválido. -->
   <!-- r70.1: lista corrente no HTML inicial; o painel não espera scripts tardios -->
   <meta name="fast-app-changelog-immediate" content="2.3.39">
@@ -42400,11 +42400,14 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
         if (el) el.value = valor == null ? '' : valor;
       };
       setVal('seqOrigem', ultimaRota.origem || '');
-      // r143: destino/qtd/valor NAO sao mais pre-preenchidos — o usuario
-      // digita direto, sem precisar apagar nada (pedido do usuario).
+      // 2.3.51: reaproveitar a última rota do cliente para acelerar o lançamento.
+      setVal('seqDestino', ultimaRota.destino || '');
+      setVal('seqQtdDestino', ultimaRota.qtdMercadorias != null ? ultimaRota.qtdMercadorias : (ultimaRota.qtdVolumes || 1));
+      fastSetMoeda('seqValorDestino', ultimaRota.valor != null ? ultimaRota.valor : 0);
       setVal('seqObs', ultimaRota.descricao || ultimaRota.observacao || '');
       fastSetMoeda('seqValor', ultimaRota.valor != null ? ultimaRota.valor : 0);
       setVal('seqQtdVolumes', ultimaRota.qtdMercadorias != null ? ultimaRota.qtdMercadorias : (ultimaRota.qtdVolumes || 0));
+      setVal('seqMotorista', ultimaRota.motorista || '');
       atualizarPreviewAba2();
     }
 
@@ -42440,7 +42443,13 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
         item.setAttribute('role', 'option');
         const cad = (bancoDados.clientes || []).find(c => normalizarBuscaCliente(c && c.nome) === normalizarBuscaCliente(nome));
         const telefone = cad ? (cad.whatsapp || cad.telefone || '') : '';
-        item.textContent = telefone ? `${nome}  📞 ${telefone}` : nome;
+        const ultima = obterUltimaRotaCliente(nome);
+        const resumo = ultima
+          ? [ultima.origem || '', ultima.destino || '', (ultima.qtdMercadorias || 1) + 'x', typeof fmtMoedaBR === 'function' ? fmtMoedaBR(Number(ultima.valor) || 0) : 'R$ ' + (Number(ultima.valor) || 0).toFixed(2).replace('.', ',')].filter(Boolean).join(' → ')
+          : '';
+        item.innerHTML = '<strong>' + escapeHtml(nome) + '</strong>' +
+          (telefone ? '<small>📞 ' + escapeHtml(telefone) + '</small>' : '') +
+          (resumo ? '<small><i class="fa-solid fa-clock-rotate-left"></i> Última rota: ' + escapeHtml(resumo) + '</small>' : '');
         item.addEventListener('mousedown', e => e.preventDefault());
         item.addEventListener('click', () => {
           input.value = nome;
@@ -49139,6 +49148,25 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
 
     // r49: Autocomplete para campos de Despesa (descricao e local)
     // Baseado nas despesas ja cadastradas, filtrando pela primeira letra digitada.
+    function preencherUltimaDespesa(despesa) {
+      if (!despesa) return;
+      const setVal = function(id, valor) { const el = document.getElementById(id); if (el) el.value = valor == null ? '' : valor; };
+      setVal('txtDescricaoDespesa', despesa.descricao || '');
+      setVal('txtLocalDespesa', despesa.local || '');
+      const categoria = despesa.categoria || '';
+      const selectCategoria = document.getElementById('cbCategoriaDespesa');
+      if (categoria && selectCategoria) {
+        try { fastSalvarCategoriaDespesa(categoria); fastPopularCategoriasDespesa(selectCategoria); } catch(e) {}
+        selectCategoria.value = Array.from(selectCategoria.options).some(o => o.value === categoria) ? categoria : 'Outros';
+        verificarOutraCategoria(selectCategoria);
+        if (selectCategoria.value === 'Outros') setVal('txtNovaCategoria', categoria);
+      }
+      fastSetMoeda('txtValorDespesa', Number(despesa.valor) || 0);
+      setVal('cbFormaPgtoDespesa', despesa.formaPgto || despesa.pagamento || '');
+      setVal('txtNomeCartaoDespesa', despesa.nomeCartao || '');
+      try { fastVerificarFormaPgtoDespesa(); } catch(e) {}
+    }
+
     function aoDigitarDespesaCampo(input, campo, listaId) {
       var termo = normalizarBuscaCliente(input.value);
       var divLista = document.getElementById(listaId);
@@ -49148,11 +49176,16 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
         divLista.style.display = 'none'; divLista.classList.remove('fast-sug-show');
         return;
       }
-      // Coleta valores unicos do campo (descricao ou local) das despesas cadastradas
+      // Mantém a despesa mais recente de cada descrição/local para mostrar a
+      // prévia e preencher todos os campos ao selecionar.
       var valores = {};
       (bancoDados.despesas || []).forEach(function(d) {
         var val = String(d[campo] || '').trim();
-        if (val) valores[val] = true;
+        if (!val) return;
+        var anterior = valores[val];
+        var ts = Date.parse(d.data || '') || Number(d.id) || 0;
+        var tsAnterior = anterior ? (Date.parse(anterior.data || '') || Number(anterior.id) || 0) : -1;
+        if (!anterior || ts >= tsAnterior) valores[val] = d;
       });
       var unicos = Object.keys(valores);
       // Filtra por correspondencia (primeira letra ou qualquer parte)
@@ -49168,13 +49201,15 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
         return;
       }
       correspondentes.forEach(function(val) {
+        var despesa = valores[val];
         var item = document.createElement('div');
         item.className = 'suggestion-item';
         item.setAttribute('role', 'option');
-        item.textContent = val;
+        var detalhes = [despesa.local || '', despesa.categoria || '', typeof fmtMoedaBR === 'function' ? fmtMoedaBR(Number(despesa.valor) || 0) : 'R$ ' + (Number(despesa.valor) || 0).toFixed(2).replace('.', ','), despesa.data ? formatarDataBR(despesa.data) : ''].filter(Boolean).join(' • ');
+        item.innerHTML = '<strong>' + escapeHtml(val) + '</strong>' + (detalhes ? '<small><i class="fa-solid fa-clock-rotate-left"></i> Última despesa: ' + escapeHtml(detalhes) + '</small>' : '');
         item.addEventListener('mousedown', function(e) { e.preventDefault(); });
         item.addEventListener('click', function() {
-          input.value = val;
+          preencherUltimaDespesa(despesa);
           divLista.style.display = 'none'; divLista.classList.remove('fast-sug-show');
         });
         divLista.appendChild(item);
@@ -61185,13 +61220,16 @@ body.fast-exclusive-app main { padding-bottom: 12px !important; }
   .fast-drive-entry i{font-size:25px;color:#16a34a}.fast-drive-entry img{width:100%;height:92px;object-fit:cover;border-radius:8px}.fast-drive-entry span{font-size:11px;font-weight:750;overflow-wrap:anywhere}
   #fastVoiceRouteStatus{display:none;align-items:center;gap:6px;padding:6px 9px;border-radius:9px;background:rgba(124,58,237,.10);color:var(--accent,#6d28d9);font-size:11px;font-weight:800;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   #fastVoiceRouteBtn.listening{background:#dc2626!important;color:#fff!important;animation:fastVoicePulse 1s infinite}
+  #listaSugestoesSeq .suggestion-item,#listaSugestoesDespesaDesc .suggestion-item,#listaSugestoesDespesaLocal .suggestion-item{align-items:flex-start!important;flex-direction:column!important;gap:3px!important}
+  #listaSugestoesSeq .suggestion-item strong,#listaSugestoesDespesaDesc .suggestion-item strong,#listaSugestoesDespesaLocal .suggestion-item strong{font-size:13px;color:var(--text-main,#172033)}
+  #listaSugestoesSeq .suggestion-item small,#listaSugestoesDespesaDesc .suggestion-item small,#listaSugestoesDespesaLocal .suggestion-item small{display:block;font-size:10.5px;line-height:1.35;color:var(--text-muted,#64748b);white-space:normal;overflow-wrap:anywhere}
   @keyframes fastVoicePulse{50%{transform:scale(1.04);box-shadow:0 0 0 7px rgba(220,38,38,.13)}}
   @media(max-width:430px){#rotasDia>.card:first-child{padding:12px!important}#rotasDia>.card:first-child .card-title{margin-bottom:8px!important}#rotasDia>.card:first-child .grid-form input,#rotasDia>.card:first-child .grid-form select{font-size:12px!important;padding:6px 8px!important}.rd-drive-label{display:none}}
 </style>
 <script id="fast-241-drive-controller">
 (function(){
   'use strict';
-  var VERSION='2.3.50', CLIENT='fast_drive_client_id', FOLDER='fast_drive_folder_id', TOKEN='fast_drive_access_token';
+  var VERSION='2.3.51', CLIENT='fast_drive_client_id', FOLDER='fast_drive_folder_id', TOKEN='fast_drive_access_token';
   function el(id){return document.getElementById(id)}
   function esc(v){var d=document.createElement('div');d.textContent=String(v==null?'':v);return d.innerHTML}
   function db(){return typeof abrirDBFotos==='function'?abrirDBFotos():Promise.reject(new Error('Armazenamento de fotos indisponível'))}
@@ -61242,7 +61280,7 @@ body.fast-exclusive-app main { padding-bottom: 12px !important; }
     restoreConfig();setTimeout(restoreConfig,1500);setTimeout(restoreConfig,5000);
     var original=window.fastDriveSalvarEConectar;if(typeof original==='function'&&!original.fast241){window.fastDriveSalvarEConectar=function(){persistConfig();return original.apply(this,arguments)};window.fastDriveSalvarEConectar.fast241=true}
     migratePhotos().catch(function(e){console.warn('Migração segura das fotos:',e)});
-    var changes=[{type:'corrigido',text:'2.3.50 (12/09/2026): Agrupar agora atua somente em Rotas do Dia; a tabela Rotas mantém cada destino como rota individual.'},{type:'corrigido',text:'2.3.50 (12/09/2026): fotos excluídas recebem bloqueio permanente no merge e não voltam após sincronizar com o Supabase.'},{type:'corrigido',text:'2.3.50 (12/09/2026): sincronismo consolida rotas realmente idênticas e novos destinos recebem IDs únicos, evitando duplicações.'},{type:'melhorado',text:'2.3.49 (12/09/2026): botões Carregar, Marcar Todos, Agrupar, Limpar e Desmembrar Rotas foram retirados do filtro e colocados no final do formulário, no lugar de Fechar / Concluir.'},{type:'corrigido',text:'2.3.49 (12/09/2026): mensagens e compartilhamentos agrupados mostram somente o nome do destino, sem o rótulo Destino antes do nome.'}];window.fastUltimoModuloNovidades=changes;var c=document.querySelector('meta[name="fast-app-changelog"]');if(c)c.content=JSON.stringify(changes)
+    var changes=[{type:'novo',text:'2.3.51 (12/09/2026): em Rotas do Dia, digitar uma letra mostra clientes com a prévia da última rota; ao selecionar, origem, destino, quantidade, valor, observação e motorista são preenchidos automaticamente.'},{type:'novo',text:'2.3.51 (12/09/2026): em Despesas, digitar a descrição ou local mostra a última despesa correspondente; ao selecionar, descrição, local, categoria, valor e pagamento são reaproveitados.'},{type:'corrigido',text:'2.3.50 (12/09/2026): Agrupar agora atua somente em Rotas do Dia; a tabela Rotas mantém cada destino como rota individual.'},{type:'corrigido',text:'2.3.50 (12/09/2026): fotos excluídas recebem bloqueio permanente no merge e não voltam após sincronizar com o Supabase.'},{type:'corrigido',text:'2.3.50 (12/09/2026): sincronismo consolida rotas realmente idênticas e novos destinos recebem IDs únicos, evitando duplicações.'}];window.fastUltimoModuloNovidades=changes;var c=document.querySelector('meta[name="fast-app-changelog"]');if(c)c.content=JSON.stringify(changes)
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){setTimeout(install,180)});else setTimeout(install,180);
 })();
