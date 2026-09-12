@@ -29,6 +29,15 @@
   <meta name="fast-app-changelog-immediate" content="2.3.39">
   <meta name="fast-app-changelog" content="[{&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;2.3.36 (11/09/2026): corrigido o virar de dia de ROTAS DO DIA — o dia agora vira à meia-noite do fuso do aparelho (antes virava às 21:00 no Brasil por causa do fuso UTC, e rotas trabalhadas à noite caíam na lista do dia seguinte); ao virar o dia, somente as rotas PENDENTES do dia anterior entram na lista do dia novo; rotas CONCLUÍDAS de dias anteriores não aparecem mais em ROTAS DO DIA (ficam no histórico da data delas, visíveis pelo filtro de data); rotas concluídas de dias anteriores que estavam paradas na lista do dia atual são removidas automaticamente.&quot;},{&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;2.3.36 (11/09/2026): corrigida a divergência de status entre a rota cadastrada e o card de ROTAS DO DIA — marcar rota como CONCLUÍDA na aba ROTAS agora atualiza o card em qualquer data em que ele esteja; antes, se o card tinha sido movido de dia, ele ficava EM ROTA enquanto a rota era CONCLUÍDA e reaparecia no dia seguinte.&quot;},{&quot;type&quot;:&quot;novo&quot;,&quot;:&quot;2.3.35 (11/09/2026): quadro de NOVIDADES abre sozinho ao abrir o app sempre que houver atualização, mostrando todas as melhorias e correções da versão; a seção ÚLTIMAS ATUALIZAÇÕES nasce sempre preenchida e nunca mais fica vazia.&quot;},{&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;2.3.34 (10/09/2026): guia passo a passo do ID AUTH do Google Drive — como criar o Client ID OAuth no Google Cloud, a origem exata autorizada e onde colar no app para conectar o backup de fotos no Drive.&quot;},{&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;2.3.34 (10/09/2026): painel ADICIONAR ROTAS agora embutido direto na tela ROTAS DO DIA — o botão antigo foi removido; a nova rota é lançada na data selecionada no filtro, com aviso da data sempre visível.&quot;},{&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;2.3.34 (10/09/2026): campos Destino, Qtd e Valor na MESMA linha, com botões + e − ao lado do valor que ajustam R$ 5 por toque; no celular tudo cabe na mesma linha, sem cortar.&quot;},{&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;2.3.34 (10/09/2026): botões Subir e Descer de volta no lado direito dos cards de rota — o primeiro não deixa subir e o último não deixa descer, exatamente como no relatório.&quot;},{&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;2.3.34 (10/09/2026): botão de comando rápido ⚡ agora é arrastável — mova para qualquer canto da tela; a posição fica salva e ele nunca sai da tela.&quot;},{&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;2.3.34 (10/09/2026): barra fixa inferior maior — os 4 botões agora têm ícones e textos maiores e ficam proporcionais dentro da barra, no celular e no computador.&quot;},{&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;2.3.34 (10/09/2026): corrigido erro de programação nos botões Subir/Descer que podia travar o aplicativo ao abrir as rotas; e ajustes de tamanho da barra e dos campos no celular.&quot;},{&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;2.3.33 (10/09/2026): versão unificada em telas, manifesto, recursos, atualização e recuperação; referências ativas antigas não comandam mais o aplicativo.&quot;},{&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;2.3.33 (10/09/2026): blocos CSS idênticos e inúteis foram removidos sem alterar o visual.&quot;},{&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;2.3.33 (10/09/2026): Centro de Diagnóstico verifica armazenamento, fotos, rede, compartilhamento, atualização, Service Worker e integridade básica.&quot;},{&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;2.3.33 (10/09/2026): backup de emergência pode ser baixado diretamente pelo diagnóstico antes de manutenção ou troca de aparelho.&quot;},{&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;2.3.33 (10/09/2026): proteção contra textos longos foi ampliada para todos os elementos dos cards das Rotas do Dia.&quot;},{&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;2.3.33 (10/09/2026): limpeza de atualização remove somente caches e Service Workers; rotas, despesas, fotos e configurações permanecem intactas.&quot;},{&quot;type&quot;:&quot;seguranca&quot;,&quot;text&quot;:&quot;2.3.33 (10/09/2026): diagnóstico alerta sobre token de publicação salvo e oferece remoção imediata em aparelhos compartilhados.&quot;},{&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;2.3.33 (10/09/2026): agrupamento total, borda verde de conclusão e envio conjunto de fotos renomeadas continuam protegidos pelo último módulo carregado.&quot;}]" data-r88="1" data-r89="1" data-r87="1" data-r127="1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https:; img-src 'self' data: blob: https: http:; connect-src 'self' https: data: blob:; font-src 'self' https: data:;">
+  <!-- Oculta o conteúdo protegido desde o primeiro frame. O JavaScript só
+       libera as telas internas depois que o gate decide a autenticação. -->
+  <style id="fast-auth-first-paint">
+    body.fast-auth-booting > :not(#fastSplash):not(#fastLoginGate):not(script):not(style) {
+      visibility: hidden !important;
+      pointer-events: none !important;
+    }
+    body.fast-auth-booting { background: #0f172a; overflow: hidden !important; }
+  </style>
   <!-- PWA: Meta tags para app instalavel -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -1439,7 +1448,7 @@ body.fast-edition-mobile .pro-sidebar, body.fast-touch-ui .pro-sidebar { display
 body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher { right:14px !important; bottom:88px !important; width:50px !important; height:50px !important; }
 
 </style></head>
-<body class="fast-pro fast-v2 fast-edition-mobile fast-touch-ui fast-v2-compact fx-executive fx-layout-command theme-light" style="" data-fast-layout="operacional">
+<body class="fast-auth-booting fast-pro fast-v2 fast-edition-mobile fast-touch-ui fast-v2-compact fx-executive fx-layout-command theme-light" style="" data-fast-layout="operacional">
 <script id="r99-ime-guard">
 /* r99: Guarda IME (teclado de voz do Google / Gboard e teclados CJK).
    Durante a composição (ditado por voz), NENHUM código pode reescrever o
@@ -2039,6 +2048,7 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
 
     function showGate(){
       if (!isEnabled()) { hideGate(); return; }
+      document.body.classList.add('fast-auth-booting');
       gate = $('fastLoginGate');
       if (!gate) return;
       // r82: uma nova abertura real do gate libera novo disparo automático.
@@ -2049,12 +2059,12 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
         var vNum = $('fastGateVersionNum');
         if (vNum) vNum.textContent = (typeof fastObterVersao === 'function') ? fastObterVersao() : '2026.09.01-r47';
       } catch(e){}
-      // Reexibe a splash desfocada ao fundo quando o gate e mostrado novamente (ex: logout)
+      // O gate abre diretamente, sem revelar o app nem reexibir a splash atrás.
       var splash = $('fastSplash');
       if (splash){
-        splash.style.display = 'flex';
-        splash.classList.remove('hide');
-        splash.classList.add('blur');
+        splash.classList.remove('show', 'blur');
+        splash.classList.add('hide');
+        splash.style.display = 'none';
       }
       gate.classList.add('show');
       // r85: esta é a opção padrão em todos os acessos e também na biometria.
@@ -2073,6 +2083,7 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
     function hideGate(){
       gate = $('fastLoginGate');
       if (gate) gate.classList.remove('show');
+      document.body.classList.remove('fast-auth-booting');
       document.body.style.overflow = '';
       // Esconde a splash desfocada apos login concluido com sucesso
       var splash = $('fastSplash');
@@ -2873,6 +2884,15 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
           // a splash precisa ser curta para a digital aparecer IMEDIATAMENTE.
           var loginAtivado = false;
           try { loginAtivado = localStorage.getItem(K_ENABLED) === '1'; } catch(e){}
+          // Com proteção ativa, não aguarda nem exibe a splash: abre o gate
+          // imediatamente e mantém todas as áreas internas ocultas.
+          if (loginAtivado){
+            splash.classList.remove('show', 'blur');
+            splash.classList.add('hide');
+            splash.style.display = 'none';
+            try { initGate(); } catch(err){ if (window.console) console.error('FastGate init error', err); }
+            return;
+          }
           var temBio = false;
           try { temBio = bioCredExists(); } catch(e){}
           // Se tem login + biometria: splash rapida (800ms) para a digital pedir logo.
