@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="fast-linux-desktop" data-fast-version="2.3.46"><head>
+<html lang="pt-BR" class="fast-linux-desktop" data-fast-version="2.3.47"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
   <meta name="theme-color" content="#4f46e5">
@@ -21,9 +21,9 @@
   <meta name="fast-github-branch" content="main">
   <meta name="fast-github-path" content="index.html">
   <meta name="fast-github-token-env" content="GH_TOKEN">
-  <meta name="fast-app-version" content="2.3.46">
+  <meta name="fast-app-version" content="2.3.47">
   <meta name="fast-app-date" content="2026-09-11T09:30:00-03:00">
-  <meta name="fast-latest-update" content="2.3.46: comando de voz agora busca rotas ou preenche uma rota nova completa em Rotas do Dia.">
+  <meta name="fast-latest-update" content="2.3.47: siglas ditadas no comando de voz são convertidas automaticamente para letras maiúsculas.">
   <!-- r92: verificação automática de nova versão ao abrir; Verificar Atualizações com cache-busting e sem fallback no-cors inválido. -->
   <!-- r70.1: lista corrente no HTML inicial; o painel não espera scripts tardios -->
   <meta name="fast-app-changelog-immediate" content="2.3.39">
@@ -51163,7 +51163,14 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
       // Capitaliza nomes próprios
       function cap(s) {
         if (!s) return s;
-        return s.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+        const comuns = new Set(['a','ao','aos','as','com','da','das','de','do','dos','e','em','na','nas','no','nos','o','os','para','por','um','uma']);
+        const siglasConhecidas = new Set(['api','br','cep','cnpj','cpf','gps','rh','tlf','uf','wj','wm']);
+        return s.split(' ').map(function(w){
+          const limpa = w.replace(/[^a-zA-ZÀ-ÿ]/g,'');
+          const normal = limpa.toLowerCase();
+          if (limpa.length >= 2 && limpa.length <= 5 && !comuns.has(normal) && (siglasConhecidas.has(normal) || !/[aeiouáéíóúâêôãõ]/i.test(limpa))) return w.toUpperCase();
+          return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
+        }).join(' ');
       }
       dados.cliente = cap(dados.cliente);
       dados.destino = cap(dados.destino);
@@ -51237,7 +51244,7 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
       if (d.valor !== null && typeof fastSetMoeda === 'function') fastSetMoeda('seqValorDestino', d.valor);
       const motoristaMatch = texto.match(/\bmotorista\s+(.+?)(?=\s+(?:observa[cç][aã]o|descri[cç][aã]o|data|valor|quantidade|\d+\s+(?:volumes?|mercadorias?))\b|$)/i);
       if (motoristaMatch) {
-        const nome = motoristaMatch[1].trim();
+        const nome = motoristaMatch[1].trim().replace(/\b([a-zA-Z]{2,5})\b/g,function(p){return /^(wm|wj|tlf|rh|gps|cpf|cnpj|cep|uf|br)$/i.test(p)||!/[aeiou]/i.test(p)?p.toUpperCase():p});
         const select = document.getElementById('seqMotorista');
         if (select) {
           const opt = Array.from(select.options).find(function(o){ return o.textContent.trim().toLowerCase() === nome.toLowerCase(); });
@@ -61140,7 +61147,7 @@ body.fast-exclusive-app main { padding-bottom: 12px !important; }
 <script id="fast-241-drive-controller">
 (function(){
   'use strict';
-  var VERSION='2.3.46', CLIENT='fast_drive_client_id', FOLDER='fast_drive_folder_id', TOKEN='fast_drive_access_token';
+  var VERSION='2.3.47', CLIENT='fast_drive_client_id', FOLDER='fast_drive_folder_id', TOKEN='fast_drive_access_token';
   function el(id){return document.getElementById(id)}
   function esc(v){var d=document.createElement('div');d.textContent=String(v==null?'':v);return d.innerHTML}
   function db(){return typeof abrirDBFotos==='function'?abrirDBFotos():Promise.reject(new Error('Armazenamento de fotos indisponível'))}
@@ -61191,7 +61198,7 @@ body.fast-exclusive-app main { padding-bottom: 12px !important; }
     restoreConfig();setTimeout(restoreConfig,1500);setTimeout(restoreConfig,5000);
     var original=window.fastDriveSalvarEConectar;if(typeof original==='function'&&!original.fast241){window.fastDriveSalvarEConectar=function(){persistConfig();return original.apply(this,arguments)};window.fastDriveSalvarEConectar.fast241=true}
     migratePhotos().catch(function(e){console.warn('Migração segura das fotos:',e)});
-    var changes=[{type:'novo',text:'2.3.46 (12/09/2026): Comando de voz em Rotas do Dia agora identifica se o pedido é buscar uma rota ou preencher uma rota nova com cliente, origem, destino, quantidade, valor, motorista, data e observação.'},{type:'seguranca',text:'2.3.46 (12/09/2026): rotas ditadas ficam abertas para conferência antes de serem salvas, evitando cadastro incorreto por reconhecimento de voz.'},{type:'corrigido',text:'2.3.45 (12/09/2026): corrigida a sobreposição dos títulos e campos nos filtros compactos de Rotas do Dia.'}];window.fastUltimoModuloNovidades=changes;var c=document.querySelector('meta[name="fast-app-changelog"]');if(c)c.content=JSON.stringify(changes)
+    var changes=[{type:'melhorado',text:'2.3.47 (12/09/2026): siglas ditadas no comando de voz, como WM, WJ e TLF, são preenchidas automaticamente em letras maiúsculas em cliente, origem, destino e motorista.'},{type:'novo',text:'2.3.46 (12/09/2026): Comando de voz em Rotas do Dia identifica se o pedido é buscar uma rota ou preencher uma rota nova completa.'},{type:'seguranca',text:'2.3.46 (12/09/2026): rotas ditadas ficam abertas para conferência antes de serem salvas.'}];window.fastUltimoModuloNovidades=changes;var c=document.querySelector('meta[name="fast-app-changelog"]');if(c)c.content=JSON.stringify(changes)
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){setTimeout(install,180)});else setTimeout(install,180);
 })();
