@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="fast-linux-desktop" data-fast-version="2.3.41"><head>
+<html lang="pt-BR" class="fast-linux-desktop" data-fast-version="2.3.42"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
   <meta name="theme-color" content="#4f46e5">
@@ -21,9 +21,9 @@
   <meta name="fast-github-branch" content="main">
   <meta name="fast-github-path" content="index.html">
   <meta name="fast-github-token-env" content="GH_TOKEN">
-  <meta name="fast-app-version" content="2.3.41">
+  <meta name="fast-app-version" content="2.3.42">
   <meta name="fast-app-date" content="2026-09-11T09:30:00-03:00">
-  <meta name="fast-latest-update" content="2.3.41: Google Drive persistente, migração automática das fotos locais, acesso aos arquivos dentro do FAST e filtros compactos.">
+  <meta name="fast-latest-update" content="2.3.42: card redundante de armazenamento removido; armazenamento interno automático e Google Drive mantidos.">
   <!-- r92: verificação automática de nova versão ao abrir; Verificar Atualizações com cache-busting e sem fallback no-cors inválido. -->
   <!-- r70.1: lista corrente no HTML inicial; o painel não espera scripts tardios -->
   <meta name="fast-app-changelog-immediate" content="2.3.39">
@@ -61086,7 +61086,7 @@ body.fast-exclusive-app main { padding-bottom: 12px !important; }
 <script id="fast-241-drive-controller">
 (function(){
   'use strict';
-  var VERSION='2.3.41', CLIENT='fast_drive_client_id', FOLDER='fast_drive_folder_id', TOKEN='fast_drive_access_token';
+  var VERSION='2.3.42', CLIENT='fast_drive_client_id', FOLDER='fast_drive_folder_id', TOKEN='fast_drive_access_token';
   function el(id){return document.getElementById(id)}
   function esc(v){var d=document.createElement('div');d.textContent=String(v==null?'':v);return d.innerHTML}
   function db(){return typeof abrirDBFotos==='function'?abrirDBFotos():Promise.reject(new Error('Armazenamento de fotos indisponível'))}
@@ -61102,6 +61102,7 @@ body.fast-exclusive-app main { padding-bottom: 12px !important; }
     var cloud=window.bancoDados&&bancoDados.integracoes&&bancoDados.integracoes.googleDrive||{},c=localStorage.getItem(CLIENT)||cloud.clientId||'',f=localStorage.getItem(FOLDER)||cloud.folderId||'';
     if(c)localStorage.setItem(CLIENT,c);if(f)localStorage.setItem(FOLDER,f);if(el('fastDriveClientId')&&!el('fastDriveClientId').value)el('fastDriveClientId').value=c;if(el('fastDriveFolderId')&&!el('fastDriveFolderId').value)el('fastDriveFolderId').value=f;
   }
+  function removeStorageCard(){document.querySelectorAll('.config-topic').forEach(function(card){var title=card.querySelector('.config-topic-title');if(title&&title.textContent.trim()==='Armazenamento de Fotos')card.remove()})}
   async function migratePhotos(){
     if(!window.bancoDados)return;var regs=await all('fotosBase64'),queued=await all('driveQueue'),sent=await all('driveLedger'),known=new Set(queued.concat(sent).map(function(x){return String(x.id)})),routes=[];
     Object.keys(bancoDados.sequencias||{}).forEach(function(date){(bancoDados.sequencias[date]||[]).forEach(function(item){routes.push({date:date,item:item})})});var added=0;
@@ -61115,12 +61116,13 @@ body.fast-exclusive-app main { padding-bottom: 12px !important; }
   window.fastDriveAbrirArquivos=function(){var modal=el('fast70Modal'),title=el('fast70Titulo'),body=el('fast70Conteudo'),folder=localStorage.getItem(FOLDER)||'1IH_EujjBX57aQxC1moMlv695vqc-OY-p';if(!modal||!body)return;title.textContent='Arquivos do Google Drive';body.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;gap:8px"><strong id="fastDriveExplorerPath">APP FAST</strong><button class="btn-secondary" onclick="fastDriveAbrirArquivos()"><i class="fa-solid fa-rotate"></i> Atualizar</button></div><div id="fastDriveExplorerGrid"></div>';modal.classList.add('show');listDrive(folder,'APP FAST')};
   function install(){
     document.documentElement.setAttribute('data-fast-version',VERSION);var meta=document.querySelector('meta[name="fast-app-version"]');if(meta)meta.content=VERSION;['fastSplashVersion','fastGateVersionNum','fastVersaoLabel'].forEach(function(id){if(el(id))el(id).textContent=VERSION});if(el('navMenuVersao'))el('navMenuVersao').textContent='Versão '+VERSION;
-    ['btnConfigPastaFoto','btnRecuperarFotos','statusPastaFoto'].forEach(function(id){var x=el(id);if(x)x.remove()});
+    ['btnConfigPastaFoto','btnRecuperarFotos','statusPastaFoto','statusPastaFotoConfig'].forEach(function(id){var x=el(id);if(x)x.remove()});
+    removeStorageCard();setTimeout(removeStorageCard,1000);setTimeout(removeStorageCard,4000);
     var head=document.querySelector('#rotasDia>.card:first-child .card-title>div');if(head&&!el('fastDriveFilesBtn')){var b=document.createElement('button');b.id='fastDriveFilesBtn';b.className='btn-secondary no-print ripple';b.innerHTML='<i class="fa-brands fa-google-drive"></i> <span class="rd-drive-label">Google Drive</span>';b.onclick=window.fastDriveAbrirArquivos;head.insertBefore(b,head.firstChild)}
     restoreConfig();setTimeout(restoreConfig,1500);setTimeout(restoreConfig,5000);
     var original=window.fastDriveSalvarEConectar;if(typeof original==='function'&&!original.fast241){window.fastDriveSalvarEConectar=function(){persistConfig();return original.apply(this,arguments)};window.fastDriveSalvarEConectar.fast241=true}
     migratePhotos().catch(function(e){console.warn('Migração segura das fotos:',e)});
-    var changes=[{type:'corrigido',text:'2.3.41 (12/09/2026): ID OAuth e pasta do Google Drive passam a acompanhar os dados sincronizados da plataforma e são restaurados automaticamente após atualização.'},{type:'melhorado',text:'2.3.41 (12/09/2026): fotos locais existentes entram na fila do Google Drive sem apagar a cópia de segurança; novos envios continuam automáticos quando o Drive está conectado.'},{type:'novo',text:'2.3.41 (12/09/2026): arquivos e pastas do APP FAST podem ser consultados pelo botão Google Drive dentro de Rotas do Dia.'},{type:'melhorado',text:'2.3.41 (12/09/2026): filtro de Rotas do Dia compactado, com Data e Motorista lado a lado e Origem e Destino lado a lado.'}];window.fastUltimoModuloNovidades=changes;var c=document.querySelector('meta[name="fast-app-changelog"]');if(c)c.content=JSON.stringify(changes)
+    var changes=[{type:'removido',text:'2.3.42 (12/09/2026): card redundante Armazenamento de Fotos removido; o modo interno compatível continua automático e integrado ao sistema.'},{type:'corrigido',text:'2.3.42 (12/09/2026): ID OAuth e pasta do Google Drive passam a acompanhar os dados sincronizados da plataforma e são restaurados automaticamente após atualização.'},{type:'melhorado',text:'2.3.42 (12/09/2026): fotos locais existentes entram na fila do Google Drive sem apagar a cópia de segurança; novos envios continuam automáticos quando o Drive está conectado.'},{type:'novo',text:'2.3.42 (12/09/2026): arquivos e pastas do APP FAST podem ser consultados pelo botão Google Drive dentro de Rotas do Dia.'},{type:'melhorado',text:'2.3.42 (12/09/2026): filtro de Rotas do Dia compactado, com Data e Motorista lado a lado e Origem e Destino lado a lado.'}];window.fastUltimoModuloNovidades=changes;var c=document.querySelector('meta[name="fast-app-changelog"]');if(c)c.content=JSON.stringify(changes)
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){setTimeout(install,180)});else setTimeout(install,180);
 })();
