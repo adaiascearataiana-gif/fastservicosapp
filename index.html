@@ -60938,4 +60938,129 @@ body.fast-exclusive-app main { padding-bottom: 12px !important; }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){setTimeout(boot,60)});else setTimeout(boot,60);
 })();
 </script>
+<!-- FAST 2.3.40 — cadastro confirmado e recuperação exclusivamente por e-mail -->
+<style id="fast-240-email-auth-style">
+  #fastGateCreateEmailWrap{margin-bottom:12px}
+  #fastEmailConfirmBox{display:none}
+  #fastEmailConfirmBox .fast-email-ok{padding:11px 12px;margin:0 0 13px;border:1px solid rgba(134,239,172,.5);border-radius:11px;background:rgba(22,163,74,.15);color:#dcfce7;font-size:13px;font-weight:700;line-height:1.5;text-align:center}
+  .fast-email-small{margin:9px 0 0;color:rgba(255,255,255,.72);font-size:12px;line-height:1.45;text-align:center}
+</style>
+<script id="fast-240-email-auth">
+(function(){
+  'use strict';
+  var VERSION='2.3.40';
+  var PROJECT='https://jizoedwnyfcjokoqgfmn.supabase.co';
+  var KEY='sb_publishable_mXMGOmMueyVWcS8UdQHP-w_sa13m9B4';
+  var SITE='https://adaiascearataiana-gif.github.io/fastservicosapp/';
+  var RECOVERY=SITE+'?recuperar-senha=1';
+  var PENDING='fast_email_signup_pending';
+  var oldCreate=null,busy=false;
+  function el(id){return document.getElementById(id)}
+  function validEmail(v){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v||'').trim())}
+  function hash(){return new URLSearchParams(location.hash.replace(/^#/,''))}
+  function authHeaders(token){var h={'Content-Type':'application/json','apikey':KEY};if(token)h.Authorization='Bearer '+token;return h}
+  async function request(path,options){
+    options=options||{};
+    var res=await fetch(PROJECT+'/auth/v1'+path,{method:options.method||'POST',headers:authHeaders(options.token),body:options.body===undefined?undefined:JSON.stringify(options.body)});
+    var data={};try{data=await res.json()}catch(e){}
+    if(!res.ok){var error=new Error(data.msg||data.message||data.error_description||data.error||('Erro HTTP '+res.status));error.status=res.status;throw error}
+    return data;
+  }
+  function setCompanyEmail(email){
+    try{var d=JSON.parse(localStorage.getItem('fast_dados_empresa')||'{}');d.empEmail=email;localStorage.setItem('fast_dados_empresa',JSON.stringify(d));var f=el('empEmail');if(f)f.value=email}catch(e){}
+  }
+  function installEmailField(){
+    var user=el('fastGateCreateUser');if(!user||el('fastGateCreateEmail'))return;
+    var field=document.createElement('div');field.className='fast-gate-field';field.id='fastGateCreateEmailWrap';
+    field.innerHTML='<label>E-mail para confirmação</label><div class="fg-wrap"><i class="fa-solid fa-envelope fg-ico"></i><input type="email" id="fastGateCreateEmail" placeholder="seuemail@exemplo.com" autocomplete="email" autocapitalize="off" spellcheck="false"></div>';
+    var holder=user.closest('.fast-gate-field');if(holder&&holder.parentNode)holder.parentNode.insertBefore(field,holder.nextSibling);
+  }
+  function messageFor(error){
+    var raw=String(error&&error.message||'').toLowerCase();
+    if(error&&error.status===429)return 'Muitas solicitações foram feitas. Aguarde alguns minutos e tente novamente.';
+    if(raw.indexOf('already')>=0||raw.indexOf('registered')>=0||raw.indexOf('exists')>=0)return 'Este e-mail já possui cadastro. Use Entrar ou Esqueci minha senha.';
+    if(raw.indexOf('password')>=0)return 'A senha não atende aos requisitos de segurança.';
+    if(raw.indexOf('smtp')>=0||raw.indexOf('email')>=0)return 'O Supabase não conseguiu enviar o e-mail. Confira o SMTP Brevo e o remetente verificado.';
+    return 'Não foi possível enviar a confirmação: '+(error&&error.message?error.message:'erro desconhecido');
+  }
+  async function signup(){
+    if(busy)return;
+    var user=(el('fastGateCreateUser')||{}).value||'';
+    var email=(el('fastGateCreateEmail')||{}).value||'';
+    var password=(el('fastGateCreatePwd')||{}).value||'';
+    var password2=(el('fastGateCreatePwd2')||{}).value||'';
+    var err=el('fastGateCreateErr'),button=el('fastGateCreateBtn');user=user.trim();email=email.trim().toLowerCase();
+    if(err)err.textContent='';
+    if(user.length<2){if(err)err.textContent='Informe um nome de usuário com pelo menos 2 caracteres.';return}
+    if(!validEmail(email)){if(err)err.textContent='Informe um e-mail válido para confirmar o cadastro.';return}
+    if(password.length<8){if(err)err.textContent='A senha deve ter no mínimo 8 caracteres.';return}
+    if(password!==password2){if(err)err.textContent='As senhas não coincidem.';return}
+    busy=true;if(button){button.disabled=true;button.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> Enviando confirmação...'}
+    try{
+      await request('/signup?redirect_to='+encodeURIComponent(SITE),{body:{email:email,password:password,data:{fast_user:user,app:'FAST Serviços',canal:'email'}}});
+      localStorage.setItem(PENDING,JSON.stringify({user:user,email:email,createdAt:Date.now()}));
+      setCompanyEmail(email);
+      if(el('fastGateCreatePwd'))el('fastGateCreatePwd').value='';if(el('fastGateCreatePwd2'))el('fastGateCreatePwd2').value='';
+      if(err){err.style.color='#86efac';err.textContent='Enviamos a confirmação para '+email+'. Abra o e-mail, toque em Confirmar cadastro e depois informe sua senha para ativar o acesso.'}
+    }catch(e){if(err){err.style.color='#fca5a5';err.textContent=messageFor(e)}}
+    finally{busy=false;if(button){button.disabled=false;button.innerHTML='<i class="fa-solid fa-user-shield"></i> Criar acesso e confirmar e-mail'}}
+  }
+  async function completeSignup(){
+    if(busy)return;
+    var email=((el('fastConfirmedEmail')||{}).value||'').trim().toLowerCase();
+    var password=(el('fastConfirmedPassword')||{}).value||'';
+    var user=((el('fastConfirmedUser')||{}).value||'').trim();
+    var err=el('fastConfirmedErr'),button=el('fastConfirmedBtn');if(err)err.textContent='';
+    if(!validEmail(email)||!user||password.length<8){if(err)err.textContent='Informe o usuário, o e-mail confirmado e a senha usada no cadastro.';return}
+    busy=true;if(button){button.disabled=true;button.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> Validando...'}
+    try{
+      await request('/token?grant_type=password',{body:{email:email,password:password}});
+      setCompanyEmail(email);
+      var create=el('fastGateCreate');if(create)create.style.display='block';var confirmBox=el('fastEmailConfirmBox');if(confirmBox)confirmBox.style.display='none';
+      el('fastGateCreateUser').value=user;el('fastGateCreatePwd').value=password;el('fastGateCreatePwd2').value=password;
+      if(typeof oldCreate!=='function')throw new Error('módulo local indisponível');
+      await oldCreate();
+      localStorage.removeItem(PENDING);try{history.replaceState({},document.title,location.pathname)}catch(e){}
+    }catch(e){if(err)err.textContent=(e&&e.status===400)?'E-mail ainda não confirmado ou senha incorreta. Confirme pelo link recebido e tente novamente.':messageFor(e)}
+    finally{busy=false;if(button){button.disabled=false;button.innerHTML='<i class="fa-solid fa-circle-check"></i> Validar e ativar acesso'}}
+  }
+  function showConfirmed(){
+    var gate=el('fastLoginGate');if(gate)gate.classList.add('show');document.body.style.overflow='hidden';
+    ['fastGateLogin','fastGateRecover','fastGateCreate'].forEach(function(id){var n=el(id);if(n)n.style.display='none'});
+    var parent=el('fastGateCreate')&&el('fastGateCreate').parentNode;if(!parent)return;
+    var box=el('fastEmailConfirmBox');if(!box){box=document.createElement('div');box.id='fastEmailConfirmBox';box.innerHTML='<div class="fast-email-ok"><i class="fa-solid fa-envelope-circle-check"></i> E-mail confirmado com sucesso.<br>Valide a senha usada no cadastro para ativar este dispositivo.</div><div class="fast-gate-field"><label>Nome de usuário</label><div class="fg-wrap"><i class="fa-solid fa-user fg-ico"></i><input id="fastConfirmedUser" autocomplete="username"></div></div><div class="fast-gate-field"><label>E-mail confirmado</label><div class="fg-wrap"><i class="fa-solid fa-envelope fg-ico"></i><input type="email" id="fastConfirmedEmail" autocomplete="email"></div></div><div class="fast-gate-field"><label>Senha cadastrada</label><div class="fg-wrap"><i class="fa-solid fa-lock fg-ico"></i><input type="password" id="fastConfirmedPassword" autocomplete="current-password"><button type="button" class="fg-toggle ripple" onclick="fastGateTogglePwd(\'fastConfirmedPassword\',this)"><i class="fa-solid fa-eye"></i></button></div></div><div class="fast-gate-err" id="fastConfirmedErr"></div><button type="button" class="fast-gate-btn ripple" id="fastConfirmedBtn" onclick="fastEmailCompleteSignup()"><i class="fa-solid fa-circle-check"></i> Validar e ativar acesso</button><p class="fast-email-small">A senha é conferida diretamente no Supabase e não é enviada por e-mail.</p>';parent.appendChild(box)}
+    var pending={};try{pending=JSON.parse(localStorage.getItem(PENDING)||'{}')}catch(e){}
+    var token=hash().get('access_token')||'';
+    if(token){request('/user',{method:'GET',token:token}).then(function(data){if(el('fastConfirmedEmail'))el('fastConfirmedEmail').value=data.email||pending.email||'';if(el('fastConfirmedUser'))el('fastConfirmedUser').value=(data.user_metadata&&data.user_metadata.fast_user)||pending.user||'admin'}).catch(function(){})}
+    if(el('fastConfirmedEmail')&&!el('fastConfirmedEmail').value)el('fastConfirmedEmail').value=pending.email||'';
+    if(el('fastConfirmedUser')&&!el('fastConfirmedUser').value)el('fastConfirmedUser').value=pending.user||'admin';box.style.display='block';
+  }
+  async function diagnosticTest(email){
+    try{await request('/recover?redirect_to='+encodeURIComponent(RECOVERY),{body:{email:email}});return {ok:true,message:'Solicitação aceita pelo Supabase. Confira a caixa de entrada e o spam.'}}
+    catch(e){return {ok:false,message:messageFor(e),detail:e&&e.message||''}}
+  }
+  async function panelTest(button){
+    if(busy)return;var email=((el('fastBrevoRecovery')||{}).value||'').trim(),box=el('fastBrevoResult'),status=el('fastBrevoStatus');
+    if(!validEmail(email)){if(box){box.textContent='Informe um e-mail de recuperação válido.';box.className='fast-brevo-result show error'}return}
+    busy=true;if(button){button.disabled=true;button.dataset.old=button.innerHTML;button.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> Enviando teste...'}
+    if(box){box.textContent='Solicitando o envio pelo Supabase Auth e SMTP Brevo…';box.className='fast-brevo-result show info'}
+    var answer=await diagnosticTest(email);
+    if(status){status.className='fast-brevo-status '+(answer.ok?'ok':'error');status.innerHTML='<span class="fast-brevo-dot"></span><span>'+(answer.ok?'Teste aceito':'Falha no envio')+'</span>'}
+    if(box){box.textContent=answer.message+(answer.detail&&!answer.ok?' Detalhe técnico: '+answer.detail:'');box.className='fast-brevo-result show '+(answer.ok?'ok':'error')}
+    busy=false;if(button){button.disabled=false;button.innerHTML=button.dataset.old||'<i class="fa-solid fa-paper-plane"></i> Enviar e-mail de teste'}
+  }
+  function boot(){
+    installEmailField();oldCreate=window.fastGateDoCreate;if(typeof oldCreate==='function'&&!oldCreate.fast240){var wrapped=signup;wrapped.fast240=true;window.fastGateDoCreate=wrapped}
+    window.fastEmailCompleteSignup=completeSignup;
+    window.fastEmailDiagnosticar=diagnosticTest;
+    window.fastBrevoTestar=panelTest;
+    var btn=el('fastGateCreateBtn');if(btn)btn.innerHTML='<i class="fa-solid fa-user-shield"></i> Criar acesso e confirmar e-mail';
+    document.documentElement.setAttribute('data-fast-version',VERSION);var m=document.querySelector('meta[name="fast-app-version"]');if(m)m.content=VERSION;
+    ['fastSplashVersion','fastGateVersionNum','fastVersaoLabel'].forEach(function(id){var n=el(id);if(n)n.textContent=VERSION});var nav=el('navMenuVersao');if(nav)nav.textContent='Versão '+VERSION;
+    var changes=[{type:'seguranca',text:'2.3.40 (12/09/2026): novos cadastros exigem confirmação real do endereço de e-mail antes de liberar o acesso.'},{type:'melhorado',text:'2.3.40 (12/09/2026): recuperação e confirmação centralizadas no Supabase Auth com envio gratuito pelo SMTP Brevo e retorno seguro para o endereço publicado do FAST.'},{type:'corrigido',text:'2.3.40 (12/09/2026): diagnóstico de envio agora diferencia limite de tentativas, cadastro existente, senha inválida e falha de SMTP.'}];window.fastUltimoModuloNovidades=changes;var c=document.querySelector('meta[name="fast-app-changelog"]');if(c)c.content=JSON.stringify(changes);
+    var type=hash().get('type');if(type==='signup'||type==='email')showConfirmed();
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){setTimeout(boot,100)});else setTimeout(boot,100);
+})();
+</script>
 </body></html>
