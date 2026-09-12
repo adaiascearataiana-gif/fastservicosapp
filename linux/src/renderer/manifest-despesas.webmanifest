@@ -1,7 +1,7 @@
 {
   "id":"./?app=despesas",
   "name":"FAST - Despesas",
-  "version": "2.4.0",
+  "version": "2.4.1",
   "short_name":"Despesas",
   "description":"Acesso direto às Despesas da FAST Serviços",
   "start_url":"./?exclusive=despesas&atalho=despesas",

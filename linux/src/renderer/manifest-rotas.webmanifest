@@ -1,7 +1,7 @@
 {
   "id": "./?app=rotas-dia",
   "name": "FAST - Rotas do Dia",
-  "version": "2.4.0",
+  "version": "2.4.1",
   "short_name": "Rotas do Dia",
   "description": "Acesso direto às Rotas do Dia da FAST Serviços",
   "start_url": "./?exclusive=rotas-dia&atalho=rotasDia",

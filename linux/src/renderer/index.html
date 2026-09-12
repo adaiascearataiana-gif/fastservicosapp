@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="fast-linux-desktop" data-fast-version="2.4.0"><head>
+<html lang="pt-BR" class="fast-linux-desktop" data-fast-version="2.4.1"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
   <meta name="theme-color" content="#4f46e5">
@@ -21,9 +21,9 @@
   <meta name="fast-github-branch" content="main">
   <meta name="fast-github-path" content="index.html">
   <meta name="fast-github-token-env" content="GH_TOKEN">
-  <meta name="fast-app-version" content="2.4.0">
+  <meta name="fast-app-version" content="2.4.1">
   <meta name="fast-app-date" content="2026-09-11T09:30:00-03:00">
-  <meta name="fast-latest-update" content="2.4.0: pré-visualização inteligente e preenchimento pela última rota do cliente ou última despesa.">
+  <meta name="fast-latest-update" content="2.4.1: pré-visualização inteligente e preenchimento pela última rota do cliente ou última despesa.">
   <!-- r92: verificação automática de nova versão ao abrir; Verificar Atualizações com cache-busting e sem fallback no-cors inválido. -->
   <!-- r70.1: lista corrente no HTML inicial; o painel não espera scripts tardios -->
   <meta name="fast-app-changelog-immediate" content="2.3.39">
@@ -2952,13 +2952,14 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
       try { var v = localStorage.getItem(FAST_LOCK_TIMEOUT_KEY); return v !== null ? parseInt(v,10) : 2; } catch(e){ return 2; }
     }
     function fastObterLockTimeoutMs() {
-      return fastObterLockTimeoutMin() * 60 * 1000;
+      var min = fastObterLockTimeoutMin();
+      return min < 0 ? Number.MAX_SAFE_INTEGER : min * 60 * 1000;
     }
     function fastLockTimeoutChange(minutos) {
       try { localStorage.setItem(FAST_LOCK_TIMEOUT_KEY, String(minutos)); localStorage.removeItem(FAST_LOCK_LEFT_AT_KEY); localStorage.removeItem(FAST_LOCK_GRACE_KEY); } catch(e){}
       fastLockTimeoutUpdateUI();
       if (typeof mostrarToast === 'function') {
-        var lbl = minutos === 0 ? 'imediatamente' : (minutos + ' minuto' + (minutos>1?'s':''));
+        var lbl = minutos < 0 ? 'indeterminado' : (minutos === 0 ? 'imediatamente' : (minutos + ' minuto' + (minutos>1?'s':'')));
         mostrarToast('Bloqueio ao sair definido: ' + lbl, 'success');
       }
     }
@@ -35045,6 +35046,7 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
                   <button type="button" class="fast-lock-to-btn ripple active" data-to="2" onclick="fastLockTimeoutChange(2)">2 min</button>
                   <button type="button" class="fast-lock-to-btn ripple" data-to="5" onclick="fastLockTimeoutChange(5)">5 min</button>
                   <button type="button" class="fast-lock-to-btn ripple" data-to="0" onclick="fastLockTimeoutChange(0)">Imediatamente</button>
+                  <button type="button" class="fast-lock-to-btn ripple" data-to="-1" onclick="fastLockTimeoutChange(-1)">Indeterminado</button>
                 </div>
               </div>
               <div class="fast-sec-actions">
@@ -42420,7 +42422,7 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
         if (el) el.value = valor == null ? '' : valor;
       };
       setVal('seqOrigem', ultimaRota.origem || '');
-      // 2.4.0: reaproveitar a última rota do cliente para acelerar o lançamento.
+      // 2.4.1: reaproveitar a última rota do cliente para acelerar o lançamento.
       setVal('seqDestino', ultimaRota.destino || '');
       setVal('seqQtdDestino', ultimaRota.qtdMercadorias != null ? ultimaRota.qtdMercadorias : (ultimaRota.qtdVolumes || 1));
       fastSetMoeda('seqValorDestino', ultimaRota.valor != null ? ultimaRota.valor : 0);
@@ -61249,7 +61251,7 @@ body.fast-exclusive-app main { padding-bottom: 12px !important; }
 <script id="fast-241-drive-controller">
 (function(){
   'use strict';
-  var VERSION='2.4.0', CLIENT='fast_drive_client_id', FOLDER='fast_drive_folder_id', TOKEN='fast_drive_access_token';
+  var VERSION='2.4.1', CLIENT='fast_drive_client_id', FOLDER='fast_drive_folder_id', TOKEN='fast_drive_access_token';
   function el(id){return document.getElementById(id)}
   function esc(v){var d=document.createElement('div');d.textContent=String(v==null?'':v);return d.innerHTML}
   function db(){return typeof abrirDBFotos==='function'?abrirDBFotos():Promise.reject(new Error('Armazenamento de fotos indisponível'))}
@@ -61300,12 +61302,12 @@ body.fast-exclusive-app main { padding-bottom: 12px !important; }
     restoreConfig();setTimeout(restoreConfig,1500);setTimeout(restoreConfig,5000);
     var original=window.fastDriveSalvarEConectar;if(typeof original==='function'&&!original.fast241){window.fastDriveSalvarEConectar=function(){persistConfig();return original.apply(this,arguments)};window.fastDriveSalvarEConectar.fast241=true}
     migratePhotos().catch(function(e){console.warn('Migração segura das fotos:',e)});
-    var changes=[{type:'novo',text:'2.4.0 (12/09/2026): em Rotas do Dia, digitar uma letra mostra clientes com a prévia da última rota; ao selecionar, origem, destino, quantidade, valor, observação e motorista são preenchidos automaticamente.'},{type:'novo',text:'2.4.0 (12/09/2026): em Despesas, digitar a descrição ou local mostra a última despesa correspondente; ao selecionar, descrição, local, categoria, valor e pagamento são reaproveitados.'},{type:'corrigido',text:'2.3.50 (12/09/2026): Agrupar agora atua somente em Rotas do Dia; a tabela Rotas mantém cada destino como rota individual.'},{type:'corrigido',text:'2.3.50 (12/09/2026): fotos excluídas recebem bloqueio permanente no merge e não voltam após sincronizar com o Supabase.'},{type:'corrigido',text:'2.3.50 (12/09/2026): sincronismo consolida rotas realmente idênticas e novos destinos recebem IDs únicos, evitando duplicações.'}];window.fastUltimoModuloNovidades=changes;var c=document.querySelector('meta[name="fast-app-changelog"]');if(c)c.content=JSON.stringify(changes)
+    var changes=[{type:'novo',text:'2.4.1 (12/09/2026): em Rotas do Dia, digitar uma letra mostra clientes com a prévia da última rota; ao selecionar, origem, destino, quantidade, valor, observação e motorista são preenchidos automaticamente.'},{type:'novo',text:'2.4.1 (12/09/2026): em Despesas, digitar a descrição ou local mostra a última despesa correspondente; ao selecionar, descrição, local, categoria, valor e pagamento são reaproveitados.'},{type:'corrigido',text:'2.3.50 (12/09/2026): Agrupar agora atua somente em Rotas do Dia; a tabela Rotas mantém cada destino como rota individual.'},{type:'corrigido',text:'2.3.50 (12/09/2026): fotos excluídas recebem bloqueio permanente no merge e não voltam após sincronizar com o Supabase.'},{type:'corrigido',text:'2.3.50 (12/09/2026): sincronismo consolida rotas realmente idênticas e novos destinos recebem IDs únicos, evitando duplicações.'}];window.fastUltimoModuloNovidades=changes;var c=document.querySelector('meta[name="fast-app-changelog"]');if(c)c.content=JSON.stringify(changes)
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){setTimeout(install,180)});else setTimeout(install,180);
 })();
 </script>
-<link rel="stylesheet" href="fast-logistics-2.4.css?v=2.4.0">
-<script src="fast-logistics-2.4.js?v=2.4.0"></script>
+<link rel="stylesheet" href="fast-logistics-2.4.css?v=2.4.1">
+<script src="fast-logistics-2.4.js?v=2.4.1"></script>
 <script src="desktop-bridge.js"></script>
 </body></html>
