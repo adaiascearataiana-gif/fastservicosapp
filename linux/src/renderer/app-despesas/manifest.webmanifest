@@ -1,19 +1,45 @@
 {
   "id":"/fastservicosapp/app-despesas/",
   "name":"Despesas",
+  "version": "2.3.51",
   "short_name":"Despesas",
-  "description":"Aplicativo exclusivo de Despesas",
-  "start_url":"/fastservicosapp/app-despesas/",
+  "description":"Aplicativo exclusivo de Despesas — le comprovantes PDF/imagens e preenche os campos sozinho",
+  "start_url":"/fastservicosapp/app-despesas/?fh=1",
   "scope":"/fastservicosapp/app-despesas/",
   "display":"standalone",
   "display_override":["standalone","minimal-ui"],
   "background_color":"#dc2626",
   "theme_color":"#dc2626",
   "prefer_related_applications":false,
+  "file_handlers":[
+    {
+      "action":"./",
+      "accept":{
+        "application/pdf":[".pdf"],
+        "image/png":[".png"],
+        "image/jpeg":[".jpg",".jpeg"],
+        "image/webp":[".webp"]
+      },
+      "launch_type":"single-client"
+    }
+  ],
+  "share_target":{
+    "action":"./",
+    "method":"POST",
+    "enctype":"multipart/form-data",
+    "params":{
+      "title":"title",
+      "text":"text",
+      "url":"url",
+      "files":[
+        {"name":"comprovante","accept":["application/pdf",".pdf","image/*",".jpg",".jpeg",".png",".webp"]}
+      ]
+    }
+  },
   "icons":[
-    {"src":"../assets/atalho-despesas-192.png?v=r144","sizes":"192x192","type":"image/png","purpose":"any"},
-    {"src":"../assets/atalho-despesas-192.png?v=r144","sizes":"192x192","type":"image/png","purpose":"maskable"},
-    {"src":"../assets/atalho-despesas-512.png?v=r144","sizes":"512x512","type":"image/png","purpose":"any"},
-    {"src":"../assets/atalho-despesas-512.png?v=r144","sizes":"512x512","type":"image/png","purpose":"maskable"}
+    {"src":"../assets/atalho-despesas-192.png?v=r145","sizes":"192x192","type":"image/png","purpose":"any"},
+    {"src":"../assets/atalho-despesas-192.png?v=r145","sizes":"192x192","type":"image/png","purpose":"maskable"},
+    {"src":"../assets/atalho-despesas-512.png?v=r145","sizes":"512x512","type":"image/png","purpose":"any"},
+    {"src":"../assets/atalho-despesas-512.png?v=r145","sizes":"512x512","type":"image/png","purpose":"maskable"}
   ]
 }

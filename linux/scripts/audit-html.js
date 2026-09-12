@@ -10,4 +10,13 @@ const forbidden = [/ghp_[A-Za-z0-9]{20,}/, /github_pat_[A-Za-z0-9_]{20,}/, /serv
 if (duplicates.length) throw new Error(`IDs HTML duplicados: ${[...new Set(duplicates)].join(', ')}`);
 for (const pattern of forbidden) if (pattern.test(html)) throw new Error(`Credencial potencialmente exposta: ${pattern}`);
 if (!html.includes('desktop-bridge.js')) throw new Error('Integração Linux ausente.');
-console.log(`Auditoria OK: ${ids.length} IDs únicos; nenhuma credencial GitHub/Supabase administrativa encontrada.`);
+let scriptsOk = 0;
+const scripts = [...html.matchAll(/<script([^>]*)>([\s\S]*?)<\/script>/gi)];
+scripts.forEach((match, index) => {
+  const attrs = match[1] || '';
+  const code = match[2] || '';
+  if (/\bsrc\s*=/.test(attrs) || /type\s*=\s*["'](?:application\/ld\+json|module)["']/.test(attrs) || !code.trim()) return;
+  try { new Function(code); scriptsOk++; }
+  catch (error) { throw new Error(`JavaScript interno quebrado no bloco ${index + 1}: ${error.message}`); }
+});
+console.log(`Auditoria OK: ${ids.length} IDs únicos; ${scriptsOk} scripts internos válidos; nenhuma credencial administrativa encontrada.`);

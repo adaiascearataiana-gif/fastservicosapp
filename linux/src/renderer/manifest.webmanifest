@@ -1,8 +1,8 @@
 {
   "name": "FAST Serviços - Gestão de Rotas",
   "short_name": "FAST Serviços",
-  "version": "2.3.22",
-  "description": "FAST Serviços 2.3.22 — Operações, rotas, clientes, equipe e finanças",
+  "version": "2.3.51",
+  "description": "FAST Serviços 2.3.51 — Operações, rotas, clientes, equipe e finanças",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
@@ -11,6 +11,18 @@
   "theme_color": "#07111f",
   "lang": "pt-BR",
   "categories": ["business", "productivity", "finance"],
+  "file_handlers": [
+    {
+      "action": "app-despesas/",
+      "accept": {
+        "application/pdf": [".pdf"],
+        "image/png": [".png"],
+        "image/jpeg": [".jpg", ".jpeg"],
+        "image/webp": [".webp"]
+      },
+      "launch_type": "single-client"
+    }
+  ],
   "icons": [
     {"src":"assets/fast-servicos-icon-192.png?v=2.1.0","sizes":"192x192","type":"image/png","purpose":"any"},
     {"src":"assets/fast-servicos-icon-512.png?v=2.1.0","sizes":"512x512","type":"image/png","purpose":"any maskable"}

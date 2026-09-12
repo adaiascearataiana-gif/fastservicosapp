@@ -1,6 +1,6 @@
 {
   "name": "fast-servicos-linux",
-  "version": "2.3.27",
+  "version": "2.3.51",
   "description": "FAST Serviços 2 — central profissional de rotas, entregas, finanças e equipe",
   "main": "src/main.js",
   "author": {
@@ -13,7 +13,8 @@
   "private": true,
   "scripts": {
     "start": "electron .",
-    "check": "node --check src/main.js && node --check src/preload.js && node --check src/renderer/desktop-bridge.js && node scripts/audit-html.js",
+    "sync": "node scripts/sync-renderer.js",
+    "check": "npm run sync && node --check src/main.js && node --check src/preload.js && node --check src/renderer/desktop-bridge.js && node scripts/audit-html.js",
     "dist": "npm run check && electron-builder --linux AppImage deb",
     "dist:appimage": "npm run check && electron-builder --linux AppImage",
     "dist:deb": "npm run check && electron-builder --linux deb"

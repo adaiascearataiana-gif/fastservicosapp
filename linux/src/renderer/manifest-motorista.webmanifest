@@ -1,5 +1,6 @@
 {
   "name": "FAST Motorista",
+  "version": "2.3.51",
   "id": "/fastservicosapp/fast-motorista",
   "short_name": "FAST Motorista",
   "description": "Rotas do dia, botão CHEGUEI, fotos pela câmera e conclusão de rotas",

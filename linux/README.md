@@ -1,6 +1,6 @@
-# FAST Serviços 2.3.27 para Linux
+# FAST Serviços 2.3.51 para Linux
 
-Aplicativo desktop profissional sincronizado com a mesma base da versão web 2.3.27. Inclui rotas, Rotas do Dia, clientes, destinos, despesas, equipe, RH, login por setor, dashboards, backups, Supabase, Google Drive, modo offline e atualização pelo GitHub.
+Aplicativo desktop profissional sincronizado automaticamente com a mesma base da versão web 2.3.51. Inclui rotas, Rotas do Dia, clientes, destinos, despesas, equipe, RH, login por setor, dashboards, backups, Supabase, Google Drive, modo offline e atualização pelo GitHub.
 
 ## Instalação rápida
 
@@ -20,18 +20,18 @@ npm start
 
 ### Como verificar a versão após instalar (r119)
 
-O script de instalação já confere automaticamente se o pacote gerado contém a versão 2.3.27 (marcação `fast-app-version` dentro do aplicativo). Se quiser conferir manualmente em um pacote pronto:
+O script de instalação já confere automaticamente se o pacote gerado contém a versão 2.3.51 (marcação `fast-app-version` dentro do aplicativo). Se quiser conferir manualmente em um pacote pronto:
 
 ```bash
 # DEB: liste a versão do pacote instalado
 dpkg -s fast-servicos-linux | grep Version
 
 # AppImage: extraia e verifique a marcação interna
-./FAST-Servicos-2.3.27-x86_64.AppImage --appimage-extract > /dev/null 2>&1
+./FAST-Servicos-2.3.51-x86_64.AppImage --appimage-extract > /dev/null 2>&1
 grep -ao 'fast-app-version" content="[^"]*"' squashfs-root/resources/app.asar 2>/dev/null || true
 ```
 
-Após instalar, abra o FAST Serviços e confira o rodapé do menu: deve exibir **Versão 2.3.27**. O aplicativo também verifica atualizações automaticamente (7 segundos após abrir) pelas **Releases do GitHub**.
+Após instalar, abra o FAST Serviços e confira o rodapé do menu: deve exibir **Versão 2.3.51**. O aplicativo também verifica atualizações automaticamente (7 segundos após abrir) pelas **Releases do GitHub**.
 
 ## Instalar um pacote pronto
 
@@ -39,7 +39,7 @@ Após instalar, abra o FAST Serviços e confira o rodapé do menu: deve exibir *
 
 ```bash
 cd ~/Downloads
-sudo apt install ./FAST-Servicos-2.3.27-amd64.deb
+sudo apt install ./FAST-Servicos-2.3.51-amd64.deb
 ```
 
 Depois, abra **FAST Serviços** pelo menu de aplicativos. Para remover:
@@ -52,8 +52,8 @@ sudo apt remove fast-servicos-linux
 
 ```bash
 cd ~/Downloads
-chmod +x FAST-Servicos-2.3.27-x86_64.AppImage
-./FAST-Servicos-2.3.27-x86_64.AppImage
+chmod +x FAST-Servicos-2.3.51-x86_64.AppImage
+./FAST-Servicos-2.3.51-x86_64.AppImage
 ```
 
 Se o AppImage solicitar FUSE em Ubuntu/Debian:
@@ -76,7 +76,7 @@ O app mantém os perfis Administrador, Atendimento e Entregador, com permissões
 
 ## GitHub
 
-Crie uma tag como `v2.3.27`. O workflow da raiz do repositório gera AppImage e DEB e publica os instaladores na Release do GitHub.
+Crie uma tag como `v2.3.51`. O workflow da raiz do repositório gera AppImage e DEB e publica os instaladores na Release do GitHub.
 
 ## Segurança aplicada
 
