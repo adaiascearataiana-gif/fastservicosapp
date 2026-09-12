@@ -36,6 +36,8 @@ syncMain();
   'sw.js',
   'v2-ui.css',
   'v2-ui.js',
+  'fast-logistics-2.4.css',
+  'fast-logistics-2.4.js',
   'app-cliente/index.html',
   'app-cliente/manifest.webmanifest',
   'app-cliente/sw.js',

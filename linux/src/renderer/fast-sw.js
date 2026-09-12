@@ -29,7 +29,7 @@
      ./?share=1) e GET /fastservicosapp/app-despesas/__fast-share-get__
      (devolve o comprovante guardado em JSON).
    ========================================================================== */
-const CACHE='fast-root-r146';
+const CACHE='fast-root-r240';
 const CORE=[
   './',
   './index.html',
@@ -38,6 +38,8 @@ const CORE=[
   './manifest-motorista.webmanifest',
   './v2-ui.css',
   './v2-ui.js',
+  './fast-logistics-2.4.css',
+  './fast-logistics-2.4.js',
   './assets/fast-servicos-icon-192.png',
   './assets/fast-servicos-icon-512.png'
 ];
