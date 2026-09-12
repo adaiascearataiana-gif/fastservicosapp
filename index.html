@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="fast-linux-desktop" data-fast-version="2.3.44"><head>
+<html lang="pt-BR" class="fast-linux-desktop" data-fast-version="2.3.45"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
   <meta name="theme-color" content="#4f46e5">
@@ -21,9 +21,9 @@
   <meta name="fast-github-branch" content="main">
   <meta name="fast-github-path" content="index.html">
   <meta name="fast-github-token-env" content="GH_TOKEN">
-  <meta name="fast-app-version" content="2.3.44">
+  <meta name="fast-app-version" content="2.3.45">
   <meta name="fast-app-date" content="2026-09-11T09:30:00-03:00">
-  <meta name="fast-latest-update" content="2.3.44: busca de rotas por comando de voz e nova ordem dos tempos de bloqueio.">
+  <meta name="fast-latest-update" content="2.3.45: corrigida a sobreposição dos nomes e campos nos filtros compactos de Rotas do Dia.">
   <!-- r92: verificação automática de nova versão ao abrir; Verificar Atualizações com cache-busting e sem fallback no-cors inválido. -->
   <!-- r70.1: lista corrente no HTML inicial; o painel não espera scripts tardios -->
   <meta name="fast-app-changelog-immediate" content="2.3.39">
@@ -18083,27 +18083,27 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
         <!-- (r135) Botão Instalar Rotas do Dia movido para a CENTRAL DE DOWNLOADS nas Configurações -->
         
         <div class="grid-form no-print" style="margin-bottom: 5px;">
-          <div>
+          <div class="rd-filter-date">
             <label>Selecione a Data:</label>
             <input type="date" id="dpDataSequencia" onchange="carregarSequenciaDia()">
           </div>
-          <div>
+          <div class="rd-filter-client">
             <label>Filtrar por Cliente:</label>
             <input type="text" id="filtroSeqCliente" placeholder="Digite o cliente..." oninput="renderizarSequencia()">
           </div>
-          <div>
+          <div class="rd-filter-origin">
             <label>Filtrar por Origem:</label>
             <input type="text" id="filtroSeqOrigem" placeholder="Digite a origem..." oninput="renderizarSequencia()">
           </div>
-          <div>
+          <div class="rd-filter-destination">
             <label>Filtrar por Destino:</label>
             <input type="text" id="filtroSeqDestino" placeholder="Digite o destino..." oninput="renderizarSequencia()">
           </div>
-          <div>
+          <div class="rd-filter-driver">
             <label>Filtrar por Motorista:</label>
             <select id="filtroSeqMotorista" onchange="renderizarSequencia()"><option value="">Todos</option></select>
           </div>
-          <div>
+          <div class="rd-filter-actions">
             <label>Seleção / Ações:</label>
             <div class="rd-actions-grid">
               <button class="btn-success rd-btn-sm ripple" onclick="carregarRotasCadastradasParaSequencia()"><i class="fa-solid fa-rotate"></i> Carregar</button>
@@ -61084,12 +61084,12 @@ body.fast-exclusive-app main { padding-bottom: 12px !important; }
 <style id="fast-241-drive-layout">
   #rotasDia>.card:first-child .grid-form{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;gap:8px!important;margin-bottom:5px!important}
   #rotasDia>.card:first-child .grid-form>div{margin:0!important;min-width:0}
-  #rotasDia>.card:first-child .grid-form>div:nth-child(1){grid-column:1;grid-row:1}
-  #rotasDia>.card:first-child .grid-form>div:nth-child(5){grid-column:2;grid-row:1}
-  #rotasDia>.card:first-child .grid-form>div:nth-child(2){grid-column:1/-1;grid-row:2}
-  #rotasDia>.card:first-child .grid-form>div:nth-child(3){grid-column:1;grid-row:3}
-  #rotasDia>.card:first-child .grid-form>div:nth-child(4){grid-column:2;grid-row:3}
-  #rotasDia>.card:first-child .grid-form>div:nth-child(6){grid-column:1/-1;grid-row:4}
+  #rotasDia>.card:first-child .rd-filter-date{grid-column:1!important;grid-row:1!important}
+  #rotasDia>.card:first-child .rd-filter-driver{grid-column:2!important;grid-row:1!important}
+  #rotasDia>.card:first-child .rd-filter-client{grid-column:1/-1!important;grid-row:2!important}
+  #rotasDia>.card:first-child .rd-filter-origin{grid-column:1!important;grid-row:3!important}
+  #rotasDia>.card:first-child .rd-filter-destination{grid-column:2!important;grid-row:3!important}
+  #rotasDia>.card:first-child .rd-filter-actions{grid-column:1/-1!important;grid-row:4!important}
   #rotasDia>.card:first-child .grid-form label{font-size:10px!important;margin:0 0 3px!important;line-height:1.15!important}
   #rotasDia>.card:first-child .grid-form input,#rotasDia>.card:first-child .grid-form select{height:39px!important;min-height:39px!important;padding:7px 10px!important;font-size:13px!important;border-radius:10px!important}
   #rotasDia>.card:first-child .rd-actions-grid{gap:6px!important}
@@ -61105,7 +61105,7 @@ body.fast-exclusive-app main { padding-bottom: 12px !important; }
 <script id="fast-241-drive-controller">
 (function(){
   'use strict';
-  var VERSION='2.3.44', CLIENT='fast_drive_client_id', FOLDER='fast_drive_folder_id', TOKEN='fast_drive_access_token';
+  var VERSION='2.3.45', CLIENT='fast_drive_client_id', FOLDER='fast_drive_folder_id', TOKEN='fast_drive_access_token';
   function el(id){return document.getElementById(id)}
   function esc(v){var d=document.createElement('div');d.textContent=String(v==null?'':v);return d.innerHTML}
   function db(){return typeof abrirDBFotos==='function'?abrirDBFotos():Promise.reject(new Error('Armazenamento de fotos indisponível'))}
@@ -61152,7 +61152,7 @@ body.fast-exclusive-app main { padding-bottom: 12px !important; }
     restoreConfig();setTimeout(restoreConfig,1500);setTimeout(restoreConfig,5000);
     var original=window.fastDriveSalvarEConectar;if(typeof original==='function'&&!original.fast241){window.fastDriveSalvarEConectar=function(){persistConfig();return original.apply(this,arguments)};window.fastDriveSalvarEConectar.fast241=true}
     migratePhotos().catch(function(e){console.warn('Migração segura das fotos:',e)});
-    var changes=[{type:'novo',text:'2.3.44 (12/09/2026): botão Buscar por voz em Rotas do Dia pesquisa imediatamente por cliente, origem, destino ou motorista e mostra as rotas encontradas.'},{type:'melhorado',text:'2.3.44 (12/09/2026): botão Imediatamente reposicionado depois de 5 min nas opções de bloqueio.'},{type:'melhorado',text:'2.3.43 (12/09/2026): ao adicionar outro destino para o mesmo cliente em Rotas do Dia, a nova linha recebe automaticamente a quantidade e o valor da linha anterior.'}];window.fastUltimoModuloNovidades=changes;var c=document.querySelector('meta[name="fast-app-changelog"]');if(c)c.content=JSON.stringify(changes)
+    var changes=[{type:'corrigido',text:'2.3.45 (12/09/2026): corrigida a sobreposição dos títulos e campos Data, Motorista, Origem e Destino nos filtros compactos de Rotas do Dia.'},{type:'novo',text:'2.3.44 (12/09/2026): botão Buscar por voz em Rotas do Dia pesquisa imediatamente por cliente, origem, destino ou motorista e mostra as rotas encontradas.'},{type:'melhorado',text:'2.3.44 (12/09/2026): botão Imediatamente reposicionado depois de 5 min nas opções de bloqueio.'}];window.fastUltimoModuloNovidades=changes;var c=document.querySelector('meta[name="fast-app-changelog"]');if(c)c.content=JSON.stringify(changes)
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){setTimeout(install,180)});else setTimeout(install,180);
 })();
