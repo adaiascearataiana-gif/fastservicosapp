@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="fast-linux-desktop" data-fast-version="2.3.45"><head>
+<html lang="pt-BR" class="fast-linux-desktop" data-fast-version="2.3.46"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
   <meta name="theme-color" content="#4f46e5">
@@ -21,9 +21,9 @@
   <meta name="fast-github-branch" content="main">
   <meta name="fast-github-path" content="index.html">
   <meta name="fast-github-token-env" content="GH_TOKEN">
-  <meta name="fast-app-version" content="2.3.45">
+  <meta name="fast-app-version" content="2.3.46">
   <meta name="fast-app-date" content="2026-09-11T09:30:00-03:00">
-  <meta name="fast-latest-update" content="2.3.45: corrigida a sobreposição dos nomes e campos nos filtros compactos de Rotas do Dia.">
+  <meta name="fast-latest-update" content="2.3.46: comando de voz agora busca rotas ou preenche uma rota nova completa em Rotas do Dia.">
   <!-- r92: verificação automática de nova versão ao abrir; Verificar Atualizações com cache-busting e sem fallback no-cors inválido. -->
   <!-- r70.1: lista corrente no HTML inicial; o painel não espera scripts tardios -->
   <meta name="fast-app-changelog-immediate" content="2.3.39">
@@ -51223,6 +51223,41 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
       if (st) st.innerHTML = '<i class="fa-solid fa-check"></i> Formulário preenchido! Confirme em "Salvar Rota".';
     }
 
+    // 2.3.46: usa o mesmo interpretador no formulário embutido de Rotas do Dia.
+    window.fastVozPreencherRotaDia = function(texto) {
+      texto = String(texto || '').replace(/\bquantidade\s+(\d+)\b/ig, '$1 volumes');
+      vozExtrairDados(texto);
+      const d = vozDados || {};
+      const setVal = function(id, value) { const campo = document.getElementById(id); if (campo && value !== '' && value != null) campo.value = value; };
+      if (typeof proIr === 'function') proIr('rotasDia');
+      setVal('seqCliente', d.cliente);
+      setVal('seqOrigem', d.origem);
+      setVal('seqDestino', d.destino);
+      if (d.qtdMercadorias !== null) setVal('seqQtdDestino', d.qtdMercadorias);
+      if (d.valor !== null && typeof fastSetMoeda === 'function') fastSetMoeda('seqValorDestino', d.valor);
+      const motoristaMatch = texto.match(/\bmotorista\s+(.+?)(?=\s+(?:observa[cç][aã]o|descri[cç][aã]o|data|valor|quantidade|\d+\s+(?:volumes?|mercadorias?))\b|$)/i);
+      if (motoristaMatch) {
+        const nome = motoristaMatch[1].trim();
+        const select = document.getElementById('seqMotorista');
+        if (select) {
+          const opt = Array.from(select.options).find(function(o){ return o.textContent.trim().toLowerCase() === nome.toLowerCase(); });
+          if (opt) select.value = opt.value;
+        }
+      }
+      const obsMatch = texto.match(/\b(?:observa[cç][aã]o|descri[cç][aã]o)\s+(.+?)(?=\s+data\b|$)/i);
+      if (obsMatch) setVal('seqObs', obsMatch[1].trim());
+      const dataMatch = texto.match(/\bdata\s+(\d{1,2})[\/.-](\d{1,2})(?:[\/.-](\d{4}))?/i);
+      if (dataMatch) {
+        const ano = dataMatch[3] || String(new Date().getFullYear());
+        setVal('dpDataSequencia', ano + '-' + String(dataMatch[2]).padStart(2,'0') + '-' + String(dataMatch[1]).padStart(2,'0'));
+      }
+      if (typeof atualizarPreviewAba2 === 'function') atualizarPreviewAba2();
+      const card = document.getElementById('fastSeqInlineCard');
+      if (card) setTimeout(function(){ card.scrollIntoView({behavior:'smooth',block:'start'}); },100);
+      if (typeof mostrarToast === 'function') mostrarToast('Rota preenchida por voz. Confira e toque em Salvar e Adicionar Outra.','success');
+      return d;
+    };
+
     // Salva a rota diretamente a partir dos dados de voz (igual ao processo manual)
     function vozSalvarDireto() {
       const d = vozDados;
@@ -61105,7 +61140,7 @@ body.fast-exclusive-app main { padding-bottom: 12px !important; }
 <script id="fast-241-drive-controller">
 (function(){
   'use strict';
-  var VERSION='2.3.45', CLIENT='fast_drive_client_id', FOLDER='fast_drive_folder_id', TOKEN='fast_drive_access_token';
+  var VERSION='2.3.46', CLIENT='fast_drive_client_id', FOLDER='fast_drive_folder_id', TOKEN='fast_drive_access_token';
   function el(id){return document.getElementById(id)}
   function esc(v){var d=document.createElement('div');d.textContent=String(v==null?'':v);return d.innerHTML}
   function db(){return typeof abrirDBFotos==='function'?abrirDBFotos():Promise.reject(new Error('Armazenamento de fotos indisponível'))}
@@ -61117,9 +61152,13 @@ body.fast-exclusive-app main { padding-bottom: 12px !important; }
     if(!SR){if(typeof mostrarToast==='function')mostrarToast('Comando de voz não disponível. Use o Chrome ou Edge atualizado.','error');return}
     var rec=new SR();rec.lang='pt-BR';rec.continuous=false;rec.interimResults=false;rec.maxAlternatives=1;
     if(btn){btn.classList.add('listening');btn.innerHTML='<i class="fa-solid fa-wave-square"></i> Ouvindo…'}if(status){status.style.display='inline-flex';status.innerHTML='<i class="fa-solid fa-microphone-lines"></i> Fale o cliente, origem, destino ou motorista';}
-    rec.onresult=function(ev){var fala=String(ev.results[0][0].transcript||'').trim().replace(/^(buscar|procure|procurar|pesquisar|busque)(\s+a)?\s+(rota\s+)?/i,'').trim();if(input)input.value=fala;if(status)status.innerHTML='<i class="fa-solid fa-circle-check"></i> '+esc(fala);if(typeof renderizarSequencia==='function')renderizarSequencia();var list=el('containerSequencia');if(list)setTimeout(function(){list.scrollIntoView({behavior:'smooth',block:'start'})},80)};
+    rec.onresult=function(ev){
+      var original=String(ev.results[0][0].transcript||'').trim(),adicionar=/^(adicionar|adicione|inserir|insira|cadastrar|cadastre|criar|crie|nova)\b/i.test(original)||/\bnova rota\b/i.test(original);
+      if(adicionar){if(input)input.value='';if(status)status.innerHTML='<i class="fa-solid fa-route"></i> Preenchendo nova rota…';if(typeof window.fastVozPreencherRotaDia==='function')window.fastVozPreencherRotaDia(original);return}
+      var fala=original.replace(/^(buscar|procure|procurar|pesquisar|busque)(\s+a)?\s+(rota\s+)?/i,'').trim();if(input)input.value=fala;if(status)status.innerHTML='<i class="fa-solid fa-circle-check"></i> '+esc(fala);if(typeof renderizarSequencia==='function')renderizarSequencia();var list=el('containerSequencia');if(list)setTimeout(function(){list.scrollIntoView({behavior:'smooth',block:'start'})},80)
+    };
     rec.onerror=function(ev){if(status)status.innerHTML='<i class="fa-solid fa-triangle-exclamation"></i> Não foi possível ouvir. Tente novamente.';if(typeof mostrarToast==='function')mostrarToast(ev.error==='not-allowed'?'Autorize o microfone no navegador.':'Não foi possível reconhecer a fala.','error')};
-    rec.onend=function(){if(btn){btn.classList.remove('listening');btn.innerHTML='<i class="fa-solid fa-microphone"></i> <span class="rd-drive-label">Buscar por voz</span>'}};
+    rec.onend=function(){if(btn){btn.classList.remove('listening');btn.innerHTML='<i class="fa-solid fa-microphone"></i> <span class="rd-drive-label">Comando de voz</span>'}};
     try{rec.start()}catch(e){rec.onerror({error:'start'})}
   };
   function persistConfig(){
@@ -61148,11 +61187,11 @@ body.fast-exclusive-app main { padding-bottom: 12px !important; }
     ['btnConfigPastaFoto','btnRecuperarFotos','statusPastaFoto','statusPastaFotoConfig'].forEach(function(id){var x=el(id);if(x)x.remove()});
     removeStorageCard();setTimeout(removeStorageCard,1000);setTimeout(removeStorageCard,4000);
     var head=document.querySelector('#rotasDia>.card:first-child .card-title>div');if(head&&!el('fastDriveFilesBtn')){var b=document.createElement('button');b.id='fastDriveFilesBtn';b.className='btn-secondary no-print ripple';b.innerHTML='<i class="fa-brands fa-google-drive"></i> <span class="rd-drive-label">Google Drive</span>';b.onclick=window.fastDriveAbrirArquivos;head.insertBefore(b,head.firstChild)}
-    if(head&&!el('fastVoiceRouteBtn')){var voice=document.createElement('button');voice.id='fastVoiceRouteBtn';voice.type='button';voice.className='btn-primary no-print ripple';voice.innerHTML='<i class="fa-solid fa-microphone"></i> <span class="rd-drive-label">Buscar por voz</span>';voice.onclick=window.fastBuscarRotaPorVoz;head.insertBefore(voice,head.firstChild);var hidden=document.createElement('input');hidden.type='hidden';hidden.id='filtroSeqVoz';head.parentElement.insertAdjacentElement('afterend',hidden);var badge=document.createElement('div');badge.id='fastVoiceRouteStatus';badge.innerHTML='<i class="fa-solid fa-microphone"></i> Busca por voz';hidden.insertAdjacentElement('afterend',badge)}
+    if(head&&!el('fastVoiceRouteBtn')){var voice=document.createElement('button');voice.id='fastVoiceRouteBtn';voice.type='button';voice.className='btn-primary no-print ripple';voice.innerHTML='<i class="fa-solid fa-microphone"></i> <span class="rd-drive-label">Comando de voz</span>';voice.onclick=window.fastBuscarRotaPorVoz;head.insertBefore(voice,head.firstChild);var hidden=document.createElement('input');hidden.type='hidden';hidden.id='filtroSeqVoz';head.parentElement.insertAdjacentElement('afterend',hidden);var badge=document.createElement('div');badge.id='fastVoiceRouteStatus';badge.innerHTML='<i class="fa-solid fa-microphone"></i> Busca ou cadastro por voz';hidden.insertAdjacentElement('afterend',badge)}
     restoreConfig();setTimeout(restoreConfig,1500);setTimeout(restoreConfig,5000);
     var original=window.fastDriveSalvarEConectar;if(typeof original==='function'&&!original.fast241){window.fastDriveSalvarEConectar=function(){persistConfig();return original.apply(this,arguments)};window.fastDriveSalvarEConectar.fast241=true}
     migratePhotos().catch(function(e){console.warn('Migração segura das fotos:',e)});
-    var changes=[{type:'corrigido',text:'2.3.45 (12/09/2026): corrigida a sobreposição dos títulos e campos Data, Motorista, Origem e Destino nos filtros compactos de Rotas do Dia.'},{type:'novo',text:'2.3.44 (12/09/2026): botão Buscar por voz em Rotas do Dia pesquisa imediatamente por cliente, origem, destino ou motorista e mostra as rotas encontradas.'},{type:'melhorado',text:'2.3.44 (12/09/2026): botão Imediatamente reposicionado depois de 5 min nas opções de bloqueio.'}];window.fastUltimoModuloNovidades=changes;var c=document.querySelector('meta[name="fast-app-changelog"]');if(c)c.content=JSON.stringify(changes)
+    var changes=[{type:'novo',text:'2.3.46 (12/09/2026): Comando de voz em Rotas do Dia agora identifica se o pedido é buscar uma rota ou preencher uma rota nova com cliente, origem, destino, quantidade, valor, motorista, data e observação.'},{type:'seguranca',text:'2.3.46 (12/09/2026): rotas ditadas ficam abertas para conferência antes de serem salvas, evitando cadastro incorreto por reconhecimento de voz.'},{type:'corrigido',text:'2.3.45 (12/09/2026): corrigida a sobreposição dos títulos e campos nos filtros compactos de Rotas do Dia.'}];window.fastUltimoModuloNovidades=changes;var c=document.querySelector('meta[name="fast-app-changelog"]');if(c)c.content=JSON.stringify(changes)
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){setTimeout(install,180)});else setTimeout(install,180);
 })();
