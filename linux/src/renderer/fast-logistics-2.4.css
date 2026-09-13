@@ -25,3 +25,20 @@ html.fast-linux-desktop,html.fast-linux-desktop body,body.fast-edition-desktop{m
   .table-container table,.table-responsive table,.dre-tabela-wrapper table{max-width:none}
 }
 @media (min-width:901px) and (max-width:1200px){body.fast-v2 .tab-content{padding-left:16px!important;padding-right:16px!important}.fed-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.fef-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* 2.4.9 — saneamento visual de todas as áreas desktop */
+@media (min-width:901px){
+  *,*::before,*::after{box-sizing:border-box}
+  body.fast-v2:not(.fast-touch-ui) main>.tab-content,body.fast-edition-desktop main>.tab-content{flex:0 1 auto!important;align-self:center!important;overflow:visible!important}
+  .tab-content.active>*{min-width:0;max-width:100%;box-sizing:border-box}
+  .card,.form-card,.config-topic,.stats-card,.kpi-card,.pro-panel,.fast-home-list-panel{min-width:0;max-width:100%}
+  form,fieldset,.grid-form,.metrics-container,.dash-grid,.dash-metrics-row,.pro-hero,.pro-grid-2,.pro-kpi-grid,.pro-quick-grid,.fast71-grid,.fast-health-grid,.fast-brevo-grid{min-width:0;max-width:100%;box-sizing:border-box}
+  form>*,fieldset>*,.grid-form>*,.metrics-container>*,.dash-grid>*,.dash-metrics-row>*,.pro-hero>*,.pro-grid-2>*,.pro-kpi-grid>*,.pro-quick-grid>*{min-width:0;max-width:100%;box-sizing:border-box}
+  input:not([type=checkbox]):not([type=radio]),select,textarea{max-width:100%;min-width:0;box-sizing:border-box}
+  img,video,canvas,svg{max-width:100%}
+  .modal{padding:18px!important;box-sizing:border-box!important}.modal-content,.fl-sheet,.fast89-notif-box,.emp-data-box{width:min(100%,1080px)!important;max-width:calc(100vw - 36px)!important;min-width:0!important;box-sizing:border-box!important}
+  .config-btn-row,.actions-cell,.fl-actions,.fast71-actions,.fast-brevo-actions,.pro-command-actions{max-width:100%;flex-wrap:wrap}
+  .fast-layout-overflow{max-width:100%!important;min-width:0!important;overflow-x:hidden!important}
+  .fast-layout-overflow>.table-container,.fast-layout-overflow>.table-responsive,.fast-layout-overflow>.dre-tabela-wrapper{overflow-x:auto!important}
+}
+@media (min-width:901px) and (max-width:1366px){body.fast-v2 .tab-content{padding-left:18px!important;padding-right:18px!important}.pro-kpi-grid,.metrics-container,.dash-metrics-row{grid-template-columns:repeat(2,minmax(0,1fr))!important}.pro-hero,.pro-grid-2{grid-template-columns:minmax(0,1fr)!important}}
