@@ -34844,6 +34844,10 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
             return;
           }
           d.nome = nome;
+          // (v2.4.14) Propaga a renomeacao para rotas e "Rotas do Dia".
+          if (chaveAnterior && chaveNova && chaveAnterior !== chaveNova) {
+            fastPropagarRenomeacao('destino', anterior && anterior.nome, nome);
+          }
           d.bairro = bairro;
           d.endereco = endereco;
           d.telefone = telefone;
@@ -39848,6 +39852,41 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
       if (inpDoc.value) mascaraDocCliente(inpDoc);
     }
 
+    /* (v2.4.14) PROPAGAR RENOMEACAO -> ROTAS E SEQUENCIAS
+       Sem isto, ao editar o nome de um cliente ou lugar no cadastro, as rotas
+       e os itens de "Rotas do Dia" continuavam exibindo o nome antigo
+       (snapshot), dando a impressao de que o nome "voltava". Agora a
+       renomeacao reflete imediatamente em todo o historico. */
+    function fastPropagarRenomeacao(tipo, nomeAntigo, nomeNovo) {
+      try {
+        var ant = String(nomeAntigo || '').trim();
+        var nov = String(nomeNovo || '').trim();
+        if (!ant || !nov || ant === nov) return;
+        var chaveAnt = destNormalizarNome(ant);
+        var chaveNov = destNormalizarNome(nov);
+        if (!chaveAnt || !chaveNov || chaveAnt === chaveNov) return;
+        var rotas = Array.isArray(bancoDados.rotas) ? bancoDados.rotas : null;
+        if (rotas) {
+          for (var i = 0; i < rotas.length; i++) {
+            var r = rotas[i];
+            if (tipo === 'cliente' && r && destNormalizarNome(r.cliente) === chaveAnt) r.cliente = nov;
+            else if (tipo === 'destino' && r && destNormalizarNome(r.destino) === chaveAnt) r.destino = nov;
+          }
+        }
+        var seqs = bancoDados.sequencias;
+        if (seqs && typeof seqs === 'object') {
+          Object.keys(seqs).forEach(function(d) {
+            var lista = seqs[d];
+            if (!Array.isArray(lista)) return;
+            for (var j = 0; j < lista.length; j++) {
+              var it = lista[j];
+              if (tipo === 'cliente' && it && destNormalizarNome(it.cliente) === chaveAnt) it.cliente = nov;
+              else if (tipo === 'destino' && it && destNormalizarNome(it.destino) === chaveAnt) it.destino = nov;
+            }
+          });
+        }
+      } catch(e) { console.warn('fastPropagarRenomeacao:', e); }
+    }
     function salvarCliente(e) {
       if (e && e.preventDefault) e.preventDefault();
       const id = document.getElementById('clienteId').value;
@@ -39915,6 +39954,10 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
         bancoDados.clientes = bancoDados.clientes.map(c =>
           String(c.id) === String(id) ? { ...c, ...dados } : c
         );
+        // (v2.4.14) Propaga a renomeacao para rotas e "Rotas do Dia".
+        if (chaveAnterior && chaveNova && chaveAnterior !== chaveNova) {
+          fastPropagarRenomeacao('cliente', anterior && anterior.nome, dados.nome);
+        }
       } else {
         dados.id = Date.now();
         dados.codigoCliente = gerarIdCliente();
