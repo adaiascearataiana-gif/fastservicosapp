@@ -1,7 +1,7 @@
 {
   "id":"/fastservicosapp/app-despesas/",
   "name":"Despesas",
-  "version": "2.4.2",
+  "version": "2.4.3",
   "short_name":"Despesas",
   "description":"Aplicativo exclusivo de Despesas — le comprovantes PDF/imagens e preenche os campos sozinho",
   "start_url":"/fastservicosapp/app-despesas/?fh=1",

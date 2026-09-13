@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="fast-linux-desktop" data-fast-version="2.4.2"><head>
+<html lang="pt-BR" class="fast-linux-desktop" data-fast-version="2.4.3"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
   <meta name="theme-color" content="#4f46e5">
@@ -21,9 +21,9 @@
   <meta name="fast-github-branch" content="main">
   <meta name="fast-github-path" content="index.html">
   <meta name="fast-github-token-env" content="GH_TOKEN">
-  <meta name="fast-app-version" content="2.4.2">
+  <meta name="fast-app-version" content="2.4.3">
   <meta name="fast-app-date" content="2026-09-11T09:30:00-03:00">
-  <meta name="fast-latest-update" content="2.4.2: pré-visualização inteligente e preenchimento pela última rota do cliente ou última despesa.">
+  <meta name="fast-latest-update" content="2.4.3: pré-visualização inteligente e preenchimento pela última rota do cliente ou última despesa.">
   <!-- r92: verificação automática de nova versão ao abrir; Verificar Atualizações com cache-busting e sem fallback no-cors inválido. -->
   <!-- r70.1: lista corrente no HTML inicial; o painel não espera scripts tardios -->
   <meta name="fast-app-changelog-immediate" content="2.3.39">
@@ -39954,7 +39954,7 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
       ]);
       [...(nuvem.clientes || []), ...(local.clientes || [])].forEach(c => {
         const nomeCli = destNormalizarNome(c.nome);
-        // 2.4.2: cadastro sem nenhuma letra (somente números/sinais) é inválido.
+        // 2.4.3: cadastro sem nenhuma letra (somente números/sinais) é inválido.
         if (!/[a-z]/i.test(nomeCli)) return;
         if (nomeCli && blNomesCli.has(nomeCli)) return; // pular cliente excluído
         // O nome canônico é a identidade do cliente. Antes o merge era por ID,
@@ -39997,7 +39997,7 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
       const destinosUnificados = destMesclarDuplicados([
         ...(nuvem.destinos || []),
         ...(local.destinos || [])
-      ]).filter(d => /[a-z]/i.test(destNormalizarNome(d.nome)) && !destinosExcluidosSet.has(destNormalizarNome(d.nome)));
+      ]).filter(d => /[a-z]/i.test(destNormalizarNome(d.nome)) && !/^\s*\d/.test(String(d.nome || '')) && !destinosExcluidosSet.has(destNormalizarNome(d.nome)));
       return {
         rotas: Array.from(rotasMap.values()),
         despesas: Array.from(despMap.values()),
@@ -42438,7 +42438,7 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
         if (el) el.value = valor == null ? '' : valor;
       };
       setVal('seqOrigem', ultimaRota.origem || '');
-      // 2.4.2: reaproveitar a última rota do cliente para acelerar o lançamento.
+      // 2.4.3: reaproveitar a última rota do cliente para acelerar o lançamento.
       setVal('seqDestino', ultimaRota.destino || '');
       setVal('seqQtdDestino', ultimaRota.qtdMercadorias != null ? ultimaRota.qtdMercadorias : (ultimaRota.qtdVolumes || 1));
       fastSetMoeda('seqValorDestino', ultimaRota.valor != null ? ultimaRota.valor : 0);
@@ -42982,8 +42982,8 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
       // Antes usava toLocaleLowerCase('pt-BR') (mantinha acentos), então um lugar
       // excluído como "Jaciará" voltava se uma rota re-inserisse "Jaciara".
       const chave = destNormalizarNome(nomeDestino);
-      // 2.4.2: não recriar Lugares/Destinos cujo nome é apenas número/código.
-      if (!/[a-z]/i.test(chave)) return null;
+      // 2.4.3: não recriar Lugares/Destinos cujo nome é apenas número/código.
+      if (!/[a-z]/i.test(chave) || /^\s*\d/.test(String(nomeDestino))) return null;
       if ((bancoDados.destinosExcluidos || []).some(n => destNormalizarNome(n) === chave)) return null;
       const destinos = destGarantir();
       const existente = destBuscar(nomeDestino);
@@ -43183,6 +43183,14 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
       // Safety net: dividir compostos antes de renderizar (r11)
       try { destDividirCompostos(); } catch(e) {}
       try { destDeduplicarBase(false); } catch(e) { console.warn('Erro ao remover destinos repetidos:', e); }
+      try {
+        const antesEnxugar = destGarantir().length;
+        bancoDados.destinos = destMesclarDuplicados(destGarantir()).filter(d => /[a-z]/i.test(destNormalizarNome(d && d.nome)) && !/^\s*\d/.test(String(d && d.nome || '')));
+        if (bancoDados.destinos.length !== antesEnxugar) {
+          salvarStorage();
+          fastSalvarSemBloquear(100);
+        }
+      } catch(e) { console.warn('Falha ao enxugar destinos na fonte:', e); }
       const tbody = document.getElementById('tabelaDestinosBody');
       if (!tbody) return;
       const destinos = destGarantir();
@@ -48848,7 +48856,36 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
         </div>`;
     }
 
+    // 2.4.3: barreira final para aparelhos com uma base local antiga.
+    function fastEnxugarClientesNaFonte() {
+      if (!bancoDados || !Array.isArray(bancoDados.clientes)) return 0;
+      const antes = bancoDados.clientes.length;
+      const mapa = new Map();
+      const pontuar = x => Object.values(x || {}).filter(v => v !== null && v !== '' && (!Array.isArray(v) || v.length)).length;
+      bancoDados.clientes.forEach(c => {
+        const chave = destNormalizarNome(c && c.nome).replace(/[^a-z0-9]+/g, ' ').trim();
+        if (!chave || !/[a-z]/.test(chave)) return;
+        const atual = mapa.get(chave);
+        if (!atual) { mapa.set(chave, c); return; }
+        const base = pontuar(c) > pontuar(atual) ? { ...c } : { ...atual };
+        const extra = pontuar(c) > pontuar(atual) ? atual : c;
+        Object.keys(extra || {}).forEach(k => {
+          if ((base[k] == null || base[k] === '' || (Array.isArray(base[k]) && !base[k].length)) && extra[k] != null && extra[k] !== '') base[k] = extra[k];
+        });
+        mapa.set(chave, base);
+      });
+      bancoDados.clientes = Array.from(mapa.values());
+      const removidos = antes - bancoDados.clientes.length;
+      if (removidos > 0) {
+        renumerarClientesSequencial();
+        try { salvarStorage(); } catch(e) {}
+        try { fastSalvarSemBloquear(100); } catch(e) {}
+      }
+      return removidos;
+    }
+
     function renderizarClientes() {
+      fastEnxugarClientesNaFonte();
       const tbody = document.getElementById('tabelaClientesBody');
       const wrap = document.getElementById('clientesTableWrap');
       if (!tbody) return;
@@ -49084,7 +49121,7 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
       const nomesRotas = [...new Set((bancoDados.rotas || []).map(r => r.cliente).filter(Boolean))];
       nomesRotas.forEach(nome => {
         const nomeLower = destNormalizarNome(nome);
-        // 2.4.2: números de pedido/CEP não são nomes de clientes.
+        // 2.4.3: números de pedido/CEP não são nomes de clientes.
         if (!/[a-z]/i.test(nomeLower)) return;
         // Pular se o cliente já existe no cadastro
         if (nomesExistentes.has(nomeLower)) return;
@@ -61271,7 +61308,7 @@ body.fast-exclusive-app main { padding-bottom: 12px !important; }
 <script id="fast-241-drive-controller">
 (function(){
   'use strict';
-  var VERSION='2.4.2', CLIENT='fast_drive_client_id', FOLDER='fast_drive_folder_id', TOKEN='fast_drive_access_token';
+  var VERSION='2.4.3', CLIENT='fast_drive_client_id', FOLDER='fast_drive_folder_id', TOKEN='fast_drive_access_token';
   function el(id){return document.getElementById(id)}
   function esc(v){var d=document.createElement('div');d.textContent=String(v==null?'':v);return d.innerHTML}
   function db(){return typeof abrirDBFotos==='function'?abrirDBFotos():Promise.reject(new Error('Armazenamento de fotos indisponível'))}
@@ -61322,12 +61359,12 @@ body.fast-exclusive-app main { padding-bottom: 12px !important; }
     restoreConfig();setTimeout(restoreConfig,1500);setTimeout(restoreConfig,5000);
     var original=window.fastDriveSalvarEConectar;if(typeof original==='function'&&!original.fast241){window.fastDriveSalvarEConectar=function(){persistConfig();return original.apply(this,arguments)};window.fastDriveSalvarEConectar.fast241=true}
     migratePhotos().catch(function(e){console.warn('Migração segura das fotos:',e)});
-    var changes=[{type:'novo',text:'2.4.2 (12/09/2026): em Rotas do Dia, digitar uma letra mostra clientes com a prévia da última rota; ao selecionar, origem, destino, quantidade, valor, observação e motorista são preenchidos automaticamente.'},{type:'novo',text:'2.4.2 (12/09/2026): em Despesas, digitar a descrição ou local mostra a última despesa correspondente; ao selecionar, descrição, local, categoria, valor e pagamento são reaproveitados.'},{type:'corrigido',text:'2.3.50 (12/09/2026): Agrupar agora atua somente em Rotas do Dia; a tabela Rotas mantém cada destino como rota individual.'},{type:'corrigido',text:'2.3.50 (12/09/2026): fotos excluídas recebem bloqueio permanente no merge e não voltam após sincronizar com o Supabase.'},{type:'corrigido',text:'2.3.50 (12/09/2026): sincronismo consolida rotas realmente idênticas e novos destinos recebem IDs únicos, evitando duplicações.'}];window.fastUltimoModuloNovidades=changes;var c=document.querySelector('meta[name="fast-app-changelog"]');if(c)c.content=JSON.stringify(changes)
+    var changes=[{type:'novo',text:'2.4.3 (12/09/2026): em Rotas do Dia, digitar uma letra mostra clientes com a prévia da última rota; ao selecionar, origem, destino, quantidade, valor, observação e motorista são preenchidos automaticamente.'},{type:'novo',text:'2.4.3 (12/09/2026): em Despesas, digitar a descrição ou local mostra a última despesa correspondente; ao selecionar, descrição, local, categoria, valor e pagamento são reaproveitados.'},{type:'corrigido',text:'2.3.50 (12/09/2026): Agrupar agora atua somente em Rotas do Dia; a tabela Rotas mantém cada destino como rota individual.'},{type:'corrigido',text:'2.3.50 (12/09/2026): fotos excluídas recebem bloqueio permanente no merge e não voltam após sincronizar com o Supabase.'},{type:'corrigido',text:'2.3.50 (12/09/2026): sincronismo consolida rotas realmente idênticas e novos destinos recebem IDs únicos, evitando duplicações.'}];window.fastUltimoModuloNovidades=changes;var c=document.querySelector('meta[name="fast-app-changelog"]');if(c)c.content=JSON.stringify(changes)
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){setTimeout(install,180)});else setTimeout(install,180);
 })();
 </script>
-<link rel="stylesheet" href="fast-logistics-2.4.css?v=2.4.2">
-<script src="fast-logistics-2.4.js?v=2.4.2"></script>
+<link rel="stylesheet" href="fast-logistics-2.4.css?v=2.4.3">
+<script src="fast-logistics-2.4.js?v=2.4.3"></script>
 <script src="desktop-bridge.js"></script>
 </body></html>
