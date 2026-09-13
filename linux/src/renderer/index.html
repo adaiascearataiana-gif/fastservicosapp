@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="fast-linux-desktop" data-fast-version="2.4.4"><head>
+<html lang="pt-BR" class="fast-linux-desktop" data-fast-version="2.4.5"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
   <meta name="theme-color" content="#4f46e5">
@@ -21,9 +21,9 @@
   <meta name="fast-github-branch" content="main">
   <meta name="fast-github-path" content="index.html">
   <meta name="fast-github-token-env" content="GH_TOKEN">
-  <meta name="fast-app-version" content="2.4.4">
+  <meta name="fast-app-version" content="2.4.5">
   <meta name="fast-app-date" content="2026-09-11T09:30:00-03:00">
-  <meta name="fast-latest-update" content="2.4.4: dashboard exclusivo de Despesas e atualização unificada dos cinco aplicativos, incluindo Linux.">
+  <meta name="fast-latest-update" content="2.4.5: dashboard exclusivo de Despesas e atualização unificada dos cinco aplicativos, incluindo Linux.">
   <!-- r92: verificação automática de nova versão ao abrir; Verificar Atualizações com cache-busting e sem fallback no-cors inválido. -->
   <!-- r70.1: lista corrente no HTML inicial; o painel não espera scripts tardios -->
   <meta name="fast-app-changelog-immediate" content="2.3.39">
@@ -33955,6 +33955,24 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
 
     <!-- ABA 6: DESPESAS -->
     <div id="despesas" class="tab-content"><!-- (r135) Botão Instalar Despesas movido para a CENTRAL DE DOWNLOADS nas Configurações -->
+      <div id="fastExpenseDashboard" class="card no-print">
+        <div class="fed-head">
+          <div><span class="fed-eyebrow">VISÃO FINANCEIRA</span><h3><i class="fa-solid fa-chart-pie"></i> Dashboard de Despesas</h3><p>Acompanhe somente os gastos registrados nesta seção.</p></div>
+          <select id="fedPeriod" class="fed-period" onchange="fastRenderExpenseDashboard()"><option value="month">Mês atual</option><option value="all">Todo o período</option></select>
+        </div>
+        <div class="fed-kpis">
+          <div class="fed-kpi fed-total"><span>Total</span><strong id="fedTotal">R$ 0,00</strong><small id="fedPeriodLabel">Mês atual</small></div>
+          <div class="fed-kpi"><span>Lançamentos</span><strong id="fedCount">0</strong><small>despesas registradas</small></div>
+          <div class="fed-kpi"><span>Média</span><strong id="fedAverage">R$ 0,00</strong><small>por lançamento</small></div>
+          <div class="fed-kpi"><span>Maior gasto</span><strong id="fedLargest">R$ 0,00</strong><small id="fedLargestName">Sem lançamentos</small></div>
+        </div>
+        <div class="fed-panels">
+          <section class="fed-panel"><h4><i class="fa-solid fa-chart-column"></i> Evolução — 6 meses</h4><div id="fedBars" class="fed-bars"></div></section>
+          <section class="fed-panel"><h4><i class="fa-solid fa-tags"></i> Categorias</h4><div id="fedCategories" class="fed-rank"></div></section>
+          <section class="fed-panel"><h4><i class="fa-solid fa-wallet"></i> Formas de pagamento</h4><div id="fedPayments" class="fed-rank"></div></section>
+          <section class="fed-panel fed-insight"><h4><i class="fa-solid fa-lightbulb"></i> Destaque</h4><div id="fedInsight">Cadastre uma despesa para começar a análise.</div></section>
+        </div>
+      </div>
       <div class="card">
         <form id="formDespesa" onsubmit="salvarDespesa(event)">
           <div class="grid-form">
@@ -39954,7 +39972,7 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
       ]);
       [...(nuvem.clientes || []), ...(local.clientes || [])].forEach(c => {
         const nomeCli = destNormalizarNome(c.nome);
-        // 2.4.4: cadastro sem nenhuma letra (somente números/sinais) é inválido.
+        // 2.4.5: cadastro sem nenhuma letra (somente números/sinais) é inválido.
         if (!/[a-z]/i.test(nomeCli)) return;
         if (nomeCli && blNomesCli.has(nomeCli)) return; // pular cliente excluído
         // O nome canônico é a identidade do cliente. Antes o merge era por ID,
@@ -42438,7 +42456,7 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
         if (el) el.value = valor == null ? '' : valor;
       };
       setVal('seqOrigem', ultimaRota.origem || '');
-      // 2.4.4: reaproveitar a última rota do cliente para acelerar o lançamento.
+      // 2.4.5: reaproveitar a última rota do cliente para acelerar o lançamento.
       setVal('seqDestino', ultimaRota.destino || '');
       setVal('seqQtdDestino', ultimaRota.qtdMercadorias != null ? ultimaRota.qtdMercadorias : (ultimaRota.qtdVolumes || 1));
       fastSetMoeda('seqValorDestino', ultimaRota.valor != null ? ultimaRota.valor : 0);
@@ -42982,7 +43000,7 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
       // Antes usava toLocaleLowerCase('pt-BR') (mantinha acentos), então um lugar
       // excluído como "Jaciará" voltava se uma rota re-inserisse "Jaciara".
       const chave = destNormalizarNome(nomeDestino);
-      // 2.4.4: não recriar Lugares/Destinos cujo nome é apenas número/código.
+      // 2.4.5: não recriar Lugares/Destinos cujo nome é apenas número/código.
       if (!/[a-z]/i.test(chave) || /^\s*\d/.test(String(nomeDestino))) return null;
       if ((bancoDados.destinosExcluidos || []).some(n => destNormalizarNome(n) === chave)) return null;
       const destinos = destGarantir();
@@ -48856,7 +48874,7 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
         </div>`;
     }
 
-    // 2.4.4: barreira final para aparelhos com uma base local antiga.
+    // 2.4.5: barreira final para aparelhos com uma base local antiga.
     function fastEnxugarClientesNaFonte() {
       if (!bancoDados || !Array.isArray(bancoDados.clientes)) return 0;
       const antes = bancoDados.clientes.length;
@@ -49121,7 +49139,7 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
       const nomesRotas = [...new Set((bancoDados.rotas || []).map(r => r.cliente).filter(Boolean))];
       nomesRotas.forEach(nome => {
         const nomeLower = destNormalizarNome(nome);
-        // 2.4.4: números de pedido/CEP não são nomes de clientes.
+        // 2.4.5: números de pedido/CEP não são nomes de clientes.
         if (!/[a-z]/i.test(nomeLower)) return;
         // Pular se o cliente já existe no cadastro
         if (nomesExistentes.has(nomeLower)) return;
@@ -61308,7 +61326,7 @@ body.fast-exclusive-app main { padding-bottom: 12px !important; }
 <script id="fast-241-drive-controller">
 (function(){
   'use strict';
-  var VERSION='2.4.4', CLIENT='fast_drive_client_id', FOLDER='fast_drive_folder_id', TOKEN='fast_drive_access_token';
+  var VERSION='2.4.5', CLIENT='fast_drive_client_id', FOLDER='fast_drive_folder_id', TOKEN='fast_drive_access_token';
   function el(id){return document.getElementById(id)}
   function esc(v){var d=document.createElement('div');d.textContent=String(v==null?'':v);return d.innerHTML}
   function db(){return typeof abrirDBFotos==='function'?abrirDBFotos():Promise.reject(new Error('Armazenamento de fotos indisponível'))}
@@ -61359,12 +61377,12 @@ body.fast-exclusive-app main { padding-bottom: 12px !important; }
     restoreConfig();setTimeout(restoreConfig,1500);setTimeout(restoreConfig,5000);
     var original=window.fastDriveSalvarEConectar;if(typeof original==='function'&&!original.fast241){window.fastDriveSalvarEConectar=function(){persistConfig();return original.apply(this,arguments)};window.fastDriveSalvarEConectar.fast241=true}
     migratePhotos().catch(function(e){console.warn('Migração segura das fotos:',e)});
-    var changes=[{type:'novo',text:'2.4.4 (12/09/2026): em Rotas do Dia, digitar uma letra mostra clientes com a prévia da última rota; ao selecionar, origem, destino, quantidade, valor, observação e motorista são preenchidos automaticamente.'},{type:'novo',text:'2.4.4 (12/09/2026): em Despesas, digitar a descrição ou local mostra a última despesa correspondente; ao selecionar, descrição, local, categoria, valor e pagamento são reaproveitados.'},{type:'corrigido',text:'2.3.50 (12/09/2026): Agrupar agora atua somente em Rotas do Dia; a tabela Rotas mantém cada destino como rota individual.'},{type:'corrigido',text:'2.3.50 (12/09/2026): fotos excluídas recebem bloqueio permanente no merge e não voltam após sincronizar com o Supabase.'},{type:'corrigido',text:'2.3.50 (12/09/2026): sincronismo consolida rotas realmente idênticas e novos destinos recebem IDs únicos, evitando duplicações.'}];window.fastUltimoModuloNovidades=changes;var c=document.querySelector('meta[name="fast-app-changelog"]');if(c)c.content=JSON.stringify(changes)
+    var changes=[{type:'novo',text:'2.4.5 (12/09/2026): em Rotas do Dia, digitar uma letra mostra clientes com a prévia da última rota; ao selecionar, origem, destino, quantidade, valor, observação e motorista são preenchidos automaticamente.'},{type:'novo',text:'2.4.5 (12/09/2026): em Despesas, digitar a descrição ou local mostra a última despesa correspondente; ao selecionar, descrição, local, categoria, valor e pagamento são reaproveitados.'},{type:'corrigido',text:'2.3.50 (12/09/2026): Agrupar agora atua somente em Rotas do Dia; a tabela Rotas mantém cada destino como rota individual.'},{type:'corrigido',text:'2.3.50 (12/09/2026): fotos excluídas recebem bloqueio permanente no merge e não voltam após sincronizar com o Supabase.'},{type:'corrigido',text:'2.3.50 (12/09/2026): sincronismo consolida rotas realmente idênticas e novos destinos recebem IDs únicos, evitando duplicações.'}];window.fastUltimoModuloNovidades=changes;var c=document.querySelector('meta[name="fast-app-changelog"]');if(c)c.content=JSON.stringify(changes)
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){setTimeout(install,180)});else setTimeout(install,180);
 })();
 </script>
-<link rel="stylesheet" href="fast-logistics-2.4.css?v=2.4.4">
-<script src="fast-logistics-2.4.js?v=2.4.4"></script>
+<link rel="stylesheet" href="fast-logistics-2.4.css?v=2.4.5">
+<script src="fast-logistics-2.4.js?v=2.4.5"></script>
 <script src="desktop-bridge.js"></script>
 </body></html>
