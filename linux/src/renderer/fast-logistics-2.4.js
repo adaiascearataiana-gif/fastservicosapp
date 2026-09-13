@@ -1,6 +1,6 @@
 (function(){
   'use strict';
-  var VERSION='2.4.11', STORE='fast_logistics_v2411', state={watchId:null,lastPosition:null};
+  var VERSION='2.4.12', STORE='fast_logistics_v2411', state={watchId:null,lastPosition:null};
   function el(id){return document.getElementById(id)}
   function esc(v){var d=document.createElement('div');d.textContent=String(v==null?'':v);return d.innerHTML}
   function norm(v){return String(v||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim()}
@@ -87,18 +87,19 @@
   function boot(){document.documentElement.setAttribute('data-fast-version',VERSION);var m=document.querySelector('meta[name="fast-app-version"]');if(m)m.content=VERSION;['fastSplashVersion','fastGateVersionNum','fastVersaoLabel'].forEach(function(id){if(el(id))el(id).textContent=VERSION});if(el('navMenuVersao'))el('navMenuVersao').textContent='Versão '+VERSION;migrateIdentity();installHub();installExpenseRouteLink();installExpenseDashboard();patchExpenseDashboard();installBanks();var initial=cleanDirectory(false);installPostSyncClean();if(initial.clientes||initial.destinos)setTimeout(pushSlimLists,1200);setTimeout(function(){var late=cleanDirectory(true);if(late.clientes||late.destinos)pushSlimLists();try{if(typeof renderizarClientes==='function')renderizarClientes();if(typeof destRenderizarLista==='function')destRenderizarLista()}catch(e){}window.fastRenderExpenseDashboard();window.fastFilterExpenses();auditDesktopLayout()},5000);patchRender();var expenseBody=el('tabelaDespesasBody');if(expenseBody)new MutationObserver(function(){window.fastRenderExpenseDashboard();window.fastFilterExpenses()}).observe(expenseBody,{childList:true,subtree:true});setInterval(function(){window.fastRenderExpenseDashboard();window.fastFilterExpenses()},3000);window.fastFilterExpenses();auditDesktopLayout();window.addEventListener('resize',auditDesktopLayout);var observer=new MutationObserver(function(){addProofButtons();refresh()});var cont=el('containerSequencia');if(cont)observer.observe(cont,{childList:true,subtree:true});setInterval(refresh,60000);var changes=[{type:'corrigido',text:'2.4.9 (13/09/2026): auditoria visual em todas as seções do desktop e Linux; cards, formulários, indicadores, tabelas, modais e áreas protegidas agora respeitam a janela.'},{type:'corrigido',text:'2.4.8: conteúdo deslocado e largura excedente corrigidos no desktop.'},{type:'novo',text:'2.4.7: filtro instantâneo de Despesas por descrição, local, categoria e pagamento.'}];window.fastUltimoModuloNovidades=changes;var c=document.querySelector('meta[name="fast-app-changelog"]');if(c)c.content=JSON.stringify(changes)}
   function finalizeReleaseInfo(){
     var changes=[
-      {type:'corrigido',text:'2.4.11 (13/09/2026): versão, manifestos, caches, aplicativos instaláveis e pacote Linux foram unificados; módulos antigos não podem mais rebaixar a versão exibida.'},
-      {type:'corrigido',text:'2.4.11 (13/09/2026): Últimas Atualizações agora mostra somente as mudanças reais da publicação atual.'},
-      {type:'novo',text:'2.4.11 (13/09/2026): no desktop e no Linux, Enter avança para o próximo campo em todas as seções e formulários.'},
-      {type:'corrigido',text:'2.4.11 (13/09/2026): revisão geral de responsividade no desktop e Linux para evitar conteúdo deslocado ou fora da janela.'},
-      {type:'novo',text:'2.4.11 (13/09/2026): Despesas ganhou dashboard alimentado pelos dados existentes e filtros por descrição, local, categoria e pagamento.'},
-      {type:'melhorado',text:'2.4.11 (13/09/2026): prévias da última rota e da última despesa agilizam o preenchimento sem alterar os dados originais.'},
-      {type:'corrigido',text:'2.4.11 (13/09/2026): Agrupar permanece exclusivo de Rotas do Dia; exclusões de fotos e consolidação de rotas não retornam duplicações durante o sincronismo.'}
+      {type:'corrigido',text:'2.4.12 (13/09/2026): clientes e lugares excluídos ou renomeados não voltam ao estado anterior; os nomes antigos agora recebem bloqueio permanente sincronizado entre aparelhos pelo Supabase.'},
+      {type:'corrigido',text:'2.4.12 (13/09/2026): versão, manifestos, caches, aplicativos instaláveis e pacote Linux foram unificados; módulos antigos não podem mais rebaixar a versão exibida.'},
+      {type:'corrigido',text:'2.4.12 (13/09/2026): Últimas Atualizações agora mostra somente as mudanças reais da publicação atual.'},
+      {type:'novo',text:'2.4.12 (13/09/2026): no desktop e no Linux, Enter avança para o próximo campo em todas as seções e formulários.'},
+      {type:'corrigido',text:'2.4.12 (13/09/2026): revisão geral de responsividade no desktop e Linux para evitar conteúdo deslocado ou fora da janela.'},
+      {type:'novo',text:'2.4.12 (13/09/2026): Despesas ganhou dashboard alimentado pelos dados existentes e filtros por descrição, local, categoria e pagamento.'},
+      {type:'melhorado',text:'2.4.12 (13/09/2026): prévias da última rota e da última despesa agilizam o preenchimento sem alterar os dados originais.'},
+      {type:'corrigido',text:'2.4.12 (13/09/2026): Agrupar permanece exclusivo de Rotas do Dia; exclusões de fotos e consolidação de rotas não retornam duplicações durante o sincronismo.'}
     ];
     document.documentElement.setAttribute('data-fast-version',VERSION);
     var m=document.querySelector('meta[name="fast-app-version"]');if(m)m.content=VERSION;
     var immediate=document.querySelector('meta[name="fast-app-changelog-immediate"]');if(immediate)immediate.content=VERSION;
-    var latest=document.querySelector('meta[name="fast-latest-update"]');if(latest)latest.content='2.4.11: versões e novidades unificadas em todos os aplicativos.';
+    var latest=document.querySelector('meta[name="fast-latest-update"]');if(latest)latest.content='2.4.12: exclusões e edições de clientes e lugares permanecem após sincronizar.';
     var date=document.querySelector('meta[name="fast-app-date"]');if(date)date.content='2026-09-13T09:00:00-03:00';
     var changelog=document.querySelector('meta[name="fast-app-changelog"]');if(changelog)changelog.content=JSON.stringify(changes);
     window.fastUltimoModuloNovidades=changes;
