@@ -29,7 +29,7 @@
      ./?share=1) e GET /fastservicosapp/app-despesas/__fast-share-get__
      (devolve o comprovante guardado em JSON).
    ========================================================================== */
-const CACHE='fast-root-r246';
+const CACHE='fast-root-r247';
 const CORE=[
   './',
   './index.html',
