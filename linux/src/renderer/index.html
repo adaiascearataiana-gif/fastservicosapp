@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="fast-linux-desktop" data-fast-version="2.4.12"><head>
+<html lang="pt-BR" class="fast-linux-desktop" data-fast-version="2.4.13"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
   <meta name="theme-color" content="#4f46e5">
@@ -21,13 +21,13 @@
   <meta name="fast-github-branch" content="main">
   <meta name="fast-github-path" content="index.html">
   <meta name="fast-github-token-env" content="GH_TOKEN">
-  <meta name="fast-app-version" content="2.4.12">
-  <meta name="fast-app-date" content="2026-09-13T09:00:00-03:00">
-  <meta name="fast-latest-update" content="2.4.12: exclusões e edições de clientes e lugares permanecem após sincronizar.">
+  <meta name="fast-app-version" content="2.4.13">
+  <meta name="fast-app-date" content="2026-09-14T09:00:00-03:00">
+  <meta name="fast-latest-update" content="2.4.13: recuperação de senha retorna para o endereço oficial, sem localhost.">
   <!-- r92: verificação automática de nova versão ao abrir; Verificar Atualizações com cache-busting e sem fallback no-cors inválido. -->
   <!-- r70.1: lista corrente no HTML inicial; o painel não espera scripts tardios -->
-  <meta name="fast-app-changelog-immediate" content="2.4.12">
-  <meta name="fast-app-changelog" content="[{&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;2.4.12 (13/09/2026): clientes e lugares excluídos ou renomeados não voltam após a sincronização.&quot;}]" data-r88="1" data-r89="1" data-r87="1" data-r127="1">
+  <meta name="fast-app-changelog-immediate" content="2.4.13">
+  <meta name="fast-app-changelog" content="[{&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;2.4.13 (14/09/2026): recuperação de senha retorna para o endereço oficial do FAST, sem localhost.&quot;}]" data-r88="1" data-r89="1" data-r87="1" data-r127="1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https:; img-src 'self' data: blob: https: http:; connect-src 'self' https: data: blob:; font-src 'self' https: data:;">
   <!-- Oculta o conteúdo protegido desde o primeiro frame. O JavaScript só
        libera as telas internas depois que o gate decide a autenticação. -->
@@ -36325,6 +36325,7 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
     let ultimoSyncTimestamp = 0;
     const SYNC_INTERVALO_MS = 30000; // auto-sync a cada 30s se houver mudanças pendentes
     let mudancasPendentes = false;
+    let fastMutationRevision = 0;
     // Flag para suprimir sincronização (download da nuvem) durante restauração de backup.
     // Quando true, sincronizarAgora() apenas faz UPLOAD dos dados locais, sem baixar/mesclar.
     let restaurandoBackup = false;
@@ -39482,6 +39483,7 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
 
     // --- Mapear destino do app para formato da tabela Supabase ---
     function destinoToSupabase(d) {
+      const carimbo = d.updatedAt || d.updated_at || new Date().toISOString();
       return {
         id: Number(d.id),
         nome: d.nome || '',
@@ -39491,7 +39493,7 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
         endereco_obj: d.enderecoObj || null,
         usado_em: Number(d.usadoEm) || 0,
         ultima_uso: Number(d.ultimaUso) || null,
-        updated_at: new Date().toISOString()
+        updated_at: carimbo
       };
     }
 
@@ -39505,7 +39507,8 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
         telefone: row.telefone || '',
         enderecoObj: row.endereco_obj || null,
         usadoEm: row.usado_em || 0,
-        ultimaUso: row.ultima_uso || null
+        ultimaUso: row.ultima_uso || null,
+        updatedAt: row.updated_at || ''
       };
     }
 
@@ -39989,7 +39992,7 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
       ]);
       [...(nuvem.clientes || []), ...(local.clientes || [])].forEach(c => {
         const nomeCli = destNormalizarNome(c.nome);
-        // 2.4.12: cadastro sem nenhuma letra (somente números/sinais) é inválido.
+        // 2.4.13: cadastro sem nenhuma letra (somente números/sinais) é inválido.
         if (!/[a-z]/i.test(nomeCli)) return;
         if (nomeCli && blNomesCli.has(nomeCli)) return; // pular cliente excluído
         // O nome canônico é a identidade do cliente. Antes o merge era por ID,
@@ -39998,10 +40001,15 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
         if (!anterior) {
           clientesMap.set(nomeCli, c);
         } else {
+          const tsAnterior = Date.parse(anterior.ultimaModificacao || anterior.updatedAt || anterior.updated_at || anterior.dataCadastro || '') || 0;
+          const tsNovo = Date.parse(c.ultimaModificacao || c.updatedAt || c.updated_at || c.dataCadastro || '') || 0;
           const completoAnterior = Object.values(anterior).filter(v => v !== null && v !== '' && (!Array.isArray(v) || v.length)).length;
           const completoNovo = Object.values(c).filter(v => v !== null && v !== '' && (!Array.isArray(v) || v.length)).length;
-          const base = completoNovo > completoAnterior ? { ...c } : { ...anterior };
-          const complemento = completoNovo > completoAnterior ? anterior : c;
+          // O registro editado mais recentemente vence. Antes, o mais “completo”
+          // podia restaurar campos antigos e dar a impressão de que Salvar falhou.
+          const novoVence = tsNovo > tsAnterior || (tsNovo === tsAnterior && completoNovo > completoAnterior);
+          const base = novoVence ? { ...c } : { ...anterior };
+          const complemento = novoVence ? anterior : c;
           Object.keys(complemento).forEach(k => {
             if ((base[k] == null || base[k] === '' || (Array.isArray(base[k]) && !base[k].length)) && complemento[k] != null && complemento[k] !== '') base[k] = complemento[k];
           });
@@ -40116,7 +40124,6 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
         }
       }
       ultimoSyncTimestamp = Date.now();
-      mudancasPendentes = false;
       return true;
     }
 
@@ -40173,6 +40180,7 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
         return;
       }
       syncEmAndamento = true;
+      const revisaoNoInicio = fastMutationRevision;
       atualizarStatusSync('pending', 'Sincronizando com Supabase...');
       try {
         if (restaurandoBackup) {
@@ -40353,6 +40361,14 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
         }
       } finally {
         syncEmAndamento = false;
+        // Uma edição/exclusão feita durante uma requisição em andamento nunca
+        // pode ser descartada pela conclusão daquela requisição antiga.
+        if (fastMutationRevision !== revisaoNoInicio) {
+          mudancasPendentes = true;
+          setTimeout(fastDebounceSincronizar, 120);
+        } else {
+          mudancasPendentes = false;
+        }
       }
     }
 
@@ -42106,9 +42122,7 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
         // Roda o sync sem bloquear — usa Promise para não travar a UI
         try {
           atualizarStatusSync('pending', 'Sincronizando...');
-          Promise.resolve(sincronizarAgora()).then(function() {
-            mudancasPendentes = false;
-          }).catch(function(err) {
+          Promise.resolve(sincronizarAgora()).catch(function(err) {
             console.warn('fastDebounceSincronizar erro:', err);
             mudancasPendentes = true;
           });
@@ -42121,6 +42135,7 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
 
     function salvarStorage() {
       try {
+        fastMutationRevision++;
         // Gravação imediata e síncrona para sobreviver a fechamento inesperado.
         const fastSerializedNow = JSON.stringify(fastNormalizarBanco(bancoDados));
         localStorage.setItem(FAST_LOCAL_KEY, fastSerializedNow);
@@ -42475,7 +42490,7 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
         if (el) el.value = valor == null ? '' : valor;
       };
       setVal('seqOrigem', ultimaRota.origem || '');
-      // 2.4.12: reaproveitar a última rota do cliente para acelerar o lançamento.
+      // 2.4.13: reaproveitar a última rota do cliente para acelerar o lançamento.
       setVal('seqDestino', ultimaRota.destino || '');
       setVal('seqQtdDestino', ultimaRota.qtdMercadorias != null ? ultimaRota.qtdMercadorias : (ultimaRota.qtdVolumes || 1));
       fastSetMoeda('seqValorDestino', ultimaRota.valor != null ? ultimaRota.valor : 0);
@@ -42950,10 +42965,22 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
         if (!porNome.has(chave)) { porNome.set(chave, atual); return; }
 
         const base = porNome.get(chave);
+        const tsBase = Date.parse(base.updatedAt || base.updated_at || '') || Number(base.ultimaUso || 0) || 0;
+        const tsAtual = Date.parse(atual.updatedAt || atual.updated_at || '') || Number(atual.ultimaUso || 0) || 0;
+        // A edição mais recente é autoritativa. O código antigo escolhia o texto
+        // mais longo e podia restaurar endereço/bairro antigos logo após salvar.
+        if (tsAtual > tsBase) {
+          ['nome', 'endereco', 'bairro', 'telefone', 'enderecoObj'].forEach(function(campo) {
+            if (atual[campo] !== undefined) base[campo] = atual[campo];
+          });
+          base.updatedAt = atual.updatedAt || atual.updated_at || new Date(tsAtual).toISOString();
+        }
         ['nome', 'endereco', 'bairro', 'telefone'].forEach(function(campo) {
           const a = String(base[campo] || '').trim();
           const b = String(atual[campo] || '').trim();
-          if (!a || b.length > a.length) base[campo] = atual[campo];
+          // Completar somente lacunas; nunca trocar uma edição recente por um
+          // texto antigo apenas porque o texto antigo é mais comprido.
+          if (!a && b) base[campo] = atual[campo];
         });
         if (!base.enderecoObj && atual.enderecoObj) base.enderecoObj = atual.enderecoObj;
         base.usadoEm = Math.max(Number(base.usadoEm) || 0, Number(atual.usadoEm) || 0);
@@ -43019,7 +43046,7 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
       // Antes usava toLocaleLowerCase('pt-BR') (mantinha acentos), então um lugar
       // excluído como "Jaciará" voltava se uma rota re-inserisse "Jaciara".
       const chave = destNormalizarNome(nomeDestino);
-      // 2.4.12: não recriar Lugares/Destinos cujo nome é apenas número/código.
+      // 2.4.13: não recriar Lugares/Destinos cujo nome é apenas número/código.
       if (!/[a-z]/i.test(chave) || /^\s*\d/.test(String(nomeDestino))) return null;
       if ((bancoDados.destinosExcluidos || []).some(n => destNormalizarNome(n) === chave)) return null;
       const destinos = destGarantir();
@@ -43357,23 +43384,34 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
         const d = destGarantir().find(x => String(x.id) === String(id));
         if (d) {
           // Verificar duplicidade (outro destino com mesmo nome)
-          const dup = destBuscar(nome);
-          if (dup && String(dup.id) !== String(d.id)) {
-            mostrarToast('Ja existe outro destino com este nome.', 'info');
-            return;
+          const duplicados = destGarantir().filter(x => String(x.id) !== String(d.id) && destNormalizarNome(x.nome) === destNormalizarNome(nome));
+          // Bases antigas possuem cópias com IDs diferentes. Em vez de travar o
+          // botão Salvar, consolidar essas cópias no registro que está sendo editado.
+          duplicados.forEach(dup => {
+            if (!d.bairro && dup.bairro) d.bairro = dup.bairro;
+            if (!d.endereco && dup.endereco) d.endereco = dup.endereco;
+            if (!d.telefone && dup.telefone) d.telefone = dup.telefone;
+            if (!d.enderecoObj && dup.enderecoObj) d.enderecoObj = dup.enderecoObj;
+            d.usadoEm = Math.max(Number(d.usadoEm || 0), Number(dup.usadoEm || 0));
+          });
+          if (duplicados.length) {
+            const idsDuplicados = new Set(duplicados.map(x => String(x.id)));
+            bancoDados.destinos = destGarantir().filter(x => !idsDuplicados.has(String(x.id)));
           }
           d.nome = nome;
           d.bairro = bairro;
           d.endereco = endereco;
           d.telefone = telefone;
+          d.updatedAt = new Date().toISOString();
         }
       } else {
         // Novo
         if (destBuscar(nome)) { mostrarToast('Este destino ja existe na lista.', 'info'); return; }
         destAdicionarOuAtualizar(nome, { bairro: bairro, endereco: endereco, telefone: telefone });
       }
-      salvarStorage();
-      if (typeof sincronizarAgora === 'function') setTimeout(() => sincronizarAgora(), 0);
+      // Permitir que o modal feche e o botão responda antes da serialização da
+      // base completa (que pode ser grande em aparelhos com muitas fotos).
+      fastSalvarSemBloquear(25);
       destRenderizarLista();
       atualizarContadoresHeader();
       fecharModalDestino();
@@ -43394,9 +43432,10 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
         // (r119) Grava a chave canônica (sem acentos) para bater com destAdicionarOuAtualizar e mergeDados.
         const chaveExcluida = destNormalizarNome(d.nome || '');
         if (chaveExcluida && !bancoDados.destinosExcluidos.some(n => destNormalizarNome(n) === chaveExcluida)) bancoDados.destinosExcluidos.push(chaveExcluida);
-        bancoDados.destinos = destGarantir().filter(x => String(x.id) !== String(id));
-        salvarStorage();
-        if (typeof sincronizarAgora === 'function') setTimeout(() => sincronizarAgora(), 0);
+        // Excluir todas as cópias equivalentes, inclusive duplicatas antigas
+        // com outro ID, para o nome desaparecer imediatamente da lista.
+        bancoDados.destinos = destGarantir().filter(x => String(x.id) !== String(id) && destNormalizarNome(x.nome) !== chaveExcluida);
+        fastSalvarSemBloquear(25);
         destRenderizarLista();
         atualizarContadoresHeader();
         mostrarToast('Destino excluído.', 'info');
@@ -48363,11 +48402,18 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
     function salvarCliente(e) {
       if (e && e.preventDefault) e.preventDefault();
       const id = document.getElementById('clienteId').value;
+      const clienteOriginal = id ? (bancoDados.clientes || []).find(c => String(c.id) === String(id)) : null;
       // Validação de CPF/CNPJ (algoritmo real)
       const docInput = document.getElementById('clienteDoc');
       const tipoPessoa = document.getElementById('clienteTipoPessoa').value;
       const docValor = docInput.value.trim();
-      if (docValor) {
+      const docOriginal = String(clienteOriginal && clienteOriginal.doc || '').replace(/\D/g, '');
+      const docAtual = String(docValor || '').replace(/\D/g, '');
+      const documentoFoiAlterado = !clienteOriginal || docOriginal !== docAtual || String(clienteOriginal.tipoPessoa || 'PF') !== String(tipoPessoa);
+      // Cadastros legados podem conter CPF/CNPJ incompleto. Isso não deve
+      // impedir corrigir nome, telefone ou endereço; validar quando o documento
+      // for novo ou tiver sido realmente alterado.
+      if (docValor && documentoFoiAlterado) {
         const docOk = tipoPessoa === 'PJ' ? validarCNPJ(docValor) : validarCPF(docValor);
         if (!docOk) {
           marcarCampoInvalido(docInput, (tipoPessoa === 'PJ' ? 'CNPJ' : 'CPF') + ' inválido — verifique os dígitos');
@@ -48385,7 +48431,7 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
         return;
       }
       // Anti-duplicidade de CPF/CNPJ
-      if (docValor && docJaCadastrado(docValor, tipoPessoa, id, 'clientes')) {
+      if (docValor && documentoFoiAlterado && docJaCadastrado(docValor, tipoPessoa, id, 'clientes')) {
         marcarCampoInvalido(docInput, (tipoPessoa === 'PJ' ? 'CNPJ' : 'CPF') + ' já cadastrado para outro cliente');
         docInput.focus();
         mostrarToast('Este ' + (tipoPessoa === 'PJ' ? 'CNPJ' : 'CPF') + ' já está cadastrado para outro cliente.', 'error');
@@ -48411,6 +48457,11 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
         obs: document.getElementById('clienteObs').value.trim(),
         ultimaModificacao: new Date().toISOString()
       };
+      if (!dados.nome) {
+        marcarCampoInvalido(document.getElementById('clienteNome'), 'Informe o nome do cliente');
+        mostrarToast('Informe o nome do cliente antes de salvar.', 'error');
+        return;
+      }
       // Normaliza CPF/CNPJ (já vem com máscara, mantém formatado)
       dados.doc = (dados.doc || '').trim();
       if (!bancoDados.clientes) bancoDados.clientes = [];
@@ -48454,8 +48505,7 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
           }
         }
       } catch(e) { console.warn('Sync cliente->destino:', e); }
-      salvarStorage();
-      if (typeof sincronizarAgora === 'function') setTimeout(() => sincronizarAgora(), 0);
+      fastSalvarSemBloquear(25);
       renderizarClientes();
       try { destRenderizarLista(); } catch(e) {}
       fecharModalCliente();
@@ -48523,12 +48573,10 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
               bancoDados.clientesExcluidos.push(chave);
             }
           });
-          bancoDados.clientes = (bancoDados.clientes || []).filter(c => !idsSel.includes(String(c.id)));
+          const nomesExcluidos = new Set(clientesSel.map(c => destNormalizarNome(c.nome)));
+          bancoDados.clientes = (bancoDados.clientes || []).filter(c => !idsSel.includes(String(c.id)) && !nomesExcluidos.has(destNormalizarNome(c.nome)));
           renumerarClientesSequencial();
-          salvarStorage();
-          if (typeof sincronizarAgora === 'function') {
-            try { sincronizarAgora(); } catch(e) { console.warn('Erro ao sincronizar após exclusão em massa:', e); }
-          }
+          fastSalvarSemBloquear(25);
           renderizarClientes();
           atualizarContadoresHeader();
           mostrarToast(total + ' cliente' + (total > 1 ? 's' : '') + ' excluído' + (total > 1 ? 's' : '') + '.', 'info');
@@ -48594,11 +48642,9 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
               bancoDados.destinosExcluidos.push(chave);
             }
           });
-          bancoDados.destinos = destGarantir().filter(d => !idsSel.includes(String(d.id)));
-          salvarStorage();
-          if (typeof sincronizarAgora === 'function') {
-            try { sincronizarAgora(); } catch(e) { console.warn('Erro ao sincronizar após exclusão em massa:', e); }
-          }
+          const nomesExcluidos = new Set(destinosSel.map(d => destNormalizarNome(d.nome)));
+          bancoDados.destinos = destGarantir().filter(d => !idsSel.includes(String(d.id)) && !nomesExcluidos.has(destNormalizarNome(d.nome)));
+          fastSalvarSemBloquear(25);
           destRenderizarLista();
           atualizarContadoresHeader();
           mostrarToast(total + ' lugar' + (total > 1 ? 'es' : '') + ' excluído' + (total > 1 ? 's' : '') + '.', 'info');
@@ -48764,21 +48810,20 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
       const c = (bancoDados.clientes || []).find(x => String(x.id) === String(id));
       if (!c) return;
       const nomeCliente = (c.nome || '').trim();
+      const chaveCliente = destNormalizarNome(nomeCliente);
       confirmarDialog('Excluir Cliente', `Deseja realmente excluir o cliente <strong>"${escapeHtml(c.nome)}"</strong>?<br><br>Ele será removido do cadastro. O histórico de rotas não será afetado.`, () => {
         // Registrar o nome na lista de excluídos para que migrarClientesExistentes()
         // não o re-crie automaticamente a partir das rotas existentes
         if (nomeCliente) {
           if (!bancoDados.clientesExcluidos) bancoDados.clientesExcluidos = [];
           // (r119) Grava chave canônica (sem acentos) — bate com mergeDados e migrarClientesExistentes.
-          const nomeLower = destNormalizarNome(nomeCliente);
-          if (!bancoDados.clientesExcluidos.some(n => destNormalizarNome(n) === nomeLower)) {
-            bancoDados.clientesExcluidos.push(nomeLower);
+          if (!bancoDados.clientesExcluidos.some(n => destNormalizarNome(n) === chaveCliente)) {
+            bancoDados.clientesExcluidos.push(chaveCliente);
           }
         }
-        bancoDados.clientes = (bancoDados.clientes || []).filter(x => String(x.id) !== String(id));
+        bancoDados.clientes = (bancoDados.clientes || []).filter(x => String(x.id) !== String(id) && destNormalizarNome(x.nome) !== chaveCliente);
         renumerarClientesSequencial();
-        salvarStorage();
-        if (typeof sincronizarAgora === 'function') setTimeout(() => sincronizarAgora(), 0);
+        fastSalvarSemBloquear(25);
         renderizarClientes();
         atualizarContadoresHeader();
         mostrarToast('Cliente excluído.', 'info');
@@ -48918,19 +48963,21 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
         </div>`;
     }
 
-    // 2.4.12: barreira final para aparelhos com uma base local antiga.
+    // 2.4.13: barreira final para aparelhos com uma base local antiga.
     function fastEnxugarClientesNaFonte() {
       if (!bancoDados || !Array.isArray(bancoDados.clientes)) return 0;
       const antes = bancoDados.clientes.length;
       const mapa = new Map();
       const pontuar = x => Object.values(x || {}).filter(v => v !== null && v !== '' && (!Array.isArray(v) || v.length)).length;
+      const carimbo = x => Date.parse(x && (x.ultimaModificacao || x.updatedAt || x.updated_at || x.dataCadastro) || '') || 0;
       bancoDados.clientes.forEach(c => {
         const chave = destNormalizarNome(c && c.nome).replace(/[^a-z0-9]+/g, ' ').trim();
         if (!chave || !/[a-z]/.test(chave)) return;
         const atual = mapa.get(chave);
         if (!atual) { mapa.set(chave, c); return; }
-        const base = pontuar(c) > pontuar(atual) ? { ...c } : { ...atual };
-        const extra = pontuar(c) > pontuar(atual) ? atual : c;
+        const cVence = carimbo(c) > carimbo(atual) || (carimbo(c) === carimbo(atual) && pontuar(c) > pontuar(atual));
+        const base = cVence ? { ...c } : { ...atual };
+        const extra = cVence ? atual : c;
         Object.keys(extra || {}).forEach(k => {
           if ((base[k] == null || base[k] === '' || (Array.isArray(base[k]) && !base[k].length)) && extra[k] != null && extra[k] !== '') base[k] = extra[k];
         });
@@ -49183,7 +49230,7 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
       const nomesRotas = [...new Set((bancoDados.rotas || []).map(r => r.cliente).filter(Boolean))];
       nomesRotas.forEach(nome => {
         const nomeLower = destNormalizarNome(nome);
-        // 2.4.12: números de pedido/CEP não são nomes de clientes.
+        // 2.4.13: números de pedido/CEP não são nomes de clientes.
         if (!/[a-z]/i.test(nomeLower)) return;
         // Pular se o cliente já existe no cadastro
         if (nomesExistentes.has(nomeLower)) return;
@@ -57791,7 +57838,7 @@ window.fastMobileNav = function(ev, abaId, botao) {
           var response = await fetch(RECOVERY_ENDPOINT, {
             method:'POST',
             headers:{ 'Content-Type':'application/json', 'apikey':RECOVERY_PUBLIC_KEY, 'Authorization':'Bearer '+RECOVERY_PUBLIC_KEY },
-            body:JSON.stringify({ email:email.trim(), origem:origem || 'plataforma', versao:(document.querySelector('meta[name="fast-app-version"]')||{}).content||'2.4.12' })
+            body:JSON.stringify({ email:email.trim(), origem:origem || 'plataforma', versao:(document.querySelector('meta[name="fast-app-version"]')||{}).content||'2.4.13' })
           });
           if (!response.ok) throw new Error('Serviço de recuperação indisponível');
           return { ok:true, message:'Se o e-mail estiver cadastrado, as instruções de recuperação serão enviadas. Verifique também a caixa de spam.' };
@@ -60693,7 +60740,7 @@ body.fast-exclusive-app main { padding-bottom: 12px !important; }
 <script id="fast-231-route-fixes-script">
 (function(){
   'use strict';
-  var VERSAO=(document.querySelector('meta[name="fast-app-version"]')||{}).content||document.documentElement.getAttribute('data-fast-version')||'2.4.12';
+  var VERSAO=(document.querySelector('meta[name="fast-app-version"]')||{}).content||document.documentElement.getAttribute('data-fast-version')||'2.4.13';
   function atualizarMetadados(){
     var mudancas=[
       {type:'corrigido',text:'2.3.32 (10/09/2026): eliminado o loop que baixava a atualizacao e voltava a abrir a versao anterior.'},
@@ -60776,7 +60823,7 @@ body.fast-exclusive-app main { padding-bottom: 12px !important; }
 <script id="fast-233-maintenance-script">
 (function(){
   'use strict';
-  var VERSION=(document.querySelector('meta[name="fast-app-version"]')||{}).content||'2.4.12';
+  var VERSION=(document.querySelector('meta[name="fast-app-version"]')||{}).content||'2.4.13';
   var CHANGES=[
     {type:'corrigido',text:'2.3.36 (11/09/2026): corrigido o virar de dia de ROTAS DO DIA — o dia agora vira à meia-noite do fuso do aparelho (antes virava às 21:00 no Brasil por causa do fuso UTC, e rotas trabalhadas à noite caíam na lista do dia seguinte); ao virar o dia, somente as rotas PENDENTES do dia anterior entram na lista do dia novo; rotas CONCLUÍDAS de dias anteriores não aparecem mais em ROTAS DO DIA (ficam no histórico da data delas, visíveis pelo filtro de data); rotas concluídas de dias anteriores que estavam paradas na lista do dia atual são removidas automaticamente.'},
     {type:'corrigido',text:'2.3.36 (11/09/2026): corrigida a divergência de status entre a rota cadastrada e o card de ROTAS DO DIA — marcar rota como CONCLUÍDA na aba ROTAS agora atualiza o card em qualquer data em que ele esteja; antes, se o card tinha sido movido de dia, ele ficava EM ROTA enquanto a rota era CONCLUÍDA e reaparecia no dia seguinte.'},
@@ -60947,10 +60994,13 @@ body.fast-exclusive-app main { padding-bottom: 12px !important; }
 <script id="fast-237-auth-recovery">
 (function(){
   'use strict';
-  var VERSION=(document.querySelector('meta[name="fast-app-version"]')||{}).content||'2.4.12';
+  var VERSION=(document.querySelector('meta[name="fast-app-version"]')||{}).content||'2.4.13';
   var PROJECT_URL='https://jizoedwnyfcjokoqgfmn.supabase.co';
   var PUBLIC_KEY='sb_publishable_mXMGOmMueyVWcS8UdQHP-w_sa13m9B4';
-  var REDIRECT_URL='https://adaiascearataiana-gif.github.io/fastservicosapp/?recuperar-senha=1';
+  // Usar a raiz exata cadastrada no Supabase. O próprio Supabase acrescenta
+  // #access_token=...&type=recovery; query strings extras podem falhar na
+  // allowlist e fazê-lo voltar silenciosamente para localhost:3000.
+  var REDIRECT_URL='https://adaiascearataiana-gif.github.io/fastservicosapp/';
   var busy=false;
 
   function el(id){return document.getElementById(id)}
@@ -61154,9 +61204,9 @@ body.fast-exclusive-app main { padding-bottom: 12px !important; }
 <script id="fast-238-brevo-panel">
 (function(){
   'use strict';
-  var VERSION=(document.querySelector('meta[name="fast-app-version"]')||{}).content||'2.4.12',CONFIG_KEY='fast_brevo_config',STATUS_KEY='fast_brevo_last_status';
+  var VERSION=(document.querySelector('meta[name="fast-app-version"]')||{}).content||'2.4.13',CONFIG_KEY='fast_brevo_config',STATUS_KEY='fast_brevo_last_status';
   var PROJECT='https://jizoedwnyfcjokoqgfmn.supabase.co',KEY='sb_publishable_mXMGOmMueyVWcS8UdQHP-w_sa13m9B4';
-  var SITE='https://adaiascearataiana-gif.github.io/fastservicosapp/',REDIRECT=SITE+'?recuperar-senha=1';
+  var SITE='https://adaiascearataiana-gif.github.io/fastservicosapp/',REDIRECT=SITE;
   function byId(id){return document.getElementById(id)}
   function esc(v){return String(v||'').replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
   function emailOk(v){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v||'').trim())}
@@ -61226,11 +61276,11 @@ body.fast-exclusive-app main { padding-bottom: 12px !important; }
 <script id="fast-240-email-auth">
 (function(){
   'use strict';
-  var VERSION=(document.querySelector('meta[name="fast-app-version"]')||{}).content||'2.4.12';
+  var VERSION=(document.querySelector('meta[name="fast-app-version"]')||{}).content||'2.4.13';
   var PROJECT='https://jizoedwnyfcjokoqgfmn.supabase.co';
   var KEY='sb_publishable_mXMGOmMueyVWcS8UdQHP-w_sa13m9B4';
   var SITE='https://adaiascearataiana-gif.github.io/fastservicosapp/';
-  var RECOVERY=SITE+'?recuperar-senha=1';
+  var RECOVERY=SITE;
   var PENDING='fast_email_signup_pending';
   var oldCreate=null,busy=false;
   function el(id){return document.getElementById(id)}
@@ -61370,7 +61420,7 @@ body.fast-exclusive-app main { padding-bottom: 12px !important; }
 <script id="fast-241-drive-controller">
 (function(){
   'use strict';
-  var VERSION=(document.querySelector('meta[name="fast-app-version"]')||{}).content||'2.4.12', CLIENT='fast_drive_client_id', FOLDER='fast_drive_folder_id', TOKEN='fast_drive_access_token';
+  var VERSION=(document.querySelector('meta[name="fast-app-version"]')||{}).content||'2.4.13', CLIENT='fast_drive_client_id', FOLDER='fast_drive_folder_id', TOKEN='fast_drive_access_token';
   function el(id){return document.getElementById(id)}
   function esc(v){var d=document.createElement('div');d.textContent=String(v==null?'':v);return d.innerHTML}
   function db(){return typeof abrirDBFotos==='function'?abrirDBFotos():Promise.reject(new Error('Armazenamento de fotos indisponível'))}
@@ -61421,12 +61471,12 @@ body.fast-exclusive-app main { padding-bottom: 12px !important; }
     restoreConfig();setTimeout(restoreConfig,1500);setTimeout(restoreConfig,5000);
     var original=window.fastDriveSalvarEConectar;if(typeof original==='function'&&!original.fast241){window.fastDriveSalvarEConectar=function(){persistConfig();return original.apply(this,arguments)};window.fastDriveSalvarEConectar.fast241=true}
     migratePhotos().catch(function(e){console.warn('Migração segura das fotos:',e)});
-    var changes=[{type:'novo',text:'2.4.12 (12/09/2026): em Rotas do Dia, digitar uma letra mostra clientes com a prévia da última rota; ao selecionar, origem, destino, quantidade, valor, observação e motorista são preenchidos automaticamente.'},{type:'novo',text:'2.4.12 (12/09/2026): em Despesas, digitar a descrição ou local mostra a última despesa correspondente; ao selecionar, descrição, local, categoria, valor e pagamento são reaproveitados.'},{type:'corrigido',text:'2.4.12 (13/09/2026): Agrupar agora atua somente em Rotas do Dia; a tabela Rotas mantém cada destino como rota individual.'},{type:'corrigido',text:'2.4.12 (13/09/2026): fotos excluídas recebem bloqueio permanente no merge e não voltam após sincronizar com o Supabase.'},{type:'corrigido',text:'2.4.12 (13/09/2026): sincronismo consolida rotas realmente idênticas e novos destinos recebem IDs únicos, evitando duplicações.'}];window.fastUltimoModuloNovidades=changes;var c=document.querySelector('meta[name="fast-app-changelog"]');if(c)c.content=JSON.stringify(changes)
+    var changes=[{type:'novo',text:'2.4.13 (12/09/2026): em Rotas do Dia, digitar uma letra mostra clientes com a prévia da última rota; ao selecionar, origem, destino, quantidade, valor, observação e motorista são preenchidos automaticamente.'},{type:'novo',text:'2.4.13 (12/09/2026): em Despesas, digitar a descrição ou local mostra a última despesa correspondente; ao selecionar, descrição, local, categoria, valor e pagamento são reaproveitados.'},{type:'corrigido',text:'2.4.13 (13/09/2026): Agrupar agora atua somente em Rotas do Dia; a tabela Rotas mantém cada destino como rota individual.'},{type:'corrigido',text:'2.4.13 (13/09/2026): fotos excluídas recebem bloqueio permanente no merge e não voltam após sincronizar com o Supabase.'},{type:'corrigido',text:'2.4.13 (13/09/2026): sincronismo consolida rotas realmente idênticas e novos destinos recebem IDs únicos, evitando duplicações.'}];window.fastUltimoModuloNovidades=changes;var c=document.querySelector('meta[name="fast-app-changelog"]');if(c)c.content=JSON.stringify(changes)
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){setTimeout(install,180)});else setTimeout(install,180);
 })();
 </script>
-<link rel="stylesheet" href="fast-logistics-2.4.css?v=2.4.12">
-<script src="fast-logistics-2.4.js?v=2.4.12"></script>
+<link rel="stylesheet" href="fast-logistics-2.4.css?v=2.4.13">
+<script src="fast-logistics-2.4.js?v=2.4.13"></script>
 <script src="desktop-bridge.js"></script>
 </body></html>
