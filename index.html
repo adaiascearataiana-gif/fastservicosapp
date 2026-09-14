@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="fast-linux-desktop" data-fast-version="2.4.14"><head>
+<html lang="pt-BR" class="fast-linux-desktop" data-fast-version="2.4.15"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
   <meta name="theme-color" content="#4f46e5">
@@ -21,12 +21,12 @@
   <meta name="fast-github-branch" content="main">
   <meta name="fast-github-path" content="index.html">
   <meta name="fast-github-token-env" content="GH_TOKEN">
-  <meta name="fast-app-version" content="2.4.14">
-  <meta name="fast-app-date" content="2026-09-13T21:30:00-03:00">
-  <meta name="fast-latest-update" content="2.4.14: exclusões e renomeações de clientes, lugares, motoristas, funcionários e despesas da empresa agora são PERMANENTES e irreversíveis na nuvem — nenhuma limpeza, backup antigo ou aparelho desfaz mais uma exclusão.">
+  <meta name="fast-app-version" content="2.4.15">
+  <meta name="fast-app-date" content="2026-09-14T12:55:00-03:00">
+  <meta name="fast-latest-update" content="2.4.15: todos os aplicativos migrados para o novo projeto Supabase.">
   <!-- r92: verificação automática de nova versão ao abrir; Verificar Atualizações com cache-busting e sem fallback no-cors inválido. -->
   <!-- r70.1: lista corrente no HTML inicial; o painel não espera scripts tardios -->
-  <meta name="fast-app-changelog-immediate" content="2.4.14">
+  <meta name="fast-app-changelog-immediate" content="2.4.15">
   <meta name="fast-app-changelog" content="[{&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;2.4.14 (13/09/2026): CORRIGIDO de vez o retorno de nomes excluídos ou renomeados. As listas de bloqueio permanente (lápides) agora são acumulativas e irreversíveis na nuvem: antes de subir, o app baixa as bloqueios existentes e envia a união completa — nenhum aparelho consegue mais encurtar ou apagar as exclusões acumuladas de todos os outros.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;2.4.14 (13/09/2026): restaurar um backup antigo NÃO desfaz mais as exclusões feitas depois dele. As bloqueios atuais do aparelho são somados aos do backup, e o envio à nuvem preserva o histórico completo.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;2.4.14 (13/09/2026): Limpar Todos os Dados deixou de apagar os bloqueios de exclusão do aparelho, e a opção “local + nuvem” agora limpa também as tabelas-ponte do Supabase — clientes, motoristas, funcionários e despesas da empresa realmente somem da nuvem em vez de voltarem na sincronização seguinte.&quot;}, {&quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;2.4.14 (13/09/2026): clientes, lugares/destinos, motoristas, funcionários (RH) e despesas da empresa excluídos em qualquer aparelho ficam permanentemente bloqueados em todos, mesmo após limpeza local, restauração de backup ou reinstalação.&quot;}]" data-r88="1" data-r89="1" data-r87="1" data-r127="1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https:; img-src 'self' data: blob: https: http:; connect-src 'self' https: data: blob:; font-src 'self' https: data:;">
   <!-- Oculta o conteúdo protegido desde o primeiro frame. O JavaScript só
@@ -27714,8 +27714,8 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
        Supabase = fonte de verdade na nuvem (banco PostgreSQL).
        ============================================================ */
     // --- Configuração do Supabase (URL + Key embutidas no código) ---
-    const SUPABASE_URL = 'https://jizoedwnyfcjokoqgfmn.supabase.co/rest/v1';
-    const SUPABASE_KEY = 'sb_publishable_mXMGOmMueyVWcS8UdQHP-w_sa13m9B4';
+    const SUPABASE_URL = 'https://yhxuplhohhetzloxvgku.supabase.co/rest/v1';
+    const SUPABASE_KEY = 'sb_publishable_jlsorkXci3_0Hla7gt8z1g_pe6zOT19';
 
     // Flag: true quando as tabelas do Supabase existem e respondem
     let supabaseDisponivel = false;
@@ -33349,7 +33349,7 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
       msg += `  • Suporte a MÚLTIPLAS fotos por rota (miniaturas)\n\n`;
       msg += `☁️ Nuvem (Supabase):\n`;
       msg += `  • Status: ${syncAtivo ? '✅ Configurado' : '❌ Não configurado'}\n`;
-      msg += `  • URL: https://jizoedwnyfcjokoqgfmn.supabase.co\n`;
+      msg += `  • URL: https://yhxuplhohhetzloxvgku.supabase.co\n`;
       msg += `  • Última sincronização: ${ultimoSyncTimestamp ? new Date(ultimoSyncTimestamp).toLocaleString('pt-BR') : 'Nunca'}\n`;
       msg += `  • Mudanças pendentes: ${mudancasPendentes ? 'Sim' : 'Não'}\n`;
       if (!supabaseDisponivel && supabaseVerificado) {
@@ -47928,11 +47928,11 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
           <p class="emp-sql-info">Seus dados são sincronizados automaticamente com o banco de dados <strong>Supabase</strong> (PostgreSQL na nuvem). A URL e a chave de API já estão configuradas no código. Acesse de qualquer dispositivo (celular, computador, tablet) sem perda de dados.</p>
           <div class="emp-field-row">
             <label><i class="fa-solid fa-link"></i> URL do Supabase (REST API)</label>
-            <input type="text" value="https://jizoedwnyfcjokoqgfmn.supabase.co/rest/v1" readonly="" style="opacity:0.85;">
+            <input type="text" value="https://yhxuplhohhetzloxvgku.supabase.co/rest/v1" readonly="" style="opacity:0.85;">
           </div>
           <div class="emp-field-row">
             <label><i class="fa-solid fa-key"></i> Chave de API (Publishable Key)</label>
-            <input type="password" value="sb_publishable_mXMGOmMueyVWcS8UdQHP-w_sa13m9B4" readonly="" style="opacity:0.85;">
+            <input type="password" value="sb_publishable_jlsorkXci3_0Hla7gt8z1g_pe6zOT19" readonly="" style="opacity:0.85;">
           </div>
           <div class="emp-actions">
             <button type="button" class="emp-btn-success ripple" onclick="sincronizarAgora()" style="user-select: none;"><i class="fa-solid fa-rotate"></i> Sincronizar Agora</button>
@@ -49437,8 +49437,8 @@ window.fastMobileNav = function(ev, abaId, botao) {
   <script id="r56-security-updates">
     (function(){
       'use strict';
-      var RECOVERY_ENDPOINT = 'https://jizoedwnyfcjokoqgfmn.supabase.co/functions/v1/fast-password-recovery';
-      var RECOVERY_PUBLIC_KEY = 'sb_publishable_mXMGOmMueyVWcS8UdQHP-w_sa13m9B4';
+      var RECOVERY_ENDPOINT = 'https://yhxuplhohhetzloxvgku.supabase.co/functions/v1/fast-password-recovery';
+      var RECOVERY_PUBLIC_KEY = 'sb_publishable_jlsorkXci3_0Hla7gt8z1g_pe6zOT19';
       var recoveryBusy = false;
       // Preserva a recuperação nativa da Área Protegida. Ela confirma o e-mail
       // cadastrado localmente e libera a criação da nova senha sem depender de
@@ -50161,8 +50161,8 @@ window.fastMobileNav = function(ev, abaId, botao) {
   <script id="r101-motorista-acesso">
 (function(){
   'use strict';
-  var SB_URL='https://jizoedwnyfcjokoqgfmn.supabase.co/rest/v1';
-  var SB_KEY='sb_publishable_mXMGOmMueyVWcS8UdQHP-w_sa13m9B4';
+  var SB_URL='https://yhxuplhohhetzloxvgku.supabase.co/rest/v1';
+  var SB_KEY='sb_publishable_jlsorkXci3_0Hla7gt8z1g_pe6zOT19';
   var K_LOCAL='fast101_acessos_motoristas_v1';
   function hdrs(extra){var h={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'};if(extra)Object.assign(h,extra);return h}
   function jget(k,d){try{return JSON.parse(localStorage.getItem(k)||JSON.stringify(d))}catch(e){return d}}
@@ -50350,8 +50350,8 @@ window.fastMobileNav = function(ev, abaId, botao) {
   <script id="r101-motorista-inbox">
 (function(){
   'use strict';
-  var SB_URL='https://jizoedwnyfcjokoqgfmn.supabase.co/rest/v1';
-  var SB_KEY='sb_publishable_mXMGOmMueyVWcS8UdQHP-w_sa13m9B4';
+  var SB_URL='https://yhxuplhohhetzloxvgku.supabase.co/rest/v1';
+  var SB_KEY='sb_publishable_jlsorkXci3_0Hla7gt8z1g_pe6zOT19';
   function hdrs(extra){var h={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'};if(extra)Object.assign(h,extra);return h}
   var EXECUTANDO=false, ULTIMA=0, INTERVALO_MS=20000, FOTOS_SESSION='fast101_fotos_motorista_recebidas';
 
@@ -52610,8 +52610,8 @@ body.fast-exclusive-app main { padding-bottom: 12px !important; }
 (function(){
   'use strict';
   var VERSION=(document.querySelector('meta[name="fast-app-version"]')||{}).content||'2.4.14';
-  var PROJECT_URL='https://jizoedwnyfcjokoqgfmn.supabase.co';
-  var PUBLIC_KEY='sb_publishable_mXMGOmMueyVWcS8UdQHP-w_sa13m9B4';
+  var PROJECT_URL='https://yhxuplhohhetzloxvgku.supabase.co';
+  var PUBLIC_KEY='sb_publishable_jlsorkXci3_0Hla7gt8z1g_pe6zOT19';
   // Usar a raiz exata cadastrada no Supabase. O próprio Supabase acrescenta
   // #access_token=...&type=recovery; query strings extras podem falhar na
   // allowlist e fazê-lo voltar silenciosamente para localhost:3000.
@@ -52820,7 +52820,7 @@ body.fast-exclusive-app main { padding-bottom: 12px !important; }
 (function(){
   'use strict';
   var VERSION=(document.querySelector('meta[name="fast-app-version"]')||{}).content||'2.4.14',CONFIG_KEY='fast_brevo_config',STATUS_KEY='fast_brevo_last_status';
-  var PROJECT='https://jizoedwnyfcjokoqgfmn.supabase.co',KEY='sb_publishable_mXMGOmMueyVWcS8UdQHP-w_sa13m9B4';
+  var PROJECT='https://yhxuplhohhetzloxvgku.supabase.co',KEY='sb_publishable_jlsorkXci3_0Hla7gt8z1g_pe6zOT19';
   var SITE='https://adaiascearataiana-gif.github.io/fastservicosapp/',REDIRECT=SITE;
   function byId(id){return document.getElementById(id)}
   function esc(v){return String(v||'').replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
@@ -52892,8 +52892,8 @@ body.fast-exclusive-app main { padding-bottom: 12px !important; }
 (function(){
   'use strict';
   var VERSION=(document.querySelector('meta[name="fast-app-version"]')||{}).content||'2.4.14';
-  var PROJECT='https://jizoedwnyfcjokoqgfmn.supabase.co';
-  var KEY='sb_publishable_mXMGOmMueyVWcS8UdQHP-w_sa13m9B4';
+  var PROJECT='https://yhxuplhohhetzloxvgku.supabase.co';
+  var KEY='sb_publishable_jlsorkXci3_0Hla7gt8z1g_pe6zOT19';
   var SITE='https://adaiascearataiana-gif.github.io/fastservicosapp/';
   var RECOVERY=SITE;
   var PENDING='fast_email_signup_pending';
