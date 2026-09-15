@@ -50,3 +50,14 @@ html.fast-linux-desktop,html.fast-linux-desktop body,body.fast-edition-desktop{m
 .fast-expense-voice-tools span{color:var(--text-muted,#64748b);font-size:11px;font-weight:750;line-height:1.4}
 @keyframes fastVoicePulse{50%{transform:scale(1.025);box-shadow:0 0 0 7px #ef444422}}
 @media(max-width:560px){.fast-expense-voice-tools{align-items:stretch;flex-direction:column}.fast-expense-voice-tools button{width:100%}}
+
+/* Rotas do Dia — setas e número ordinal sempre na mesma linha. */
+#rotasDia #tabelaRelatorioBody .rd-ord-cell{
+  min-width:138px!important;width:138px!important;white-space:nowrap!important;vertical-align:middle!important;text-align:left!important
+}
+#rotasDia #tabelaRelatorioBody .rd-ord-btns{
+  display:inline-flex!important;align-items:center!important;gap:6px!important;vertical-align:middle!important;margin-right:8px!important;white-space:nowrap!important
+}
+#rotasDia #tabelaRelatorioBody .rd-ord-cell>strong{
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;min-width:30px!important;height:40px!important;vertical-align:middle!important;line-height:1!important;font-size:16px!important
+}
