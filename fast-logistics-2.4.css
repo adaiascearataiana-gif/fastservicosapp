@@ -56,7 +56,7 @@ html.fast-linux-desktop,html.fast-linux-desktop body,body.fast-edition-desktop{m
   min-width:138px!important;width:138px!important;white-space:nowrap!important;vertical-align:middle!important;text-align:left!important
 }
 #rotasDia #tabelaRelatorioBody .rd-ord-btns{
-  display:inline-flex!important;align-items:center!important;gap:6px!important;vertical-align:middle!important;margin-right:8px!important;white-space:nowrap!important
+  display:inline-flex!important;align-items:center!important;gap:6px!important;vertical-align:middle!important;margin-left:8px!important;margin-right:0!important;white-space:nowrap!important
 }
 #rotasDia #tabelaRelatorioBody .rd-ord-cell>strong{
   display:inline-flex!important;align-items:center!important;justify-content:center!important;min-width:30px!important;height:40px!important;vertical-align:middle!important;line-height:1!important;font-size:16px!important

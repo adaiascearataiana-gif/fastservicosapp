@@ -18009,10 +18009,10 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
             </thead>
             <tbody id="tabelaRelatorioBody">
             <tr>
-              <td class="rd-ord-cell no-print"><div class="rd-ord-btns">
+              <td class="rd-ord-cell no-print"><strong>1º</strong><div class="rd-ord-btns">
                 <button class="rd-ord-btn rd-btn-up" disabled="" title="Subir na fila (trocar com 0º)" onclick="moverSeq('2026-09-13', 0, -1)" style="user-select: none;"><i class="fa-solid fa-arrow-up"></i></button>
                 <button class="rd-ord-btn rd-btn-down" title="Descer na fila (trocar com o de baixo)" onclick="moverSeq('2026-09-13', 0, 1)" style="user-select: none;"><i class="fa-solid fa-arrow-down"></i></button>
-              </div><strong>1º</strong></td>
+              </div></td>
               <td>Ariel Fofix</td>
               <td>WM</td>
               <td>SIQUEIRA</td>
@@ -18022,10 +18022,10 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
             </tr>
           
             <tr>
-              <td class="rd-ord-cell no-print"><div class="rd-ord-btns">
+              <td class="rd-ord-cell no-print"><strong>2º</strong><div class="rd-ord-btns">
                 <button class="rd-ord-btn rd-btn-up" title="Subir na fila (trocar com 1º de cima)" onclick="moverSeq('2026-09-13', 1, -1)" style="user-select: none;"><i class="fa-solid fa-arrow-up"></i></button>
                 <button class="rd-ord-btn rd-btn-down" title="Descer na fila (trocar com o de baixo)" onclick="moverSeq('2026-09-13', 1, 1)" style="user-select: none;"><i class="fa-solid fa-arrow-down"></i></button>
-              </div><strong>2º</strong></td>
+              </div></td>
               <td>Samira</td>
               <td>Chocolog</td>
               <td>CANINDEZINHO</td>
@@ -18035,10 +18035,10 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
             </tr>
           
             <tr>
-              <td class="rd-ord-cell no-print"><div class="rd-ord-btns">
+              <td class="rd-ord-cell no-print"><strong>3º</strong><div class="rd-ord-btns">
                 <button class="rd-ord-btn rd-btn-up" title="Subir na fila (trocar com 2º de cima)" onclick="moverSeq('2026-09-13', 2, -1)" style="user-select: none;"><i class="fa-solid fa-arrow-up"></i></button>
                 <button class="rd-ord-btn rd-btn-down" disabled="" title="Descer na fila (trocar com o de baixo)" onclick="moverSeq('2026-09-13', 2, 1)" style="user-select: none;"><i class="fa-solid fa-arrow-down"></i></button>
-              </div><strong>3º</strong></td>
+              </div></td>
               <td>Brena Felix</td>
               <td>Brena Felix </td>
               <td>JAÇANAÚ</td>
@@ -36140,10 +36140,10 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
           const podeDescer = idxOriginal >= 0 && idxOriginal < listaCompleta.length - 1;
           linhasRelatorio.push(`
             <tr>
-              <td class="rd-ord-cell no-print"><div class="rd-ord-btns">
+              <td class="rd-ord-cell no-print"><strong>${idx + 1}º</strong><div class="rd-ord-btns">
                 <button class="rd-ord-btn rd-btn-up" ${podeSubir ? '' : 'disabled'} title="Subir na fila (trocar com ${idx}º${idx > 0 ? ' de cima' : ''})" onclick="moverSeq('${dataSel}', ${idxOriginal}, -1)"><i class="fa-solid fa-arrow-up"></i></button>
                 <button class="rd-ord-btn rd-btn-down" ${podeDescer ? '' : 'disabled'} title="Descer na fila (trocar com o de baixo)" onclick="moverSeq('${dataSel}', ${idxOriginal}, 1)"><i class="fa-solid fa-arrow-down"></i></button>
-              </div><strong>${idx + 1}º</strong></td>
+              </div></td>
               <td>${item.cliente || '-'}</td>
               <td>${item.origem || '-'}</td>
               <td>${formatarDestinoCelula((item.destino || '-').toUpperCase())}</td>
