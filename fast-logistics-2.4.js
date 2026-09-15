@@ -1,6 +1,6 @@
 (function(){
   'use strict';
-  var VERSION='2.4.15', STORE='fast_logistics_v2411', state={watchId:null,lastPosition:null};
+  var VERSION='2.4.16', STORE='fast_logistics_v2411', state={watchId:null,lastPosition:null};
   function el(id){return document.getElementById(id)}
   function esc(v){var d=document.createElement('div');d.textContent=String(v==null?'':v);return d.innerHTML}
   function norm(v){return String(v||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim()}
@@ -102,8 +102,8 @@
     document.documentElement.setAttribute('data-fast-version',VERSION);
     var m=document.querySelector('meta[name="fast-app-version"]');if(m)m.content=VERSION;
     var immediate=document.querySelector('meta[name="fast-app-changelog-immediate"]');if(immediate)immediate.content=VERSION;
-    var latest=document.querySelector('meta[name="fast-latest-update"]');if(latest)latest.content='2.4.15: migração completa dos aplicativos para o novo projeto Supabase.';
-    var date=document.querySelector('meta[name="fast-app-date"]');if(date)date.content='2026-09-14T09:00:00-03:00';
+    var latest=document.querySelector('meta[name="fast-latest-update"]');if(latest)latest.content='2.4.16: Drive persistente no mobile, confirmação manual no Linux e painel de integrações.';
+    var date=document.querySelector('meta[name="fast-app-date"]');if(date)date.content='2026-09-15T12:00:00-03:00';
     var changelog=document.querySelector('meta[name="fast-app-changelog"]');if(changelog)changelog.content=JSON.stringify(changes);
     window.fastUltimoModuloNovidades=changes;
     window.fastObterUltimasAtualizacoes=function(){return changes.slice()};
