@@ -1,6 +1,6 @@
 (function(){
   'use strict';
-  var VERSION='2.4.22', STORE='fast_logistics_v2411', state={watchId:null,lastPosition:null};
+  var VERSION='2.4.23', STORE='fast_logistics_v2411', state={watchId:null,lastPosition:null};
   function el(id){return document.getElementById(id)}
   function esc(v){var d=document.createElement('div');d.textContent=String(v==null?'':v);return d.innerHTML}
   function norm(v){return String(v||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim()}
@@ -135,13 +135,13 @@
   function boot(){document.documentElement.setAttribute('data-fast-version',VERSION);var m=document.querySelector('meta[name="fast-app-version"]');if(m)m.content=VERSION;['fastSplashVersion','fastGateVersionNum','fastVersaoLabel'].forEach(function(id){if(el(id))el(id).textContent=VERSION});if(el('navMenuVersao'))el('navMenuVersao').textContent='Versão '+VERSION;migrateIdentity();installHub();bindOperationalCounters();bindOperationalButtons();installExpenseVoice();installExpenseRouteLink();installExpenseDashboard();patchExpenseDashboard();installBanks();setTimeout(bindOperationalButtons,1200);var initial=cleanDirectory(false);installPostSyncClean();if(initial.clientes||initial.destinos)setTimeout(pushSlimLists,1200);setTimeout(function(){var late=cleanDirectory(true);if(late.clientes||late.destinos)pushSlimLists();try{if(typeof renderizarClientes==='function')renderizarClientes();if(typeof destRenderizarLista==='function')destRenderizarLista()}catch(e){}window.fastRenderExpenseDashboard();window.fastFilterExpenses();auditDesktopLayout();refresh()},5000);patchRender();var expenseBody=el('tabelaDespesasBody');if(expenseBody)new MutationObserver(function(){window.fastRenderExpenseDashboard();window.fastFilterExpenses()}).observe(expenseBody,{childList:true,subtree:true});setInterval(function(){window.fastRenderExpenseDashboard();window.fastFilterExpenses()},3000);window.fastFilterExpenses();auditDesktopLayout();window.addEventListener('resize',auditDesktopLayout);var observer=new MutationObserver(function(){addProofButtons();refresh()});var cont=el('containerSequencia');if(cont)observer.observe(cont,{childList:true,subtree:true});setInterval(refresh,15000)}
   function finalizeReleaseInfo(){
     var allChanges=[
-      {app:'rotas',type:'corrigido',text:'2.4.22 (16/09/2026): ao reagendar em ROTAS uma rota pendente, ela sai imediatamente das Rotas do Dia da data anterior e aparece somente na nova data, sem duplicação e preservando fotos e informações.'}
+      {app:'rotas',type:'corrigido',text:'2.4.23 (16/09/2026): corrigido o reagendamento de rotas pendentes, inclusive itens antigos, sem vínculo e agrupados; a rota desaparece imediatamente do dia anterior e fica disponível somente na nova data.'}
     ],exclusive=new URLSearchParams(location.search).get('exclusive')||'',scope=exclusive==='rotas-dia'?'rotas':exclusive==='despesas'?'despesas':'',changes=scope?allChanges.filter(function(x){return x.app===scope}):allChanges;
     document.documentElement.setAttribute('data-fast-version',VERSION);
     var m=document.querySelector('meta[name="fast-app-version"]');if(m)m.content=VERSION;
     var immediate=document.querySelector('meta[name="fast-app-changelog-immediate"]');if(immediate)immediate.content=VERSION;
-    var latest=document.querySelector('meta[name="fast-latest-update"]');if(latest)latest.content='2.4.22: reagendamento de rotas pendentes sincronizado por data.';
-    var date=document.querySelector('meta[name="fast-app-date"]');if(date)date.content='2026-09-16T14:30:00-03:00';
+    var latest=document.querySelector('meta[name="fast-latest-update"]');if(latest)latest.content='2.4.23: reagendamento de rotas pendentes corrigido inclusive em itens agrupados e antigos.';
+    var date=document.querySelector('meta[name="fast-app-date"]');if(date)date.content='2026-09-16T17:30:00-03:00';
     var changelog=document.querySelector('meta[name="fast-app-changelog"]');if(changelog)changelog.content=JSON.stringify(changes);
     window.fastUltimoModuloNovidades=changes;
     window.fastObterUltimasAtualizacoes=function(){return changes.slice()};

@@ -1,11 +1,11 @@
 {
-  "version": "2.4.22",
-  "releasedAt": "2026-09-16T12:00:00-03:00",
+  "version": "2.4.23",
+  "releasedAt": "2026-09-16T17:30:00-03:00",
   "updates": [
     {
       "app": "rotas",
       "type": "corrigido",
-      "text": "2.4.22 (16/09/2026): ao reagendar em ROTAS uma rota pendente, ela sai imediatamente das Rotas do Dia da data anterior e aparece somente na nova data, sem duplicação e preservando fotos e informações."
+      "text": "2.4.23 (16/09/2026): corrigido o reagendamento de rotas pendentes, inclusive itens antigos, sem vínculo e agrupados; a rota desaparece imediatamente do dia anterior e fica disponível somente na nova data."
     }
   ]
 }
