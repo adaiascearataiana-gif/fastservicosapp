@@ -1,6 +1,6 @@
-# FAST Serviços 2.4.21 para Windows e Linux
+# FAST Serviços 2.4.22 para Windows e Linux
 
-Aplicativo desktop profissional sincronizado automaticamente com a mesma base da versão web 2.4.21. Inclui rotas, Rotas do Dia, clientes, destinos, despesas, equipe, RH, login por setor, dashboards, backups, Supabase, Google Drive, modo offline e atualização pelo GitHub.
+Aplicativo desktop profissional sincronizado automaticamente com a mesma base da versão web 2.4.22. Inclui rotas, Rotas do Dia, clientes, destinos, despesas, equipe, RH, login por setor, dashboards, backups, Supabase, Google Drive, modo offline e atualização pelo GitHub.
 
 ## Instalação rápida
 
@@ -31,7 +31,7 @@ dpkg -s fast-servicos-linux | grep Version
 grep -ao 'fast-app-version" content="[^"]*"' squashfs-root/resources/app.asar 2>/dev/null || true
 ```
 
-Após instalar, abra o FAST Serviços e confira o rodapé do menu: deve exibir **Versão 2.4.21**. O aplicativo também verifica atualizações automaticamente pelas **Releases do GitHub**.
+Após instalar, abra o FAST Serviços e confira o rodapé do menu: deve exibir **Versão 2.4.22**. O aplicativo também verifica atualizações automaticamente pelas **Releases do GitHub**.
 
 ## Instalar um pacote pronto
 
@@ -80,7 +80,7 @@ O app mantém os perfis Administrador, Atendimento e Entregador, com permissões
 
 ## GitHub
 
-Crie uma tag como `v2.4.21`. Os workflows da raiz geram o instalador Windows, AppImage e DEB e publicam os arquivos na mesma Release do GitHub.
+Crie uma tag como `v2.4.22`. Os workflows da raiz geram o instalador Windows, AppImage e DEB e publicam os arquivos na mesma Release do GitHub.
 
 ## Segurança aplicada
 

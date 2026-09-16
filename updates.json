@@ -1,36 +1,11 @@
 {
-  "version": "2.4.21",
-  "releasedAt": "2026-09-16T14:30:00-03:00",
+  "version": "2.4.22",
+  "releasedAt": "2026-09-16T12:00:00-03:00",
   "updates": [
     {
-      "app": "despesas",
-      "type": "corrigido",
-      "text": "2.4.21 (16/09/2026): o Dashboard de Despesas agora calcula separadamente o mês atual, cada mês escolhido e todo o período."
-    },
-    {
-      "app": "principal",
-      "type": "melhorado",
-      "text": "2.4.21 (16/09/2026): as novidades agora são separadas por aplicativo; o FAST principal continua exibindo o resumo completo."
-    },
-    {
       "app": "rotas",
-      "type": "melhorado",
-      "text": "2.4.21 (16/09/2026): Rotas do Dia passa a exibir exclusivamente novidades relacionadas às rotas."
-    },
-    {
-      "app": "despesas",
-      "type": "melhorado",
-      "text": "2.4.21 (16/09/2026): Despesas passa a exibir exclusivamente novidades relacionadas ao módulo financeiro."
-    },
-    {
-      "app": "cliente",
-      "type": "melhorado",
-      "text": "2.4.21 (16/09/2026): Cliente FAST passa a exibir exclusivamente suas próprias novidades e melhorias."
-    },
-    {
-      "app": "motorista",
-      "type": "melhorado",
-      "text": "2.4.21 (16/09/2026): FAST Motorista passa a exibir exclusivamente suas próprias novidades e melhorias."
+      "type": "corrigido",
+      "text": "2.4.22 (16/09/2026): ao reagendar em ROTAS uma rota pendente, ela sai imediatamente das Rotas do Dia da data anterior e aparece somente na nova data, sem duplicação e preservando fotos e informações."
     }
   ]
 }
