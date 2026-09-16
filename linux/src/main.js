@@ -103,7 +103,9 @@ function showUpdateNotification(version) {
   try {
     const n = new Notification({
       title: 'FAST Serviços — nova versão disponível',
-      body: `A versão ${version} chegou! Clique aqui para abrir a área de ATUALIZAÇÕES e atualizar pelo terminal.`,
+      body: process.platform === 'win32'
+        ? `A versão ${version} chegou! Clique aqui para abrir a área de ATUALIZAÇÕES.`
+        : `A versão ${version} chegou! Clique aqui para abrir a área de ATUALIZAÇÕES e atualizar pelo terminal.`,
       icon: notificationIconPath(),
       urgency: 'normal'
     });
@@ -137,6 +139,9 @@ async function checkLatestRelease() {
 // O script vive dentro do asar (não executável por fora), então é
 // copiado para userData antes de chamar o emulador.
 function openUpdateTerminal() {
+  if (process.platform === 'win32') {
+    return autoUpdater.downloadUpdate().then(() => ({ ok: true, updater: 'windows' })).catch(error => ({ ok: false, error: error && error.message || String(error) }));
+  }
   const scriptPath = path.join(app.getPath('userData'), UPDATE_SCRIPT_NAME);
   try {
     const src = path.join(__dirname, 'update-terminal.sh');
@@ -258,4 +263,7 @@ ipcMain.handle('fast:update:terminal', () => openUpdateTerminal());
 // (r145) nada baixa em silêncio — quem atualiza é o terminal, ao vivo.
 autoUpdater.autoDownload = false;
 autoUpdater.on('update-available', info => maybeNotifyUpdate(info && info.version));
-autoUpdater.on('update-downloaded', () => mainWindow?.webContents.send('fast:update:downloaded'));
+autoUpdater.on('update-downloaded', () => {
+  mainWindow?.webContents.send('fast:update:downloaded');
+  if (process.platform === 'win32') autoUpdater.quitAndInstall(false, true);
+});

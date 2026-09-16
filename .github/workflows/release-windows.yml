@@ -1,4 +1,4 @@
-name: Gerar FAST Serviços para Linux
+name: Gerar FAST Serviços para Windows
 
 on:
   workflow_dispatch:
@@ -10,8 +10,8 @@ permissions:
   contents: write
 
 jobs:
-  linux:
-    runs-on: ubuntu-latest
+  windows:
+    runs-on: windows-latest
     defaults:
       run:
         working-directory: linux
@@ -23,13 +23,12 @@ jobs:
           cache: npm
           cache-dependency-path: linux/package-lock.json
       - run: npm ci
-      - run: npm run dist:linux
+      - run: npm run dist:windows
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
-            linux/dist/*.AppImage
-            linux/dist/*.deb
-            linux/dist/latest-linux.yml
+            linux/dist/*.exe
+            linux/dist/latest.yml

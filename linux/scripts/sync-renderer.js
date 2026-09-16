@@ -47,6 +47,9 @@ syncMain();
   'app-despesas/index.html',
   'app-despesas/manifest.webmanifest',
   'app-despesas/sw.js',
+  'app-limpo/index.html',
+  'app-limpo/manifest.webmanifest',
+  'app-limpo/sw.js',
   'rotas-do-dia/index.html',
   'rotas-do-dia/manifest.webmanifest',
   'despesas/index.html',
@@ -58,4 +61,4 @@ for (const name of fs.readdirSync(path.join(repoRoot, 'assets'))) {
   if (fs.statSync(source).isFile()) copy(path.join('assets', name));
 }
 
-console.log('Renderer Linux sincronizado com os cinco aplicativos da raiz.');
+console.log('Renderer desktop sincronizado com todos os aplicativos da raiz.');

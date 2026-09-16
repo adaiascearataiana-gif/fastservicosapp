@@ -1,6 +1,6 @@
 {
-  "name": "fast-servicos-linux",
-  "version": "2.4.18",
+  "name": "fast-servicos-desktop",
+  "version": "2.4.19",
   "description": "FAST Serviços 2 — central profissional de rotas, entregas, finanças e equipe",
   "main": "src/main.js",
   "author": {
@@ -15,7 +15,9 @@
     "start": "electron .",
     "sync": "node scripts/sync-renderer.js",
     "check": "npm run sync && node --check src/main.js && node --check src/preload.js && node --check src/renderer/desktop-bridge.js && node scripts/audit-html.js",
-    "dist": "npm run check && electron-builder --linux AppImage deb",
+    "dist": "npm run dist:linux",
+    "dist:linux": "npm run check && electron-builder --linux AppImage deb",
+    "dist:windows": "npm run check && electron-builder --win nsis",
     "dist:appimage": "npm run check && electron-builder --linux AppImage",
     "dist:deb": "npm run check && electron-builder --linux deb"
   },
@@ -30,7 +32,6 @@
     "appId": "br.com.fastservicos.desktop",
     "productName": "FAST Serviços",
     "asar": true,
-    "artifactName": "FAST-Servicos-${version}-${arch}.${ext}",
     "files": [
       "src/**/*",
       "package.json"
@@ -45,10 +46,23 @@
         "deb"
       ],
       "category": "Office",
+      "artifactName": "FAST-Servicos-Linux-${arch}.${ext}",
       "icon": "build/icon.png",
       "synopsis": "Gestão de rotas, entregas, despesas e equipe",
       "syncDesktopName": true,
       "maintainer": "Adaías — FAST Serviços <fastservicoslog@gmail.com>"
+    },
+    "win": {
+      "target": ["nsis"],
+      "icon": "build/icon.png",
+      "artifactName": "FAST-Servicos-Windows-${arch}-Instalador.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "FAST Serviços"
     },
     "publish": [
       {
