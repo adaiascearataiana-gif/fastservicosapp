@@ -1,6 +1,6 @@
 {
   "name": "fast-servicos-desktop",
-  "version": "2.4.19",
+  "version": "2.4.20",
   "description": "FAST Serviços 2 — central profissional de rotas, entregas, finanças e equipe",
   "main": "src/main.js",
   "author": {
@@ -25,8 +25,8 @@
     "electron-updater": "^6.6.2"
   },
   "devDependencies": {
-    "electron": "^37.4.0",
-    "electron-builder": "^26.0.12"
+    "electron": "37.4.0",
+    "electron-builder": "26.0.12"
   },
   "overrides": {
     "node-gyp": "12.2.0"
@@ -52,7 +52,6 @@
       "artifactName": "FAST-Servicos-Linux-${arch}.${ext}",
       "icon": "build/icon.png",
       "synopsis": "Gestão de rotas, entregas, despesas e equipe",
-      "syncDesktopName": true,
       "maintainer": "Adaías — FAST Serviços <fastservicoslog@gmail.com>"
     },
     "win": {

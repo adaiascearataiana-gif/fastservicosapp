@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
 <meta name="theme-color" content="#4f46e5">
 <meta name="description" content="FAST Motorista — rotas do dia, botão CHEGUEI, fotos pela câmera e conclusão de rotas direto do celular do motorista.">
-<meta name="fast-app-version" content="2.4.19-motorista">
+<meta name="fast-app-version" content="2.4.20-motorista">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -234,7 +234,7 @@ button{font-family:inherit;cursor:pointer}
     <div class="ms-logo"><img src="assets/fast-servicos-icon-512.png?v=r101" alt="Fast Serviços"></div>
     <div class="ms-name">FAST MOTORISTA</div>
     <div class="ms-tag">ROTAS E ENTREGAS</div>
-    <div class="ms-ver">Versão <span id="motSplashVersion">2.4.19-motorista</span></div>
+    <div class="ms-ver">Versão <span id="motSplashVersion">2.4.20-motorista</span></div>
   </div>
   <div class="ms-loader"><span></span></div>
 </div>
@@ -247,7 +247,7 @@ button{font-family:inherit;cursor:pointer}
       <div class="gate-logo"><i class="fa-solid fa-motorcycle"></i></div>
       <h1>FAST Motorista</h1>
       <p>FAST SERVIÇOS · SOLUÇÕES EM LOGÍSTICA</p>
-      <div class="gate-version">Versão <span>2.4.19-motorista</span></div>
+      <div class="gate-version">Versão <span>2.4.20-motorista</span></div>
     </div>
     <div class="gate-field">
       <label for="motUser">Usuário</label>
@@ -292,6 +292,8 @@ button{font-family:inherit;cursor:pointer}
       <div class="mot-h2">Rotas e entregas</div>
     </div>
     <button class="mh-btn" id="motInstallBtn" onclick="motInstalar()" title="Instalar aplicativo" style="display:none"><i class="fa-solid fa-download"></i></button>
+    <button class="mh-btn mot-head-pref" onclick="motAbrirPainel('notificacoes')" title="Notificações"><i class="fa-solid fa-bell"></i><span id="motNotifyCount" class="mot-notify-count hide">0</span></button>
+    <button class="mh-btn mot-head-pref" onclick="motAbrirPainel('configuracoes')" title="Configurações"><i class="fa-solid fa-gear"></i></button>
     <button class="mh-btn" onclick="motAtualizar()" title="Atualizar rotas"><i class="fa-solid fa-rotate"></i></button>
     <button class="mh-btn" onclick="motSair()" title="Sair"><i class="fa-solid fa-right-from-bracket"></i></button>
   </header>
@@ -337,7 +339,7 @@ button{font-family:inherit;cursor:pointer}
   </main>
 
   <footer class="mot-footer">
-    FAST MOTORISTA · <span id="motVersaoRodape">2.4.19-motorista</span><br>
+    FAST MOTORISTA · <span id="motVersaoRodape">2.4.20-motorista</span><br>
     Rotas · CHEGUEI · Fotos · Conclusão — tudo sincronizado com o patrão 🏍️
   </footer>
 </div>
@@ -365,7 +367,7 @@ button{font-family:inherit;cursor:pointer}
 'use strict';
 var SB_URL='https://yhxuplhohhetzloxvgku.supabase.co/rest/v1';
 var SB_KEY='sb_publishable_jlsorkXci3_0Hla7gt8z1g_pe6zOT19';
-var VER='2.4.19-motorista';
+var VER='2.4.20-motorista';
 var K_SESSAO='mot_sessao_v1';
 var K_FILA='mot_fila_fotos_v1';
 var K_ACOES='mot_acoes_pendentes_v1';
@@ -451,7 +453,7 @@ function abrirApp(){
   $('motDataHoje').textContent=fmtDataLonga(ESTADO.dataSel);
   restaurarCache();
   motAtualizar();
-  iniciarGPS();
+  if(!window.motGpsPermitido||window.motGpsPermitido())iniciarGPS();
   setInterval(function(){tentarEnvios();tentarEnviosFotos()},30000);
   setInterval(function(){if(navigator.onLine&&ESTADO.sessao)motAtualizar(true)},60000);
   window.addEventListener('online',function(){atualizarChips();toast('Conexão voltou — enviando o que estava na fila…','info');tentarEnvios();tentarEnviosFotos();motAtualizar(true)});
@@ -562,6 +564,7 @@ function motAtualizar(silencioso){
       if(ind.semColunas){ESTADO.rotas=[];renderizar();renderChipsDatas();return null}
       return baixarDia(ESTADO.dataSel).then(function(rows){
         ESTADO.rotas=(rows||[]).filter(ehMinha);
+        if(window.motAtualizarNotificacoes)window.motAtualizarNotificacoes(ESTADO.rotas);
         jset(K_CACHE,{data:ESTADO.dataSel,rows:ESTADO.rotas,ts:Date.now()});
         renderizar();renderChipsDatas();
         if(!silencioso)toast('Rotas atualizadas ✓','ok');
@@ -1037,15 +1040,38 @@ window.motInstalar=motInstalar;
     else mostrarGate();
   };
   if('serviceWorker' in navigator){
-    try{navigator.serviceWorker.register('fast-sw.js?v=r2419',{scope:'./'}).catch(function(e){console.warn('sw:',e)})}catch(e){}
+    try{navigator.serviceWorker.register('fast-sw.js?v=r2420',{scope:'./'}).catch(function(e){console.warn('sw:',e)})}catch(e){}
   }
   setTimeout(pronto,1500);
 })();
 
 </script>
+<style id="mot-preferencias-css">
+.mot-head-pref{position:relative}.mot-notify-count{position:absolute;right:-4px;top:-5px;min-width:18px;height:18px;border-radius:99px;background:#ef4444;color:#fff;font:800 10px/18px Inter;text-align:center}.mot-user-panel{position:fixed;inset:0;z-index:1100;background:#0f172acc;display:none;align-items:flex-end;justify-content:center}.mot-user-panel.show{display:flex}.mot-user-sheet{width:min(100%,720px);max-height:90dvh;overflow:auto;background:var(--card,#fff);color:var(--text,#0f172a);border-radius:24px 24px 0 0;padding:20px}.mot-panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}.mot-panel-head h2{margin:0}.mot-panel-close{width:42px;height:42px;border:0;border-radius:12px;background:#e2e8f0;color:#0f172a;font-size:22px}.mot-pref-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.mot-pref-grid label{display:block;font-size:11px;font-weight:800;color:var(--muted);margin-bottom:5px}.mot-pref-grid input,.mot-pref-grid select{width:100%;min-height:44px;border:1px solid var(--border);border-radius:11px;padding:9px;background:var(--card);color:var(--text)}.mot-pref-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 0;border-bottom:1px solid var(--border)}.mot-pref-row input{width:22px;height:22px}.mot-notice{padding:12px;border:1px solid var(--border);border-radius:12px;margin:8px 0;background:#f8fafc;color:#0f172a}.mot-notice.unread{border-left:5px solid #6366f1}.mot-panel-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:15px}body.mot-dark{--bg:#07111f;--card:#101d2f;--text:#f8fafc;--muted:#a8b5c7;--border:#2b3b52;background:var(--bg);color:var(--text)}body.mot-large{font-size:18px}@media(max-width:560px){.mot-pref-grid{grid-template-columns:1fr}.mot-header{gap:5px}.mot-header .mh-btn{width:37px;height:37px}.mot-titles{min-width:0}.mot-h2{display:none}}
+</style>
+<div id="motUserPanel" class="mot-user-panel" onclick="if(event.target===this)motFecharPainel()"><div class="mot-user-sheet"><div class="mot-panel-head"><h2 id="motPanelTitle">Configurações</h2><button class="mot-panel-close" onclick="motFecharPainel()">×</button></div><div id="motPanelBody"></div></div></div>
+<script id="mot-preferencias-notificacoes">
+(function(){
+  var PK='mot_preferencias_v1',NK='mot_notificacoes_v1',SK='mot_status_rotas_v1';
+  var defaults={novaRota:true,status:true,conclusao:true,offline:true,som:true,nativo:false,gps:true,tema:'claro',texto:'normal',mapa:'google'};
+  function pref(){return Object.assign({},defaults,jget(PK,{}))}
+  function apply(){var p=pref();document.body.classList.toggle('mot-dark',p.tema==='escuro');document.body.classList.toggle('mot-large',p.texto==='grande');if(!p.gps&&typeof pararGPS==='function')pararGPS()}
+  window.motGpsPermitido=function(){return pref().gps!==false};
+  function count(){var n=jget(NK,[]),c=n.filter(function(x){return !x.lida}).length,e=$('motNotifyCount');if(e){e.textContent=c;e.classList.toggle('hide',!c)}}
+  function add(t,m,type){var p=pref();if(p[type]===false)return;var n=jget(NK,[]);n.unshift({id:Date.now()+Math.random(),titulo:t,texto:m,data:new Date().toISOString(),lida:false});jset(NK,n.slice(0,100));count();if(p.som)try{navigator.vibrate&&navigator.vibrate([100,50,100])}catch(e){}if(p.nativo&&Notification.permission==='granted')try{new Notification(t,{body:m,icon:'assets/fast-servicos-icon-192.png'})}catch(e){}}
+  window.motAtualizarNotificacoes=function(rows){var old=jget(SK,{}),next={};(rows||[]).forEach(function(r){var id=String(r.id),sig=[r.status||'',r.destino||'',r.updated_at||'',r.data_conclusao||''].join('|');next[id]=sig;if(!old[id])add('Nova rota recebida',(r.cliente||'Cliente')+' · '+(r.destino||'destino não informado'),'novaRota');else if(old[id]!==sig){if(ehConcluida(r))add('Rota concluída','A conclusão de '+(r.destino||'uma rota')+' foi sincronizada.','conclusao');else add('Rota alterada',(r.destino||'Rota')+' recebeu uma atualização.','status')}});jset(SK,next)};
+  window.motAbrirPainel=function(tipo){var panel=$('motUserPanel'),body=$('motPanelBody');if(tipo==='notificacoes'){$('motPanelTitle').textContent='Notificações do Motorista';var n=jget(NK,[]);body.innerHTML='<div class="mot-panel-actions"><button class="gate-btn secondary" onclick="motMarcarLidas()">Marcar como lidas</button><button class="gate-btn secondary" onclick="motLimparNotificacoes()">Limpar</button></div>'+(n.length?n.map(function(x){return '<div class="mot-notice '+(x.lida?'':'unread')+'"><b>'+esc(x.titulo)+'</b><div>'+esc(x.texto)+'</div><small>'+new Date(x.data).toLocaleString('pt-BR')+'</small></div>'}).join(''):'<p>Nenhuma notificação ainda.</p>')}else{var p=pref(),s=ESTADO.sessao||{};$('motPanelTitle').textContent='Configurações do Motorista';body.innerHTML='<div class="mot-pref-grid"><div><label>Nome exibido</label><input value="'+esc(s.employee_name||s.username||'Motorista')+'" disabled></div><div><label>Abrir rotas no mapa</label><select id="mpMapa"><option value="google">Google Maps</option><option value="waze">Waze</option></select></div><div><label>Aparência</label><select id="mpTema"><option value="claro">Clara</option><option value="escuro">Escura</option></select></div><div><label>Tamanho do texto</label><select id="mpTexto"><option value="normal">Normal</option><option value="grande">Grande</option></select></div></div><h3>Avisos exclusivos</h3>'+[['novaRota','Nova rota atribuída'],['status','Alterações na rota'],['conclusao','Confirmação de conclusão'],['offline','Entrada e saída do modo offline'],['som','Vibração dos avisos'],['nativo','Notificações do aparelho'],['gps','Compartilhar localização durante o trabalho']].map(function(x){return '<label class="mot-pref-row"><span>'+x[1]+'</span><input id="mp_'+x[0]+'" type="checkbox" '+(p[x[0]]?'checked':'')+'></label>'}).join('')+'<div class="mot-panel-actions"><button class="gate-btn" onclick="motSalvarConfiguracoes()">Salvar configurações</button><button class="gate-btn secondary" onclick="motAtualizar()">Sincronizar agora</button></div>';$('mpMapa').value=p.mapa;$('mpTema').value=p.tema;$('mpTexto').value=p.texto}panel.classList.add('show')};
+  window.motFecharPainel=function(){$('motUserPanel').classList.remove('show')};
+  window.motMarcarLidas=function(){var n=jget(NK,[]);n.forEach(function(x){x.lida=true});jset(NK,n);count();motAbrirPainel('notificacoes')};
+  window.motLimparNotificacoes=function(){jset(NK,[]);count();motAbrirPainel('notificacoes')};
+  window.motSalvarConfiguracoes=async function(){var p=pref();['novaRota','status','conclusao','offline','som','nativo','gps'].forEach(function(k){p[k]=$('mp_'+k).checked});p.mapa=$('mpMapa').value;p.tema=$('mpTema').value;p.texto=$('mpTexto').value;if(p.nativo&&'Notification'in window&&Notification.permission==='default')p.nativo=(await Notification.requestPermission())==='granted';jset(PK,p);if(p.gps&&ESTADO.sessao&&!ESTADO.gps.ativo)iniciarGPS();apply();motFecharPainel();toast('Configurações salvas.','ok')};
+  window.addEventListener('online',function(){add('Conexão restaurada','As ações pendentes serão sincronizadas.','offline')});window.addEventListener('offline',function(){add('Modo offline','Rotas, fotos e conclusões ficarão na fila.','offline')});
+  apply();count();
+})();
+</script>
 <style>.mot-update-balloon{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:999;width:min(92vw,390px);border:1px solid #ffffff55;border-radius:15px;padding:12px 14px;background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;box-shadow:0 14px 38px #312e8166;display:none;align-items:center;gap:10px;text-align:left;font:inherit}.mot-update-balloon b{display:block;font-size:13px}.mot-update-balloon small{opacity:.9}.mot-update-panel{position:fixed;inset:0;z-index:1000;background:#0f172acc;display:none;place-items:center;padding:18px}.mot-update-panel.show{display:grid}.mot-update-box{width:min(100%,390px);background:#fff;color:#0f172a;border-radius:20px;padding:20px}.mot-update-progress{height:9px;background:#e2e8f0;border-radius:99px;overflow:hidden;margin:14px 0}.mot-update-progress span{display:block;width:0;height:100%;background:linear-gradient(90deg,#4f46e5,#7c3aed);transition:width .35s}</style>
 <button id="motUpdateBalloon" class="mot-update-balloon" type="button" onclick="motAbrirAtualizacao()"><span style="font-size:22px">⇩</span><span style="flex:1"><b>NOVA VERSÃO DISPONÍVEL</b><small id="motUpdateVer">Toque para atualizar</small></span><span>›</span></button>
 <div id="motUpdatePanel" class="mot-update-panel"><div class="mot-update-box"><h2>Atualizar FAST Motorista</h2><p id="motUpdateText">Uma nova versão está pronta.</p><div class="mot-update-progress"><span id="motUpdateBar"></span></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><button class="gate-btn secondary" onclick="document.getElementById('motUpdatePanel').classList.remove('show')">Agora não</button><button class="gate-btn" onclick="motAtualizarAgora()">Atualizar agora</button></div></div></div>
-<script>(function(){var ATUAL='2.4.19';window.motAbrirAtualizacao=function(){document.getElementById('motUpdatePanel').classList.add('show')};window.motAtualizarAgora=async function(){var b=document.getElementById('motUpdateBar'),t=document.getElementById('motUpdateText');b.style.width='18%';t.textContent='Preparando atualização…';try{var regs=await navigator.serviceWorker.getRegistrations();await Promise.all(regs.map(function(r){return r.update()}));b.style.width='72%';t.textContent='Instalando nova versão…';setTimeout(function(){b.style.width='100%';location.replace(location.pathname+'?v='+Date.now())},700)}catch(e){location.replace(location.pathname+'?v='+Date.now())}};setTimeout(async function(){try{var h=await fetch('./?fast_check='+Date.now(),{cache:'no-store'}).then(function(r){return r.text()}),m=h.match(/name=["']fast-app-version["']\s+content=["']([^"']+)/i),nova=m&&m[1];if(nova&&nova!==ATUAL){document.getElementById('motUpdateVer').textContent=ATUAL+' → '+nova+' · Toque para atualizar';document.getElementById('motUpdateBalloon').style.display='flex'}}catch(e){}},2200)})();</script>
+<script>(function(){var ATUAL='2.4.20';window.motAbrirAtualizacao=function(){document.getElementById('motUpdatePanel').classList.add('show')};window.motAtualizarAgora=async function(){var b=document.getElementById('motUpdateBar'),t=document.getElementById('motUpdateText');b.style.width='18%';t.textContent='Preparando atualização…';try{var regs=await navigator.serviceWorker.getRegistrations();await Promise.all(regs.map(function(r){return r.update()}));b.style.width='72%';t.textContent='Instalando nova versão…';setTimeout(function(){b.style.width='100%';location.replace(location.pathname+'?v='+Date.now())},700)}catch(e){location.replace(location.pathname+'?v='+Date.now())}};setTimeout(async function(){try{var h=await fetch('./?fast_check='+Date.now(),{cache:'no-store'}).then(function(r){return r.text()}),m=h.match(/name=["']fast-app-version["']\s+content=["']([^"']+)/i),nova=m&&m[1];if(nova&&nova!==ATUAL){document.getElementById('motUpdateVer').textContent=ATUAL+' → '+nova+' · Toque para atualizar';document.getElementById('motUpdateBalloon').style.display='flex'}}catch(e){}},2200)})();</script>
 </body>
 </html>

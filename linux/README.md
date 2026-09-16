@@ -1,6 +1,6 @@
-# FAST Serviços 2.4.19 para Windows e Linux
+# FAST Serviços 2.4.20 para Windows e Linux
 
-Aplicativo desktop profissional sincronizado automaticamente com a mesma base da versão web 2.4.19. Inclui rotas, Rotas do Dia, clientes, destinos, despesas, equipe, RH, login por setor, dashboards, backups, Supabase, Google Drive, modo offline e atualização pelo GitHub.
+Aplicativo desktop profissional sincronizado automaticamente com a mesma base da versão web 2.4.20. Inclui rotas, Rotas do Dia, clientes, destinos, despesas, equipe, RH, login por setor, dashboards, backups, Supabase, Google Drive, modo offline e atualização pelo GitHub.
 
 ## Instalação rápida
 
@@ -27,11 +27,11 @@ O script de instalação lê a versão do `package.json` e confere automaticamen
 dpkg -s fast-servicos-linux | grep Version
 
 # AppImage: extraia e verifique a marcação interna
-./FAST-Servicos-Linux-x64.AppImage --appimage-extract > /dev/null 2>&1
+./FAST-Servicos-Linux-x86_64.AppImage --appimage-extract > /dev/null 2>&1
 grep -ao 'fast-app-version" content="[^"]*"' squashfs-root/resources/app.asar 2>/dev/null || true
 ```
 
-Após instalar, abra o FAST Serviços e confira o rodapé do menu: deve exibir **Versão 2.4.19**. O aplicativo também verifica atualizações automaticamente pelas **Releases do GitHub**.
+Após instalar, abra o FAST Serviços e confira o rodapé do menu: deve exibir **Versão 2.4.20**. O aplicativo também verifica atualizações automaticamente pelas **Releases do GitHub**.
 
 ## Instalar um pacote pronto
 
@@ -52,8 +52,8 @@ sudo apt remove fast-servicos-desktop
 
 ```bash
 cd ~/Downloads
-chmod +x FAST-Servicos-Linux-x64.AppImage
-./FAST-Servicos-Linux-x64.AppImage
+chmod +x FAST-Servicos-Linux-x86_64.AppImage
+./FAST-Servicos-Linux-x86_64.AppImage
 ```
 
 Se o AppImage solicitar FUSE em Ubuntu/Debian:
@@ -80,7 +80,7 @@ O app mantém os perfis Administrador, Atendimento e Entregador, com permissões
 
 ## GitHub
 
-Crie uma tag como `v2.4.19`. Os workflows da raiz geram o instalador Windows, AppImage e DEB e publicam os arquivos na mesma Release do GitHub.
+Crie uma tag como `v2.4.20`. Os workflows da raiz geram o instalador Windows, AppImage e DEB e publicam os arquivos na mesma Release do GitHub.
 
 ## Segurança aplicada
 
