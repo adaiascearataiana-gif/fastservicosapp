@@ -43,7 +43,7 @@ html.fast-linux-desktop,html.fast-linux-desktop body,body.fast-edition-desktop{m
 }
 @media (min-width:901px) and (max-width:1366px){body.fast-v2 .tab-content{padding-left:18px!important;padding-right:18px!important}.pro-kpi-grid,.metrics-container,.dash-metrics-row{grid-template-columns:repeat(2,minmax(0,1fr))!important}.pro-hero,.pro-grid-2{grid-template-columns:minmax(0,1fr)!important}}
 
-/* 2.4.23 — comando de voz das despesas */
+/* 3.0.0 — comando de voz das despesas */
 .fast-expense-voice-tools{display:flex;align-items:center;gap:12px;margin-bottom:14px;padding:12px;border:1px solid #c4b5fd;border-radius:14px;background:linear-gradient(135deg,#f5f3ff,#ecfeff)}
 .fast-expense-voice-tools button{flex:0 0 auto;min-height:46px!important;padding:10px 18px!important}
 .fast-expense-voice-tools button.listening{background:linear-gradient(135deg,#dc2626,#f97316)!important;animation:fastVoicePulse 1.1s infinite}

@@ -1,11 +1,11 @@
 {
-  "version": "2.4.23",
-  "releasedAt": "2026-09-16T17:30:00-03:00",
+  "version": "3.0.0",
+  "releasedAt": "2026-09-16T20:40:00-03:00",
   "updates": [
     {
-      "app": "rotas",
-      "type": "corrigido",
-      "text": "2.4.23 (16/09/2026): corrigido o reagendamento de rotas pendentes, inclusive itens antigos, sem vínculo e agrupados; a rota desaparece imediatamente do dia anterior e fica disponível somente na nova data."
+      "app": "despesas",
+      "type": "melhorado",
+      "text": "3.0.0 (16/09/2026): ao selecionar a última despesa pela descrição ou local, a forma de pagamento também é preenchida, incluindo registros antigos e variações de nomenclatura."
     }
   ]
 }
