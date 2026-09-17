@@ -30,6 +30,14 @@ public class MainActivity extends Activity {
         settings.setDatabaseEnabled(true);
         settings.setGeolocationEnabled(true);
         settings.setMediaPlaybackRequiresUserGesture(false);
+        // Respeitar o viewport meta (width=device-width) e ajustar o conteudo a tela.
+        // Sem isto o WebView usa ~980px de largura e o conteudo estoura os limites da tela.
+        settings.setUseWideViewPort(true);
+        settings.setLoadWithOverviewMode(true);
+        settings.setSupportZoom(false);
+        settings.setBuiltInZoomControls(false);
+        settings.setDisplayZoomControls(false);
+        settings.setTextZoom(100);
         settings.setUserAgentString(settings.getUserAgentString() + " FASTAndroid/3.1.6");
         CookieManager.getInstance().setAcceptCookie(true);
         CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
