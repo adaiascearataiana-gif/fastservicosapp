@@ -1,8 +1,8 @@
 {
   "name": "FAST Serviços - Gestão de Rotas",
   "short_name": "FAST Serviços",
-  "version": "3.1.2",
-  "description": "FAST Serviços 3.1.2 — Operações, rotas, clientes, equipe e finanças",
+  "version": "3.1.3",
+  "description": "FAST Serviços 3.1.3 — Operações, rotas, clientes, equipe e finanças",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
@@ -33,14 +33,14 @@
       "short_name":"Rotas do Dia",
       "description":"Abrir diretamente as rotas programadas para hoje",
       "url":"rotas-do-dia/",
-      "icons":[{"src":"assets/atalho-rotas-dia-192.png?v=r3102","sizes":"192x192","type":"image/png"}]
+      "icons":[{"src":"assets/atalho-rotas-dia-192.png?v=r3103","sizes":"192x192","type":"image/png"}]
     },
     {
       "name":"Despesas",
       "short_name":"Despesas",
       "description":"Abrir diretamente o controle de despesas",
       "url":"despesas/",
-      "icons":[{"src":"assets/atalho-despesas-192.png?v=r3102","sizes":"192x192","type":"image/png"}]
+      "icons":[{"src":"assets/atalho-despesas-192.png?v=r3103","sizes":"192x192","type":"image/png"}]
     },
     {
       "name":"FAST Motorista",
