@@ -1,7 +1,27 @@
 {
-  "version": "3.0.0",
-  "releasedAt": "2026-09-16T20:40:00-03:00",
+  "version": "3.1.0",
+  "releasedAt": "2026-09-17T14:30:00-03:00",
   "updates": [
+    {
+      "app": "rotas",
+      "type": "novo",
+      "text": "3.1.0 (17/09/2026): Rotas do Dia agora sinaliza cada entrega em verde, laranja ou vermelho; o atraso é contado por duas horas a partir das 08h ou da criação posterior."
+    },
+    {
+      "app": "cliente",
+      "type": "melhorado",
+      "text": "3.1.0 (17/09/2026): configurações exclusivas de segurança e entrega, bloqueio independente, avisos de rota/15 min/5 min/chegada, WhatsApp opcional e redefinição segura de senha."
+    },
+    {
+      "app": "motorista",
+      "type": "melhorado",
+      "text": "3.1.0 (17/09/2026): bloqueio independente, preferências de toque, histórico operacional somente leitura, atualizações exclusivas e recuperação segura de senha."
+    },
+    {
+      "app": "fast",
+      "type": "corrigido",
+      "text": "3.1.0 (17/09/2026): acesso à pasta do Google Drive funciona pelo explorador interno e por abertura direta; configuração da pasta é preservada."
+    },
     {
       "app": "despesas",
       "type": "melhorado",
