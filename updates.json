@@ -1,21 +1,21 @@
 {
-  "version": "3.1.4",
+  "version": "3.1.5",
   "releasedAt": "2026-09-17T16:20:00-03:00",
   "updates": [
     {
       "app": "rotas",
       "type": "corrigido",
-      "text": "3.1.4 (17/09/2026): Rotas do Dia ganhou APK Android próprio, independente e com download direto."
+      "text": "3.1.5 (17/09/2026): Rotas do Dia ganhou APK Android próprio, independente e com download direto."
     },
     {
       "app": "despesas",
       "type": "corrigido",
-      "text": "3.1.4 (17/09/2026): Despesas ganhou APK Android próprio, independente e com download direto."
+      "text": "3.1.5 (17/09/2026): Despesas ganhou APK Android próprio, independente e com download direto."
     },
     {
       "app": "fast",
       "type": "melhorado",
-      "text": "3.1.4 (17/09/2026): Central de Downloads passou a oferecer APK direto para Cliente, Motorista, Rotas do Dia e Despesas."
+      "text": "3.1.5 (17/09/2026): Central de Downloads passou a oferecer APK direto para Cliente, Motorista, Rotas do Dia e Despesas."
     },
     {
       "app": "cliente",
