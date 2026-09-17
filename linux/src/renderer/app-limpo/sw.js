@@ -1,4 +1,4 @@
-const CACHE='fast-limpo-shell-r3000';
+const CACHE='fast-limpo-shell-r3101';
 const SHELL=['./','./index.html','./manifest.webmanifest','../assets/fast-servicos-icon-192.png','../assets/fast-servicos-icon-512.png'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith('fast-limpo-shell-')&&key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));

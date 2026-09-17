@@ -1,6 +1,6 @@
 {
   "name": "fast-servicos-desktop",
-  "version": "3.0.0",
+  "version": "3.1.1",
   "description": "FAST Serviços 2 — central profissional de rotas, entregas, finanças e equipe",
   "main": "src/main.js",
   "author": {
@@ -55,7 +55,9 @@
       "maintainer": "Adaías — FAST Serviços <fastservicoslog@gmail.com>"
     },
     "win": {
-      "target": ["nsis"],
+      "target": [
+        "nsis"
+      ],
       "icon": "build/icon.png",
       "artifactName": "FAST-Servicos-Windows-${arch}-Instalador.${ext}"
     },

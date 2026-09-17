@@ -1,6 +1,6 @@
 (function(){
   'use strict';
-  var VERSION='3.1.0', STORE='fast_logistics_v2411', state={watchId:null,lastPosition:null};
+  var VERSION='3.1.1', STORE='fast_logistics_v2411', state={watchId:null,lastPosition:null};
   function el(id){return document.getElementById(id)}
   function esc(v){var d=document.createElement('div');d.textContent=String(v==null?'':v);return d.innerHTML}
   function norm(v){return String(v||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim()}
@@ -135,13 +135,22 @@
   function boot(){document.documentElement.setAttribute('data-fast-version',VERSION);var m=document.querySelector('meta[name="fast-app-version"]');if(m)m.content=VERSION;['fastSplashVersion','fastGateVersionNum','fastVersaoLabel'].forEach(function(id){if(el(id))el(id).textContent=VERSION});if(el('navMenuVersao'))el('navMenuVersao').textContent='Versão '+VERSION;migrateIdentity();installHub();bindOperationalCounters();bindOperationalButtons();installExpenseVoice();installExpenseRouteLink();installExpenseDashboard();patchExpenseDashboard();installBanks();setTimeout(bindOperationalButtons,1200);var initial=cleanDirectory(false);installPostSyncClean();if(initial.clientes||initial.destinos)setTimeout(pushSlimLists,1200);setTimeout(function(){var late=cleanDirectory(true);if(late.clientes||late.destinos)pushSlimLists();try{if(typeof renderizarClientes==='function')renderizarClientes();if(typeof destRenderizarLista==='function')destRenderizarLista()}catch(e){}window.fastRenderExpenseDashboard();window.fastFilterExpenses();auditDesktopLayout();refresh()},5000);patchRender();var expenseBody=el('tabelaDespesasBody');if(expenseBody)new MutationObserver(function(){window.fastRenderExpenseDashboard();window.fastFilterExpenses()}).observe(expenseBody,{childList:true,subtree:true});setInterval(function(){window.fastRenderExpenseDashboard();window.fastFilterExpenses()},3000);window.fastFilterExpenses();auditDesktopLayout();window.addEventListener('resize',auditDesktopLayout);var observer=new MutationObserver(function(){addProofButtons();refresh()});var cont=el('containerSequencia');if(cont)observer.observe(cont,{childList:true,subtree:true});setInterval(refresh,15000)}
   function finalizeReleaseInfo(){
     var allChanges=[
-      {app:'despesas',type:'melhorado',text:'3.0.0 (16/09/2026): ao selecionar a última despesa pela descrição ou local, a forma de pagamento também é preenchida, incluindo registros antigos e variações de nomenclatura.'}
+      {app:'rotas',type:'novo',text:'3.1.1 (17/09/2026): Rotas do Dia ganhou sinalizador verde, laranja e vermelho após os botões de ordenação.'},
+      {app:'rotas',type:'melhorado',text:'3.1.1 (17/09/2026): atraso calculado após duas horas, contando a partir das 08h ou do horário de criação posterior.'},
+      {app:'fast',type:'corrigido',text:'3.1.1 (17/09/2026): Central Operacional passou a contabilizar risco de atraso com a mesma regra das Rotas do Dia.'},
+      {app:'fast',type:'corrigido',text:'3.1.1 (17/09/2026): bloqueio de tela revisado e compartilhado entre FAST, Rotas do Dia e Despesas.'},
+      {app:'cliente',type:'novo',text:'3.1.1 (17/09/2026): Cliente FAST ganhou bloqueio independente, preferências de som e avisos de rota, 15 minutos, 5 minutos e chegada.'},
+      {app:'motorista',type:'novo',text:'3.1.1 (17/09/2026): FAST Motorista ganhou bloqueio independente, preferências de toque, histórico e atualizações exclusivas.'},
+      {app:'cliente',type:'corrigido',text:'3.1.1 (17/09/2026): recuperação de senha do Cliente retorna ao endereço público correto, sem localhost:3000.'},
+      {app:'motorista',type:'corrigido',text:'3.1.1 (17/09/2026): recuperação de senha do Motorista retorna ao endereço público correto, sem localhost:3000.'},
+      {app:'fast',type:'melhorado',text:'3.1.1 (17/09/2026): Google Drive agora abre a pasta configurada pelo explorador interno ou diretamente no Drive.'},
+      {app:'fast',type:'corrigido',text:'3.1.1 (17/09/2026): ID da pasta do Google Drive é preservado ao abrir e sincronizar.'}
     ],exclusive=new URLSearchParams(location.search).get('exclusive')||'',scope=exclusive==='rotas-dia'?'rotas':exclusive==='despesas'?'despesas':'',changes=scope?allChanges.filter(function(x){return x.app===scope}):allChanges;
     document.documentElement.setAttribute('data-fast-version',VERSION);
     var m=document.querySelector('meta[name="fast-app-version"]');if(m)m.content=VERSION;
     var immediate=document.querySelector('meta[name="fast-app-changelog-immediate"]');if(immediate)immediate.content=VERSION;
-    var latest=document.querySelector('meta[name="fast-latest-update"]');if(latest)latest.content='3.0.0: nova série de versões e reaproveitamento completo da última despesa.';
-    var date=document.querySelector('meta[name="fast-app-date"]');if(date)date.content='2026-09-16T20:40:00-03:00';
+    var latest=document.querySelector('meta[name="fast-latest-update"]');if(latest)latest.content='3.1.1: sinalização operacional, segurança por aplicativo, recuperação de senha e Google Drive.';
+    var date=document.querySelector('meta[name="fast-app-date"]');if(date)date.content='2026-09-17T08:05:00-03:00';
     var changelog=document.querySelector('meta[name="fast-app-changelog"]');if(changelog)changelog.content=JSON.stringify(changes);
     window.fastUltimoModuloNovidades=changes;
     window.fastObterUltimasAtualizacoes=function(){return changes.slice()};

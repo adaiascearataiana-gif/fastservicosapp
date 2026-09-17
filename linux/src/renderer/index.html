@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="fast-linux-desktop" data-fast-version="3.0.0"><head>
+<html lang="pt-BR" class="fast-linux-desktop" data-fast-version="3.1.1"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
   <meta name="theme-color" content="#4f46e5">
@@ -21,13 +21,13 @@
   <meta name="fast-github-branch" content="main">
   <meta name="fast-github-path" content="index.html">
   <meta name="fast-github-token-env" content="GH_TOKEN">
-  <meta name="fast-app-version" content="3.0.0">
-  <meta name="fast-app-date" content="2026-09-16T20:40:00-03:00">
-  <meta name="fast-latest-update" content="3.0.0: nova série de versões e reaproveitamento completo da última despesa.">
+  <meta name="fast-app-version" content="3.1.1">
+  <meta name="fast-app-date" content="2026-09-17T08:05:00-03:00">
+  <meta name="fast-latest-update" content="3.1.1: sinalização operacional, segurança por aplicativo, recuperação de senha e Google Drive.">
   <!-- r92: verificação automática de nova versão ao abrir; Verificar Atualizações com cache-busting e sem fallback no-cors inválido. -->
   <!-- r70.1: lista corrente no HTML inicial; o painel não espera scripts tardios -->
-  <meta name="fast-app-changelog-immediate" content="3.0.0">
-  <meta name="fast-app-changelog" content="[{&quot;app&quot;:&quot;despesas&quot;,&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;3.0.0 (16/09/2026): ao selecionar a última despesa pela descrição ou local, a forma de pagamento também é preenchida, incluindo registros antigos e variações de nomenclatura.&quot;}]" data-r88="1" data-r89="1" data-r87="1" data-r127="1">
+  <meta name="fast-app-changelog-immediate" content="3.1.1">
+  <meta name="fast-app-changelog" content="[{&quot;app&quot;:&quot;rotas&quot;,&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;3.1.1 (17/09/2026): Rotas do Dia ganhou sinalizador verde, laranja e vermelho após os botões de ordenação.&quot;},{&quot;app&quot;:&quot;rotas&quot;,&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;3.1.1 (17/09/2026): atraso calculado após duas horas, contando a partir das 08h ou do horário de criação posterior.&quot;},{&quot;app&quot;:&quot;fast&quot;,&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;3.1.1 (17/09/2026): Central Operacional passou a contabilizar risco de atraso com a mesma regra das Rotas do Dia.&quot;},{&quot;app&quot;:&quot;fast&quot;,&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;3.1.1 (17/09/2026): bloqueio de tela revisado e compartilhado entre FAST, Rotas do Dia e Despesas.&quot;},{&quot;app&quot;:&quot;cliente&quot;,&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;3.1.1 (17/09/2026): Cliente FAST ganhou bloqueio independente, preferências de som e avisos de rota, 15 minutos, 5 minutos e chegada.&quot;},{&quot;app&quot;:&quot;motorista&quot;,&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;3.1.1 (17/09/2026): FAST Motorista ganhou bloqueio independente, preferências de toque, histórico e atualizações exclusivas.&quot;},{&quot;app&quot;:&quot;cliente&quot;,&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;3.1.1 (17/09/2026): recuperação de senha do Cliente retorna ao endereço público correto, sem localhost:3000.&quot;},{&quot;app&quot;:&quot;motorista&quot;,&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;3.1.1 (17/09/2026): recuperação de senha do Motorista retorna ao endereço público correto, sem localhost:3000.&quot;},{&quot;app&quot;:&quot;fast&quot;,&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;3.1.1 (17/09/2026): Google Drive agora abre a pasta configurada pelo explorador interno ou diretamente no Drive.&quot;},{&quot;app&quot;:&quot;fast&quot;,&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;3.1.1 (17/09/2026): ID da pasta do Google Drive é preservado ao abrir e sincronizar.&quot;}]" data-r88="1" data-r89="1" data-r87="1" data-r127="1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https:; img-src 'self' data: blob: https: http:; connect-src 'self' https: data: blob:; font-src 'self' https: data:;">
   <script id="fast-clean-edition-bootstrap">
   (function(){
@@ -36062,6 +36062,27 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
     }
 
 
+    function fastEstadoPrazoRota(item, rota, dataSel) {
+      var concluida = (rota && rota.statusExecucao === 'CONCLUÍDA') || /conclu|entreg|finaliz/i.test(String((item && item.status) || ''));
+      if (concluida) return { classe:'verde', texto:'Concluída', detalhe:'Rota concluída' };
+      var partes = String(dataSel || '').split('-');
+      if (partes.length !== 3) return { classe:'laranja', texto:'Em andamento', detalhe:'Rota criada e ainda dentro do prazo' };
+      var inicio = new Date(+partes[0], +partes[1]-1, +partes[2], 8, 0, 0, 0);
+      var criadoRaw = (item && (item.criadoEm || item.createdAt || item.created_at)) || (rota && (rota.criadoEm || rota.createdAt || rota.created_at));
+      var criado = criadoRaw ? new Date(criadoRaw) : null;
+      if ((!criado || isNaN(criado.getTime())) && item && /^\d{12,}$/.test(String(item.id || ''))) criado = new Date(Number(item.id));
+      // Antes das 08h a contagem começa às 08h; depois disso começa na criação.
+      var base = criado && criado > inicio ? criado : inicio;
+      var limite = new Date(base.getTime() + 2 * 60 * 60 * 1000);
+      var agora = new Date();
+      if (agora > limite) return { classe:'vermelho', texto:'Atrasada', detalhe:'Pendente há mais de 2h (expediente a partir das 08:00)' };
+      return { classe:'laranja', texto:'Em andamento', detalhe:'Criada; fica vermelha após ' + limite.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}) };
+    }
+    function fastSinalizadorRotaHtml(item, rota, dataSel) {
+      var s = fastEstadoPrazoRota(item, rota, dataSel);
+      return '<span class="rd-route-signal rd-route-signal-' + s.classe + '" role="status" aria-label="' + s.texto + '" title="' + s.detalhe + '"><span></span><small>' + s.texto + '</small></span>';
+    }
+
     function renderizarSequencia() {
       const dataSel = document.getElementById('dpDataSequencia').value;
       const container = document.getElementById('containerSequencia');
@@ -36166,6 +36187,7 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
                 return '<div class="rd-ord-btns seq-ord-inline no-print">'
                   + '<button class="rd-ord-btn rd-btn-up' + (ps3 ? '' : ' is-disabled') + '"' + (ps3 ? '' : ' disabled') + ' title="Subir na fila (trocar com ' + io3 + 'º' + (io3 > 0 ? ' de cima' : '') + ')" onclick="moverSeq(\'' + dataSel + '\', ' + io3 + ', -1)"><i class="fa-solid fa-arrow-up"></i></button>'
                   + '<button class="rd-ord-btn rd-btn-down' + (pd3 ? '' : ' is-disabled') + '"' + (pd3 ? '' : ' disabled') + ' title="Descer na fila (trocar com o de baixo)" onclick="moverSeq(\'' + dataSel + '\', ' + io3 + ', 1)"><i class="fa-solid fa-arrow-down"></i></button>'
+                  + fastSinalizadorRotaHtml(item, rotaVinculada, dataSel)
                   + '</div>';
               })()}
             </div>
@@ -36292,6 +36314,7 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
               <td class="rd-ord-cell no-print"><strong>${idx + 1}º</strong><div class="rd-ord-btns">
                 <button class="rd-ord-btn rd-btn-up" ${podeSubir ? '' : 'disabled'} title="Subir na fila (trocar com ${idx}º${idx > 0 ? ' de cima' : ''})" onclick="moverSeq('${dataSel}', ${idxOriginal}, -1)"><i class="fa-solid fa-arrow-up"></i></button>
                 <button class="rd-ord-btn rd-btn-down" ${podeDescer ? '' : 'disabled'} title="Descer na fila (trocar com o de baixo)" onclick="moverSeq('${dataSel}', ${idxOriginal}, 1)"><i class="fa-solid fa-arrow-down"></i></button>
+                ${fastSinalizadorRotaHtml(item, rotaVinculada, dataSel)}
               </div></td>
               <td>${item.cliente || '-'}</td>
               <td>${item.origem || '-'}</td>
@@ -48244,6 +48267,7 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
               </div>
               <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;align-items:center;">
                 <button type="button" class="btn-success ripple" onclick="fastDriveSalvarEConectar()" style="user-select: none;"><i class="fa-brands fa-google-drive"></i> Conectar Google Drive</button>
+                <button type="button" class="btn-secondary ripple" onclick="fastDriveAbrirPastaExterna()" style="user-select: none;"><i class="fa-brands fa-google-drive"></i> Abrir pasta do Drive</button>
                 <button type="button" class="btn-secondary ripple" onclick="fastDriveSincronizarPendentes()" style="user-select: none;"><i class="fa-solid fa-rotate"></i> Sincronizar pendentes</button>
                 <button type="button" class="btn-secondary ripple" onclick="fastDriveDesconectar()" style="user-select: none;"><i class="fa-solid fa-link-slash"></i> Desconectar</button>
               </div>
@@ -53366,7 +53390,8 @@ body.fast-exclusive-app main { padding-bottom: 12px !important; }
     var token=sessionStorage.getItem(TOKEN)||localStorage.getItem(TOKEN)||'',box=el('fastDriveExplorerGrid'),title=el('fastDriveExplorerPath');if(!box)return;if(!token){box.innerHTML='<p>Conecte o Google Drive nas Configurações para visualizar os arquivos.</p>';return}title.textContent=name||'APP FAST';box.innerHTML='<p>Carregando arquivos…</p>';
     try{var q="'"+String(parent).replace(/'/g,"\\'")+"' in parents and trashed=false",url='https://www.googleapis.com/drive/v3/files?orderBy=folder,name&fields=files(id,name,mimeType,thumbnailLink,webViewLink)&pageSize=200&q='+encodeURIComponent(q),res=await fetch(url,{headers:{Authorization:'Bearer '+token}});if(res.status===401)throw new Error('A autorização expirou. Conecte o Drive novamente.');if(!res.ok)throw new Error('Não foi possível consultar o Drive.');var files=(await res.json()).files||[];box.innerHTML=files.length?'':'<p>A pasta está vazia.</p>';files.forEach(function(x){var b=document.createElement('button');b.type='button';b.className='fast-drive-entry';var folder=x.mimeType==='application/vnd.google-apps.folder';b.innerHTML=folder?'<i class="fa-solid fa-folder"></i><span>'+esc(x.name)+'</span>':(x.thumbnailLink?'<img alt="" src="'+esc(x.thumbnailLink)+'"><span>'+esc(x.name)+'</span>':'<i class="fa-solid fa-file-image"></i><span>'+esc(x.name)+'</span>');b.onclick=function(){folder?listDrive(x.id,x.name):(x.webViewLink?window.open(x.webViewLink,'_blank'):null)};box.appendChild(b)})}catch(e){box.innerHTML='<p style="color:#b91c1c">'+esc(e.message||e)+'</p>'}
   }
-  window.fastDriveAbrirArquivos=function(){var modal=el('fast70Modal'),title=el('fast70Titulo'),body=el('fast70Conteudo'),folder=localStorage.getItem(FOLDER)||'1IH_EujjBX57aQxC1moMlv695vqc-OY-p';if(!modal||!body)return;title.textContent='Arquivos do Google Drive';body.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;gap:8px"><strong id="fastDriveExplorerPath">APP FAST</strong><button class="btn-secondary" onclick="fastDriveAbrirArquivos()"><i class="fa-solid fa-rotate"></i> Atualizar</button></div><div id="fastDriveExplorerGrid"></div>';modal.classList.add('show');listDrive(folder,'APP FAST')};
+  window.fastDriveAbrirPastaExterna=function(){var folder=(el('fastDriveFolderId')&&el('fastDriveFolderId').value.trim())||localStorage.getItem(FOLDER)||'1IH_EujjBX57aQxC1moMlv695vqc-OY-p';if(el('fastDriveFolderId'))localStorage.setItem(FOLDER,folder);window.open('https://drive.google.com/drive/folders/'+encodeURIComponent(folder),'_blank','noopener')};
+  window.fastDriveAbrirArquivos=function(){var modal=el('fast70Modal'),title=el('fast70Titulo'),body=el('fast70Conteudo'),folder=(el('fastDriveFolderId')&&el('fastDriveFolderId').value.trim())||localStorage.getItem(FOLDER)||'1IH_EujjBX57aQxC1moMlv695vqc-OY-p';if(el('fastDriveFolderId'))localStorage.setItem(FOLDER,folder);if(!modal||!body){fastDriveAbrirPastaExterna();return}title.textContent='Arquivos do Google Drive';body.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;gap:8px"><strong id="fastDriveExplorerPath">APP FAST</strong><span><button class="btn-secondary" onclick="fastDriveAbrirArquivos()"><i class="fa-solid fa-rotate"></i> Atualizar</button> <button class="btn-secondary" onclick="fastDriveAbrirPastaExterna()"><i class="fa-solid fa-up-right-from-square"></i> Abrir no Drive</button></span></div><div id="fastDriveExplorerGrid"></div>';modal.classList.add('show');listDrive(folder,'APP FAST')};
   function install(){
     document.documentElement.setAttribute('data-fast-version',VERSION);var meta=document.querySelector('meta[name="fast-app-version"]');if(meta)meta.content=VERSION;['fastSplashVersion','fastGateVersionNum','fastVersaoLabel'].forEach(function(id){if(el(id))el(id).textContent=VERSION});if(el('navMenuVersao'))el('navMenuVersao').textContent='Versão '+VERSION;
     ['btnConfigPastaFoto','btnRecuperarFotos','statusPastaFoto','statusPastaFotoConfig'].forEach(function(id){var x=el(id);if(x)x.remove()});
@@ -53378,12 +53403,24 @@ body.fast-exclusive-app main { padding-bottom: 12px !important; }
     restoreConfig();setTimeout(restoreConfig,1500);setTimeout(restoreConfig,5000);
     var original=window.fastDriveSalvarEConectar;if(typeof original==='function'&&!original.fast241){window.fastDriveSalvarEConectar=function(){persistConfig();return original.apply(this,arguments)};window.fastDriveSalvarEConectar.fast241=true}
     migratePhotos().catch(function(e){console.warn('Migração segura das fotos:',e)});
-    var allChanges=[{app:'despesas',type:'melhorado',text:'3.0.0 (16/09/2026): ao selecionar a última despesa pela descrição ou local, a forma de pagamento também é preenchida, incluindo registros antigos e variações de nomenclatura.'}],exclusive=new URLSearchParams(location.search).get('exclusive')||'',scope=exclusive==='rotas-dia'?'rotas':exclusive==='despesas'?'despesas':'',changes=scope?allChanges.filter(function(x){return x.app===scope}):allChanges;window.fastUltimoModuloNovidades=changes;window.fastObterUltimasAtualizacoes=function(){return changes.slice()};var c=document.querySelector('meta[name="fast-app-changelog"]');if(c)c.content=JSON.stringify(changes);if(typeof window.fastPopularUltimasAtualizacoes==='function')window.fastPopularUltimasAtualizacoes()
+    var allChanges=[{app:'rotas',type:'novo',text:'3.1.1 (17/09/2026): sinalizador de prazo verde, laranja e vermelho nas Rotas do Dia, com atraso após duas horas e expediente iniciado às 08h.'},{app:'fast',type:'corrigido',text:'3.1.1 (17/09/2026): acesso à pasta do Google Drive corrigido e disponível também por abertura direta.'},{app:'cliente',type:'melhorado',text:'3.1.1 (17/09/2026): segurança, notificações de entrega e bloqueio independentes no Cliente FAST.'},{app:'motorista',type:'melhorado',text:'3.1.1 (17/09/2026): segurança, histórico, alertas e bloqueio independentes no FAST Motorista.'}],exclusive=new URLSearchParams(location.search).get('exclusive')||'',scope=exclusive==='rotas-dia'?'rotas':exclusive==='despesas'?'despesas':'',changes=scope?allChanges.filter(function(x){return x.app===scope}):allChanges;window.fastUltimoModuloNovidades=changes;window.fastObterUltimasAtualizacoes=function(){return changes.slice()};var c=document.querySelector('meta[name="fast-app-changelog"]');if(c)c.content=JSON.stringify(changes);if(typeof window.fastPopularUltimasAtualizacoes==='function')window.fastPopularUltimasAtualizacoes()
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){setTimeout(install,180)});else setTimeout(install,180);
 })();
 </script>
-<link rel="stylesheet" href="fast-logistics-2.4.css?v=3.0.0">
-<script src="fast-logistics-2.4.js?v=3.0.0"></script>
+<style id="fast-route-deadline-signal">
+.rd-route-signal{display:inline-flex;align-items:center;gap:6px;min-width:92px;padding:5px 8px;border-radius:999px;font-size:10px;font-weight:900;line-height:1;white-space:nowrap}
+.rd-route-signal>span{width:11px;height:11px;border-radius:50%;box-shadow:0 0 0 3px rgba(148,163,184,.16)}
+.rd-route-signal-verde{color:#047857;background:#d1fae5}.rd-route-signal-verde>span{background:#10b981;box-shadow:0 0 0 3px #a7f3d0}
+.rd-route-signal-laranja{color:#b45309;background:#ffedd5}.rd-route-signal-laranja>span{background:#f59e0b;box-shadow:0 0 0 3px #fed7aa}
+.rd-route-signal-vermelho{color:#b91c1c;background:#fee2e2}.rd-route-signal-vermelho>span{background:#ef4444;box-shadow:0 0 0 3px #fecaca}
+.rd-ord-btns{align-items:center}.rd-ord-cell .rd-route-signal small{display:none}.rd-ord-cell .rd-route-signal{min-width:0;padding:6px}
+@media(max-width:720px){.seq-ord-inline .rd-route-signal small{display:none}.seq-ord-inline .rd-route-signal{min-width:0;padding:6px}}
+</style>
+<script id="fast-route-deadline-refresh">
+setInterval(function(){try{var tab=document.getElementById('rotasDia');if(tab&&tab.classList.contains('active')&&typeof renderizarSequencia==='function')renderizarSequencia()}catch(e){}},60000);
+</script>
+<link rel="stylesheet" href="fast-logistics-2.4.css?v=3.1.1">
+<script src="fast-logistics-2.4.js?v=3.1.1"></script>
 <script src="desktop-bridge.js"></script>
 </body></html>
