@@ -30,7 +30,7 @@ public class MainActivity extends Activity {
         settings.setDatabaseEnabled(true);
         settings.setGeolocationEnabled(true);
         settings.setMediaPlaybackRequiresUserGesture(false);
-        settings.setUserAgentString(settings.getUserAgentString() + " FASTAndroid/3.1.5");
+        settings.setUserAgentString(settings.getUserAgentString() + " FASTAndroid/3.1.6");
         CookieManager.getInstance().setAcceptCookie(true);
         CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
         webView.setWebViewClient(new WebViewClient() {
