@@ -48,7 +48,7 @@ jobs:
         env:
           FAST_ANDROID_STORE_PASSWORD: ${{ secrets.FAST_ANDROID_STORE_PASSWORD }}
           FAST_ANDROID_KEY_PASSWORD: ${{ secrets.FAST_ANDROID_KEY_PASSWORD }}
-        run: gradle :app:assembleClienteRelease :app:assembleMotoristaRelease :app:assembleRotasRelease :app:assembleDespesasRelease --no-daemon
+        run: gradle :app:assembleClienteRelease :app:assembleMotoristaRelease :app:assembleRotasRelease :app:assembleDespesasRelease :app:assembleFastRelease :app:assembleLimpoRelease --no-daemon
       - name: Preparar downloads
         shell: bash
         run: |
@@ -56,6 +56,8 @@ jobs:
           cp android/app/build/outputs/apk/motorista/release/app-motorista-release.apk Motorista-FAST-Android.apk
           cp android/app/build/outputs/apk/rotas/release/app-rotas-release.apk Rotas-do-Dia-FAST-Android.apk
           cp android/app/build/outputs/apk/despesas/release/app-despesas-release.apk Despesas-FAST-Android.apk
+          cp android/app/build/outputs/apk/fast/release/app-fast-release.apk FAST-Servicos-Android.apk
+          cp android/app/build/outputs/apk/limpo/release/app-limpo-release.apk FAST-Limpo-Android.apk
       - uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
         with:
@@ -64,3 +66,5 @@ jobs:
             Motorista-FAST-Android.apk
             Rotas-do-Dia-FAST-Android.apk
             Despesas-FAST-Android.apk
+            FAST-Servicos-Android.apk
+            FAST-Limpo-Android.apk

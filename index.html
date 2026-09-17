@@ -26415,11 +26415,11 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
                   <tbody>
                     <tr>
                       <td class="fast-dl-nome"><i class="fa-solid fa-mobile-screen-button fast-dl-ico fast-dl-ico-principal"></i> APP FAST SERVIÇOS</td>
-                      <td class="fast-dl-acoes"><button type="button" class="btn-success ripple fast-dl-btn" onclick="pwaInstalar()"><i class="fa-solid fa-download"></i> INSTALAR</button></td>
+                      <td class="fast-dl-acoes"><button type="button" class="btn-success ripple fast-dl-btn" onclick="fastBaixarAndroid('fast')"><i class="fa-solid fa-download"></i> BAIXAR APK</button></td>
                     </tr>
                     <tr>
                       <td class="fast-dl-nome"><i class="fa-solid fa-wand-magic-sparkles fast-dl-ico fast-dl-ico-limpo"></i> FAST LIMPO · COMEÇAR DO ZERO</td>
-                      <td class="fast-dl-acoes"><button type="button" class="btn-success ripple fast-dl-btn" onclick="fastAbrirInstalacao('app-limpo/')"><i class="fa-solid fa-download"></i> INSTALAR</button></td>
+                      <td class="fast-dl-acoes"><button type="button" class="btn-success ripple fast-dl-btn" onclick="fastBaixarAndroid('limpo')"><i class="fa-solid fa-download"></i> BAIXAR APK</button></td>
                     </tr>
                     <tr>
                       <td class="fast-dl-nome"><i class="fa-brands fa-windows fast-dl-ico fast-dl-ico-windows"></i> FAST PARA WINDOWS</td>
@@ -50939,7 +50939,7 @@ window.fastMobileNav = function(ev, abaId, botao) {
       window.open(base+file,'_blank','noopener');
     };
     window.fastUrlAndroid = function(app){
-      var files={cliente:'Cliente-FAST-Android.apk',motorista:'Motorista-FAST-Android.apk',rotas:'Rotas-do-Dia-FAST-Android.apk',despesas:'Despesas-FAST-Android.apk'};
+      var files={cliente:'Cliente-FAST-Android.apk',motorista:'Motorista-FAST-Android.apk',rotas:'Rotas-do-Dia-FAST-Android.apk',despesas:'Despesas-FAST-Android.apk',fast:'FAST-Servicos-Android.apk',limpo:'FAST-Limpo-Android.apk'};
       var file=files[app]||files.cliente;
       return 'https://github.com/adaiascearataiana-gif/fastservicosapp/releases/latest/download/'+file;
     };
