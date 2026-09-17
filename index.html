@@ -50941,10 +50941,16 @@ window.fastMobileNav = function(ev, abaId, botao) {
     window.fastUrlAndroid = function(app){
       var files={cliente:'Cliente-FAST-Android.apk',motorista:'Motorista-FAST-Android.apk',rotas:'Rotas-do-Dia-FAST-Android.apk',despesas:'Despesas-FAST-Android.apk',fast:'FAST-Servicos-Android.apk',limpo:'FAST-Limpo-Android.apk'};
       var file=files[app]||files.cliente;
-      return 'https://github.com/adaiascearataiana-gif/fastservicosapp/releases/latest/download/'+file;
+      // Download direto via GitHub Pages (sem redirect duplo do Releases, que trava no Chrome Android)
+      return 'https://adaiascearataiana-gif.github.io/fastservicosapp/downloads/'+file;
     };
     window.fastBaixarAndroid = function(app){
-      location.href=window.fastUrlAndroid(app);
+      var url=window.fastUrlAndroid(app);
+      try{
+        var a=document.createElement('a');
+        a.href=url; a.download=''; a.rel='noopener';
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      }catch(e){ location.href=url; }
     };
     window.fastCompartilharAndroid = function(app){
       var url=window.fastUrlAndroid(app),nome=app==='cliente'?'Cliente FAST':'FAST Motorista';
