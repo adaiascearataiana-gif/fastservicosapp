@@ -4,8 +4,13 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowInsets;
 import android.webkit.CookieManager;
 import android.webkit.GeolocationPermissions;
 import android.webkit.ValueCallback;
@@ -14,6 +19,7 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.FrameLayout;
 
 public class MainActivity extends Activity {
     private WebView webView;
@@ -22,8 +28,54 @@ public class MainActivity extends Activity {
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
+
+        // ------------------------------------------------------------------
+        // Correcao "tela estourando" (Android 15 / targetSdk 35):
+        // A partir do Android 15 o sistema FORCA edge-to-edge e ignora
+        // statusBarColor/navigationBarColor. Sem tratar os insets, o conteudo
+        // do WebView fica POR BAIXO da barra de status e da barra de navegacao
+        // (cabecalho sobreposto + rodape cortado).
+        //
+        // Solucao: manter o layout "fitsSystemWindows" (conteudo dentro da area
+        // segura) e, quando o edge-to-edge for inevitavel, aplicar os insets do
+        // sistema como padding no container do WebView.
+        // ------------------------------------------------------------------
+        if (Build.VERSION.SDK_INT >= 35) {
+            // Android 15+: pede explicitamente para NAO desenhar atras das barras.
+            getWindow().setDecorFitsSystemWindows(true);
+        }
+
+        // Container que recebe os insets como padding (evita sobreposicao).
+        final FrameLayout root = new FrameLayout(this);
+        root.setBackgroundColor(Color.parseColor("#0F172A"));
+        root.setFitsSystemWindows(true);
+
         webView = new WebView(this);
-        setContentView(webView);
+        webView.setBackgroundColor(Color.parseColor("#0F172A"));
+        root.addView(webView, new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT));
+        setContentView(root);
+
+        // Aplica os insets do sistema (status bar / nav bar / gesto) como padding.
+        root.setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
+            @Override public WindowInsets onApplyWindowInsets(View v, WindowInsets insets) {
+                int top, bottom, left, right;
+                if (Build.VERSION.SDK_INT >= 30) {
+                    android.graphics.Insets bars = insets.getInsets(
+                            WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout());
+                    top = bars.top; bottom = bars.bottom; left = bars.left; right = bars.right;
+                } else {
+                    top = insets.getSystemWindowInsetTop();
+                    bottom = insets.getSystemWindowInsetBottom();
+                    left = insets.getSystemWindowInsetLeft();
+                    right = insets.getSystemWindowInsetRight();
+                }
+                v.setPadding(left, top, right, bottom);
+                return insets;
+            }
+        });
+
         WebSettings settings = webView.getSettings();
         settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true);
@@ -68,7 +120,7 @@ public class MainActivity extends Activity {
     }
 
     private void getOnBackPressedDispatcherCompat() {
-        // Activity clássica: o callback é tratado em onBackPressed para manter compatibilidade ampla.
+        // Activity classica: o callback e tratado em onBackPressed para manter compatibilidade ampla.
     }
 
     private void requestPermissionsIfNeeded() {
