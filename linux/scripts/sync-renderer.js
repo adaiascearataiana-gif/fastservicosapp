@@ -28,6 +28,9 @@ function syncMain() {
 syncMain();
 [
   'motorista.html',
+  'app-motorista/index.html',
+  'app-motorista/manifest.webmanifest',
+  'app-motorista/sw.js',
   'manifest.webmanifest',
   'manifest-motorista.webmanifest',
   'manifest-rotas.webmanifest',
