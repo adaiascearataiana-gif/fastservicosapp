@@ -1,7 +1,22 @@
 {
-  "version": "3.1.6",
-  "releasedAt": "2026-09-17T16:20:00-03:00",
+  "version": "3.1.7",
+  "releasedAt": "2026-09-18T17:10:00-03:00",
   "updates": [
+    {
+      "app": "fast",
+      "type": "corrigido",
+      "text": "3.1.7 (18/09/2026): barra fixa inferior reduzida e alinhada à barra de navegação do navegador, sem espaço excessivo."
+    },
+    {
+      "app": "fast",
+      "type": "novo",
+      "text": "3.1.7 (18/09/2026): botão de usuário no cabeçalho com nome, identificação (ID) e perfil, além de acesso rápido à Área Protegida e à saída."
+    },
+    {
+      "app": "fast",
+      "type": "corrigido",
+      "text": "3.1.7 (18/09/2026): versão do site alinhada com os aplicativos Android, Windows e Linux (fim da divergência 3.1.6 x 3.1.7)."
+    },
     {
       "app": "rotas",
       "type": "corrigido",
