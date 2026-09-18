@@ -1,6 +1,6 @@
 (function(){
   'use strict';
-  var VERSION='3.1.7', STORE='fast_logistics_v2416', state={watchId:null,lastPosition:null};
+  var VERSION='3.1.8', STORE='fast_logistics_v2416', state={watchId:null,lastPosition:null};
   function el(id){return document.getElementById(id)}
   function esc(v){var d=document.createElement('div');d.textContent=String(v==null?'':v);return d.innerHTML}
   function norm(v){return String(v||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim()}
@@ -160,7 +160,7 @@
     document.documentElement.setAttribute('data-fast-version',VERSION);
     var m=document.querySelector('meta[name="fast-app-version"]');if(m)m.content=VERSION;
     var immediate=document.querySelector('meta[name="fast-app-changelog-immediate"]');if(immediate)immediate.content=VERSION;
-    var latest=document.querySelector('meta[name="fast-latest-update"]');if(latest)latest.content='3.1.7: APKs Android independentes de Cliente, Motorista, Rotas do Dia e Despesas.';
+    var latest=document.querySelector('meta[name="fast-latest-update"]');if(latest)latest.content='3.1.8: login e autenticacao de senha pelo banco de dados (Supabase Auth); APKs Android independentes de Cliente, Motorista, Rotas do Dia e Despesas.';
     var date=document.querySelector('meta[name="fast-app-date"]');if(date)date.content='2026-09-17T16:20:00-03:00';
     var changelog=document.querySelector('meta[name="fast-app-changelog"]');if(changelog)changelog.content=JSON.stringify(changes);
     window.fastUltimoModuloNovidades=changes;
