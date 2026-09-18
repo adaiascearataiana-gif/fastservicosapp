@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="fast-linux-desktop" data-fast-version="3.1.7"><head>
+<html lang="pt-BR" class="fast-linux-desktop" data-fast-version="3.1.8"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
   <meta name="theme-color" content="#4f46e5">
@@ -21,7 +21,7 @@
   <meta name="fast-github-branch" content="main">
   <meta name="fast-github-path" content="index.html">
   <meta name="fast-github-token-env" content="GH_TOKEN">
-  <meta name="fast-app-version" content="3.1.7">
+  <meta name="fast-app-version" content="3.1.8">
   <meta name="fast-app-date" content="2026-09-17T16:20:00-03:00">
   <meta name="fast-latest-update" content="3.1.7: APKs Android independentes de Cliente, Motorista, Rotas do Dia e Despesas.">
   <!-- r92: verificação automática de nova versão ao abrir; Verificar Atualizações com cache-busting e sem fallback no-cors inválido. -->
@@ -55952,5 +55952,250 @@ setInterval(function(){try{var tab=document.getElementById('rotasDia');if(tab&&t
     setInterval(render,4000);
   })();
   </script>
+
+
+<!-- FAST 3.1.8 — Autenticacao de senha e login pelo banco de dados (Supabase Auth) -->
+<style id="fast-318-auth-db-style">
+  #fastAuthDbBadge{display:none;align-items:center;gap:7px;justify-content:center;margin:0 auto 12px;padding:7px 12px;border-radius:999px;font-size:12px;font-weight:800;letter-spacing:.2px;max-width:100%;width:max-content;border:1px solid rgba(148,163,184,.35);background:rgba(148,163,184,.12);color:rgba(255,255,255,.82)}
+  #fastAuthDbBadge.show{display:inline-flex}
+  #fastAuthDbBadge .fast-auth-db-dot{width:9px;height:9px;border-radius:50%;background:#f59e0b;flex:0 0 auto}
+  #fastAuthDbBadge.ok{border-color:rgba(134,239,172,.5);background:rgba(22,163,74,.16);color:#dcfce7}
+  #fastAuthDbBadge.ok .fast-auth-db-dot{background:#22c55e}
+  #fastAuthDbBadge.off{border-color:rgba(252,165,165,.5);background:rgba(220,38,38,.16);color:#fee2e2}
+  #fastAuthDbBadge.off .fast-auth-db-dot{background:#ef4444}
+</style>
+<script id="fast-318-auth-db">
+(function(){
+  'use strict';
+  var VERSION='3.1.8';
+  var PROJECT='https://yhxuplhohhetzloxvgku.supabase.co';
+  var KEY='sb_publishable_jlsorkXci3_0Hla7gt8z1g_pe6zOT19';
+  var K_SESS='fast_supa_session';
+  var K_CRED='fast_auth_cred';
+  var K_ENABLED='fast_auth_enabled';
+  var K_BIO='fast_auth_bio';
+  var K_FAIL='fast_auth_fails';
+  var K_EMP_HASH='fast_empresa_senha_hash';
+  var ITER=600000;
+  var busy=false;
+
+  function el(id){return document.getElementById(id)}
+  function validEmail(v){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v||'').trim())}
+  function companyEmail(){
+    try{var d=JSON.parse(localStorage.getItem('fast_dados_empresa')||'{}');return String(d.empEmail||'').trim().toLowerCase()}catch(e){return ''}
+  }
+  function authHeaders(token){var h={'Content-Type':'application/json','apikey':KEY};if(token)h.Authorization='Bearer '+token;return h}
+  async function authRequest(path,options){
+    options=options||{};
+    var res=await fetch(PROJECT+'/auth/v1'+path,{method:options.method||'POST',headers:authHeaders(options.token||''),body:options.body===undefined?undefined:JSON.stringify(options.body)});
+    var data={};try{data=await res.json()}catch(e){}
+    if(!res.ok){var err=new Error(data.msg||data.message||data.error_description||data.error||('Erro HTTP '+res.status));err.status=res.status;err.payload=data;throw err}
+    return data;
+  }
+
+  // ---- Sessao real do Supabase (access_token + refresh_token) ----
+  function salvarSessao(payload){
+    try{
+      if(!payload||!payload.access_token)return;
+      localStorage.setItem(K_SESS,JSON.stringify({
+        access_token:payload.access_token,
+        refresh_token:payload.refresh_token||'',
+        expires_at:Date.now()+((payload.expires_in||3600)*1000)
+      }));
+    }catch(e){}
+  }
+  function lerSessao(){try{return JSON.parse(localStorage.getItem(K_SESS)||'null')}catch(e){return null}}
+  function tokenValido(){
+    var s=lerSessao();
+    return (s&&s.access_token&&(!s.expires_at||Date.now()<s.expires_at))?s.access_token:null;
+  }
+  async function renovarSessao(){
+    try{
+      var s=lerSessao();
+      if(!s||!s.refresh_token)return;
+      if(s.expires_at&&Date.now()<s.expires_at-120000)return;
+      var resp=await authRequest('/token?grant_type=refresh_token',{body:{refresh_token:s.refresh_token}});
+      salvarSessao(resp);
+    }catch(e){}
+  }
+
+  // ---- Credencial local (PBKDF2) — mantida como cache offline ----
+  function b64(buf){var b=new Uint8Array(buf),s='';for(var i=0;i<b.length;i++)s+=String.fromCharCode(b[i]);return btoa(s)}
+  function b64buf(str){var bin=atob(str),b=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)b[i]=bin.charCodeAt(i);return b}
+  async function derivar(senha,salt,iter){
+    var key=await crypto.subtle.importKey('raw',new TextEncoder().encode(senha),{name:'PBKDF2'},false,['deriveBits']);
+    var bits=await crypto.subtle.deriveBits({name:'PBKDF2',salt:salt,iterations:iter||ITER,hash:'SHA-256'},key,256);
+    return b64(bits);
+  }
+  async function sincronizarCredencialLocal(senha,usuario){
+    try{
+      var antigo={};try{antigo=JSON.parse(localStorage.getItem(K_CRED)||'{}')}catch(e){}
+      var user=String(usuario||antigo.user||'admin');
+      var salt=crypto.getRandomValues(new Uint8Array(16));
+      var hash=await derivar(senha,salt,ITER);
+      localStorage.setItem(K_CRED,JSON.stringify({user:user,saltB64:b64(salt),hashB64:hash,iter:ITER,created:Date.now(),origem:'supabase'}));
+      localStorage.setItem(K_ENABLED,'1');
+      localStorage.removeItem(K_BIO);
+      localStorage.removeItem(K_FAIL);
+      localStorage.removeItem(K_EMP_HASH);
+      return true;
+    }catch(e){return false}
+  }
+  async function verificarCredencialLocal(usuario,senha){
+    try{
+      var cred=JSON.parse(localStorage.getItem(K_CRED)||'null');
+      if(!cred)return false;
+      if(String(cred.user||'').toLowerCase()!==String(usuario||'').toLowerCase())return false;
+      var hash=await derivar(senha,b64buf(cred.saltB64),cred.iter||ITER);
+      if(hash.length!==String(cred.hashB64).length)return false;
+      var diff=0;for(var i=0;i<hash.length;i++)diff|=hash.charCodeAt(i)^cred.hashB64.charCodeAt(i);
+      return diff===0;
+    }catch(e){return false}
+  }
+
+  // ---- Indicador visual no gate ----
+  function badge(){
+    var b=el('fastAuthDbBadge');
+    if(b)return b;
+    var gate=el('fastLoginGate');if(!gate)return null;
+    var card=gate.querySelector('.fast-gate-card')||gate.firstElementChild||gate;
+    b=document.createElement('div');b.id='fastAuthDbBadge';
+    b.innerHTML='<span class="fast-auth-db-dot"></span><span id="fastAuthDbBadgeTxt">Verificando banco de dados…</span>';
+    if(card&&card.firstChild)card.insertBefore(b,card.firstChild);else card.appendChild(b);
+    return b;
+  }
+  function setBadge(state,text){
+    var b=badge();if(!b)return;
+    b.className='show '+(state||'');
+    var t=el('fastAuthDbBadgeTxt');if(t)t.textContent=text;
+  }
+  async function verificarBanco(){
+    try{
+      var res=await fetch(PROJECT+'/auth/v1/health',{headers:{apikey:KEY}});
+      if(res.ok){setBadge('ok','Login pelo banco de dados (Supabase Auth) ativo');return true}
+      throw new Error('http '+res.status);
+    }catch(e){setBadge('off','Sem conexão — login local neste dispositivo');return false}
+  }
+
+  // ---- Login: banco de dados primeiro, local como fallback ----
+  async function loginBanco(usuario,senha){
+    var email=companyEmail();
+    if(!validEmail(email))return {ok:false,motivo:'sem-email'};
+    try{
+      var resp=await authRequest('/token?grant_type=password',{body:{email:email,password:senha}});
+      salvarSessao(resp);
+      await sincronizarCredencialLocal(senha,usuario);
+      return {ok:true,origem:'banco'};
+    }catch(e){
+      if(e&&e.status===400)return {ok:false,motivo:'credencial'};
+      if(e&&e.status===429)return {ok:false,motivo:'limite'};
+      return {ok:false,motivo:'rede'};
+    }
+  }
+
+  function instalarLogin(){
+    var anterior=window.fastGateDoLogin;
+    if(typeof anterior!=='function'||anterior.fast318)return;
+    var wrapped=async function(){
+      if(busy)return;
+      var usuario=(el('fastGateUser')||{}).value||'';
+      var senha=(el('fastGatePwd')||{}).value||'';
+      if(!usuario||!senha)return anterior.apply(this,arguments);
+      busy=true;
+      var btn=el('fastGateLoginBtn');if(btn)btn.disabled=true;
+      var err=el('fastGateErr');if(err)err.textContent='';
+      var loading=el('fastGateLoading');if(loading)loading.classList.add('show');
+      var resultado;
+      try{resultado=await loginBanco(usuario,senha)}
+      catch(e){resultado={ok:false,motivo:'rede'}}
+      finally{busy=false;if(loading)loading.classList.remove('show');if(btn)btn.disabled=false}
+      if(resultado.ok){
+        // Banco confirmou a senha: a credencial local ja foi sincronizada.
+        // Deixa o fluxo local concluir (sessao, biometria, navegacao).
+        return anterior.apply(this,arguments);
+      }
+      if(resultado.motivo==='credencial'){
+        // Senha nao confere no banco. Se houver credencial local valida
+        // (ex.: conta antiga ainda nao migrada), permite o acesso local.
+        var localOk=false;
+        try{localOk=await verificarCredencialLocal(usuario,senha)}catch(e){}
+        if(localOk)return anterior.apply(this,arguments);
+        if(err)err.textContent='Usuário ou senha incorretos.';
+        var p=el('fastGatePwd');if(p){p.value='';p.focus()}
+        return;
+      }
+      if(resultado.motivo==='limite'){
+        if(err)err.textContent='Muitas tentativas. Aguarde alguns minutos e tente novamente.';
+        return;
+      }
+      // Sem conexao / sem e-mail cadastrado: usa o fluxo local.
+      return anterior.apply(this,arguments);
+    };
+    wrapped.fast318=true;
+    window.fastGateDoLogin=wrapped;
+  }
+
+  // ---- Criacao de acesso: garante conta + sessao no Supabase ----
+  function instalarCriacao(){
+    var anterior=window.fastGateDoCreate;
+    if(typeof anterior!=='function'||anterior.fast318)return;
+    var wrapped=async function(){
+      var usuario=(el('fastGateCreateUser')||{}).value||'';
+      var senha=(el('fastGateCreatePwd')||{}).value||'';
+      var resultado=await anterior.apply(this,arguments);
+      var gate=el('fastLoginGate');
+      var email=companyEmail();
+      if(senha&&validEmail(email)&&gate&&!gate.classList.contains('show')){
+        try{
+          var resp=await authRequest('/token?grant_type=password',{body:{email:email,password:senha}});
+          salvarSessao(resp);
+        }catch(e){
+          try{
+            var resp2=await authRequest('/signup',{body:{email:email,password:senha,data:{fast_user:usuario||'admin',app:'FAST Serviços'}}});
+            salvarSessao(resp2);
+          }catch(e2){}
+        }
+      }
+      return resultado;
+    };
+    wrapped.fast318=true;
+    window.fastGateDoCreate=wrapped;
+  }
+
+  // ---- Recuperacao: guarda a sessao do link e sincroniza a credencial local ----
+  function instalarRecuperacao(){
+    var anterior=window.fastGateSaveRecoveredPassword;
+    if(typeof anterior!=='function'||anterior.fast318)return;
+    var wrapped=async function(){
+      var senha=(el('fastGateNewPassword')||{}).value||'';
+      var hash=new URLSearchParams(location.hash.replace(/^#/,''));
+      var token=hash.get('type')==='recovery'?(hash.get('access_token')||''):'';
+      if(token&&senha){
+        try{
+          var dados=await authRequest('/user',{method:'GET',token:token});
+          var usuario=(dados&&dados.user_metadata&&dados.user_metadata.fast_user)||'admin';
+          await sincronizarCredencialLocal(senha,usuario);
+        }catch(e){}
+      }
+      return anterior.apply(this,arguments);
+    };
+    wrapped.fast318=true;
+    window.fastGateSaveRecoveredPassword=wrapped;
+  }
+
+  function boot(){
+    instalarLogin();
+    instalarCriacao();
+    instalarRecuperacao();
+    verificarBanco();
+    renovarSessao();
+    setInterval(renovarSessao,25*60*1000);
+    // Reinstala caso outro modulo redefina os handlers depois do boot.
+    setTimeout(function(){instalarLogin();instalarCriacao();instalarRecuperacao()},400);
+    setTimeout(function(){instalarLogin();instalarCriacao();instalarRecuperacao()},1500);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+})();
+</script>
 
 </body></html>
