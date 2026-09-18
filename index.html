@@ -6900,9 +6900,9 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
     top: 62px !important;
     right: 8px !important;
     left: auto !important;
-    width: min(400px, calc(100vw - 24px)) !important;
+    width: min(400px, calc(100vw - 16px)) !important;
     min-width: 0 !important;
-    max-width: 400px !important;
+    max-width: calc(100vw - 16px) !important;
     max-height: min(66dvh, 540px) !important;
     padding: 8px !important;
     border-radius: 18px !important;
@@ -55435,7 +55435,7 @@ setInterval(function(){try{var tab=document.getElementById('rotasDia');if(tab&&t
     .top-nav-brand {
       flex: 1 1 auto !important;
       min-width: 0 !important;
-      max-width: calc(100% - 112px) !important;
+      max-width: calc(100% - 152px) !important;
       overflow: hidden !important;
       white-space: nowrap !important;
       text-overflow: ellipsis !important;
@@ -55445,7 +55445,7 @@ setInterval(function(){try{var tab=document.getElementById('rotasDia');if(tab&&t
     .top-nav-right {
       flex: 0 0 auto !important;
       min-width: 0 !important;
-      max-width: 112px !important;
+      max-width: none !important;
       margin-left: auto !important;
       gap: 6px !important;
       overflow: visible !important;
@@ -55455,6 +55455,19 @@ setInterval(function(){try{var tab=document.getElementById('rotasDia');if(tab&&t
     .top-nav-right .nav-dropdown {
       flex: 0 0 auto !important;
       min-width: 0 !important;
+    }
+
+    /* 2026-09-18e: o container do menu tinha backdrop-filter (efeito glass),
+       que cria um containing block para descendentes position:fixed. Com isso
+       o painel .nav-dropdown-menu era posicionado a partir do BOTAO (que
+       estourava a tela a direita) e saia pela borda. Removemos o filtro do
+       container; o visual glass permanece no proprio painel do menu. */
+    #navDropdown.nav-dropdown {
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
     }
 
     .bell-btn {
