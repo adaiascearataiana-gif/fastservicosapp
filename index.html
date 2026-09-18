@@ -29175,10 +29175,19 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
     });
 
     // --- Cabeçalhos padrão para todas as requisições ao Supabase ---
+    // FAST 2026-09-18c: agora usa o token real da sessão logada (quando
+    // existir), em vez de mandar sempre a chave pública genérica para
+    // todo mundo. Isso é o que permite travar o banco de dados exigindo
+    // login de verdade nas políticas de RLS. Se ainda não houver sessão
+    // capturada (ex.: app recém-atualizado, usuário nunca digitou a
+    // senha de novo), cai de volta na chave pública, mantendo o app
+    // funcionando com as políticas antigas até a migração acontecer.
     function supabaseHeaders(extra) {
+      var tokenUsuario = (typeof window.fastObterTokenSupabase === 'function')
+        ? window.fastObterTokenSupabase() : null;
       const h = {
         'apikey': SUPABASE_KEY,
-        'Authorization': 'Bearer ' + SUPABASE_KEY,
+        'Authorization': 'Bearer ' + (tokenUsuario || SUPABASE_KEY),
         'Content-Type': 'application/json'
       };
       if (extra) Object.assign(h, extra);
@@ -54189,11 +54198,49 @@ body.fast-exclusive-app main { padding-bottom: 12px !important; }
   async function ensureAuthAccount(email,password,user){
     if(!validEmail(email)||!password)return;
     try{
-      await authRequest('/token?grant_type=password',{body:{email:email,password:password}});
+      var resp=await authRequest('/token?grant_type=password',{body:{email:email,password:password}});
+      salvarSessaoSupabase(resp);
       return;
     }catch(e){}
     try{
-      await authRequest('/signup',{body:{email:email,password:password,data:{fast_user:user||'admin',app:'FAST Serviços'}}});
+      var resp2=await authRequest('/signup',{body:{email:email,password:password,data:{fast_user:user||'admin',app:'FAST Serviços'}}});
+      salvarSessaoSupabase(resp2);
+    }catch(e){}
+  }
+
+  // FAST 2026-09-18c — guarda a sessão real (access_token + refresh_token)
+  // vinda do Supabase Auth, para as leituras/escritas de rotas, despesas,
+  // destinos etc. pararem de usar só a chave pública genérica.
+  var K_SUPA_SESSION='fast_supa_session';
+  function salvarSessaoSupabase(payload){
+    try{
+      if(!payload||!payload.access_token)return;
+      var dados={
+        access_token:payload.access_token,
+        refresh_token:payload.refresh_token||'',
+        expires_at:Date.now()+((payload.expires_in||3600)*1000)
+      };
+      localStorage.setItem(K_SUPA_SESSION,JSON.stringify(dados));
+    }catch(e){}
+  }
+  window.fastObterTokenSupabase=function(){
+    try{
+      var s=JSON.parse(localStorage.getItem(K_SUPA_SESSION)||'null');
+      if(s&&s.access_token&&(!s.expires_at||Date.now()<s.expires_at))return s.access_token;
+    }catch(e){}
+    return null;
+  };
+  // Renova o token antes de vencer (o access_token do Supabase dura ~1h).
+  // Isso cobre quem abre o app só com biometria/digital, sem digitar a
+  // senha de novo — sem isso, essas pessoas perderiam acesso ao banco
+  // depois de 1h, mesmo com o app aberto normalmente.
+  async function atualizarSessaoSupabase(){
+    try{
+      var s=JSON.parse(localStorage.getItem(K_SUPA_SESSION)||'null');
+      if(!s||!s.refresh_token)return;
+      if(s.expires_at&&Date.now()<s.expires_at-120000)return;
+      var resp=await authRequest('/token?grant_type=refresh_token',{body:{refresh_token:s.refresh_token}});
+      salvarSessaoSupabase(resp);
     }catch(e){}
   }
   function wrapLoginForMigration(){
@@ -54240,6 +54287,11 @@ body.fast-exclusive-app main { padding-bottom: 12px !important; }
     window.fastUltimoModuloNovidades=currentChanges;
     wrapLoginForMigration();
     wrapCreateForMigration();
+    // FAST 2026-09-18c: tenta renovar a sessão real do Supabase assim que o
+    // app abre (cobre quem entra só com biometria) e depois a cada 25min
+    // enquanto o app fica aberto, para nunca deixar o token vencer em uso.
+    atualizarSessaoSupabase();
+    setInterval(atualizarSessaoSupabase, 25*60*1000);
     try{if(typeof window.fastPopularUltimasAtualizacoes==='function')window.fastPopularUltimasAtualizacoes()}catch(e){}
     if(recoveryToken())showResetForm();
   }
