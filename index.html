@@ -54954,20 +54954,34 @@ setInterval(function(){try{var tab=document.getElementById('rotasDia');if(tab&&t
     body.fast-v2 .top-nav,
     body.fast-edition-mobile .top-nav,
     body.fast-edition-desktop.fast-pro .top-nav {
-      padding-top: 28px !important;
-      height: 84px !important;
-      min-height: 84px !important;
+      padding-top: 42px !important;
+      height: 98px !important;
+      min-height: 98px !important;
     }
     main,
     body.fast-pro main,
     body.fast-v2 main,
     body.fast-edition-mobile main,
     body.fast-edition-desktop.fast-pro main {
-      padding-top: 100px !important;
+      padding-top: 114px !important;
     }
     .bottom-nav {
       padding-bottom: 20px !important;
     }
+  }
+
+  /* Rolagem vertical dentro das tabelas, para não precisar descer a
+     página inteira até o fim para ver a última linha. */
+  .table-container {
+    max-height: 58vh !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+  .table-container thead th {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 2 !important;
+    background: var(--card-bg, #fff) !important;
   }
 </style>
 <script id="fast-status-bar-hardfix-2026-09-18b-js">
@@ -54990,7 +55004,7 @@ setInterval(function(){try{var tab=document.getElementById('rotasDia');if(tab&&t
 
       /* Mínimo de segurança: cobre o caso de o WebView não repassar
          env(safe-area-inset-top) nem entender max()/calc() no CSS. */
-      var minimo = 28;
+      var minimo = 42;
       var folga = Math.max(insetTopo, minimo);
 
       topo.style.setProperty('padding-top', px(folga), 'important');
