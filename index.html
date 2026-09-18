@@ -54941,4 +54941,89 @@ setInterval(function(){try{var tab=document.getElementById('rotasDia');if(tab&&t
 })();
 </script>
 
+<!-- FAST 2026-09-18b — reforço direto contra a barra de status sobrepondo o
+     cabeçalho. As camadas anteriores usam var()/calc()/env(), que dependem
+     do WebView entender essas funções. Este bloco usa valores fixos, sem
+     nenhuma dessas funções, como garantia mínima, e a versão em JS abaixo
+     aplica o mesmo resultado via estilo inline, que sempre vence a cascata
+     do CSS (exceto outro inline definido depois). -->
+<style id="fast-status-bar-hardfix-2026-09-18b">
+  @media (max-width: 900px) {
+    .top-nav,
+    body.fast-pro .top-nav,
+    body.fast-v2 .top-nav,
+    body.fast-edition-mobile .top-nav,
+    body.fast-edition-desktop.fast-pro .top-nav {
+      padding-top: 28px !important;
+      height: 84px !important;
+      min-height: 84px !important;
+    }
+    main,
+    body.fast-pro main,
+    body.fast-v2 main,
+    body.fast-edition-mobile main,
+    body.fast-edition-desktop.fast-pro main {
+      padding-top: 100px !important;
+    }
+    .bottom-nav {
+      padding-bottom: 20px !important;
+    }
+  }
+</style>
+<script id="fast-status-bar-hardfix-2026-09-18b-js">
+(function(){
+  'use strict';
+  function px(n){ return n + 'px'; }
+  function aplicar(){
+    try{
+      var vw = Math.max(document.documentElement.clientWidth||0, window.innerWidth||0);
+      if (!vw || vw > 900) return; /* só em telas estreitas (celular) */
+
+      var topo = document.querySelector('.top-nav');
+      var conteudo = document.querySelector('main');
+      if(!topo) return;
+
+      /* Insets reais, quando o WebView informar (0 se não suportar). */
+      var cs = getComputedStyle(document.documentElement);
+      var insetTopoStr = cs.getPropertyValue('--fast-safe-top') || '0px';
+      var insetTopo = parseFloat(insetTopoStr) || 0;
+
+      /* Mínimo de segurança: cobre o caso de o WebView não repassar
+         env(safe-area-inset-top) nem entender max()/calc() no CSS. */
+      var minimo = 28;
+      var folga = Math.max(insetTopo, minimo);
+
+      topo.style.setProperty('padding-top', px(folga), 'important');
+      topo.style.setProperty('height', px(56 + folga), 'important');
+      topo.style.setProperty('min-height', px(56 + folga), 'important');
+      topo.style.setProperty('box-sizing', 'border-box', 'important');
+
+      if (conteudo) {
+        conteudo.style.setProperty('padding-top', px(72 + folga), 'important');
+        conteudo.style.setProperty('box-sizing', 'border-box', 'important');
+      }
+
+      /* Mesmo raciocínio para a barra de baixo, contra a barra de
+         navegação/gestos do Android por cima do rodapé do app. */
+      var rodape = document.querySelector('.bottom-nav');
+      if (rodape) {
+        var csBottom = getComputedStyle(document.documentElement);
+        var insetBaixoStr = csBottom.getPropertyValue('--fast-safe-bottom') || '0px';
+        var insetBaixo = parseFloat(insetBaixoStr) || 0;
+        var folgaBaixo = Math.max(insetBaixo, 16);
+        rodape.style.setProperty('padding-bottom', px(folgaBaixo), 'important');
+        rodape.style.setProperty('box-sizing', 'border-box', 'important');
+      }
+    }catch(e){ /* nunca deixa o app quebrar por causa disso */ }
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',aplicar,{once:true});
+  else aplicar();
+  window.addEventListener('resize', aplicar, {passive:true});
+  window.addEventListener('orientationchange', aplicar, {passive:true});
+  if(window.visualViewport) window.visualViewport.addEventListener('resize', aplicar, {passive:true});
+  setTimeout(aplicar, 300);
+  setTimeout(aplicar, 1000);
+})();
+</script>
+
 </body></html>
