@@ -58,7 +58,7 @@ function sair(){localStorage.removeItem(KS);sessao=null;tela('auth')}addEventLis
 })();
 </script>
 <script id="cliente-novidades-exclusivas">
-(function(){fetch('../updates.json?v=3.1.8',{cache:'no-store'}).then(function(r){return r.json()}).then(function(data){var rows=(data.updates||[]).filter(function(x){return x.app==='cliente'}),card=document.getElementById('clienteUpdatesCard'),list=document.getElementById('clienteUpdatesList');if(!rows.length||!card||!list)return;list.innerHTML=rows.map(function(x){return '<div class="notice"><b>'+(x.type==='corrigido'?'Corrigido':'Melhorado')+'</b><div>'+esc(x.text)+'</div></div>'}).join('');card.classList.remove('hide')}).catch(function(){})})();
+(function(){var ATUAL='3.1.8';fetch('../updates.json?v=3.1.8',{cache:'no-store'}).then(function(r){return r.json()}).then(function(data){var rows=(data.updates||[]).filter(function(x){return x.app==='cliente'&&String(x.text||'').indexOf(ATUAL+' (')===0}),card=document.getElementById('clienteUpdatesCard'),list=document.getElementById('clienteUpdatesList');if(!rows.length||!card||!list)return;list.innerHTML=rows.map(function(x){return '<div class="notice"><b>'+(x.type==='corrigido'?'Corrigido':'Melhorado')+'</b><div>'+esc(x.text)+'</div></div>'}).join('');card.classList.remove('hide')}).catch(function(){})})();
 </script>
 <script id="cliente-seguranca-config-v310">
 (function(){
