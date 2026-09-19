@@ -4040,6 +4040,11 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
       user-select: none; touch-action: none;
     }
     .floating-select-box.show { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
+    /* v3.1.9: quando o balão é arrastado, a posição passa a ser controlada por
+       left/top inline (px). Zeramos o transform de centralização para o balão
+       ficar exatamente sob o dedo/cursor em QUALQUER largura de tela. */
+    .floating-select-box.fsb-positioned,
+    .floating-select-box.fsb-positioned.show { transform: none !important; }
     .floating-select-box.dragging {
       box-shadow: 0 20px 60px rgba(0,0,0,0.40), 0 0 0 5px rgba(99,102,241,0.18), inset 0 1px 0 rgba(255,255,255,0.6);
       cursor: grabbing !important; transition: none;
