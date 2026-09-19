@@ -1,6 +1,6 @@
 (function(){
   'use strict';
-  var VERSION='3.1.7', STORE='fast_logistics_v2416', state={watchId:null,lastPosition:null};
+  var VERSION='3.1.8', STORE='fast_logistics_v2416', state={watchId:null,lastPosition:null};
   function el(id){return document.getElementById(id)}
   function esc(v){var d=document.createElement('div');d.textContent=String(v==null?'':v);return d.innerHTML}
   function norm(v){return String(v||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim()}

@@ -1,101 +1,71 @@
 {
-  "version": "3.1.7",
-  "releasedAt": "2026-09-18T17:10:00-03:00",
+  "version": "3.1.8",
+  "releasedAt": "2026-09-19T05:00:00-03:00",
   "updates": [
     {
       "app": "fast",
-      "type": "corrigido",
-      "text": "3.1.7 (18/09/2026): barra fixa inferior reduzida e alinhada à barra de navegação do navegador, sem espaço excessivo."
+      "type": "novo",
+      "text": "3.1.8 (19/09/2026): login e autenticação de senha pelo banco de dados (Supabase Auth), com sessão real, renovação automática e sincronização da credencial local."
     },
     {
       "app": "fast",
       "type": "novo",
-      "text": "3.1.7 (18/09/2026): botão de usuário no cabeçalho com nome, identificação (ID) e perfil, além de acesso rápido à Área Protegida e à saída."
+      "text": "3.1.8 (19/09/2026): recuperação de senha pelo banco de dados, com envio de e-mail e redefinição segura."
     },
     {
       "app": "fast",
       "type": "corrigido",
-      "text": "3.1.7 (18/09/2026): versão do site alinhada com os aplicativos Android, Windows e Linux (fim da divergência 3.1.6 x 3.1.7)."
-    },
-    {
-      "app": "rotas",
-      "type": "corrigido",
-      "text": "3.1.6 (17/09/2026): Rotas do Dia ganhou APK Android próprio, independente e com download direto."
-    },
-    {
-      "app": "despesas",
-      "type": "corrigido",
-      "text": "3.1.6 (17/09/2026): Despesas ganhou APK Android próprio, independente e com download direto."
+      "text": "3.1.8 (19/09/2026): botões Área Protegida e Sair alinhados à esquerda no painel do usuário."
     },
     {
       "app": "fast",
       "type": "melhorado",
-      "text": "3.1.6 (17/09/2026): Central de Downloads passou a oferecer APK direto para Cliente, Motorista, Rotas do Dia e Despesas."
-    },
-    {
-      "app": "cliente",
-      "type": "corrigido",
-      "text": "3.1.3 (17/09/2026): Cliente FAST ganhou APK Android próprio, com download direto e instalação independente do FAST."
-    },
-    {
-      "app": "motorista",
-      "type": "corrigido",
-      "text": "3.1.3 (17/09/2026): FAST Motorista ganhou APK Android próprio, com download direto e instalação independente do FAST."
-    },
-    {
-      "app": "fast",
-      "type": "melhorado",
-      "text": "3.1.3 (17/09/2026): os botões de Cliente e Motorista na Central de Downloads baixam diretamente os respectivos APKs."
-    },
-    {
-      "app": "cliente",
-      "type": "melhorado",
-      "text": "3.1.2 (17/09/2026): cadastro do Cliente FAST ganhou escolha WhatsApp Sim/Não, CEP com preenchimento automático, complemento e lista completa dos estados."
+      "text": "3.1.8 (19/09/2026): Central de Downloads com APK Android independente para Cliente, Motorista, Rotas do Dia e Despesas."
     },
     {
       "app": "cliente",
       "type": "novo",
-      "text": "3.1.2 (17/09/2026): a senha agora possui verificação visual ao vivo de 8 caracteres, maiúscula, minúscula, caractere especial e confirmação."
+      "text": "3.1.8 (19/09/2026): aplicativo Cliente FAST com APK Android próprio, instalação independente e download direto."
     },
     {
       "app": "cliente",
-      "type": "corrigido",
-      "text": "3.1.2 (17/09/2026): Cliente FAST mantém manifesto, identidade e Service Worker próprios para instalação independente."
+      "type": "melhorado",
+      "text": "3.1.8 (19/09/2026): cadastro com WhatsApp Sim/Não, CEP automático, complemento e lista completa dos estados."
+    },
+    {
+      "app": "cliente",
+      "type": "novo",
+      "text": "3.1.8 (19/09/2026): verificação visual da senha ao vivo (8 caracteres, maiúscula, minúscula, especial e confirmação)."
     },
     {
       "app": "motorista",
-      "type": "corrigido",
-      "text": "3.1.2 (17/09/2026): FAST Motorista foi separado do escopo do FAST e agora instala e abre como aplicativo independente."
+      "type": "novo",
+      "text": "3.1.8 (19/09/2026): aplicativo FAST Motorista com APK Android próprio, instalação independente e download direto."
     },
     {
-      "app": "fast",
-      "type": "corrigido",
-      "text": "3.1.2 (17/09/2026): Central de Downloads, links e QR do Motorista agora apontam para o aplicativo isolado correto."
+      "app": "motorista",
+      "type": "melhorado",
+      "text": "3.1.8 (19/09/2026): bloqueio independente, preferências de toque, histórico operacional somente leitura e recuperação segura de senha."
     },
     {
       "app": "rotas",
       "type": "novo",
-      "text": "3.1.1 (17/09/2026): Rotas do Dia agora sinaliza cada entrega em verde, laranja ou vermelho; o atraso é contado por duas horas a partir das 08h ou da criação posterior."
+      "text": "3.1.8 (19/09/2026): aplicativo Rotas do Dia com APK Android próprio, instalação independente e download direto."
     },
     {
-      "app": "cliente",
+      "app": "rotas",
       "type": "melhorado",
-      "text": "3.1.1 (17/09/2026): configurações exclusivas de segurança e entrega, bloqueio independente, avisos de rota/15 min/5 min/chegada, WhatsApp opcional e redefinição segura de senha."
+      "text": "3.1.8 (19/09/2026): sinalizador de prazo verde, laranja e vermelho, com atraso contado após duas horas a partir das 08h."
     },
     {
-      "app": "motorista",
-      "type": "melhorado",
-      "text": "3.1.1 (17/09/2026): bloqueio independente, preferências de toque, histórico operacional somente leitura, atualizações exclusivas e recuperação segura de senha."
-    },
-    {
-      "app": "fast",
-      "type": "corrigido",
-      "text": "3.1.1 (17/09/2026): acesso à pasta do Google Drive funciona pelo explorador interno e por abertura direta; configuração da pasta é preservada."
+      "app": "despesas",
+      "type": "novo",
+      "text": "3.1.8 (19/09/2026): aplicativo Despesas com APK Android próprio, instalação independente e download direto."
     },
     {
       "app": "despesas",
       "type": "melhorado",
-      "text": "3.0.0 (16/09/2026): ao selecionar a última despesa pela descrição ou local, a forma de pagamento também é preenchida, incluindo registros antigos e variações de nomenclatura."
+      "text": "3.1.8 (19/09/2026): ao selecionar a última despesa pela descrição ou local, a forma de pagamento também é preenchida."
     }
   ]
 }
