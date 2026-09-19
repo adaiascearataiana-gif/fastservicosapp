@@ -3378,13 +3378,11 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
           fastPush(all[i]);
         }
       }
-      // 2) entradas de versoes NOVAS que o usuario ainda nao viu desde a ultima vista
-      if (pesoVista !== null && pesoVista >= 0) {
-        for (var j = 0; j < all.length; j++) {
-          var vj = fastVersaoDoTexto(all[j].text);
-          if (vj && fastPesoVersao(vj) > pesoVista) fastPush(all[j]);
-        }
-      }
+      // 2026-09-19: removido o passo que reincluía "versões novas desde a
+      // última vez que o usuário viu uma atualização" — isso trazia de volta
+      // o histórico inteiro sempre que o valor salvo no aparelho (última
+      // versão vista) estava desatualizado. Agora a lista é sempre,
+      // estritamente, só a versão instalada (passo 1 acima).
       // A lista visual é estritamente da versão instalada. Nunca completar
       // com versões antigas, pois isso mistura correções obsoletas no popup.
       if (!filtrados.length) {
@@ -52814,7 +52812,7 @@ window.fastMobileNav = function(ev, abaId, botao) {
        Botões ~26px (vence min-height:48px do layout operacional). */
     .fast-downloads-table { margin-top: 2px; }
     .fast-downloads-thead { display: none !important; }
-    .fast-downloads-table table { width: 100%; max-width: 100%; table-layout: auto; }
+    .fast-downloads-table table { width: 100% !important; max-width: 100% !important; min-width: 0 !important; table-layout: auto; }
     .fast-downloads-table tbody tr { transition: background 0.2s ease; }
     .fast-downloads-table tbody tr:hover { background: rgba(124,58,237,0.03) !important; }
     .fast-downloads-table td { padding: 5px 8px !important; border-bottom: 1px solid var(--border) !important; vertical-align: middle !important; }
