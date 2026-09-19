@@ -3,6 +3,31 @@
     {
       "app": "fast",
       "type": "corrigido",
+      "text": "3.1.9 (19/09/2026): número da versão agora é atualizado a cada nova correção publicada."
+    },
+    {
+      "app": "fast",
+      "type": "corrigido",
+      "text": "3.1.9 (19/09/2026): botões de download da Central de Downloads não esticavam até a borda do card."
+    },
+    {
+      "app": "fast",
+      "type": "corrigido",
+      "text": "3.1.9 (19/09/2026): quadro de Novidades voltava a mostrar o histórico inteiro em vez de só a versão atual."
+    },
+    {
+      "app": "rotas",
+      "type": "corrigido",
+      "text": "3.1.9 (19/09/2026): balão de seleção de rotas agrupadas ficava preso fora da tela depois de arrastado; agora fica sempre visível e continua arrastável."
+    },
+    {
+      "app": "rotas",
+      "type": "corrigido",
+      "text": "3.1.9 (19/09/2026): envio de fotos agrupadas por cliente no WhatsApp agora abre o WhatsApp mesmo sem número cadastrado, para escolher o contato manualmente."
+    },
+    {
+      "app": "fast",
+      "type": "corrigido",
       "text": "3.1.8 (19/09/2026): corrigida a sobreposição do cabeçalho com a barra de status quando o app está instalado (FAST, Rotas do Dia, Despesas, Cliente e Motorista)."
     },
     {
