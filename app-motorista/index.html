@@ -222,6 +222,17 @@ button{font-family:inherit;cursor:pointer}
 @media (prefers-reduced-motion:reduce){
   *{animation-duration:0.001s !important;transition-duration:0.001s !important}
 }
+/* 2026-09-19: no app instalado (APK), a tela desenha até a borda real,
+   sem o navegador reservar espaço para a barra de status — o cabeçalho,
+   a splash e a tela de login ficavam escondidos atrás dela. Só adiciona
+   a folga quando é o app instalado (display-mode standalone/fullscreen/
+   minimal-ui); no navegador continua igual. */
+@media (display-mode: standalone), (display-mode: fullscreen), (display-mode: minimal-ui), (display-mode: window-controls-overlay) {
+  .mot-header { padding-top: 42px !important; }
+  #motSplash { padding-top: 54px !important; }
+  #motGate { padding-top: 54px !important; }
+  #motCadastro { padding-top: 50px !important; }
+}
 </style>
 
 </head>
