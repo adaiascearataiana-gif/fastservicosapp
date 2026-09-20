@@ -37572,7 +37572,24 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
                   try { navigator.serviceWorker.controller.postMessage({type:'SKIP_WAITING'}); } catch(e) {}
                 }
                 var finalSep = urlDeploy.indexOf('?') >= 0 ? '&' : '?';
-                window.location.replace(urlDeploy + finalSep + 'v=' + encodeURIComponent(versaoConfirmada) + '&fast_fresh=' + Date.now());
+                var urlFinal = urlDeploy + finalSep + 'v=' + encodeURIComponent(versaoConfirmada) + '&fast_fresh=' + Date.now();
+                // 2026-09-19: antes disso, o app fazia uma SEGUNDA viagem até o
+                // servidor (location.replace), que podia bater numa cópia antiga
+                // guardada na CDN do GitHub Pages mesmo com parâmetros diferentes
+                // na URL — resultando em "volta pra versão antiga" mesmo depois
+                // de confirmar a versão nova. Como o HTML novo já foi baixado e
+                // confirmado acima (codigoNovo), agora ele é usado diretamente,
+                // sem pedir de novo pro servidor.
+                try {
+                  history.replaceState(null, '', urlFinal);
+                  document.open();
+                  document.write(codigoNovo);
+                  document.close();
+                } catch (eEscrita) {
+                  // Se por algum motivo não for possível escrever o documento
+                  // diretamente, cai para o comportamento antigo (navegação).
+                  window.location.replace(urlFinal);
+                }
               } catch (e) {
                 if (prog) prog.style.display = 'none';
                 if (bar) bar.style.width = '0%';
