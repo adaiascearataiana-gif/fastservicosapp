@@ -1,6 +1,6 @@
 {
   "name": "fast-servicos-desktop",
-  "version": "3.1.6",
+  "version": "4.0.0",
   "description": "FAST Serviços 2 — central profissional de rotas, entregas, finanças e equipe",
   "main": "src/main.js",
   "author": {

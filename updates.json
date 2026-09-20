@@ -1,7 +1,27 @@
 {
-  "version": "3.1.6",
-  "releasedAt": "2026-09-17T16:20:00-03:00",
+  "version": "4.0.0",
+  "releasedAt": "2026-09-20T12:30:00-03:00",
   "updates": [
+    {
+      "app": "fast",
+      "type": "novo",
+      "text": "4.0.0 (20/09/2026): novo ciclo de versões com número único e diagnóstico de atualização para evitar divergência entre arquivo, GitHub e aplicativo instalado."
+    },
+    {
+      "app": "fast",
+      "type": "melhorado",
+      "text": "4.0.0 (20/09/2026): Restaurar Backup e Restaurar Ponto agora exibem progresso por etapas, resultado, auditoria local e relatório técnico copiável."
+    },
+    {
+      "app": "rotas",
+      "type": "corrigido",
+      "text": "4.0.0 (20/09/2026): rotas passadas não são mais transferidas automaticamente para hoje; cada rota permanece exclusivamente na data cadastrada em ROTAS."
+    },
+    {
+      "app": "fast",
+      "type": "corrigido",
+      "text": "4.0.0 (20/09/2026): removido estado de atualização gravado pelo navegador que mantinha o aplicativo preso em versões 3.1.x."
+    },
     {
       "app": "rotas",
       "type": "corrigido",
