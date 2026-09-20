@@ -46,6 +46,18 @@ android {
             resValue 'string', 'app_name', 'Despesas FAST'
             buildConfigField 'String', 'APP_URL', '"https://adaiascearataiana-gif.github.io/fastservicosapp/?exclusive=despesas&atalho=despesas&source=android"'
         }
+        fast {
+            dimension 'aplicativo'
+            applicationId 'br.com.fastservicos.app'
+            resValue 'string', 'app_name', 'FAST Servi\u00e7os'
+            buildConfigField 'String', 'APP_URL', '"https://adaiascearataiana-gif.github.io/fastservicosapp/?source=android"'
+        }
+        limpo {
+            dimension 'aplicativo'
+            applicationId 'br.com.fastservicos.limpo'
+            resValue 'string', 'app_name', 'FAST Limpo'
+            buildConfigField 'String', 'APP_URL', '"https://adaiascearataiana-gif.github.io/fastservicosapp/?edition=clean&source=android"'
+        }
     }
 
     buildTypes {

@@ -24,12 +24,11 @@ jobs:
       - name: Preparar Android SDK
         shell: bash
         run: |
-          export ANDROID_HOME="$HOME/android-sdk"
-          mkdir -p "$ANDROID_HOME/cmdline-tools"
-          curl -fsSL -o "$RUNNER_TEMP/android-tools.zip" https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
-          unzip -q "$RUNNER_TEMP/android-tools.zip" -d "$ANDROID_HOME/cmdline-tools"
-          mv "$ANDROID_HOME/cmdline-tools/cmdline-tools" "$ANDROID_HOME/cmdline-tools/latest"
+          # Usa o SDK pre-instalado do runner para evitar conflito de caminhos
+          # (ANDROID_HOME x ANDROID_SDK_ROOT) que quebra o Gradle.
+          export ANDROID_HOME="${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}"
           echo "ANDROID_HOME=$ANDROID_HOME" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=$ANDROID_HOME" >> "$GITHUB_ENV"
           echo "$ANDROID_HOME/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
           echo "$ANDROID_HOME/platform-tools" >> "$GITHUB_PATH"
           SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
@@ -48,7 +47,7 @@ jobs:
         env:
           FAST_ANDROID_STORE_PASSWORD: ${{ secrets.FAST_ANDROID_STORE_PASSWORD }}
           FAST_ANDROID_KEY_PASSWORD: ${{ secrets.FAST_ANDROID_KEY_PASSWORD }}
-        run: gradle :app:assembleClienteRelease :app:assembleMotoristaRelease :app:assembleRotasRelease :app:assembleDespesasRelease --no-daemon
+        run: gradle :app:assembleClienteRelease :app:assembleMotoristaRelease :app:assembleRotasRelease :app:assembleDespesasRelease :app:assembleFastRelease :app:assembleLimpoRelease --no-daemon
       - name: Preparar downloads
         shell: bash
         run: |
@@ -56,6 +55,8 @@ jobs:
           cp android/app/build/outputs/apk/motorista/release/app-motorista-release.apk Motorista-FAST-Android.apk
           cp android/app/build/outputs/apk/rotas/release/app-rotas-release.apk Rotas-do-Dia-FAST-Android.apk
           cp android/app/build/outputs/apk/despesas/release/app-despesas-release.apk Despesas-FAST-Android.apk
+          cp android/app/build/outputs/apk/fast/release/app-fast-release.apk FAST-Servicos-Android.apk
+          cp android/app/build/outputs/apk/limpo/release/app-limpo-release.apk FAST-Limpo-Android.apk
       - uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
         with:
@@ -64,3 +65,5 @@ jobs:
             Motorista-FAST-Android.apk
             Rotas-do-Dia-FAST-Android.apk
             Despesas-FAST-Android.apk
+            FAST-Servicos-Android.apk
+            FAST-Limpo-Android.apk

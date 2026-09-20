@@ -4,7 +4,15 @@
         <item name="android:fontFamily">sans</item>
         <item name="android:colorAccent">#4F46E5</item>
         <item name="android:navigationBarColor">#0F172A</item>
-        <item name="android:statusBarColor">#4F46E5</item>
+        <item name="android:statusBarColor">#0F172A</item>
         <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">false</item>
+        <!-- Mantem o conteudo dentro da area segura (nao desenha atras das barras). -->
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <!-- Evita o "scrim" translucido que o Android 15 aplica sobre as barras. -->
+        <item name="android:enforceStatusBarContrast">false</item>
+        <item name="android:enforceNavigationBarContrast">false</item>
+        <!-- Nao invade o recorte (notch) da tela. -->
+        <item name="android:windowLayoutInDisplayCutoutMode">never</item>
     </style>
 </resources>
