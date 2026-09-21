@@ -1,7 +1,13 @@
 {
-  "version": "4.0.3",
+  "version": "4.0.4",
   "releasedAt": "2026-09-21T05:55:00-03:00",
   "updates": [
+    {"app":"fast","type":"corrigido","text":"4.0.4 (21/09/2026): a Central de Downloads deixou de entregar APKs antigos armazenados no site e agora baixa sempre a compilação Android mais recente publicada."},
+    {"app":"fast","type":"corrigido","text":"4.0.4 (21/09/2026): os ícones Android receberam um novo identificador interno para impedir que o lançador do aparelho reutilize o ícone antigo em cache."},
+    {"app":"rotas","type":"corrigido","text":"4.0.4 (21/09/2026): o APK Rotas do Dia passa a instalar e atualizar com o ícone azul próprio."},
+    {"app":"despesas","type":"corrigido","text":"4.0.4 (21/09/2026): o APK Despesas passa a instalar e atualizar com o ícone vermelho próprio."},
+    {"app":"cliente","type":"corrigido","text":"4.0.4 (21/09/2026): o APK Cliente FAST passa a instalar e atualizar com o ícone verde próprio."},
+    {"app":"motorista","type":"corrigido","text":"4.0.4 (21/09/2026): o APK FAST Motorista passa a instalar e atualizar com o ícone cinza próprio."},
     {"app":"fast","type":"melhorado","text":"4.0.3 (21/09/2026): a Central de Downloads fica disponível somente no navegador e é ocultada nos aplicativos instalados."},
     {"app":"fast","type":"novo","text":"4.0.3 (21/09/2026): Despesas, Rotas do Dia, Cliente e Motorista receberam identidades visuais próprias nos ícones Android e nas telas de acesso."},
     {"app":"rotas","type":"melhorado","text":"4.0.3 (21/09/2026): Rotas do Dia usa o novo ícone azul em tela cheia no gate e moldura azul nos limites do aplicativo mobile."},

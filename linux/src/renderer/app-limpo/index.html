@@ -4,12 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#0891b2">
-  <meta name="fast-app-version" content="4.0.3">
+  <meta name="fast-app-version" content="4.0.4">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <title>FAST Limpo</title>
-  <link rel="manifest" href="manifest.webmanifest?v=r403">
-  <link rel="icon" href="../assets/fast-servicos-icon-192.png?v=r403">
+  <link rel="manifest" href="manifest.webmanifest?v=r404">
+  <link rel="icon" href="../assets/fast-servicos-icon-192.png?v=r404">
   <style>
     *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;font-family:Inter,Arial,sans-serif}
     body{background:linear-gradient(145deg,#ecfeff,#cffafe);color:#164e63}.app{display:none;width:100%;height:100%;border:0;background:#fff}
@@ -22,21 +22,21 @@
 <body>
   <iframe class="app" title="FAST Limpo" allow="camera; geolocation; clipboard-read; clipboard-write; publickey-credentials-get *"></iframe>
   <main class="install-page"><section class="card">
-    <img src="../assets/fast-servicos-icon-192.png?v=r403" alt="FAST Limpo">
+    <img src="../assets/fast-servicos-icon-192.png?v=r404" alt="FAST Limpo">
     <h1>FAST Limpo</h1>
     <p>A plataforma completa, vazia e pronta para começar do zero.</p>
     <div class="safe">Dados separados do aplicativo principal. Esta edição não lê nem altera a base operacional.</div>
     <button id="install" type="button">Instalar FAST Limpo</button>
     <a class="open" href="../?edition=clean">Abrir sem instalar</a>
     <div class="status" id="status">Abra no Google Chrome ou Microsoft Edge para instalar.</div>
-    <div class="versao" id="versao">Versão 4.0.3</div>
+    <div class="versao" id="versao">Versão 4.0.4</div>
   </section></main>
   <script>
   (function(){
     var standalone=matchMedia('(display-mode:standalone)').matches||navigator.standalone===true;
-    if(standalone){document.body.classList.add('standalone');document.querySelector('.app').src='../?edition=clean&v=4.0.3'}
+    if(standalone){document.body.classList.add('standalone');document.querySelector('.app').src='../?edition=clean&v=4.0.4'}
     var b=document.getElementById('install'),s=document.getElementById('status');
-    if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js?v=r403',{scope:'./'}).catch(function(){});
+    if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js?v=r404',{scope:'./'}).catch(function(){});
     b.onclick=async function(){if(window.__installPrompt){window.__installPrompt.prompt();var r=await window.__installPrompt.userChoice;window.__installPrompt=null;s.textContent=r.outcome==='accepted'?'Instalação confirmada. Abra o ícone FAST Limpo.':'Instalação cancelada.'}else{s.textContent='No navegador, abra o menu e escolha “Instalar aplicativo” ou “Adicionar à tela inicial”.'}};
     addEventListener('appinstalled',function(){s.textContent='FAST Limpo instalado com sucesso!'});
     setInterval(async function(){try{var h=await fetch('../?fast_clean_check='+Date.now(),{cache:'no-store'}).then(function(r){return r.text()}),m=h.match(/name=["']fast-app-version["']\s+content=["']([^"']+)/i);if(m&&m[1]!==document.querySelector('meta[name="fast-app-version"]').content)location.reload()}catch(e){}},300000);

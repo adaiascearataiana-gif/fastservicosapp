@@ -9,8 +9,8 @@
     <application
         android:allowBackup="false"
         android:usesCleartextTraffic="false"
-        android:icon="@mipmap/ic_launcher"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:icon="@mipmap/fast_app_icon_v404"
+        android:roundIcon="@mipmap/fast_app_icon_v404_round"
         android:label="@string/app_name"
         android:theme="@style/AppTheme">
         <activity
