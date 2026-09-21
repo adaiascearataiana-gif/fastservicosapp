@@ -1,6 +1,6 @@
 /* FAST Servicos - app Despesas - Service Worker persistente
    (r134; r144 = novos icones; r145 = SHARE TARGET unico arquivo;
-    r406 (2.3.32) = SHARE TARGET MULTI-ARQUIVO: o app Despesas aparece na
+    r407 (2.3.32) = SHARE TARGET MULTI-ARQUIVO: o app Despesas aparece na
     folha de compartilhamento do Android; ao compartilhar um ou VARIOS
     PDFs (boleto/comprovante) ou imagens (JPG/PNG) de dentro de qualquer
     app, TODOS os arquivos sao entregues ao formulario de despesa,
@@ -17,11 +17,11 @@
    - activate: apaga caches antigos (fast-despesas-r145 e anteriores).
    - SEM self.unregister e SEM clients.navigate (nada de reload em loop).
 
-   r406 SHARE TARGET (como funciona):
+   r407 SHARE TARGET (como funciona):
    1. Android compartilha -> POST multipart na action "./" do manifest.
    2. O SW extrai TODOS os arquivos do formData, guarda
       {files:[{nome,mime,tamanho,b64}],ts} em cache de uso unico
-      (fast-despesas-share-r406) e responde 303 para "./?share=1".
+      (fast-despesas-share-r407) e responde 303 para "./?share=1".
    3. O wrapper (index.html) carrega, ve ?share=1, busca a lista em
       fetch('./__fast-share-get__') (interceptado aqui) e repassa ao app
       principal dentro do iframe via postMessage (lista completa).
@@ -31,9 +31,9 @@
    - O POST nunca vai a rede (GitHub Pages nao aceita POST).
    - Compat r145: se o wrapper antigo pedir, o item antigo (arquivo unico)
      continua disponivel no mesmo payload (campo "item" = primeiro arquivo). */
-const CACHE='fast-despesas-r406';
-const CORE=['./','./index.html','./manifest.webmanifest','../assets/app-despesas-192.png?v=r406','../assets/app-despesas-512.png?v=r406'];
-const SHARE_CACHE='fast-despesas-share-r406';
+const CACHE='fast-despesas-r407';
+const CORE=['./','./index.html','./manifest.webmanifest','../assets/app-despesas-192.png?v=r407','../assets/app-despesas-512.png?v=r407'];
+const SHARE_CACHE='fast-despesas-share-r407';
 const SHARE_KEY='/fastservicosapp/app-despesas/__fast-share__';
 const SHARE_GET_URL='/fastservicosapp/app-despesas/__fast-share-get__';
 const SHARE_TTL=300000; /* 5 minutos de validade (rede lenta / primeiro acesso) */
@@ -80,7 +80,7 @@ self.addEventListener('fetch',function(event){
       lerShare().then(function(pacote){
         var corpo;
         if(pacote&&pacote.files&&pacote.files.length){
-          /* formato novo r406 (lista) + campo "item" de compat r145 */
+          /* formato novo r407 (lista) + campo "item" de compat r145 */
           corpo=JSON.stringify({ok:true,ts:pacote.ts,files:pacote.files,item:pacote.files[0]||null});
         }else{
           corpo=JSON.stringify({ok:false,item:null,files:[]});
