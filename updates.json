@@ -1,15 +1,13 @@
 {
-  "version": "4.0.2",
-  "releasedAt": "2026-09-20T21:15:00-04:00",
+  "version": "4.0.3",
+  "releasedAt": "2026-09-21T05:55:00-03:00",
   "updates": [
-    {"app":"fast","type":"corrigido","text":"4.0.2 (20/09/2026): auditoria geral eliminou divergências de versão, referências quebradas e conflitos de layout entre navegador, Android, Windows e Linux."},
-    {"app":"fast","type":"melhorado","text":"4.0.2 (20/09/2026): Central de Segurança, backups e pontos de restauração foram reunidos e organizados em uma única área."},
-    {"app":"fast","type":"novo","text":"4.0.2 (20/09/2026): pontos de restauração manuais e automáticos preservam o estado anterior e mantêm até dez cópias recentes."},
-    {"app":"fast","type":"corrigido","text":"4.0.2 (20/09/2026): clientes e lugares editados ou excluídos não retornam após sincronização, restauração ou concorrência entre aparelhos."},
-    {"app":"rotas","type":"corrigido","text":"4.0.2 (20/09/2026): ao editar uma rota, o formulário usa exatamente a rota escolhida; a última rota do cliente fica exclusiva para novas inclusões."},
-    {"app":"rotas","type":"melhorado","text":"4.0.2 (20/09/2026): balão de seleção permanece aberto até o fechamento, pode ser arrastado e respeita os limites da tela."},
-    {"app":"despesas","type":"melhorado","text":"4.0.2 (20/09/2026): dashboard financeiro recebeu tipografia e indicadores mais visíveis, mantendo adaptação para celular e desktop."},
-    {"app":"cliente","type":"corrigido","text":"4.0.2 (20/09/2026): área segura e cabeçalho foram ajustados para não estourar a largura da tela em instalações independentes."},
-    {"app":"motorista","type":"corrigido","text":"4.0.2 (20/09/2026): área segura e cabeçalho foram ajustados para não estourar a largura da tela em instalações independentes."}
+    {"app":"fast","type":"melhorado","text":"4.0.3 (21/09/2026): a Central de Downloads fica disponível somente no navegador e é ocultada nos aplicativos instalados."},
+    {"app":"fast","type":"novo","text":"4.0.3 (21/09/2026): Despesas, Rotas do Dia, Cliente e Motorista receberam identidades visuais próprias nos ícones Android e nas telas de acesso."},
+    {"app":"rotas","type":"melhorado","text":"4.0.3 (21/09/2026): Rotas do Dia usa o novo ícone azul em tela cheia no gate e moldura azul nos limites do aplicativo mobile."},
+    {"app":"despesas","type":"melhorado","text":"4.0.3 (21/09/2026): Despesas usa o novo ícone vermelho em tela cheia no gate e moldura vermelha nos limites do aplicativo mobile."},
+    {"app":"cliente","type":"melhorado","text":"4.0.3 (21/09/2026): Cliente FAST usa o novo ícone verde no Android, no cabeçalho e no gate, com moldura verde no aplicativo."},
+    {"app":"cliente","type":"corrigido","text":"4.0.3 (21/09/2026): telefones colados do WhatsApp com +55, DDD, espaços ou símbolos agora preenchem o número completo sem cortar dígitos."},
+    {"app":"motorista","type":"melhorado","text":"4.0.3 (21/09/2026): FAST Motorista usa o novo ícone cinza no Android, na abertura, no gate e no cabeçalho, com moldura cinza no aplicativo."}
   ]
 }

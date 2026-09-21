@@ -1,5 +1,5 @@
 /*
-  FAST Serviços — Service Worker (v4.0.2)
+  FAST Serviços — Service Worker (v4.0.3)
   ============================================================
   Reescrito em 19/09/2026 para resolver o app ficando "preso"
   numa versão antiga mesmo depois de um novo deploy.
@@ -20,7 +20,7 @@
   ============================================================
 */
 
-const SW_VERSION = '4.0.2';
+const SW_VERSION = '4.0.3';
 const CACHE_NAME = 'fast-servicos-' + SW_VERSION;
 
 self.addEventListener('install', (event) => {

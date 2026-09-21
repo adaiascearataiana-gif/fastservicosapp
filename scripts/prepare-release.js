@@ -9,11 +9,11 @@ if (!/^\d+\.\d+\.\d+$/.test(version || '')) {
   throw new Error('Uso: node scripts/prepare-release.js X.Y.Z');
 }
 const cacheTag = 'r' + version.replace(/\D/g, '');
-const previous = '4.0.1';
-const previousTag = 'r4001';
+const previous = '4.0.2';
+const previousTag = 'r402';
 
 const files = [
-  'index.html', 'fast-logistics-2.4.js', 'manifest.webmanifest',
+  'index.html', 'fast-logistics-2.4.js', 'fast-sw.js', 'manifest.webmanifest',
   'manifest-motorista.webmanifest', 'manifest-rotas.webmanifest',
   'manifest-despesas.webmanifest', 'app-cliente/index.html',
   'app-cliente/manifest.webmanifest', 'app-cliente/sw.js',
@@ -21,8 +21,9 @@ const files = [
   'app-motorista/sw.js', 'app-rotas-dia/index.html',
   'app-rotas-dia/manifest.webmanifest', 'app-rotas-dia/sw.js',
   'app-despesas/index.html', 'app-despesas/manifest.webmanifest',
-  'app-despesas/sw.js', 'app-limpo/index.html',
+  'app-despesas/sw.js', 'app-limpo/index.html', 'motorista.html',
   'app-limpo/manifest.webmanifest', 'app-limpo/sw.js',
+  'despesas/manifest.webmanifest', 'rotas-do-dia/manifest.webmanifest',
   'android/app/build.gradle',
   'android/app/src/main/java/br/com/fastservicos/app/MainActivity.java',
   'linux/package.json'

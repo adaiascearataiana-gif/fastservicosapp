@@ -1,6 +1,6 @@
 {
   "name": "FAST Motorista",
-  "version": "4.0.2",
+  "version": "4.0.3",
   "id": "/fastservicosapp/app-motorista/",
   "short_name": "FAST Motorista",
   "description": "Rotas do dia, botão CHEGUEI, fotos pela câmera e conclusão de rotas",
@@ -8,12 +8,12 @@
   "scope": "/fastservicosapp/app-motorista/",
   "display": "standalone",
   "orientation": "any",
-  "background_color": "#4f46e5",
-  "theme_color": "#4f46e5",
+  "background_color": "#111827",
+  "theme_color": "#374151",
   "lang": "pt-BR",
   "categories": ["business", "productivity", "navigation"],
   "icons": [
-    {"src":"../assets/fast-servicos-icon-192.png?v=r118","sizes":"192x192","type":"image/png","purpose":"any"},
-    {"src":"../assets/fast-servicos-icon-512.png?v=r118","sizes":"512x512","type":"image/png","purpose":"any maskable"}
+    {"src":"../assets/app-motorista-192.png?v=r403","sizes":"192x192","type":"image/png","purpose":"any"},
+    {"src":"../assets/app-motorista-512.png?v=r403","sizes":"512x512","type":"image/png","purpose":"any maskable"}
   ]
 }
