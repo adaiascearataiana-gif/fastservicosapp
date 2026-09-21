@@ -1,7 +1,11 @@
 {
-  "version": "4.0.7",
+  "version": "4.0.8",
   "releasedAt": "2026-09-21T05:55:00-03:00",
   "updates": [
+    {"app":"despesas","type":"melhorado","text":"4.0.8 (21/09/2026): Despesas recebeu a nova identidade vermelha no ícone Android e no gate, preenchendo toda a área visível sem margens."},
+    {"app":"rotas","type":"melhorado","text":"4.0.8 (21/09/2026): Rotas do Dia recebeu a nova identidade azul no ícone Android e no gate, preenchendo toda a área visível sem margens."},
+    {"app":"cliente","type":"melhorado","text":"4.0.8 (21/09/2026): Cliente FAST recebeu a nova identidade verde no ícone Android e no gate, preenchendo toda a área visível sem margens."},
+    {"app":"motorista","type":"melhorado","text":"4.0.8 (21/09/2026): Motorista FAST recebeu a nova identidade cinza no ícone Android e no gate, preenchendo toda a área visível sem margens."},
     {"app":"fast","type":"novo","text":"4.0.7 (21/09/2026): o sino do FAST detecta novos cadastros de Cliente e Motorista, mantém o aviso pendente e abre diretamente a seção correta ao tocar."},
     {"app":"motorista","type":"novo","text":"4.0.6 (21/09/2026): cadastro do Motorista foi dividido em Dados pessoais, Dados da CNH e Dados do veículo, com endereço completo e documentos adicionais."},
     {"app":"motorista","type":"novo","text":"4.0.6 (21/09/2026): foto pessoal, comprovante de residência, motorista com CNH, CNH e CRLV exigem análise de nitidez, confirmação ou remoção antes do cadastro."},
