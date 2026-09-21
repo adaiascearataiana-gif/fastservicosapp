@@ -1,43 +1,16 @@
 {
-  "id":"/fastservicosapp/app-despesas/",
-  "name":"Despesas",
-  "version": "4.0.8",
-  "short_name":"Despesas",
-  "description":"Aplicativo exclusivo de Despesas — le comprovantes PDF/imagens e preenche os campos sozinho",
-  "start_url":"/fastservicosapp/app-despesas/?fh=1",
-  "scope":"/fastservicosapp/app-despesas/",
-  "display":"standalone",
-  "display_override":["standalone","minimal-ui"],
-  "background_color":"#dc2626",
-  "theme_color":"#dc2626",
-  "prefer_related_applications":false,
-  "file_handlers":[
-    {
-      "action":"./",
-      "accept":{
-        "application/pdf":[".pdf"],
-        "image/png":[".png"],
-        "image/jpeg":[".jpg",".jpeg"],
-        "image/webp":[".webp"]
-      },
-      "launch_type":"single-client"
-    }
-  ],
-  "share_target":{
-    "action":"./",
-    "method":"POST",
-    "enctype":"multipart/form-data",
-    "params":{
-      "title":"title",
-      "text":"text",
-      "url":"url",
-      "files":[
-        {"name":"comprovante","accept":["application/pdf",".pdf","image/*",".jpg",".jpeg",".png",".webp"]}
-      ]
-    }
-  },
-  "icons":[
-    {"src":"../assets/app-despesas-192.png?v=r408","sizes":"192x192","type":"image/png","purpose":"any"},
-    {"src":"../assets/app-despesas-512.png?v=r408","sizes":"512x512","type":"image/png","purpose":"maskable"}
+  "name": "FAST Despesas",
+  "short_name": "Despesas",
+  "version": "4.0.9",
+  "start_url": "/fastservicosapp/app-despesas/?source=pwa-despesas",
+  "scope": "/fastservicosapp/app-despesas/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#450a0a",
+  "theme_color": "#dc2626",
+  "lang": "pt-BR",
+  "icons": [
+    {"src":"../assets/app-despesas-192.png?v=r409","sizes":"192x192","type":"image/png","purpose":"any"},
+    {"src":"../assets/app-despesas-512.png?v=r409","sizes":"512x512","type":"image/png","purpose":"any maskable"}
   ]
 }
