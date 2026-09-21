@@ -1,7 +1,15 @@
 {
-  "version": "4.0.4",
+  "version": "4.0.5",
   "releasedAt": "2026-09-21T05:55:00-03:00",
   "updates": [
+    {"app":"motorista","type":"corrigido","text":"4.0.5 (21/09/2026): o cadastro do Motorista aceita corretamente nomes e textos com acentos e caracteres Unicode, preservando minúsculas em login, e-mail e senha."},
+    {"app":"motorista","type":"melhorado","text":"4.0.5 (21/09/2026): cadastro ganhou visualizar senha, repetir senha e validação visual de maiúscula, minúscula, caractere especial e mínimo de 8 caracteres."},
+    {"app":"motorista","type":"corrigido","text":"4.0.5 (21/09/2026): cadastro não depende mais do cofre provisório antes da confirmação do e-mail; os dados pendentes são sincronizados com segurança após o primeiro login confirmado."},
+    {"app":"motorista","type":"removido","text":"4.0.5 (21/09/2026): removidos os avisos de registro facial preparado e de criação da própria conta."},
+    {"app":"cliente","type":"melhorado","text":"4.0.5 (21/09/2026): Número fica ao lado de Endereço e Complemento aparece logo abaixo no cadastro do Cliente."},
+    {"app":"cliente","type":"removido","text":"4.0.5 (21/09/2026): removido o aviso de validação facial reservada."},
+    {"app":"fast","type":"corrigido","text":"4.0.5 (21/09/2026): links de confirmação de Cliente e Motorista retornam para a página correta do aplicativo, eliminando o erro 404 do GitHub Pages."},
+    {"app":"despesas","type":"melhorado","text":"4.0.5 (21/09/2026): tabela de Despesas ocupa a área útil até o limite da tela, mantém rolagem interna e centraliza os títulos das colunas."},
     {"app":"fast","type":"corrigido","text":"4.0.4 (21/09/2026): a Central de Downloads deixou de entregar APKs antigos armazenados no site e agora baixa sempre a compilação Android mais recente publicada."},
     {"app":"fast","type":"corrigido","text":"4.0.4 (21/09/2026): os ícones Android receberam um novo identificador interno para impedir que o lançador do aparelho reutilize o ícone antigo em cache."},
     {"app":"rotas","type":"corrigido","text":"4.0.4 (21/09/2026): o APK Rotas do Dia passa a instalar e atualizar com o ícone azul próprio."},
