@@ -8,9 +8,11 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.speech.RecognizerIntent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
+import android.webkit.JavascriptInterface;
 import android.webkit.CookieManager;
 import android.webkit.GeolocationPermissions;
 import android.webkit.ValueCallback;
@@ -20,11 +22,14 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
+import org.json.JSONObject;
+import java.util.ArrayList;
 
 public class MainActivity extends Activity {
     private WebView webView;
     private ValueCallback<Uri[]> fileCallback;
     private static final int FILE_REQUEST = 401;
+    private static final int VOICE_REQUEST = 403;
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
@@ -93,6 +98,7 @@ public class MainActivity extends Activity {
         settings.setUserAgentString(settings.getUserAgentString() + " FASTAndroid/4.0.8");
         CookieManager.getInstance().setAcceptCookie(true);
         CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
+        webView.addJavascriptInterface(new VoiceBridge(), "FASTVoice");
         webView.setWebViewClient(new WebViewClient() {
             @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 Uri uri = request.getUrl();
@@ -124,11 +130,44 @@ public class MainActivity extends Activity {
     }
 
     private void requestPermissionsIfNeeded() {
-        if (android.os.Build.VERSION.SDK_INT >= 23) requestPermissions(new String[]{Manifest.permission.CAMERA, Manifest.permission.ACCESS_FINE_LOCATION}, 402);
+        if (android.os.Build.VERSION.SDK_INT >= 23) requestPermissions(new String[]{Manifest.permission.CAMERA, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.RECORD_AUDIO}, 402);
+    }
+
+    private class VoiceBridge {
+        @JavascriptInterface public void startSpeech() {
+            runOnUiThread(() -> {
+                if (Build.VERSION.SDK_INT >= 23 && checkSelfPermission(Manifest.permission.RECORD_AUDIO) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                    requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, 402);
+                    voiceError("permission");
+                    return;
+                }
+                Intent voice = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+                voice.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+                voice.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "pt-BR");
+                voice.putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, "pt-BR");
+                voice.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1);
+                voice.putExtra(RecognizerIntent.EXTRA_PROMPT, "Fale os dados para o FAST");
+                try { startActivityForResult(voice, VOICE_REQUEST); }
+                catch (ActivityNotFoundException e) { voiceError("unavailable"); }
+            });
+        }
+    }
+
+    private void voiceError(String code) {
+        if (webView == null) return;
+        webView.evaluateJavascript("window.fastNativeSpeechError&&window.fastNativeSpeechError(" + JSONObject.quote(code) + ")", null);
     }
 
     @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == VOICE_REQUEST) {
+            if (resultCode == RESULT_OK && data != null) {
+                ArrayList<String> results = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+                String text = results != null && !results.isEmpty() ? results.get(0) : "";
+                webView.evaluateJavascript("window.fastNativeSpeechResult&&window.fastNativeSpeechResult(" + JSONObject.quote(text) + ")", null);
+            } else voiceError("cancelled");
+            return;
+        }
         if (requestCode == FILE_REQUEST && fileCallback != null) {
             fileCallback.onReceiveValue(WebChromeClient.FileChooserParams.parseResult(resultCode, data));
             fileCallback = null;

@@ -90,11 +90,13 @@
   }
   window.fastExpenseVoiceStart=function(){
     var Speech=window.SpeechRecognition||window.webkitSpeechRecognition,button=el('fastVoiceExpenseBtn'),status=el('fastVoiceExpenseStatus');
+    window.fastHandleExpenseSpeech=function(said){var fields=fillExpenseFromSpeech(said);if(status)status.textContent='Ouvido: “'+said+'”';toast(fields.length?'Campos preenchidos por voz: '+fields.join(', ')+'.':'Não identifiquei os campos. Diga, por exemplo: combustível, local Posto X, valor 100 reais, pagamento PIX.',fields.length?'success':'info')};
+    if(!Speech&&window.FASTVoice&&typeof window.FASTVoice.startSpeech==='function'){window.fastNativeVoiceMode='expense';if(button)button.classList.add('listening');if(status)status.textContent='Ouvindo… fale descrição, local, categoria, valor, data e pagamento.';window.FASTVoice.startSpeech();return}
     if(!Speech){toast('O comando de voz exige Chrome ou Edge com reconhecimento de fala.','error');if(status)status.textContent='Reconhecimento de voz indisponível neste navegador.';return}
     if(window.fastExpenseRecognition){try{window.fastExpenseRecognition.stop()}catch(e){}return}
     var recognition=new Speech();window.fastExpenseRecognition=recognition;recognition.lang='pt-BR';recognition.interimResults=false;recognition.maxAlternatives=1;
     if(button)button.classList.add('listening');if(status)status.textContent='Ouvindo… fale descrição, local, categoria, valor, data e pagamento.';
-    recognition.onresult=function(e){var said=e.results[0][0].transcript,fields=fillExpenseFromSpeech(said);if(status)status.textContent='Ouvido: “'+said+'”';toast(fields.length?'Campos preenchidos por voz: '+fields.join(', ')+'.':'Não identifiquei os campos. Diga, por exemplo: combustível, local Posto X, valor 100 reais, pagamento PIX.',fields.length?'success':'info')};
+    recognition.onresult=function(e){window.fastHandleExpenseSpeech(e.results[0][0].transcript)};
     recognition.onerror=function(e){if(e.error!=='aborted')toast(e.error==='not-allowed'?'Autorize o microfone para usar o comando de voz.':'Não consegui reconhecer a fala. Tente novamente.','error')};
     recognition.onend=function(){window.fastExpenseRecognition=null;if(button)button.classList.remove('listening');if(status&&status.textContent==='Ouvindo… fale descrição, local, categoria, valor, data e pagamento.')status.textContent='Toque no microfone e fale os dados da despesa.'};
     try{recognition.start()}catch(e){window.fastExpenseRecognition=null;if(button)button.classList.remove('listening');toast('Não foi possível iniciar o microfone.','error')}

@@ -58775,17 +58775,34 @@ body.fast-exclusive-app main { padding-bottom: 12px !important; }
   function dataBlob(data){var p=String(data||'').split(','),mime=((p[0]||'').match(/data:([^;]+)/)||[])[1]||'image/jpeg',raw=atob(p[1]||''),u=new Uint8Array(raw.length);for(var i=0;i<raw.length;i++)u[i]=raw.charCodeAt(i);return new Blob([u],{type:mime})}
   window.fastBuscarRotaPorVoz=function(){
     var SR=window.SpeechRecognition||window.webkitSpeechRecognition,btn=el('fastVoiceRouteBtn'),status=el('fastVoiceRouteStatus'),input=el('filtroSeqVoz');
+    window.fastHandleRouteSpeech=function(original){
+      original=String(original||'').trim();var adicionar=/^(adicionar|adicione|inserir|insira|cadastrar|cadastre|criar|crie|nova)\b/i.test(original)||/\bnova rota\b/i.test(original);
+      if(adicionar){if(input)input.value='';if(status)status.innerHTML='<i class="fa-solid fa-route"></i> Preenchendo nova rota…';if(typeof window.fastVozPreencherRotaDia==='function')window.fastVozPreencherRotaDia(original);return}
+      var fala=original.replace(/^(buscar|procure|procurar|pesquisar|busque)(\s+a)?\s+(rota\s+)?/i,'').trim();if(input)input.value=fala;if(status)status.innerHTML='<i class="fa-solid fa-circle-check"></i> '+esc(fala);if(typeof renderizarSequencia==='function')renderizarSequencia();var list=el('containerSequencia');if(list)setTimeout(function(){list.scrollIntoView({behavior:'smooth',block:'start'})},80)
+    };
+    if(!SR&&window.FASTVoice&&typeof window.FASTVoice.startSpeech==='function'){
+      window.fastNativeVoiceMode='route';if(btn){btn.classList.add('listening');btn.innerHTML='<i class="fa-solid fa-wave-square"></i> Ouvindo…'}if(status){status.style.display='inline-flex';status.innerHTML='<i class="fa-solid fa-microphone-lines"></i> Fale o cliente, origem, destino ou motorista'}window.FASTVoice.startSpeech();return
+    }
     if(!SR){if(typeof mostrarToast==='function')mostrarToast('Comando de voz não disponível. Use o Chrome ou Edge atualizado.','error');return}
     var rec=new SR();rec.lang='pt-BR';rec.continuous=false;rec.interimResults=false;rec.maxAlternatives=1;
     if(btn){btn.classList.add('listening');btn.innerHTML='<i class="fa-solid fa-wave-square"></i> Ouvindo…'}if(status){status.style.display='inline-flex';status.innerHTML='<i class="fa-solid fa-microphone-lines"></i> Fale o cliente, origem, destino ou motorista';}
     rec.onresult=function(ev){
-      var original=String(ev.results[0][0].transcript||'').trim(),adicionar=/^(adicionar|adicione|inserir|insira|cadastrar|cadastre|criar|crie|nova)\b/i.test(original)||/\bnova rota\b/i.test(original);
-      if(adicionar){if(input)input.value='';if(status)status.innerHTML='<i class="fa-solid fa-route"></i> Preenchendo nova rota…';if(typeof window.fastVozPreencherRotaDia==='function')window.fastVozPreencherRotaDia(original);return}
-      var fala=original.replace(/^(buscar|procure|procurar|pesquisar|busque)(\s+a)?\s+(rota\s+)?/i,'').trim();if(input)input.value=fala;if(status)status.innerHTML='<i class="fa-solid fa-circle-check"></i> '+esc(fala);if(typeof renderizarSequencia==='function')renderizarSequencia();var list=el('containerSequencia');if(list)setTimeout(function(){list.scrollIntoView({behavior:'smooth',block:'start'})},80)
+      window.fastHandleRouteSpeech(String(ev.results[0][0].transcript||''));
     };
     rec.onerror=function(ev){if(status)status.innerHTML='<i class="fa-solid fa-triangle-exclamation"></i> Não foi possível ouvir. Tente novamente.';if(typeof mostrarToast==='function')mostrarToast(ev.error==='not-allowed'?'Autorize o microfone no navegador.':'Não foi possível reconhecer a fala.','error')};
     rec.onend=function(){if(btn){btn.classList.remove('listening');btn.innerHTML='<i class="fa-solid fa-microphone"></i> <span class="rd-drive-label">Comando de voz</span>'}};
     try{rec.start()}catch(e){rec.onerror({error:'start'})}
+  };
+  window.fastNativeSpeechResult=function(text){
+    var mode=window.fastNativeVoiceMode||'',routeBtn=el('fastVoiceRouteBtn'),expenseBtn=el('fastVoiceExpenseBtn');window.fastNativeVoiceMode='';
+    if(routeBtn){routeBtn.classList.remove('listening');routeBtn.innerHTML='<i class="fa-solid fa-microphone"></i> <span class="rd-drive-label">Comando de voz</span>'}
+    if(expenseBtn)expenseBtn.classList.remove('listening');
+    if(mode==='expense'&&typeof window.fastHandleExpenseSpeech==='function')window.fastHandleExpenseSpeech(text);else if(typeof window.fastHandleRouteSpeech==='function')window.fastHandleRouteSpeech(text)
+  };
+  window.fastNativeSpeechError=function(code){
+    var routeBtn=el('fastVoiceRouteBtn'),expenseBtn=el('fastVoiceExpenseBtn'),status=el(window.fastNativeVoiceMode==='expense'?'fastVoiceExpenseStatus':'fastVoiceRouteStatus');window.fastNativeVoiceMode='';
+    if(routeBtn){routeBtn.classList.remove('listening');routeBtn.innerHTML='<i class="fa-solid fa-microphone"></i> <span class="rd-drive-label">Comando de voz</span>'}if(expenseBtn)expenseBtn.classList.remove('listening');
+    var msg=code==='permission'?'Autorize o microfone e toque novamente.':code==='cancelled'?'Comando de voz cancelado.':'Reconhecimento de voz indisponível neste aparelho.';if(status)status.textContent=msg;if(typeof mostrarToast==='function')mostrarToast(msg,code==='cancelled'?'info':'error')
   };
   function persistConfig(){
     var c=(el('fastDriveClientId')||{}).value||localStorage.getItem(CLIENT)||'',f=(el('fastDriveFolderId')||{}).value||localStorage.getItem(FOLDER)||'';
