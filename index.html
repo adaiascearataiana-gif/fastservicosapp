@@ -56215,9 +56215,10 @@ window.fastMobileNav = function(ev, abaId, botao) {
     window.fastUrlAndroid = function(app){
       var files={cliente:'Cliente-FAST-Android.apk',motorista:'Motorista-FAST-Android.apk',rotas:'Rotas-do-Dia-FAST-Android.apk',despesas:'Despesas-FAST-Android.apk',fast:'FAST-Servicos-Android.apk',limpo:'FAST-Limpo-Android.apk'};
       var file=files[app]||files.cliente;
-      // Usa sempre o APK mais recente publicado. Os arquivos estáticos do site
-      // podem permanecer no cache do navegador e entregar ícones antigos.
-      return 'https://github.com/adaiascearataiana-gif/fastservicosapp/releases/latest/download/'+file;
+      // Download direto pelo mesmo domínio do FAST: evita os redirecionamentos
+      // do GitHub Releases que podem deixar o Chrome Android preso em "baixando".
+      // O parâmetro de versão impede reaproveitamento de um APK antigo em cache.
+      return 'https://adaiascearataiana-gif.github.io/fastservicosapp/downloads/'+file+'?v=4.0.4';
     };
     window.fastBaixarAndroid = function(app){
       var url=window.fastUrlAndroid(app);
