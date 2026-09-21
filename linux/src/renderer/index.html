@@ -2745,7 +2745,7 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
       enter('fastGateCreatePwd', function(){ var n=$('fastGateCreatePwd2'); if(n)n.focus(); });
       enter('fastGateCreatePwd2', window.fastGateDoCreate);
       enter('fastGateUser', function(){ var n=$('fastGatePwd'); if(n)n.focus(); });
-      enter('fastGatePwd', function(){ /* confirmação somente pelo botão CONFIRMAR */ });
+      enter('fastGatePwd', function(){ window.fastGateDoLogin(); });
       var cp = $('fastGateCreatePwd'); if (cp) cp.addEventListener('input', updateStrength);
     }
 
@@ -31379,11 +31379,11 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
                       <td class="fast-dl-acoes"><button type="button" class="btn-success ripple fast-dl-btn" onclick="fastBaixarAndroid('limpo')"><i class="fa-solid fa-download"></i> BAIXAR APK</button></td>
                     </tr>
                     <tr>
-                      <td class="fast-dl-nome"><i class="fa-brands fa-windows fast-dl-ico fast-dl-ico-windows"></i> FAST PARA WINDOWS</td>
+                      <td class="fast-dl-nome"><i class="fa-brands fa-windows fast-dl-ico fast-dl-ico-windows"></i> <button type="button" class="fast-desktop-guide-link" onclick="fastAbrirGuiaDesktop('windows')">FAST PARA WINDOWS</button></td>
                       <td class="fast-dl-acoes"><button type="button" class="btn-primary ripple fast-dl-btn" onclick="fastBaixarDesktop('windows')"><i class="fa-solid fa-download"></i> BAIXAR</button></td>
                     </tr>
                     <tr>
-                      <td class="fast-dl-nome"><i class="fa-brands fa-linux fast-dl-ico fast-dl-ico-linux"></i> FAST PARA LINUX</td>
+                      <td class="fast-dl-nome"><i class="fa-brands fa-linux fast-dl-ico fast-dl-ico-linux"></i> <button type="button" class="fast-desktop-guide-link" onclick="fastAbrirGuiaDesktop('linux')">FAST PARA LINUX</button></td>
                       <td class="fast-dl-acoes"><button type="button" class="btn-primary ripple fast-dl-btn" onclick="fastBaixarDesktop('linux')"><i class="fa-solid fa-download"></i> BAIXAR</button></td>
                     </tr>
                     <tr>
@@ -35067,12 +35067,12 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
       }
     }
 
-    // A senha da Área Protegida só pode ser confirmada pelo botão.
+    // Enter confirma a senha da Área Protegida; Tab mantém a navegação padrão.
     document.addEventListener('DOMContentLoaded', function(){
       const inp = document.getElementById('empSenhaInput');
       if (inp) {
         inp.addEventListener('keydown', function(e){
-          if (e.key === 'Enter') e.preventDefault();
+          if (e.key === 'Enter') { e.preventDefault(); confirmarEmpSenha(); }
         });
       }
       // ESC fecha o overlay
@@ -57289,7 +57289,7 @@ body.fast-touch-ui #scrollNavBox { bottom: 130px !important; top: auto !importan
 <script id="r107-protected-tabs-fix">
 (function(){
   'use strict';
-  var valid = {empresa:'emptabEmpresa',acessos:'emptabAcessos',backups:'emptabBackups',banco:'emptabBanco',brevo:'emptabBrevo',publicacao:'emptabPublicacao',sql:'emptabSql'};
+  var valid = {empresa:'emptabEmpresa',acessos:'emptabAcessos',backups:'emptabBackups',banco:'emptabBanco',datavalid:'emptabDatavalid',brevo:'emptabBrevo',publicacao:'emptabPublicacao',sql:'emptabSql'};
   function activate(tabId, focusTab){
     if(!valid[tabId] || !document.getElementById(valid[tabId])) tabId='empresa';
     var box=document.getElementById('empDataBox'); if(!box) return false;
@@ -57303,6 +57303,7 @@ body.fast-touch-ui #scrollNavBox { bottom: 130px !important; top: auto !importan
       panel.setAttribute('role','tabpanel'); if(on) panel.scrollTop=0;
     });
     try{sessionStorage.setItem('fast_emp_tab',tabId)}catch(e){}
+    if(tabId==='datavalid'&&typeof window.fastDatavalidRefresh==='function')window.fastDatavalidRefresh();
     return false;
   }
   window.empTrocarTab=function(tabId){ return activate(tabId,true); };
@@ -60152,5 +60153,7 @@ setInterval(function(){try{var tab=document.getElementById('rotasDia');if(tab&&t
 </script>
 <link rel="stylesheet" href="motorista-admin.css?v=1">
 <script src="motorista-admin.js?v=1"></script>
+<script src="datavalid-panel.js"></script>
+<script src="desktop-guides-keyboard.js"></script>
 <script src="desktop-bridge.js"></script>
 </body></html>

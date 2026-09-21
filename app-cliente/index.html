@@ -104,4 +104,5 @@ function sair(){localStorage.removeItem(KS);sessao=null;tela('auth')}addEventLis
   var hash=new URLSearchParams(location.hash.slice(1)),token=hash.get('access_token');if(hash.get('type')==='recovery'&&token){setTimeout(async function(){var senha=prompt('Crie uma nova senha com pelo menos 8 caracteres:');if(!senha||senha.length<8)return alert('A senha não foi alterada.');try{await api(AUTH+'/user',{method:'PUT',headers:headers(token),body:JSON.stringify({password:senha})});history.replaceState(null,'',location.pathname);alert('Senha alterada com segurança. Entre novamente.');lockNow()}catch(e){alert('Não foi possível alterar a senha: '+e.message)}},300)}
 })();
 </script>
+<script src="../app-keyboard.js"></script>
 </body></html>

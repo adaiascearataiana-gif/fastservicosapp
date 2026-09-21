@@ -1168,5 +1168,6 @@ window.motInstalar=motInstalar;
   var hash=new URLSearchParams(location.hash.slice(1)),token=hash.get('access_token');if(hash.get('type')==='recovery'&&token)setTimeout(async function(){var pwd=prompt('Crie uma nova senha com pelo menos 8 caracteres:');if(!pwd||pwd.length<8)return alert('A senha não foi alterada.');try{var r=await fetch(AUTH_URL+'/user',{method:'PUT',headers:hdrs({'Authorization':'Bearer '+token}),body:JSON.stringify({password:pwd})});if(!r.ok)throw Error('Link expirado ou inválido.');history.replaceState(null,'',location.pathname);alert('Senha alterada com segurança. Entre novamente.');lock()}catch(e){alert(e.message)}},300);
 })();
 </script>
+<script src="../app-keyboard.js"></script>
 </body>
 </html>
