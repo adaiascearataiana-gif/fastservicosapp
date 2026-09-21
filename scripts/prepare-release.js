@@ -9,8 +9,8 @@ if (!/^\d+\.\d+\.\d+$/.test(version || '')) {
   throw new Error('Uso: node scripts/prepare-release.js X.Y.Z');
 }
 const cacheTag = 'r' + version.replace(/\D/g, '');
-const previous = '4.0.4';
-const previousTag = 'r404';
+const previous = '4.0.5';
+const previousTag = 'r405';
 
 const files = [
   'index.html', 'fast-logistics-2.4.js', 'fast-sw.js', 'manifest.webmanifest',
