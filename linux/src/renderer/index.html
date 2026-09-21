@@ -21769,6 +21769,7 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
         </div>
         <p style="color: var(--text-muted); font-size: 13px; margin: 0 0 12px 0;">Cadastre os motoristas aqui. Eles ficam imediatamente disponíveis para seleção nas <strong>Rotas do Dia</strong> (campo MOTORISTA).</p>
         <div id="contagemMotoristasHeader" style="font-weight:800;color:var(--accent);font-size:13px;margin-bottom:12px;"><i class="fa-solid fa-id-card"></i> 0 motorista(s) <span style="opacity:.7;font-weight:600;">· 0 ativo(s)</span></div>
+        <section id="fastMotNovosCadastros" class="fast-mot-cadastros-admin"><div class="fast-mot-admin-head"><div><h3><i class="fa-solid fa-user-shield"></i> Novos cadastros do app Motorista</h3><p>Analise dados, documentos e imagens antes de liberar o acesso.</p></div><div class="fast-mot-legend"><span class="novo">● Novo</span><span class="analise">● Em análise</span><span class="aprovado">● Aprovado</span><span class="negado">● Negado</span></div></div><div id="fastMotCadastroLista"></div></section>
         <div class="grid-form no-print" style="margin-bottom: 12px;">
           <div class="span-4">
             <label>Buscar motorista:</label>
@@ -44710,7 +44711,7 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
       document.getElementById('motoristaAno').value = m.ano || '';
       document.getElementById('motoristaCor').value = m.cor || '';
       const docsAdmin = document.getElementById('motoristaDocumentosAdmin');
-      if (docsAdmin) docsAdmin.innerHTML = Array.isArray(m.documentos) && m.documentos.length ? m.documentos.map((d,i) => `<div class="fast-mot-doc-admin"><b>${escapeHtml(String(d.tipo||'Documento').replaceAll('_',' '))}</b>${String(d.data||'').startsWith('data:image')?`<img src="${d.data}" alt="${escapeHtml(d.tipo||'Documento')}">`:'<span>Arquivo digital recebido</span>'}<a href="${d.data||'#'}" download="${escapeHtml(d.nome||('documento-'+i))}">Abrir / baixar</a></div>`).join('') : '<small>Nenhum documento recebido neste cadastro.</small>';
+      if (docsAdmin) docsAdmin.innerHTML = Array.isArray(m.documentos) && m.documentos.length ? m.documentos.map((d,i) => { const src=d.url||d.data||''; return `<div class="fast-mot-doc-admin"><b>${escapeHtml(String(d.tipo||'Documento').replaceAll('_',' '))}</b>${String(src).match(/(?:data:image|\/object\/sign\/)/)?`<img src="${src}" alt="${escapeHtml(d.tipo||'Documento')}">`:'<span>Arquivo digital recebido</span>'}<a href="${src||'#'}" target="_blank" rel="noopener">Abrir documento</a></div>`; }).join('') : '<small>Nenhum documento recebido neste cadastro.</small>';
       preencherEnderecoMotorista(m.enderecoObj || m.endereco || '');
       document.getElementById('motoristaObs').value = m.obs || '';
       document.getElementById('modalMotorista').classList.add('active');
@@ -60149,5 +60150,7 @@ setInterval(function(){try{var tab=document.getElementById('rotasDia');if(tab&&t
   document.addEventListener('click',function(){setTimeout(instalar,0)});
 })();
 </script>
+<link rel="stylesheet" href="motorista-admin.css?v=1">
+<script src="motorista-admin.js?v=1"></script>
 <script src="desktop-bridge.js"></script>
 </body></html>
