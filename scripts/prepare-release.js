@@ -25,7 +25,7 @@ const files = [
   'app-limpo/manifest.webmanifest', 'app-limpo/sw.js',
   'android/app/build.gradle',
   'android/app/src/main/java/br/com/fastservicos/app/MainActivity.java',
-  'linux/package.json', 'linux/package-lock.json'
+  'linux/package.json'
 ];
 
 for (const rel of files) {
@@ -51,6 +51,14 @@ const parts = version.split('.').map(Number);
 const code = parts[0] * 10000 + parts[1] * 100 + parts[2];
 android = android.replace(/versionCode\s+\d+/, 'versionCode ' + code);
 fs.writeFileSync(gradle, android);
+
+// No package-lock, alterar somente a versão do projeto. Substituição global
+// corromperia versões legítimas de dependências que coincidam com a anterior.
+const lockFile = path.join(root, 'linux/package-lock.json');
+const lock = JSON.parse(fs.readFileSync(lockFile, 'utf8'));
+lock.version = version;
+if (lock.packages && lock.packages['']) lock.packages[''].version = version;
+fs.writeFileSync(lockFile, JSON.stringify(lock, null, 2) + '\n');
 
 console.log(`Versão ${version} preparada em todos os aplicativos (${cacheTag}).`);
 
