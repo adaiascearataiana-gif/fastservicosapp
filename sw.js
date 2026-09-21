@@ -1,5 +1,5 @@
 /* ==========================================================================
-   FAST Serviços — sw.js "HEALER" (r133 / 2.3.19)
+   FAST Serviços — sw.js "HEALER" (r134 / 2.3.20)
    Este Service Worker NÃO faz cache de NADA. Ele existe por UM motivo:
    substituir em todos os aparelhos o sw.js antigo (2.3.x) que servia página
    velha do cache e travava o app na versão antiga ("fica na 12").
@@ -9,8 +9,9 @@
    2) ACTIVATE: apaga caches de novo, desregistra a si mesmo e recarrega as
       abas abertas para que a página venha 100% da rede (versão nova).
    3) FETCH: passagem direta à rede — nunca intercepta, nunca cacheia.
-   ========================================================================== */
-var FAST_HEAL_TAG = 'fast-healer-2.3.19';
+   ==========================================================================
+*/
+var FAST_HEAL_TAG = 'fast-healer-2.3.20';
 
 self.addEventListener('install', function (e) {
   self.skipWaiting();
