@@ -1,121 +1,15 @@
 {
-  "version": "4.0.1",
-  "releasedAt": "2026-09-20T12:30:00-03:00",
+  "version": "4.0.2",
+  "releasedAt": "2026-09-20T21:15:00-04:00",
   "updates": [
-    {
-      "app": "fast",
-      "type": "melhorado",
-      "text": "4.0.1 (20/09/2026): botões Subir e Descer voltaram a ser arrastáveis verticalmente na lateral direita e preservam a posição escolhida."
-    },
-    {
-      "app": "fast",
-      "type": "melhorado",
-      "text": "4.0.1 (20/09/2026): barra inferior ganhou botões, ícones e área de toque maiores e proporcionais à altura da barra."
-    },
-    {
-      "app": "fast",
-      "type": "corrigido",
-      "text": "4.0.1 (20/09/2026): Central de Downloads ganhou mais espaço entre título e botão, divisores completos e alinhamento até o limite útil do card."
-    },
-    {
-      "app": "fast",
-      "type": "novo",
-      "text": "4.0.1 (20/09/2026): novo ciclo de versões com número único e diagnóstico de atualização para evitar divergência entre arquivo, GitHub e aplicativo instalado."
-    },
-    {
-      "app": "fast",
-      "type": "melhorado",
-      "text": "4.0.1 (20/09/2026): Restaurar Backup e Restaurar Ponto agora exibem progresso por etapas, resultado, auditoria local e relatório técnico copiável."
-    },
-    {
-      "app": "rotas",
-      "type": "corrigido",
-      "text": "4.0.1 (20/09/2026): rotas passadas não são mais transferidas automaticamente para hoje; cada rota permanece exclusivamente na data cadastrada em ROTAS."
-    },
-    {
-      "app": "fast",
-      "type": "corrigido",
-      "text": "4.0.1 (20/09/2026): removido estado de atualização gravado pelo navegador que mantinha o aplicativo preso em versões 3.1.x."
-    },
-    {
-      "app": "rotas",
-      "type": "corrigido",
-      "text": "3.1.6 (17/09/2026): Rotas do Dia ganhou APK Android próprio, independente e com download direto."
-    },
-    {
-      "app": "despesas",
-      "type": "corrigido",
-      "text": "3.1.6 (17/09/2026): Despesas ganhou APK Android próprio, independente e com download direto."
-    },
-    {
-      "app": "fast",
-      "type": "melhorado",
-      "text": "3.1.6 (17/09/2026): Central de Downloads passou a oferecer APK direto para Cliente, Motorista, Rotas do Dia e Despesas."
-    },
-    {
-      "app": "cliente",
-      "type": "corrigido",
-      "text": "3.1.3 (17/09/2026): Cliente FAST ganhou APK Android próprio, com download direto e instalação independente do FAST."
-    },
-    {
-      "app": "motorista",
-      "type": "corrigido",
-      "text": "3.1.3 (17/09/2026): FAST Motorista ganhou APK Android próprio, com download direto e instalação independente do FAST."
-    },
-    {
-      "app": "fast",
-      "type": "melhorado",
-      "text": "3.1.3 (17/09/2026): os botões de Cliente e Motorista na Central de Downloads baixam diretamente os respectivos APKs."
-    },
-    {
-      "app": "cliente",
-      "type": "melhorado",
-      "text": "3.1.2 (17/09/2026): cadastro do Cliente FAST ganhou escolha WhatsApp Sim/Não, CEP com preenchimento automático, complemento e lista completa dos estados."
-    },
-    {
-      "app": "cliente",
-      "type": "novo",
-      "text": "3.1.2 (17/09/2026): a senha agora possui verificação visual ao vivo de 8 caracteres, maiúscula, minúscula, caractere especial e confirmação."
-    },
-    {
-      "app": "cliente",
-      "type": "corrigido",
-      "text": "3.1.2 (17/09/2026): Cliente FAST mantém manifesto, identidade e Service Worker próprios para instalação independente."
-    },
-    {
-      "app": "motorista",
-      "type": "corrigido",
-      "text": "3.1.2 (17/09/2026): FAST Motorista foi separado do escopo do FAST e agora instala e abre como aplicativo independente."
-    },
-    {
-      "app": "fast",
-      "type": "corrigido",
-      "text": "3.1.2 (17/09/2026): Central de Downloads, links e QR do Motorista agora apontam para o aplicativo isolado correto."
-    },
-    {
-      "app": "rotas",
-      "type": "novo",
-      "text": "3.1.1 (17/09/2026): Rotas do Dia agora sinaliza cada entrega em verde, laranja ou vermelho; o atraso é contado por duas horas a partir das 08h ou da criação posterior."
-    },
-    {
-      "app": "cliente",
-      "type": "melhorado",
-      "text": "3.1.1 (17/09/2026): configurações exclusivas de segurança e entrega, bloqueio independente, avisos de rota/15 min/5 min/chegada, WhatsApp opcional e redefinição segura de senha."
-    },
-    {
-      "app": "motorista",
-      "type": "melhorado",
-      "text": "3.1.1 (17/09/2026): bloqueio independente, preferências de toque, histórico operacional somente leitura, atualizações exclusivas e recuperação segura de senha."
-    },
-    {
-      "app": "fast",
-      "type": "corrigido",
-      "text": "3.1.1 (17/09/2026): acesso à pasta do Google Drive funciona pelo explorador interno e por abertura direta; configuração da pasta é preservada."
-    },
-    {
-      "app": "despesas",
-      "type": "melhorado",
-      "text": "3.0.0 (16/09/2026): ao selecionar a última despesa pela descrição ou local, a forma de pagamento também é preenchida, incluindo registros antigos e variações de nomenclatura."
-    }
+    {"app":"fast","type":"corrigido","text":"4.0.2 (20/09/2026): auditoria geral eliminou divergências de versão, referências quebradas e conflitos de layout entre navegador, Android, Windows e Linux."},
+    {"app":"fast","type":"melhorado","text":"4.0.2 (20/09/2026): Central de Segurança, backups e pontos de restauração foram reunidos e organizados em uma única área."},
+    {"app":"fast","type":"novo","text":"4.0.2 (20/09/2026): pontos de restauração manuais e automáticos preservam o estado anterior e mantêm até dez cópias recentes."},
+    {"app":"fast","type":"corrigido","text":"4.0.2 (20/09/2026): clientes e lugares editados ou excluídos não retornam após sincronização, restauração ou concorrência entre aparelhos."},
+    {"app":"rotas","type":"corrigido","text":"4.0.2 (20/09/2026): ao editar uma rota, o formulário usa exatamente a rota escolhida; a última rota do cliente fica exclusiva para novas inclusões."},
+    {"app":"rotas","type":"melhorado","text":"4.0.2 (20/09/2026): balão de seleção permanece aberto até o fechamento, pode ser arrastado e respeita os limites da tela."},
+    {"app":"despesas","type":"melhorado","text":"4.0.2 (20/09/2026): dashboard financeiro recebeu tipografia e indicadores mais visíveis, mantendo adaptação para celular e desktop."},
+    {"app":"cliente","type":"corrigido","text":"4.0.2 (20/09/2026): área segura e cabeçalho foram ajustados para não estourar a largura da tela em instalações independentes."},
+    {"app":"motorista","type":"corrigido","text":"4.0.2 (20/09/2026): área segura e cabeçalho foram ajustados para não estourar a largura da tela em instalações independentes."}
   ]
 }

@@ -1,6 +1,6 @@
 (function(){
   'use strict';
-  var VERSION='4.0.1', STORE='fast_logistics_v2416', state={watchId:null,lastPosition:null};
+  var VERSION='4.0.2', STORE='fast_logistics_v2416', state={watchId:null,lastPosition:null};
   function el(id){return document.getElementById(id)}
   function esc(v){var d=document.createElement('div');d.textContent=String(v==null?'':v);return d.innerHTML}
   function norm(v){return String(v||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim()}
@@ -134,38 +134,12 @@
   function bindOperationalCounters(){var date=el('dpDataSequencia')||el('dataSequencia');if(date&&!date.dataset.fastCounterBound){date.dataset.fastCounterBound='1';date.addEventListener('change',refresh);date.addEventListener('input',refresh)}window.addEventListener('storage',refresh);[0,400,1200,3000,7000].forEach(function(ms){setTimeout(refresh,ms)})}
   function boot(){document.documentElement.setAttribute('data-fast-version',VERSION);var m=document.querySelector('meta[name="fast-app-version"]');if(m)m.content=VERSION;['fastSplashVersion','fastGateVersionNum','fastVersaoLabel'].forEach(function(id){if(el(id))el(id).textContent=VERSION});if(el('navMenuVersao'))el('navMenuVersao').textContent='Versão '+VERSION;migrateIdentity();installHub();bindOperationalCounters();bindOperationalButtons();installExpenseVoice();installExpenseRouteLink();installExpenseDashboard();patchExpenseDashboard();installBanks();setTimeout(bindOperationalButtons,1200);var initial=cleanDirectory(false);installPostSyncClean();if(initial.clientes||initial.destinos)setTimeout(pushSlimLists,1200);setTimeout(function(){var late=cleanDirectory(true);if(late.clientes||late.destinos)pushSlimLists();try{if(typeof renderizarClientes==='function')renderizarClientes();if(typeof destRenderizarLista==='function')destRenderizarLista()}catch(e){}window.fastRenderExpenseDashboard();window.fastFilterExpenses();auditDesktopLayout();refresh()},5000);patchRender();var expenseBody=el('tabelaDespesasBody');if(expenseBody)new MutationObserver(function(){window.fastRenderExpenseDashboard();window.fastFilterExpenses()}).observe(expenseBody,{childList:true,subtree:true});setInterval(function(){window.fastRenderExpenseDashboard();window.fastFilterExpenses()},3000);window.fastFilterExpenses();auditDesktopLayout();window.addEventListener('resize',auditDesktopLayout);var observer=new MutationObserver(function(){addProofButtons();refresh()});var cont=el('containerSequencia');if(cont)observer.observe(cont,{childList:true,subtree:true});setInterval(refresh,15000)}
   function finalizeReleaseInfo(){
-    var allChanges=[
-      {app:'fast',type:'melhorado',text:'4.0.1 (20/09/2026): botões Subir e Descer arrastáveis verticalmente na lateral direita, com posição preservada.'},
-      {app:'fast',type:'melhorado',text:'4.0.1 (20/09/2026): barra inferior ampliada com ícones e áreas de toque proporcionais.'},
-      {app:'fast',type:'corrigido',text:'4.0.1 (20/09/2026): Central de Downloads realinhada, com espaçamento e divisores ocupando toda a largura útil.'},
-      {app:'fast',type:'novo',text:'4.0.1 (20/09/2026): novo ciclo de versões com uma fonte única para arquivo, GitHub e aplicativo instalado.'},
-      {app:'fast',type:'melhorado',text:'4.0.1 (20/09/2026): restauração ganhou barra de progresso, validação, auditoria e relatório técnico.'},
-      {app:'rotas',type:'corrigido',text:'4.0.1 (20/09/2026): rotas passadas não são mais transferidas para hoje e permanecem na data cadastrada em ROTAS.'},
-      {app:'fast',type:'corrigido',text:'4.0.1 (20/09/2026): removido estado de navegador que prendia a atualização em versões 3.1.x.'},
-      {app:'cliente',type:'corrigido',text:'3.1.3 (17/09/2026): Cliente FAST ganhou APK Android próprio e independente, com download direto.'},
-      {app:'motorista',type:'corrigido',text:'3.1.3 (17/09/2026): FAST Motorista ganhou APK Android próprio e independente, com download direto.'},
-      {app:'fast',type:'melhorado',text:'3.1.3 (17/09/2026): Central de Downloads agora baixa diretamente os APKs de Cliente e Motorista.'},
-      {app:'cliente',type:'melhorado',text:'3.1.2 (17/09/2026): cadastro com WhatsApp Sim/Não, CEP automático, complemento e estados por nome completo.'},
-      {app:'cliente',type:'novo',text:'3.1.2 (17/09/2026): validação visual da senha exige 8 caracteres, maiúscula, minúscula, especial e confirmação.'},
-      {app:'cliente',type:'corrigido',text:'3.1.2 (17/09/2026): Cliente FAST permanece instalável e independente do aplicativo principal.'},
-      {app:'motorista',type:'corrigido',text:'3.1.2 (17/09/2026): FAST Motorista agora possui endereço, manifesto e Service Worker próprios, sem conflito com o FAST.'},
-      {app:'fast',type:'corrigido',text:'3.1.2 (17/09/2026): links, compartilhamento e QR da Central de Downloads foram direcionados aos aplicativos independentes.'},
-      {app:'rotas',type:'novo',text:'3.1.1 (17/09/2026): Rotas do Dia ganhou sinalizador verde, laranja e vermelho após os botões de ordenação.'},
-      {app:'rotas',type:'melhorado',text:'3.1.1 (17/09/2026): atraso calculado após duas horas, contando a partir das 08h ou do horário de criação posterior.'},
-      {app:'fast',type:'corrigido',text:'3.1.1 (17/09/2026): Central Operacional passou a contabilizar risco de atraso com a mesma regra das Rotas do Dia.'},
-      {app:'fast',type:'corrigido',text:'3.1.1 (17/09/2026): bloqueio de tela revisado e compartilhado entre FAST, Rotas do Dia e Despesas.'},
-      {app:'cliente',type:'novo',text:'3.1.1 (17/09/2026): Cliente FAST ganhou bloqueio independente, preferências de som e avisos de rota, 15 minutos, 5 minutos e chegada.'},
-      {app:'motorista',type:'novo',text:'3.1.1 (17/09/2026): FAST Motorista ganhou bloqueio independente, preferências de toque, histórico e atualizações exclusivas.'},
-      {app:'cliente',type:'corrigido',text:'3.1.1 (17/09/2026): recuperação de senha do Cliente retorna ao endereço público correto, sem localhost:3000.'},
-      {app:'motorista',type:'corrigido',text:'3.1.1 (17/09/2026): recuperação de senha do Motorista retorna ao endereço público correto, sem localhost:3000.'},
-      {app:'fast',type:'melhorado',text:'3.1.1 (17/09/2026): Google Drive agora abre a pasta configurada pelo explorador interno ou diretamente no Drive.'},
-      {app:'fast',type:'corrigido',text:'3.1.1 (17/09/2026): ID da pasta do Google Drive é preservado ao abrir e sincronizar.'}
-    ],exclusive=new URLSearchParams(location.search).get('exclusive')||'',scope=exclusive==='rotas-dia'?'rotas':exclusive==='despesas'?'despesas':'',changes=scope?allChanges.filter(function(x){return x.app===scope}):allChanges;
+    var allChanges=[{"app":"fast","type":"corrigido","text":"4.0.2 (20/09/2026): auditoria geral eliminou divergências de versão, referências quebradas e conflitos de layout entre navegador, Android, Windows e Linux."},{"app":"fast","type":"melhorado","text":"4.0.2 (20/09/2026): Central de Segurança, backups e pontos de restauração foram reunidos e organizados em uma única área."},{"app":"fast","type":"novo","text":"4.0.2 (20/09/2026): pontos de restauração manuais e automáticos preservam o estado anterior e mantêm até dez cópias recentes."},{"app":"fast","type":"corrigido","text":"4.0.2 (20/09/2026): clientes e lugares editados ou excluídos não retornam após sincronização, restauração ou concorrência entre aparelhos."},{"app":"rotas","type":"corrigido","text":"4.0.2 (20/09/2026): ao editar uma rota, o formulário usa exatamente a rota escolhida; a última rota do cliente fica exclusiva para novas inclusões."},{"app":"rotas","type":"melhorado","text":"4.0.2 (20/09/2026): balão de seleção permanece aberto até o fechamento, pode ser arrastado e respeita os limites da tela."},{"app":"despesas","type":"melhorado","text":"4.0.2 (20/09/2026): dashboard financeiro recebeu tipografia e indicadores mais visíveis, mantendo adaptação para celular e desktop."},{"app":"cliente","type":"corrigido","text":"4.0.2 (20/09/2026): área segura e cabeçalho foram ajustados para não estourar a largura da tela em instalações independentes."},{"app":"motorista","type":"corrigido","text":"4.0.2 (20/09/2026): área segura e cabeçalho foram ajustados para não estourar a largura da tela em instalações independentes."}],exclusive=new URLSearchParams(location.search).get('exclusive')||'',scope=exclusive==='rotas-dia'?'rotas':exclusive==='despesas'?'despesas':'',changes=scope?allChanges.filter(function(x){return x.app===scope}):allChanges;
     document.documentElement.setAttribute('data-fast-version',VERSION);
     var m=document.querySelector('meta[name="fast-app-version"]');if(m)m.content=VERSION;
     var immediate=document.querySelector('meta[name="fast-app-changelog-immediate"]');if(immediate)immediate.content=VERSION;
-    var latest=document.querySelector('meta[name="fast-latest-update"]');if(latest)latest.content='4.0.1: controle lateral arrastável, dock ampliada e downloads realinhados.';
-    var date=document.querySelector('meta[name="fast-app-date"]');if(date)date.content='2026-09-20T12:30:00-03:00';
+    var latest=document.querySelector('meta[name="fast-latest-update"]');if(latest)latest.content='4.0.2: auditoria geral, proteção de dados, sincronização e layout corrigidos.';
+    var date=document.querySelector('meta[name="fast-app-date"]');if(date)date.content='2026-09-20T21:15:00-04:00';
     var changelog=document.querySelector('meta[name="fast-app-changelog"]');if(changelog)changelog.content=JSON.stringify(changes);
     window.fastUltimoModuloNovidades=changes;
     window.fastObterUltimasAtualizacoes=function(){return changes.slice()};
