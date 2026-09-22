@@ -2312,8 +2312,13 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
     // ---- UI: mostrar / ocultar o gate ----
     var gate, elCreate, elLogin, elRecover;
     function $(id){ return document.getElementById(id); }
+    function isExclusiveWorkspace(){
+      var mode = new URLSearchParams(location.search).get('exclusive');
+      return mode === 'despesas' || mode === 'rotas-dia';
+    }
 
     function showGate(){
+      if (isExclusiveWorkspace()) { hideGate(); return; }
       if (!isEnabled()) { hideGate(); return; }
       document.body.classList.add('fast-auth-booting');
       gate = $('fastLoginGate');
@@ -2959,6 +2964,7 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
     var K_BOOT_DONE = 'fast_auth_boot';    // sessionStorage: '1' se o boot inicial ja foi feito nesta aba
     function initGate(){
       bindEnter();
+      if (isExclusiveWorkspace()) { hideGate(); refreshSecCard(); return; }
       if (isEnabled()){
         var hasBio = bioCredExists();
         // r16: Verifica se e o primeiro carregamento da aba (boot fresco).
@@ -3140,6 +3146,12 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
     // FAST SPLASH: mostra a apresentacao profissional antes de qualquer outra coisa.
     // Apos ~2.6s, esconde a splash e inicializa o gate (login) normalmente.
     function boot(){
+      if (isExclusiveWorkspace()) {
+        var exclusiveSplash = document.getElementById('fastSplash');
+        if (exclusiveSplash) { exclusiveSplash.classList.remove('show', 'blur'); exclusiveSplash.classList.add('hide'); exclusiveSplash.style.display = 'none'; }
+        initGate();
+        return;
+      }
       try {
         // Preenche a versao na splash
         var sv = document.getElementById('fastSplashVersion');
@@ -3277,6 +3289,7 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
     // a biometria e sempre exigida ao retornar para sua seguranca.
     // Se NAO tem biometria, respeita o "manter conectado" (sessao em localStorage por 12h).
     document.addEventListener('visibilitychange', function(){
+      if (isExclusiveWorkspace()) return;
       if (_fastBioInProgress || fastAuthEmCooldown()) {
         if (document.visibilityState === 'visible') {
           fastLimparSaida(); fastLimparGrace();
