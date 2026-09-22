@@ -1,5 +1,5 @@
 /* FAST Servicos - app Despesas - Service Worker persistente
-   (r409; adotando a mesma estratégia de atualização via cache-rollback)
+   (r4010; adotando a mesma estratégia de atualização via cache-rollback)
    ==========================================================================
    RESTAURA a instalabilidade do mini-app: o Chrome so dispara o
    beforeinstallprompt (botao "Instalar Despesas") quando existe uma
@@ -9,12 +9,12 @@
    Modelo network-first (igual ao r128 que sempre funcionou):
    - recursos: rede primeiro (cache:'no-store'); cache so como fallback
      quando a rede falha (offline).
-   - activate: apaga caches antigos (fast-despesas-r408 e anteriores).
+   - activate: apaga caches antigos (fast-despesas-r4010 e anteriores).
    - SEM self.unregister e SEM clients.navigate (nada de reload em loop).
 */
-const CACHE='fast-despesas-r409';
-const CORE=['./','./index.html','./manifest.webmanifest','../assets/app-despesas-192.png?v=r409','../assets/app-despesas-512.png?v=r409'];
-const SHARE_CACHE='fast-despesas-share-r409';
+const CACHE='fast-despesas-r4010';
+const CORE=['./','./index.html','./manifest.webmanifest','../assets/app-despesas-192.png?v=r4010','../assets/app-despesas-512.png?v=r4010'];
+const SHARE_CACHE='fast-despesas-share-r4010';
 const SHARE_KEY='/fastservicosapp/app-despesas/__fast-share__';
 const SHARE_GET_URL='/fastservicosapp/app-despesas/__fast-share-get__';
 const SHARE_TTL=300000;

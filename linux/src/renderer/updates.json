@@ -1,47 +1,236 @@
 {
-  "version": "4.0.9",
-  "releasedAt": "2026-09-21T12:00:00-03:00",
+  "version": "4.0.10",
+  "releasedAt": "2026-09-22T18:00:00-03:00",
   "updates": [
-    {"app":"despesas","type":"melhorado","text":"4.0.9 (21/09/2026): atualização automática de PWA e cache de service worker aplicada para todos os apps do FAST, sem reinstalação manual da página."},
-    {"app":"rotas","type":"melhorado","text":"4.0.9 (21/09/2026): atualização automática de PWA e cache de service worker aplicada para todos os apps do FAST, sem reinstalação manual da página."},
-    {"app":"cliente","type":"melhorado","text":"4.0.9 (21/09/2026): atualização automática de PWA e cache de service worker aplicada para todos os apps do FAST, sem reinstalação manual da página."},
-    {"app":"motorista","type":"melhorado","text":"4.0.9 (21/09/2026): atualização automática de PWA e cache de service worker aplicada para todos os apps do FAST, sem reinstalação manual da página."},
-    {"app":"fast","type":"melhorado","text":"4.0.9 (21/09/2026): atualização automática e balão de nova versão agora passam a orientar a troca imediata sem que o usuário precise reinstalar o app manualmente."},
-    {"app":"despesas","type":"melhorado","text":"4.0.8 (21/09/2026): Despesas recebeu a nova identidade vermelha no ícone Android e no gate, preenchendo toda a área visível sem margens."},
-    {"app":"rotas","type":"melhorado","text":"4.0.8 (21/09/2026): Rotas do Dia recebeu a nova identidade azul no ícone Android e no gate, preenchendo toda a área visível sem margens."},
-    {"app":"cliente","type":"melhorado","text":"4.0.8 (21/09/2026): Cliente FAST recebeu a nova identidade verde no ícone Android e no gate, preenchendo toda a área visível sem margens."},
-    {"app":"motorista","type":"melhorado","text":"4.0.8 (21/09/2026): Motorista FAST recebeu a nova identidade cinza no ícone Android e no gate, preenchendo toda a área visível sem margens."},
-    {"app":"fast","type":"novo","text":"4.0.7 (21/09/2026): o sino do FAST detecta novos cadastros de Cliente e Motorista, mantém o aviso pendente e abre diretamente a seção correta ao tocar."},
-    {"app":"motorista","type":"novo","text":"4.0.6 (21/09/2026): cadastro do Motorista foi dividido em Dados pessoais, Dados da CNH e Dados do veículo, com endereço completo e documentos adicionados."},
-    {"app":"motorista","type":"novo","text":"4.0.6 (21/09/2026): foto pessoal, comprovante de residência, motorista com CNH, CNH e CRLV exigem análise de nitidez, confirmação ou remoção antes do envio."},
-    {"app":"motorista","type":"melhorado","text":"4.0.6 (21/09/2026): comprovante, CNH e CRLV recebem leitura assistida para preencher endereço e dados dos documentos; arquivos aprovados entram no cofre privado do Supabase."},
-    {"app":"fast","type":"novo","text":"4.0.6 (21/09/2026): a área Motoristas do FAST passou a exibir dados do veículo e os documentos recebidos no cadastro para consulta do administrador."},
-    {"app":"cliente","type":"corrigido","text":"4.0.6 (21/09/2026): confirmação e recuperação continuam retornando às páginas oficiais do Cliente FAST, com mensagem clara de conta confirmada."},
-    {"app":"cliente","type":"seguranca","text":"4.0.6 (21/09/2026): o Cliente FAST verifica atualizações antes e depois do login e bloqueia o uso quando uma versão obrigatória estiver disponível."},
-    {"app":"cliente","type":"melhorado","text":"4.0.6 (21/09/2026): atualização obrigatória mostra progresso, tenta novamente após falha de internet e preserva cadastro, sessão, preferências e fila de pedidos."},
-    {"app":"motorista","type":"seguranca","text":"4.0.6 (21/09/2026): o FAST Motorista verifica atualizações antes e depois do login e bloqueia o uso quando uma versão obrigatória estiver disponível."},
-    {"app":"motorista","type":"melhorado","text":"4.0.6 (21/09/2026): atualização obrigatória mostra progresso e preserva cadastro, preferências, fotos e operações pendentes."},
-    {"app":"fast","type":"melhorado","text":"4.0.6 (21/09/2026): Cliente e Motorista passam a exigir a versão mais recente independentemente do estado de autenticação."},
-    {"app":"motorista","type":"corrigido","text":"4.0.5 (21/09/2026): o cadastro do Motorista aceita corretamente nomes e textos com acentos e caracteres Unicode, preservando minúsculas em login, e-mail e senha."},
-    {"app":"motorista","type":"melhorado","text":"4.0.5 (21/09/2026): cadastro ganhou visualizar senha, repetir senha e validação visual de maiúscula, minúscula, caractere especial e mínimo de 8 caracteres."},
-    {"app":"motorista","type":"corrigido","text":"4.0.5 (21/09/2026): cadastro não depende mais do cofre provisório antes da confirmação do e-mail; os dados pendentes são sincronizados com segurança."},
-    {"app":"motorista","type":"removido","text":"4.0.5 (21/09/2026): removidos os avisos de registro facial preparado e de criação da própria conta."},
-    {"app":"cliente","type":"melhorado","text":"4.0.5 (21/09/2026): Número fica ao lado de Endereço e Complemento aparece logo abaixo no cadastro do Cliente."},
-    {"app":"cliente","type":"removido","text":"4.0.5 (21/09/2026): removido o aviso de validação facial reservada."},
-    {"app":"fast","type":"corrigido","text":"4.0.5 (21/09/2026): links de confirmação de Cliente e Motorista retornam para a página correta do aplicativo, eliminando o erro 404 do GitHub Pages."},
-    {"app":"despesas","type":"melhorado","text":"4.0.5 (21/09/2026): tabela de Despesas ocupa a área útil até o limite da tela, mantém rolagem interna e centraliza os títulos das colunas."},
-    {"app":"fast","type":"corrigido","text":"4.0.4 (21/09/2026): a Central de Downloads deixou de entregar APKs antigos armazenados no site e agora baixa sempre a compilação Android mais recente."},
-    {"app":"fast","type":"corrigido","text":"4.0.4 (21/09/2026): os ícones Android receberam um novo identificador interno para impedir que o lançador do aparelho reutilize o ícone antigo em caches antigos."},
-    {"app":"rotas","type":"corrigido","text":"4.0.4 (21/09/2026): o APK Rotas do Dia passa a instalar e atualizar com o ícone azul próprio."},
-    {"app":"despesas","type":"corrigido","text":"4.0.4 (21/09/2026): o APK Despesas passa a instalar e atualizar com o ícone vermelho próprio."},
-    {"app":"cliente","type":"corrigido","text":"4.0.4 (21/09/2026): o APK Cliente FAST passa a instalar e atualizar com o ícone verde próprio."},
-    {"app":"motorista","type":"corrigido","text":"4.0.4 (21/09/2026): o APK FAST Motorista passa a instalar e atualizar com o ícone cinza próprio."},
-    {"app":"fast","type":"melhorado","text":"4.0.3 (21/09/2026): a Central de Downloads fica disponível somente no navegador e é ocultada nos aplicativos instalados."},
-    {"app":"fast","type":"novo","text":"4.0.3 (21/09/2026): Despesas, Rotas do Dia, Cliente e Motorista receberam identidades visuais próprias nos ícones Android e nas telas de acesso."},
-    {"app":"rotas","type":"melhorado","text":"4.0.3 (21/09/2026): Rotas do Dia usa o novo ícone azul em tela cheia no gate e moldura azul nos limites do aplicativo mobile."},
-    {"app":"despesas","type":"melhorado","text":"4.0.3 (21/09/2026): Despesas usa o novo ícone vermelho em tela cheia no gate e moldura vermelha nos limites do aplicativo mobile."},
-    {"app":"cliente","type":"melhorado","text":"4.0.3 (21/09/2026): Cliente FAST usa o novo ícone verde no Android, no cabeçalho e no gate, com moldura verde no aplicativo."},
-    {"app":"cliente","type":"corrigido","text":"4.0.3 (21/09/2026): telefones colados do WhatsApp com +55, DDD, espaços ou símbolos agora preenchem o número completo sem cortar dígitos."},
-    {"app":"motorista","type":"melhorado","text":"4.0.3 (21/09/2026): FAST Motorista usa o novo ícone cinza no Android, na abertura, no gate e no cabeçalho, com moldura cinza no aplicativo."}
+    {
+      "app": "fast",
+      "type": "corrigido",
+      "text": "4.0.10 (22/09/2026): versão exibida no FAST e nos aplicativos corrigida; cache e instaladores sincronizados para que a atualização apareça após instalar."
+    },
+    {
+      "app": "cliente",
+      "type": "corrigido",
+      "text": "4.0.10 (22/09/2026): versão exibida no login e atualização do Cliente sincronizada com o instalador."
+    },
+    {
+      "app": "motorista",
+      "type": "corrigido",
+      "text": "4.0.10 (22/09/2026): versão exibida no login e atualização do Motorista sincronizada com o instalador."
+    },
+    {
+      "app": "rotas",
+      "type": "corrigido",
+      "text": "4.0.10 (22/09/2026): versão exibida e cache de Rotas do Dia sincronizados com o instalador."
+    },
+    {
+      "app": "despesas",
+      "type": "corrigido",
+      "text": "4.0.10 (22/09/2026): versão exibida e cache de Despesas sincronizados com o instalador."
+    },
+    {
+      "app": "despesas",
+      "type": "melhorado",
+      "text": "4.0.9 (21/09/2026): atualização automática de PWA e cache de service worker aplicada para todos os apps do FAST, sem reinstalação manual da página."
+    },
+    {
+      "app": "rotas",
+      "type": "melhorado",
+      "text": "4.0.9 (21/09/2026): atualização automática de PWA e cache de service worker aplicada para todos os apps do FAST, sem reinstalação manual da página."
+    },
+    {
+      "app": "cliente",
+      "type": "melhorado",
+      "text": "4.0.9 (21/09/2026): atualização automática de PWA e cache de service worker aplicada para todos os apps do FAST, sem reinstalação manual da página."
+    },
+    {
+      "app": "motorista",
+      "type": "melhorado",
+      "text": "4.0.9 (21/09/2026): atualização automática de PWA e cache de service worker aplicada para todos os apps do FAST, sem reinstalação manual da página."
+    },
+    {
+      "app": "fast",
+      "type": "melhorado",
+      "text": "4.0.9 (21/09/2026): atualização automática e balão de nova versão agora passam a orientar a troca imediata sem que o usuário precise reinstalar o app manualmente."
+    },
+    {
+      "app": "despesas",
+      "type": "melhorado",
+      "text": "4.0.8 (21/09/2026): Despesas recebeu a nova identidade vermelha no ícone Android e no gate, preenchendo toda a área visível sem margens."
+    },
+    {
+      "app": "rotas",
+      "type": "melhorado",
+      "text": "4.0.8 (21/09/2026): Rotas do Dia recebeu a nova identidade azul no ícone Android e no gate, preenchendo toda a área visível sem margens."
+    },
+    {
+      "app": "cliente",
+      "type": "melhorado",
+      "text": "4.0.8 (21/09/2026): Cliente FAST recebeu a nova identidade verde no ícone Android e no gate, preenchendo toda a área visível sem margens."
+    },
+    {
+      "app": "motorista",
+      "type": "melhorado",
+      "text": "4.0.8 (21/09/2026): Motorista FAST recebeu a nova identidade cinza no ícone Android e no gate, preenchendo toda a área visível sem margens."
+    },
+    {
+      "app": "fast",
+      "type": "novo",
+      "text": "4.0.7 (21/09/2026): o sino do FAST detecta novos cadastros de Cliente e Motorista, mantém o aviso pendente e abre diretamente a seção correta ao tocar."
+    },
+    {
+      "app": "motorista",
+      "type": "novo",
+      "text": "4.0.6 (21/09/2026): cadastro do Motorista foi dividido em Dados pessoais, Dados da CNH e Dados do veículo, com endereço completo e documentos adicionados."
+    },
+    {
+      "app": "motorista",
+      "type": "novo",
+      "text": "4.0.6 (21/09/2026): foto pessoal, comprovante de residência, motorista com CNH, CNH e CRLV exigem análise de nitidez, confirmação ou remoção antes do envio."
+    },
+    {
+      "app": "motorista",
+      "type": "melhorado",
+      "text": "4.0.6 (21/09/2026): comprovante, CNH e CRLV recebem leitura assistida para preencher endereço e dados dos documentos; arquivos aprovados entram no cofre privado do Supabase."
+    },
+    {
+      "app": "fast",
+      "type": "novo",
+      "text": "4.0.6 (21/09/2026): a área Motoristas do FAST passou a exibir dados do veículo e os documentos recebidos no cadastro para consulta do administrador."
+    },
+    {
+      "app": "cliente",
+      "type": "corrigido",
+      "text": "4.0.6 (21/09/2026): confirmação e recuperação continuam retornando às páginas oficiais do Cliente FAST, com mensagem clara de conta confirmada."
+    },
+    {
+      "app": "cliente",
+      "type": "seguranca",
+      "text": "4.0.6 (21/09/2026): o Cliente FAST verifica atualizações antes e depois do login e bloqueia o uso quando uma versão obrigatória estiver disponível."
+    },
+    {
+      "app": "cliente",
+      "type": "melhorado",
+      "text": "4.0.6 (21/09/2026): atualização obrigatória mostra progresso, tenta novamente após falha de internet e preserva cadastro, sessão, preferências e fila de pedidos."
+    },
+    {
+      "app": "motorista",
+      "type": "seguranca",
+      "text": "4.0.6 (21/09/2026): o FAST Motorista verifica atualizações antes e depois do login e bloqueia o uso quando uma versão obrigatória estiver disponível."
+    },
+    {
+      "app": "motorista",
+      "type": "melhorado",
+      "text": "4.0.6 (21/09/2026): atualização obrigatória mostra progresso e preserva cadastro, preferências, fotos e operações pendentes."
+    },
+    {
+      "app": "fast",
+      "type": "melhorado",
+      "text": "4.0.6 (21/09/2026): Cliente e Motorista passam a exigir a versão mais recente independentemente do estado de autenticação."
+    },
+    {
+      "app": "motorista",
+      "type": "corrigido",
+      "text": "4.0.5 (21/09/2026): o cadastro do Motorista aceita corretamente nomes e textos com acentos e caracteres Unicode, preservando minúsculas em login, e-mail e senha."
+    },
+    {
+      "app": "motorista",
+      "type": "melhorado",
+      "text": "4.0.5 (21/09/2026): cadastro ganhou visualizar senha, repetir senha e validação visual de maiúscula, minúscula, caractere especial e mínimo de 8 caracteres."
+    },
+    {
+      "app": "motorista",
+      "type": "corrigido",
+      "text": "4.0.5 (21/09/2026): cadastro não depende mais do cofre provisório antes da confirmação do e-mail; os dados pendentes são sincronizados com segurança."
+    },
+    {
+      "app": "motorista",
+      "type": "removido",
+      "text": "4.0.5 (21/09/2026): removidos os avisos de registro facial preparado e de criação da própria conta."
+    },
+    {
+      "app": "cliente",
+      "type": "melhorado",
+      "text": "4.0.5 (21/09/2026): Número fica ao lado de Endereço e Complemento aparece logo abaixo no cadastro do Cliente."
+    },
+    {
+      "app": "cliente",
+      "type": "removido",
+      "text": "4.0.5 (21/09/2026): removido o aviso de validação facial reservada."
+    },
+    {
+      "app": "fast",
+      "type": "corrigido",
+      "text": "4.0.5 (21/09/2026): links de confirmação de Cliente e Motorista retornam para a página correta do aplicativo, eliminando o erro 404 do GitHub Pages."
+    },
+    {
+      "app": "despesas",
+      "type": "melhorado",
+      "text": "4.0.5 (21/09/2026): tabela de Despesas ocupa a área útil até o limite da tela, mantém rolagem interna e centraliza os títulos das colunas."
+    },
+    {
+      "app": "fast",
+      "type": "corrigido",
+      "text": "4.0.4 (21/09/2026): a Central de Downloads deixou de entregar APKs antigos armazenados no site e agora baixa sempre a compilação Android mais recente."
+    },
+    {
+      "app": "fast",
+      "type": "corrigido",
+      "text": "4.0.4 (21/09/2026): os ícones Android receberam um novo identificador interno para impedir que o lançador do aparelho reutilize o ícone antigo em caches antigos."
+    },
+    {
+      "app": "rotas",
+      "type": "corrigido",
+      "text": "4.0.4 (21/09/2026): o APK Rotas do Dia passa a instalar e atualizar com o ícone azul próprio."
+    },
+    {
+      "app": "despesas",
+      "type": "corrigido",
+      "text": "4.0.4 (21/09/2026): o APK Despesas passa a instalar e atualizar com o ícone vermelho próprio."
+    },
+    {
+      "app": "cliente",
+      "type": "corrigido",
+      "text": "4.0.4 (21/09/2026): o APK Cliente FAST passa a instalar e atualizar com o ícone verde próprio."
+    },
+    {
+      "app": "motorista",
+      "type": "corrigido",
+      "text": "4.0.4 (21/09/2026): o APK FAST Motorista passa a instalar e atualizar com o ícone cinza próprio."
+    },
+    {
+      "app": "fast",
+      "type": "melhorado",
+      "text": "4.0.3 (21/09/2026): a Central de Downloads fica disponível somente no navegador e é ocultada nos aplicativos instalados."
+    },
+    {
+      "app": "fast",
+      "type": "novo",
+      "text": "4.0.3 (21/09/2026): Despesas, Rotas do Dia, Cliente e Motorista receberam identidades visuais próprias nos ícones Android e nas telas de acesso."
+    },
+    {
+      "app": "rotas",
+      "type": "melhorado",
+      "text": "4.0.3 (21/09/2026): Rotas do Dia usa o novo ícone azul em tela cheia no gate e moldura azul nos limites do aplicativo mobile."
+    },
+    {
+      "app": "despesas",
+      "type": "melhorado",
+      "text": "4.0.3 (21/09/2026): Despesas usa o novo ícone vermelho em tela cheia no gate e moldura vermelha nos limites do aplicativo mobile."
+    },
+    {
+      "app": "cliente",
+      "type": "melhorado",
+      "text": "4.0.3 (21/09/2026): Cliente FAST usa o novo ícone verde no Android, no cabeçalho e no gate, com moldura verde no aplicativo."
+    },
+    {
+      "app": "cliente",
+      "type": "corrigido",
+      "text": "4.0.3 (21/09/2026): telefones colados do WhatsApp com +55, DDD, espaços ou símbolos agora preenchem o número completo sem cortar dígitos."
+    },
+    {
+      "app": "motorista",
+      "type": "melhorado",
+      "text": "4.0.3 (21/09/2026): FAST Motorista usa o novo ícone cinza no Android, na abertura, no gate e no cabeçalho, com moldura cinza no aplicativo."
+    }
   ]
 }
