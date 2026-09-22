@@ -17,6 +17,7 @@ import android.webkit.CookieManager;
 import android.webkit.GeolocationPermissions;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
+import android.webkit.PermissionRequest;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -30,6 +31,8 @@ public class MainActivity extends Activity {
     private ValueCallback<Uri[]> fileCallback;
     private static final int FILE_REQUEST = 401;
     private static final int VOICE_REQUEST = 403;
+    private static final int CAMERA_REQUEST = 404;
+    private PermissionRequest pendingCameraRequest;
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
@@ -109,6 +112,29 @@ public class MainActivity extends Activity {
             }
         });
         webView.setWebChromeClient(new WebChromeClient() {
+            @Override public void onPermissionRequest(PermissionRequest request) {
+                runOnUiThread(() -> {
+                    Uri origin = request.getOrigin();
+                    if (origin == null || !"https".equals(origin.getScheme()) ||
+                        !"adaiascearataiana-gif.github.io".equals(origin.getHost())) {
+                        request.deny(); return;
+                    }
+                    boolean video = false;
+                    for (String resource : request.getResources()) {
+                        if (PermissionRequest.RESOURCE_VIDEO_CAPTURE.equals(resource)) video = true;
+                    }
+                    if (!video) { request.deny(); return; }
+                    if (Build.VERSION.SDK_INT >= 23 && checkSelfPermission(Manifest.permission.CAMERA) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                        pendingCameraRequest = request;
+                        requestPermissions(new String[]{Manifest.permission.CAMERA}, CAMERA_REQUEST);
+                        return;
+                    }
+                    request.grant(new String[]{PermissionRequest.RESOURCE_VIDEO_CAPTURE});
+                });
+            }
+            @Override public void onPermissionRequestCanceled(PermissionRequest request) {
+                if (pendingCameraRequest == request) pendingCameraRequest = null;
+            }
             @Override public void onGeolocationPermissionsShowPrompt(String origin, GeolocationPermissions.Callback callback) {
                 callback.invoke(origin, true, false);
             }
@@ -130,7 +156,20 @@ public class MainActivity extends Activity {
     }
 
     private void requestPermissionsIfNeeded() {
-        if (android.os.Build.VERSION.SDK_INT >= 23) requestPermissions(new String[]{Manifest.permission.CAMERA, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.RECORD_AUDIO}, 402);
+        // A camera pede autorização quando o motorista toca em Câmera.
+        // Pedir tudo no início não libera automaticamente o acesso do WebView.
+        if (Build.VERSION.SDK_INT >= 23) requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.RECORD_AUDIO}, 402);
+    }
+
+    @Override public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == CAMERA_REQUEST && pendingCameraRequest != null) {
+            PermissionRequest request = pendingCameraRequest;
+            pendingCameraRequest = null;
+            if (grantResults.length > 0 && grantResults[0] == android.content.pm.PackageManager.PERMISSION_GRANTED)
+                request.grant(new String[]{PermissionRequest.RESOURCE_VIDEO_CAPTURE});
+            else request.deny();
+        }
     }
 
     private class VoiceBridge {

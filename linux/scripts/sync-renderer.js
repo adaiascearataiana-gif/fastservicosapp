@@ -42,6 +42,7 @@ syncMain();
   'datavalid-panel.js',
   'desktop-guides-keyboard.js',
   'app-keyboard.js',
+  'motorista-documentos.js',
   'fast-logistics-2.4.css',
   'fast-logistics-2.4.js',
   'updates.json',
