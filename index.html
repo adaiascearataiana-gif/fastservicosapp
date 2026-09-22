@@ -59438,8 +59438,11 @@ setInterval(function(){try{var tab=document.getElementById('rotasDia');if(tab&&t
           matchMedia('(display-mode: minimal-ui)').matches ||
           matchMedia('(display-mode: window-controls-overlay)').matches
         )) || /FASTAndroid|;\s*wv\)|\bwv\b/i.test(ua);
-      var minimo = instalado ? 42 : 8;
-      var folga = Math.max(insetTopo, minimo);
+      // O APK ja posiciona o WebView dentro dos insets do Android.
+      // Somar outra margem de status reduz a tela e desloca o cabecalho.
+      var nativo = /FASTAndroid\//i.test(ua);
+      var minimo = nativo ? 8 : (instalado ? 42 : 8);
+      var folga = nativo ? 8 : Math.max(insetTopo, minimo);
 
       topo.style.setProperty('padding-top', px(folga), 'important');
       topo.style.setProperty('height', px(56 + folga), 'important');
@@ -59461,7 +59464,7 @@ setInterval(function(){try{var tab=document.getElementById('rotasDia');if(tab&&t
         var csBottom = getComputedStyle(document.documentElement);
         var insetBaixoStr = csBottom.getPropertyValue('--fast-safe-bottom') || '0px';
         var insetBaixo = parseFloat(insetBaixoStr) || 0;
-        var folgaBaixo = Math.max(insetBaixo, instalado ? 20 : 6);
+        var folgaBaixo = nativo ? 6 : Math.max(insetBaixo, instalado ? 20 : 6);
         rodape.style.setProperty('padding-bottom', px(folgaBaixo), 'important');
         rodape.style.setProperty('box-sizing', 'border-box', 'important');
       }
@@ -60205,4 +60208,18 @@ setInterval(function(){try{var tab=document.getElementById('rotasDia');if(tab&&t
 <script src="desktop-guides-keyboard.js"></script>
 <script src="table-viewport.js?v=1"></script>
 <script src="clear-money-on-tap.js?v=1"></script>
+<style id="fast-android-full-viewport-20260922">
+  /* O WebView nativo ja desconta as barras do Android do seu viewport. */
+  body.fast-android-native nav.bottom-nav.fast-dock {
+    position:fixed!important;
+    inset:auto 0 0 0!important;
+    margin:0!important;
+    transform:none!important;
+    padding-bottom:6px!important;
+  }
+  body.fast-android-native main { width:100%!important;max-width:100%!important; }
+</style>
+<script id="fast-android-full-viewport-marker">
+  if (/FASTAndroid\//i.test(navigator.userAgent)) document.body.classList.add('fast-android-native');
+</script>
 </body></html>

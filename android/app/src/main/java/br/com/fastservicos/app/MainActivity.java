@@ -48,15 +48,15 @@ public class MainActivity extends Activity {
         // segura) e, quando o edge-to-edge for inevitavel, aplicar os insets do
         // sistema como padding no container do WebView.
         // ------------------------------------------------------------------
-        if (Build.VERSION.SDK_INT >= 35) {
-            // Android 15+: pede explicitamente para NAO desenhar atras das barras.
-            getWindow().setDecorFitsSystemWindows(true);
+        if (Build.VERSION.SDK_INT >= 30) {
+            // A Activity ocupa a tela; o container aplica os insets uma unica vez.
+            getWindow().setDecorFitsSystemWindows(false);
         }
 
         // Container que recebe os insets como padding (evita sobreposicao).
         final FrameLayout root = new FrameLayout(this);
         root.setBackgroundColor(Color.parseColor("#0F172A"));
-        root.setFitsSystemWindows(true);
+        root.setFitsSystemWindows(false);
 
         webView = new WebView(this);
         webView.setBackgroundColor(Color.parseColor("#0F172A"));

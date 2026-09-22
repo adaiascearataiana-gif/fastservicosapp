@@ -7,7 +7,7 @@ android {
     defaultConfig {
         minSdk 24
         targetSdk 35
-        versionCode 40011
+        versionCode 40012
         versionName '4.0.10'
     }
 
