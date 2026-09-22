@@ -2,6 +2,11 @@ name: Gerar Cliente e Motorista para Android
 
 on:
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Tag de release existente para atualizar os instaladores'
+        required: false
+        type: string
   push:
     tags:
       - 'v*'
@@ -58,8 +63,9 @@ jobs:
           cp android/app/build/outputs/apk/fast/release/app-fast-release.apk FAST-Servicos-Android.apk
           cp android/app/build/outputs/apk/limpo/release/app-limpo-release.apk FAST-Limpo-Android.apk
       - uses: softprops/action-gh-release@v2
-        if: startsWith(github.ref, 'refs/tags/')
+        if: startsWith(github.ref, 'refs/tags/') || inputs.release_tag != ''
         with:
+          tag_name: ${{ inputs.release_tag || github.ref_name }}
           files: |
             Cliente-FAST-Android.apk
             Motorista-FAST-Android.apk

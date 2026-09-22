@@ -2,6 +2,11 @@ name: Gerar FAST Serviços para Windows
 
 on:
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Tag de release existente para atualizar os instaladores'
+        required: false
+        type: string
   push:
     tags:
       - 'v*'
@@ -27,8 +32,9 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: softprops/action-gh-release@v2
-        if: startsWith(github.ref, 'refs/tags/')
+        if: startsWith(github.ref, 'refs/tags/') || inputs.release_tag != ''
         with:
+          tag_name: ${{ inputs.release_tag || github.ref_name }}
           files: |
             linux/dist/*.exe
             linux/dist/latest.yml
