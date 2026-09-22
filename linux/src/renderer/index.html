@@ -50456,11 +50456,21 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
       return pendentes;
     }
     function fastAbrirNovoCadastro(id, tipo) {
+      if (tipo !== 'cliente' && tipo !== 'motorista') return;
+      const registros = tipo === 'cliente' ? (bancoDados.clientes || []) : (bancoDados.motoristas || []);
+      const cadastro = registros.find(item => fastCadastroId(tipo, item) === id);
+      if (!cadastro) {
+        mostrarToast('Este cadastro não está disponível. Sincronize os dados e tente novamente.', 'warning');
+        return;
+      }
+      trocarAba(null, tipo === 'cliente' ? 'clientes' : 'motoristas');
+      if (tipo === 'cliente') abrirModalEditarCliente(cadastro.id);
+      else abrirModalEditarMotorista(cadastro.id);
       let pendentes=[];try{pendentes=JSON.parse(localStorage.getItem(FAST_CADASTROS_PENDENTES)||'[]')}catch(e){}
       localStorage.setItem(FAST_CADASTROS_PENDENTES,JSON.stringify(pendentes.filter(x=>x.id!==id)));
       let lidas=[];try{lidas=JSON.parse(localStorage.getItem('notificacoes_lidas')||'[]')}catch(e){}
       localStorage.setItem('notificacoes_lidas',JSON.stringify(lidas.filter(x=>!String(x).includes(id))));
-      trocarAba(null,tipo==='cliente'?'clientes':'motoristas');fecharBellPanel();setTimeout(atualizarNotificacoes,50);
+      fecharBellPanel();setTimeout(atualizarNotificacoes,50);
     }
     window.fastAbrirNovoCadastro = fastAbrirNovoCadastro;
 
@@ -50474,7 +50484,7 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
       fastDetectarNovosCadastros().forEach(c => notifs.unshift({
         tipo:'success', icon:c.tipo==='cliente'?'fa-user-plus':'fa-id-card',
         titulo:(c.tipo==='cliente'?'Novo cliente cadastrado: ':'Novo motorista cadastrado: ')+escapeHtml(c.nome)+' ['+c.id+']',
-        desc:'Cadastro recebido no FAST. Toque para abrir diretamente a seção '+(c.tipo==='cliente'?'Clientes':'Motoristas')+' e acompanhar os dados.',
+        desc:'Cadastro recebido no FAST. Toque para abrir diretamente o cadastro de '+(c.tipo==='cliente'?'cliente':'motorista')+'.',
         acao:"fastAbrirNovoCadastro('"+String(c.id).replace(/'/g,"\\'")+"','"+c.tipo+"')"
       }));
       const cnhVencidas = [];
