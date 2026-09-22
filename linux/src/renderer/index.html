@@ -1852,7 +1852,7 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
             if(atalho)mode=(atalho==='rotas-dia'||atalho==='rotasDia')?'rotas-dia':(atalho==='despesas')?'despesas':'';
           }
           if(mode!=='rotas-dia'&&mode!=='despesas')return;
-          var icone=mode==='rotas-dia'?'assets/app-rotas-dia-512.png?v=r4010':'assets/app-despesas-512.png?v=r4010';
+          var icone=mode==='rotas-dia'?'assets/app-rotas-dia-512.png?v=r4010':'assets/app-despesas-512.png?art=20260922&v=r4010';
           var nome=mode==='rotas-dia'?'Rotas do Dia':'Despesas';
           window.fastIconeExclusivo=function(){return{src:icone,alt:nome}};
           function aplicar(){
@@ -48250,6 +48250,28 @@ CREATE POLICY "demp_del"   ON despesas_empresa FOR DELETE USING (true);
       if (e) e.stopPropagation();
       if (window._vozFabWasDragging) { window._vozFabWasDragging = false; if (e) e.preventDefault(); return; }
 
+      // Dentro do APK, usar o reconhecedor do Android. O Web Speech do WebView
+      // pode existir no navegador, mas falhar ao iniciar o microfone.
+      if (window.FASTVoice && typeof window.FASTVoice.startSpeech === 'function') {
+        document.getElementById('vozPainel').classList.add('show');
+        if (vozGravando) return;
+        window.fastNativeVoiceMode = 'global';
+        window.fastHandleGlobalSpeech = function(texto) {
+          vozTextoFinal = String(texto || '').trim();
+          if (vozTextoFinal) {
+            document.getElementById('vozTranscricao').textContent = vozTextoFinal;
+            vozExtrairDados(vozTextoFinal);
+            vozRenderDetectado();
+            vozHabilitarBotoes();
+          }
+          vozSetGravando(false);
+        };
+        window.fastGlobalVoiceCancel = function() { vozSetGravando(false); };
+        vozSetGravando(true);
+        window.FASTVoice.startSpeech();
+        return;
+      }
+
       // 1) Verifica suporte do navegador
       const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (!SR) {
@@ -58113,7 +58135,7 @@ body.fast-exclusive-app main { padding-bottom: 12px !important; }
     }catch(e){if(!(e&&e.name==='AbortError')){console.error('FAST 2.3.31 - envio multiplo:',e);avisar('Nao foi possivel enviar todas as fotos: '+(e.message||e),'error')}}finally{if(btn){btn.disabled=false;btn.innerHTML=html}}
   };
 
-  function aplicarIdentidadeGate(){try{var p=new URLSearchParams(location.search),modo=p.get('exclusive')||p.get('atalho')||'';if(modo==='rotasDia')modo='rotas-dia';if(modo!=='rotas-dia'&&modo!=='despesas')return;document.body.classList.add('fast-exclusive-brand');var src=modo==='rotas-dia'?'assets/app-rotas-dia-512.png?v='+VERSAO:'assets/app-despesas-512.png?v='+VERSAO;var alt=modo==='rotas-dia'?'Rotas do Dia':'Despesas';document.querySelectorAll('#fastLoginGate .fast-gate-logo img').forEach(function(img){img.src=src;img.alt=alt;img.removeAttribute('style')})}catch(e){}}
+  function aplicarIdentidadeGate(){try{var p=new URLSearchParams(location.search),modo=p.get('exclusive')||p.get('atalho')||'';if(modo==='rotasDia')modo='rotas-dia';if(modo!=='rotas-dia'&&modo!=='despesas')return;document.body.classList.add('fast-exclusive-brand');var src=modo==='rotas-dia'?'assets/app-rotas-dia-512.png?v='+VERSAO:'assets/app-despesas-512.png?art=20260922&v='+VERSAO;var alt=modo==='rotas-dia'?'Rotas do Dia':'Despesas';document.querySelectorAll('#fastLoginGate .fast-gate-logo img').forEach(function(img){img.src=src;img.alt=alt;img.removeAttribute('style')})}catch(e){}}
   function ajustarModal(){var modal=document.getElementById('modalAgrupar');if(modal){var titulo=modal.querySelector('.modal-header h3');if(titulo)titulo.innerHTML='<i class="fa-solid fa-object-group"></i> Agrupar tudo em uma rota';modal.querySelectorAll('.agrupar-option-label').forEach(function(x){x.style.display='none'});modal.querySelectorAll('.fast71-note').forEach(function(n){if(/somente|individual/i.test(n.textContent||''))n.remove()})}}
   function atualizarVersao(){document.querySelectorAll('#fastSplashVersion,#fastGateVersionNum').forEach(function(el){el.textContent=VERSAO})}
   function boot(){aplicarIdentidadeGate();ajustarModal();atualizarVersao()}
@@ -58792,7 +58814,7 @@ body.fast-exclusive-app main { padding-bottom: 12px !important; }
       if(adicionar){if(input)input.value='';if(status)status.innerHTML='<i class="fa-solid fa-route"></i> Preenchendo nova rota…';if(typeof window.fastVozPreencherRotaDia==='function')window.fastVozPreencherRotaDia(original);return}
       var fala=original.replace(/^(buscar|procure|procurar|pesquisar|busque)(\s+a)?\s+(rota\s+)?/i,'').trim();if(input)input.value=fala;if(status)status.innerHTML='<i class="fa-solid fa-circle-check"></i> '+esc(fala);if(typeof renderizarSequencia==='function')renderizarSequencia();var list=el('containerSequencia');if(list)setTimeout(function(){list.scrollIntoView({behavior:'smooth',block:'start'})},80)
     };
-    if(!SR&&window.FASTVoice&&typeof window.FASTVoice.startSpeech==='function'){
+    if(window.FASTVoice&&typeof window.FASTVoice.startSpeech==='function'){
       window.fastNativeVoiceMode='route';if(btn){btn.classList.add('listening');btn.innerHTML='<i class="fa-solid fa-wave-square"></i> Ouvindo…'}if(status){status.style.display='inline-flex';status.innerHTML='<i class="fa-solid fa-microphone-lines"></i> Fale o cliente, origem, destino ou motorista'}window.FASTVoice.startSpeech();return
     }
     if(!SR){if(typeof mostrarToast==='function')mostrarToast('Comando de voz não disponível. Use o Chrome ou Edge atualizado.','error');return}
@@ -58809,11 +58831,14 @@ body.fast-exclusive-app main { padding-bottom: 12px !important; }
     var mode=window.fastNativeVoiceMode||'',routeBtn=el('fastVoiceRouteBtn'),expenseBtn=el('fastVoiceExpenseBtn');window.fastNativeVoiceMode='';
     if(routeBtn){routeBtn.classList.remove('listening');routeBtn.innerHTML='<i class="fa-solid fa-microphone"></i> <span class="rd-drive-label">Comando de voz</span>'}
     if(expenseBtn)expenseBtn.classList.remove('listening');
-    if(mode==='expense'&&typeof window.fastHandleExpenseSpeech==='function')window.fastHandleExpenseSpeech(text);else if(typeof window.fastHandleRouteSpeech==='function')window.fastHandleRouteSpeech(text)
+    if(mode==='expense'&&typeof window.fastHandleExpenseSpeech==='function')window.fastHandleExpenseSpeech(text);
+    else if(mode==='global'&&typeof window.fastHandleGlobalSpeech==='function')window.fastHandleGlobalSpeech(text);
+    else if(mode==='route'&&typeof window.fastHandleRouteSpeech==='function')window.fastHandleRouteSpeech(text)
   };
   window.fastNativeSpeechError=function(code){
     var routeBtn=el('fastVoiceRouteBtn'),expenseBtn=el('fastVoiceExpenseBtn'),status=el(window.fastNativeVoiceMode==='expense'?'fastVoiceExpenseStatus':'fastVoiceRouteStatus');window.fastNativeVoiceMode='';
     if(routeBtn){routeBtn.classList.remove('listening');routeBtn.innerHTML='<i class="fa-solid fa-microphone"></i> <span class="rd-drive-label">Comando de voz</span>'}if(expenseBtn)expenseBtn.classList.remove('listening');
+    if(typeof window.fastGlobalVoiceCancel==='function')window.fastGlobalVoiceCancel();
     var msg=code==='permission'?'Autorize o microfone e toque novamente.':code==='cancelled'?'Comando de voz cancelado.':'Reconhecimento de voz indisponível neste aparelho.';if(status)status.textContent=msg;if(typeof mostrarToast==='function')mostrarToast(msg,code==='cancelled'?'info':'error')
   };
   function persistConfig(){
@@ -60090,13 +60115,13 @@ setInterval(function(){try{var tab=document.getElementById('rotasDia');if(tab&&t
     content:"";position:fixed;inset:0;z-index:2147483646;pointer-events:none;
     border:4px solid transparent;box-sizing:border-box
   }
-  body.fast-exclusive-app[data-fast-exclusive="despesas"]::after{border-color:#dc2626;box-shadow:inset 0 0 18px rgba(220,38,38,.16)}
+  body.fast-exclusive-app[data-fast-exclusive="despesas"]::after{border-color:#ad1017;box-shadow:inset 0 0 18px rgba(220,38,38,.16)}
   body.fast-exclusive-app[data-fast-exclusive="rotasDia"]::after{border-color:#1d4ed8;box-shadow:inset 0 0 18px rgba(29,78,216,.18)}
   body.fast-exclusive-app[data-fast-exclusive="despesas"] #fastLoginGate{background:linear-gradient(145deg,rgba(127,29,29,.92),rgba(69,10,10,.96))!important}
   body.fast-exclusive-app[data-fast-exclusive="rotasDia"] #fastLoginGate{background:linear-gradient(145deg,rgba(49,46,129,.92),rgba(30,27,75,.96))!important}
-  body.fast-exclusive-app[data-fast-exclusive="despesas"] #fastGateCard{border:3px solid #dc2626!important;box-shadow:0 24px 70px rgba(220,38,38,.32)!important}
+  body.fast-exclusive-app[data-fast-exclusive="despesas"] #fastGateCard{border:3px solid #ad1017!important;box-shadow:0 24px 70px rgba(220,38,38,.32)!important}
   body.fast-exclusive-app[data-fast-exclusive="rotasDia"] #fastGateCard{border:3px solid #1d4ed8!important;box-shadow:0 24px 70px rgba(29,78,216,.32)!important}
-  body.fast-exclusive-app[data-fast-exclusive="despesas"] #fastLoginGate .fast-gate-logo{border:3px solid #dc2626!important}
+  body.fast-exclusive-app[data-fast-exclusive="despesas"] #fastLoginGate .fast-gate-logo{border:3px solid #ad1017!important}
   body.fast-exclusive-app[data-fast-exclusive="rotasDia"] #fastLoginGate .fast-gate-logo{border:3px solid #1d4ed8!important}
   body.fast-exclusive-brand #fastLoginGate .fast-gate-logo img{object-fit:cover!important}
   @media(max-width:520px){body.fast-exclusive-app::after{border-width:3px}}
@@ -60123,7 +60148,7 @@ setInterval(function(){try{var tab=document.getElementById('rotasDia');if(tab&&t
     var cor=modo==='rotas-dia'?'#1d4ed8':'#dc2626';
     var nome=modo==='rotas-dia'?'Rotas do Dia':'Despesas';
     var versao=(document.querySelector('meta[name="fast-app-version"]')||{}).content||'4.0.10';
-    var src=modo==='rotas-dia'?'assets/app-rotas-dia-512.png?v='+versao:'assets/app-despesas-512.png?v='+versao;
+    var src=modo==='rotas-dia'?'assets/app-rotas-dia-512.png?v='+versao:'assets/app-despesas-512.png?art=20260922&v='+versao;
     document.body.classList.add('fast-exclusive-app','fast-exclusive-brand');
     document.body.dataset.fastExclusive=target;
     document.documentElement.style.setProperty('--fast-exclusive-color',cor);
@@ -60165,5 +60190,7 @@ setInterval(function(){try{var tab=document.getElementById('rotasDia');if(tab&&t
 <script src="motorista-admin.js?v=1"></script>
 <script src="datavalid-panel.js"></script>
 <script src="desktop-guides-keyboard.js"></script>
+<script src="table-viewport.js?v=1"></script>
+<script src="clear-money-on-tap.js?v=1"></script>
 <script src="desktop-bridge.js"></script>
 </body></html>

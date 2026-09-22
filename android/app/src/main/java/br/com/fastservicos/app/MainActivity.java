@@ -170,14 +170,18 @@ public class MainActivity extends Activity {
                 request.grant(new String[]{PermissionRequest.RESOURCE_VIDEO_CAPTURE});
             else request.deny();
         }
+        if (requestCode == 404) {
+            if (grantResults.length > 0 && grantResults[0] == android.content.pm.PackageManager.PERMISSION_GRANTED)
+                new VoiceBridge().startSpeech();
+            else voiceError("permission");
+        }
     }
 
     private class VoiceBridge {
         @JavascriptInterface public void startSpeech() {
             runOnUiThread(() -> {
                 if (Build.VERSION.SDK_INT >= 23 && checkSelfPermission(Manifest.permission.RECORD_AUDIO) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
-                    requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, 402);
-                    voiceError("permission");
+                    requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, 404);
                     return;
                 }
                 Intent voice = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
