@@ -11,7 +11,7 @@
    3) FETCH: passagem direta à rede — nunca intercepta, nunca cacheia.
    ==========================================================================
 */
-var FAST_HEAL_TAG = 'fast-healer-4.0.15';
+var FAST_HEAL_TAG = 'fast-healer-4.0.16';
 
 self.addEventListener('install', function (e) {
   self.skipWaiting();

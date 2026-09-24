@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#0891b2">
-  <meta name="fast-app-version" content="4.0.15">
+  <meta name="fast-app-version" content="4.0.16">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <title>FAST Limpo</title>
@@ -29,12 +29,12 @@
     <button id="install" type="button">Instalar FAST Limpo</button>
     <a class="open" href="../?edition=clean">Abrir sem instalar</a>
     <div class="status" id="status">Abra no Google Chrome ou Microsoft Edge para instalar.</div>
-    <div class="versao" id="versao">Versão 4.0.15</div>
+    <div class="versao" id="versao">Versão 4.0.16</div>
   </section></main>
   <script>
   (function(){
     var standalone=matchMedia('(display-mode:standalone)').matches||navigator.standalone===true;
-    if(standalone){document.body.classList.add('standalone');document.querySelector('.app').src='../?edition=clean&v=4.0.15'}
+    if(standalone){document.body.classList.add('standalone');document.querySelector('.app').src='../?edition=clean&v=4.0.16'}
     var b=document.getElementById('install'),s=document.getElementById('status');
     if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js?v=r4010',{scope:'./'}).catch(function(){});
     b.onclick=async function(){if(window.__installPrompt){window.__installPrompt.prompt();var r=await window.__installPrompt.userChoice;window.__installPrompt=null;s.textContent=r.outcome==='accepted'?'Instalação confirmada. Abra o ícone FAST Limpo.':'Instalação cancelada.'}else{s.textContent='No navegador, abra o menu e escolha “Instalar aplicativo” ou “Adicionar à tela inicial”.'}};
