@@ -1,7 +1,7 @@
 {
   "id":"./",
   "name":"FAST - Rotas do Dia",
-  "version": "4.0.14",
+  "version": "4.0.15",
   "short_name":"Rotas do Dia",
   "start_url":"./",
   "scope":"./",

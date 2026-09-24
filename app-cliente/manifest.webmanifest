@@ -1,7 +1,7 @@
 {
   "name": "FAST Cliente",
   "short_name": "Cliente FAST",
-  "version": "4.0.14",
+  "version": "4.0.15",
   "start_url": "/fastservicosapp/app-cliente/?source=pwa-cliente",
   "scope": "/fastservicosapp/app-cliente/",
   "display": "standalone",
