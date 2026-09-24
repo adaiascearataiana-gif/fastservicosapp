@@ -1,7 +1,17 @@
 {
-  "version": "4.0.16",
-  "releasedAt": "2026-09-24T01:20:00-03:00",
+  "version": "4.0.17",
+  "releasedAt": "2026-09-24T01:45:00-03:00",
   "updates": [
+    {
+      "app": "fast",
+      "type": "corrigido",
+      "text": "4.0.17 (24/09/2026): o app agora capta mensagens do WhatsApp em formato livre (nome, endereço, quantidade e valor) e extrai automaticamente novos clientes e lugares."
+    },
+    {
+      "app": "fast",
+      "type": "melhorado",
+      "text": "4.0.17 (24/09/2026): mensagens sem rótulos como “Jaciara / Rua das almas / 5 caixas / 250,00” passam a virar rota, cliente e lugar automaticamente."
+    },
     {
       "app": "fast",
       "type": "novo",
