@@ -21,12 +21,12 @@
   <meta name="fast-github-branch" content="main">
   <meta name="fast-github-path" content="index.html">
   <meta name="fast-github-token-env" content="GH_TOKEN">
-  <meta name="fast-app-version" content="4.0.30">
+  <meta name="fast-app-version" content="4.0.31">
   <meta name="fast-app-date" content="2026-09-25T12:00:00-03:00">
   <meta name="fast-latest-update" content="4.0.27: identidade visual consolidada na Central de Downloads; FAST e FAST LIMPO usam a arte oficial amarela, Windows/Linux recebem artes próprias, Cliente e Motoristas recebem novas artes, e Windows/Linux passam a acompanhar as atualizações online em tempo real.">
   <!-- r92: verificação automática de nova versão ao abrir; Verificar Atualizações com cache-busting e sem fallback no-cors inválido. -->
   <!-- r70.1: lista corrente no HTML inicial; o painel não espera scripts tardios -->
-  <meta name="fast-app-changelog-immediate" content="4.0.30">
+  <meta name="fast-app-changelog-immediate" content="4.0.31">
   <meta name="fast-app-changelog" content="[{&quot;app&quot;: &quot;fast&quot;, &quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;4.0.27 (25/09/2026): Central de Downloads recebeu as artes oficiais; FAST e FAST LIMPO usam a imagem amarela do FAST; Windows, Linux, Despesas, Cliente FAST e Motoristas FAST receberam imagens próprias; Windows/Linux acompanham a atualização online em tempo real.&quot;}, {&quot;app&quot;: &quot;fast&quot;, &quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;4.0.24 (25/09/2026): migração de segurança preparada; o acesso administrativo fixo foi removido e a autenticação segura passa pelo Supabase Auth.&quot;}, {&quot;app&quot;: &quot;fast&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.23 (25/09/2026): corrigido o problema em que o aplicativo voltava para a versao 4.0.17 e nao conseguia atualizar na plataforma; a versao exibida agora permanece sempre a mais recente e a atualizacao e aplicada de verdade.&quot;}, {&quot;app&quot;: &quot;fast&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.22 (25/09/2026): corrigido de vez o flash ao abrir o app — o código-fonte estava salvo com a aba Configurações já marcada como ativa e a Área Protegida já marcada como visível desde o primeiro instante da página (antes do JavaScript rodar); por isso elas apareciam na tela por uma fração de segundo antes do app te levar de volta pra Central. Agora a página principal já começa ativa e a Área Protegida começa fechada, sem flash nenhum.&quot;}, {&quot;app&quot;: &quot;rotas&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.22 (25/09/2026): mesmo ajuste aplicado em Rotas do Dia — o app abre direto na tela certa, sem passar por Configurações antes.&quot;}, {&quot;app&quot;: &quot;rotas&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.21 (24/09/2026): em Rotas do Dia e Despesas, se a atualização automática falhar, o app não mostra mais nenhum alerta nem recarrega de novo sozinho — fica em silêncio total, como já devia ser.&quot;}, {&quot;app&quot;: &quot;fast&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.20 (24/09/2026): Google Drive não pede mais para reconectar toda hora — a reconexão silenciosa ficou mais forte (janela de 20 min, tentativa a cada 2 min) e o app reconecta sozinho ao voltar o foco, ao recuperar a internet e quando a autorização expira.&quot;}, {&quot;app&quot;: &quot;fast&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.20 (24/09/2026): rotas e lugares excluídos ou editados não voltam mais em segundos — as exclusões de rotas, sequências e fotos agora são gravadas na nuvem (lápides sincronizadas) e respeitadas em todos os aparelhos.&quot;}, {&quot;app&quot;: &quot;fast&quot;, &quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;4.0.20 (24/09/2026): sincronização em segundos — a busca na nuvem passou a rodar a cada 3 segundos, o envio automático a cada 10 segundos e o disparo por edição em 200 ms, mantendo os dados sempre atualizados sem perda.&quot;}, {&quot;app&quot;: &quot;fast&quot;, &quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;4.0.20 (24/09/2026): indicador 100% sincronizado na barra fixa — ao lado de Online aparece a luz verde com o rótulo 100% e ícone de confirmado quando tudo está salvo na nuvem; amarelo mostra Sincronizando e vermelho mostra Sem conexão.&quot;}, {&quot;app&quot;: &quot;fast&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.20 (24/09/2026): a luz amarela ao lado de Online agora tem identificação — mostra o texto do estado (Sincronizando), ícone próprio e dica ao passar o mouse, em vez de ficar sem rótulo.&quot;}, {&quot;app&quot;: &quot;fast&quot;, &quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;4.0.19 (24/09/2026): navegação por teclado nas listas de sugestões — nos campos com pré-visualização de nomes (cliente, origem, despesa, filtro) use as setas ↑/↓ para subir e descer e Enter para escolher no desktop.&quot;}, {&quot;app&quot;: &quot;fast&quot;, &quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;4.0.19 (24/09/2026): logo oficial no menu lateral do desktop, no lugar do ícone antigo, com o número da versão logo abaixo do nome.&quot;}, {&quot;app&quot;: &quot;fast&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.18 (24/09/2026): corrigido o sumiço de clientes na sincronização — um cliente cujo nome chegasse vazio num momento ruim do sync era descartado para sempre; agora ele é preservado pelo ID em vez de apagado.&quot;}, {&quot;app&quot;: &quot;fast&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.17 (23/09/2026): câmera em tempo real muito mais nítida — a foto agora é salva em alta resolução (1920px) em vez de 720px, e o preview usa a resolução máxima do aparelho.&quot;}, {&quot;app&quot;: &quot;fast&quot;, &quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;4.0.17 (23/09/2026): Google Drive reconecta sozinho ao abrir o app, sem ficar pedindo autorização toda hora.&quot;}, {&quot;app&quot;: &quot;fast&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.17 (23/09/2026): removidas as telas que ficavam piscando — o box de novidades e a tela de configurações não aparecem mais sozinhos.&quot;}, {&quot;app&quot;: &quot;rotas&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.17 (23/09/2026): botão Salvar Rota/Despesa funciona no primeiro toque, mesmo com o teclado aberto, sem descer a tela.&quot;}, {&quot;app&quot;: &quot;rotas&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.17 (23/09/2026): balão de seleção não fica mais travado à esquerda; aparece centralizado com Agrupar, Excluir e Enviar Fotos.&quot;}, {&quot;app&quot;: &quot;despesas&quot;, &quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;4.0.17 (23/09/2026): bordas do app Despesas arredondadas e mais bonitas.&quot;}, {&quot;app&quot;: &quot;fast&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.14 (23/09/2026): corrigido o loop de atualização — o app se reportava sempre como 4.0.10 e por isso avisava “nova versão” sem nunca conseguir atualizar; agora a versão exibida e a versão online ficam iguais e a atualização é aplicada de verdade.&quot;}, {&quot;app&quot;: &quot;fast&quot;, &quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;4.0.14 (23/09/2026): versão unificada em todas as telas, manifesto, service worker e instaladores para evitar divergência de versão.&quot;}, {&quot;app&quot;: &quot;fast&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.10 (22/09/2026): versão exibida no FAST e nos aplicativos corrigida; cache e instaladores sincronizados para que a atualização apareça após instalar.&quot;}, {&quot;app&quot;: &quot;cliente&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.10 (22/09/2026): versão exibida no login e atualização do Cliente sincronizada com o instalador.&quot;}, {&quot;app&quot;: &quot;motorista&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.10 (22/09/2026): versão exibida no login e atualização do Motorista sincronizada com o instalador.&quot;}, {&quot;app&quot;: &quot;rotas&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.10 (22/09/2026): versão exibida e cache de Rotas do Dia sincronizados com o instalador.&quot;}, {&quot;app&quot;: &quot;despesas&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.10 (22/09/2026): versão exibida e cache de Despesas sincronizados com o instalador.&quot;}, {&quot;app&quot;: &quot;despesas&quot;, &quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;4.0.8 (21/09/2026): Despesas recebeu a nova identidade vermelha no ícone Android e no gate, preenchendo toda a área visível sem margens.&quot;}, {&quot;app&quot;: &quot;rotas&quot;, &quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;4.0.8 (21/09/2026): Rotas do Dia recebeu a nova identidade azul no ícone Android e no gate, preenchendo toda a área visível sem margens.&quot;}, {&quot;app&quot;: &quot;cliente&quot;, &quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;4.0.8 (21/09/2026): Cliente FAST recebeu a nova identidade verde no ícone Android e no gate, preenchendo toda a área visível sem margens.&quot;}, {&quot;app&quot;: &quot;motorista&quot;, &quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;4.0.8 (21/09/2026): Motorista FAST recebeu a nova identidade cinza no ícone Android e no gate, preenchendo toda a área visível sem margens.&quot;}, {&quot;app&quot;: &quot;fast&quot;, &quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;4.0.7 (21/09/2026): o sino do FAST detecta novos cadastros de Cliente e Motorista, mantém o aviso pendente e abre diretamente a seção correta ao tocar.&quot;}, {&quot;app&quot;: &quot;motorista&quot;, &quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;4.0.6 (21/09/2026): cadastro do Motorista foi dividido em Dados pessoais, Dados da CNH e Dados do veículo, com endereço completo e documentos adicionais.&quot;}, {&quot;app&quot;: &quot;motorista&quot;, &quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;4.0.6 (21/09/2026): foto pessoal, comprovante de residência, motorista com CNH, CNH e CRLV exigem análise de nitidez, confirmação ou remoção antes do cadastro.&quot;}, {&quot;app&quot;: &quot;motorista&quot;, &quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;4.0.6 (21/09/2026): comprovante, CNH e CRLV recebem leitura assistida para preencher endereço e dados dos documentos; arquivos aprovados entram na fila protegida do Google Drive.&quot;}, {&quot;app&quot;: &quot;fast&quot;, &quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;4.0.6 (21/09/2026): a área Motoristas do FAST passou a exibir dados do veículo e os documentos recebidos no cadastro para consulta do administrador.&quot;}, {&quot;app&quot;: &quot;cliente&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.6 (21/09/2026): confirmação e recuperação continuam retornando às páginas oficiais do Cliente FAST, com mensagem clara de conta confirmada e redefinição segura.&quot;}, {&quot;app&quot;: &quot;cliente&quot;, &quot;type&quot;: &quot;seguranca&quot;, &quot;text&quot;: &quot;4.0.6 (21/09/2026): o Cliente FAST verifica atualizações antes e depois do login e bloqueia o uso quando uma versão obrigatória estiver disponível.&quot;}, {&quot;app&quot;: &quot;cliente&quot;, &quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;4.0.6 (21/09/2026): atualização obrigatória mostra progresso, tenta novamente após falha de internet e preserva cadastro, sessão, preferências e dados locais.&quot;}, {&quot;app&quot;: &quot;motorista&quot;, &quot;type&quot;: &quot;seguranca&quot;, &quot;text&quot;: &quot;4.0.6 (21/09/2026): o FAST Motorista verifica atualizações antes e depois do login e bloqueia o uso quando uma versão obrigatória estiver disponível.&quot;}, {&quot;app&quot;: &quot;motorista&quot;, &quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;4.0.6 (21/09/2026): atualização obrigatória mostra progresso e preserva cadastro, preferências, fotos e operações pendentes.&quot;}, {&quot;app&quot;: &quot;fast&quot;, &quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;4.0.6 (21/09/2026): Cliente e Motorista passam a exigir a versão mais recente independentemente do estado de autenticação.&quot;}, {&quot;app&quot;: &quot;motorista&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.5 (21/09/2026): o cadastro do Motorista aceita corretamente nomes e textos com acentos e caracteres Unicode, preservando minúsculas em login, e-mail e senha.&quot;}, {&quot;app&quot;: &quot;motorista&quot;, &quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;4.0.5 (21/09/2026): cadastro ganhou visualizar senha, repetir senha e validação visual de maiúscula, minúscula, caractere especial e mínimo de 8 caracteres.&quot;}, {&quot;app&quot;: &quot;motorista&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.5 (21/09/2026): cadastro não depende mais do cofre provisório antes da confirmação do e-mail; os dados pendentes são sincronizados com segurança após o primeiro login confirmado.&quot;}, {&quot;app&quot;: &quot;motorista&quot;, &quot;type&quot;: &quot;removido&quot;, &quot;text&quot;: &quot;4.0.5 (21/09/2026): removidos os avisos de registro facial preparado e de criação da própria conta.&quot;}, {&quot;app&quot;: &quot;cliente&quot;, &quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;4.0.5 (21/09/2026): Número fica ao lado de Endereço e Complemento aparece logo abaixo no cadastro do Cliente.&quot;}, {&quot;app&quot;: &quot;cliente&quot;, &quot;type&quot;: &quot;removido&quot;, &quot;text&quot;: &quot;4.0.5 (21/09/2026): removido o aviso de validação facial reservada.&quot;}, {&quot;app&quot;: &quot;fast&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.5 (21/09/2026): links de confirmação de Cliente e Motorista retornam para a página correta do aplicativo, eliminando o erro 404 do GitHub Pages.&quot;}, {&quot;app&quot;: &quot;despesas&quot;, &quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;4.0.5 (21/09/2026): tabela de Despesas ocupa a área útil até o limite da tela, mantém rolagem interna e centraliza os títulos das colunas.&quot;}, {&quot;app&quot;: &quot;fast&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.4 (21/09/2026): a Central de Downloads deixou de entregar APKs antigos armazenados no site e agora baixa sempre a compilação Android mais recente publicada.&quot;}, {&quot;app&quot;: &quot;fast&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.4 (21/09/2026): os ícones Android receberam um novo identificador interno para impedir que o lançador do aparelho reutilize o ícone antigo em cache.&quot;}, {&quot;app&quot;: &quot;rotas&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.4 (21/09/2026): o APK Rotas do Dia passa a instalar e atualizar com o ícone azul próprio.&quot;}, {&quot;app&quot;: &quot;despesas&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.4 (21/09/2026): o APK Despesas passa a instalar e atualizar com o ícone vermelho próprio.&quot;}, {&quot;app&quot;: &quot;cliente&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.4 (21/09/2026): o APK Cliente FAST passa a instalar e atualizar com o ícone verde próprio.&quot;}, {&quot;app&quot;: &quot;motorista&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.4 (21/09/2026): o APK FAST Motorista passa a instalar e atualizar com o ícone cinza próprio.&quot;}, {&quot;app&quot;: &quot;fast&quot;, &quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;4.0.3 (21/09/2026): a Central de Downloads fica disponível somente no navegador e é ocultada nos aplicativos instalados.&quot;}, {&quot;app&quot;: &quot;fast&quot;, &quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;4.0.3 (21/09/2026): Despesas, Rotas do Dia, Cliente e Motorista receberam identidades visuais próprias nos ícones Android e nas telas de acesso.&quot;}, {&quot;app&quot;: &quot;rotas&quot;, &quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;4.0.3 (21/09/2026): Rotas do Dia usa o novo ícone azul em tela cheia no gate e moldura azul nos limites do aplicativo mobile.&quot;}, {&quot;app&quot;: &quot;despesas&quot;, &quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;4.0.3 (21/09/2026): Despesas usa o novo ícone vermelho em tela cheia no gate e moldura vermelha nos limites do aplicativo mobile.&quot;}, {&quot;app&quot;: &quot;cliente&quot;, &quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;4.0.3 (21/09/2026): Cliente FAST usa o novo ícone verde no Android, no cabeçalho e no gate, com moldura verde no aplicativo.&quot;}, {&quot;app&quot;: &quot;cliente&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.3 (21/09/2026): telefones colados do WhatsApp com +55, DDD, espaços ou símbolos agora preenchem o número completo sem cortar dígitos.&quot;}, {&quot;app&quot;: &quot;motorista&quot;, &quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;4.0.3 (21/09/2026): FAST Motorista usa o novo ícone cinza no Android, na abertura, no gate e no cabeçalho, com moldura cinza no aplicativo.&quot;}]">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https:; img-src 'self' data: blob: https: http:; connect-src 'self' https: data: blob:; font-src 'self' https: data:;">
   <script id="fast-clean-edition-bootstrap">
@@ -1962,6 +1962,121 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
 }
 </style>
 </style>
+
+<style id="fast031-central-downloads-final-fix">
+/* FAST 4.0.31 — Central de Downloads: compacta o bloco e usa as artes oficiais reais. */
+#fastDownloadsCenter{
+  height:max-content !important;
+  min-height:0 !important;
+  max-height:none !important;
+  flex:none !important;
+  padding:12px !important;
+  gap:9px !important;
+  margin:0 !important;
+  align-self:stretch !important;
+}
+#fastDownloadsCenter .config-topic-header{
+  padding-bottom:8px !important;
+  gap:9px !important;
+}
+#fastDownloadsCenter .config-topic-icon{
+  width:34px !important;
+  height:34px !important;
+  border-radius:9px !important;
+  font-size:16px !important;
+}
+#fastDownloadsCenter .config-topic-title{font-size:15px !important;line-height:1.15 !important;}
+#fastDownloadsCenter .config-topic-sub{font-size:10.5px !important;line-height:1.2 !important;}
+#fastDownloadsCenter .config-topic-body{gap:5px !important;}
+#fastDownloadsCenter .config-desc{margin:0 !important;font-size:10.5px !important;line-height:1.35 !important;}
+#fastDownloadsCenter .fast-downloads-table{
+  margin:0 !important;
+  height:max-content !important;
+  min-height:0 !important;
+  max-height:none !important;
+  overflow:hidden !important;
+  border-radius:9px !important;
+}
+#fastDownloadsCenter .fast-downloads-table table,
+#fastDownloadsCenter .fast-downloads-table tbody,
+#fastDownloadsCenter .fast-downloads-table tr{
+  height:auto !important;
+  min-height:0 !important;
+  max-height:none !important;
+}
+#fastDownloadsCenter .fast-downloads-table td{
+  height:40px !important;
+  min-height:0 !important;
+  padding:3px 5px !important;
+  vertical-align:middle !important;
+}
+#fastDownloadsCenter .fast-downloads-table .fast-dl-nome{
+  gap:6px !important;
+  font-size:10.5px !important;
+  line-height:1.1 !important;
+  white-space:nowrap !important;
+  overflow:hidden !important;
+}
+#fastDownloadsCenter .fast-downloads-table .fast-dl-thumb{
+  width:34px !important;
+  height:34px !important;
+  min-width:34px !important;
+  max-width:34px !important;
+  min-height:34px !important;
+  max-height:34px !important;
+  object-fit:contain !important;
+  object-position:center !important;
+  border-radius:8px !important;
+  display:inline-block !important;
+  flex:0 0 34px !important;
+  background:#fff !important;
+}
+#fastDownloadsCenter .fast-downloads-table .fast-dl-nome span,
+#fastDownloadsCenter .fast-downloads-table .fast-desktop-guide-link{
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+  white-space:nowrap !important;
+}
+#fastDownloadsCenter .fast-downloads-table .fast-dl-acoes{
+  width:104px !important;
+  padding:3px 2px !important;
+  text-align:right !important;
+  white-space:nowrap !important;
+}
+#fastDownloadsCenter .fast-downloads-table .fast-dl-acoes .fast-dl-btn{
+  width:96px !important;
+  min-width:96px !important;
+  height:30px !important;
+  min-height:30px !important;
+  padding:0 7px !important;
+  font-size:9.5px !important;
+  gap:3px !important;
+  border-radius:16px !important;
+}
+#fastDownloadsCenter .fast-downloads-table .fast-dl-acoes .fast-dl-btn i{font-size:8.5px !important;}
+#fastDownloadsCenter .fast-downloads-table .fast-dl-nome .fast-dl-share{
+  width:21px !important;height:21px !important;min-height:21px !important;
+  padding:0 !important;margin-left:2px !important;flex:0 0 21px !important;
+}
+#fastDownloadsCenter .fast-downloads-table .fast-dl-nome .fast-dl-share i{font-size:8px !important;}
+#fastDownloadsCenter .fast-dl-row-rotas td{border-left:3px solid #2563eb !important;}
+#fastDownloadsCenter .fast-dl-row-rotas .fast-dl-thumb{border:2px solid #2563eb !important;}
+#fastDownloadsCenter .fast-dl-row-windows .fast-dl-thumb{border:2px solid #2563eb !important;}
+#fastDownloadsCenter .fast-dl-row-linux .fast-dl-thumb{border:2px solid #16a34a !important;}
+@media(max-width:480px){
+  #fastDownloadsCenter{padding:10px !important;gap:7px !important;}
+  #fastDownloadsCenter .config-topic-header{padding-bottom:6px !important;}
+  #fastDownloadsCenter .config-topic-title{font-size:14px !important;}
+  #fastDownloadsCenter .config-topic-sub{font-size:10px !important;}
+  #fastDownloadsCenter .config-desc{font-size:9.5px !important;}
+  #fastDownloadsCenter .fast-downloads-table td{height:38px !important;padding:2px 3px !important;}
+  #fastDownloadsCenter .fast-downloads-table .fast-dl-nome{gap:5px !important;font-size:10px !important;}
+  #fastDownloadsCenter .fast-downloads-table .fast-dl-thumb{width:32px !important;height:32px !important;min-width:32px !important;max-width:32px !important;min-height:32px !important;max-height:32px !important;flex-basis:32px !important;border-radius:7px !important;}
+  #fastDownloadsCenter .fast-downloads-table .fast-dl-acoes{width:100px !important;padding:2px 1px !important;}
+  #fastDownloadsCenter .fast-downloads-table .fast-dl-acoes .fast-dl-btn{width:92px !important;min-width:92px !important;height:29px !important;min-height:29px !important;font-size:9px !important;padding:0 5px !important;}
+}
+</style>
+
 </head>
 <body class="fast-pro fast-v2 fast-v2-compact fast-edition-desktop fx-executive fx-layout-command theme-light" style="" data-fast-layout="operacional">
 <script id="r99-ime-guard">
@@ -34058,35 +34173,35 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
                   <thead class="fast-downloads-thead"><tr><th>Aplicativo</th><th>Ações</th></tr></thead>
                   <tbody>
                     <tr class="fast-dl-row fast-dl-row-fast">
-                      <td class="fast-dl-nome"><img class="fast-dl-thumb" src="assets/fast-servicos-icon-512.png?v=4.0.27" alt="FAST Serviços"> <span>APP FAST SERVIÇOS</span></td>
+                      <td class="fast-dl-nome"><img class="fast-dl-thumb" src="assets/fast-servicos-official-yellow.png?v=4.0.31" alt="FAST Serviços"> <span>APP FAST SERVIÇOS</span></td>
                       <td class="fast-dl-acoes"><button type="button" class="btn-success ripple fast-dl-btn" onclick="fastBaixarAndroid('fast')"><i class="fa-solid fa-download"></i> BAIXAR APK</button></td>
                     </tr>
                     <tr class="fast-dl-row fast-dl-row-limpo">
-                      <td class="fast-dl-nome"><img class="fast-dl-thumb" src="assets/fast-servicos-icon-512.png?v=4.0.27" alt="FAST Limpo"> <span>FAST LIMPO · COMEÇAR DO ZERO</span></td>
+                      <td class="fast-dl-nome"><img class="fast-dl-thumb" src="assets/fast-servicos-official-yellow.png?v=4.0.31" alt="FAST Limpo"> <span>FAST LIMPO · COMEÇAR DO ZERO</span></td>
                       <td class="fast-dl-acoes"><button type="button" class="btn-success ripple fast-dl-btn" onclick="fastBaixarAndroid('limpo')"><i class="fa-solid fa-download"></i> BAIXAR APK</button></td>
                     </tr>
                     <tr class="fast-dl-row fast-dl-row-windows">
-                      <td class="fast-dl-nome"><img class="fast-dl-thumb" src="assets/fast-windows-central.png?v=4.0.27" alt="FAST para Windows"> <button type="button" class="fast-desktop-guide-link ripple" onclick="fastAbrirGuiaDesktop('windows')">FAST PARA WINDOWS</button></td>
+                      <td class="fast-dl-nome"><img class="fast-dl-thumb" src="assets/fast-windows-central.png?v=4.0.31" alt="FAST para Windows"> <button type="button" class="fast-desktop-guide-link ripple" onclick="fastAbrirGuiaDesktop('windows')">FAST PARA WINDOWS</button></td>
                       <td class="fast-dl-acoes"><button type="button" class="btn-primary ripple fast-dl-btn" onclick="fastBaixarDesktop('windows')"><i class="fa-solid fa-download"></i> BAIXAR</button></td>
                     </tr>
                     <tr class="fast-dl-row fast-dl-row-linux">
-                      <td class="fast-dl-nome"><img class="fast-dl-thumb" src="assets/fast-linux-central.png?v=4.0.27" alt="FAST Linux"> <button type="button" class="fast-desktop-guide-link ripple" onclick="fastAbrirGuiaDesktop('linux')">FAST LINUX</button></td>
+                      <td class="fast-dl-nome"><img class="fast-dl-thumb" src="assets/fast-linux-central.png?v=4.0.31" alt="FAST Linux"> <button type="button" class="fast-desktop-guide-link ripple" onclick="fastAbrirGuiaDesktop('linux')">FAST LINUX</button></td>
                       <td class="fast-dl-acoes"><button type="button" class="btn-primary ripple fast-dl-btn" onclick="fastBaixarDesktop('linux')"><i class="fa-solid fa-download"></i> BAIXAR</button></td>
                     </tr>
                     <tr class="fast-dl-row fast-dl-row-rotas">
-                      <td class="fast-dl-nome"><i class="fa-solid fa-calendar-day fast-dl-ico fast-dl-ico-rotas"></i> <span>ROTAS DO DIA</span></td>
+                      <td class="fast-dl-nome"><img class="fast-dl-thumb" src="assets/fast-rotas-dia-central.jpg?v=4.0.31" alt="Rotas do Dia"> <span>ROTAS DO DIA</span></td>
                       <td class="fast-dl-acoes"><button type="button" class="btn-success ripple fast-dl-btn" onclick="fastBaixarAndroid('rotas')"><i class="fa-solid fa-download"></i> BAIXAR APK</button></td>
                     </tr>
                     <tr class="fast-dl-row fast-dl-row-despesas">
-                      <td class="fast-dl-nome"><img class="fast-dl-thumb" src="assets/fast-despesas-central.jpg?v=4.0.27" alt="Despesas"> <span>DESPESAS</span></td>
+                      <td class="fast-dl-nome"><img class="fast-dl-thumb" src="assets/fast-despesas-central.jpg?v=4.0.31" alt="Despesas"> <span>DESPESAS</span></td>
                       <td class="fast-dl-acoes"><button type="button" class="btn-success ripple fast-dl-btn" onclick="fastBaixarAndroid('despesas')"><i class="fa-solid fa-download"></i> BAIXAR APK</button></td>
                     </tr>
                     <tr class="fast-dl-row fast-dl-row-cliente">
-                      <td class="fast-dl-nome"><img class="fast-dl-thumb" src="assets/fast-client-central.png?v=4.0.27" alt="Cliente FAST"> <span>CLIENTE FAST</span><button type="button" class="btn-secondary ripple fast-dl-share" onclick="fastCompartilharAndroid('cliente')" title="Compartilhar download do Cliente FAST"><i class="fa-solid fa-share-nodes"></i></button></td>
+                      <td class="fast-dl-nome"><img class="fast-dl-thumb" src="assets/fast-client-central.png?v=4.0.31" alt="Cliente FAST"> <span>CLIENTE FAST</span><button type="button" class="btn-secondary ripple fast-dl-share" onclick="fastCompartilharAndroid('cliente')" title="Compartilhar download do Cliente FAST"><i class="fa-solid fa-share-nodes"></i></button></td>
                       <td class="fast-dl-acoes"><button type="button" class="btn-success ripple fast-dl-btn" onclick="fastBaixarAndroid('cliente')"><i class="fa-solid fa-download"></i> BAIXAR APK</button></td>
                     </tr>
                     <tr class="fast-dl-row fast-dl-row-motoristas">
-                      <td class="fast-dl-nome"><img class="fast-dl-thumb" src="assets/fast-motoristas-central.png?v=4.0.27" alt="Motoristas FAST"> <span>MOTORISTAS FAST</span><button type="button" class="btn-secondary ripple fast-dl-share" onclick="fastCompartilharAndroid('motorista')" title="Compartilhar download dos Motoristas FAST"><i class="fa-solid fa-share-nodes"></i></button></td>
+                      <td class="fast-dl-nome"><img class="fast-dl-thumb" src="assets/fast-motorista-central.png?v=4.0.31" alt="Motoristas FAST"> <span>MOTORISTAS FAST</span><button type="button" class="btn-secondary ripple fast-dl-share" onclick="fastCompartilharAndroid('motorista')" title="Compartilhar download dos Motoristas FAST"><i class="fa-solid fa-share-nodes"></i></button></td>
                       <td class="fast-dl-acoes"><button type="button" class="btn-success ripple fast-dl-btn" onclick="fastBaixarAndroid('motorista')"><i class="fa-solid fa-download"></i> BAIXAR APK</button></td>
                     </tr>
                   </tbody>
@@ -60929,7 +61044,7 @@ body.fast-edition-desktop #rotasDia .card{padding:16px!important;margin-bottom:1
 })();
 </script>
 <div id="fastDesktopBrandCorner" aria-label="FAST Serviços — Operação Suíte">
-  <img src="assets/fast-servicos-icon-512.png?v=4.0.27" alt="FAST Serviços">
+  <img src="assets/fast-servicos-official-yellow.png?v=4.0.31" alt="FAST Serviços">
   <div><strong>FAST SERVIÇOS</strong><span id="fastDesktopBrandPlatform">OPERAÇÃO SUÍTE</span></div>
 </div>
 <div id="fastLinuxBadge">● FAST LINUX · SEGURO</div>
