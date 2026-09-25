@@ -1,7 +1,32 @@
 {
-  "version": "4.0.23",
-  "releasedAt": "2026-09-25T18:00:00-03:00",
+  "version": "4.0.24",
+  "releasedAt": "2026-09-25T12:00:00-03:00",
   "updates": [
+    {
+      "app": "fast",
+      "type": "novo",
+      "text": "4.0.24 (25/09/2026): todas as senhas foram zeradas e o novo acesso de administrador adm0001 entra direto na plataforma, sem tela de login, em todos os aparelhos."
+    },
+    {
+      "app": "cliente",
+      "type": "melhorado",
+      "text": "4.0.24 (25/09/2026): FAST Cliente sincronizado com a versao 4.0.24 da plataforma."
+    },
+    {
+      "app": "motorista",
+      "type": "melhorado",
+      "text": "4.0.24 (25/09/2026): FAST Motorista sincronizado com a versao 4.0.24 da plataforma."
+    },
+    {
+      "app": "rotas",
+      "type": "melhorado",
+      "text": "4.0.24 (25/09/2026): Rotas do Dia sincronizado com a versao 4.0.24 da plataforma."
+    },
+    {
+      "app": "despesas",
+      "type": "melhorado",
+      "text": "4.0.24 (25/09/2026): Despesas sincronizado com a versao 4.0.24 da plataforma."
+    },
     {
       "app": "fast",
       "type": "corrigido",

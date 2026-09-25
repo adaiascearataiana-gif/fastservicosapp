@@ -2,7 +2,7 @@
    Não mantém cache do HTML e não força reload/navegação no activate.
    Isso evita o loop em que o app atualiza, o SW recarrega a página e a
    página volta a registrar/ativar o SW novamente. */
-var FAST_SW_VERSION = 'fast-stable-4.0.23';
+var FAST_SW_VERSION = 'fast-stable-4.0.24';
 
 self.addEventListener('install', function (event) {
   event.waitUntil(self.skipWaiting());

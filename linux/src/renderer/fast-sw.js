@@ -1,5 +1,5 @@
 /* Desktop renderer copy of the stable web service worker. */
-const SW_VERSION = '4.0.23';
+const SW_VERSION = '4.0.24';
 const CACHE_NAME = 'fast-servicos-' + SW_VERSION;
 self.addEventListener('install', e => e.waitUntil(self.skipWaiting()));
 self.addEventListener('activate', e => e.waitUntil((async()=>{
