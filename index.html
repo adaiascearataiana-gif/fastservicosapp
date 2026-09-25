@@ -37638,130 +37638,49 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (true);
     // VERIFICAR STATUS DO BANCO DE DADOS SQL
     // Checa conectividade, existência de cada tabela e contagem de registros
     // ============================================================
-    async function empVerificarStatusBanco() {
-      const card = document.getElementById('empDbStatusCard');
-      const titleEl = document.getElementById('empDbStatusTitle');
-      const subEl = document.getElementById('empDbStatusSub');
-      const tblRotas = document.getElementById('empTblRotas');
-      const tblDespesas = document.getElementById('empTblDespesas');
-      const tblSeq = document.getElementById('empTblSeq');
-      const tblEmp = document.getElementById('empTblEmp');
-      const tblDest = document.getElementById('empTblDest');
-      const tblRotasCount = document.getElementById('empTblRotasCount');
-      const tblDespesasCount = document.getElementById('empTblDespesasCount');
-      const tblSeqCount = document.getElementById('empTblSeqCount');
-      const tblEmpCount = document.getElementById('empTblEmpCount');
-      const tblDestCount = document.getElementById('empTblDestCount');
-
-      if (!card || !titleEl) {
-        mostrarToastSync('Elementos de status não encontrados na página.', 'error');
-        return;
-      }
-
-      // Estado: verificando
-      card.className = 'emp-db-status-card verificando';
-      card.querySelector('.emp-db-ico').innerHTML = '<i class="fa-solid fa-spinner"></i>';
-      titleEl.textContent = 'Verificando conexão com o banco...';
-      subEl.textContent = 'Aguarde, checando Supabase e as tabelas...';
-
-      // Badge de cada tabela: verificando
-      [[tblRotas, tblRotasCount], [tblDespesas, tblDespesasCount],
-       [tblSeq, tblSeqCount], [tblEmp, tblEmpCount], [tblDest, tblDestCount]].forEach(([badge, count]) => {
-        if (badge) { badge.textContent = 'Verificando'; badge.className = 'emp-db-tbadge verificando'; }
-        if (count) { count.textContent = '-'; }
+    function empIconeTabelaBanco(nome) {
+      const icones = {biometria:'fa-fingerprint',clientes:'fa-building-user',dados_empresa:'fa-building',despesas:'fa-receipt',despesas_empresa:'fa-file-invoice-dollar',destinos:'fa-map-location-dot',funcionarios:'fa-user-tie',motoristas:'fa-id-card',rh:'fa-users-gear',rotas:'fa-route',sequencias_itens:'fa-list-ol',usuarios_permissoes:'fa-user-shield',rastreamento:'fa-location-crosshairs',motorista_acessos:'fa-key',motorista_fotos:'fa-camera'};
+      return icones[nome] || 'fa-table';
+    }
+    function empRenderizarTabelasBanco() {
+      const area = document.getElementById('empDbTables'); if (!area) return;
+      area.innerHTML = '';
+      SUPABASE_TABELAS.forEach(function(nome){
+        const card=document.createElement('div'); card.className='emp-db-table'; card.dataset.tableName=nome;
+        const obrigatoria=SUPABASE_TABELAS_OBRIGATORIAS.indexOf(nome)>=0;
+        card.innerHTML='<div class="emp-db-tname"><i class="fa-solid '+empIconeTabelaBanco(nome)+'"></i> '+nome+'</div><div class="emp-db-tbadge verificando" id="empTbl_'+nome+'">Aguardando</div><div class="emp-db-tcount" id="empTblCount_'+nome+'">'+(obrigatoria?'Tabela principal':'Tabela complementar')+'</div>';
+        area.appendChild(card);
       });
-
-      // Helper: checar uma tabela (existência + contagem)
-      async function checarTabela(nome, badge, countEl) {
-        try {
-          // HEAD não retorna corpo; usamos select=id&limit=0 para contar via header
-          const resp = await fetch(SUPABASE_URL + '/' + nome + '?select=id&limit=1', {
-            method: 'GET',
-            headers: supabaseHeaders({ 'Prefer': 'count=exact' })
-          });
-          if (resp.ok) {
-            // Tentar obter contagem total via header content-range
-            let total = 0;
-            const range = resp.headers.get('content-range');
-            if (range) {
-              const parts = range.split('/');
-              if (parts.length >= 2 && parts[1] !== '*') total = parseInt(parts[1], 10) || 0;
-            }
-            // Se não veio do header, fazer uma requisição de contagem
-            if (total === 0) {
-              try {
-                const resp2 = await fetch(SUPABASE_URL + '/' + nome + '?select=id', {
-                  method: 'GET',
-                  headers: supabaseHeaders({ 'Range': '0-0', 'Prefer': 'count=exact' })
-                });
-                const range2 = resp2.headers.get('content-range');
-                if (range2) {
-                  const parts2 = range2.split('/');
-                  if (parts2.length >= 2 && parts2[1] !== '*') total = parseInt(parts2[1], 10) || 0;
-                } else if (resp2.ok) {
-                  // Fallback: contar o array retornado (menos eficiente)
-                  const arr = await resp2.json();
-                  total = Array.isArray(arr) ? arr.length : 0;
-                }
-              } catch(e2) { total = 0; }
-            }
-            if (badge) { badge.textContent = 'OK'; badge.className = 'emp-db-tbadge on'; }
-            if (countEl) { countEl.textContent = total + (total === 1 ? ' registro' : ' registros'); }
-            return true;
-          } else if (resp.status === 404) {
-            // Tabela não existe
-            if (badge) { badge.textContent = 'Não existe'; badge.className = 'emp-db-tbadge off'; }
-            if (countEl) { countEl.textContent = '—'; }
-            return false;
-          } else {
-            if (badge) { badge.textContent = 'Erro ' + resp.status; badge.className = 'emp-db-tbadge off'; }
-            if (countEl) { countEl.textContent = '—'; }
-            return false;
+    }
+    async function empVerificarStatusBanco() {
+      const card=document.getElementById('empDbStatusCard'), titleEl=document.getElementById('empDbStatusTitle'), subEl=document.getElementById('empDbStatusSub');
+      if(!card||!titleEl){mostrarToastSync('Elementos de status não encontrados na página.','error');return;}
+      empRenderizarTabelasBanco();
+      card.className='emp-db-status-card verificando'; card.querySelector('.emp-db-ico').innerHTML='<i class="fa-solid fa-spinner"></i>'; titleEl.textContent='Verificando conexão com o banco...'; subEl.textContent='Aguarde, checando todas as tabelas do Supabase...';
+      SUPABASE_TABELAS.forEach(function(nome){const b=document.getElementById('empTbl_'+nome),c=document.getElementById('empTblCount_'+nome);if(b){b.textContent='Verificando';b.className='emp-db-tbadge verificando';}if(c)c.textContent='Consultando...';});
+      async function checarTabela(nome){
+        try{
+          const resp=await fetch(SUPABASE_URL+'/'+nome+'?select=id&limit=1',{method:'GET',headers:supabaseHeaders({'Prefer':'count=exact'})});
+          const b=document.getElementById('empTbl_'+nome),c=document.getElementById('empTblCount_'+nome);
+          if(resp.ok){
+            let total=0, range=resp.headers.get('content-range');
+            if(range){const parts=range.split('/');if(parts.length>=2&&parts[1]!=='*')total=parseInt(parts[1],10)||0;}
+            if(total===0){try{const r2=await fetch(SUPABASE_URL+'/'+nome+'?select=id',{method:'GET',headers:supabaseHeaders({'Range':'0-0','Prefer':'count=exact'})});const rg=r2.headers.get('content-range');if(rg){const p2=rg.split('/');if(p2.length>=2&&p2[1]!=='*')total=parseInt(p2[1],10)||0;}else if(r2.ok){const arr=await r2.json();total=Array.isArray(arr)?arr.length:0;}}catch(e2){}}
+            if(b){b.textContent='OK';b.className='emp-db-tbadge on';} if(c)c.textContent=total+(total===1?' registro':' registros'); supabaseTabelasStatus[nome]=true; return true;
           }
-        } catch(e) {
-          if (badge) { badge.textContent = 'Sem conexão'; badge.className = 'emp-db-tbadge off'; }
-          if (countEl) { countEl.textContent = '—'; }
-          return false;
-        }
+          if(b){b.textContent=resp.status===404?'Não existe':'Erro '+resp.status;b.className='emp-db-tbadge off';} if(c)c.textContent='—'; supabaseTabelasStatus[nome]=false; return false;
+        }catch(e){const b=document.getElementById('empTbl_'+nome),c=document.getElementById('empTblCount_'+nome);if(b){b.textContent='Sem conexão';b.className='emp-db-tbadge off';}if(c)c.textContent='—';supabaseTabelasStatus[nome]=false;return false;}
       }
-
-      // Verificar as tabelas principais (todas obrigatórias para sync completo)
-      const okRotas = await checarTabela('rotas', tblRotas, tblRotasCount);
-      const okDespesas = await checarTabela('despesas', tblDespesas, tblDespesasCount);
-      const okSeq = await checarTabela('sequencias_itens', tblSeq, tblSeqCount);
-      const okEmp = await checarTabela('dados_empresa', tblEmp, tblEmpCount);
-      const okDest = await checarTabela('destinos', tblDest, tblDestCount);
-      // Todas as 5 tabelas são obrigatórias agora (destinos sincroniza na nuvem desde r28)
-      const todasOk = okRotas && okDespesas && okSeq && okEmp && okDest;
-
-      // Atualizar flags globais
-      supabaseDisponivel = todasOk;
-      supabaseVerificado = true;
-
-      if (todasOk) {
-        card.className = 'emp-db-status-card ok';
-        card.querySelector('.emp-db-ico').innerHTML = '<i class="fa-solid fa-circle-check"></i>';
-        titleEl.textContent = 'Banco Online — todas as tabelas OK';
-        subEl.textContent = 'A conexão com o Supabase está ativa e todas as tabelas existem. Você já pode sincronizar os dados.';
-        atualizarStatusSync('ok', 'Conectado ao Supabase ✓');
-        mostrarToastSync('Banco de dados online! Todas as tabelas estão OK.', 'success');
-      } else {
-        const faltando = [];
-        if (!okRotas) faltando.push('rotas');
-        if (!okDespesas) faltando.push('despesas');
-        if (!okSeq) faltando.push('sequencias_itens');
-        if (!okEmp) faltando.push('dados_empresa');
-        if (!okDest) faltando.push('destinos');
-        card.className = 'emp-db-status-card erro';
-        card.querySelector('.emp-db-ico').innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
-        titleEl.textContent = 'Banco com problemas';
-        if (faltando.length === 5) {
-          subEl.textContent = 'Nenhuma tabela foi encontrada. Acesse a aba "Passo a Passo SQL", copie o script SQL e execute no SQL Editor do Supabase para criar as tabelas.';
-        } else {
-          subEl.textContent = 'Tabelas faltando ou com erro: ' + faltando.join(', ') + '. Acesse a aba "Passo a Passo SQL" e execute o script para criar as tabelas que faltam.';
-        }
-        atualizarStatusSync('error', 'Tabelas não criadas');
-        mostrarToastSync('Problema no banco: ' + faltando.join(', ') + '. Veja a aba "Passo a Passo SQL".', 'error');
+      const resultados=await Promise.all(SUPABASE_TABELAS.map(checarTabela));
+      const todasObrigatoriasOk=SUPABASE_TABELAS_OBRIGATORIAS.every(function(nome){return supabaseTabelasStatus[nome]===true;});
+      const qtdOk=resultados.filter(Boolean).length, qtdTotal=SUPABASE_TABELAS.length;
+      const faltando=SUPABASE_TABELAS.filter(function(nome){return supabaseTabelasStatus[nome]!==true;});
+      supabaseDisponivel=todasObrigatoriasOk; supabaseVerificado=true;
+      supabaseTabelasFaltando=SUPABASE_TABELAS_OBRIGATORIAS.filter(function(nome){return supabaseTabelasStatus[nome]!==true;});
+      if(todasObrigatoriasOk){
+        card.className='emp-db-status-card ok';card.querySelector('.emp-db-ico').innerHTML='<i class="fa-solid fa-circle-check"></i>';titleEl.textContent='Banco Online — '+qtdOk+'/'+qtdTotal+' tabelas encontradas';subEl.textContent=faltando.length?'As 5 tabelas principais estão OK. Tabelas complementares ausentes: '+faltando.join(', ')+'.':'A conexão com o Supabase está ativa e todas as tabelas cadastradas no app existem.';atualizarStatusSync('ok','Conectado ao Supabase ✓');mostrarToastSync(faltando.length?'Banco online. As 5 tabelas principais estão OK.':'Banco online! Todas as tabelas estão OK.','success');
+      }else{
+        card.className='emp-db-status-card erro';card.querySelector('.emp-db-ico').innerHTML='<i class="fa-solid fa-triangle-exclamation"></i>';titleEl.textContent='Banco com tabelas pendentes — '+qtdOk+'/'+qtdTotal+' OK';subEl.textContent='Tabelas principais faltando ou com erro: '+supabaseTabelasFaltando.join(', ')+'. Veja cada tabela abaixo.';atualizarStatusSync('error','Tabelas principais não criadas');mostrarToastSync('Há tabelas principais pendentes: '+supabaseTabelasFaltando.join(', ')+'.','error');
       }
     }
 
@@ -37779,6 +37698,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (true);
       });
       // Popular o bloco de script SQL no primeiro carregamento
       empPreencherScriptSQL();
+      empRenderizarTabelasBanco();
     });
 
     // --- Testar conexão com o Supabase ---
@@ -56597,13 +56517,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (true);
               </div>
             </div>
           </div>
-          <div class="emp-db-tables" id="empDbTables">
-            <div class="emp-db-table"><div class="emp-db-tname"><i class="fa-solid fa-route"></i> rotas</div><div class="emp-db-tbadge on" id="empTblRotas">OK</div><div class="emp-db-tcount" id="empTblRotasCount">398 registros</div></div>
-            <div class="emp-db-table"><div class="emp-db-tname"><i class="fa-solid fa-receipt"></i> despesas</div><div class="emp-db-tbadge on" id="empTblDespesas">OK</div><div class="emp-db-tcount" id="empTblDespesasCount">21 registros</div></div>
-            <div class="emp-db-table"><div class="emp-db-tname"><i class="fa-solid fa-list-ol"></i> sequencias_itens</div><div class="emp-db-tbadge on" id="empTblSeq">OK</div><div class="emp-db-tcount" id="empTblSeqCount">156 registros</div></div>
-            <div class="emp-db-table"><div class="emp-db-tname"><i class="fa-solid fa-building"></i> dados_empresa</div><div class="emp-db-tbadge on" id="empTblEmp">OK</div><div class="emp-db-tcount" id="empTblEmpCount">1 registro</div></div>
-            <div class="emp-db-table"><div class="emp-db-tname"><i class="fa-solid fa-map-location-dot"></i> destinos</div><div class="emp-db-tbadge on" id="empTblDest">OK</div><div class="emp-db-tcount" id="empTblDestCount">263 registros</div></div>
-          </div>
+          <div class="emp-db-tables" id="empDbTables" aria-live="polite"></div>
           <div class="emp-actions">
             <button type="button" class="emp-btn-primary ripple" onclick="empVerificarStatusBanco()" style="user-select: none;"><i class="fa-solid fa-rotate-right"></i> Atualizar Status</button>
             <button type="button" class="emp-btn-secondary ripple" onclick="empCopiarScriptSQL()" style="user-select: none;"><i class="fa-solid fa-copy"></i> Copiar Script SQL</button>
@@ -56778,7 +56692,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (true);
             </div>
             <div class="emp-sql-step">
               <div class="emp-sql-step-title">Copie o script SQL abaixo</div>
-              <div class="emp-sql-step-body">Use o botão <strong>"Copiar Script SQL"</strong> logo abaixo do bloco de código, ou selecione todo o texto do bloco e copie com <code>Ctrl+C</code>. Este script cria as 5 tabelas necessárias: <code>rotas</code>, <code>despesas</code>, <code>sequencias_itens</code>, <code>dados_empresa</code> e <code>destinos</code>, além das permissões de acesso.</div>
+              <div class="emp-sql-step-body">Use o botão <strong>"Copiar Script SQL"</strong> logo abaixo do bloco de código, ou selecione todo o texto do bloco e copie com <code>Ctrl+C</code>. Este script cria as tabelas principais e complementares usadas pelo FAST, incluindo <code>rotas</code>, <code>despesas</code>, <code>sequencias_itens</code>, <code>dados_empresa</code>, <code>destinos</code>, <code>funcionarios</code>, <code>usuarios_permissoes</code> e <code>biometria</code>.</div>
             </div>
             <div class="emp-sql-step">
               <div class="emp-sql-step-title">Cole o script no SQL Editor</div>
@@ -56790,7 +56704,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (true);
             </div>
             <div class="emp-sql-step">
               <div class="emp-sql-step-title">Confirme que as tabelas foram criadas</div>
-              <div class="emp-sql-step-body">No menu lateral, clique em <strong>"Table Editor"</strong>. Você deve ver as 5 tabelas: <code>rotas</code>, <code>despesas</code>, <code>sequencias_itens</code>, <code>dados_empresa</code> e <code>destinos</code>. Se elas aparecerem, o banco está pronto.</div>
+              <div class="emp-sql-step-body">No menu lateral, clique em <strong>"Table Editor"</strong>. Você deve ver todas as tabelas cadastradas no FAST. As 5 tabelas principais precisam existir para liberar a sincronização completa; as complementares são verificadas separadamente.</div>
             </div>
             <div class="emp-sql-step">
               <div class="emp-sql-step-title">Volte ao app e verifique o status</div>
