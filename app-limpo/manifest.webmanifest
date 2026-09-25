@@ -2,7 +2,7 @@
   "id": "/fastservicosapp/app-limpo/",
   "name": "FAST Limpo",
   "short_name": "FAST Limpo",
-  "version": "4.0.17",
+  "version": "4.0.23",
   "description": "FAST Serviços completo, vazio e com armazenamento independente",
   "start_url": "/fastservicosapp/app-limpo/?source=pwa",
   "scope": "/fastservicosapp/app-limpo/",

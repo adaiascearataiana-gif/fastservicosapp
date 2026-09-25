@@ -1,7 +1,32 @@
 {
-  "version": "4.0.17",
-  "releasedAt": "2026-09-24T01:45:00-03:00",
+  "version": "4.0.23",
+  "releasedAt": "2026-09-25T18:00:00-03:00",
   "updates": [
+    {
+      "app": "fast",
+      "type": "corrigido",
+      "text": "4.0.23 (25/09/2026): corrigido o problema em que o aplicativo voltava para a versao 4.0.17 e nao conseguia atualizar na plataforma; a versao exibida agora permanece sempre a mais recente e a atualizacao e aplicada de verdade."
+    },
+    {
+      "app": "cliente",
+      "type": "corrigido",
+      "text": "4.0.23 (25/09/2026): atualizacao do Cliente FAST sincronizada com a versao 4.0.23 da plataforma."
+    },
+    {
+      "app": "motorista",
+      "type": "corrigido",
+      "text": "4.0.23 (25/09/2026): atualizacao do FAST Motorista sincronizada com a versao 4.0.23 da plataforma."
+    },
+    {
+      "app": "rotas",
+      "type": "corrigido",
+      "text": "4.0.23 (25/09/2026): Rotas do Dia sincronizado com a versao 4.0.23 da plataforma."
+    },
+    {
+      "app": "despesas",
+      "type": "corrigido",
+      "text": "4.0.23 (25/09/2026): Despesas sincronizado com a versao 4.0.23 da plataforma."
+    },
     {
       "app": "fast",
       "type": "corrigido",
