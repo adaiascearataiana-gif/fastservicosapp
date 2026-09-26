@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Diagnóstico de Segurança — FAST SERVIÇOS 4.0.32</title>
+<style>
+  :root{
+    --bg:#0f172a; --card:#ffffff; --ink:#0f172a; --muted:#475569;
+    --crit:#b91c1c; --critbg:#fef2f2; --high:#c2410c; --highbg:#fff7ed;
+    --med:#b45309; --medbg:#fffbeb; --low:#0369a1; --lowbg:#f0f9ff;
+    --ok:#047857; --okbg:#ecfdf5; --line:#e2e8f0; --brand:#4f46e5;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:#f1f5f9;color:var(--ink);font-family:'Segoe UI',Inter,Arial,sans-serif;line-height:1.6}
+  .page{max-width:960px;margin:0 auto;background:#fff;padding:48px 56px;box-shadow:0 10px 40px rgba(15,23,42,.08)}
+  header.cover{border-bottom:4px solid var(--brand);padding-bottom:22px;margin-bottom:30px}
+  header.cover .kicker{color:var(--brand);font-weight:800;letter-spacing:.14em;font-size:12px;text-transform:uppercase}
+  header.cover h1{font-size:30px;margin:8px 0 6px;line-height:1.2}
+  header.cover .sub{color:var(--muted);font-size:14px}
+  h2{font-size:21px;margin:38px 0 12px;padding-bottom:8px;border-bottom:2px solid var(--line)}
+  h3{font-size:16px;margin:24px 0 8px}
+  p{margin:10px 0}
+  .meta-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:18px 0 0}
+  .meta-grid div{background:#f8fafc;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13px}
+  .meta-grid b{display:block;color:var(--muted);font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.06em}
+  .summary{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:22px 0}
+  .sum-card{border-radius:12px;padding:14px;text-align:center;border:1px solid var(--line)}
+  .sum-card .n{font-size:30px;font-weight:900;line-height:1}
+  .sum-card .l{font-size:11px;text-transform:uppercase;letter-spacing:.08em;font-weight:700;margin-top:6px}
+  .c-crit{background:var(--critbg);color:var(--crit);border-color:#fecaca}
+  .c-high{background:var(--highbg);color:var(--high);border-color:#fed7aa}
+  .c-med{background:var(--medbg);color:var(--med);border-color:#fde68a}
+  .c-low{background:var(--lowbg);color:var(--low);border-color:#bae6fd}
+  .finding{border:1px solid var(--line);border-left-width:6px;border-radius:12px;padding:18px 20px;margin:16px 0;background:#fff;page-break-inside:avoid}
+  .finding.crit{border-left-color:var(--crit)}
+  .finding.high{border-left-color:var(--high)}
+  .finding.med{border-left-color:var(--med)}
+  .finding.low{border-left-color:var(--low)}
+  .finding h3{margin:0 0 4px;font-size:16px}
+  .badge{display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:3px 9px;border-radius:999px;margin-right:8px;vertical-align:middle}
+  .b-crit{background:var(--crit);color:#fff}
+  .b-high{background:var(--high);color:#fff}
+  .b-med{background:var(--med);color:#fff}
+  .b-low{background:var(--low);color:#fff}
+  .tag{font-size:11px;color:var(--muted);font-weight:700}
+  .evidence{background:#0f172a;color:#e2e8f0;border-radius:8px;padding:12px 14px;font-family:'Cascadia Code',Consolas,monospace;font-size:12px;overflow:auto;margin:10px 0;white-space:pre-wrap;word-break:break-word}
+  .fix{background:var(--okbg);border:1px solid #a7f3d0;border-radius:10px;padding:12px 16px;margin-top:10px}
+  .fix b{color:var(--ok)}
+  .impact{background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:10px 14px;margin-top:8px;font-size:13.5px}
+  .impact b{color:var(--crit)}
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:13.5px}
+  th,td{border:1px solid var(--line);padding:9px 11px;text-align:left;vertical-align:top}
+  th{background:#f8fafc;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+  ul{margin:8px 0 8px 4px;padding-left:20px}
+  li{margin:5px 0}
+  .pill{display:inline-block;background:#eef2ff;color:#3730a3;border-radius:6px;padding:1px 7px;font-size:12px;font-weight:700;font-family:monospace}
+  footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:12px}
+  .ok-list li{color:#065f46}
+  @media print{
+    body{background:#fff}
+    .page{box-shadow:none;max-width:100%;padding:0 10mm}
+    .finding,.sum-card,table{page-break-inside:avoid}
+    h2{page-break-after:avoid}
+  }
+</style>
+<script src="https://sites.super.myninja.ai/_assets/ninja-daytona-script.js"></script>
+</head>
+<body>
+<div class="page">
+
+<header class="cover">
+  <div class="kicker">Relatório Técnico Confidencial</div>
+  <h1>Diagnóstico Completo de Segurança e Estabilidade<br>FAST SERVIÇOS — versão 4.0.32</h1>
+  <div class="sub">Análise de riscos, vazamento de dados, criptografia, instabilidades e plano de correção</div>
+  <div class="meta-grid">
+    <div><b>Data da análise</b>26/09/2026</div>
+    <div><b>Aplicação</b>FAST SERVIÇOS (app principal + Cliente + Motorista + Rotas do Dia + Despesas)</div>
+    <div><b>Repositório</b>adaiascearataiana-gif/fastservicosapp</div>
+    <div><b>Backend</b>Supabase (Auth + REST) · Google Drive · backend WhatsApp</div>
+    <div><b>Escopo</b>Código-fonte, autenticação, banco de dados, armazenamento local e integrações</div>
+    <div><b>Método</b>Revisão estática de código, inspeção em navegador e análise de políticas de banco</div>
+  </div>
+</header>
+
+<h2>1. Sumário executivo</h2>
+<p>A revisão encontrou <b>um risco crítico</b> que, sozinho, permite que qualquer pessoa na internet leia, altere e apague <b>toda a base de dados</b> do aplicativo (clientes, rotas, despesas, RH, motoristas, documentos e fotos). Esse risco não depende de adivinhar senhas nem de invadir servidores: a "chave" necessária está publicada dentro do próprio HTML do app, e as regras de segurança do banco estão abertas para qualquer um. É a prioridade número um e deve ser corrigida antes de qualquer outra coisa.</p>
+<p>Além disso, foram identificados pontos de risco alto e médio relacionados a armazenamento de tokens, ausência de cabeçalhos de segurança (CSP), uso de caixas de diálogo nativas para confirmar senha, e fragilidades no fluxo de compartilhamento de comprovantes. Também foi corrigida, nesta versão, uma falha de código que quebrava todo o motor do aplicativo (um erro de JavaScript que impedia a pré-visualização de despesas e a sincronização de funcionarem).</p>
+
+<div class="summary">
+  <div class="sum-card c-crit"><div class="n">1</div><div class="l">Crítico</div></div>
+  <div class="sum-card c-high"><div class="n">5</div><div class="l">Alto</div></div>
+  <div class="sum-card c-med"><div class="n">6</div><div class="l">Médio</div></div>
+  <div class="sum-card c-low"><div class="n">4</div><div class="l">Baixo</div></div>
+</div>
+
+<h2>2. Metodologia</h2>
+<p>A análise foi feita por inspeção direta do código-fonte do aplicativo (arquivo único <span class="pill">index.html</span> com aproximadamente 65 mil linhas, além dos mini-apps Cliente, Motorista, Rotas do Dia e Despesas), execução do app em navegador controlado para observar erros de console e comportamento real, e leitura do script SQL de criação do banco embutido no próprio app. Foram avaliados: autenticação e sessões, criptografia de credenciais, políticas de acesso ao banco (RLS), armazenamento local (localStorage/IndexedDB), integrações externas (Google Drive e backend de WhatsApp), comunicação entre páginas (postMessage) e cabeçalhos de segurança.</p>
+
+<h2>3. Achados por severidade</h2>
+
+<!-- ================= CRÍTICO ================= -->
+<h3>3.1 — Crítico</h3>
+
+<div class="finding crit">
+  <h3><span class="badge b-crit">Crítico</span>Banco de dados aberto ao público (RLS com "true" em todas as tabelas)</h3>
+  <div class="tag">Categoria: Vazamento de dados / Controle de acesso · Local: script SQL embutido, linhas 37532–37700</div>
+  <p>Todas as tabelas do Supabase têm Row Level Security (RLS) <i>ativada</i>, mas as políticas liberam <b>tudo para todos</b>: leitura, inserção, atualização e exclusão usam <span class="pill">USING (true)</span> e <span class="pill">WITH CHECK (true)</span>. Como a chave pública do projeto (<span class="pill">sb_publishable_…</span>) está embutida no HTML — e HTML é público — qualquer pessoa com um navegador e essa chave consegue acessar a API REST do banco e ler, modificar ou apagar os dados de todas as empresas que usam o app.</p>
+  <div class="evidence">-- Exemplo real do script do app (trecho):
+ALTER TABLE rotas ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "rotas_read"  ON rotas    FOR SELECT USING (true);   -- qualquer um lê
+CREATE POLICY "rotas_write" ON rotas    FOR INSERT WITH CHECK (true); -- qualquer um grava
+CREATE POLICY "rotas_upd"   ON rotas    FOR UPDATE USING (true) WITH CHECK (true); -- qualquer um altera
+CREATE POLICY "rotas_del"   ON rotas    FOR DELETE USING (true);   -- qualquer um apaga
+-- (o mesmo padrão se repete em despesas, clientes, motoristas, rh,
+--  dados_empresa, destinos, sequencias_itens, motorista_fotos, etc.)</div>
+  <div class="impact"><b>Impacto:</b> vazamento total de dados pessoais e financeiros (nomes, endereços, telefones, valores, documentos de CNH/CRLV, fotos), possibilidade de fraude, exclusão ou corrupção da base inteira, e engenharia social usando dados reais dos clientes. É o risco mais grave do sistema.</div>
+  <div class="fix"><b>Correção:</b> substituir as políticas abertas por políticas amarradas ao usuário autenticado. Como o app já usa Supabase Auth (e-mail/senha), o banco deve exigir <span class="pill">auth.role() = 'authenticated'</span> no mínimo — e, idealmente, filtrar por dono/empresa (<span class="pill">auth.uid()</span>). O script pronto está no anexo <span class="pill">correcao-rls-supabase.sql</span>. Enquanto isso não é aplicado, considere o banco como público.</div>
+</div>
+
+<!-- ================= ALTO ================= -->
+<h3>3.2 — Alto</h3>
+
+<div class="finding high">
+  <h3><span class="badge b-high">Alto</span>Token de acesso do Google Drive guardado em localStorage</h3>
+  <div class="tag">Categoria: Criptografia / Armazenamento de segredos · Local: linhas 58352 e 58378</div>
+  <p>O token OAuth do Google Drive (que dá acesso aos arquivos de fotos e documentos) é salvo em <span class="pill">localStorage</span> sob a chave <span class="pill">fast_drive_access_token</span>. Qualquer script injetado na página (por exemplo, via um componente de terceiros comprometido) pode ler esse token e acessar os arquivos do Drive do usuário.</p>
+  <div class="evidence">var TOKEN_KEY = 'fast_drive_access_token';
+...
+localStorage.setItem(TOKEN_KEY, v);   // token persistente no navegador</div>
+  <div class="impact"><b>Impacto:</b> roubo de acesso aos arquivos do Google Drive (fotos de entregas, documentos de motoristas) caso haja qualquer XSS ou extensão maliciosa.</div>
+  <div class="fix"><b>Correção:</b> manter o token apenas em memória/sessionStorage e nunca em localStorage; reduzir o escopo OAuth ao mínimo necessário (<span class="pill">drive.file</span> já é usado — manter); e implementar CSP (ver achado 3.3) para dificultar injeção de scripts.</div>
+</div>
+
+<div class="finding high">
+  <h3><span class="badge b-high">Alto</span>Ausência de Content-Security-Policy (CSP)</h3>
+  <div class="tag">Categoria: Cabeçalhos de segurança · Local: &lt;head&gt; do index.html</div>
+  <p>O app não define uma política de segurança de conteúdo. Ele carrega scripts e estilos de vários domínios externos (Font Awesome, Google Fonts, gerador de QR Code, Google Identity Services). Sem CSP, qualquer injeção de script tem caminho livre, e o risco do achado anterior (roubo de token) aumenta bastante.</p>
+  <div class="impact"><b>Impacto:</b> amplifica qualquer XSS; permite carregamento de scripts não autorizados.</div>
+  <div class="fix"><b>Correção:</b> publicar uma CSP restritiva (via <span class="pill">&lt;meta http-equiv="Content-Security-Policy"&gt;</span> ou cabeçalho no host) listando apenas os domínios realmente usados em <span class="pill">script-src</span>, <span class="pill">style-src</span>, <span class="pill">img-src</span> e <span class="pill">connect-src</span>. Exemplo no anexo de recomendações.</div>
+</div>
+
+<div class="finding high">
+  <h3><span class="badge b-high">Alto</span>Dados sensíveis armazenados sem criptografia no navegador</h3>
+  <div class="tag">Categoria: Criptografia / Privacidade · Local: localStorage e IndexedDB em todo o app</div>
+  <p>Dados de clientes, valores de rotas e despesas, dados de RH, sessão do Supabase (<span class="pill">fast_supa_session</span>) e credenciais locais ficam em <span class="pill">localStorage</span> em texto puro. Em aparelhos compartilhados ou comprometidos, esses dados ficam expostos. A senha em si <b>não</b> é guardada em texto (usa PBKDF2 — bom), mas o restante sim.</p>
+  <div class="impact"><b>Impacto:</b> exposição de dados pessoais e financeiros em caso de acesso físico ao aparelho ou de XSS.</div>
+  <div class="fix"><b>Correção:</b> criptografar os campos sensíveis antes de gravar (Web Crypto AES-GCM com chave derivada do login), reduzir o tempo de vida da sessão, e oferecer "sair e limpar dados locais" com facilidade. Manter a senha apenas como hash PBKDF2 (já correto).</div>
+</div>
+
+<div class="finding high">
+  <h3><span class="badge b-high">Alto</span>Compartilhamento de comprovantes aceita mensagens sem validar a origem</h3>
+  <div class="tag">Categoria: Injeção / Integridade · Local: linha 58976</div>
+  <p>O app escuta mensagens de janela (<span class="pill">postMessage</span>) para receber comprovantes compartilhados, mas <b>não verifica <span class="pill">ev.origin</span></b>. Se o app for aberto dentro de outra página (iframe) ou em um contexto controlado por terceiros, mensagens forjadas podem injetar comprovantes e disparar o fluxo de leitura automática.</p>
+  <div class="evidence">window.addEventListener('message', function(ev){
+  if (!ev || !ev.data || typeof ev.data !== 'object') return; // falta checar ev.origin
+  var d = ev.data;
+  if (d.type === 'fast-share-comprovante' && d.file) { ... }
+});</div>
+  <div class="impact"><b>Impacto:</b> injeção de dados falsos no fluxo de despesas; risco maior se o app for embutido por terceiros.</div>
+  <div class="fix"><b>Correção:</b> validar <span class="pill">ev.origin</span> contra a origem oficial (GitHub Pages) e usar <span class="pill">targetOrigin</span> específico no <span class="pill">postMessage</span> de retorno, em vez de <span class="pill">'*'</span>.</div>
+</div>
+
+<div class="finding high">
+  <h3><span class="badge b-high">Alto</span>Confirmação de senha por caixa de diálogo nativa (prompt)</h3>
+  <div class="tag">Categoria: Exposição de credenciais · Local: linhas 3212, 3261, 3268, 3304, 36691, 36757</div>
+  <p>Várias ações (ativar biometria, alterar senha, remover senha) usam o <span class="pill">prompt()</span> nativo do navegador para pedir a senha. Esse campo <b>não mascara</b> os caracteres, aparece em texto claro na tela e pode ficar registrado em histórico/gerenciadores.</p>
+  <div class="impact"><b>Impacto:</b> exposição visual da senha a quem estiver por perto e a gravação indevida do valor.</div>
+  <div class="fix"><b>Correção:</b> trocar todos os <span class="pill">prompt()</span> de senha por um modal próprio com <span class="pill">&lt;input type="password"&gt;</span>, autocomplete apropriado e limpeza do valor após o uso.</div>
+</div>
+
+<!-- ================= MÉDIO ================= -->
+<h3>3.3 — Médio</h3>
+
+<div class="finding med">
+  <h3><span class="badge b-med">Médio</span>Sessão e chave do Supabase expostas no cliente</h3>
+  <div class="tag">Local: linhas 35537–35538, 56685, 62908</div>
+  <p>A URL e a chave pública do Supabase estão fixas no código e também exibidas em um campo da interface de configuração. Chaves "publishable/anon" são feitas para o cliente, então isso é aceitável <b>somente</b> com RLS correta — que hoje não existe (ver achado crítico). A sessão (<span class="pill">fast_supa_session</span>) também fica em localStorage.</p>
+  <div class="fix"><b>Correção:</b> manter a chave publishable (é pública por natureza), mas <b>fechar a RLS</b>; remover a exibição da chave na UI; e considerar renovação curta de sessão.</div>
+</div>
+
+<div class="finding med">
+  <h3><span class="badge b-med">Médio</span>Backend de WhatsApp externo sem autenticação visível</h3>
+  <div class="tag">Local: linha 55240</div>
+  <p>O app conversa com <span class="pill">https://fast-whatsapp-backend.onrender.com</span>. Durante os testes, a chamada falhou por CORS e não há sinal de autenticação (token/chave) na requisição. Um backend sem autenticação pode ser abusado por terceiros e vazar conversas.</p>
+  <div class="fix"><b>Correção:</b> exigir um token de API no backend, restringir CORS à origem oficial e nunca expor credenciais do WhatsApp no cliente.</div>
+</div>
+
+<div class="finding med">
+  <h3><span class="badge b-med">Médio</span>Erro fatal de JavaScript quebrava o motor do app (corrigido nesta versão)</h3>
+  <div class="tag">Local: linhas 37422 e 35945</div>
+  <p>Havia um erro <span class="pill">Assignment to constant variable</span> (uma constante reatribuída) e uma variável indefinida (<span class="pill">todasOk</span>). Esse erro <b>abortava todo o bloco principal de código</b>, o que explica a pré-visualização de despesas ter "parado de funcionar" e a instabilidade geral. <b>Já corrigido</b> nesta versão.</p>
+  <div class="fix"><b>Correção aplicada:</b> <span class="pill">const → let</span> e retorno corrigido. Recomenda-se manter verificação automática de erros de console a cada publicação.</div>
+</div>
+
+<div class="finding med">
+  <h3><span class="badge b-med">Médio</span>Uso de innerHTML com dados dinâmicos</h3>
+  <div class="tag">Local: amplamente no app; função escapeHtml existe (linha 48058)</div>
+  <p>O app monta HTML com <span class="pill">innerHTML</span> em muitos pontos. Existe uma função <span class="pill">escapeHtml</span>, mas nem sempre é usada. Dados vindos de cadastros (nomes de clientes, descrições) podem, em tese, injetar HTML/script.</p>
+  <div class="fix"><b>Correção:</b> padronizar o uso de <span class="pill">escapeHtml</span> em todos os pontos que inserem dados do usuário, ou usar <span class="pill">textContent</span> quando possível.</div>
+</div>
+
+<div class="finding med">
+  <h3><span class="badge b-med">Médio</span>Service Worker e cache podem servir versão antiga</h3>
+  <div class="tag">Local: sw.js, manifest.webmanifest, atualização automática</div>
+  <p>O app usa Service Worker e cache agressivo. Há mecanismos de auto-atualização, mas um cache desatualizado pode fazer o usuário rodar uma versão antiga (inclusive com falhas já corrigidas).</p>
+  <div class="fix"><b>Correção:</b> versionar o cache com o número da versão, forçar <span class="pill">skipWaiting</span>/<span class="pill">clients.claim</span> e validar a versão no boot.</div>
+</div>
+
+<div class="finding med">
+  <h3><span class="badge b-med">Médio</span>Arquivos ausentes no pacote enviado (404s)</h3>
+  <div class="tag">Local: manifest.webmanifest, fast-logistics-2.4.js/css, motorista-admin.js/css, datavalid-panel.js, desktop-guides-keyboard.js, table-viewport.js, clear-money-on-tap.js</div>
+  <p>O ZIP enviado estava incompleto, gerando vários 404 e recursos não carregados. No repositório completo os arquivos existem. Isso afeta integridade/estabilidade, não é falha de segurança.</p>
+  <div class="fix"><b>Correção:</b> publicar sempre a partir do repositório completo (o deploy desta versão já usa o repositório íntegro).</div>
+</div>
+
+<!-- ================= BAIXO ================= -->
+<h3>3.4 — Baixo</h3>
+
+<div class="finding low">
+  <h3><span class="badge b-low">Baixo</span>Recuperação de senha depende de serviço externo/allowlist</h3>
+  <div class="tag">Local: linhas 58245–58275</div>
+  <p>O fluxo de recuperação usa o endpoint do Supabase Auth e uma Edge Function de fallback. Se a allowlist de redirecionamento não estiver exata, o link pode falhar. Há também um caminho local que confirma o e-mail cadastrado.</p>
+  <div class="fix"><b>Correção:</b> manter a allowlist exata e documentar o fluxo; considerar confirmação em duas etapas.</div>
+</div>
+
+<div class="finding low">
+  <h3><span class="badge b-low">Baixo</span>Sem limite de tentativas no cliente</h3>
+  <div class="tag">Local: fluxo de login</div>
+  <p>Existe bloqueio local por tentativas, mas o controle real de rate limit deve ser do servidor (Supabase). Depender só do cliente é contornável.</p>
+  <div class="fix"><b>Correção:</b> manter o rate limit do Supabase Auth e monitorar tentativas.</div>
+</div>
+
+<div class="finding low">
+  <h3><span class="badge b-low">Baixo</span>Exposição de QR Code via serviço externo</h3>
+  <div class="tag">Local: api.qrserver.com</div>
+  <p>QR Codes de instalação são gerados por um serviço de terceiros, enviando a URL do app para esse serviço.</p>
+  <div class="fix"><b>Correção:</b> gerar QR Code localmente (biblioteca embutida) para não depender de terceiros.</div>
+</div>
+
+<div class="finding low">
+  <h3><span class="badge b-low">Baixo</span>Monolito de arquivo único dificulta manutenção e auditoria</h3>
+  <div class="tag">Local: index.html (~65 mil linhas)</div>
+  <p>Todo o CSS/JS em um único arquivo dificulta revisão de segurança e favorece regressões (como o erro fatal corrigido).</p>
+  <div class="fix"><b>Correção:</b> no médio prazo, separar em módulos versionados e adicionar verificação automática de sintaxe antes de publicar.</div>
+</div>
+
+<h2>4. O que já foi corrigido nesta versão (4.0.32)</h2>
+<ul class="ok-list">
+  <li><b>Valor ao editar (despesas e rotas):</b> um valor como <span class="pill">123,45</span> virava <span class="pill">12.345,00</span> ao abrir a edição. Corrigida a função de leitura de moeda (<span class="pill">fastParseMoeda</span>) para tratar corretamente números e o separador de milhar brasileiro.</li>
+  <li><b>Pré-visualização de despesas:</b> restaurada a prévia de nome/local/descrição (mostra "Última despesa: local • categoria • forma de pagamento • valor • data").</li>
+  <li><b>Rotas do dia:</b> ao digitar o cliente, o app puxa automaticamente os dados da <b>última rota</b> daquele cliente.</li>
+  <li><b>Login do app principal:</b> removido o pedido de "criar senha". Agora aparece <b>somente login e senha</b> (a criação só existe no fluxo de recuperação). Cliente e Motorista já tinham login/senha próprios.</li>
+  <li><b>Flash de login da Google:</b> o script do Google Identity Services não é mais carregado ao abrir o app, e a reconexão silenciosa do Google Drive passou a ter limite de frequência (cooldown de 15 min) — elimina o "flash" repetido da tela da Google.</li>
+  <li><b>Erro fatal de JavaScript:</b> corrigido o erro que quebrava todo o motor do app.</li>
+</ul>
+
+<h2>5. Plano de ação priorizado</h2>
+<table>
+  <thead><tr><th>#</th><th>Prioridade</th><th>Ação</th><th>Esforço</th></tr></thead>
+  <tbody>
+    <tr><td>1</td><td><b style="color:#b91c1c">Imediato</b></td><td>Aplicar o script <span class="pill">correcao-rls-supabase.sql</span> no Supabase (fechar RLS para usuários autenticados)</td><td>Baixo</td></tr>
+    <tr><td>2</td><td><b style="color:#b91c1c">Imediato</b></td><td>Trocar a senha do administrador e revisar acessos após fechar a RLS (assumir que os dados podem ter sido acessados)</td><td>Baixo</td></tr>
+    <tr><td>3</td><td><b style="color:#c2410c">Alto</b></td><td>Publicar Content-Security-Policy restritiva</td><td>Médio</td></tr>
+    <tr><td>4</td><td><b style="color:#c2410c">Alto</b></td><td>Tirar o token do Google Drive do localStorage e reduzir sessão</td><td>Médio</td></tr>
+    <tr><td>5</td><td><b style="color:#c2410c">Alto</b></td><td>Validar origem no postMessage e trocar prompt() de senha por modal</td><td>Baixo</td></tr>
+    <tr><td>6</td><td><b style="color:#b45309">Médio</b></td><td>Autenticar o backend de WhatsApp e restringir CORS</td><td>Médio</td></tr>
+    <tr><td>7</td><td><b style="color:#b45309">Médio</b></td><td>Padronizar escapeHtml em todo innerHTML com dados do usuário</td><td>Médio</td></tr>
+    <tr><td>8</td><td><b style="color:#b45309">Médio</b></td><td>Revisar versionamento de cache do Service Worker</td><td>Baixo</td></tr>
+    <tr><td>9</td><td><b style="color:#0369a1">Baixo</b></td><td>Gerar QR Code localmente; separar o monolito em módulos</td><td>Médio</td></tr>
+  </tbody>
+</table>
+
+<h2>6. Considerações sobre criptografia</h2>
+<p>O ponto positivo é que a senha do usuário <b>não</b> é armazenada em texto puro: o app usa PBKDF2-HMAC-SHA-256 com 600.000 iterações e salt aleatório, o que é uma boa prática. A autenticação real acontece no Supabase Auth (e-mail/senha), com a credencial local servindo de cache offline. Os problemas de criptografia não estão na senha, e sim na proteção dos <b>dados</b> e dos <b>tokens</b> guardados no navegador (localStorage/IndexedDB), que hoje ficam em texto puro, e na ausência de CSP que os proteja de injeção.</p>
+
+<h2>7. Conclusão</h2>
+<p>O aplicativo tem uma base funcional sólida e já adota boas práticas de senha. O que separa o FAST SERVIÇOS de um nível de segurança adequado é, essencialmente, <b>uma única correção no banco de dados</b>: fechar as políticas de acesso (RLS) para que só usuários autenticados possam ler e gravar. Sem isso, todo o resto fica vulnerável. Recomenda-se aplicar essa correção imediatamente, seguir o plano priorizado e adotar verificação automática de erros a cada publicação para evitar regressões como a que foi corrigida nesta versão.</p>
+
+<footer>
+  FAST SERVIÇOS — Diagnóstico de Segurança 4.0.32 · Gerado em 26/09/2026 · Documento técnico confidencial.<br>
+  Anexos: <span class="pill">correcao-rls-supabase.sql</span> (script de correção do banco) · <span class="pill">recomendacoes-csp.txt</span> (exemplo de cabeçalho de segurança).
+</footer>
+
+</div>
+</body>
+</html>

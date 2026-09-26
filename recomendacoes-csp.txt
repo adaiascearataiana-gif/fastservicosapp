@@ -1,0 +1,52 @@
+============================================================================
+FAST SERVIÇOS — RECOMENDAÇÕES DE CABEÇALHOS DE SEGURANÇA (CSP) — 4.0.32
+============================================================================
+
+PROBLEMA
+--------
+O app não define Content-Security-Policy (CSP). Sem ela, qualquer script
+injetado (XSS) roda livremente e pode roubar o token do Google Drive e a
+sessão do Supabase guardados no navegador.
+
+OBSERVAÇÃO IMPORTANTE SOBRE GITHUB PAGES
+----------------------------------------
+O GitHub Pages NÃO permite definir cabeçalhos HTTP personalizados. Por isso,
+a CSP deve ser aplicada via <meta> dentro do <head> do index.html. A meta CSP
+é ligeiramente menos poderosa que o cabeçalho, mas já bloqueia a maior parte
+dos ataques de injeção de script.
+
+COMO APLICAR
+------------
+1) Cole a linha abaixo logo após a tag <head> (antes de qualquer script):
+
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://accounts.google.com https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com data:; img-src 'self' data: blob: https:; connect-src 'self' https://yhxuplhohhetzloxvgku.supabase.co https://accounts.google.com https://oauth2.googleapis.com https://www.googleapis.com https://fast-whatsapp-backend.onrender.com; frame-src 'self' https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self';">
+
+2) Ajuste a lista de domínios conforme os recursos realmente usados:
+   - script-src: Font Awesome (cdnjs), Google Identity Services (accounts.google.com)
+   - style-src : Google Fonts, Font Awesome
+   - font-src  : fonts.gstatic.com, cdnjs
+   - img-src   : inclui api.qrserver.com via "https:" (ou troque por geração local de QR)
+   - connect-src: Supabase, Google APIs, backend do WhatsApp
+
+3) 'unsafe-inline' é necessário enquanto o app usa muito estilo/script inline.
+   No futuro, migrar para nonces/hashes permitirá REMOVER 'unsafe-inline',
+   que é o ideal de segurança.
+
+RECOMENDAÇÃO DE EVOLUÇÃO (mais segura)
+--------------------------------------
+- Migrar para um host que permita cabeçalhos HTTP (ex.: Cloudflare Pages,
+  Netlify, Vercel). Assim a CSP pode ser enviada como cabeçalho real e
+  reforçada com:
+    Strict-Transport-Security: max-age=31536000; includeSubDomains
+    X-Content-Type-Options: nosniff
+    Referrer-Policy: strict-origin-when-cross-origin
+    Permissions-Policy: camera=(self), geolocation=(self)
+    X-Frame-Options: SAMEORIGIN
+
+TESTE
+-----
+Após publicar, abra o app e verifique no Console (F12) se NÃO aparecem erros
+de "Refused to load/execute". Se algum recurso legítimo for bloqueado, adicione
+o domínio dele à diretiva correspondente.
+
+============================================================================
