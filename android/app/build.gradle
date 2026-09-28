@@ -1,0 +1,74 @@
+plugins { id 'com.android.application' }
+
+android {
+    namespace 'br.com.fastservicos.app'
+    compileSdk 35
+
+    defaultConfig {
+        minSdk 24
+        targetSdk 35
+        versionCode 40012
+        versionName '4.0.24'
+    }
+
+    signingConfigs {
+        release {
+            storeFile file(System.getenv('HOME') + '/.android/fast-release.jks')
+            storePassword System.getenv('FAST_ANDROID_STORE_PASSWORD')
+            keyAlias 'fast-apps'
+            keyPassword System.getenv('FAST_ANDROID_KEY_PASSWORD')
+        }
+    }
+
+    flavorDimensions += 'aplicativo'
+    productFlavors {
+        cliente {
+            dimension 'aplicativo'
+            applicationId 'br.com.fastservicos.cliente'
+            resValue 'string', 'app_name', 'Cliente FAST'
+            buildConfigField 'String', 'APP_URL', '"https://adaiascearataiana-gif.github.io/fastservicosapp/app-cliente/?source=android"'
+        }
+        motorista {
+            dimension 'aplicativo'
+            applicationId 'br.com.fastservicos.motorista'
+            resValue 'string', 'app_name', 'FAST Motorista'
+            buildConfigField 'String', 'APP_URL', '"https://adaiascearataiana-gif.github.io/fastservicosapp/app-motorista/?source=android"'
+        }
+        rotas {
+            dimension 'aplicativo'
+            applicationId 'br.com.fastservicos.rotasdodia'
+            resValue 'string', 'app_name', 'Rotas do Dia'
+            buildConfigField 'String', 'APP_URL', '"https://adaiascearataiana-gif.github.io/fastservicosapp/?exclusive=rotas-dia&atalho=rotasDia&source=android"'
+        }
+        despesas {
+            dimension 'aplicativo'
+            applicationId 'br.com.fastservicos.despesas'
+            resValue 'string', 'app_name', 'Despesas FAST'
+            buildConfigField 'String', 'APP_URL', '"https://adaiascearataiana-gif.github.io/fastservicosapp/?exclusive=despesas&atalho=despesas&source=android"'
+        }
+        fast {
+            dimension 'aplicativo'
+            applicationId 'br.com.fastservicos.app'
+            resValue 'string', 'app_name', 'FAST Servi\u00e7os'
+            buildConfigField 'String', 'APP_URL', '"https://adaiascearataiana-gif.github.io/fastservicosapp/?source=android"'
+        }
+        limpo {
+            dimension 'aplicativo'
+            applicationId 'br.com.fastservicos.limpo'
+            resValue 'string', 'app_name', 'FAST Limpo'
+            buildConfigField 'String', 'APP_URL', '"https://adaiascearataiana-gif.github.io/fastservicosapp/?edition=clean&source=android"'
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.release
+        }
+    }
+    buildFeatures { buildConfig true }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}

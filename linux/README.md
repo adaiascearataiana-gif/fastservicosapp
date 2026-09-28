@@ -1,0 +1,96 @@
+# FAST Serviços 3.0.0 para Windows e Linux
+
+Aplicativo desktop profissional sincronizado automaticamente com a mesma base da versão web 3.0.0. Inclui rotas, Rotas do Dia, clientes, destinos, despesas, equipe, RH, login por setor, dashboards, backups, Supabase, Google Drive, modo offline e atualização pelo GitHub.
+
+## Instalação rápida
+
+Requer Node.js 20+ e npm.
+
+```bash
+chmod +x scripts/install.sh scripts/configure.sh
+./scripts/install.sh
+```
+
+Os instaladores AppImage e DEB serão criados em `dist/`. Para testar antes de empacotar:
+
+```bash
+npm install
+npm start
+```
+
+### Como verificar a versão após instalar (r119)
+
+O script de instalação lê a versão do `package.json` e confere automaticamente se o pacote gerado contém a mesma marcação `fast-app-version`. Se quiser conferir manualmente em um pacote pronto:
+
+```bash
+# DEB: liste a versão do pacote instalado
+dpkg -s fast-servicos-linux | grep Version
+
+# AppImage: extraia e verifique a marcação interna
+./FAST-Servicos-Linux-x86_64.AppImage --appimage-extract > /dev/null 2>&1
+grep -ao 'fast-app-version" content="[^"]*"' squashfs-root/resources/app.asar 2>/dev/null || true
+```
+
+Após instalar, abra o FAST Serviços e confira o rodapé do menu: deve exibir **Versão 3.0.0**. O aplicativo também verifica atualizações automaticamente pelas **Releases do GitHub**.
+
+## Instalar um pacote pronto
+
+### Ubuntu, Debian, Linux Mint e derivados — recomendado
+
+```bash
+cd ~/Downloads
+sudo apt install ./FAST-Servicos-Linux-x64.deb
+```
+
+Depois, abra **FAST Serviços** pelo menu de aplicativos. Para remover:
+
+```bash
+sudo apt remove fast-servicos-desktop
+```
+
+### AppImage — não altera o sistema
+
+```bash
+cd ~/Downloads
+chmod +x FAST-Servicos-Linux-x86_64.AppImage
+./FAST-Servicos-Linux-x86_64.AppImage
+```
+
+Se o AppImage solicitar FUSE em Ubuntu/Debian:
+
+```bash
+sudo apt update
+sudo apt install libfuse2
+```
+
+### Windows 10/11
+
+Baixe `FAST-Servicos-Windows-x64-Instalador.exe` na Central de Downloads, execute o instalador e escolha a pasta. O atalho é criado no menu Iniciar e na Área de Trabalho.
+
+## Integrações seguras
+
+1. Copie `config.example.json` para o diretório de configuração exibido pelo aplicativo/script.
+2. Use somente a URL REST e a chave **anon pública** do Supabase. Nunca use `service_role` no cliente.
+3. No Google Cloud, crie um Client ID OAuth; o Drive é autorizado pelo próprio usuário.
+4. No GitHub, o aplicativo recebe atualizações por **Releases públicas**. `GH_TOKEN` é usado apenas no terminal ou GitHub Actions para publicar, nunca salvo no HTML.
+
+## Login por setor
+
+O app mantém os perfis Administrador, Atendimento e Entregador, com permissões configuráveis por área. O SQL em `supabase/r102_security.sql` prepara Administração, Atendimento, Logística, Financeiro, RH e Motorista usando Supabase Auth e RLS. Crie usuários no painel seguro do Supabase/servidor; não distribua chave administrativa ao aplicativo.
+
+## GitHub
+
+Crie uma tag como `v3.0.0`. Os workflows da raiz geram o instalador Windows, AppImage e DEB e publicam os arquivos na mesma Release do GitHub.
+
+## Segurança aplicada
+
+- `contextIsolation`, sandbox e `nodeIntegration` desativada na tela do app.
+- Navegação externa bloqueada e aberta no navegador padrão.
+- Permissões limitadas a câmera, localização, notificações e clipboard seguro.
+- Cofre local protegido por `safeStorage` do Linux.
+- Scanner impede empacotamento com tokens GitHub, `service_role` ou IDs HTML duplicados.
+- Atualização por Release assinada pelo fluxo do GitHub, sem token no cliente.
+
+## Migração de dados
+
+Antes de trocar de dispositivo, use **Fotos e Backups → Criar Ponto de Restauração/Backup**. O desktop usa armazenamento próprio e preserva checkpoints locais; para trazer dados exclusivos de outro navegador, importe o backup na primeira abertura ou conclua a sincronização pelo Supabase.
