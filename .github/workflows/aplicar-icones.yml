@@ -1,0 +1,28 @@
+name: Aplicar ícones oficiais
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  icones:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Instalar Pillow
+        run: pip install pillow
+      - name: Gerar todos os ícones a partir de icones-fonte/
+        run: python scripts/aplicar_icones.py
+      - name: Salvar no repositório
+        run: |
+          git config user.name "FAST Ícones"
+          git config user.email "fastservicoslog@gmail.com"
+          git add -A
+          if git diff --cached --quiet; then echo "Nada mudou."; exit 0; fi
+          git commit -m "Ícones oficiais aplicados (arte inteira, sem cortar)"
+          git push
