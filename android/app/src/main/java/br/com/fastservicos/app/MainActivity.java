@@ -2,6 +2,10 @@ package br.com.fastservicos.app;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.KeyguardManager;
+import android.hardware.biometrics.BiometricManager;
+import android.hardware.biometrics.BiometricPrompt;
+import android.os.CancellationSignal;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.graphics.Color;
@@ -98,10 +102,12 @@ public class MainActivity extends Activity {
         settings.setBuiltInZoomControls(false);
         settings.setDisplayZoomControls(false);
         settings.setTextZoom(100);
-        settings.setUserAgentString(settings.getUserAgentString() + " FASTAndroid/4.0.24");
+        settings.setUserAgentString(settings.getUserAgentString() + " FASTAndroid/4.0.65");
         CookieManager.getInstance().setAcceptCookie(true);
         CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
         webView.addJavascriptInterface(new VoiceBridge(), "FASTVoice");
+        // 4.0.65: biometria nativa do Android (digital / rosto / PIN do aparelho) para o app web.
+        webView.addJavascriptInterface(new BioBridge(), "FASTBiometria");
         webView.setWebViewClient(new WebViewClient() {
             @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 Uri uri = request.getUrl();
@@ -194,6 +200,67 @@ public class MainActivity extends Activity {
                 catch (ActivityNotFoundException e) { voiceError("unavailable"); }
             });
         }
+    }
+
+    // ------------------------------------------------------------------
+    // 4.0.65: BIOMETRIA NATIVA. O WebView do Android nao oferece WebAuthn, entao
+    // o app web chama window.FASTBiometria.autenticar(id, titulo) e recebe o
+    // resultado em window.fastNativeBioResult(id, ok, codigo).
+    // ------------------------------------------------------------------
+    private class BioBridge {
+        @JavascriptInterface public boolean disponivel() {
+            try {
+                if (Build.VERSION.SDK_INT < 28) return false;
+                if (Build.VERSION.SDK_INT >= 30) {
+                    BiometricManager bm = getSystemService(BiometricManager.class);
+                    if (bm != null && bm.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_WEAK
+                            | BiometricManager.Authenticators.DEVICE_CREDENTIAL) == BiometricManager.BIOMETRIC_SUCCESS) return true;
+                } else if (Build.VERSION.SDK_INT == 29) {
+                    BiometricManager bm = getSystemService(BiometricManager.class);
+                    if (bm != null && bm.canAuthenticate() == BiometricManager.BIOMETRIC_SUCCESS) return true;
+                }
+                KeyguardManager km = (KeyguardManager) getSystemService(KEYGUARD_SERVICE);
+                return km != null && km.isDeviceSecure();
+            } catch (Exception e) { return false; }
+        }
+        @JavascriptInterface public void autenticar(final String id, final String titulo) {
+            runOnUiThread(() -> bioAutenticar(id, titulo));
+        }
+    }
+
+    private void bioAutenticar(final String id, String titulo) {
+        if (Build.VERSION.SDK_INT < 28) { bioResultado(id, false, "unsupported"); return; }
+        try {
+            BiometricPrompt.Builder b = new BiometricPrompt.Builder(this)
+                    .setTitle(titulo == null || titulo.isEmpty() ? "Entrar no FAST" : titulo)
+                    .setSubtitle("Use a digital, o rosto ou o bloqueio de tela do aparelho");
+            if (Build.VERSION.SDK_INT >= 30) {
+                b.setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_WEAK
+                        | BiometricManager.Authenticators.DEVICE_CREDENTIAL);
+            } else if (Build.VERSION.SDK_INT == 29) {
+                b.setDeviceCredentialAllowed(true);
+            } else {
+                b.setNegativeButton("Cancelar", getMainExecutor(), (dialog, which) -> bioResultado(id, false, "cancelled"));
+            }
+            b.build().authenticate(new CancellationSignal(), getMainExecutor(), new BiometricPrompt.AuthenticationCallback() {
+                @Override public void onAuthenticationSucceeded(BiometricPrompt.AuthenticationResult result) {
+                    bioResultado(id, true, "ok");
+                }
+                @Override public void onAuthenticationError(int errorCode, CharSequence errString) {
+                    bioResultado(id, false, "error:" + errorCode);
+                }
+            });
+        } catch (Exception e) {
+            bioResultado(id, false, "exception");
+        }
+    }
+
+    private void bioResultado(final String id, final boolean ok, final String codigo) {
+        runOnUiThread(() -> {
+            if (webView == null) return;
+            webView.evaluateJavascript("window.fastNativeBioResult&&window.fastNativeBioResult("
+                    + JSONObject.quote(id) + "," + (ok ? "true" : "false") + "," + JSONObject.quote(codigo) + ")", null);
+        });
     }
 
     private void voiceError(String code) {

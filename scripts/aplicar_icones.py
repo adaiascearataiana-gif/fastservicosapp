@@ -85,7 +85,7 @@ if os.path.isdir(res_base):
                     continue
                 with Image.open(cam) as im:
                     w, h, modelo = im.size[0], im.size[1], im.copy()
-                if pasta.startswith('drawable') and arq.startswith('ic_launcher_foreground'):
+                if pasta.startswith('drawable') and 'foreground' in arq:  # ic_launcher_foreground, fast_despesas_foreground...
                     salvar(primeiro_plano(app, w), cam, modelo); trocados.append(cam)
                 elif pasta.startswith('mipmap'):
                     salvar(inteira(app, w, h), cam, modelo); trocados.append(cam)
