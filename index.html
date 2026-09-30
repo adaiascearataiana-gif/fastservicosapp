@@ -5963,7 +5963,18 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
       background: var(--card-bg); border-radius: var(--radius-lg);
       box-shadow: var(--shadow-lg); padding: 28px; width: 100%; max-width: 380px;
       text-align: center; animation: empPop 0.28s cubic-bezier(.34,1.56,.64,1);
+      position: relative;
     }
+    /* Botão X para fechar a caixa de login da Área Protegida */
+    .emp-pwd-close {
+      position: absolute; top: 12px; right: 12px;
+      width: 34px; height: 34px; border-radius: 50%;
+      border: none; cursor: pointer; z-index: 2;
+      background: var(--bg-soft); color: var(--text-muted);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px; transition: all 0.18s; user-select: none;
+    }
+    .emp-pwd-close:hover { background: var(--danger); color: #fff; transform: scale(1.06); }
     @keyframes empPop { from { opacity: 0; transform: scale(0.9) translateY(12px); } to { opacity: 1; transform: scale(1) translateY(0); } }
 
     .emp-pwd-box .emp-pwd-icon {
@@ -19279,7 +19290,16 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
         if (!item || fastEhConcluido(item, bancoDados.rotas || [])) return true;
         if (item.rotaId != null) {
           const rota = rotasPorIdData.get(String(item.rotaId));
-          if (rota && rota.data && String(rota.data) !== String(dataSel)) return false;
+          if (rota && rota.data && String(rota.data) !== String(dataSel)) {
+            // (fix) A barreira anti-cópia-no-dia-errado só pode ESCONDER este item
+            // se existir OUTRA cópia da MESMA rota no dia correto (rota.data).
+            // Antes escondia sempre — se esta fosse a única cópia, a rota recém
+            // inserida sumia de TODOS os dias (nem aqui, nem em rota.data). Agora,
+            // quando não há cópia no dia certo, mostramos aqui para não perder a rota.
+            const listaDiaCerto = (bancoDados.sequencias && bancoDados.sequencias[String(rota.data)]) || [];
+            const temCopiaNoDiaCerto = Array.isArray(listaDiaCerto) && listaDiaCerto.some(function(it){ return it && String(it.rotaId) === String(item.rotaId); });
+            if (temCopiaNoDiaCerto) return false;
+          }
         }
         if (item.agrupado && Array.isArray(item.rotasOriginais) && item.rotasOriginais.length) {
           // O grupo so pode aparecer se ao menos uma rota que ainda o compoe
@@ -22629,6 +22649,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
       let novoId = Date.now();
       const idsExistentes = new Set((bancoDados.rotas || []).map(r => String(r.id)));
       while (idsExistentes.has(String(novoId))) novoId++;
+      const _agora = new Date().toISOString();
       const novaRota = {
         id: novoId,
         cliente: cliente,
@@ -22641,7 +22662,12 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
         status: 'Pendente',
         statusExecucao: 'EM ROTA',
         valor: valor,
-        descricao: obs
+        descricao: obs,
+        // (fix) Carimbo de edição na criação: sem ele o merge tratava a rota nova
+        // como "mais antiga" (updatedAt=0) e uma cópia da nuvem podia re-datá-la,
+        // fazendo a rota do dia recém-criada sumir de todas as telas após o sync.
+        updatedAt: _agora,
+        statusUpdatedAt: _agora
       };
       if (!bancoDados.rotas) bancoDados.rotas = [];
       bancoDados.rotas.push(novaRota);
@@ -31706,9 +31732,10 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
   <!-- ============================================================
        OVERLAY: Acesso protegido aos Dados da Empresa + Banco de Dados (SQL/Supabase)
        ============================================================ -->
-  <div id="empOverlay" class="emp-overlay" role="dialog" aria-modal="true" aria-label="Dados da Empresa e Banco de Dados protegidos">
+  <div id="empOverlay" class="emp-overlay" role="dialog" aria-modal="true" aria-label="Dados da Empresa e Banco de Dados protegidos" onclick="if(event.target===this) fecharEmpOverlay()">
     <!-- Caixa de senha (criar/entrar) -->
     <div id="empPwdBox" class="emp-pwd-box" style="display: none;">
+      <button type="button" class="emp-pwd-close ripple" onclick="fecharEmpOverlay()" aria-label="Fechar" style="user-select: none;"><i class="fa-solid fa-xmark"></i></button>
       <div class="emp-pwd-icon"><i class="fa-solid fa-lock"></i></div>
       <h3 id="empPwdTitulo">Acesso à Área Protegida</h3>
       <p id="empPwdTexto">Digite a senha de acesso (a mesma da Segurança de Acesso) para visualizar os dados da empresa.</p>
