@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="fast-linux-desktop" data-fast-version="4.0.65" data-fast-enter-navigation="1"><head>
+<html lang="pt-BR" class="fast-linux-desktop" data-fast-version="4.0.66" data-fast-enter-navigation="1"><head>
 <script id="fast-4065-bio-nativa">
-/* 4.0.65: ponte para a biometria NATIVA do Android (APK). No WebView do APK o
+/* 4.0.66: ponte para a biometria NATIVA do Android (APK). No WebView do APK o
    WebAuthn não existe; o APK expõe window.FASTBiometria e o app usa a digital/rosto
    do próprio Android. No navegador continua valendo o WebAuthn. */
 (function(){
@@ -19,7 +19,7 @@
 })();
 </script>
 <script id="fast-4058-sessao-principal">
-/* 4.0.65: um login interno com o e-mail da conta principal "sequestrava" a entrada
+/* 4.0.66: um login interno com o e-mail da conta principal "sequestrava" a entrada
    (perfil Atendimento, menu reduzido e sem sincronizar). Remove essa sessão antes
    de qualquer outro script do app ler. */
 (function(){try{
@@ -51,14 +51,14 @@
   <meta name="fast-github-branch" content="main">
   <meta name="fast-github-path" content="index.html">
   <meta name="fast-github-token-env" content="GH_TOKEN">
-  <meta name="fast-app-version" content="4.0.65">
+  <meta name="fast-app-version" content="4.0.66">
   <script id="fast-version-source-of-truth">try{var __m=document.querySelector('meta[name="fast-app-version"]');if(__m)document.documentElement.setAttribute("data-fast-version",__m.content)}catch(e){}</script>
   <meta name="fast-app-date" content="2026-09-27T22:40:00-03:00">
-  <meta name="fast-latest-update" content="4.0.65: biometria (digital/rosto) também no app instalado pelo APK, e nos apps Cliente e Motorista.">
+  <meta name="fast-latest-update" content="4.0.66: tabelas com quantidade de linhas à escolha, Rotas do Dia sincronizando na hora entre aparelhos, edição de rota em janela própria, câmera mais rápida, senha única e Unificar.">
   <!-- r92: verificação automática de nova versão ao abrir; Verificar Atualizações com cache-busting e sem fallback no-cors inválido. -->
   <!-- r70.1: lista corrente no HTML inicial; o painel não espera scripts tardios -->
   <meta name="fast-app-changelog-immediate" content="4.0.37">
-  <meta name="fast-app-changelog" content="[{&quot;app&quot;: &quot;geral&quot;, &quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;4.0.65 (29/09/2026): login por biometria no app instalado pelo APK, usando a digital, o rosto ou o bloqueio de tela do próprio Android (antes aparecia não suportado). Os apps Cliente FAST e FAST Motorista também ganharam entrada com a digital.&quot;}, {&quot;app&quot;: &quot;geral&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.64 (29/09/2026): o app baixava o banco de dados inteiro a cada 10 segundos (e mais uma vez a cada 30), o que estourou o limite de tráfego do plano gratuito do Supabase. Agora sincroniza a cada 5 minutos, ao abrir ou voltar ao app e depois de salvar, e não sincroniza com o app em segundo plano.&quot;}, {&quot;app&quot;: &quot;rotas&quot;, &quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;4.0.63 (29/09/2026): nova coluna Imagem na tabela de Rotas e no Relatório Geral: ❌ sem foto, ✅ com foto e, embaixo, o nome do arquivo exatamente como veio do celular. Na edição da rota, os botões Salvar e Cancelar ficam sempre visíveis no rodapé. Filtros de Busca de Rotas e do Relatório ganharam Origem, Destino e Tipo de Volume. As caixas de seleção das tabelas não se desmarcam mais sozinhas quando a tela atualiza.&quot;}, {&quot;app&quot;: &quot;geral&quot;, &quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;4.0.62 (29/09/2026): ícones sempre inteiros, sem cortar, na tela de login, na Central de Downloads e no diálogo de instalação (o modo que recortava a imagem foi desligado).&quot;}, {&quot;app&quot;: &quot;geral&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.62 (29/09/2026): o app parou de abrir a tela de login do Google sozinho (ela aparecia a cada toque/minutos, principalmente no APK, e interrompia a câmera ao vivo). A renovação automática agora é só pela conexão permanente; sem ela, basta tocar em Conectar quando quiser enviar fotos.&quot;}, {&quot;app&quot;: &quot;rotas&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.61 (29/09/2026): Rotas do Dia — ao escolher o cliente, o formulário puxa origem, destino, quantidade, observação, motorista e o último valor, procurando também nas Rotas do Dia anteriores e tolerando diferenças de acento, pontuação e espaço no nome. A pré-visualização acompanha a digitação.&quot;}, {&quot;app&quot;: &quot;despesas&quot;, &quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;4.0.60 (29/09/2026): novo ícone do app Despesas (recibo, calculadora e categorias), no instalador, na tela de acesso e na Central de Downloads.&quot;}, {&quot;app&quot;: &quot;rotas&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.59 (29/09/2026): encontrada a causa do espaço em branco: um arquivo antigo (table-viewport.js) esticava as tabelas até o fim da tela a cada rolagem ou toque e brigava com o ajuste de altura, fazendo a tabela pular e o toque no Pendente/Recebido falhar. Ele foi desligado.&quot;}, {&quot;app&quot;: &quot;geral&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.58 (29/09/2026): um login interno cadastrado com o mesmo e-mail da conta principal fazia o app entrar com perfil Atendimento (menu reduzido e sem sincronizar). O e-mail da conta principal agora sempre entra pela conta principal.&quot;}, {&quot;app&quot;: &quot;despesas&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.57 (28/09/2026): a caixa de seleção das tabelas de Despesas, Despesas da Empresa e RH aparecia gigante e empurrava os botões para baixo. Agora fica pequena, na mesma linha dos botões Editar e Excluir.&quot;}, {&quot;app&quot;: &quot;rotas&quot;, &quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;4.0.56 (28/09/2026): rolagem da tela de edição de rota mais lisa e rápida (sem desfoque pesado no fundo, um único rolador e toques de arrasto que não seguram mais a rolagem).&quot;}, {&quot;app&quot;: &quot;rotas&quot;, &quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;4.0.56 (28/09/2026): caixa Inserir na Rota do Dia ao criar ou editar uma rota. Marcada, a rota entra (ou é atualizada) na Rota do Dia da data escolhida.&quot;}, {&quot;app&quot;: &quot;rotas&quot;, &quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;4.0.55 (28/09/2026): o Valor total volta a apenas somar as rotas e continua editável; editar o total não altera o valor de cada rota.&quot;}, {&quot;app&quot;: &quot;rotas&quot;, &quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;4.0.54 (28/09/2026): o campo Valor total volta a ser editável. Ao mudar o total, ele é dividido entre as rotas mantendo a proporção de cada uma (sem perder centavos).&quot;}, {&quot;app&quot;: &quot;rotas&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.53 (28/09/2026): botão Selecionar imagem agora abre a galeria do mesmo jeito das Rotas do Dia; o nome do arquivo aparece embaixo da rota e a imagem fica registrada na hora (Cancelar desfaz). A renovação do Google Drive não interrompe mais a escolha de arquivos.&quot;}, {&quot;app&quot;: &quot;geral&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.52 (28/09/2026): rede de segurança das exclusões. Antes de mostrar, salvar ou depois de sincronizar, o app remove tudo que está na lista de excluídos, venha de onde vier. As despesas excluídas agora também vão para a nuvem, então não voltam de outro aparelho.&quot;}, {&quot;app&quot;: &quot;lugares&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.51 (28/09/2026): lugares e clientes excluídos voltavam quando o nome começava com símbolo (ex.: *RETIRADA*) ou terminava com ponto. A comparação com a lista de excluídos foi corrigida e as exclusões antigas passam a valer.&quot;}, {&quot;app&quot;: &quot;geral&quot;, &quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;4.0.50 (28/09/2026): conexão permanente do Google Drive pelo Supabase. A autorização de longa duração fica guardada no servidor e o app renova o acesso sozinho, sem janela do Google e sem pedir para conectar de novo.&quot;}, {&quot;app&quot;: &quot;rotas&quot;, &quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;4.0.49 (28/09/2026): removida a opção Valor por rota. Igual às Rotas do Dia, cada destino adicionado ganha seu próprio valor (repetindo o da rota anterior) e o campo Valor passa a mostrar a soma de todas.&quot;}, {&quot;app&quot;: &quot;rotas&quot;, &quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;4.0.49 (28/09/2026): botão Imagens abaixo da Descrição para escolher imagens de cada rota; ao salvar, elas vão para o Google Drive na mesma estrutura das Rotas do Dia (dia, cliente, lugar).&quot;}, {&quot;app&quot;: &quot;geral&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.49 (28/09/2026): Google Drive renova a conexão sozinho no uso do app, sem pedir para conectar de novo.&quot;}, {&quot;app&quot;: &quot;geral&quot;, &quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;4.0.48 (28/09/2026): ao unificar clientes, lugares, motoristas ou funcionários, tudo vira um só: histórico de rotas, quantidades e valores são somados (salário e benefícios do RH não são somados).&quot;}, {&quot;app&quot;: &quot;rotas&quot;, &quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;4.0.48 (28/09/2026): ao escolher o cliente, o formulário puxa tudo da última rota (origem, destinos, tipo, volumes, pagamento e valor). Ao clicar em Adicionar Destino aparece a opção Valor por rota: marcada, cada rota recebe o valor digitado; desmarcada, o valor é dividido entre as rotas.&quot;}, {&quot;app&quot;: &quot;geral&quot;, &quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;4.0.47 (28/09/2026): todas as tabelas e listas (Rotas, Relatório, Rotas do Dia, Clientes, Lugares, Motoristas, Despesas, Despesas da Empresa, RH) com filtro por letra, 10 itens por página e Anterior/Próxima, sem espaço em branco.&quot;}, {&quot;app&quot;: &quot;geral&quot;, &quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;4.0.47 (28/09/2026): ao marcar 2 ou mais itens, o balão mostra Unificar (clientes, lugares, motoristas, rotas, despesas e RH), com escolha do nome final ou de um novo nome. O antigo botão Unificar Duplicados de Clientes foi removido.&quot;}, {&quot;app&quot;: &quot;geral&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.47 (28/09/2026): segurança — o arquivo publicado não leva mais nomes de clientes, rotas, lugares e despesas; despesas excluídas não voltam mais após sincronizar.&quot;}, {&quot;app&quot;: &quot;rotas&quot;, &quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;4.0.46 (27/09/2026): tabela de Rotas e Relatório Geral travadas em 10 rotas por página, com altura exata das linhas e sem espaço em branco.&quot;}, {&quot;app&quot;: &quot;geral&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.46 (27/09/2026): sincronização automática passou de 3 em 3 segundos para 30 em 30 segundos, deixando o app mais leve.&quot;}, {&quot;app&quot;: &quot;geral&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.46 (27/09/2026): segurança — removido script externo de terceiros e textos das rotas passam a ser tratados antes de exibir.&quot;}, {&quot;app&quot;: &quot;rotas&quot;, &quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;4.0.45 (27/09/2026): tabela principal da aba Rotas com Visualizar 10, 20, 30 ou 50 rotas e navegação Anterior/Próxima; marcar todos só marca as rotas da página visível.&quot;}, {&quot;app&quot;: &quot;rotas&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.45 (27/09/2026): relatório geral de rotas sem o espaço em branco abaixo da última linha; a tabela ocupa no máximo a altura livre da tela, terminando logo acima da barra inferior.&quot;}, {&quot;app&quot;: &quot;rotas&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.44 (27/09/2026): removido o espaço em branco abaixo da tabela do relatório geral de rotas; a área da tabela agora termina na última linha e volta ao topo ao trocar de página.&quot;}, {&quot;app&quot;: &quot;rotas&quot;, &quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;4.0.43 (27/09/2026): filtros da aba Rotas reorganizados em pares no celular — cliente ao lado do status da rota, data inicial ao lado da data final, tipo de volume ao lado do status de pagamento — nos dois cards (tabela e relatório).&quot;}, {&quot;app&quot;: &quot;fast&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.43 (27/09/2026): o aviso inicial mostrava 4.0.36 mesmo com o app em outra versão; agora a versão exibida em todo o app é lida da meta tag única.&quot;}, {&quot;app&quot;: &quot;rotas&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.42 (27/09/2026): relatório geral de rotas aparecia espremido (30px) e fora da aba ROTAS; agora aparece completo, com visualização de 10 a 50 rotas.&quot;}, {&quot;app&quot;: &quot;fast&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.37 (27/09/2026): corrigido um erro fatal de JavaScript (um &lt;script&gt; escrito dentro de um texto de impress\u00e3o de comprovante quebrava o parser da p\u00e1gina) que fazia c\u00f3digo aparecer vis\u00edvel na tela e travava o script que mant\u00e9m a vers\u00e3o sincronizada em todos os cantos do app.&quot;}, {&quot;app&quot;: &quot;fast&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.37 (27/09/2026): bal\u00e3o \u2018FAST SERVI\u00c7OS / OPERA\u00c7\u00c3O SU\u00cdTE\u2019 reposicionado \u2014 antes ficava fixo sobre o conte\u00fado da tela; agora fica no canto inferior direito, sem sobrepor nada.&quot;}, {&quot;app&quot;: &quot;fast&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.37 (27/09/2026): vers\u00e3o exibida na barra lateral agora acompanha a vers\u00e3o real do app (antes ficava presa em n\u00fameros antigos).&quot;}, {&quot;app&quot;: &quot;fast&quot;, &quot;type&quot;: &quot;removido&quot;, &quot;text&quot;: &quot;4.0.37 (27/09/2026): Comprovante de Entrega desativado da interface a pedido \u2014 c\u00f3digo mantido, pronto para reativar.&quot;}, {&quot;app&quot;: &quot;rotas&quot;, &quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;4.0.37 (27/09/2026): relat\u00f3rio geral de rotas com pagina\u00e7\u00e3o (10 a 50) e bot\u00e3o para sincronizar com o Google Planilhas.&quot;}, {&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;r87 (03/09/2026): Área Protegida dividida em seis abas temáticas: Empresa, Usuários e Acessos, Fotos e Backups, Banco de Dados, Publicação e Ajuda SQL.&quot;},{&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;r87 (03/09/2026): logins de funcionários, permissões e biometria foram reunidos em Usuários e Acessos, separados do cadastro empresarial.&quot;},{&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;r87 (03/09/2026): segurança, armazenamento de fotos, Google Drive, backup e restauração agora ficam na aba Fotos e Backups.&quot;},{&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;r87 (03/09/2026): publicação no GitHub ganhou aba própria; Banco de Dados ficou focado no Supabase e o guia técnico foi renomeado para Ajuda SQL.&quot;},{&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;r70: Fechamento diário automático e painel de rentabilidade por cliente, destino, motorista e rota.&quot;},{&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;r70: Alertas de pagamentos pendentes aparecem exclusivamente no sino de notificações.&quot;},{&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;r70: Usuários vinculados ao RH, perfis Administrador, Atendimento e Entregador, senhas PBKDF2 e revogação de sessões preparada.&quot;},{&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;r70: Registro de auditoria identifica quem criou, alterou, excluiu ou acessou itens do aplicativo.&quot;},{&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;r70: Lixeira preserva rotas e referências das fotos para recuperação; biometria mantida na Área Protegida.&quot;},{&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;r70: Leitura de nome do cliente e endereço pela câmera com OCR e confirmação humana.&quot;},{&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;r70: Alertas de proximidade do destino e geofence revisados para acompanhamento da entrega.&quot;},{&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;r70: Logo oficial aplicada ao ícone Android e tela de login redimensionada; atalhos Android para Rotas do Dia e Despesas.&quot;},{&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;r70: Android, Windows e Linux usam a mesma PWA responsiva e recebem as próximas versões pelo endereço oficial, sem substituir o armazenamento local.&quot;},{&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;r70: Backup de fotos, fila offline, Google Drive, comprovante, modo entregador e histórico do cliente preparados.&quot;},{&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;r70: API do WhatsApp permanece suspensa e desativada até configuração posterior do backend seguro.&quot;},{&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;r70: Check-up geral de sintaxe, armazenamento, navegação, segurança e compatibilidade executado antes da publicação.&quot;},{&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;r91 (03/09/2026): botão Verificar Atualizações corrigido e exportado para funcionar também nos handlers inline e Android/PWA.&quot;},{&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;r91 (03/09/2026): removidos da interface o botão Assistente IA da barra superior e o selo IA dos anexos, mantendo os recursos internos sem ocupar espaço na tela.&quot;},{&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;r91 (03/09/2026): Central de Notificações ampliada com controles separados para atualizações, sincronização, rotas, despesas, rastreamento, câmera/QR e instalação.&quot;},{&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;r91 (03/09/2026): o controle de notificações agora classifica também os balões por assunto, permitindo desligar apenas a categoria desejada.&quot;},{&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;r89 (03/09/2026): criada a Central de Notificações com controle geral, Marcar tudo, Desmarcar tudo e opções individuais para balões, sino e dispositivo.&quot;},{&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;r89 (03/09/2026): o gerenciamento pode ser aberto por Configurações, pelo menu principal e pelo link Gerenciar dentro do sino.&quot;},{&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;r89 (03/09/2026): balões de operação, avisos e erros ficam silenciosos por padrão; processos, sincronização e backups continuam em segundo plano.&quot;},{&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;r89 (03/09/2026): corrigida a falha fastObterUltimasAtualizacoes is not defined que gerava vários balões vermelhos repetidos.&quot;},{&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;r89 (03/09/2026): Manter conectado não cancela mais a revalidação automática; quando o gate aparece, a biometria tem prioridade e a sessão persistente só é restaurada após a digital.&quot;},{&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;r89 (03/09/2026): o painel flutuante de clientes com várias rotas não reaparece mais após cada ação; ele fica desligado por padrão e pode ser controlado nas notificações.&quot;},{&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;r89 (03/09/2026): Despesas agora oferece PIX e À Vista entre as formas de pagamento.&quot;},{&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;r89 (03/09/2026): os totalizadores financeiros do Dashboard podem ser filtrados por hoje, mês, ano, todo o período ou intervalo personalizado.&quot;},{&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;r88 (03/09/2026): ao aparecer o gate depois de sair ou voltar ao aplicativo, o pedido nativo de biometria abre automaticamente, sem tocar no botão.&quot;},{&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;r88 (03/09/2026): o campo de senha não recebe mais foco automático quando existe biometria cadastrada, evitando que o teclado do Android interrompa o prompt biométrico.&quot;},{&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;r88 (03/09/2026): o disparo aguarda somente a primeira pintura visível do gate, impede pedidos duplicados e continua respeitando os tempos Imediatamente, 1, 2 ou 5 minutos.&quot;},{&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;r86 (03/09/2026): removido do painel o acúmulo de registros das versões anteriores. Agora somente as mudanças da versão instalada são exibidas.&quot;},{&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;r86 (03/09/2026): cada alteração da revisão passa a ser descrita separadamente e qualificada como Novo, Melhorado ou Corrigido, deixando claro o que realmente mudou.&quot;},{&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;r86 (03/09/2026): painel de Configurações e aviso de nova versão usam a mesma lista da revisão atual; o contador acompanha somente os itens dessa revisão.&quot;},{&quot;app&quot;:&quot;fast&quot;,&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;4.0.34 (26/09/2026): a tela ROTAS ganhou galeria de fotos ao editar a rota (ideal para rotas lancadas avulsas, fora das Rotas do Dia); os icones do Despesas (vermelho) e Rotas do Dia (azul) foram atualizados com as artes enviadas; e as bordas neon de cada aplicativo ficaram mais vivas, com a cor propria de cada um.&quot;},{&quot;app&quot;:&quot;fast&quot;,&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;4.0.34 (26/09/2026): a tela E-mail Brevo ficou mais clara e guiada — mostra um checklist de 4 passos (e-mails do aplicativo, configuração salva, Supabase Auth e endereço de retorno), traz o passo a passo do Supabase escrito na própria tela, botão Testar envio real e o indicador de saúde não fica mais vermelho só porque ainda não foi configurado (agora mostra Pendente em amarelo).&quot;},{&quot;app&quot;:&quot;fast&quot;,&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;4.0.32 (26/09/2026): corrigido o valor que virava xxxx,xx ao editar despesas e rotas; restaurada a pré-visualização de nomes/lugares/descrição nas despesas; rotas do dia puxam os dados da última rota do cliente; o app principal agora mostra somente login e senha (sem pedir para criar senha); eliminado o flash repetido do login da Google; e corrigido um erro fatal de JavaScript que quebrava o motor do app.&quot;},{&quot;app&quot;:&quot;fast&quot;,&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;4.0.27 (25/09/2026): Central de Downloads recebeu as artes oficiais; FAST e FAST LIMPO usam a imagem amarela do FAST; Windows, Linux, Despesas, Cliente FAST e Motorista FAST receberam imagens próprias; Windows/Linux acompanham a atualização online em tempo real.&quot;},{&quot;app&quot;:&quot;fast&quot;,&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;4.0.24 (25/09/2026): migração de segurança preparada; o acesso administrativo fixo foi removido e a autenticação segura passa pelo Supabase Auth.&quot;},{&quot;app&quot;:&quot;fast&quot;,&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;4.0.23 (25/09/2026): corrigido o problema em que o aplicativo voltava para a versao 4.0.17 e nao conseguia atualizar na plataforma; a versao exibida agora permanece sempre a mais recente e a atualizacao e aplicada de verdade.&quot;},{&quot;app&quot;:&quot;fast&quot;,&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;4.0.22 (25/09/2026): corrigido de vez o flash ao abrir o app — o código-fonte estava salvo com a aba Configurações já marcada como ativa e a Área Protegida já marcada como visível desde o primeiro instante da página (antes do JavaScript rodar); por isso elas apareciam na tela por uma fração de segundo antes do app te levar de volta pra Central. Agora a página principal já começa ativa e a Área Protegida começa fechada, sem flash nenhum.&quot;},{&quot;app&quot;:&quot;rotas&quot;,&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;4.0.22 (25/09/2026): mesmo ajuste aplicado em Rotas do Dia — o app abre direto na tela certa, sem passar por Configurações antes.&quot;},{&quot;app&quot;:&quot;rotas&quot;,&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;4.0.21 (24/09/2026): em Rotas do Dia e Despesas, se a atualização automática falhar, o app não mostra mais nenhum alerta nem recarrega de novo sozinho — fica em silêncio total, como já devia ser.&quot;},{&quot;app&quot;:&quot;fast&quot;,&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;4.0.20 (24/09/2026): Google Drive não pede mais para reconectar toda hora — a reconexão silenciosa ficou mais forte (janela de 20 min, tentativa a cada 2 min) e o app reconecta sozinho ao voltar o foco, ao recuperar a internet e quando a autorização expira.&quot;},{&quot;app&quot;:&quot;fast&quot;,&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;4.0.20 (24/09/2026): rotas e lugares excluídos ou editados não voltam mais em segundos — as exclusões de rotas, sequências e fotos agora são gravadas na nuvem (lápides sincronizadas) e respeitadas em todos os aparelhos.&quot;},{&quot;app&quot;:&quot;fast&quot;,&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;4.0.20 (24/09/2026): sincronização em segundos — a busca na nuvem passou a rodar a cada 3 segundos, o envio automático a cada 10 segundos e o disparo por edição em 200 ms, mantendo os dados sempre atualizados sem perda.&quot;},{&quot;app&quot;:&quot;fast&quot;,&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;4.0.20 (24/09/2026): indicador 100% sincronizado na barra fixa — ao lado de Online aparece a luz verde com o rótulo 100% e ícone de confirmado quando tudo está salvo na nuvem; amarelo mostra Sincronizando e vermelho mostra Sem conexão.&quot;},{&quot;app&quot;:&quot;fast&quot;,&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;4.0.20 (24/09/2026): a luz amarela ao lado de Online agora tem identificação — mostra o texto do estado (Sincronizando), ícone próprio e dica ao passar o mouse, em vez de ficar sem rótulo.&quot;},{&quot;app&quot;:&quot;fast&quot;,&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;4.0.19 (24/09/2026): navegação por teclado nas listas de sugestões — nos campos com pré-visualização de nomes (cliente, origem, despesa, filtro) use as setas ↑/↓ para subir e descer e Enter para escolher no desktop.&quot;},{&quot;app&quot;:&quot;fast&quot;,&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;4.0.19 (24/09/2026): logo oficial no menu lateral do desktop, no lugar do ícone antigo, com o número da versão logo abaixo do nome.&quot;},{&quot;app&quot;:&quot;fast&quot;,&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;4.0.18 (24/09/2026): corrigido o sumiço de clientes na sincronização — um cliente cujo nome chegasse vazio num momento ruim do sync era descartado para sempre; agora ele é preservado pelo ID em vez de apagado.&quot;},{&quot;app&quot;:&quot;fast&quot;,&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;4.0.17 (23/09/2026): câmera em tempo real muito mais nítida — a foto agora é salva em alta resolução (1920px) em vez de 720px, e o preview usa a resolução máxima do aparelho.&quot;},{&quot;app&quot;:&quot;fast&quot;,&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;4.0.17 (23/09/2026): Google Drive reconecta sozinho ao abrir o app, sem ficar pedindo autorização toda hora.&quot;},{&quot;app&quot;:&quot;fast&quot;,&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;4.0.17 (23/09/2026): removidas as telas que ficavam piscando — o box de novidades e a tela de configurações não aparecem mais sozinhos.&quot;},{&quot;app&quot;:&quot;rotas&quot;,&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;4.0.17 (23/09/2026): botão Salvar Rota/Despesa funciona no primeiro toque, mesmo com o teclado aberto, sem descer a tela.&quot;},{&quot;app&quot;:&quot;rotas&quot;,&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;4.0.17 (23/09/2026): balão de seleção não fica mais travado à esquerda; aparece centralizado com Agrupar, Excluir e Enviar Fotos.&quot;},{&quot;app&quot;:&quot;despesas&quot;,&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;4.0.17 (23/09/2026): bordas do app Despesas arredondadas e mais bonitas.&quot;},{&quot;app&quot;:&quot;fast&quot;,&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;4.0.14 (23/09/2026): corrigido o loop de atualização — o app se reportava sempre como 4.0.10 e por isso avisava “nova versão” sem nunca conseguir atualizar; agora a versão exibida e a versão online ficam iguais e a atualização é aplicada de verdade.&quot;},{&quot;app&quot;:&quot;fast&quot;,&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;4.0.14 (23/09/2026): versão unificada em todas as telas, manifesto, service worker e instaladores para evitar divergência de versão.&quot;},{&quot;app&quot;:&quot;fast&quot;,&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;4.0.10 (22/09/2026): versão exibida no FAST e nos aplicativos corrigida; cache e instaladores sincronizados para que a atualização apareça após instalar.&quot;},{&quot;app&quot;:&quot;cliente&quot;,&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;4.0.10 (22/09/2026): versão exibida no login e atualização do Cliente sincronizada com o instalador.&quot;},{&quot;app&quot;:&quot;motorista&quot;,&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;4.0.10 (22/09/2026): versão exibida no login e atualização do Motorista sincronizada com o instalador.&quot;},{&quot;app&quot;:&quot;rotas&quot;,&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;4.0.10 (22/09/2026): versão exibida e cache de Rotas do Dia sincronizados com o instalador.&quot;},{&quot;app&quot;:&quot;despesas&quot;,&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;4.0.10 (22/09/2026): versão exibida e cache de Despesas sincronizados com o instalador.&quot;},{&quot;app&quot;:&quot;despesas&quot;,&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;4.0.8 (21/09/2026): Despesas recebeu a nova identidade vermelha no ícone Android e no gate, preenchendo toda a área visível sem margens.&quot;},{&quot;app&quot;:&quot;rotas&quot;,&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;4.0.8 (21/09/2026): Rotas do Dia recebeu a nova identidade azul no ícone Android e no gate, preenchendo toda a área visível sem margens.&quot;},{&quot;app&quot;:&quot;cliente&quot;,&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;4.0.8 (21/09/2026): Cliente FAST recebeu a nova identidade verde no ícone Android e no gate, preenchendo toda a área visível sem margens.&quot;},{&quot;app&quot;:&quot;motorista&quot;,&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;4.0.8 (21/09/2026): Motorista FAST recebeu a nova identidade cinza no ícone Android e no gate, preenchendo toda a área visível sem margens.&quot;},{&quot;app&quot;:&quot;fast&quot;,&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;4.0.7 (21/09/2026): o sino do FAST detecta novos cadastros de Cliente e Motorista, mantém o aviso pendente e abre diretamente a seção correta ao tocar.&quot;},{&quot;app&quot;:&quot;motorista&quot;,&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;4.0.6 (21/09/2026): cadastro do Motorista foi dividido em Dados pessoais, Dados da CNH e Dados do veículo, com endereço completo e documentos adicionais.&quot;},{&quot;app&quot;:&quot;motorista&quot;,&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;4.0.6 (21/09/2026): foto pessoal, comprovante de residência, motorista com CNH, CNH e CRLV exigem análise de nitidez, confirmação ou remoção antes do cadastro.&quot;},{&quot;app&quot;:&quot;motorista&quot;,&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;4.0.6 (21/09/2026): comprovante, CNH e CRLV recebem leitura assistida para preencher endereço e dados dos documentos; arquivos aprovados entram na fila protegida do Google Drive.&quot;},{&quot;app&quot;:&quot;fast&quot;,&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;4.0.6 (21/09/2026): a área Motoristas do FAST passou a exibir dados do veículo e os documentos recebidos no cadastro para consulta do administrador.&quot;},{&quot;app&quot;:&quot;cliente&quot;,&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;4.0.6 (21/09/2026): confirmação e recuperação continuam retornando às páginas oficiais do Cliente FAST, com mensagem clara de conta confirmada e redefinição segura.&quot;},{&quot;app&quot;:&quot;cliente&quot;,&quot;type&quot;:&quot;seguranca&quot;,&quot;text&quot;:&quot;4.0.6 (21/09/2026): o Cliente FAST verifica atualizações antes e depois do login e bloqueia o uso quando uma versão obrigatória estiver disponível.&quot;},{&quot;app&quot;:&quot;cliente&quot;,&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;4.0.6 (21/09/2026): atualização obrigatória mostra progresso, tenta novamente após falha de internet e preserva cadastro, sessão, preferências e dados locais.&quot;},{&quot;app&quot;:&quot;motorista&quot;,&quot;type&quot;:&quot;seguranca&quot;,&quot;text&quot;:&quot;4.0.6 (21/09/2026): o FAST Motorista verifica atualizações antes e depois do login e bloqueia o uso quando uma versão obrigatória estiver disponível.&quot;},{&quot;app&quot;:&quot;motorista&quot;,&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;4.0.6 (21/09/2026): atualização obrigatória mostra progresso e preserva cadastro, preferências, fotos e operações pendentes.&quot;},{&quot;app&quot;:&quot;fast&quot;,&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;4.0.6 (21/09/2026): Cliente e Motorista passam a exigir a versão mais recente independentemente do estado de autenticação.&quot;},{&quot;app&quot;:&quot;motorista&quot;,&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;4.0.5 (21/09/2026): o cadastro do Motorista aceita corretamente nomes e textos com acentos e caracteres Unicode, preservando minúsculas em login, e-mail e senha.&quot;},{&quot;app&quot;:&quot;motorista&quot;,&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;4.0.5 (21/09/2026): cadastro ganhou visualizar senha, repetir senha e validação visual de maiúscula, minúscula, caractere especial e mínimo de 8 caracteres.&quot;},{&quot;app&quot;:&quot;motorista&quot;,&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;4.0.5 (21/09/2026): cadastro não depende mais do cofre provisório antes da confirmação do e-mail; os dados pendentes são sincronizados com segurança após o primeiro login confirmado.&quot;},{&quot;app&quot;:&quot;motorista&quot;,&quot;type&quot;:&quot;removido&quot;,&quot;text&quot;:&quot;4.0.5 (21/09/2026): removidos os avisos de registro facial preparado e de criação da própria conta.&quot;},{&quot;app&quot;:&quot;cliente&quot;,&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;4.0.5 (21/09/2026): Número fica ao lado de Endereço e Complemento aparece logo abaixo no cadastro do Cliente.&quot;},{&quot;app&quot;:&quot;cliente&quot;,&quot;type&quot;:&quot;removido&quot;,&quot;text&quot;:&quot;4.0.5 (21/09/2026): removido o aviso de validação facial reservada.&quot;},{&quot;app&quot;:&quot;fast&quot;,&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;4.0.5 (21/09/2026): links de confirmação de Cliente e Motorista retornam para a página correta do aplicativo, eliminando o erro 404 do GitHub Pages.&quot;},{&quot;app&quot;:&quot;despesas&quot;,&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;4.0.5 (21/09/2026): tabela de Despesas ocupa a área útil até o limite da tela, mantém rolagem interna e centraliza os títulos das colunas.&quot;},{&quot;app&quot;:&quot;fast&quot;,&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;4.0.4 (21/09/2026): a Central de Downloads deixou de entregar APKs antigos armazenados no site e agora baixa sempre a compilação Android mais recente publicada.&quot;},{&quot;app&quot;:&quot;fast&quot;,&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;4.0.4 (21/09/2026): os ícones Android receberam um novo identificador interno para impedir que o lançador do aparelho reutilize o ícone antigo em cache.&quot;},{&quot;app&quot;:&quot;rotas&quot;,&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;4.0.4 (21/09/2026): o APK Rotas do Dia passa a instalar e atualizar com o ícone azul próprio.&quot;},{&quot;app&quot;:&quot;despesas&quot;,&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;4.0.4 (21/09/2026): o APK Despesas passa a instalar e atualizar com o ícone vermelho próprio.&quot;},{&quot;app&quot;:&quot;cliente&quot;,&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;4.0.4 (21/09/2026): o APK Cliente FAST passa a instalar e atualizar com o ícone verde próprio.&quot;},{&quot;app&quot;:&quot;motorista&quot;,&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;4.0.4 (21/09/2026): o APK FAST Motorista passa a instalar e atualizar com o ícone cinza próprio.&quot;},{&quot;app&quot;:&quot;fast&quot;,&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;4.0.3 (21/09/2026): a Central de Downloads fica disponível somente no navegador e é ocultada nos aplicativos instalados.&quot;},{&quot;app&quot;:&quot;fast&quot;,&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;4.0.3 (21/09/2026): Despesas, Rotas do Dia, Cliente e Motorista receberam identidades visuais próprias nos ícones Android e nas telas de acesso.&quot;},{&quot;app&quot;:&quot;rotas&quot;,&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;4.0.3 (21/09/2026): Rotas do Dia usa o novo ícone azul em tela cheia no gate e moldura azul nos limites do aplicativo mobile.&quot;},{&quot;app&quot;:&quot;despesas&quot;,&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;4.0.3 (21/09/2026): Despesas usa o novo ícone vermelho em tela cheia no gate e moldura vermelha nos limites do aplicativo mobile.&quot;},{&quot;app&quot;:&quot;cliente&quot;,&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;4.0.3 (21/09/2026): Cliente FAST usa o novo ícone verde no Android, no cabeçalho e no gate, com moldura verde no aplicativo.&quot;},{&quot;app&quot;:&quot;cliente&quot;,&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;4.0.3 (21/09/2026): telefones colados do WhatsApp com +55, DDD, espaços ou símbolos agora preenchem o número completo sem cortar dígitos.&quot;},{&quot;app&quot;:&quot;motorista&quot;,&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;4.0.3 (21/09/2026): FAST Motorista usa o novo ícone cinza no Android, na abertura, no gate e no cabeçalho, com moldura cinza no aplicativo.&quot;}]" data-r88="1" data-r89="1" data-r87="1">
+  <meta name="fast-app-changelog" content="[{&quot;app&quot;: &quot;rotas&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.66 (30/09/2026): Rotas do Dia agrupadas/unificadas — ao enviar as fotos para o cliente, cada foto sai com a descrição do SEU destino escrita nela, e o texto do envio lista Foto 1, Foto 2… com cada destino. Antes todas saíam com a lista de destinos juntos.&quot;}, {&quot;app&quot;: &quot;rotas&quot;, &quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;4.0.66 (30/09/2026): todas as tabelas deixam escolher quantas linhas mostrar (10, 15, 20, 30, 50, 100, todas ou um número digitado). Rotas do Dia: editar abre uma janela própria com Confirmar edição, que altera só aquela rota; cards Filtro de busca e Criação de rotas separados, com um único Limpar que limpa tudo na hora; pré-visualização só aparece quando a rota já foi feita antes. Alterações aparecem na hora nos outros aparelhos (sincronização em tempo real), e as Rotas do Dia sincronizam mesmo em login interno. Câmera ao vivo abre e bate a foto na hora.&quot;}, {&quot;app&quot;: &quot;geral&quot;, &quot;type&quot;: &quot;seguranca&quot;, &quot;text&quot;: &quot;4.0.66 (30/09/2026): senha única para todos os lugares. Trocar a senha pelo site, pelo app ou pelo link do e-mail vale na hora para o site e todos os aplicativos; os outros aparelhos são desconectados e pedem a senha nova, e a senha antiga deixa de funcionar, inclusive sem internet. O login também passou a usar o e-mail digitado (antes o APK comparava com a senha antiga guardada no aparelho).&quot;}, {&quot;app&quot;: &quot;geral&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.66 (30/09/2026): ao criar nova senha pelo link do e-mail, o app mostra o motivo real quando não consegue (senha igual à anterior, senha fraca, link expirado, muitas tentativas ou sem internet), em vez de sempre dizer que o link expirou.&quot;}, {&quot;app&quot;: &quot;geral&quot;, &quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;4.0.65 (29/09/2026): login por biometria no app instalado pelo APK, usando a digital, o rosto ou o bloqueio de tela do próprio Android (antes aparecia não suportado). Os apps Cliente FAST e FAST Motorista também ganharam entrada com a digital.&quot;}, {&quot;app&quot;: &quot;geral&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.64 (29/09/2026): o app baixava o banco de dados inteiro a cada 10 segundos (e mais uma vez a cada 30), o que estourou o limite de tráfego do plano gratuito do Supabase. Agora sincroniza a cada 5 minutos, ao abrir ou voltar ao app e depois de salvar, e não sincroniza com o app em segundo plano.&quot;}, {&quot;app&quot;: &quot;rotas&quot;, &quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;4.0.63 (29/09/2026): nova coluna Imagem na tabela de Rotas e no Relatório Geral: ❌ sem foto, ✅ com foto e, embaixo, o nome do arquivo exatamente como veio do celular. Na edição da rota, os botões Salvar e Cancelar ficam sempre visíveis no rodapé. Filtros de Busca de Rotas e do Relatório ganharam Origem, Destino e Tipo de Volume. As caixas de seleção das tabelas não se desmarcam mais sozinhas quando a tela atualiza.&quot;}, {&quot;app&quot;: &quot;geral&quot;, &quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;4.0.62 (29/09/2026): ícones sempre inteiros, sem cortar, na tela de login, na Central de Downloads e no diálogo de instalação (o modo que recortava a imagem foi desligado).&quot;}, {&quot;app&quot;: &quot;geral&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.62 (29/09/2026): o app parou de abrir a tela de login do Google sozinho (ela aparecia a cada toque/minutos, principalmente no APK, e interrompia a câmera ao vivo). A renovação automática agora é só pela conexão permanente; sem ela, basta tocar em Conectar quando quiser enviar fotos.&quot;}, {&quot;app&quot;: &quot;rotas&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.61 (29/09/2026): Rotas do Dia — ao escolher o cliente, o formulário puxa origem, destino, quantidade, observação, motorista e o último valor, procurando também nas Rotas do Dia anteriores e tolerando diferenças de acento, pontuação e espaço no nome. A pré-visualização acompanha a digitação.&quot;}, {&quot;app&quot;: &quot;despesas&quot;, &quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;4.0.60 (29/09/2026): novo ícone do app Despesas (recibo, calculadora e categorias), no instalador, na tela de acesso e na Central de Downloads.&quot;}, {&quot;app&quot;: &quot;rotas&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.59 (29/09/2026): encontrada a causa do espaço em branco: um arquivo antigo (table-viewport.js) esticava as tabelas até o fim da tela a cada rolagem ou toque e brigava com o ajuste de altura, fazendo a tabela pular e o toque no Pendente/Recebido falhar. Ele foi desligado.&quot;}, {&quot;app&quot;: &quot;geral&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.58 (29/09/2026): um login interno cadastrado com o mesmo e-mail da conta principal fazia o app entrar com perfil Atendimento (menu reduzido e sem sincronizar). O e-mail da conta principal agora sempre entra pela conta principal.&quot;}, {&quot;app&quot;: &quot;despesas&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.57 (28/09/2026): a caixa de seleção das tabelas de Despesas, Despesas da Empresa e RH aparecia gigante e empurrava os botões para baixo. Agora fica pequena, na mesma linha dos botões Editar e Excluir.&quot;}, {&quot;app&quot;: &quot;rotas&quot;, &quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;4.0.56 (28/09/2026): rolagem da tela de edição de rota mais lisa e rápida (sem desfoque pesado no fundo, um único rolador e toques de arrasto que não seguram mais a rolagem).&quot;}, {&quot;app&quot;: &quot;rotas&quot;, &quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;4.0.56 (28/09/2026): caixa Inserir na Rota do Dia ao criar ou editar uma rota. Marcada, a rota entra (ou é atualizada) na Rota do Dia da data escolhida.&quot;}, {&quot;app&quot;: &quot;rotas&quot;, &quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;4.0.55 (28/09/2026): o Valor total volta a apenas somar as rotas e continua editável; editar o total não altera o valor de cada rota.&quot;}, {&quot;app&quot;: &quot;rotas&quot;, &quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;4.0.54 (28/09/2026): o campo Valor total volta a ser editável. Ao mudar o total, ele é dividido entre as rotas mantendo a proporção de cada uma (sem perder centavos).&quot;}, {&quot;app&quot;: &quot;rotas&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.53 (28/09/2026): botão Selecionar imagem agora abre a galeria do mesmo jeito das Rotas do Dia; o nome do arquivo aparece embaixo da rota e a imagem fica registrada na hora (Cancelar desfaz). A renovação do Google Drive não interrompe mais a escolha de arquivos.&quot;}, {&quot;app&quot;: &quot;geral&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.52 (28/09/2026): rede de segurança das exclusões. Antes de mostrar, salvar ou depois de sincronizar, o app remove tudo que está na lista de excluídos, venha de onde vier. As despesas excluídas agora também vão para a nuvem, então não voltam de outro aparelho.&quot;}, {&quot;app&quot;: &quot;lugares&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.51 (28/09/2026): lugares e clientes excluídos voltavam quando o nome começava com símbolo (ex.: *RETIRADA*) ou terminava com ponto. A comparação com a lista de excluídos foi corrigida e as exclusões antigas passam a valer.&quot;}, {&quot;app&quot;: &quot;geral&quot;, &quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;4.0.50 (28/09/2026): conexão permanente do Google Drive pelo Supabase. A autorização de longa duração fica guardada no servidor e o app renova o acesso sozinho, sem janela do Google e sem pedir para conectar de novo.&quot;}, {&quot;app&quot;: &quot;rotas&quot;, &quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;4.0.49 (28/09/2026): removida a opção Valor por rota. Igual às Rotas do Dia, cada destino adicionado ganha seu próprio valor (repetindo o da rota anterior) e o campo Valor passa a mostrar a soma de todas.&quot;}, {&quot;app&quot;: &quot;rotas&quot;, &quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;4.0.49 (28/09/2026): botão Imagens abaixo da Descrição para escolher imagens de cada rota; ao salvar, elas vão para o Google Drive na mesma estrutura das Rotas do Dia (dia, cliente, lugar).&quot;}, {&quot;app&quot;: &quot;geral&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.49 (28/09/2026): Google Drive renova a conexão sozinho no uso do app, sem pedir para conectar de novo.&quot;}, {&quot;app&quot;: &quot;geral&quot;, &quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;4.0.48 (28/09/2026): ao unificar clientes, lugares, motoristas ou funcionários, tudo vira um só: histórico de rotas, quantidades e valores são somados (salário e benefícios do RH não são somados).&quot;}, {&quot;app&quot;: &quot;rotas&quot;, &quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;4.0.48 (28/09/2026): ao escolher o cliente, o formulário puxa tudo da última rota (origem, destinos, tipo, volumes, pagamento e valor). Ao clicar em Adicionar Destino aparece a opção Valor por rota: marcada, cada rota recebe o valor digitado; desmarcada, o valor é dividido entre as rotas.&quot;}, {&quot;app&quot;: &quot;geral&quot;, &quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;4.0.47 (28/09/2026): todas as tabelas e listas (Rotas, Relatório, Rotas do Dia, Clientes, Lugares, Motoristas, Despesas, Despesas da Empresa, RH) com filtro por letra, 10 itens por página e Anterior/Próxima, sem espaço em branco.&quot;}, {&quot;app&quot;: &quot;geral&quot;, &quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;4.0.47 (28/09/2026): ao marcar 2 ou mais itens, o balão mostra Unificar (clientes, lugares, motoristas, rotas, despesas e RH), com escolha do nome final ou de um novo nome. O antigo botão Unificar Duplicados de Clientes foi removido.&quot;}, {&quot;app&quot;: &quot;geral&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.47 (28/09/2026): segurança — o arquivo publicado não leva mais nomes de clientes, rotas, lugares e despesas; despesas excluídas não voltam mais após sincronizar.&quot;}, {&quot;app&quot;: &quot;rotas&quot;, &quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;4.0.46 (27/09/2026): tabela de Rotas e Relatório Geral travadas em 10 rotas por página, com altura exata das linhas e sem espaço em branco.&quot;}, {&quot;app&quot;: &quot;geral&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.46 (27/09/2026): sincronização automática passou de 3 em 3 segundos para 30 em 30 segundos, deixando o app mais leve.&quot;}, {&quot;app&quot;: &quot;geral&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.46 (27/09/2026): segurança — removido script externo de terceiros e textos das rotas passam a ser tratados antes de exibir.&quot;}, {&quot;app&quot;: &quot;rotas&quot;, &quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;4.0.45 (27/09/2026): tabela principal da aba Rotas com Visualizar 10, 20, 30 ou 50 rotas e navegação Anterior/Próxima; marcar todos só marca as rotas da página visível.&quot;}, {&quot;app&quot;: &quot;rotas&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.45 (27/09/2026): relatório geral de rotas sem o espaço em branco abaixo da última linha; a tabela ocupa no máximo a altura livre da tela, terminando logo acima da barra inferior.&quot;}, {&quot;app&quot;: &quot;rotas&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.44 (27/09/2026): removido o espaço em branco abaixo da tabela do relatório geral de rotas; a área da tabela agora termina na última linha e volta ao topo ao trocar de página.&quot;}, {&quot;app&quot;: &quot;rotas&quot;, &quot;type&quot;: &quot;melhorado&quot;, &quot;text&quot;: &quot;4.0.43 (27/09/2026): filtros da aba Rotas reorganizados em pares no celular — cliente ao lado do status da rota, data inicial ao lado da data final, tipo de volume ao lado do status de pagamento — nos dois cards (tabela e relatório).&quot;}, {&quot;app&quot;: &quot;fast&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.43 (27/09/2026): o aviso inicial mostrava 4.0.36 mesmo com o app em outra versão; agora a versão exibida em todo o app é lida da meta tag única.&quot;}, {&quot;app&quot;: &quot;rotas&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.42 (27/09/2026): relatório geral de rotas aparecia espremido (30px) e fora da aba ROTAS; agora aparece completo, com visualização de 10 a 50 rotas.&quot;}, {&quot;app&quot;: &quot;fast&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.37 (27/09/2026): corrigido um erro fatal de JavaScript (um &lt;script&gt; escrito dentro de um texto de impress\u00e3o de comprovante quebrava o parser da p\u00e1gina) que fazia c\u00f3digo aparecer vis\u00edvel na tela e travava o script que mant\u00e9m a vers\u00e3o sincronizada em todos os cantos do app.&quot;}, {&quot;app&quot;: &quot;fast&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.37 (27/09/2026): bal\u00e3o \u2018FAST SERVI\u00c7OS / OPERA\u00c7\u00c3O SU\u00cdTE\u2019 reposicionado \u2014 antes ficava fixo sobre o conte\u00fado da tela; agora fica no canto inferior direito, sem sobrepor nada.&quot;}, {&quot;app&quot;: &quot;fast&quot;, &quot;type&quot;: &quot;corrigido&quot;, &quot;text&quot;: &quot;4.0.37 (27/09/2026): vers\u00e3o exibida na barra lateral agora acompanha a vers\u00e3o real do app (antes ficava presa em n\u00fameros antigos).&quot;}, {&quot;app&quot;: &quot;fast&quot;, &quot;type&quot;: &quot;removido&quot;, &quot;text&quot;: &quot;4.0.37 (27/09/2026): Comprovante de Entrega desativado da interface a pedido \u2014 c\u00f3digo mantido, pronto para reativar.&quot;}, {&quot;app&quot;: &quot;rotas&quot;, &quot;type&quot;: &quot;novo&quot;, &quot;text&quot;: &quot;4.0.37 (27/09/2026): relat\u00f3rio geral de rotas com pagina\u00e7\u00e3o (10 a 50) e bot\u00e3o para sincronizar com o Google Planilhas.&quot;}, {&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;r87 (03/09/2026): Área Protegida dividida em seis abas temáticas: Empresa, Usuários e Acessos, Fotos e Backups, Banco de Dados, Publicação e Ajuda SQL.&quot;},{&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;r87 (03/09/2026): logins de funcionários, permissões e biometria foram reunidos em Usuários e Acessos, separados do cadastro empresarial.&quot;},{&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;r87 (03/09/2026): segurança, armazenamento de fotos, Google Drive, backup e restauração agora ficam na aba Fotos e Backups.&quot;},{&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;r87 (03/09/2026): publicação no GitHub ganhou aba própria; Banco de Dados ficou focado no Supabase e o guia técnico foi renomeado para Ajuda SQL.&quot;},{&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;r70: Fechamento diário automático e painel de rentabilidade por cliente, destino, motorista e rota.&quot;},{&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;r70: Alertas de pagamentos pendentes aparecem exclusivamente no sino de notificações.&quot;},{&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;r70: Usuários vinculados ao RH, perfis Administrador, Atendimento e Entregador, senhas PBKDF2 e revogação de sessões preparada.&quot;},{&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;r70: Registro de auditoria identifica quem criou, alterou, excluiu ou acessou itens do aplicativo.&quot;},{&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;r70: Lixeira preserva rotas e referências das fotos para recuperação; biometria mantida na Área Protegida.&quot;},{&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;r70: Leitura de nome do cliente e endereço pela câmera com OCR e confirmação humana.&quot;},{&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;r70: Alertas de proximidade do destino e geofence revisados para acompanhamento da entrega.&quot;},{&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;r70: Logo oficial aplicada ao ícone Android e tela de login redimensionada; atalhos Android para Rotas do Dia e Despesas.&quot;},{&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;r70: Android, Windows e Linux usam a mesma PWA responsiva e recebem as próximas versões pelo endereço oficial, sem substituir o armazenamento local.&quot;},{&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;r70: Backup de fotos, fila offline, Google Drive, comprovante, modo entregador e histórico do cliente preparados.&quot;},{&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;r70: API do WhatsApp permanece suspensa e desativada até configuração posterior do backend seguro.&quot;},{&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;r70: Check-up geral de sintaxe, armazenamento, navegação, segurança e compatibilidade executado antes da publicação.&quot;},{&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;r91 (03/09/2026): botão Verificar Atualizações corrigido e exportado para funcionar também nos handlers inline e Android/PWA.&quot;},{&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;r91 (03/09/2026): removidos da interface o botão Assistente IA da barra superior e o selo IA dos anexos, mantendo os recursos internos sem ocupar espaço na tela.&quot;},{&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;r91 (03/09/2026): Central de Notificações ampliada com controles separados para atualizações, sincronização, rotas, despesas, rastreamento, câmera/QR e instalação.&quot;},{&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;r91 (03/09/2026): o controle de notificações agora classifica também os balões por assunto, permitindo desligar apenas a categoria desejada.&quot;},{&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;r89 (03/09/2026): criada a Central de Notificações com controle geral, Marcar tudo, Desmarcar tudo e opções individuais para balões, sino e dispositivo.&quot;},{&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;r89 (03/09/2026): o gerenciamento pode ser aberto por Configurações, pelo menu principal e pelo link Gerenciar dentro do sino.&quot;},{&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;r89 (03/09/2026): balões de operação, avisos e erros ficam silenciosos por padrão; processos, sincronização e backups continuam em segundo plano.&quot;},{&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;r89 (03/09/2026): corrigida a falha fastObterUltimasAtualizacoes is not defined que gerava vários balões vermelhos repetidos.&quot;},{&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;r89 (03/09/2026): Manter conectado não cancela mais a revalidação automática; quando o gate aparece, a biometria tem prioridade e a sessão persistente só é restaurada após a digital.&quot;},{&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;r89 (03/09/2026): o painel flutuante de clientes com várias rotas não reaparece mais após cada ação; ele fica desligado por padrão e pode ser controlado nas notificações.&quot;},{&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;r89 (03/09/2026): Despesas agora oferece PIX e À Vista entre as formas de pagamento.&quot;},{&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;r89 (03/09/2026): os totalizadores financeiros do Dashboard podem ser filtrados por hoje, mês, ano, todo o período ou intervalo personalizado.&quot;},{&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;r88 (03/09/2026): ao aparecer o gate depois de sair ou voltar ao aplicativo, o pedido nativo de biometria abre automaticamente, sem tocar no botão.&quot;},{&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;r88 (03/09/2026): o campo de senha não recebe mais foco automático quando existe biometria cadastrada, evitando que o teclado do Android interrompa o prompt biométrico.&quot;},{&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;r88 (03/09/2026): o disparo aguarda somente a primeira pintura visível do gate, impede pedidos duplicados e continua respeitando os tempos Imediatamente, 1, 2 ou 5 minutos.&quot;},{&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;r86 (03/09/2026): removido do painel o acúmulo de registros das versões anteriores. Agora somente as mudanças da versão instalada são exibidas.&quot;},{&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;r86 (03/09/2026): cada alteração da revisão passa a ser descrita separadamente e qualificada como Novo, Melhorado ou Corrigido, deixando claro o que realmente mudou.&quot;},{&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;r86 (03/09/2026): painel de Configurações e aviso de nova versão usam a mesma lista da revisão atual; o contador acompanha somente os itens dessa revisão.&quot;},{&quot;app&quot;:&quot;fast&quot;,&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;4.0.34 (26/09/2026): a tela ROTAS ganhou galeria de fotos ao editar a rota (ideal para rotas lancadas avulsas, fora das Rotas do Dia); os icones do Despesas (vermelho) e Rotas do Dia (azul) foram atualizados com as artes enviadas; e as bordas neon de cada aplicativo ficaram mais vivas, com a cor propria de cada um.&quot;},{&quot;app&quot;:&quot;fast&quot;,&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;4.0.34 (26/09/2026): a tela E-mail Brevo ficou mais clara e guiada — mostra um checklist de 4 passos (e-mails do aplicativo, configuração salva, Supabase Auth e endereço de retorno), traz o passo a passo do Supabase escrito na própria tela, botão Testar envio real e o indicador de saúde não fica mais vermelho só porque ainda não foi configurado (agora mostra Pendente em amarelo).&quot;},{&quot;app&quot;:&quot;fast&quot;,&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;4.0.32 (26/09/2026): corrigido o valor que virava xxxx,xx ao editar despesas e rotas; restaurada a pré-visualização de nomes/lugares/descrição nas despesas; rotas do dia puxam os dados da última rota do cliente; o app principal agora mostra somente login e senha (sem pedir para criar senha); eliminado o flash repetido do login da Google; e corrigido um erro fatal de JavaScript que quebrava o motor do app.&quot;},{&quot;app&quot;:&quot;fast&quot;,&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;4.0.27 (25/09/2026): Central de Downloads recebeu as artes oficiais; FAST e FAST LIMPO usam a imagem amarela do FAST; Windows, Linux, Despesas, Cliente FAST e Motorista FAST receberam imagens próprias; Windows/Linux acompanham a atualização online em tempo real.&quot;},{&quot;app&quot;:&quot;fast&quot;,&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;4.0.24 (25/09/2026): migração de segurança preparada; o acesso administrativo fixo foi removido e a autenticação segura passa pelo Supabase Auth.&quot;},{&quot;app&quot;:&quot;fast&quot;,&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;4.0.23 (25/09/2026): corrigido o problema em que o aplicativo voltava para a versao 4.0.17 e nao conseguia atualizar na plataforma; a versao exibida agora permanece sempre a mais recente e a atualizacao e aplicada de verdade.&quot;},{&quot;app&quot;:&quot;fast&quot;,&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;4.0.22 (25/09/2026): corrigido de vez o flash ao abrir o app — o código-fonte estava salvo com a aba Configurações já marcada como ativa e a Área Protegida já marcada como visível desde o primeiro instante da página (antes do JavaScript rodar); por isso elas apareciam na tela por uma fração de segundo antes do app te levar de volta pra Central. Agora a página principal já começa ativa e a Área Protegida começa fechada, sem flash nenhum.&quot;},{&quot;app&quot;:&quot;rotas&quot;,&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;4.0.22 (25/09/2026): mesmo ajuste aplicado em Rotas do Dia — o app abre direto na tela certa, sem passar por Configurações antes.&quot;},{&quot;app&quot;:&quot;rotas&quot;,&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;4.0.21 (24/09/2026): em Rotas do Dia e Despesas, se a atualização automática falhar, o app não mostra mais nenhum alerta nem recarrega de novo sozinho — fica em silêncio total, como já devia ser.&quot;},{&quot;app&quot;:&quot;fast&quot;,&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;4.0.20 (24/09/2026): Google Drive não pede mais para reconectar toda hora — a reconexão silenciosa ficou mais forte (janela de 20 min, tentativa a cada 2 min) e o app reconecta sozinho ao voltar o foco, ao recuperar a internet e quando a autorização expira.&quot;},{&quot;app&quot;:&quot;fast&quot;,&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;4.0.20 (24/09/2026): rotas e lugares excluídos ou editados não voltam mais em segundos — as exclusões de rotas, sequências e fotos agora são gravadas na nuvem (lápides sincronizadas) e respeitadas em todos os aparelhos.&quot;},{&quot;app&quot;:&quot;fast&quot;,&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;4.0.20 (24/09/2026): sincronização em segundos — a busca na nuvem passou a rodar a cada 3 segundos, o envio automático a cada 10 segundos e o disparo por edição em 200 ms, mantendo os dados sempre atualizados sem perda.&quot;},{&quot;app&quot;:&quot;fast&quot;,&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;4.0.20 (24/09/2026): indicador 100% sincronizado na barra fixa — ao lado de Online aparece a luz verde com o rótulo 100% e ícone de confirmado quando tudo está salvo na nuvem; amarelo mostra Sincronizando e vermelho mostra Sem conexão.&quot;},{&quot;app&quot;:&quot;fast&quot;,&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;4.0.20 (24/09/2026): a luz amarela ao lado de Online agora tem identificação — mostra o texto do estado (Sincronizando), ícone próprio e dica ao passar o mouse, em vez de ficar sem rótulo.&quot;},{&quot;app&quot;:&quot;fast&quot;,&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;4.0.19 (24/09/2026): navegação por teclado nas listas de sugestões — nos campos com pré-visualização de nomes (cliente, origem, despesa, filtro) use as setas ↑/↓ para subir e descer e Enter para escolher no desktop.&quot;},{&quot;app&quot;:&quot;fast&quot;,&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;4.0.19 (24/09/2026): logo oficial no menu lateral do desktop, no lugar do ícone antigo, com o número da versão logo abaixo do nome.&quot;},{&quot;app&quot;:&quot;fast&quot;,&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;4.0.18 (24/09/2026): corrigido o sumiço de clientes na sincronização — um cliente cujo nome chegasse vazio num momento ruim do sync era descartado para sempre; agora ele é preservado pelo ID em vez de apagado.&quot;},{&quot;app&quot;:&quot;fast&quot;,&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;4.0.17 (23/09/2026): câmera em tempo real muito mais nítida — a foto agora é salva em alta resolução (1920px) em vez de 720px, e o preview usa a resolução máxima do aparelho.&quot;},{&quot;app&quot;:&quot;fast&quot;,&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;4.0.17 (23/09/2026): Google Drive reconecta sozinho ao abrir o app, sem ficar pedindo autorização toda hora.&quot;},{&quot;app&quot;:&quot;fast&quot;,&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;4.0.17 (23/09/2026): removidas as telas que ficavam piscando — o box de novidades e a tela de configurações não aparecem mais sozinhos.&quot;},{&quot;app&quot;:&quot;rotas&quot;,&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;4.0.17 (23/09/2026): botão Salvar Rota/Despesa funciona no primeiro toque, mesmo com o teclado aberto, sem descer a tela.&quot;},{&quot;app&quot;:&quot;rotas&quot;,&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;4.0.17 (23/09/2026): balão de seleção não fica mais travado à esquerda; aparece centralizado com Agrupar, Excluir e Enviar Fotos.&quot;},{&quot;app&quot;:&quot;despesas&quot;,&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;4.0.17 (23/09/2026): bordas do app Despesas arredondadas e mais bonitas.&quot;},{&quot;app&quot;:&quot;fast&quot;,&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;4.0.14 (23/09/2026): corrigido o loop de atualização — o app se reportava sempre como 4.0.10 e por isso avisava “nova versão” sem nunca conseguir atualizar; agora a versão exibida e a versão online ficam iguais e a atualização é aplicada de verdade.&quot;},{&quot;app&quot;:&quot;fast&quot;,&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;4.0.14 (23/09/2026): versão unificada em todas as telas, manifesto, service worker e instaladores para evitar divergência de versão.&quot;},{&quot;app&quot;:&quot;fast&quot;,&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;4.0.10 (22/09/2026): versão exibida no FAST e nos aplicativos corrigida; cache e instaladores sincronizados para que a atualização apareça após instalar.&quot;},{&quot;app&quot;:&quot;cliente&quot;,&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;4.0.10 (22/09/2026): versão exibida no login e atualização do Cliente sincronizada com o instalador.&quot;},{&quot;app&quot;:&quot;motorista&quot;,&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;4.0.10 (22/09/2026): versão exibida no login e atualização do Motorista sincronizada com o instalador.&quot;},{&quot;app&quot;:&quot;rotas&quot;,&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;4.0.10 (22/09/2026): versão exibida e cache de Rotas do Dia sincronizados com o instalador.&quot;},{&quot;app&quot;:&quot;despesas&quot;,&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;4.0.10 (22/09/2026): versão exibida e cache de Despesas sincronizados com o instalador.&quot;},{&quot;app&quot;:&quot;despesas&quot;,&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;4.0.8 (21/09/2026): Despesas recebeu a nova identidade vermelha no ícone Android e no gate, preenchendo toda a área visível sem margens.&quot;},{&quot;app&quot;:&quot;rotas&quot;,&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;4.0.8 (21/09/2026): Rotas do Dia recebeu a nova identidade azul no ícone Android e no gate, preenchendo toda a área visível sem margens.&quot;},{&quot;app&quot;:&quot;cliente&quot;,&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;4.0.8 (21/09/2026): Cliente FAST recebeu a nova identidade verde no ícone Android e no gate, preenchendo toda a área visível sem margens.&quot;},{&quot;app&quot;:&quot;motorista&quot;,&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;4.0.8 (21/09/2026): Motorista FAST recebeu a nova identidade cinza no ícone Android e no gate, preenchendo toda a área visível sem margens.&quot;},{&quot;app&quot;:&quot;fast&quot;,&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;4.0.7 (21/09/2026): o sino do FAST detecta novos cadastros de Cliente e Motorista, mantém o aviso pendente e abre diretamente a seção correta ao tocar.&quot;},{&quot;app&quot;:&quot;motorista&quot;,&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;4.0.6 (21/09/2026): cadastro do Motorista foi dividido em Dados pessoais, Dados da CNH e Dados do veículo, com endereço completo e documentos adicionais.&quot;},{&quot;app&quot;:&quot;motorista&quot;,&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;4.0.6 (21/09/2026): foto pessoal, comprovante de residência, motorista com CNH, CNH e CRLV exigem análise de nitidez, confirmação ou remoção antes do cadastro.&quot;},{&quot;app&quot;:&quot;motorista&quot;,&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;4.0.6 (21/09/2026): comprovante, CNH e CRLV recebem leitura assistida para preencher endereço e dados dos documentos; arquivos aprovados entram na fila protegida do Google Drive.&quot;},{&quot;app&quot;:&quot;fast&quot;,&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;4.0.6 (21/09/2026): a área Motoristas do FAST passou a exibir dados do veículo e os documentos recebidos no cadastro para consulta do administrador.&quot;},{&quot;app&quot;:&quot;cliente&quot;,&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;4.0.6 (21/09/2026): confirmação e recuperação continuam retornando às páginas oficiais do Cliente FAST, com mensagem clara de conta confirmada e redefinição segura.&quot;},{&quot;app&quot;:&quot;cliente&quot;,&quot;type&quot;:&quot;seguranca&quot;,&quot;text&quot;:&quot;4.0.6 (21/09/2026): o Cliente FAST verifica atualizações antes e depois do login e bloqueia o uso quando uma versão obrigatória estiver disponível.&quot;},{&quot;app&quot;:&quot;cliente&quot;,&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;4.0.6 (21/09/2026): atualização obrigatória mostra progresso, tenta novamente após falha de internet e preserva cadastro, sessão, preferências e dados locais.&quot;},{&quot;app&quot;:&quot;motorista&quot;,&quot;type&quot;:&quot;seguranca&quot;,&quot;text&quot;:&quot;4.0.6 (21/09/2026): o FAST Motorista verifica atualizações antes e depois do login e bloqueia o uso quando uma versão obrigatória estiver disponível.&quot;},{&quot;app&quot;:&quot;motorista&quot;,&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;4.0.6 (21/09/2026): atualização obrigatória mostra progresso e preserva cadastro, preferências, fotos e operações pendentes.&quot;},{&quot;app&quot;:&quot;fast&quot;,&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;4.0.6 (21/09/2026): Cliente e Motorista passam a exigir a versão mais recente independentemente do estado de autenticação.&quot;},{&quot;app&quot;:&quot;motorista&quot;,&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;4.0.5 (21/09/2026): o cadastro do Motorista aceita corretamente nomes e textos com acentos e caracteres Unicode, preservando minúsculas em login, e-mail e senha.&quot;},{&quot;app&quot;:&quot;motorista&quot;,&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;4.0.5 (21/09/2026): cadastro ganhou visualizar senha, repetir senha e validação visual de maiúscula, minúscula, caractere especial e mínimo de 8 caracteres.&quot;},{&quot;app&quot;:&quot;motorista&quot;,&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;4.0.5 (21/09/2026): cadastro não depende mais do cofre provisório antes da confirmação do e-mail; os dados pendentes são sincronizados com segurança após o primeiro login confirmado.&quot;},{&quot;app&quot;:&quot;motorista&quot;,&quot;type&quot;:&quot;removido&quot;,&quot;text&quot;:&quot;4.0.5 (21/09/2026): removidos os avisos de registro facial preparado e de criação da própria conta.&quot;},{&quot;app&quot;:&quot;cliente&quot;,&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;4.0.5 (21/09/2026): Número fica ao lado de Endereço e Complemento aparece logo abaixo no cadastro do Cliente.&quot;},{&quot;app&quot;:&quot;cliente&quot;,&quot;type&quot;:&quot;removido&quot;,&quot;text&quot;:&quot;4.0.5 (21/09/2026): removido o aviso de validação facial reservada.&quot;},{&quot;app&quot;:&quot;fast&quot;,&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;4.0.5 (21/09/2026): links de confirmação de Cliente e Motorista retornam para a página correta do aplicativo, eliminando o erro 404 do GitHub Pages.&quot;},{&quot;app&quot;:&quot;despesas&quot;,&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;4.0.5 (21/09/2026): tabela de Despesas ocupa a área útil até o limite da tela, mantém rolagem interna e centraliza os títulos das colunas.&quot;},{&quot;app&quot;:&quot;fast&quot;,&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;4.0.4 (21/09/2026): a Central de Downloads deixou de entregar APKs antigos armazenados no site e agora baixa sempre a compilação Android mais recente publicada.&quot;},{&quot;app&quot;:&quot;fast&quot;,&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;4.0.4 (21/09/2026): os ícones Android receberam um novo identificador interno para impedir que o lançador do aparelho reutilize o ícone antigo em cache.&quot;},{&quot;app&quot;:&quot;rotas&quot;,&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;4.0.4 (21/09/2026): o APK Rotas do Dia passa a instalar e atualizar com o ícone azul próprio.&quot;},{&quot;app&quot;:&quot;despesas&quot;,&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;4.0.4 (21/09/2026): o APK Despesas passa a instalar e atualizar com o ícone vermelho próprio.&quot;},{&quot;app&quot;:&quot;cliente&quot;,&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;4.0.4 (21/09/2026): o APK Cliente FAST passa a instalar e atualizar com o ícone verde próprio.&quot;},{&quot;app&quot;:&quot;motorista&quot;,&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;4.0.4 (21/09/2026): o APK FAST Motorista passa a instalar e atualizar com o ícone cinza próprio.&quot;},{&quot;app&quot;:&quot;fast&quot;,&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;4.0.3 (21/09/2026): a Central de Downloads fica disponível somente no navegador e é ocultada nos aplicativos instalados.&quot;},{&quot;app&quot;:&quot;fast&quot;,&quot;type&quot;:&quot;novo&quot;,&quot;text&quot;:&quot;4.0.3 (21/09/2026): Despesas, Rotas do Dia, Cliente e Motorista receberam identidades visuais próprias nos ícones Android e nas telas de acesso.&quot;},{&quot;app&quot;:&quot;rotas&quot;,&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;4.0.3 (21/09/2026): Rotas do Dia usa o novo ícone azul em tela cheia no gate e moldura azul nos limites do aplicativo mobile.&quot;},{&quot;app&quot;:&quot;despesas&quot;,&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;4.0.3 (21/09/2026): Despesas usa o novo ícone vermelho em tela cheia no gate e moldura vermelha nos limites do aplicativo mobile.&quot;},{&quot;app&quot;:&quot;cliente&quot;,&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;4.0.3 (21/09/2026): Cliente FAST usa o novo ícone verde no Android, no cabeçalho e no gate, com moldura verde no aplicativo.&quot;},{&quot;app&quot;:&quot;cliente&quot;,&quot;type&quot;:&quot;corrigido&quot;,&quot;text&quot;:&quot;4.0.3 (21/09/2026): telefones colados do WhatsApp com +55, DDD, espaços ou símbolos agora preenchem o número completo sem cortar dígitos.&quot;},{&quot;app&quot;:&quot;motorista&quot;,&quot;type&quot;:&quot;melhorado&quot;,&quot;text&quot;:&quot;4.0.3 (21/09/2026): FAST Motorista usa o novo ícone cinza no Android, na abertura, no gate e no cabeçalho, com moldura cinza no aplicativo.&quot;}]" data-r88="1" data-r89="1" data-r87="1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https:; img-src 'self' data: blob: https: http:; connect-src 'self' https: data: blob:; font-src 'self' https: data:;">
   <script id="fast-clean-edition-bootstrap">
   (function(){
@@ -114,7 +114,7 @@
   <link rel="apple-touch-icon" sizes="192x192" href="assets/fast-servicos-icon-192.png?v=2.3.36">
   <title>⚡ FAST SERVIÇOS — Mobile</title>
   <link rel="icon" type="image/png" sizes="192x192" href="assets/fast-servicos-icon-192.png?v=2.3.36">
-  <link rel="stylesheet" href="https://adaiascearataiana-gif.github.io/fastservicosapp/v2-ui.css?v=4.0.65">
+  <link rel="stylesheet" href="https://adaiascearataiana-gif.github.io/fastservicosapp/v2-ui.css?v=4.0.66">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet">
@@ -2251,7 +2251,7 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
       </div>
       <div class="fast-splash-name">FAST SERVIÇOS</div>
       <div class="fast-splash-tag">SOLUÇÕES EM LOGÍSTICA</div>
-      <div class="fast-splash-version">Versão <span id="fastSplashVersion">4.0.65</span></div>
+      <div class="fast-splash-version">Versão <span id="fastSplashVersion">4.0.66</span></div>
     </div>
     <div class="fast-splash-loader"><span></span></div>
   </div>
@@ -2268,7 +2268,7 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
         <div class="fast-gate-logo"><img src="assets/fast-servicos-icon-512.png?v=2.3.36" alt="Fast Serviços" style="width:100%;height:100%;object-fit:contain;padding:6px;"></div>
         <h1 id="fastGateTitle">FAST Serviços</h1>
         <p id="fastGateSubtitle">SOLUÇÕES EM LOGÍSTICA</p>
-        <p class="fast-gate-version" id="fastGateVersion">Versão <span id="fastGateVersionNum">4.0.65</span></p>
+        <p class="fast-gate-version" id="fastGateVersion">Versão <span id="fastGateVersionNum">4.0.66</span></p>
       </div>
       <script id="r145-exclusive-gate-icon">
       /* (r145 / 2.3.28) ÍCONE CERTO NA TELA DE ACESSO DE CADA MINI-APP.
@@ -2290,7 +2290,7 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
             if(atalho)mode=(atalho==='rotas-dia'||atalho==='rotasDia')?'rotas-dia':(atalho==='despesas')?'despesas':'';
           }
           if(mode!=='rotas-dia'&&mode!=='despesas')return;
-          var icone=mode==='rotas-dia'?'assets/fast-rotas-512.png?v=4.0.65':'assets/fast-despesas-512.png?art=20260929&v=4.0.65';
+          var icone=mode==='rotas-dia'?'assets/fast-rotas-512.png?v=4.0.66':'assets/fast-despesas-512.png?art=20260929&v=4.0.66';
           var nome=mode==='rotas-dia'?'Rotas do Dia':'Despesas';
           window.fastIconeExclusivo=function(){return{src:icone,alt:nome}};
           function aplicar(){
@@ -2511,7 +2511,7 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
 
     // ---- WebAuthn: detecção de autenticador de plataforma (Windows Hello / Touch ID / Face ID) ----
     function fastBioIsSupported(){
-      if (window.fastBioNativo && window.fastBioNativo.disponivel()) return true; // 4.0.65: APK
+      if (window.fastBioNativo && window.fastBioNativo.disponivel()) return true; // 4.0.66: APK
       return typeof window !== 'undefined' &&
              (window.isSecureContext || window.location.hostname === 'localhost') &&
              window.PublicKeyCredential !== undefined &&
@@ -2524,7 +2524,7 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
     // Verifica se há um autenticador de plataforma (não roaming/cross-device)
     // Windows Hello no Windows, Touch ID no Mac, Face ID / digital no mobile
     function fastBioPlatformAvailable(){
-      if (window.fastBioNativo && window.fastBioNativo.disponivel()) return Promise.resolve(true); // 4.0.65: APK
+      if (window.fastBioNativo && window.fastBioNativo.disponivel()) return Promise.resolve(true); // 4.0.66: APK
       if (!fastBioIsSupported()) return Promise.resolve(false);
       if (typeof window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable !== 'function')
         return Promise.resolve(false);
@@ -2555,7 +2555,7 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
       var cred = getCred();
       if (!cred) throw new Error('Crie um usuário e senha primeiro.');
       if (window.fastBioNativo && window.fastBioNativo.disponivel()) {
-        // 4.0.65: APK — confirma com a digital/rosto do Android e registra neste aparelho
+        // 4.0.66: APK — confirma com a digital/rosto do Android e registra neste aparelho
         await window.fastBioNativo.autenticar('Ativar biometria no FAST');
         var bioNat = { nativa: true, credIdB64: 'nativa', rawIdB64: 'nativa', user: cred.user, created: Date.now() };
         setBioCred(bioNat);
@@ -2606,7 +2606,7 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
       var bioCred = getBioCred();
       if (!bioCred) throw new Error('Nenhuma biometria registrada neste dispositivo.');
       if (bioCred.nativa || (window.fastBioNativo && window.fastBioNativo.disponivel())) {
-        // 4.0.65: APK — digital/rosto do Android
+        // 4.0.66: APK — digital/rosto do Android
         await window.fastBioNativo.autenticar('Entrar no FAST');
         return true;
       }
@@ -4838,7 +4838,7 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
     /* Status Pagamento — ampliado p/ badge "RECEBIDO"/"PENDENTE" sem quebrar */
     #rotasTable thead th:nth-child(11),#tabelaRotasBody td:nth-child(11){ min-width: 100px; white-space: nowrap; text-align: center; }
     /* Valor — centralizado */
-    /* Imagem (4.0.65) — ✅/❌ e o nome do arquivo, sem aumentar a linha */
+    /* Imagem (4.0.66) — ✅/❌ e o nome do arquivo, sem aumentar a linha */
     #rotasTable thead th:nth-child(12),#tabelaRotasBody td:nth-child(12){ min-width: 84px; max-width: 132px; text-align: center; white-space: nowrap; overflow: hidden; }
     /* Valor — centralizado */
     #rotasTable thead th:nth-child(13),#tabelaRotasBody td:nth-child(13){ min-width: 76px; text-align: center; white-space: nowrap; }
@@ -7915,7 +7915,7 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
           <!-- Rodapé do menu: nome do app + versão -->
           <div class="nav-menu-footer">
             <div class="nav-menu-footer-app"><i class="fa-solid fa-bolt"></i> APP FAST SERVIÇOS</div>
-            <div class="nav-menu-footer-ver" id="navMenuVersao">Versão 4.0.65</div>
+            <div class="nav-menu-footer-ver" id="navMenuVersao">Versão 4.0.66</div>
           </div>
         </div>
       </div>
@@ -8260,7 +8260,7 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
           <div><i class="fa-solid fa-file-lines"></i> Relatório Geral de Rotas</div>
           <div class="fast-route-report-actions">
             <div class="fast-rel-paginacao" style="display:flex;align-items:center;gap:6px;font-size:12px;">
-              <span class="f47-lock"><i class="fa-solid fa-lock"></i> 10 rotas por página</span>
+              <label class="f47-lock f47-pp"><i class="fa-solid fa-list-ol"></i> <select class="f47-pp-sel" id="f47pp_rel" aria-label="Linhas por página"></select></label>
             </div>
             <button type="button" class="btn-secondary ripple" onclick="fastRelatorioRotasSincronizarFotos()"><i class="fa-brands fa-google-drive"></i> Sincronizar fotos</button>
             <button type="button" class="btn-success ripple" onclick="fastRelatorioRotasCSV()"><i class="fa-solid fa-file-csv"></i> CSV</button>
@@ -8297,7 +8297,7 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
     <div id="rotasDia" class="tab-content">
       <div id="fastLogisticsHub" class="card no-print"><div class="fl-head"><h3><i class="fa-solid fa-tower-broadcast"></i> Central Operacional</h3><span class="fl-live">AO VIVO</span></div><div class="fl-kpis"><div class="fl-kpi"><span>Rotas do dia</span><strong id="flTotal">0</strong></div><div class="fl-kpi warn"><span>Pendentes</span><strong id="flPending">0</strong></div><div class="fl-kpi danger"><span>Risco de atraso</span><strong id="flLate">0</strong></div><div class="fl-kpi" style="display:none" title="Comprovante de Entrega desativado"><span>Sem comprovante</span><strong id="flProof">0</strong></div></div><div class="fl-tools"><button class="fl-tool ripple" onclick="fastLogOtimizar()" style="user-select: none;" data-fast-bound="1"><i class="fa-solid fa-wand-magic-sparkles"></i> Otimizar ordem</button><button class="fl-tool ripple" onclick="fastLogMapa()" style="user-select: none;" data-fast-bound="1"><i class="fa-solid fa-map-location-dot"></i> Torre no mapa</button><button class="fl-tool ripple" onclick="fastLogSync()" style="user-select: none;" data-fast-bound="1"><i class="fa-solid fa-cloud-arrow-up"></i> Sincronização</button><button class="fl-tool ripple" onclick="fastLogGeo()" style="user-select: none;" data-fast-bound="1"><i class="fa-solid fa-location-crosshairs"></i> Geolocalização</button><button class="fl-tool ripple" onclick="fastLogTracking()" style="user-select: none;" data-fast-bound="1"><i class="fa-solid fa-link"></i> Rastrear cliente</button><button class="fl-tool ripple" onclick="fastLogInteligencia()" style="user-select: none;" data-fast-bound="1"><i class="fa-solid fa-chart-line"></i> Previsões e lucro</button></div><div class="fl-alerts" id="flAlerts"><div class="fl-alert"><i class="fa-solid fa-camera"></i>1 rota(s) aberta(s) ainda sem foto.</div></div></div><div class="card">
         <div class="card-title">
-          <span><i class="fa-solid fa-calendar-day"></i> Rotas do Dia</span>
+          <span><i class="fa-solid fa-magnifying-glass"></i> Filtro de busca</span>
           <div style="display: flex; gap: 8px; flex-wrap: wrap;"><button id="fastVoiceRouteBtn" type="button" class="btn-primary no-print ripple" style="user-select: none;" data-fast-bound="1"><i class="fa-solid fa-microphone"></i> <span class="rd-drive-label">Comando de voz</span></button><button id="fastDriveFilesBtn" class="btn-secondary no-print ripple" style="user-select: none;" data-fast-bound="1"><i class="fa-brands fa-google-drive"></i> <span class="rd-drive-label">Google Drive</span></button>
 
 
@@ -8337,10 +8337,10 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
       <!-- (2.3.35) LANÇAMENTO DE ROTA DO DIA — embutido (antes era o modal ADICIONAR ROTAS) -->
       <div class="card no-print" id="fastSeqInlineCard" style="margin-bottom: 14px;">
         <div class="card-title">
-          <span id="modalSeqTitulo"><i class="fa-solid fa-calendar-plus"></i> Adicionar Item às Rotas do Dia</span>
+          <span id="modalSeqTitulo"><i class="fa-solid fa-calendar-plus"></i> Criação de rotas</span>
         </div>
         <form id="formModalSeq" onsubmit="salvarItemSeq(event)">
-        <input type="hidden" id="seqItemId" value="1788442495632">
+        <input type="hidden" id="seqItemId" value="">
         <div id="fastSeqDataHint" style="font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 8px;">As rotas serão lançadas na data selecionada no filtro acima: 2026-09-26</div><div class="grid-form"><div id="fast71OcrBox" class="span-4"><button type="button" class="btn-secondary ripple" onclick="fastOcrRota()" style="user-select: none;"><i class="fa-solid fa-camera"></i> Ler cliente e endereço pela câmera</button><input id="fast71OcrInput" type="file" accept="image/*" capture="environment" hidden=""><div class="fast71-note" style="margin-top:7px">A leitura preenche somente campos vazios e sempre pede conferência antes de salvar.</div></div>
           <div class="span-2 autocomplete-container">
             <label>Cliente:</label>
@@ -8432,7 +8432,7 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
         <h3 id="tituloDataSeq" style="margin-bottom: 15px; color: var(--accent); font-weight: 900; font-size: 20px; display: flex; align-items: center; gap: 10px;"><i class="fa-solid fa-calendar-day"></i> ROTAS DO DIA — 26/09/2026</h3>
         <div class="fast-nav-rotas no-print" id="fastNavRotasWrap"><button type="button" class="btn-secondary ripple" id="fastBtnRotaAnterior" style="user-select: none;"><i class="fa-solid fa-chevron-left"></i> Rota anterior</button><button type="button" class="btn-primary ripple" id="fastBtnProximaRota" style="user-select: none;">Proxima rota <i class="fa-solid fa-chevron-right"></i></button></div><div id="containerSequencia" style="display: flex; flex-direction: column; gap: 14px;"><div style="text-align: center; color: var(--text-muted); padding: 30px; font-weight: 700;">
           Nenhuma rota encontrada para os filtros aplicados nesta data.<br>
-          Clique em <strong>"Carregar"</strong> ou use o painel <strong>"Adicionar Item às Rotas do Dia"</strong> acima.
+          Clique em <strong>"Carregar"</strong> ou use o painel <strong>"Criação de rotas"</strong> acima.
         </div></div>
       </div>
 
@@ -9170,10 +9170,10 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
               <div id="fastDeployInfo" style="background:var(--card-bg-2);border:1px solid var(--border);border-radius:10px;padding:12px;margin:10px 0;font-size:13px;">
                 <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
                   <div>
-                    <div><strong>Versão atual:</strong> <span id="fastVersaoLabel" style="color:var(--accent);font-weight:800;">4.0.65</span></div>
+                    <div><strong>Versão atual:</strong> <span id="fastVersaoLabel" style="color:var(--accent);font-weight:800;">4.0.66</span></div>
                     <div id="fastVersaoDateLabel" style="font-size:11.5px;color:var(--text-muted);margin-top:3px;"><i class="fa-solid fa-clock"></i> Lançada em 25/09/2026 12:00</div>
                   </div>
-                  <div id="fastVersaoOnlineLabel" style="font-size:12px;color:var(--text-muted);text-align:right;">Online: <strong>4.0.65</strong> <span style="color:var(--success);">(ok)</span></div>
+                  <div id="fastVersaoOnlineLabel" style="font-size:12px;color:var(--text-muted);text-align:right;">Online: <strong>4.0.66</strong> <span style="color:var(--success);">(ok)</span></div>
                 </div>
                 <div style="font-size:12px;color:var(--text-muted);word-break:break-all;margin-bottom:10px;"><i class="fa-solid fa-link"></i> <span id="fastUrlLabel">https://adaiascearataiana-gif.github.io/fastservicosapp/</span></div>
                 <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
@@ -9209,35 +9209,35 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
                   <thead class="fast-downloads-thead"><tr><th>Aplicativo</th><th>Ações</th></tr></thead>
                   <tbody>
                     <tr class="fast-dl-row fast-dl-row-fast">
-                      <td class="fast-dl-nome"><img class="fast-dl-thumb" src="assets/fast-servicos-official-yellow.png?v=4.0.65" alt="FAST Serviços"> <span>APP FAST SERVIÇOS</span></td>
+                      <td class="fast-dl-nome"><img class="fast-dl-thumb" src="assets/fast-servicos-official-yellow.png?v=4.0.66" alt="FAST Serviços"> <span>APP FAST SERVIÇOS</span></td>
                       <td class="fast-dl-acoes"><button type="button" class="btn-success ripple fast-dl-btn" onclick="fastBaixarAndroid('fast')"><i class="fa-solid fa-download"></i> BAIXAR APK</button></td>
                     </tr>
                     <tr class="fast-dl-row fast-dl-row-limpo">
-                      <td class="fast-dl-nome"><img class="fast-dl-thumb" src="assets/fast-servicos-official-yellow.png?v=4.0.65" alt="FAST Limpo"> <span>FAST LIMPO · COMEÇAR DO ZERO</span></td>
+                      <td class="fast-dl-nome"><img class="fast-dl-thumb" src="assets/fast-servicos-official-yellow.png?v=4.0.66" alt="FAST Limpo"> <span>FAST LIMPO · COMEÇAR DO ZERO</span></td>
                       <td class="fast-dl-acoes"><button type="button" class="btn-success ripple fast-dl-btn" onclick="fastBaixarAndroid('limpo')"><i class="fa-solid fa-download"></i> BAIXAR APK</button></td>
                     </tr>
                     <tr class="fast-dl-row fast-dl-row-windows">
-                      <td class="fast-dl-nome"><img class="fast-dl-thumb" src="assets/fast-windows-central.png?v=4.0.65" alt="FAST para Windows"> <button type="button" class="fast-desktop-guide-link ripple" onclick="fastAbrirGuiaDesktop('windows')">FAST PARA WINDOWS</button></td>
+                      <td class="fast-dl-nome"><img class="fast-dl-thumb" src="assets/fast-windows-central.png?v=4.0.66" alt="FAST para Windows"> <button type="button" class="fast-desktop-guide-link ripple" onclick="fastAbrirGuiaDesktop('windows')">FAST PARA WINDOWS</button></td>
                       <td class="fast-dl-acoes"><button type="button" class="btn-primary ripple fast-dl-btn" onclick="fastBaixarDesktop('windows')"><i class="fa-solid fa-download"></i> BAIXAR</button></td>
                     </tr>
                     <tr class="fast-dl-row fast-dl-row-linux">
-                      <td class="fast-dl-nome"><img class="fast-dl-thumb" src="assets/fast-linux-central.png?v=4.0.65" alt="FAST Linux"> <button type="button" class="fast-desktop-guide-link ripple" onclick="fastAbrirGuiaDesktop('linux')">FAST LINUX</button></td>
+                      <td class="fast-dl-nome"><img class="fast-dl-thumb" src="assets/fast-linux-central.png?v=4.0.66" alt="FAST Linux"> <button type="button" class="fast-desktop-guide-link ripple" onclick="fastAbrirGuiaDesktop('linux')">FAST LINUX</button></td>
                       <td class="fast-dl-acoes"><button type="button" class="btn-primary ripple fast-dl-btn" onclick="fastBaixarDesktop('linux')"><i class="fa-solid fa-download"></i> BAIXAR</button></td>
                     </tr>
                     <tr class="fast-dl-row fast-dl-row-rotas">
-                      <td class="fast-dl-nome"><img class="fast-dl-thumb" src="assets/fast-rotas-dia-central.jpg?v=4.0.65" alt="Rotas do Dia"> <span>ROTAS DO DIA</span></td>
+                      <td class="fast-dl-nome"><img class="fast-dl-thumb" src="assets/fast-rotas-dia-central.jpg?v=4.0.66" alt="Rotas do Dia"> <span>ROTAS DO DIA</span></td>
                       <td class="fast-dl-acoes"><button type="button" class="btn-success ripple fast-dl-btn" onclick="fastBaixarAndroid('rotas')"><i class="fa-solid fa-download"></i> BAIXAR APK</button></td>
                     </tr>
                     <tr class="fast-dl-row fast-dl-row-despesas">
-                      <td class="fast-dl-nome"><img class="fast-dl-thumb" src="assets/fast-despesas-central.jpg?v=4.0.65" alt="Despesas"> <span>DESPESAS</span></td>
+                      <td class="fast-dl-nome"><img class="fast-dl-thumb" src="assets/fast-despesas-central.jpg?v=4.0.66" alt="Despesas"> <span>DESPESAS</span></td>
                       <td class="fast-dl-acoes"><button type="button" class="btn-success ripple fast-dl-btn" onclick="fastBaixarAndroid('despesas')"><i class="fa-solid fa-download"></i> BAIXAR APK</button></td>
                     </tr>
                     <tr class="fast-dl-row fast-dl-row-cliente">
-                      <td class="fast-dl-nome"><img class="fast-dl-thumb" src="assets/fast-client-central.png?v=4.0.65" alt="Cliente FAST"> <span>CLIENTE FAST</span><button type="button" class="btn-secondary ripple fast-dl-share" onclick="fastCompartilharAndroid('cliente')" title="Compartilhar download do Cliente FAST"><i class="fa-solid fa-share-nodes"></i></button></td>
+                      <td class="fast-dl-nome"><img class="fast-dl-thumb" src="assets/fast-client-central.png?v=4.0.66" alt="Cliente FAST"> <span>CLIENTE FAST</span><button type="button" class="btn-secondary ripple fast-dl-share" onclick="fastCompartilharAndroid('cliente')" title="Compartilhar download do Cliente FAST"><i class="fa-solid fa-share-nodes"></i></button></td>
                       <td class="fast-dl-acoes"><button type="button" class="btn-success ripple fast-dl-btn" onclick="fastBaixarAndroid('cliente')"><i class="fa-solid fa-download"></i> BAIXAR APK</button></td>
                     </tr>
                     <tr class="fast-dl-row fast-dl-row-motoristas">
-                      <td class="fast-dl-nome"><img class="fast-dl-thumb" src="assets/fast-motorista-central.jpg?v=4.0.65" alt="Motorista FAST"> <span>MOTORISTA FAST</span><button type="button" class="btn-secondary ripple fast-dl-share" onclick="fastCompartilharAndroid('motorista')" title="Compartilhar download dos Motorista FAST"><i class="fa-solid fa-share-nodes"></i></button></td>
+                      <td class="fast-dl-nome"><img class="fast-dl-thumb" src="assets/fast-motorista-central.jpg?v=4.0.66" alt="Motorista FAST"> <span>MOTORISTA FAST</span><button type="button" class="btn-secondary ripple fast-dl-share" onclick="fastCompartilharAndroid('motorista')" title="Compartilhar download dos Motorista FAST"><i class="fa-solid fa-share-nodes"></i></button></td>
                       <td class="fast-dl-acoes"><button type="button" class="btn-success ripple fast-dl-btn" onclick="fastBaixarAndroid('motorista')"><i class="fa-solid fa-download"></i> BAIXAR APK</button></td>
                     </tr>
                   </tbody>
@@ -9264,7 +9264,7 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
                   <span class="fup-count" id="fastUpdatesCount">2</span>
                   <i class="fa-solid fa-chevron-down fup-chevron"></i>
                 </div>
-                <div class="fast-updates-panel-body" id="fastUpdatesBody"><div class="fup-version-header"><div class="fup-version-row"><i class="fa-solid fa-sparkles"></i> <span>Versão 4.0.65</span></div><div class="fup-date-row"><i class="fa-solid fa-clock"></i> <span>Lançada em 25/09/2026 12:00</span></div></div><div class="fup-item"><div class="fup-item-dot" style="background:rgba(37,99,235,0.10);"><i class="fa-solid fa-arrow-up" style="color:#2563eb;"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#2563eb;background:rgba(37,99,235,0.10);">Melhorado</span><div class="fup-item-text">4.0.34 (26/09/2026): a tela ROTAS ganhou galeria de fotos ao editar a rota (ideal para rotas lancadas avulsas, fora das Rotas do Dia); os icones do Despesas (vermelho) e Rotas do Dia (azul) foram atualizados com as artes enviadas; e as bordas neon de cada aplicativo ficaram mais vivas, com a cor propria de cada um.</div></div></div><div class="fup-item"><div class="fup-item-dot" style="background:rgba(37,99,235,0.10);"><i class="fa-solid fa-arrow-up" style="color:#2563eb;"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#2563eb;background:rgba(37,99,235,0.10);">Melhorado</span><div class="fup-item-text">4.0.34 (26/09/2026): a tela E-mail Brevo ficou mais clara e guiada — mostra um checklist de 4 passos (e-mails do aplicativo, configuração salva, Supabase Auth e endereço de retorno), traz o passo a passo do Supabase escrito na própria tela, botão Testar envio real e o indicador de saúde não fica mais vermelho só porque ainda não foi configurado (agora mostra Pendente em amarelo).</div></div></div></div>
+                <div class="fast-updates-panel-body" id="fastUpdatesBody"><div class="fup-version-header"><div class="fup-version-row"><i class="fa-solid fa-sparkles"></i> <span>Versão 4.0.66</span></div><div class="fup-date-row"><i class="fa-solid fa-clock"></i> <span>Lançada em 25/09/2026 12:00</span></div></div><div class="fup-item"><div class="fup-item-dot" style="background:rgba(37,99,235,0.10);"><i class="fa-solid fa-arrow-up" style="color:#2563eb;"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#2563eb;background:rgba(37,99,235,0.10);">Melhorado</span><div class="fup-item-text">4.0.34 (26/09/2026): a tela ROTAS ganhou galeria de fotos ao editar a rota (ideal para rotas lancadas avulsas, fora das Rotas do Dia); os icones do Despesas (vermelho) e Rotas do Dia (azul) foram atualizados com as artes enviadas; e as bordas neon de cada aplicativo ficaram mais vivas, com a cor propria de cada um.</div></div></div><div class="fup-item"><div class="fup-item-dot" style="background:rgba(37,99,235,0.10);"><i class="fa-solid fa-arrow-up" style="color:#2563eb;"></i></div><div class="fup-item-content"><span class="fup-item-badge" style="color:#2563eb;background:rgba(37,99,235,0.10);">Melhorado</span><div class="fup-item-text">4.0.34 (26/09/2026): a tela E-mail Brevo ficou mais clara e guiada — mostra um checklist de 4 passos (e-mails do aplicativo, configuração salva, Supabase Auth e endereço de retorno), traz o passo a passo do Supabase escrito na própria tela, botão Testar envio real e o indicador de saúde não fica mais vermelho só porque ainda não foi configurado (agora mostra Pendente em amarelo).</div></div></div></div>
             </div>
           </div>
 
@@ -10592,7 +10592,7 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
     let syncEmAndamento = false;
     let syncTimer = null;
     let ultimoSyncTimestamp = 0;
-    const SYNC_INTERVALO_MS = 5 * 60 * 1000; // 4.0.65: era 10s — baixava o banco inteiro 6x por minuto e estourou o limite de tráfego do Supabase
+    const SYNC_INTERVALO_MS = 5 * 60 * 1000; // 4.0.66: era 10s — baixava o banco inteiro 6x por minuto e estourou o limite de tráfego do Supabase
     let mudancasPendentes = false;
     let fastMutationRevision = 0;
     // Flag para suprimir sincronização (download da nuvem) durante restauração de backup.
@@ -13272,7 +13272,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
       window.addEventListener('mouseup', onEnd);
       // Touch (celular) — attacha no box inteiro
       box.addEventListener('touchstart', onStart, { passive: true });
-      window.addEventListener('touchmove', onMove, { passive: true }); // 4.0.65: passivo = rolagem lisa
+      window.addEventListener('touchmove', onMove, { passive: true }); // 4.0.66: passivo = rolagem lisa
       window.addEventListener('touchend', onEnd);
       window.addEventListener('touchcancel', onEnd);
 
@@ -13954,7 +13954,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
       { chave: 'seqItensExcluidos', tabela: '', bridge: 'FASTR106_SEQ_ITENS_EXCLUIDOS', raw: true },
       { chave: 'seqRotasExcluidas', tabela: '', bridge: 'FASTR106_SEQ_ROTAS_EXCLUIDAS', raw: true },
       { chave: 'fotosExcluidas',    tabela: '', bridge: 'FASTR106_FOTOS_EXCLUIDAS',     raw: true },
-      // 4.0.65: lápide das despesas (antes voltavam de outro aparelho)
+      // 4.0.66: lápide das despesas (antes voltavam de outro aparelho)
       { chave: 'despesasExcluidas', tabela: '', bridge: 'FASTR106_DESPESAS_EXCLUIDAS',  raw: true }
     ];
     // Modo por coleção: 'tabela' (real) | 'bridge' (FAST SERVICOS) | 'off' (nenhum disponível)
@@ -14292,7 +14292,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
       });
       // Merge despesas por ID
       const despMap = new Map();
-      // 4.0.65: lápide de despesas excluídas (antes voltavam da nuvem no merge)
+      // 4.0.66: lápide de despesas excluídas (antes voltavam da nuvem no merge)
       const despesasExcluidasSet = new Set([...((local.despesasExcluidas || []).map(String)), ...((nuvem.despesasExcluidas || []).map(String))]);
       [...nuvemDesp, ...localDesp].forEach(d => {
         if (despesasExcluidasSet.has(String(d.id))) return;
@@ -17597,7 +17597,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
         .replace(/&/g, ' e ')
         .replace(/[^a-z0-9]+/g, ' ')
         .replace(/\s+/g, ' ')
-        .trim(); // 4.0.65: sem espaço nas pontas. Nomes com * no início ou . no final geravam chave com espaço, que nunca batia com a lápide — por isso voltavam.
+        .trim(); // 4.0.66: sem espaço nas pontas. Nomes com * no início ou . no final geravam chave com espaço, que nunca batia com a lápide — por isso voltavam.
     }
 
     // Consolida lugares repetidos sem descartar os dados úteis de nenhuma cópia.
@@ -18426,7 +18426,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
       handle.addEventListener('mousedown', down);
       handle.addEventListener('touchstart', down, { passive: false });
       window.addEventListener('mousemove', move);
-      window.addEventListener('touchmove', move, { passive: true }); // 4.0.65
+      window.addEventListener('touchmove', move, { passive: true }); // 4.0.66
       window.addEventListener('mouseup', up);
       window.addEventListener('touchend', up);
     }
@@ -19317,7 +19317,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
       if (listaFiltrada.length === 0) {
         container.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 30px; font-weight: 700;">
           Nenhuma rota encontrada para os filtros aplicados nesta data.<br>
-          Clique em <strong>"Carregar"</strong> ou use o painel <strong>"Adicionar Item às Rotas do Dia"</strong> acima.
+          Clique em <strong>"Carregar"</strong> ou use o painel <strong>"Criação de rotas"</strong> acima.
         </div>`;
         renderizarRelatorioSequencia(dataSel, []);
         atualizarBoxFlutuanteSelecao();
@@ -19696,8 +19696,9 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
           var constraints = {
             video: {
               facingMode: { ideal: modo },
-              width: { ideal: 3840 },
-              height: { ideal: 2160 },
+              // 4.0.66: 1920x1080 abre mais rápido e bate a foto na hora (4K travava em vários aparelhos)
+              width: { ideal: 1920 },
+              height: { ideal: 1080 },
               // resizeMode:'none' impede o navegador de reduzir o quadro da
               // câmera (era uma das causas do preview/foto borrados).
               resizeMode: 'none',
@@ -19753,8 +19754,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
         btnCap.disabled = true;
         var dsAtual = fastCameraAoVivoState ? fastCameraAoVivoState.dataSel : dataSel;
         var idxAtual = fastCameraAoVivoState ? fastCameraAoVivoState.index : index;
-        var ic = fastCameraAoVivoState ? fastCameraAoVivoState.imageCapture : null;
-        // 1) Caminho de melhor qualidade: foto real do sensor via ImageCapture.
+        var ic = null; // 4.0.66: takePhoto() do sensor demorava vários segundos e travava — usa o quadro do vídeo (instantâneo)
         if (ic && ic.takePhoto) {
           try {
             var blobFoto = await ic.takePhoto();
@@ -19768,15 +19768,20 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
         // real da câmera (videoWidth/videoHeight), não na resolução da tela.
         if (!video.videoWidth) { btnCap.disabled = false; return; }
         var canvas = document.createElement('canvas');
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
+        var escala = Math.min(1, 1920 / Math.max(video.videoWidth, video.videoHeight));
+        canvas.width = Math.round(video.videoWidth * escala);
+        canvas.height = Math.round(video.videoHeight * escala);
         canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+        // 4.0.66: fecha a câmera NA HORA (clique = foto) e grava em segundo plano
+        try { var fl = document.createElement('div'); fl.style.cssText = 'position:fixed;inset:0;background:#fff;opacity:.85;z-index:2147483647;pointer-events:none;transition:opacity .25s'; document.body.appendChild(fl); requestAnimationFrame(function(){ fl.style.opacity = '0'; }); setTimeout(function(){ fl.remove(); }, 320); } catch (e) {}
+        fastFecharCameraAoVivo();
         canvas.toBlob(function (blob) {
-          if (!blob) { btnCap.disabled = false; return; }
-          var arquivo = new File([blob], 'foto_' + Date.now() + '.jpg', { type: 'image/jpeg' });
-          fastFecharCameraAoVivo();
+          if (!blob) { alert('Não foi possível registrar a foto. Tente de novo.'); return; }
+          var agora = new Date(), dd = function(n){ return String(n).padStart(2,'0'); };
+          var nome = 'FAST_' + agora.getFullYear() + dd(agora.getMonth()+1) + dd(agora.getDate()) + '_' + dd(agora.getHours()) + dd(agora.getMinutes()) + dd(agora.getSeconds()) + '.jpg';
+          var arquivo = new File([blob], nome, { type: 'image/jpeg' });
           salvarFotoRota(dsAtual, idxAtual, { target: { files: [arquivo], value: '' } });
-        }, 'image/jpeg', 0.95);
+        }, 'image/jpeg', 0.85);
       };
       iniciarStream(facing);
     }
@@ -20831,7 +20836,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
 
       // Touch (celular)
       handle.addEventListener('touchstart', onStart, { passive: false });
-      document.addEventListener('touchmove', onMove, { passive: true }); // 4.0.65
+      document.addEventListener('touchmove', onMove, { passive: true }); // 4.0.66
       document.addEventListener('touchend', onEnd);
       document.addEventListener('touchcancel', onEnd);
 
@@ -21945,7 +21950,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
           try {
             const nomeArq = `comprovante_${nomeCliente}_${fi + 1}.jpg`;
             const fileObj = await resolverFotoParaFile(fotoRef, nomeArq);
-            if (fileObj) paresFotoDestino.push({ file: fileObj, destino: destino });
+            if (fileObj) paresFotoDestino.push({ file: fileObj, destino: (window.fastFotoDestino ? window.fastFotoDestino(item, fotoRef, destino) : destino) });
           } catch (e) {
             console.warn('Erro ao preparar foto', fi, 'do cliente', item.cliente, e);
           }
@@ -21964,7 +21969,8 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
             typeof navigator !== 'undefined' &&
             typeof navigator.canShare === 'function' &&
             typeof navigator.share === 'function') {
-          const arquivosAgrupados = paresFotoDestino.map(function(par){ return par.file; });
+          // 4.0.66: cada foto sai com o SEU destino escrito nela (o WhatsApp só aceita uma legenda por envio)
+          const arquivosAgrupados = window.fastCarimbarDestino ? await Promise.all(paresFotoDestino.map(function(par){ return window.fastCarimbarDestino(par.file, par.destino); })) : paresFotoDestino.map(function(par){ return par.file; });
           let podeCompartilharGrupo = false;
           try { podeCompartilharGrupo = navigator.canShare({ files: arquivosAgrupados }); } catch(e) {}
           if (podeCompartilharGrupo) {
@@ -21973,7 +21979,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
               await navigator.share({
                 files: arquivosAgrupados,
                 title: 'Comprovantes - ' + (item.cliente || 'Rota agrupada'),
-                text: destino || item.destino || ''
+                text: (window.fastLegendaLista ? window.fastLegendaLista(paresFotoDestino) : (destino || item.destino || ''))
               });
               setTimeout(function(){
                 alert('\u2705 Todas as ' + arquivosAgrupados.length + ' fotos da rota agrupada foram encaminhadas juntas.');
@@ -22267,7 +22273,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
               try {
                 const nomeArq = `comprovante_${nomeClienteArq}_${fi + 1}.jpg`;
                 const fileObj = await resolverFotoParaFile(fotoRef, nomeArq);
-                if (fileObj) paresFotoDestino.push({ file: fileObj, destino: destinoItem });
+                if (fileObj) paresFotoDestino.push({ file: (window.fastCarimbarDestino ? await window.fastCarimbarDestino(fileObj, window.fastFotoDestino(item, fotoRef, destinoItem)) : fileObj), destino: (window.fastFotoDestino ? window.fastFotoDestino(item, fotoRef, destinoItem) : destinoItem) });
               } catch (e) {
                 console.warn('Erro ao preparar foto', fi, 'do cliente', nomeCliente, e);
               }
@@ -22499,7 +22505,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
 
     function abrirModalNovaSeq() {
       document.getElementById('seqItemId').value = '';
-      document.getElementById('modalSeqTitulo').innerHTML = '<i class="fa-solid fa-calendar-plus"></i> Adicionar Item às Rotas do Dia';
+      document.getElementById('modalSeqTitulo').innerHTML = '<i class="fa-solid fa-calendar-plus"></i> Criação de rotas';
       document.getElementById('formModalSeq').reset();
       fastSetMoeda('seqValor', 0);
       // r143: campos por linha de destino abrem VAZIOS (sem 1 / sem R$ 0,00)
@@ -23122,7 +23128,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
 
     // Escapa HTML para texto exibido
     function fastIdSeguro(v){ return String(v==null?'':v).replace(/[^A-Za-z0-9_.:-]/g,''); }
-    // 4.0.65: coluna IMAGEM da tabela de Rotas — ❌ sem foto / ✅ com foto + nome do arquivo
+    // 4.0.66: coluna IMAGEM da tabela de Rotas — ❌ sem foto / ✅ com foto + nome do arquivo
     function fast63CelulaImagem(r){
       var fotos=Array.isArray(r&&r.fotos)?r.fotos.filter(Boolean):((r&&r.foto)?[r.foto]:[]);
       if(!fotos.length) return '<span class="f63-sem" title="Sem imagem">❌</span>';
@@ -27995,7 +28001,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
       const tipoVolFiltro = document.getElementById('filtroTipoVolume').value;
       const stFiltro = document.getElementById('filtroStatus').value;
       const stRotaFiltro = document.getElementById('filtroStatusRota').value;
-      // 4.0.65: busca por origem e destino (sem diferença de maiúsculas, acentos e pontuação)
+      // 4.0.66: busca por origem e destino (sem diferença de maiúsculas, acentos e pontuação)
       const _f63n = v => String(v || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
       const origemFiltro = _f63n((document.getElementById('filtroRotaOrigem') || {}).value);
       const destinoFiltro = _f63n((document.getElementById('filtroRotaDestino') || {}).value);
@@ -33287,7 +33293,7 @@ window.fastMobileNav = function(ev, abaId, botao) {
           <div style="width:42px;height:42px;border-radius:11px;background:rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px);"><i class="fa-solid fa-sparkles" style="font-size:18px;"></i></div>
           <div>
             <div style="font-size:12px;font-weight:600;opacity:.9;letter-spacing:.5px;text-transform:uppercase;">Novidades</div>
-            <div id="fastWhatsNewVer" style="font-size:19px;font-weight:800;line-height:1.2;">Versao 4.0.65</div>
+            <div id="fastWhatsNewVer" style="font-size:19px;font-weight:800;line-height:1.2;">Versao 4.0.66</div>
           </div>
         </div>
         <div id="fastWhatsNewDate" style="font-size:12.5px;opacity:.9;display:flex;align-items:center;gap:6px;"><i class="fa-solid fa-clock"></i> <span>Lançada em 17/09/2026 16:20</span></div>
@@ -33957,13 +33963,13 @@ window.fastMobileNav = function(ev, abaId, botao) {
         // assim que o aplicativo abre, e depois verifica a cada 5 minutos
         // — renovando um pouco antes de expirar.
         function reconectarSilenciosamente(){
-          // 4.0.65: com a conexão permanente (Supabase), renova pelo servidor, sem janela do Google.
+          // 4.0.66: com a conexão permanente (Supabase), renova pelo servidor, sem janela do Google.
           if(localStorage.getItem('fast_drive_servidor')==='1' && typeof window.fastDriveRenovarServidor==='function'){
             var expS=Number(localStorage.getItem(TOKEN_EXPIRES_KEY)||0);
             if(!token()||!expS||(expS-Date.now())<15*60*1000) window.fastDriveRenovarServidor();
             return;
           }
-          // 4.0.65: SEM janela do Google automática. Ela aparecia o tempo todo pedindo
+          // 4.0.66: SEM janela do Google automática. Ela aparecia o tempo todo pedindo
           // login (principalmente no APK) e ainda interrompia a câmera ao vivo.
           // Sem a conexão permanente, a renovação só acontece quando o usuário toca em Conectar.
           if(!window.fastDrivePermitirPopupAuto) return;
@@ -33997,7 +34003,7 @@ window.fastMobileNav = function(ev, abaId, botao) {
         // (v2.4.15) tenta renovar com mais frequência (a cada 2 min) e em mais eventos.
         setInterval(reconectarSilenciosamente, 15*60*1000);
         window.fastDriveReconectarSilencioso = reconectarSilenciosamente;
-        // 4.0.65: MANTER O DRIVE SEMPRE CONECTADO.
+        // 4.0.66: MANTER O DRIVE SEMPRE CONECTADO.
         // O token do Google dura 1h e o celular bloqueia a renovação feita "sozinha"
         // (sem toque do usuário). Agora: (1) o script do Google fica pré-carregado;
         // (2) no primeiro toque na tela com o token vencido ou perto de vencer, a
@@ -34031,13 +34037,13 @@ window.fastMobileNav = function(ev, abaId, botao) {
             try{tokenClient.requestAccessToken({prompt:''});}catch(e){}
           }
           if(localStorage.getItem('fast_drive_ja_conectou')==='1')carregarGIS().then(garantirCliente).catch(function(){});
-          /* 4.0.65: renovação por toque desligada (abria a janela de login do Google no meio do uso e da câmera). */
+          /* 4.0.66: renovação por toque desligada (abria a janela de login do Google no meio do uso e da câmera). */
           document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible'){_driveSilentUltimaTentativa=0;reconectarSilenciosamente();}});
           window.addEventListener('focus',function(){_driveSilentUltimaTentativa=0;reconectarSilenciosamente();});
           setInterval(function(){_driveSilentUltimaTentativa=0;reconectarSilenciosamente();},2*60*1000);
           window.fastDriveGarantirConexao=renovar;
         })();
-        // 4.0.65: CONEXÃO PERMANENTE via Supabase Edge Function "google-drive-token".
+        // 4.0.66: CONEXÃO PERMANENTE via Supabase Edge Function "google-drive-token".
         (function(){
           var FN='https://yhxuplhohhetzloxvgku.supabase.co/functions/v1/google-drive-token';
           var PK='sb_publishable_jlsorkXci3_0Hla7gt8z1g_pe6zOT19';
@@ -34994,7 +35000,7 @@ window.fastMobileNav = function(ev, abaId, botao) {
     window.fastUserRevoke=function(id){var a=jget(USERS,[]),u=a.find(function(x){return x.id===id});if(!u)return;u.sessionVersion++;jset(USERS,a);fastAuditar('encerrou sessões','usuario',id);renderUsers();alert('Sessões locais deste usuário foram revogadas. A revogação entre aparelhos será ativada quando o backend seguro estiver conectado.')};
     window.fastAuditOpen=function(){var a=jget(AUDIT,[]).slice().reverse(),rows=a.map(function(x){var u=x.usuario||{},quando=new Date(x.quando).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});return '<tr><td>'+quando+'</td><td>'+esc(u.id||'')+'</td><td>'+esc(u.nome||'')+'</td><td>'+esc(ROLE_LBL[u.perfil]||u.perfil||'')+'</td><td>'+esc(x.acao)+'</td><td>'+esc(x.entidade)+'</td><td>'+esc(x.detalhe)+'</td></tr>'}).join('');modal('Registro de auditoria','<div style="overflow:auto"><table class="fast71-table"><thead><tr><th>Data/Hora</th><th>ID</th><th>Nome</th><th>Função</th><th>Ação</th><th>Item</th><th>Detalhes</th></tr></thead><tbody>'+rows+'</tbody></table></div>')};
 
-    async function employeeLogin(user,pwd){if(String(user||'').trim().toLowerCase()==='fastservicoslog@gmail.com')return false;/* 4.0.65: o e-mail da conta principal sempre entra pela conta principal (Supabase) */var u=jget(USERS,[]).find(function(x){return x.username===String(user).trim().toLowerCase()});if(!u)return false;if(!u.active)throw new Error('Usuário bloqueado pelo administrador.');if(await hash(pwd,u.salt)!==u.hash)throw new Error('Usuário ou senha inválidos.');jset(SESSION,{userId:u.id,name:u.name,role:u.role,version:u.sessionVersion,loggedAt:new Date().toISOString()});if(window.fastAuthStartRememberedSession)window.fastAuthStartRememberedSession();fastAuditar('entrou','sessão',u.id);var g=document.getElementById('fastLoginGate');if(g)g.classList.remove('show');document.body.style.overflow='';var sp=document.getElementById('fastSplash');if(sp)sp.style.display='none';applyRole(u.role);document.dispatchEvent(new Event('fast-login-success'));return true}
+    async function employeeLogin(user,pwd){if(String(user||'').trim().toLowerCase()==='fastservicoslog@gmail.com')return false;/* 4.0.66: o e-mail da conta principal sempre entra pela conta principal (Supabase) */var u=jget(USERS,[]).find(function(x){return x.username===String(user).trim().toLowerCase()});if(!u)return false;if(!u.active)throw new Error('Usuário bloqueado pelo administrador.');if(await hash(pwd,u.salt)!==u.hash)throw new Error('Usuário ou senha inválidos.');jset(SESSION,{userId:u.id,name:u.name,role:u.role,version:u.sessionVersion,loggedAt:new Date().toISOString()});if(window.fastAuthStartRememberedSession)window.fastAuthStartRememberedSession();fastAuditar('entrou','sessão',u.id);var g=document.getElementById('fastLoginGate');if(g)g.classList.remove('show');document.body.style.overflow='';var sp=document.getElementById('fastSplash');if(sp)sp.style.display='none';applyRole(u.role);document.dispatchEvent(new Event('fast-login-success'));return true}
     function applyRole(role){document.body.dataset.fastRole=role||'administrador';if(!role||role==='administrador')return;var allowed=role==='entregador'||role==='motorista'?['rotasDia','rastreamento','central']:(role==='financeiro'?['central','despesas','despesasEmpresa','dre','dashboard']:['central','rotas','rotasDia','clientes','lugares','despesas','dashboard']);document.querySelectorAll('[onclick*="proIr("],[onclick*="trocarAba("]').forEach(function(e){var m=(e.getAttribute('onclick')||'').match(/["']([A-Za-z]+)["']/);if(m)e.style.display=allowed.indexOf(m[1])>=0?'':'none'})}
 
     window.fastOcrRota=function(){var inp=document.getElementById('fast71OcrInput');if(inp)inp.click()};
@@ -35858,7 +35864,7 @@ body.fast-touch-ui #scrollNavBox { bottom: 130px !important; top: auto !importan
   }, true);
 })();
 </script>
-<script src="https://adaiascearataiana-gif.github.io/fastservicosapp/v2-ui.js?v=4.0.65"></script>
+<script src="https://adaiascearataiana-gif.github.io/fastservicosapp/v2-ui.js?v=4.0.66"></script>
 <script id="r103c-v2-toast-fix">
 /* r103-c: o toast do v2-ui ("FAST Serviços 2.2.0 pronto para operar.") ficava
    com opacity:0 depois de esconder, mas SEM pointer-events:none — seguia
@@ -36534,7 +36540,7 @@ body.fast-edition-desktop #rotasDia .card{padding:16px!important;margin-bottom:1
 })();
 </script>
 <div id="fastDesktopBrandCorner" aria-label="FAST Serviços — Operação Suíte">
-  <img src="assets/fast-servicos-official-yellow.png?v=4.0.65" alt="FAST Serviços">
+  <img src="assets/fast-servicos-official-yellow.png?v=4.0.66" alt="FAST Serviços">
   <div><strong>FAST SERVIÇOS</strong><span id="fastDesktopBrandPlatform">OPERAÇÃO SUÍTE · LINUX</span></div>
 </div>
 <div id="fastLinuxBadge">● FAST LINUX · SEGURO</div>
@@ -36628,7 +36634,7 @@ body.fast-exclusive-app main { padding-bottom: 12px !important; }
 }
 @media print { #fastV2Launcher { display: none !important; } }
 </style>
-<button class="fast-v2-launcher ripple fast-drag-pinned" id="fastV2Launcher" aria-label="Abrir central rápida" title="Central rápida (Ctrl+K) · segure e arraste para mover" style="user-select: none; inset: 411px auto auto 373px !important;" data-dragged="0"><i class="fa-solid fa-bolt"></i></button><div class="fast-v2-palette" id="fastV2Palette" role="dialog" aria-modal="true" aria-label="Central rápida"><div class="fast-v2-palette-box"><div class="fast-v2-palette-head"><i class="fa-solid fa-magnifying-glass"></i><input id="fastV2Query" placeholder="Ir para uma área ou executar uma ação..."><kbd style="user-select: none;">ESC</kbd></div><div class="fast-v2-command-list" id="fastV2Commands"><button class="fast-v2-command ripple" data-v2-go="central" style="user-select: none;"><i class="fa-solid fa-table-cells-large"></i><span>Centro de Operações<small>Visão geral e prioridades</small></span><i class="fa-solid fa-arrow-right"></i></button><button class="fast-v2-command ripple" data-v2-go="rotasDia" style="user-select: none;"><i class="fa-solid fa-calendar-day"></i><span>Rotas do Dia<small>Execução, fotos e conclusão</small></span><i class="fa-solid fa-arrow-right"></i></button><button class="fast-v2-command ripple" data-v2-go="rotas" style="user-select: none;"><i class="fa-solid fa-route"></i><span>Rotas e Serviços<small>Histórico geral de viagens</small></span><i class="fa-solid fa-arrow-right"></i></button><button class="fast-v2-command ripple" data-v2-go="rastreamento" style="user-select: none;"><i class="fa-solid fa-location-dot"></i><span>Mapa e Rastreamento<small>Motoristas e ETA ao vivo</small></span><i class="fa-solid fa-arrow-right"></i></button><button class="fast-v2-command ripple" data-v2-go="clientes" style="user-select: none;"><i class="fa-solid fa-building-user"></i><span>Clientes<small>Cadastros e histórico</small></span><i class="fa-solid fa-arrow-right"></i></button><button class="fast-v2-command ripple" data-v2-go="motoristas" style="user-select: none;"><i class="fa-solid fa-id-card"></i><span>Motoristas<small>Equipe de entrega</small></span><i class="fa-solid fa-arrow-right"></i></button><button class="fast-v2-command ripple" data-v2-go="despesas" style="user-select: none;"><i class="fa-solid fa-receipt"></i><span>Despesas<small>Lançamentos financeiros</small></span><i class="fa-solid fa-arrow-right"></i></button><button class="fast-v2-command ripple" data-v2-go="dashboard" style="user-select: none;"><i class="fa-solid fa-chart-pie"></i><span>Dashboard<small>Indicadores e análises</small></span><i class="fa-solid fa-arrow-right"></i></button><button class="fast-v2-command ripple" data-v2-go="dre" style="user-select: none;"><i class="fa-solid fa-chart-line"></i><span>DRE<small>Resultado financeiro</small></span><i class="fa-solid fa-arrow-right"></i></button><button class="fast-v2-command ripple" data-v2-go="configuracoes" style="user-select: none;"><i class="fa-solid fa-sliders"></i><span>Configurações<small>Integrações, segurança e backup</small></span><i class="fa-solid fa-arrow-right"></i></button><button class="fast-v2-command ripple" data-fast-health="1" style="user-select: none;"><i class="fa-solid fa-stethoscope"></i><span>Diagnóstico<small>Integridade, backup e atualização</small></span><i class="fa-solid fa-arrow-right"></i></button></div><div style="display:flex;gap:8px;padding:10px 14px;border-top:1px solid #dbe4ef"><button class="btn-secondary ripple" data-v2-action="density" style="user-select: none;"><i class="fa-solid fa-table-cells"></i> Alternar densidade</button><button class="btn-secondary ripple" data-v2-action="focus" style="user-select: none;"><i class="fa-solid fa-expand"></i> Modo foco</button><button class="btn-secondary ripple" data-v2-go="configuracoes" style="user-select: none;"><i class="fa-solid fa-shield-halved"></i> Segurança</button></div></div></div><div class="fast-v2-toast" id="fastV2Toast" style="pointer-events:none;">FAST Serviços 4.0.65 pronto para operar.</div><script id="r140-launcher-drag-js">
+<button class="fast-v2-launcher ripple fast-drag-pinned" id="fastV2Launcher" aria-label="Abrir central rápida" title="Central rápida (Ctrl+K) · segure e arraste para mover" style="user-select: none; inset: 411px auto auto 373px !important;" data-dragged="0"><i class="fa-solid fa-bolt"></i></button><div class="fast-v2-palette" id="fastV2Palette" role="dialog" aria-modal="true" aria-label="Central rápida"><div class="fast-v2-palette-box"><div class="fast-v2-palette-head"><i class="fa-solid fa-magnifying-glass"></i><input id="fastV2Query" placeholder="Ir para uma área ou executar uma ação..."><kbd style="user-select: none;">ESC</kbd></div><div class="fast-v2-command-list" id="fastV2Commands"><button class="fast-v2-command ripple" data-v2-go="central" style="user-select: none;"><i class="fa-solid fa-table-cells-large"></i><span>Centro de Operações<small>Visão geral e prioridades</small></span><i class="fa-solid fa-arrow-right"></i></button><button class="fast-v2-command ripple" data-v2-go="rotasDia" style="user-select: none;"><i class="fa-solid fa-calendar-day"></i><span>Rotas do Dia<small>Execução, fotos e conclusão</small></span><i class="fa-solid fa-arrow-right"></i></button><button class="fast-v2-command ripple" data-v2-go="rotas" style="user-select: none;"><i class="fa-solid fa-route"></i><span>Rotas e Serviços<small>Histórico geral de viagens</small></span><i class="fa-solid fa-arrow-right"></i></button><button class="fast-v2-command ripple" data-v2-go="rastreamento" style="user-select: none;"><i class="fa-solid fa-location-dot"></i><span>Mapa e Rastreamento<small>Motoristas e ETA ao vivo</small></span><i class="fa-solid fa-arrow-right"></i></button><button class="fast-v2-command ripple" data-v2-go="clientes" style="user-select: none;"><i class="fa-solid fa-building-user"></i><span>Clientes<small>Cadastros e histórico</small></span><i class="fa-solid fa-arrow-right"></i></button><button class="fast-v2-command ripple" data-v2-go="motoristas" style="user-select: none;"><i class="fa-solid fa-id-card"></i><span>Motoristas<small>Equipe de entrega</small></span><i class="fa-solid fa-arrow-right"></i></button><button class="fast-v2-command ripple" data-v2-go="despesas" style="user-select: none;"><i class="fa-solid fa-receipt"></i><span>Despesas<small>Lançamentos financeiros</small></span><i class="fa-solid fa-arrow-right"></i></button><button class="fast-v2-command ripple" data-v2-go="dashboard" style="user-select: none;"><i class="fa-solid fa-chart-pie"></i><span>Dashboard<small>Indicadores e análises</small></span><i class="fa-solid fa-arrow-right"></i></button><button class="fast-v2-command ripple" data-v2-go="dre" style="user-select: none;"><i class="fa-solid fa-chart-line"></i><span>DRE<small>Resultado financeiro</small></span><i class="fa-solid fa-arrow-right"></i></button><button class="fast-v2-command ripple" data-v2-go="configuracoes" style="user-select: none;"><i class="fa-solid fa-sliders"></i><span>Configurações<small>Integrações, segurança e backup</small></span><i class="fa-solid fa-arrow-right"></i></button><button class="fast-v2-command ripple" data-fast-health="1" style="user-select: none;"><i class="fa-solid fa-stethoscope"></i><span>Diagnóstico<small>Integridade, backup e atualização</small></span><i class="fa-solid fa-arrow-right"></i></button></div><div style="display:flex;gap:8px;padding:10px 14px;border-top:1px solid #dbe4ef"><button class="btn-secondary ripple" data-v2-action="density" style="user-select: none;"><i class="fa-solid fa-table-cells"></i> Alternar densidade</button><button class="btn-secondary ripple" data-v2-action="focus" style="user-select: none;"><i class="fa-solid fa-expand"></i> Modo foco</button><button class="btn-secondary ripple" data-v2-go="configuracoes" style="user-select: none;"><i class="fa-solid fa-shield-halved"></i> Segurança</button></div></div></div><div class="fast-v2-toast" id="fastV2Toast" style="pointer-events:none;">FAST Serviços 4.0.66 pronto para operar.</div><script id="r140-launcher-drag-js">
 (function(){
   'use strict';
   /* r140 / 2.3.25 — Central Rapida (botao ⚡) arrastavel.
@@ -36939,10 +36945,10 @@ body.fast-exclusive-app main { padding-bottom: 12px !important; }
     var refs=fotosItem(item);if(refs.length<=1)return typeof envioAnterior==='function'?envioAnterior.apply(this,arguments):avisar('Esta rota nao possui fotos.','warning');
     var html=btn?btn.innerHTML:'',arquivos=[];if(btn){btn.disabled=true;btn.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> Preparando '+refs.length+' fotos...'}
     try{
-      for(var i=0;i<refs.length;i++){var destino=Array.isArray(item.fotoNomesDestino)&&item.fotoNomesDestino[i]||item.destino||'Destino';var temporario=await window.resolverFotoParaFile(refs[i],'foto_'+(i+1)+'.jpg');if(temporario)arquivos.push(renomear(temporario,nomeSeguro(destino)+' '+(i+1)+extensao(temporario)))}
+      var pares66=[];for(var i=0;i<refs.length;i++){var destino=(window.fastFotoDestino?window.fastFotoDestino(item,refs[i],''):'')||(Array.isArray(item.fotoNomesDestino)&&item.fotoNomesDestino[i])||item.destino||'Destino';var temporario=await window.resolverFotoParaFile(refs[i],'foto_'+(i+1)+'.jpg');if(temporario){/* 4.0.66: o destino de CADA foto vai escrito na própria foto */if(window.fastCarimbarDestino)temporario=await window.fastCarimbarDestino(temporario,destino);arquivos.push(renomear(temporario,nomeSeguro(destino)+' '+(i+1)+extensao(temporario)));pares66.push({destino:destino})}}
       if(arquivos.length!==refs.length)throw new Error('Nem todas as fotos puderam ser carregadas.');
       var pode=!!(navigator.share&&navigator.canShare&&navigator.canShare({files:arquivos}));
-      if(pode){if(btn)btn.innerHTML='<i class="fa-solid fa-paper-plane"></i> Enviando '+arquivos.length+' fotos...';await navigator.share({files:arquivos,title:'Fotos da rota - '+(item.cliente||'Cliente'),text:(item.destino||'')});avisar('Todas as '+arquivos.length+' fotos foram encaminhadas juntas e renomeadas pelo destino.','success')}
+      if(pode){if(btn)btn.innerHTML='<i class="fa-solid fa-paper-plane"></i> Enviando '+arquivos.length+' fotos...';await navigator.share({files:arquivos,title:'Fotos da rota - '+(item.cliente||'Cliente'),text:(window.fastLegendaLista?window.fastLegendaLista(pares66):(item.destino||''))});avisar('Todas as '+arquivos.length+' fotos foram encaminhadas juntas e renomeadas pelo destino.','success')}
       else{arquivos.forEach(baixar);window.open('https://api.whatsapp.com/send?text='+encodeURIComponent('Fotos da rota - '+(item.cliente||'Cliente')+' - '+(item.destino||'')),'_blank');avisar(arquivos.length+' fotos foram baixadas com o nome do destino. Anexe todas no WhatsApp aberto.','success')}
     }catch(e){if(!(e&&e.name==='AbortError')){console.error('FAST 2.3.31 - envio multiplo:',e);avisar('Nao foi possivel enviar todas as fotos: '+(e.message||e),'error')}}finally{if(btn){btn.disabled=false;btn.innerHTML=html}}
   };
@@ -37265,13 +37271,26 @@ body.fast-exclusive-app main { padding-bottom: 12px !important; }
     if(p1!==p2){if(err)err.textContent='As senhas não coincidem.';return}
     busy=true;if(btn){btn.disabled=true;btn.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> Salvando...'}
     try{
-      await authRequest('/user',{method:'PUT',token:token,body:{password:p1}});
+      var _sa=new Date().toISOString();
+      await authRequest('/user',{method:'PUT',token:token,body:{password:p1,data:{senha_alterada_em:_sa}}});
+      // 4.0.66: senha central — desconecta os OUTROS aparelhos e marca a versão da senha
+      try{await authRequest('/logout?scope=others',{method:'POST',token:token})}catch(_e){}
+      try{localStorage.setItem('fast_senha_versao',_sa);localStorage.removeItem('fast_senha_mudou')}catch(_e){}
       await localCredential(p1);
       try{history.replaceState({},document.title,location.pathname)}catch(e){}
       alert('Senha atualizada com sucesso. A biometria deverá ser cadastrada novamente por segurança.');
       location.reload();
     }catch(e){
-      if(err)err.textContent='Não foi possível atualizar a senha. O link pode ter expirado; solicite um novo.';
+      // 4.0.66: mostra o MOTIVO real que o servidor devolveu (antes era sempre "link expirado")
+      var pl=(e&&e.payload)||{},cod=String(pl.error_code||pl.code||'').toLowerCase(),msg=String((e&&e.message)||'').toLowerCase(),st=(e&&e.status)||0,motivo;
+      if(cod==='same_password'||/different from the old/.test(msg))motivo='A nova senha precisa ser DIFERENTE da senha atual. Escolha outra.';
+      else if(cod==='weak_password'||/weak|should contain|at least/.test(msg))motivo='Senha fraca para o servidor. Use pelo menos 8 caracteres misturando letras, números e um símbolo (ex.: !@#).';
+      else if(st===401||st===403||/expired|invalid jwt|bad_jwt|session_not_found|token/.test(msg+cod))motivo='Este link expirou ou já foi usado. Peça um novo em "Esqueceu a senha?" e abra o link logo que chegar.';
+      else if(st===429||/rate|too many/.test(msg))motivo='Muitas tentativas seguidas. Aguarde alguns minutos e tente de novo.';
+      else if(st===402||/exceed|quota|restrict/.test(msg))motivo='O servidor está limitando o acesso por excesso de uso do plano gratuito. Tente mais tarde.';
+      else if(!navigator.onLine||/failed to fetch|network/.test(msg))motivo='Sem conexão com a internet. Confira e tente de novo.';
+      else motivo='Não foi possível atualizar a senha: '+((e&&e.message)||'erro desconhecido')+(st?' ('+st+')':'');
+      if(err)err.textContent=motivo;
       busy=false;if(btn){btn.disabled=false;btn.innerHTML='<i class="fa-solid fa-shield-check"></i> Salvar nova senha'}
     }
   };
@@ -38552,12 +38571,20 @@ setInterval(function(){try{var tab=document.getElementById('rotasDia');if(tab&&t
 
   // ---- Login: banco de dados primeiro, local como fallback ----
   async function loginBanco(usuario,senha){
-    var email=companyEmail();
+    // 4.0.66: se o usuário digitou um e-mail, é ele que vai para o banco. Antes usava só o
+    // e-mail salvo nos Dados da Empresa DESTE aparelho; no APK ele não existia e a senha
+    // nova era comparada com a cópia antiga guardada no aparelho ("senha incorreta").
+    var digitado=String(usuario||'').trim().toLowerCase();
+    var email=validEmail(digitado)?digitado:companyEmail();
+    if(!validEmail(email))email='fastservicoslog@gmail.com';
     if(!validEmail(email))return {ok:false,motivo:'sem-email'};
     try{
       var resp=await authRequest('/token?grant_type=password',{body:{email:email,password:senha}});
       salvarSessao(resp);
-      await sincronizarCredencialLocal(senha,usuario);
+      try{var _sv=resp&&resp.user&&resp.user.user_metadata&&resp.user.user_metadata.senha_alterada_em;localStorage.setItem('fast_senha_versao',_sv||'');localStorage.removeItem('fast_senha_mudou')}catch(_e){}
+      // 4.0.66: só regrava a cópia local (e desliga a biometria) se a senha MUDOU
+      var jaIgual=false;try{jaIgual=await verificarCredencialLocal(usuario,senha)}catch(e){}
+      if(!jaIgual)await sincronizarCredencialLocal(senha,usuario);
       return {ok:true,origem:'banco'};
     }catch(e){
       if(e&&e.status===400)return {ok:false,motivo:'credencial'};
@@ -38590,9 +38617,9 @@ setInterval(function(){try{var tab=document.getElementById('rotasDia');if(tab&&t
       if(resultado.motivo==='credencial'){
         // Senha nao confere no banco. Se houver credencial local valida
         // (ex.: conta antiga ainda nao migrada), permite o acesso local.
-        var localOk=false;
-        try{localOk=await verificarCredencialLocal(usuario,senha)}catch(e){}
-        if(localOk)return anterior.apply(this,arguments);
+        // 4.0.66: a senha é central (servidor). A cópia antiga do aparelho NÃO vale mais
+        // quando o servidor recusa — senão a senha anterior continuaria entrando.
+        try{localStorage.setItem('fast_senha_mudou','1');localStorage.removeItem('fast_auth_bio')}catch(e){}
         if(err)err.textContent='Usuário ou senha incorretos.';
         var p=el('fastGatePwd');if(p){p.value='';p.focus()}
         return;
@@ -38601,6 +38628,8 @@ setInterval(function(){try{var tab=document.getElementById('rotasDia');if(tab&&t
         if(err)err.textContent='Muitas tentativas. Aguarde alguns minutos e tente novamente.';
         return;
       }
+      // 4.0.66: senha trocada em outro lugar — não aceita a cópia antiga sem internet
+      if(localStorage.getItem('fast_senha_mudou')==='1'){if(err)err.textContent='A senha foi trocada em outro aparelho. Conecte-se à internet e entre com a senha nova.';return;}
       // Sem conexao / sem e-mail cadastrado: usa o fluxo local.
       return anterior.apply(this,arguments);
     };
@@ -39070,7 +39099,7 @@ setInterval(function(){try{var tab=document.getElementById('rotasDia');if(tab&&t
 <script src="motorista-admin.js?v=1"></script>
 <script src="datavalid-panel.js"></script>
 <script src="desktop-guides-keyboard.js"></script>
-<!-- 4.0.65: table-viewport.js removido — esticava as tabelas até o fim da tela (espaço em branco) e brigava com a altura das tabelas a cada rolagem/toque -->
+<!-- 4.0.66: table-viewport.js removido — esticava as tabelas até o fim da tela (espaço em branco) e brigava com a altura das tabelas a cada rolagem/toque -->
 <script src="clear-money-on-tap.js?v=1"></script>
 <style id="fast-android-full-viewport-20260922">
   /* O WebView nativo ja desconta as barras do Android do seu viewport. */
@@ -39218,7 +39247,7 @@ setInterval(function(){try{var tab=document.getElementById('rotasDia');if(tab&&t
   document.addEventListener('visibilitychange', function(){ if(!document.hidden) pullSync(); });
   W.addEventListener('online', pullSync);
   // pull frequente (quase tempo real) enquanto a aba esta visivel
-  /* 4.0.65: laço extra desligado — a sincronização principal (5 min + ao abrir/voltar ao app + ao salvar) já cobre */
+  /* 4.0.66: laço extra desligado — a sincronização principal (5 min + ao abrir/voltar ao app + ao salvar) já cobre */
   // trava periodica + refresh se removeu rota fantasma
   setInterval(function(){
     try{
@@ -40487,7 +40516,7 @@ body.fast-home-reveal .tab-content.active{
 <script id="fast-4035-update-note">
 (function(){
   'use strict';
-  var V='4.0.65';
+  var V='4.0.66';
   var meta=document.querySelector('meta[name="fast-app-version"]');if(meta)meta.content=V;
   var latest=document.querySelector('meta[name="fast-latest-update"]');if(latest)latest.content='4.0.43: relatório geral de rotas, filtro por cliente, links diretos do Google Drive e sincronização das fotos de rotas avulsas; artes oficiais reaplicadas nos quatro aplicativos.';
   var log=document.querySelector('meta[name="fast-app-changelog"]');if(log){try{var a=JSON.parse(log.content||'[]');a.unshift({type:'novo',text:'4.0.36 (26/09/2026): Relatório Geral de Rotas com histórico completo, filtro por cliente/data/status, valores, fotos e link direto para a pasta do Google Drive.'},{type:'melhorado',text:'4.0.36 (26/09/2026): fotos adicionadas pela edição de ROTAS passam a usar a mesma fila de sincronização do Google Drive das ROTAS DO DIA; rotas antigas com fotos são verificadas e colocadas na fila automaticamente.'},{type:'melhorado',text:'4.0.36 (26/09/2026): artes oficiais azul, vermelha, laranja e verde reaplicadas nos locais de Rotas do Dia, Despesas, Cliente FAST e Motorista FAST, incluindo central de downloads e identidade de acesso.'});log.content=JSON.stringify(a.slice(0,40));}catch(e){}}
@@ -40674,6 +40703,22 @@ html body .seq-number-wrap>.f47-cb{margin:0 6px 0 0!important}
   'use strict';
   var POR_PAG=10, LETRAS='ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
   var W=window;
+  /* 4.0.66: quantidade de linhas por página escolhida pelo usuário (por tabela, fica salva) */
+  function ppDe(L){var k=L&&L.k?L.k:'';var v=0;try{v=parseInt(localStorage.getItem('fast_por_pagina_'+k),10)}catch(e){}return v>0?v:POR_PAG}
+  function ppSalvar(L,v){try{localStorage.setItem('fast_por_pagina_'+L.k,String(v))}catch(e){}}
+  function montarPP(L,sel){
+    if(!sel)return;
+    var atual=ppDe(L),ops=[10,15,20,30,50,100];
+    if(ops.indexOf(atual)<0&&atual<100000)ops.push(atual);ops.sort(function(a,b){return a-b});
+    sel.innerHTML=ops.map(function(n){return '<option value="'+n+'"'+(n===atual?' selected':'')+'>'+n+' por página</option>'}).join('')+'<option value="100000"'+(atual>=100000?' selected':'')+'>Todas</option><option value="outro">Outro número…</option>';
+    sel.onchange=function(){
+      var v=sel.value;
+      if(v==='outro'){var r=prompt('Quantas linhas por página?',String(ppDe(L)));var n=parseInt(r,10);if(!(n>0)){montarPP(L,sel);return}v=Math.min(n,100000)}
+      ppSalvar(L,Number(v));if(EST[L.k])EST[L.k].pag=1;montarPP(L,sel);
+      if(L.k==='rel'){try{fastRelPorPagina=ppDe(L);fastRelPagAtual=1}catch(e){}try{W.fastRelatorioRotasRender()}catch(e){}}
+      else aplicar(L,true);
+    };
+  }
   function $(id){return document.getElementById(id)}
   function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
   function canon(v){try{if(typeof destNormalizarNome==='function')return destNormalizarNome(v)}catch(e){}return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/\s+/g,' ').trim()}
@@ -40700,7 +40745,7 @@ html body .seq-number-wrap>.f47-cb{margin:0 6px 0 0!important}
     {k:'drive',cont:'fastDriveQueueTableBody',semSel:true,semLetra:true}
   ];
   var EST={};LISTAS.forEach(function(L){EST[L.k]={letra:'',pag:1,total:-1}});
-  /* 4.0.65: a SELEÇÃO sobrevive às atualizações da tabela (sincronização, filtros,
+  /* 4.0.66: a SELEÇÃO sobrevive às atualizações da tabela (sincronização, filtros,
      renderizações). Só some quando o usuário limpa, troca de página/letra ou conclui uma ação. */
   var SEL={};
   function selSet(k){return SEL[k]||(SEL[k]=new Set())}
@@ -40767,15 +40812,16 @@ html body .seq-number-wrap>.f47-cb{margin:0 6px 0 0!important}
     var top=$('f47top_'+L.k);
     if(!top){
       top=document.createElement('div');top.id='f47top_'+L.k;top.className='f47-top no-print';
-      top.innerHTML=(L.semLetra?'<span></span>':'<div class="f47-bar" id="f47bar_'+L.k+'"></div>')+'<span class="f47-lock"><i class="fa-solid fa-lock"></i> 10 por página</span>';
+      top.innerHTML=(L.semLetra?'<span></span>':'<div class="f47-bar" id="f47bar_'+L.k+'"></div>')+'<label class="f47-lock f47-pp"><i class="fa-solid fa-list-ol"></i> <select class="f47-pp-sel" aria-label="Linhas por página"></select></label>';
+      montarPP(L,top.querySelector('.f47-pp-sel'));
       w.parentNode.insertBefore(top,w);
-      if(!L.semLetra)top.querySelector('.f47-bar').addEventListener('click',function(e){var b=e.target.closest('button');if(!b||b.disabled)return;EST[L.k].letra=b.dataset.l;EST[L.k].pag=1;limparSel(L);aplicar(L,true)});
+      if(!L.semLetra)top.querySelector('.f47-bar').addEventListener('click',function(e){var b=e.target.closest('button');if(!b||b.disabled)return;EST[L.k].letra=b.dataset.l;EST[L.k].pag=1;aplicar(L,true)});
     }else if(top.nextSibling!==w&&w.parentNode){w.parentNode.insertBefore(top,w)}
     var pg=$('f47pg_'+L.k);
     if(!pg){
       pg=document.createElement('div');pg.id='f47pg_'+L.k;pg.className='f47-pager no-print';
       pg.innerHTML='<button type="button" class="btn-secondary ripple" data-d="-1">&larr; Anterior</button><span></span><button type="button" class="btn-secondary ripple" data-d="1">Próxima &rarr;</button>';
-      pg.addEventListener('click',function(e){var b=e.target.closest('button');if(!b||b.disabled)return;EST[L.k].pag+=Number(b.dataset.d);limparSel(L);aplicar(L,true)});
+      pg.addEventListener('click',function(e){var b=e.target.closest('button');if(!b||b.disabled)return;EST[L.k].pag+=Number(b.dataset.d);aplicar(L,true)});
     }
     if(w.nextSibling!==pg)w.parentNode.insertBefore(pg,w.nextSibling);
     return {top:top,pg:pg,w:w};
@@ -40808,8 +40854,9 @@ html body .seq-number-wrap>.f47-cb{margin:0 6px 0 0!important}
     linhas.forEach(function(r){var l=letraDe(nomeLinha(L,c,r));r.__f47l=l;if(l)presentes[l]=(presentes[l]||0)+1});
     if(st.letra&&!presentes[st.letra])st.letra='';
     var vis=linhas.filter(function(r){return !st.letra||r.__f47l===st.letra});
-    var totPag=Math.max(1,Math.ceil(vis.length/POR_PAG));if(st.pag>totPag)st.pag=totPag;if(st.pag<1)st.pag=1;
-    var ini=(st.pag-1)*POR_PAG,fim=ini+POR_PAG,mostrar=new Set(vis.slice(ini,fim));
+    var PP=ppDe(L);
+    var totPag=Math.max(1,Math.ceil(vis.length/PP));if(st.pag>totPag)st.pag=totPag;if(st.pag<1)st.pag=1;
+    var ini=(st.pag-1)*PP,fim=ini+PP,mostrar=new Set(vis.slice(ini,fim));
     linhas.forEach(function(r){var ok=mostrar.has(r);if(r.classList.contains('f47-oculta')===ok)r.classList.toggle('f47-oculta',!ok)});
     if(!L.semLetra){
       var bar=$('f47bar_'+L.k);
@@ -40823,7 +40870,7 @@ html body .seq-number-wrap>.f47-cb{margin:0 6px 0 0!important}
     var bs=ui.pg.querySelectorAll('button');bs[0].disabled=st.pag<=1;bs[1].disabled=st.pag>=totPag;
     ui.pg.style.display=linhas.length?'':'none';
     travar(ui.w);vigiarAltura(ui.w);
-    if(mudou){desmarcarOcultos(L);try{var todos=ui.w.querySelector('thead input[type=checkbox]');if(todos)todos.checked=false}catch(e){}}
+    if(mudou){try{var todos=ui.w.querySelector('thead input[type=checkbox]');if(todos)todos.checked=false}catch(e){}}
     atualizarBalao();
   }
   function limparSel(L){esquecerSelecao(L);if(L.clr)chamar(L.clr);else document.querySelectorAll('.f47-cb-linha[data-lista="'+L.k+'"]').forEach(function(cb){cb.checked=false})}
@@ -40838,7 +40885,8 @@ html body .seq-number-wrap>.f47-cb{margin:0 6px 0 0!important}
   function idsMarcados(L){
     var c=$(L.cont);if(!c)return[];
     var sel=(L.cb||'.f47-cb-linha')+':checked',out=[];
-    c.querySelectorAll(sel).forEach(function(cb){var r=cb.closest('tr,.seq-item');if(r&&r.classList.contains('f47-oculta'))return;var id=L.cb?L.idOf(cb):cb.dataset.id;if(id!=null&&id!=='')out.push(String(id))});
+    c.querySelectorAll(sel).forEach(function(cb){var id=L.cb?L.idOf(cb):cb.dataset.id;if(id!=null&&id!=='')out.push(String(id))});
+    if(L.k!=='seq'&&SEL[L.k])SEL[L.k].forEach(function(id){out.push(String(id))});
     return uniq2(out);
   }
   function uniq2(a){return a.filter(function(x,i){return a.indexOf(x)===i})}
@@ -40939,8 +40987,8 @@ html body .seq-number-wrap>.f47-cb{margin:0 6px 0 0!important}
     if(ent==='seq')return 'O campo '+campo+' das rotas do dia selecionadas passa a ter o nome escolhido.';
     return 'A descrição das despesas selecionadas passa a ter o nome escolhido. Valores e datas não mudam.';
   }
-  function abrirUnificar(L){
-    var ids=idsMarcados(L);
+  function abrirUnificar(L,idsForcados){
+    var ids=idsForcados||idsMarcados(L);
     if(ids.length<2)return toast('Selecione pelo menos 2 itens para unificar.','warning');
     var recs=registros(L,ids);
     if(recs.length<2)return toast('Não encontrei os itens marcados. Atualize a tela e tente de novo.','warning');
@@ -41082,11 +41130,12 @@ html body .seq-number-wrap>.f47-cb{margin:0 6px 0 0!important}
     var h='<span class="f47-lbl">Letra:</span><button type="button" data-l="" class="'+(REL.letra?'':'on')+'">Todos ('+tot+')</button>';
     LETRAS.concat(['#']).forEach(function(l){if(l==='#'&&!pres['#'])return;h+='<button type="button" data-l="'+l+'" class="'+(REL.letra===l?'on':'')+'"'+(pres[l]?'':' disabled')+'>'+l+'</button>'});
     var bar=$('f47bar_rel');if(bar.__h!==h){bar.innerHTML=h;bar.__h=h}
+    var ps=$('f47pp_rel');if(ps&&!ps.options.length)montarPP({k:'rel'},ps);
     travar(w);vigiarAltura(w);
   }
   function relInstalar(){
     var old=W.fastRelatorioRotasRender;if(typeof old!=='function'||old.__f47)return;
-    var novo=async function(){try{fastRelPorPagina=POR_PAG}catch(e){}var r=await old.apply(this,arguments);relUI();requestAnimationFrame(relUI);return r};
+    var novo=async function(){try{fastRelPorPagina=ppDe({k:'rel'})}catch(e){}var r=await old.apply(this,arguments);relUI();requestAnimationFrame(relUI);return r};
     novo.__f47=true;W.fastRelatorioRotasRender=novo;
   }
 
@@ -41099,7 +41148,7 @@ html body .seq-number-wrap>.f47-cb{margin:0 6px 0 0!important}
   function tudo(){relInstalar();LISTAS.forEach(function(L){observar(L);var c=$(L.cont);if(c&&visivel(c))aplicar(L,false)});relUI()}
   document.addEventListener('change',function(e){
     var t=e.target;if(!t||t.type!=='checkbox')return;
-    requestAnimationFrame(function(){LISTAS.forEach(function(L){if(!L.semSel){desmarcarOcultos(L);lerSelecao(L)}});atualizarBalao()});
+    requestAnimationFrame(function(){LISTAS.forEach(function(L){if(!L.semSel){lerSelecao(L)}});atualizarBalao()});
   },true);
   ['fast46Bar','fast46Pager','fast45Bar','fast45Pager'].forEach(function(id){var x=$(id);if(x)x.remove()});
   try{if(typeof letraFiltroAtiva!=='undefined'&&letraFiltroAtiva){letraFiltroAtiva='';chamar('renderizarClientes')}}catch(e){}
@@ -41117,6 +41166,13 @@ html body .seq-number-wrap>.f47-cb{margin:0 6px 0 0!important}
     });
   }
   embrulharLimpeza();W.addEventListener('load',embrulharLimpeza);
+  W.fast47Api={LISTAS:LISTAS,abrirUnificar:abrirUnificar,registros:registros,esc:esc,canon:canon,ROTULO:ROTULO_UNIF,seqData:seqData,
+    fonte:function(L){return (function(){var src;
+      if(L.ent==='rotas')src=bancoDados.rotas||[];else if(L.ent==='clientes')src=bancoDados.clientes||[];
+      else if(L.ent==='destinos')src=(typeof destGarantir==='function'?destGarantir():bancoDados.destinos)||[];
+      else if(L.ent==='motoristas')src=bancoDados.motoristas||[];else if(L.ent==='despesas')src=bancoDados.despesas||[];
+      else if(L.ent==='despesasEmpresa')src=bancoDados.despesasEmpresa||[];else if(L.ent==='rh')src=bancoDados.rh||[];
+      else if(L.ent==='seq')src=((bancoDados.sequencias||{})[seqData()]||[]);else src=[];return src})()}};
   W.fast47Atualizar=tudo;
 })();
 </script>
@@ -41220,7 +41276,7 @@ html body .destino-extra-row-rota.f49-dest-row{padding-top:8px;border-top:1px da
   }
   function ligarTotal(){
     var t=$('txtValorRota');if(!t||t.__f53)return;t.__f53=true;
-    // 4.0.65: o total só soma; pode ser editado à mão sem mexer no valor das rotas.
+    // 4.0.66: o total só soma; pode ser editado à mão sem mexer no valor das rotas.
     t.addEventListener('input',function(){if(modoMulti){totalManual=true;avisoTotal()}});
     var wrap=t.parentElement;
     if(wrap)wrap.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('.fast-step-btn');if(b&&modoMulti){setTimeout(function(){totalManual=true;avisoTotal()},0)}},true);
@@ -41408,7 +41464,7 @@ html body .destino-extra-row-rota.f49-dest-row{padding-top:8px;border-top:1px da
 <script id="fast-4051-lapides">
 (function(){
   'use strict';
-  // 4.0.65: REDE DE SEGURANÇA DAS EXCLUSÕES.
+  // 4.0.66: REDE DE SEGURANÇA DAS EXCLUSÕES.
   // Seja qual for a origem (nuvem, outro aparelho, WhatsApp, rotas antigas, scripts externos),
   // nada que está na lista de excluídos aparece nem é salvo de novo.
   var W=window;
@@ -41655,7 +41711,7 @@ html.f56-travado,html.f56-travado body{overflow:hidden!important;overscroll-beha
 })();
 </script>
 <style id="fast-4062-icones-inteiros">
-/* 4.0.65: ícones sempre inteiros (sem cortar/estourar) no gate, na Central de Downloads e onde aparecerem */
+/* 4.0.66: ícones sempre inteiros (sem cortar/estourar) no gate, na Central de Downloads e onde aparecerem */
 html body #fastLoginGate .fast-gate-logo img,html body.fast-exclusive-brand #fastLoginGate .fast-gate-logo img{object-fit:contain!important;width:100%!important;height:100%!important;padding:0!important;background:transparent!important}
 html body #fastLoginGate .fast-gate-logo{background:transparent!important;overflow:visible!important}
 html body .fast-dl-thumb{object-fit:contain!important;background:transparent!important}
@@ -41676,6 +41732,7 @@ html body .card.fast-filtros-rotas .ff-origem{order:3}html body .card.fast-filtr
 html body .card.fast-filtros-rotas .ff-data-ini{order:5}html body .card.fast-filtros-rotas .ff-data-fim{order:6}
 html body .card.fast-filtros-rotas .ff-tipo{order:7}html body .card.fast-filtros-rotas .ff-status-pag{order:8}
 html body .card.fast-filtros-rotas .grid-form>.ff-acoes{order:9}
+.f47-pp{cursor:pointer}.f47-pp .f47-pp-sel{border:0!important;background:transparent!important;color:inherit!important;font:inherit!important;font-weight:800!important;padding:0 2px!important;margin:0!important;min-height:0!important;height:auto!important;width:auto!important;box-shadow:none!important;-webkit-appearance:menulist!important;appearance:auto!important}
 td.f63-img{text-align:center;white-space:nowrap!important;overflow:hidden;max-width:132px}
 td.f63-img .f63-ok,td.f63-img .f63-sem{display:block;font-size:14px;line-height:1.1}
 td.f63-img .f63-nome{display:block;max-width:124px;margin:1px auto 0;font-size:10px;line-height:1.15;color:var(--text-muted,#64748b);white-space:nowrap!important;overflow:hidden;text-overflow:ellipsis;word-break:normal!important;overflow-wrap:normal!important}
@@ -41722,10 +41779,10 @@ html body #modalEditarRota .modal-content{margin:0 auto!important;top:auto!impor
 <script id="fast-4064-sync-apos-salvar">
 (function(){
   'use strict';
-  // 4.0.65: com a sincronização a cada 5 min, o que foi salvo sobe ~20 s depois
+  // 4.0.66: com a sincronização a cada 5 min, o que foi salvo sobe ~20 s depois
   // (agrupando várias gravações seguidas numa única sincronização).
   var W=window,t=null;
-  function agendar(){if(t)clearTimeout(t);t=setTimeout(function(){t=null;if(navigator.onLine&&typeof W.sincronizarAgora==='function'){try{Promise.resolve(W.sincronizarAgora()).catch(function(){})}catch(e){}}},20000)}
+  function agendar(){if(W.__fastSyncRodando||Date.now()-(W.__fastSyncFim||0)<4000)return;if(t)clearTimeout(t);t=setTimeout(function(){t=null;if(navigator.onLine&&typeof W.sincronizarAgora==='function'){try{Promise.resolve(W.sincronizarAgora()).catch(function(){})}catch(e){}}},3000)}
   function instalar(){
     var f=W.salvarStorage;if(typeof f!=='function'||f.__f64)return;
     var g=function(){var r=f.apply(this,arguments);if(!g.__dentroSync)agendar();return r};
@@ -41735,6 +41792,458 @@ html body #modalEditarRota .modal-content{margin:0 auto!important;top:auto!impor
   W.addEventListener('load',function(){instalar();setTimeout(instalar,2000)});
   // antes de fechar/ir para segundo plano, envia o que estiver pendente
   document.addEventListener('visibilitychange',function(){if(document.hidden&&t){clearTimeout(t);t=null;try{W.sincronizarAgora()}catch(e){}}});
+})();
+</script>
+<script id="fast-4066-senha-central">
+(function(){
+  'use strict';
+  /* 4.0.66: SENHA CENTRAL. A senha da conta vale igual no site, nos APKs e em qualquer
+     aparelho. Trocar em um lugar: (1) grava no servidor, (2) desconecta os outros
+     aparelhos e (3) cada aparelho, ao abrir com internet, percebe a troca e pede a senha nova. */
+  var W=window,PROJECT='https://yhxuplhohhetzloxvgku.supabase.co',KEY='sb_publishable_jlsorkXci3_0Hla7gt8z1g_pe6zOT19';
+  function token(){try{return typeof W.fastObterTokenSupabase==='function'?W.fastObterTokenSupabase():null}catch(e){return null}}
+  async function auth(path,opt){
+    opt=opt||{};var h={'Content-Type':'application/json',apikey:KEY};if(opt.token)h.Authorization='Bearer '+opt.token;
+    var r=await fetch(PROJECT+'/auth/v1'+path,{method:opt.method||'POST',headers:h,body:opt.body===undefined?undefined:JSON.stringify(opt.body)});
+    var d={};try{d=await r.json()}catch(e){}
+    if(!r.ok){var er=new Error(d.msg||d.message||d.error_description||d.error||('HTTP '+r.status));er.status=r.status;er.payload=d;throw er}
+    return d;
+  }
+  function motivo(e){
+    var pl=(e&&e.payload)||{},c=String(pl.error_code||pl.code||'').toLowerCase(),m=String((e&&e.message)||'').toLowerCase();
+    if(c==='same_password'||/different from the old/.test(m))return 'A nova senha precisa ser diferente da atual.';
+    if(c==='weak_password'||/weak|should contain|at least/.test(m))return 'Senha fraca para o servidor. Use 8+ caracteres com letras, números e um símbolo.';
+    if(e&&(e.status===401||e.status===403))return 'Sua sessão expirou. Saia e entre de novo com a senha atual, depois tente trocar.';
+    if(!navigator.onLine||/failed to fetch|network/.test(m))return 'Sem internet. A troca de senha precisa de conexão.';
+    return (e&&e.message)||'erro desconhecido';
+  }
+  /* troca pelo app (Configurações > Segurança > Alterar senha) agora vale para todos os lugares */
+  function instalarTroca(){
+    var orig=W.fastSecChangePwd;if(typeof orig!=='function'||orig.__f66)return;
+    var novo=async function(){
+      var t=token();
+      if(!t){alert('Para trocar a senha é preciso estar conectado à conta com internet. Saia e entre de novo com e-mail e senha, depois tente.');return}
+      var cur=prompt('Confirme a senha atual:');if(cur===null)return;
+      var np=prompt('Digite a NOVA senha (mínimo 8 caracteres):');if(np===null)return;
+      if(np.length<8){alert('A nova senha deve ter no mínimo 8 caracteres.');return}
+      var np2=prompt('Confirme a nova senha:');if(np2===null)return;
+      if(np!==np2){alert('As senhas não coincidem.');return}
+      try{
+        var u=await auth('/user',{method:'GET',token:t});
+        var email=(u&&u.email)||'';
+        // confere a senha atual no servidor
+        try{await auth('/token?grant_type=password',{body:{email:email,password:cur}})}catch(e){alert(e&&e.status===400?'Senha atual incorreta.':'Não foi possível conferir a senha atual: '+motivo(e));return}
+        var sa=new Date().toISOString();
+        await auth('/user',{method:'PUT',token:t,body:{password:np,data:{senha_alterada_em:sa}}});
+        try{await auth('/logout?scope=others',{method:'POST',token:t})}catch(e){}
+        localStorage.setItem('fast_senha_versao',sa);localStorage.removeItem('fast_senha_mudou');
+        // atualiza a cópia deste aparelho reaproveitando a rotina original (sem perguntar de novo)
+        var prompts=[cur,np,np2],pOrig=W.prompt,aOrig=W.alert;
+        W.prompt=function(){return prompts.shift()};W.alert=function(){};
+        try{await orig.apply(this,arguments)}finally{W.prompt=pOrig;W.alert=aOrig}
+        alert('Senha alterada em TODOS os lugares (site e aplicativos). Os outros aparelhos vão pedir a senha nova.');
+      }catch(e){alert('Não foi possível alterar a senha: '+motivo(e))}
+    };
+    novo.__f66=true;W.fastSecChangePwd=novo;
+  }
+  /* cada aparelho confere, com internet, se a senha foi trocada em outro lugar */
+  var ultima=0;
+  async function conferir(){
+    if(!navigator.onLine||Date.now()-ultima<10*60*1000)return;ultima=Date.now();
+    var t=token();
+    if(!t){
+      // token vencido: tenta renovar; se o servidor recusar a renovação, a sessão foi derrubada (senha trocada)
+      var ses=null;try{ses=JSON.parse(localStorage.getItem('fast_supa_session')||'null')}catch(e){}
+      if(!ses||!ses.refresh_token)return;
+      try{var nr=await auth('/token?grant_type=refresh_token',{body:{refresh_token:ses.refresh_token}});
+        localStorage.setItem('fast_supa_session',JSON.stringify({access_token:nr.access_token,refresh_token:nr.refresh_token||'',expires_at:Date.now()+((nr.expires_in||3600)*1000)}));t=nr.access_token;
+      }catch(e){if(e&&(e.status===400||e.status===401))forcarNovaSenha();return}
+    }
+    try{
+      var u=await auth('/user',{method:'GET',token:t});
+      var sv=(u&&u.user_metadata&&u.user_metadata.senha_alterada_em)||'';
+      var local=localStorage.getItem('fast_senha_versao');
+      if(local===null){localStorage.setItem('fast_senha_versao',sv);return}   // primeira vez neste aparelho
+      if(sv&&sv!==local)forcarNovaSenha();
+    }catch(e){
+      if(e&&(e.status===401||e.status===403)){ /* sessão derrubada pela troca de senha em outro aparelho */ forcarNovaSenha() }
+    }
+  }
+  function forcarNovaSenha(){
+    try{localStorage.setItem('fast_senha_mudou','1');localStorage.removeItem('fast_auth_bio');localStorage.removeItem('fast_supa_session')}catch(e){}
+    try{if(typeof W.fastSecLogout==='function')W.fastSecLogout()}catch(e){}
+    setTimeout(function(){var er=document.getElementById('fastGateErr');if(er)er.textContent='A senha da conta foi trocada. Entre com a senha nova.'},300);
+  }
+  W.fastSenhaCentralConferir=function(){ultima=0;return conferir()};
+  function tudo(){instalarTroca();conferir()}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',tudo,{once:true});else tudo();
+  W.addEventListener('load',function(){instalarTroca();setTimeout(conferir,4000)});
+  document.addEventListener('visibilitychange',function(){if(!document.hidden)conferir()});
+})();
+</script>
+<style id="fast-4066-unificar-style">
+.f66-btn-unif{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;border:0;background:var(--primary,#4f46e5);color:#fff;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap}
+.f47-top .f66-btn-unif{margin-left:auto}
+#f66Tray{position:fixed;left:8px;right:8px;bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:99990;max-width:560px;margin:0 auto;background:var(--card-bg,#fff);color:var(--text-main,#0f172a);border:1px solid var(--border,#e2e8f0);border-radius:18px;box-shadow:0 18px 44px rgba(15,23,42,.35);font-size:13px}
+#f66Tray .hd{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--border,#e2e8f0);cursor:pointer}
+#f66Tray .hd b{flex:1;font-size:14px}
+#f66Tray .hd .cnt{background:var(--primary,#4f46e5);color:#fff;border-radius:999px;padding:1px 9px;font-weight:800}
+#f66Tray .bd{padding:10px 12px;max-height:46vh;overflow:auto}
+#f66Tray.min .bd,#f66Tray.min .ft{display:none}
+#f66Tray .dica{color:var(--text-muted,#64748b);font-size:12px;margin:0 0 8px;line-height:1.4}
+#f66Tray input.busca{width:100%;box-sizing:border-box;padding:10px 12px;border-radius:12px;border:1px solid var(--border,#e2e8f0);font-size:14px;margin:0 0 8px;background:var(--input-bg,#fff);color:inherit}
+#f66Tray .res{display:flex;flex-direction:column;gap:4px;margin:0 0 10px}
+#f66Tray .res button{display:flex;align-items:center;gap:8px;text-align:left;padding:8px 10px;border-radius:10px;border:1px solid var(--border,#e2e8f0);background:transparent;color:inherit;font-size:13px;cursor:pointer;width:100%}
+#f66Tray .res button small{color:var(--text-muted,#64748b);margin-left:auto;white-space:nowrap}
+#f66Tray .res button.on{border-color:var(--primary,#4f46e5);background:rgba(99,102,241,.1);font-weight:700}
+#f66Tray .chips{display:flex;flex-wrap:wrap;gap:6px}
+#f66Tray .chips span{display:inline-flex;align-items:center;gap:6px;padding:5px 6px 5px 10px;border-radius:999px;background:rgba(99,102,241,.12);color:var(--primary,#4f46e5);font-weight:700;max-width:100%}
+#f66Tray .chips span i{font-style:normal;cursor:pointer;padding:0 6px;font-weight:900}
+#f66Tray .ft{display:flex;gap:8px;padding:10px 12px;border-top:1px solid var(--border,#e2e8f0)}
+#f66Tray .ft button{flex:1;padding:11px;border-radius:12px;border:0;font-weight:800;font-size:14px;cursor:pointer}
+#f66Tray .ft .sec{background:var(--bg-soft,#f1f5f9);color:inherit}
+#f66Tray .ft .pri{background:var(--primary,#4f46e5);color:#fff}
+#f66Tray .ft .pri:disabled{opacity:.45}
+#f66Tray input[type=checkbox]{width:16px!important;height:16px!important;min-width:16px!important;max-width:16px!important;flex:0 0 16px!important;margin:0!important;padding:0!important;-webkit-appearance:checkbox!important;appearance:auto!important}
+</style>
+<script id="fast-4066-unificar">
+(function(){
+  'use strict';
+  /* 4.0.66: botão UNIFICAR em cima de cada tabela com nomes. Abre um painel que continua
+     aberto enquanto você troca de letra/página: procure pelo nome, marque quantos quiser
+     (também dá para marcar direto na tabela) e unifique todos de uma vez, escolhendo o nome final. */
+  var W=window,API=null,ATUAL=null,SELS={};
+  var ROT={rotas:['Unificar rotas','Procure pelo cliente, destino ou origem'],clientes:['Unificar clientes','Procure pelo nome do cliente'],destinos:['Unificar lugares','Procure pelo nome do lugar'],motoristas:['Unificar motoristas','Procure pelo nome'],rh:['Unificar funcionários','Procure pelo nome'],despesas:['Unificar despesas','Procure pela descrição'],despesasEmpresa:['Unificar despesas','Procure pela descrição'],seq:['Unificar rotas do dia','Procure pelo destino ou cliente']};
+  function $(id){return document.getElementById(id)}
+  function N(v){return API?API.canon(v):String(v||'').toLowerCase()}
+  function dataBR(d){try{return formatarDataBR(d)}catch(e){return d||''}}
+  function rotulo(L,r){
+    if(!r)return {nome:'',extra:''};
+    if(L.ent==='rotas')return {nome:r.cliente||'(sem cliente)',extra:[r.destino,dataBR(r.data)].filter(Boolean).join(' · ')};
+    if(L.ent==='seq')return {nome:r.destino||r.cliente||'(sem nome)',extra:r.cliente&&r.destino?r.cliente:''};
+    if(L.ent==='despesas'||L.ent==='despesasEmpresa')return {nome:r.descricao||'(sem descrição)',extra:dataBR(r.data)};
+    if(L.ent==='destinos')return {nome:r.nome||'',extra:r.bairro||''};
+    if(L.ent==='rh')return {nome:r.nome||'',extra:r.cargo||''};
+    if(L.ent==='clientes')return {nome:r.nome||'',extra:r.telefone||r.whatsapp||''};
+    return {nome:r.nome||'',extra:''};
+  }
+  function textoBusca(L,r){var t=rotulo(L,r);return N(t.nome+' '+(L.ent==='rotas'?(r.destino||'')+' '+(r.origem||''):t.extra))}
+  function sel(){return SELS[ATUAL.k]||(SELS[ATUAL.k]=[])}
+  function fechar(limpar){var t=$('f66Tray');if(t)t.remove();if(limpar&&ATUAL)SELS[ATUAL.k]=[];ATUAL=null}
+  function abrir(L){
+    if(!API)return;
+    if(ATUAL&&ATUAL.k!==L.k)fechar(false);
+    ATUAL=L;
+    // já traz o que estiver marcado na tabela
+    try{var cont=$(L.cont);if(cont)cont.querySelectorAll((L.cb||'.f47-cb-linha')+':checked').forEach(function(cb){var id=L.cb?L.idOf(cb):cb.dataset.id;if(id!=null&&sel().indexOf(String(id))<0)sel().push(String(id))})}catch(e){}
+    desenhar();
+    setTimeout(function(){var b=$('f66Busca');if(b)b.focus()},80);
+  }
+  function desenhar(){
+    var L=ATUAL;if(!L)return;
+    var t=$('f66Tray');
+    if(!t){t=document.createElement('div');t.id='f66Tray';document.body.appendChild(t);
+      t.innerHTML='<div class="hd" id="f66Hd"><b></b><span class="cnt" id="f66Cnt">0</span><span id="f66Min" title="Minimizar/abrir">▾</span></div><div class="bd"><p class="dica">Procure e toque nos nomes para juntar. Você pode trocar de letra e de página, ou marcar na tabela: nada é desmarcado até você unificar ou cancelar.</p><input class="busca" id="f66Busca" type="search" autocomplete="off"><div class="res" id="f66Res"></div><div class="dica" style="margin:6px 0 4px"><b>Selecionados</b></div><div class="chips" id="f66Chips"></div></div><div class="ft"><button type="button" class="sec" id="f66Canc">Cancelar</button><button type="button" class="pri" id="f66Ok">Unificar</button></div>';
+      $('f66Hd').onclick=function(e){if(e.target.id!=='f66Busca')t.classList.toggle('min')};
+      $('f66Busca').addEventListener('input',resultados);
+      $('f66Canc').onclick=function(){fechar(true)};
+      $('f66Ok').onclick=function(){
+        var Lx=ATUAL,ids=sel().slice();if(ids.length<2)return;
+        var antes=JSON.stringify(API.registros(Lx,ids).map(function(r){return rotulo(Lx,r).nome}));
+        API.abrirUnificar(Lx,ids);
+        var vigia=setInterval(function(){
+          if(document.getElementById('f47Modal'))return;clearInterval(vigia);
+          setTimeout(function(){
+            var depois=JSON.stringify(API.registros(Lx,ids).map(function(r){return rotulo(Lx,r).nome}));
+            if(depois!==antes){fechar(true)}else{chips()}
+          },400);
+        },300);
+      };
+    }
+    t.querySelector('.hd b').textContent=(ROT[L.ent]||['Unificar'])[0];
+    $('f66Busca').placeholder=(ROT[L.ent]||['','Procurar'])[1];
+    resultados();chips();
+  }
+  function chips(){
+    var L=ATUAL,ids=sel(),recs=API.registros(L,ids),box=$('f66Chips');
+    // remove ids que não existem mais (ex.: depois de unificar/excluir)
+    var vivos=recs.map(function(r){return String(r.id)});SELS[L.k]=ids.filter(function(i){return vivos.indexOf(i)>=0});
+    box.innerHTML=recs.length?recs.map(function(r){var t=rotulo(L,r);return '<span>'+API.esc(t.nome)+(t.extra?' <small style="font-weight:600;opacity:.75">· '+API.esc(t.extra)+'</small>':'')+'<i data-id="'+API.esc(String(r.id))+'">×</i></span>'}).join(''):'<span style="background:transparent;color:var(--text-muted,#64748b);font-weight:600">Nenhum ainda</span>';
+    box.querySelectorAll('i[data-id]').forEach(function(x){x.onclick=function(){alternar(x.dataset.id)}});
+    $('f66Cnt').textContent=sel().length;
+    var ok=$('f66Ok');ok.disabled=sel().length<2;ok.textContent=sel().length>=2?'Unificar ('+sel().length+')':'Escolha 2 ou mais';
+  }
+  function resultados(){
+    var L=ATUAL,q=N(($('f66Busca')||{}).value||''),box=$('f66Res');if(!box)return;
+    if(!q){box.innerHTML='';return}
+    var todos=API.fonte(L)||[],achados=[];
+    for(var i=0;i<todos.length&&achados.length<40;i++){if(textoBusca(L,todos[i]).indexOf(q)>=0)achados.push(todos[i])}
+    box.innerHTML=achados.length?achados.map(function(r){var t=rotulo(L,r),on=sel().indexOf(String(r.id))>=0;return '<button type="button" data-id="'+API.esc(String(r.id))+'" class="'+(on?'on':'')+'"><input type="checkbox" tabindex="-1" '+(on?'checked':'')+'> '+API.esc(t.nome)+'<small>'+API.esc(t.extra)+'</small></button>'}).join(''):'<div class="dica">Nada encontrado com esse nome.</div>';
+    box.querySelectorAll('button[data-id]').forEach(function(b){b.onclick=function(){alternar(b.dataset.id)}});
+  }
+  function alternar(id){
+    var s=sel(),i=s.indexOf(String(id));if(i>=0)s.splice(i,1);else s.push(String(id));
+    // espelha na tabela, se a linha existir
+    try{var L=ATUAL,cont=$(L.cont);if(cont)cont.querySelectorAll(L.cb||'.f47-cb-linha').forEach(function(cb){var cid=L.cb?L.idOf(cb):cb.dataset.id;if(String(cid)===String(id)){cb.checked=i<0;cb.dispatchEvent(new Event('change',{bubbles:true}))}})}catch(e){}
+    resultados();chips();
+  }
+  // marcar/desmarcar direto na tabela também entra no painel
+  document.addEventListener('change',function(e){
+    if(!ATUAL||!e.target||e.target.type!=='checkbox')return;var L=ATUAL,cb=e.target;
+    if(!cb.matches(L.cb||'.f47-cb-linha'))return;var c=$(L.cont);if(!c||!c.contains(cb))return;
+    var id=String(L.cb?L.idOf(cb):cb.dataset.id),s=sel(),i=s.indexOf(id);
+    if(cb.checked&&i<0)s.push(id);else if(!cb.checked&&i>=0)s.splice(i,1);
+    chips();resultados();
+  },true);
+  // depois de unificar, o painel se atualiza (e fecha se não sobrou nada)
+  function aposUnificar(){if(!ATUAL||!$('f66Tray'))return;chips();if(sel().length<2&&!document.getElementById('f47Modal')){var mudou=sel().length===0;if(mudou)fechar(true)}}
+  /* botão UNIFICAR em cima de cada tabela */
+  function botoes(){
+    API=W.fast47Api;if(!API)return;
+    API.LISTAS.forEach(function(L){
+      if(L.semSel||!ROT[L.ent])return;
+      var top=$('f47top_'+L.k);if(!top||top.querySelector('.f66-btn-unif'))return;
+      var b=document.createElement('button');b.type='button';b.className='f66-btn-unif no-print';b.innerHTML='<i class="fa-solid fa-code-merge"></i> Unificar';
+      b.onclick=function(){abrir(L)};
+      var lock=top.querySelector('.f47-lock');top.insertBefore(b,lock||null);
+    });
+    var topRel=$('f47top_rel');
+    if(topRel&&!topRel.querySelector('.f66-btn-unif')){var Lr=API.LISTAS.filter(function(x){return x.k==='rel'})[0];if(Lr){var br=document.createElement('button');br.type='button';br.className='f66-btn-unif no-print';br.innerHTML='<i class="fa-solid fa-code-merge"></i> Unificar';br.onclick=function(){abrir(Lr)};topRel.appendChild(br)}}
+    if(ATUAL&&$('f66Tray'))aposUnificar();
+  }
+  // o painel acompanha a aba: some se você sair da tela da tabela
+  function visibilidade(){if(!ATUAL)return;var c=$(ATUAL.cont),t=$('f66Tray');if(t)t.style.display=(c&&c.offsetParent!==null)?'':'none'}
+  setInterval(function(){botoes();visibilidade()},1200);
+  W.addEventListener('load',function(){setTimeout(botoes,800)});
+  W.fastUnificarAbrir=function(k){API=W.fast47Api;var L=API&&API.LISTAS.filter(function(x){return x.k===k})[0];if(L)abrir(L)};
+})();
+</script>
+<style id="fast-4066b-style">
+#f66SeqEdit{position:fixed;inset:0;z-index:100000;background:rgba(15,23,42,.55);display:flex;align-items:flex-start;justify-content:center;padding:calc(10px + env(safe-area-inset-top,0px)) 10px 10px;overflow:auto}
+#f66SeqEdit .cx{width:min(560px,100%);background:var(--card-bg,#fff);color:var(--text-main,#0f172a);border-radius:18px;box-shadow:0 20px 50px rgba(0,0,0,.35);display:flex;flex-direction:column;max-height:calc(100dvh - 20px)}
+#f66SeqEdit .hd{padding:14px 16px;border-bottom:1px solid var(--border,#e2e8f0);font-weight:900;font-size:16px;display:flex;align-items:center;gap:8px}
+#f66SeqEdit .bd{padding:12px 16px;overflow:auto;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+#f66SeqEdit .bd label{display:block;font-size:11px;font-weight:800;color:var(--text-muted,#64748b);text-transform:uppercase;margin-bottom:4px}
+#f66SeqEdit .bd .full{grid-column:1/-1}
+#f66SeqEdit .bd input,#f66SeqEdit .bd select,#f66SeqEdit .bd textarea{width:100%;box-sizing:border-box}
+#f66SeqEdit .ft{display:flex;gap:8px;padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--border,#e2e8f0);position:sticky;bottom:0;background:var(--card-bg,#fff);border-radius:0 0 18px 18px}
+#f66SeqEdit .ft button{flex:1;padding:12px;border-radius:12px;font-weight:800;font-size:14px}
+#f66Sync{position:fixed;left:10px;bottom:calc(92px + env(safe-area-inset-bottom,0px));z-index:9990;font-size:11px;font-weight:800;padding:4px 9px;border-radius:999px;background:rgba(15,23,42,.8);color:#fff;pointer-events:none;opacity:0;transition:opacity .3s}
+#f66Sync.on{opacity:.9}
+</style>
+<script id="fast-4066b">
+(function(){
+  'use strict';
+  var W=window;
+  function $(id){return document.getElementById(id)}
+  function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+  function toast(m,t){try{if(typeof mostrarNotificacao==='function')mostrarNotificacao(m,t||'success');else console.log(m)}catch(e){}}
+
+  /* ===== 1) EDITAR ROTA DO DIA: janela própria, "Confirmar edição" só altera ESTA rota ===== */
+  function abrirEdicaoSeq(itemId){
+    var ds=($('dpDataSequencia')||{}).value||'';
+    var lista=((bancoDados.sequencias||{})[ds])||[];
+    var item=lista.find(function(i){return String(i.id)===String(itemId)});
+    if(!item){
+      // procura em qualquer data (a lista pode estar filtrada)
+      Object.keys(bancoDados.sequencias||{}).some(function(d){var f=(bancoDados.sequencias[d]||[]).find(function(i){return String(i.id)===String(itemId)});if(f){item=f;ds=d;return true}});
+    }
+    if(!item){toast('Rota não encontrada. Atualize a tela.','warning');return}
+    var mots=(bancoDados.motoristas||[]).map(function(m){return m&&m.nome}).filter(Boolean);
+    if(item.motorista&&mots.indexOf(item.motorista)<0)mots.unshift(item.motorista);
+    var valor=Number(item.valor)||0;
+    var d=document.createElement('div');d.id='f66SeqEdit';
+    d.innerHTML='<div class="cx"><div class="hd"><i class="fa-solid fa-pen-to-square"></i> Editar rota do dia</div><div class="bd">'
+      +'<div class="full"><label>Cliente</label><input id="f66eCli" type="text" value="'+esc(item.cliente||'')+'"></div>'
+      +'<div class="full"><label>Origem</label><input id="f66eOri" type="text" value="'+esc(item.origem||'')+'"></div>'
+      +'<div class="full"><label>Destino</label><input id="f66eDes" type="text" value="'+esc(item.destino||'')+'"></div>'
+      +'<div><label>Quantidade</label><input id="f66eQtd" type="number" min="0" inputmode="numeric" value="'+esc(item.qtdMercadorias!=null?item.qtdMercadorias:1)+'"></div>'
+      +'<div><label>Valor (R$)</label><input id="f66eVal" type="text" inputmode="numeric" value="'+esc(valor.toLocaleString('pt-BR',{style:'currency',currency:'BRL'}))+'" onfocus="try{fastMoedaFocus(this)}catch(e){}" oninput="try{fastMascaraMoeda(this)}catch(e){}"></div>'
+      +'<div class="full"><label>Motorista</label><select id="f66eMot"><option value="">— Sem motorista —</option>'+mots.map(function(m){return '<option'+(m===item.motorista?' selected':'')+'>'+esc(m)+'</option>'}).join('')+'</select></div>'
+      +'<div class="full"><label>Observação</label><input id="f66eObs" type="text" value="'+esc(item.obs||'')+'"></div>'
+      +'</div><div class="ft"><button type="button" class="btn-secondary" id="f66eCanc">Cancelar</button><button type="button" class="btn-primary" id="f66eOk"><i class="fa-solid fa-check"></i> Confirmar edição</button></div></div>';
+    document.body.appendChild(d);
+    var fechar=function(){d.remove()};
+    $('f66eCanc').onclick=fechar;d.addEventListener('click',function(e){if(e.target===d)fechar()});
+    $('f66eOk').onclick=function(){
+      var parse=function(v){try{return fastParseMoeda(v)}catch(e){return Number(String(v).replace(/[^\d,]/g,'').replace(',','.'))||0}};
+      item.cliente=$('f66eCli').value.trim();
+      item.origem=$('f66eOri').value.trim();
+      item.destino=$('f66eDes').value.trim();
+      item.qtdMercadorias=parseInt($('f66eQtd').value,10)||0;
+      item.valor=parse($('f66eVal').value);
+      item.motorista=$('f66eMot').value;
+      item.obs=$('f66eObs').value.trim();
+      item.updatedAt=new Date().toISOString();
+      try{salvarStorage()}catch(e){}
+      try{if(typeof carregarSequenciaDia==='function')carregarSequenciaDia();else renderizarSequencia()}catch(e){try{renderizarSequencia()}catch(_){}}
+      fechar();toast('Rota do dia alterada.','success');
+    };
+    setTimeout(function(){try{$('f66eCli').focus()}catch(e){}},80);
+  }
+  W.abrirModalEditarSeq=abrirEdicaoSeq;
+  // o formulário de criação volta a ser SÓ de criação (nunca herda um id de edição)
+  document.addEventListener('submit',function(e){if(e.target&&e.target.id==='formModalSeq'){var h=$('seqItemId');if(h&&!document.getElementById('f66SeqEdit'))h.value=''}},true);
+
+  /* ===== 2) ROTAS DO DIA: um Limpar só, no card "Filtro de busca", que limpa TUDO na hora ===== */
+  function limparTudoSeq(){
+    ['filtroSeqCliente','filtroSeqOrigem','filtroSeqDestino','filtroSeqMotorista','filtroSeqVoz'].forEach(function(id){var el=$(id);if(el)el.value=''});
+    var st=$('fastFiltroSeqStatus');if(st)st.value='';
+    try{var b=document.querySelector('#f47bar_seq button[data-l=""]');if(b)b.click()}catch(e){}
+    try{renderizarSequencia()}catch(e){}
+    setTimeout(function(){try{renderizarSequencia()}catch(e){}},60);
+  }
+  W.limparFiltrosSeq=limparTudoSeq;
+  function arrumarLimpar(){
+    var tab=$('rotasDia');if(!tab)return;
+    var filtroCard=($('fastFiltroSeqStatusWrap')||{}).closest?$('fastFiltroSeqStatusWrap').closest('.card'):null;
+    if(!filtroCard)return;
+    var btns=Array.prototype.filter.call(tab.querySelectorAll('button'),function(b){return /^\s*limpar\s*$/i.test(b.textContent)});
+    var principal=filtroCard.querySelector('.f66-limpar-seq');
+    if(!principal){
+      principal=document.createElement('button');principal.type='button';principal.className='btn-danger ripple f66-limpar-seq';
+      principal.innerHTML='<i class="fa-solid fa-broom"></i> Limpar';principal.style.cssText='grid-column:1/-1;width:100%;margin-top:6px';
+      principal.onclick=limparTudoSeq;
+      var grid=$('fastFiltroSeqStatusWrap').parentNode;grid.appendChild(principal);
+    }
+    btns.forEach(function(b){if(b!==principal)b.style.display='none'});
+  }
+
+  /* ===== 3) PRÉ-VISUALIZAÇÃO: só aparece quando a rota já foi feita antes ===== */
+  function previewSeq(){
+    var card=document.querySelector('#fastSeqInlineCard .preview-card');if(!card)return;
+    var nome=(($('seqCliente')||{}).value||'').trim();
+    var tem=false;try{tem=!!(nome&&W.fastUltimaRotaCompleta&&W.fastUltimaRotaCompleta(nome))}catch(e){}
+    card.style.display=tem?'':'none';
+  }
+  document.addEventListener('input',function(e){if(e.target&&e.target.id==='seqCliente')setTimeout(previewSeq,30)},true);
+  document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('button');if(!b)return;if(/adicionarDestinoExtra|abrirModalNovaSeq/.test(b.getAttribute('onclick')||'')||b.closest('#listaSugestoesSeq'))setTimeout(previewSeq,60)},true);
+
+  /* ===== 4) SINCRONIZAÇÃO IMEDIATA ENTRE APARELHOS (tempo real) ===== */
+  var PROJ='yhxuplhohhetzloxvgku',KEY='sb_publishable_jlsorkXci3_0Hla7gt8z1g_pe6zOT19';
+  var TABELAS=['rotas','sequencias_itens','despesas','destinos','clientes','motoristas','rh','despesas_empresa'];
+  function token(){try{return typeof W.fastObterTokenSupabase==='function'?W.fastObterTokenSupabase():null}catch(e){return null}}
+  // marca o início/fim de cada sincronização (evita laço e ignora o "eco" das próprias alterações)
+  function embrulharSync(){
+    var f=W.sincronizarAgora;if(typeof f!=='function'||f.__f66)return;
+    var g=async function(){
+      if(W.__fastSyncRodando)return;
+      W.__fastSyncRodando=true;aviso('Sincronizando…');
+      try{
+        if(!token()){await somenteRotasDoDia();return}
+        return await f.apply(this,arguments);
+      }finally{W.__fastSyncRodando=false;W.__fastSyncFim=Date.now();aviso('')}
+    };
+    g.__f66=true;W.sincronizarAgora=g;
+  }
+  // sem login na conta principal (ex.: login interno): pelo menos as Rotas do Dia sobem e descem
+  async function somenteRotasDoDia(){
+    if(typeof supabaseGetSequencias!=='function'||typeof supabaseSyncSequencias!=='function')return;
+    var nuvem=await supabaseGetSequencias();
+    var mortos=new Set([].concat(bancoDados.seqItensExcluidos||[]).map(String));
+    bancoDados.sequencias=bancoDados.sequencias||{};
+    Object.keys(nuvem||{}).forEach(function(d){
+      var loc=bancoDados.sequencias[d]||(bancoDados.sequencias[d]=[]);
+      var ids=new Set(loc.map(function(i){return String(i.id)}));
+      (nuvem[d]||[]).forEach(function(it){if(!ids.has(String(it.id))&&!mortos.has(String(it.id)))loc.push(it)});
+    });
+    await supabaseSyncSequencias();
+    try{localStorage.setItem('banco_gestao_local',JSON.stringify(bancoDados))}catch(e){}
+    try{if(typeof carregarSequenciaDia==='function')carregarSequenciaDia()}catch(e){}
+  }
+  var ws=null,hb=null,ref=0,deb=null,conectadoEm=0,tentativas=0;
+  function aviso(t){var e=$('f66Sync');if(!e){e=document.createElement('div');e.id='f66Sync';document.body.appendChild(e)}e.textContent=t;e.classList.toggle('on',!!t)}
+  function enviar(o){try{if(ws&&ws.readyState===1)ws.send(JSON.stringify(o))}catch(e){}}
+  function conectar(){
+    if(!('WebSocket' in W)||!navigator.onLine)return;
+    try{if(ws)ws.close()}catch(e){}
+    ws=new WebSocket('wss://'+PROJ+'.supabase.co/realtime/v1/websocket?apikey='+encodeURIComponent(KEY)+'&vsn=1.0.0');
+    ws.onopen=function(){
+      tentativas=0;conectadoEm=Date.now();ref=0;
+      enviar({topic:'realtime:fast-sync',event:'phx_join',ref:String(++ref),join_ref:'1',payload:{config:{broadcast:{self:false},presence:{key:''},postgres_changes:TABELAS.map(function(t){return {event:'*',schema:'public',table:t}})},access_token:token()||KEY}});
+      clearInterval(hb);hb=setInterval(function(){enviar({topic:'phoenix',event:'heartbeat',payload:{},ref:String(++ref)})},25000);
+    };
+    ws.onmessage=function(ev){
+      var m;try{m=JSON.parse(ev.data)}catch(e){return}
+      if(m&&m.event==='postgres_changes'){
+        // alteração feita em OUTRO aparelho: puxa na hora (ignora o eco da própria sincronização)
+        if(W.__fastSyncRodando||Date.now()-(W.__fastSyncFim||0)<5000)return;
+        clearTimeout(deb);deb=setTimeout(function(){try{W.sincronizarAgora()}catch(e){}},1500);
+      }
+    };
+    ws.onclose=function(){clearInterval(hb);if(document.hidden)return;var espera=Math.min(60000,2000*Math.pow(2,tentativas++));setTimeout(function(){if(!document.hidden)conectar()},espera)};
+    ws.onerror=function(){};
+  }
+  // renova a conexão quando o login/token muda e ao voltar para o app
+  setInterval(function(){if(ws&&ws.readyState===1&&Date.now()-conectadoEm>45*60*1000)conectar()},60000);
+  document.addEventListener('visibilitychange',function(){
+    if(document.hidden){try{ws&&ws.close()}catch(e){}}
+    else{if(!ws||ws.readyState>1)conectar()}
+  });
+  W.addEventListener('online',function(){conectar()});
+
+  function tudo(){embrulharSync();arrumarLimpar();previewSeq()}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',tudo,{once:true});else tudo();
+  W.addEventListener('load',function(){tudo();setTimeout(tudo,1500);setTimeout(function(){if(!document.hidden)conectar()},2500)});
+  setInterval(arrumarLimpar,3000);
+})();
+</script>
+<script id="fast-4066-fotos-destino">
+(function(){
+  'use strict';
+  /* 4.0.66: rotas UNIFICADAS/AGRUPADAS nas Rotas do Dia — cada foto enviada ao cliente
+     leva a descrição do SEU destino (escrita na própria foto + lista no texto). */
+  function N(v){return String(v||'').trim()}
+  window.fastFotoDestino=function(item,ref,padrao){
+    try{
+      if(item&&item.fotosDestino&&item.fotosDestino[ref])return item.fotosDestino[ref];
+      try{var fs0=Array.isArray(item.fotos)?item.fotos:[];var ix=fs0.indexOf(ref);if(ix>=0&&Array.isArray(item.fotoNomesDestino)&&item.fotoNomesDestino[ix]&&item.fotoNomesDestino[ix]!=='Destino'&&item.fotoNomesDestino[ix]!==item.destino)return item.fotoNomesDestino[ix]}catch(e){}
+      var orig=(item&&item.itensOriginais)||[];
+      for(var i=0;i<orig.length;i++){
+        var o=orig[i]||{},fs=[].concat(o.fotos||[],o.foto?[o.foto]:[]);
+        if(fs.indexOf(ref)>=0&&N(o.destino))return N(o.destino);
+      }
+    }catch(e){}
+    return padrao||'';
+  };
+  window.fastLegendaLista=function(pares){
+    var ds=pares.map(function(p){return N(p.destino)});
+    var unicos=ds.filter(function(d,i){return d&&ds.indexOf(d)===i});
+    if(unicos.length<=1)return unicos[0]||'';
+    return pares.map(function(p,i){return 'Foto '+(i+1)+': '+(N(p.destino)||'—')}).join('\n');
+  };
+  window.fastCarimbarDestino=function(file,destino){
+    return new Promise(function(res){
+      destino=N(destino);if(!file||!destino)return res(file);
+      var url=URL.createObjectURL(file),img=new Image();
+      img.onload=function(){
+        try{
+          var max=1920,esc=Math.min(1,max/Math.max(img.naturalWidth,img.naturalHeight));
+          var w=Math.round(img.naturalWidth*esc),h=Math.round(img.naturalHeight*esc);
+          var c=document.createElement('canvas');c.width=w;c.height=h;var g=c.getContext('2d');
+          g.drawImage(img,0,0,w,h);
+          var fs=Math.max(18,Math.round(Math.min(w,h)*0.045)),pad=Math.round(fs*0.6);
+          g.font='700 '+fs+'px system-ui,-apple-system,Segoe UI,Roboto,sans-serif';
+          // quebra o texto em linhas que cabem na largura
+          var palavras=destino.split(/\s+/),linhas=[],l='';
+          palavras.forEach(function(p){var t=l?l+' '+p:p;if(g.measureText(t).width>w-pad*2&&l){linhas.push(l);l=p}else l=t});if(l)linhas.push(l);
+          linhas=linhas.slice(0,3);
+          var bh=linhas.length*fs*1.25+pad*2;
+          g.fillStyle='rgba(0,0,0,.62)';g.fillRect(0,h-bh,w,bh);
+          g.fillStyle='#fff';g.textBaseline='top';
+          linhas.forEach(function(t,i){g.fillText(t,pad,h-bh+pad+i*fs*1.25)});
+          c.toBlob(function(b){
+            URL.revokeObjectURL(url);
+            if(!b)return res(file);
+            var nome=destino.replace(/[^a-zA-Z0-9À-ÿ\s_-]/g,'').replace(/\s+/g,'_').slice(0,50)||'comprovante';
+            res(new File([b],nome+'_'+Math.random().toString(36).slice(2,6)+'.jpg',{type:'image/jpeg'}));
+          },'image/jpeg',0.9);
+        }catch(e){URL.revokeObjectURL(url);res(file)}
+      };
+      img.onerror=function(){URL.revokeObjectURL(url);res(file)};
+      img.src=url;
+    });
+  };
 })();
 </script>
 </body></html>
