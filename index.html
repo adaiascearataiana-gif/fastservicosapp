@@ -8729,19 +8729,19 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
       <div id="fastExpenseDashboard" class="card no-print">
         <div class="fed-head">
           <div><span class="fed-eyebrow">VISÃO FINANCEIRA</span><h3><i class="fa-solid fa-chart-pie"></i> Dashboard de Despesas</h3><p>Acompanhe somente os gastos registrados nesta seção.</p></div>
-          <select id="fedPeriod" class="fed-period" onchange="fastRenderExpenseDashboard(true)"><option value="month">Mês atual</option><option value="all">Todo o período</option><option value="2026-09">setembro de 2026</option></select>
+          <select id="fedPeriod" class="fed-period" onchange="fastRenderExpenseDashboard(true)"><option value="month">Mês atual</option><option value="all">Todo o período</option></select>
         </div>
         <div class="fed-kpis">
-          <div class="fed-kpi fed-total"><span>Total</span><strong id="fedTotal">R$&nbsp;6.366,85</strong><small id="fedPeriodLabel">setembro de 2026</small></div>
-          <div class="fed-kpi"><span>Lançamentos</span><strong id="fedCount">110</strong><small>despesas registradas</small></div>
-          <div class="fed-kpi"><span>Média</span><strong id="fedAverage">R$&nbsp;57,88</strong><small>por lançamento</small></div>
-          <div class="fed-kpi"><span>Maior gasto</span><strong id="fedLargest">R$&nbsp;288,00</strong><small id="fedLargestName">Raquel</small></div>
+          <div class="fed-kpi fed-total"><span>Total</span><strong id="fedTotal">R$&nbsp;0,00</strong><small id="fedPeriodLabel"></small></div>
+          <div class="fed-kpi"><span>Lançamentos</span><strong id="fedCount">0</strong><small>despesas registradas</small></div>
+          <div class="fed-kpi"><span>Média</span><strong id="fedAverage">R$&nbsp;0,00</strong><small>por lançamento</small></div>
+          <div class="fed-kpi"><span>Maior gasto</span><strong id="fedLargest">R$&nbsp;0,00</strong><small id="fedLargestName"></small></div>
         </div>
         <div class="fed-panels">
-          <section class="fed-panel"><h4 id="fedEvolutionTitle"><i class="fa-solid fa-chart-column"></i> Total do mês selecionado</h4><div id="fedBars" class="fed-bars"><div class="fed-month" title="setembro de 2026: R$&nbsp;6.366,85"><strong>R$&nbsp;6.366,85</strong><div><i style="height:100%"></i></div><span>set</span></div></div></section>
-          <section class="fed-panel"><h4><i class="fa-solid fa-tags"></i> Categorias</h4><div id="fedCategories" class="fed-rank"><div class="fed-rank-row"><div><span>Alimentação</span><strong>R$&nbsp;1.452,15</strong></div><div class="fed-track"><i style="width:100%"></i></div></div><div class="fed-rank-row"><div><span>Combustível Carro</span><strong>R$&nbsp;1.236,00</strong></div><div class="fed-track"><i style="width:85%"></i></div></div><div class="fed-rank-row"><div><span>Faturas</span><strong>R$&nbsp;1.008,84</strong></div><div class="fed-track"><i style="width:69%"></i></div></div><div class="fed-rank-row"><div><span>Pagamentos Serviços</span><strong>R$&nbsp;860,00</strong></div><div class="fed-track"><i style="width:59%"></i></div></div><div class="fed-rank-row"><div><span>Lanche</span><strong>R$&nbsp;649,56</strong></div><div class="fed-track"><i style="width:45%"></i></div></div></div></section>
-          <section class="fed-panel"><h4><i class="fa-solid fa-wallet"></i> Formas de pagamento</h4><div id="fedPayments" class="fed-rank"><div class="fed-rank-row"><div><span>Não informado</span><strong>R$&nbsp;6.366,85</strong></div><div class="fed-track"><i style="width:100%"></i></div></div></div></section>
-          <section class="fed-panel fed-insight"><h4><i class="fa-solid fa-lightbulb"></i> Destaque</h4><div id="fedInsight"><strong>Raquel</strong><span>R$&nbsp;288,00 em Cartão Raquel 8/8 + 8/10.</span><small>Categoria com maior gasto: Alimentação (R$&nbsp;1.452,15).</small></div></section>
+          <section class="fed-panel"><h4 id="fedEvolutionTitle"><i class="fa-solid fa-chart-column"></i> Total do mês selecionado</h4><div id="fedBars" class="fed-bars"></div></section>
+          <section class="fed-panel"><h4><i class="fa-solid fa-tags"></i> Categorias</h4><div id="fedCategories" class="fed-rank"></div></section>
+          <section class="fed-panel"><h4><i class="fa-solid fa-wallet"></i> Formas de pagamento</h4><div id="fedPayments" class="fed-rank"></div></section>
+          <section class="fed-panel fed-insight"><h4><i class="fa-solid fa-lightbulb"></i> Destaque</h4><div id="fedInsight"></div></section>
         </div>
       </div>
       <div class="card">
@@ -8881,9 +8881,9 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
           <div id="dashFiltroTotalDatas" style="display:none;gap:8px;flex:2;min-width:260px"><div style="flex:1"><label for="dashFiltroTotalInicio" style="font-size:12px;font-weight:800;display:block;margin-bottom:5px">INÍCIO</label><input type="date" id="dashFiltroTotalInicio" onchange="renderizar()"></div><div style="flex:1"><label for="dashFiltroTotalFim" style="font-size:12px;font-weight:800;display:block;margin-bottom:5px">FIM</label><input type="date" id="dashFiltroTotalFim" onchange="renderizar()"></div></div>
         </div>
         <div class="metrics-container" style="margin: 0;">
-          <div class="metric-card green"><div class="metric-title">Recebido</div><div class="metric-value" id="lblTotalRecebido">R$ 4.445,00</div></div>
-          <div class="metric-card yellow"><div class="metric-title">Pendente</div><div class="metric-value" id="lblTotalPendente">R$ 515,00</div></div>
-          <div class="metric-card purple"><div class="metric-title">Faturamento</div><div class="metric-value" id="lblTotalFaturamento">R$ 4.960,00</div></div>
+          <div class="metric-card green"><div class="metric-title">Recebido</div><div class="metric-value" id="lblTotalRecebido">R$ 0,00</div></div>
+          <div class="metric-card yellow"><div class="metric-title">Pendente</div><div class="metric-value" id="lblTotalPendente">R$ 0,00</div></div>
+          <div class="metric-card purple"><div class="metric-title">Faturamento</div><div class="metric-value" id="lblTotalFaturamento">R$ 0,00</div></div>
         </div>
       </div>
 
@@ -8891,9 +8891,9 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
       <div class="card" style="margin-bottom: 18px;">
         <div class="card-title"><i class="fa-solid fa-calendar-week"></i> Resumo do Mês</div>
         <div class="metrics-container" style="margin: 0;">
-          <div class="metric-card green"><div class="metric-title">Receita do Mês</div><div class="metric-value" id="dashReceitaMes">R$ 5.310,50</div></div>
-          <div class="metric-card red"><div class="metric-title">Despesa do Mês</div><div class="metric-value" id="dashDespesaMes">R$ 6.366,85</div></div>
-          <div class="metric-card purple"><div class="metric-title">Lucro do Mês</div><div class="metric-value" id="dashLucroMes">R$ -1.056,35</div></div>
+          <div class="metric-card green"><div class="metric-title">Receita do Mês</div><div class="metric-value" id="dashReceitaMes">R$&nbsp;0,00</div></div>
+          <div class="metric-card red"><div class="metric-title">Despesa do Mês</div><div class="metric-value" id="dashDespesaMes">R$&nbsp;0,00</div></div>
+          <div class="metric-card purple"><div class="metric-title">Lucro do Mês</div><div class="metric-value" id="dashLucroMes">R$&nbsp;0,00</div></div>
           <div class="metric-card blue"><div class="metric-title">Rotas do Mês</div><div class="metric-value" id="dashRotasMes">245</div></div>
         </div>
       </div>
@@ -9096,9 +9096,9 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
 
       <!-- Métricas principais do DRE (destaque visual) -->
       <div class="metrics-container">
-        <div class="metric-card green"><div class="metric-title">Receita Bruta</div><div class="metric-value" id="lblDreReceita">R$ 22.775,50</div></div>
-        <div class="metric-card red"><div class="metric-title">Despesas Totais</div><div class="metric-value" id="lblDreDespesas">R$ 6.366,85</div></div>
-        <div class="metric-card blue"><div class="metric-title">Lucro Líquido</div><div class="metric-value" id="lblDreLucro">R$ 16.408,65</div></div>
+        <div class="metric-card green"><div class="metric-title">Receita Bruta</div><div class="metric-value" id="lblDreReceita">R$&nbsp;0,00</div></div>
+        <div class="metric-card red"><div class="metric-title">Despesas Totais</div><div class="metric-value" id="lblDreDespesas">R$&nbsp;0,00</div></div>
+        <div class="metric-card blue"><div class="metric-title">Lucro Líquido</div><div class="metric-value" id="lblDreLucro">R$&nbsp;0,00</div></div>
         <div class="metric-card purple"><div class="metric-title">Margem de Lucro</div><div class="metric-value" id="lblDreMargem">72.0%</div></div>
       </div>
 
@@ -42266,4 +42266,40 @@ html body #modalEditarRota .modal-content{margin:0 auto!important;top:auto!impor
   };
 })();
 </script>
+<style id="fast-4066-seq-layout">
+/* 4.0.66: card das Rotas do Dia reorganizado no computador — sem espaços vazios */
+@media (min-width: 900px){
+  html body #containerSequencia .seq-item.seq-item{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(300px,360px)!important;grid-template-rows:auto auto!important;column-gap:18px!important;row-gap:10px!important;align-items:start!important;padding:14px 16px!important;min-height:0!important;height:auto!important}
+  html body #containerSequencia .seq-item.seq-item > .seq-number-wrap{grid-column:1!important;grid-row:1!important;display:flex!important;flex-direction:row!important;flex-wrap:wrap!important;align-items:center!important;gap:8px 10px!important;width:auto!important;min-width:0!important;max-width:none!important;margin:0!important;padding:0!important;position:static!important}
+  html body #containerSequencia .seq-item .seq-number-wrap .seq-checkbox{order:0;margin:0!important;flex:0 0 auto}
+  html body #containerSequencia .seq-item .seq-number-wrap .seq-number{order:1;flex:0 0 auto;margin:0!important;width:38px!important;height:38px!important;min-width:38px!important;font-size:14px!important}
+  html body #containerSequencia .seq-item .seq-number-wrap .seq-destino-ordinal{order:2;flex:1 1 220px!important;min-width:0!important;max-width:none!important;width:auto!important;margin:0!important;font-size:15px!important;padding:8px 12px!important;white-space:normal!important;word-break:break-word}
+  html body #containerSequencia .seq-item .seq-number-wrap .badge-status{order:3;flex:0 0 auto;margin:0!important;position:static!important}
+  html body #containerSequencia .seq-item .seq-number-wrap .rd-ord-btns{order:4;display:flex!important;flex-direction:row!important;align-items:center!important;gap:6px!important;margin:0!important;position:static!important;width:auto!important;flex:0 0 auto}
+  html body #containerSequencia .seq-item .seq-number-wrap .rd-ord-btn{width:32px!important;height:32px!important;min-width:32px!important;min-height:32px!important;padding:0!important}
+  html body #containerSequencia .seq-item .seq-number-wrap .rd-route-signal{margin:0!important;position:static!important}
+  html body #containerSequencia .seq-item.seq-item > .seq-body{grid-column:1!important;grid-row:2!important;display:flex!important;flex-direction:row!important;flex-wrap:wrap!important;align-items:flex-start!important;align-content:flex-start!important;gap:8px 12px!important;width:auto!important;min-width:0!important;max-width:none!important;height:auto!important;min-height:0!important;margin:0!important;padding:0!important}
+  html body #containerSequencia .seq-item .seq-body .seq-valor-linha{flex:0 0 auto;width:auto!important;max-width:none!important;align-self:flex-start!important;display:flex!important;align-items:center!important;gap:6px!important;margin:0!important;padding:8px 12px!important;border-radius:12px;background:rgba(16,185,129,.08);font-size:14px!important;white-space:nowrap}
+  html body #containerSequencia .seq-item .seq-body .seq-info-grid{flex:1 1 320px!important;height:auto!important;min-height:0!important;max-height:none!important;align-self:flex-start!important;grid-auto-rows:auto!important;align-items:start!important;display:grid!important;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))!important;gap:6px 14px!important;margin:0!important;padding:8px 12px!important;min-width:0!important}
+  html body #containerSequencia .seq-item .seq-body .seq-info-cell{min-width:0!important;border:0!important;padding:0!important;height:auto!important;min-height:0!important;justify-content:flex-start!important}
+  html body #containerSequencia .seq-item .seq-body .seq-info-value{white-space:normal!important;word-break:normal!important;overflow-wrap:anywhere}
+  html body #containerSequencia .seq-item .seq-body .seq-info-label{white-space:nowrap!important}
+  html body #containerSequencia .seq-item .seq-body .seq-info-wa{display:inline-flex!important;width:auto!important;white-space:nowrap!important;margin-top:4px!important;padding:2px 8px!important}
+  html body #containerSequencia .seq-item .seq-body .seq-field{flex:1 1 100%!important;display:flex!important;flex-wrap:wrap!important;gap:4px 18px!important;margin:0!important;padding:0 2px!important;font-size:13px!important}
+  html body #containerSequencia .seq-item .seq-body .seq-field > *{margin:0!important;white-space:nowrap}
+  html body #containerSequencia .seq-item .seq-body .galeria-fotos{flex:1 1 100%!important;margin:0!important;min-height:0!important;padding:8px 10px!important}
+  html body #containerSequencia .seq-item .seq-body .feedback-foto:empty{display:none!important}
+  html body #containerSequencia .seq-item.seq-item > .seq-actions{grid-column:2!important;grid-row:1 / span 2!important;display:grid!important;grid-template-columns:repeat(6,minmax(0,1fr))!important;gap:8px!important;align-content:start!important;width:auto!important;min-width:0!important;max-width:none!important;margin:0!important;padding:0!important;position:static!important}
+  html body #containerSequencia .seq-item .seq-actions .seq-actions-group{display:contents!important}
+  html body #containerSequencia .seq-item .seq-actions button,html body #containerSequencia .seq-item .seq-actions label.btn-upload{width:100%!important;min-width:0!important;height:40px!important;min-height:40px!important;margin:0!important;padding:0 8px!important;font-size:12.5px!important;border-radius:10px!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:6px!important;white-space:nowrap!important;overflow:hidden;text-overflow:ellipsis;box-sizing:border-box!important}
+  html body #containerSequencia .seq-item .seq-actions input[type=file]{display:none!important}
+  /* linhas completas, sem buracos: fotos (2 por linha), contato (3), status (1 ou 2), editar/excluir (2) */
+  html body #containerSequencia .seq-item .seq-actions > .seq-actions-group > button,html body #containerSequencia .seq-item .seq-actions > .seq-actions-group > label{grid-column:span 2!important}
+  html body #containerSequencia .seq-item .seq-actions .seq-group-fotos > button,html body #containerSequencia .seq-item .seq-actions .seq-group-fotos > label{grid-column:span 3!important}
+  html body #containerSequencia .seq-item .seq-actions .seq-group-status > button{grid-column:span 3!important}
+  html body #containerSequencia .seq-item .seq-actions .seq-group-status > button:only-of-type{grid-column:1 / -1!important}
+  html body #containerSequencia .seq-item .seq-actions .seq-group-gerenciar > button{grid-column:span 3!important}
+  html body #containerSequencia .seq-item .seq-body .seq-info-wa{align-self:flex-start!important;max-width:max-content!important}
+}
+</style>
 </body></html>
