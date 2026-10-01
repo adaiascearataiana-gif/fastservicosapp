@@ -30972,7 +30972,10 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
             return;
           }
           if (typeof confirmarDialog === 'function') {
+            // 4.0.66: a janela de progresso ficava NA FRENTE da pergunta de confirmação (travava em 20%)
+            if (window.fast400Restore) window.fast400Restore.close();
             confirmarDialog('Restaurar Backup', 'Esta ação irá substituir todos os dados atuais pelos dados do backup. Deseja continuar?', function() {
+              if (window.fast400Restore) window.fast400Restore.start('Restaurando backup…');
               if (window.fast400Restore) window.fast400Restore.step(42, 'Restauração autorizada', 'Protegendo exclusões permanentes…');
               // (v2.4.14/F3) Capturar lápides atuais ANTES de substituir o banco —
               // exclusões feitas pelo usuário nunca podem ser desfeitas por um backup antigo.
@@ -38928,13 +38931,13 @@ setInterval(function(){try{var tab=document.getElementById('rotasDia');if(tab&&t
 <!-- FAST 4.0.8 — restauração assistida, diagnóstico e auditoria local -->
 <style id="fast400-restore-style">
   #fast400RestoreOverlay{position:fixed;inset:0;z-index:2147483646;display:none;place-items:center;padding:20px;background:rgba(5,13,31,.72);backdrop-filter:blur(5px)}
-  #fast400RestoreOverlay.show{display:grid}#fast400RestoreCard{width:min(520px,100%);background:var(--bg-card,#fff);color:var(--text-main,#142033);border:1px solid rgba(99,102,241,.25);border-radius:24px;padding:25px;box-shadow:0 24px 80px rgba(0,0,0,.3)}
+  #fast400RestoreOverlay.show{display:grid}#modalConfirmarDialog{z-index:2147483647!important}#fast400RestoreCard{width:min(520px,100%);background:var(--bg-card,#fff);color:var(--text-main,#142033);border:1px solid rgba(99,102,241,.25);border-radius:24px;padding:25px;box-shadow:0 24px 80px rgba(0,0,0,.3)}
   .fast400-rhead{display:flex;gap:14px;align-items:center}.fast400-ricon{width:50px;height:50px;display:grid;place-items:center;border-radius:16px;color:#fff;background:linear-gradient(135deg,#7c3aed,#0891b2);font-size:22px}.fast400-rhead h3{margin:0;font-size:21px}.fast400-rhead p{margin:4px 0 0;color:var(--text-muted,#64748b);font-size:13px}
   .fast400-track{height:13px;margin:22px 0 10px;background:#e8edf5;border-radius:999px;overflow:hidden}.fast400-bar{height:100%;width:0;background:linear-gradient(90deg,#7c3aed,#2563eb,#06b6d4);border-radius:inherit;transition:width .35s ease}.fast400-row{display:flex;justify-content:space-between;gap:12px;font-weight:800}.fast400-detail{min-height:40px;margin-top:9px;color:var(--text-muted,#64748b);font-size:13px;line-height:1.45}.fast400-actions{display:none;gap:9px;flex-wrap:wrap;margin-top:14px}.fast400-actions.show{display:flex}.fast400-actions button{border:0;border-radius:12px;padding:11px 15px;font-weight:800;cursor:pointer}.fast400-close{background:#eef2ff;color:#3730a3}.fast400-copy{background:#172033;color:#fff}
   .fast400-spin{animation:fast400spin 1s linear infinite}@keyframes fast400spin{to{transform:rotate(360deg)}}
 </style>
 <div id="fast400RestoreOverlay" role="dialog" aria-modal="true" aria-labelledby="fast400RestoreTitle">
-  <div id="fast400RestoreCard"><div class="fast400-rhead"><div class="fast400-ricon"><i id="fast400RestoreIcon" class="fa-solid fa-rotate fast400-spin"></i></div><div><h3 id="fast400RestoreTitle">Restaurando backup</h3><p>FAST Serviços 4.0.27</p></div></div><div class="fast400-track"><div id="fast400RestoreBar" class="fast400-bar"></div></div><div class="fast400-row"><span id="fast400RestoreStage">Preparando…</span><span id="fast400RestorePct">0%</span></div><div id="fast400RestoreDetail" class="fast400-detail" aria-live="polite">Não feche o aplicativo durante esta operação.</div><div id="fast400RestoreActions" class="fast400-actions"><button class="fast400-copy ripple" type="button" onclick="fast400Restore.copyReport()" style="user-select: none;"><i class="fa-solid fa-copy"></i> Copiar relatório</button><button class="fast400-close ripple" type="button" onclick="fast400Restore.close()" style="user-select: none;">Fechar</button></div></div>
+  <div id="fast400RestoreCard"><div class="fast400-rhead"><div class="fast400-ricon"><i id="fast400RestoreIcon" class="fa-solid fa-rotate fast400-spin"></i></div><div><h3 id="fast400RestoreTitle">Restaurando backup</h3><p>FAST Serviços 4.0.66</p></div></div><div class="fast400-track"><div id="fast400RestoreBar" class="fast400-bar"></div></div><div class="fast400-row"><span id="fast400RestoreStage">Preparando…</span><span id="fast400RestorePct">0%</span></div><div id="fast400RestoreDetail" class="fast400-detail" aria-live="polite">Não feche o aplicativo durante esta operação.</div><div id="fast400RestoreActions" class="fast400-actions"><button class="fast400-copy ripple" type="button" onclick="fast400Restore.copyReport()" style="user-select: none;"><i class="fa-solid fa-copy"></i> Copiar relatório</button><button class="fast400-close ripple" type="button" onclick="fast400Restore.close()" style="user-select: none;">Fechar</button></div></div>
 </div>
 <script id="fast400-continuity">
 (function(){
@@ -38949,7 +38952,7 @@ setInterval(function(){try{var tab=document.getElementById('rotasDia');if(tab&&t
     done:function(label,detail){paint(100,label||'Concluído',detail||'Restauração concluída com segurança.','done');localStorage.setItem('fast_ultima_restauracao',new Date().toISOString());audit('restauracao_concluida',detail)},
     fail:function(label,detail){paint(state.percent||10,label||'Falha na restauração',detail||'Erro não identificado.','error');audit('restauracao_falhou',detail)},
     close:function(){if(el('fast400RestoreOverlay'))el('fast400RestoreOverlay').classList.remove('show')},
-    copyReport:function(){var report=['FAST Serviços 4.0.27','Data: '+new Date().toLocaleString('pt-BR'),'Status: '+state.status,'Etapa: '+state.stage,'Progresso: '+state.percent+'%','Detalhe: '+state.detail,'Online: '+navigator.onLine,'Agente: '+navigator.userAgent].join('\n');if(navigator.clipboard)navigator.clipboard.writeText(report).then(function(){try{mostrarToast('Relatório técnico copiado.','success')}catch(e){}});else prompt('Copie o relatório:',report)}
+    copyReport:function(){var report=['FAST Serviços 4.0.66','Data: '+new Date().toLocaleString('pt-BR'),'Status: '+state.status,'Etapa: '+state.stage,'Progresso: '+state.percent+'%','Detalhe: '+state.detail,'Online: '+navigator.onLine,'Agente: '+navigator.userAgent].join('\n');if(navigator.clipboard)navigator.clipboard.writeText(report).then(function(){try{mostrarToast('Relatório técnico copiado.','success')}catch(e){}});else prompt('Copie o relatório:',report)}
   };
   window.fast400Diagnostico=function(){
     var version=(document.querySelector('meta[name="fast-app-version"]')||{}).content||'não identificada';
