@@ -5963,18 +5963,7 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
       background: var(--card-bg); border-radius: var(--radius-lg);
       box-shadow: var(--shadow-lg); padding: 28px; width: 100%; max-width: 380px;
       text-align: center; animation: empPop 0.28s cubic-bezier(.34,1.56,.64,1);
-      position: relative;
     }
-    /* Botão X para fechar a caixa de login da Área Protegida */
-    .emp-pwd-close {
-      position: absolute; top: 12px; right: 12px;
-      width: 34px; height: 34px; border-radius: 50%;
-      border: none; cursor: pointer; z-index: 2;
-      background: var(--bg-soft); color: var(--text-muted);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 15px; transition: all 0.18s; user-select: none;
-    }
-    .emp-pwd-close:hover { background: var(--danger); color: #fff; transform: scale(1.06); }
     @keyframes empPop { from { opacity: 0; transform: scale(0.9) translateY(12px); } to { opacity: 1; transform: scale(1) translateY(0); } }
 
     .emp-pwd-box .emp-pwd-icon {
@@ -8306,7 +8295,7 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
 
     <!-- ABA 2: ROTAS DO DIA -->
     <div id="rotasDia" class="tab-content">
-      <div id="fastLogisticsHub" class="card no-print"><div class="fl-head"><h3><i class="fa-solid fa-tower-broadcast"></i> Central Operacional</h3><span class="fl-live">AO VIVO</span></div><div class="fl-kpis"><div class="fl-kpi"><span>Rotas do dia</span><strong id="flTotal">0</strong></div><div class="fl-kpi warn"><span>Pendentes</span><strong id="flPending">0</strong></div><div class="fl-kpi danger"><span>Risco de atraso</span><strong id="flLate">0</strong></div><div class="fl-kpi" style="display:none" title="Comprovante de Entrega desativado"><span>Sem comprovante</span><strong id="flProof">0</strong></div></div><div class="fl-tools"><button class="fl-tool ripple" onclick="fastLogOtimizar()" style="user-select: none;" data-fast-bound="1"><i class="fa-solid fa-wand-magic-sparkles"></i> Otimizar ordem</button><button class="fl-tool ripple" onclick="fastLogMapa()" style="user-select: none;" data-fast-bound="1"><i class="fa-solid fa-map-location-dot"></i> Torre no mapa</button><button class="fl-tool ripple" onclick="fastLogSync()" style="user-select: none;" data-fast-bound="1"><i class="fa-solid fa-cloud-arrow-up"></i> Sincronização</button><button class="fl-tool ripple" onclick="fastLogGeo()" style="user-select: none;" data-fast-bound="1"><i class="fa-solid fa-location-crosshairs"></i> Geolocalização</button><button class="fl-tool ripple" onclick="fastLogTracking()" style="user-select: none;" data-fast-bound="1"><i class="fa-solid fa-link"></i> Rastrear cliente</button><button class="fl-tool ripple" onclick="fastLogInteligencia()" style="user-select: none;" data-fast-bound="1"><i class="fa-solid fa-chart-line"></i> Previsões e lucro</button></div><div class="fl-alerts" id="flAlerts"><div class="fl-alert"><i class="fa-solid fa-camera"></i>1 rota(s) aberta(s) ainda sem foto.</div></div></div><div class="card">
+      <div id="fastLogisticsHub" class="card no-print"><div class="fl-head"><h3><i class="fa-solid fa-tower-broadcast"></i> Central Operacional</h3><span class="fl-live">AO VIVO</span></div><div class="fl-kpis"><div class="fl-kpi"><span>Rotas do dia</span><strong id="flTotal">0</strong></div><div class="fl-kpi warn"><span>Pendentes</span><strong id="flPending">0</strong></div><div class="fl-kpi danger"><span>Risco de atraso</span><strong id="flLate">0</strong></div><div class="fl-kpi" style="display:none" title="Comprovante de Entrega desativado"><span>Sem comprovante</span><strong id="flProof">0</strong></div></div><div class="fl-tools"><button class="fl-tool ripple" onclick="fastLogOtimizar()" style="user-select: none;" data-fast-bound="1"><i class="fa-solid fa-wand-magic-sparkles"></i> Otimizar ordem</button><button class="fl-tool ripple" onclick="fastLogMapa()" style="user-select: none;" data-fast-bound="1"><i class="fa-solid fa-map-location-dot"></i> Torre no mapa</button><button class="fl-tool ripple" onclick="fastLogSync()" style="user-select: none;" data-fast-bound="1"><i class="fa-solid fa-cloud-arrow-up"></i> Sincronização</button><button class="fl-tool ripple" onclick="fastLogGeo()" style="user-select: none;" data-fast-bound="1"><i class="fa-solid fa-location-crosshairs"></i> Geolocalização</button><button class="fl-tool ripple" onclick="fastLogTracking()" style="user-select: none;" data-fast-bound="1"><i class="fa-solid fa-link"></i> Rastrear cliente</button><button class="fl-tool ripple" onclick="fastLogInteligencia()" style="user-select: none;" data-fast-bound="1"><i class="fa-solid fa-chart-line"></i> Previsões e lucro</button></div><div class="fl-alerts" id="flAlerts"></div></div><div class="card">
         <div class="card-title">
           <span><i class="fa-solid fa-magnifying-glass"></i> Filtro de busca</span>
           <div style="display: flex; gap: 8px; flex-wrap: wrap;"><button id="fastVoiceRouteBtn" type="button" class="btn-primary no-print ripple" style="user-select: none;" data-fast-bound="1"><i class="fa-solid fa-microphone"></i> <span class="rd-drive-label">Comando de voz</span></button><button id="fastDriveFilesBtn" class="btn-secondary no-print ripple" style="user-select: none;" data-fast-bound="1"><i class="fa-brands fa-google-drive"></i> <span class="rd-drive-label">Google Drive</span></button>
@@ -19290,16 +19279,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
         if (!item || fastEhConcluido(item, bancoDados.rotas || [])) return true;
         if (item.rotaId != null) {
           const rota = rotasPorIdData.get(String(item.rotaId));
-          if (rota && rota.data && String(rota.data) !== String(dataSel)) {
-            // (fix) A barreira anti-cópia-no-dia-errado só pode ESCONDER este item
-            // se existir OUTRA cópia da MESMA rota no dia correto (rota.data).
-            // Antes escondia sempre — se esta fosse a única cópia, a rota recém
-            // inserida sumia de TODOS os dias (nem aqui, nem em rota.data). Agora,
-            // quando não há cópia no dia certo, mostramos aqui para não perder a rota.
-            const listaDiaCerto = (bancoDados.sequencias && bancoDados.sequencias[String(rota.data)]) || [];
-            const temCopiaNoDiaCerto = Array.isArray(listaDiaCerto) && listaDiaCerto.some(function(it){ return it && String(it.rotaId) === String(item.rotaId); });
-            if (temCopiaNoDiaCerto) return false;
-          }
+          if (rota && rota.data && String(rota.data) !== String(dataSel)) return false;
         }
         if (item.agrupado && Array.isArray(item.rotasOriginais) && item.rotasOriginais.length) {
           // O grupo so pode aparecer se ao menos uma rota que ainda o compoe
@@ -22649,7 +22629,6 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
       let novoId = Date.now();
       const idsExistentes = new Set((bancoDados.rotas || []).map(r => String(r.id)));
       while (idsExistentes.has(String(novoId))) novoId++;
-      const _agora = new Date().toISOString();
       const novaRota = {
         id: novoId,
         cliente: cliente,
@@ -22662,12 +22641,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
         status: 'Pendente',
         statusExecucao: 'EM ROTA',
         valor: valor,
-        descricao: obs,
-        // (fix) Carimbo de edição na criação: sem ele o merge tratava a rota nova
-        // como "mais antiga" (updatedAt=0) e uma cópia da nuvem podia re-datá-la,
-        // fazendo a rota do dia recém-criada sumir de todas as telas após o sync.
-        updatedAt: _agora,
-        statusUpdatedAt: _agora
+        descricao: obs
       };
       if (!bancoDados.rotas) bancoDados.rotas = [];
       bancoDados.rotas.push(novaRota);
@@ -31732,10 +31706,9 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
   <!-- ============================================================
        OVERLAY: Acesso protegido aos Dados da Empresa + Banco de Dados (SQL/Supabase)
        ============================================================ -->
-  <div id="empOverlay" class="emp-overlay" role="dialog" aria-modal="true" aria-label="Dados da Empresa e Banco de Dados protegidos" onclick="if(event.target===this) fecharEmpOverlay()">
+  <div id="empOverlay" class="emp-overlay" role="dialog" aria-modal="true" aria-label="Dados da Empresa e Banco de Dados protegidos">
     <!-- Caixa de senha (criar/entrar) -->
     <div id="empPwdBox" class="emp-pwd-box" style="display: none;">
-      <button type="button" class="emp-pwd-close ripple" onclick="fecharEmpOverlay()" aria-label="Fechar" style="user-select: none;"><i class="fa-solid fa-xmark"></i></button>
       <div class="emp-pwd-icon"><i class="fa-solid fa-lock"></i></div>
       <h3 id="empPwdTitulo">Acesso à Área Protegida</h3>
       <p id="empPwdTexto">Digite a senha de acesso (a mesma da Segurança de Acesso) para visualizar os dados da empresa.</p>
@@ -42157,12 +42130,29 @@ html body #modalEditarRota .modal-content{margin:0 auto!important;top:auto!impor
       if(W.__fastSyncRodando)return;
       W.__fastSyncRodando=true;aviso('Sincronizando…');
       try{
-        if(!token()){await somenteRotasDoDia();return}
+        // 4.0.66: renova o acesso vencido ANTES de sincronizar (antes o app achava que
+        // "faltavam tabelas" e parava de sincronizar até fechar e abrir de novo)
+        var tk=await garantirToken();
+        if(!tk){await somenteRotasDoDia();try{atualizarStatusSync('error','Entre com e-mail e senha para sincronizar tudo')}catch(e){}return}
+        try{if(!supabaseDisponivel){supabaseVerificado=false}}catch(e){}
         return await f.apply(this,arguments);
       }finally{W.__fastSyncRodando=false;W.__fastSyncFim=Date.now();aviso('')}
     };
     g.__f66=true;W.sincronizarAgora=g;
   }
+  async function garantirToken(){
+    var t=token();if(t)return t;
+    var ses=null;try{ses=JSON.parse(localStorage.getItem('fast_supa_session')||'null')}catch(e){}
+    if(!ses||!ses.refresh_token||!navigator.onLine)return null;
+    try{
+      var r=await fetch('https://'+PROJ+'.supabase.co/auth/v1/token?grant_type=refresh_token',{method:'POST',headers:{'Content-Type':'application/json',apikey:KEY},body:JSON.stringify({refresh_token:ses.refresh_token})});
+      var d={};try{d=await r.json()}catch(e){}
+      if(!r.ok||!d.access_token)return null;
+      localStorage.setItem('fast_supa_session',JSON.stringify({access_token:d.access_token,refresh_token:d.refresh_token||ses.refresh_token,expires_at:Date.now()+((d.expires_in||3600)*1000)}));
+      return d.access_token;
+    }catch(e){return null}
+  }
+  W.fastGarantirToken=garantirToken;
   // sem login na conta principal (ex.: login interno): pelo menos as Rotas do Dia sobem e descem
   async function somenteRotasDoDia(){
     if(typeof supabaseGetSequencias!=='function'||typeof supabaseSyncSequencias!=='function')return;
@@ -42237,7 +42227,7 @@ html body #modalEditarRota .modal-content{margin:0 auto!important;top:auto!impor
     var ds=pares.map(function(p){return N(p.destino)});
     var unicos=ds.filter(function(d,i){return d&&ds.indexOf(d)===i});
     if(unicos.length<=1)return unicos[0]||'';
-    return pares.map(function(p,i){return 'Foto '+(i+1)+': '+(N(p.destino)||'—')}).join('\n');
+    return unicos.join('\n'); // 4.0.66: só os destinos digitados, sem "Foto 1:"
   };
   window.fastCarimbarDestino=function(file,destino){
     return new Promise(function(res){
