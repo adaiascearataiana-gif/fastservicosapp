@@ -33,7 +33,7 @@
   W.__fast4067 = true;
 
   var BASE_KEY = 'fast4067_base_v1';
-  var VERSAO = 'v7';
+  var VERSAO = 'v10';
   var DIAG = W.__f68Diag = { erro: '', erroEm: 0, envio: 0, baixou: 0 };
   function falha(txt) { DIAG.erro = String(txt).slice(0, 160); DIAG.erroEm = Date.now(); try { painel(true); } catch (e) {} }
   var PAGINA = 1000;
@@ -47,6 +47,39 @@
   function token() {
     try { return typeof W.fastObterTokenSupabase === 'function' ? W.fastObterTokenSupabase() : null; } catch (e) { return null; }
   }
+  /* ---------------- login no banco: renova sozinho antes de vencer ---------------- */
+  function sessao() { try { return JSON.parse(localStorage.getItem('fast_supa_session') || 'null'); } catch (e) { return null; } }
+  var renovando = null;
+  function renovarLogin(forcar) {
+    var s = sessao();
+    if (!s || !s.refresh_token) { DIAG.login = 'sem-sessao'; return Promise.resolve(false); }
+    if (!forcar && token() && s.expires_at && s.expires_at - Date.now() > 5 * 60000) return Promise.resolve(true);
+    if (renovando) return renovando;
+    renovando = (async function () {
+      try {
+        var base = String(SUPABASE_URL).replace(/\/rest\/v1\/?$/, '');
+        var r = await fetch(base + '/auth/v1/token?grant_type=refresh_token', {
+          method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+          body: JSON.stringify({ refresh_token: s.refresh_token })
+        });
+        var d = {}; try { d = await r.json(); } catch (e) {}
+        if (!r.ok || !d.access_token) { DIAG.login = 'recusado'; return false; }
+        var atual = sessao() || {};
+        atual.access_token = d.access_token;
+        atual.refresh_token = d.refresh_token || s.refresh_token;
+        atual.expires_at = Date.now() + (Number(d.expires_in) || 3600) * 1000;
+        localStorage.setItem('fast_supa_session', JSON.stringify(atual));
+        DIAG.login = 'ok';
+        return true;
+      } catch (e) { return false; }
+      finally { setTimeout(function () { renovando = null; }, 0); }
+    })();
+    return renovando;
+  }
+  W.fastRenovarLoginBanco = function () { return renovarLogin(true); };
+  setInterval(function () { if (navigator.onLine) renovarLogin(false); }, 60000);
+  document.addEventListener('visibilitychange', function () { if (!document.hidden && navigator.onLine) renovarLogin(false); });
+
   function hsh(s) {
     try { if (typeof fastChecksum === 'function') return fastChecksum(s); } catch (e) {}
     var h = 2166136261;
@@ -68,6 +101,7 @@
         headers: supabaseHeaders({ 'Range-Unit': 'items', 'Range': de + '-' + (de + PAGINA - 1) })
       });
       if (r.status === 416) break;
+      if (r.status === 401) renovarLogin(true);
       if (!r.ok) { falha('Download de ' + tabela + ' recusado (HTTP ' + r.status + ')'); throw new Error('GET ' + tabela + ': HTTP ' + r.status); }
       var linhas = await r.json();
       saida = saida.concat(linhas);
@@ -305,6 +339,7 @@
         if (legado && !W[flag] && typeof ehErroDeColunaSupabase === 'function' && ehErroDeColunaSupabase(r.status, t)) {
           W[flag] = true; i -= LOTE_ENVIO; continue;
         }
+        if (r.status === 401) renovarLogin(true);
         falha('Envio de ' + tabela + ' recusado (HTTP ' + r.status + ') ' + String(t).slice(0, 80));
         throw new Error('POST ' + tabela + ': HTTP ' + r.status + ' — ' + String(t).slice(0, 300));
       }
@@ -587,7 +622,8 @@
     W.__f68LeveUltima = W.__f68Leve;
     var novas = W.__f68Leve ? lapNovas() : null;
     var okSync = false;
-    try { await f(); okSync = true; DIAG.baixou = Date.now(); } catch (e) { console.warn('FAST sync:', e); falha('Sincronização: ' + (e && e.message || e)); }
+    var inicioSync = Date.now();
+    try { await f(); okSync = true; DIAG.baixou = Date.now(); if (DIAG.erro && DIAG.erroEm < inicioSync) DIAG.erro = ''; } catch (e) { console.warn('FAST sync:', e); falha('Sincronização: ' + (e && e.message || e)); }
     finally { W.__f68Pesada_on = false; W.__f68Leve = false; W.__fastSyncFim = Date.now(); }
     if (okSync && !W.__f68LeveUltima) lapConh = lapAtual();          // completa: lápides já unidas com a nuvem
     if (novas) { subirLapides(novas); LAPS.forEach(function (k) { (novas[k] || []).forEach(function (v) { if (lapConh) lapConh[k].add(String(v)); }); }); }
@@ -734,6 +770,7 @@
       var r = await fetch(SUPABASE_URL + '/' + t + '?select=updated_at&order=updated_at.desc.nullslast&limit=1', {
         method: 'GET', cache: 'no-store', headers: supabaseHeaders({ 'Prefer': 'count=exact' })
       });
+      if (r.status === 401) { renovarLogin(true); return null; }
       if (!r.ok) { falha('Verificação recusada pelo banco (HTTP ' + r.status + ')'); return null; }
       var j = await r.json();
       return (r.headers.get('content-range') || '') + '|' + (j[0] ? j[0].updated_at : '');
@@ -745,6 +782,7 @@
     if (checando || document.hidden || !navigator.onLine || !pronto()) return;
     // com tempo real ativo, a verificação vira só reserva (a cada 15 s)
     if (!forcar && Date.now() - ultimaChecagem < (rtConectado() ? 60000 : 10000)) return;
+    if (!token()) { await renovarLogin(true); }
     if (!token()) {
       if (!avisouSemLogin) {
         avisouSemLogin = true;
@@ -835,8 +873,16 @@
       if (typeof abrirDBFotos !== 'function') return -1;
       var db = await abrirDBFotos();
       return await new Promise(function (res) {
-        try { var q = db.transaction('driveQueue', 'readonly').objectStore('driveQueue').count(); q.onsuccess = function () { res(q.result); }; q.onerror = function () { res(-1); }; }
-        catch (e) { res(-1); }
+        try {
+          var q = db.transaction('driveQueue', 'readonly').objectStore('driveQueue').getAll();
+          q.onsuccess = function () {
+            var l = Array.isArray(q.result) ? q.result : [];
+            var comErro = l.filter(function (r) { return r && r.ultimoErro; });
+            DRV.erroFoto = comErro.length ? (comErro[0].ultimoErro + ' (' + (comErro[0].tentativas || 0) + ' tentativa(s))') : '';
+            res(l.length);
+          };
+          q.onerror = function () { res(-1); };
+        } catch (e) { res(-1); }
       });
     } catch (e) { return -1; }
   }
@@ -878,7 +924,19 @@
       var f = W.fastDriveEnfileirarArquivos;
       if (typeof f !== 'function' || f.__f68) return;
       var g = async function () {
-        var r = await f.apply(this, arguments);
+        var args = Array.prototype.slice.call(arguments);
+        // guarda os BYTES da foto (no app, a referência ao arquivo da galeria
+        // pode deixar de ser legível depois, e o envio falha com "Failed to fetch")
+        try {
+          var lista = Array.from(args[0] || []);
+          args[0] = await Promise.all(lista.map(async function (a) {
+            try {
+              var buf = await a.arrayBuffer();
+              return new File([buf], a.name || 'foto.jpg', { type: a.type || 'image/jpeg', lastModified: a.lastModified || Date.now() });
+            } catch (e) { return a; }
+          }));
+        } catch (e) {}
+        var r = await f.apply(this, args);
         clearTimeout(tEnf); tEnf = setTimeout(function () { garantirDrive(true); }, 800);
         return r;
       };
@@ -902,26 +960,71 @@
       // camada do topo (fica por cima até da tela de login)
       try { el.setAttribute('popover', 'manual'); } catch (e) {}
       ['visibility', 'opacity', 'pointer-events'].forEach(function (k, i) { el.style.setProperty(k, ['visible', '1', 'auto'][i], 'important'); });
-      el.addEventListener('click', function () { esconderPainel(el); });
+      el.innerHTML = '<div id="f68DiagTxt"></div><div id="f68DiagLogin"></div>';
+      el.addEventListener('click', function (ev) { if (ev.target.closest && ev.target.closest('#f68DiagLogin')) return; esconderPainel(el); });
       document.body.appendChild(el);
     }
     var tk = !!token(), rt = rtConectado();
     var linhas = [
       '<b>Sincronização ' + VERSAO + '</b> — toque para fechar',
-      (tk ? '✅' : '❌') + ' Login no banco: ' + (tk ? 'sim' : 'NÃO (saia e entre com e-mail e senha)'),
+      (tk ? '✅' : '❌') + ' Login no banco: ' + (tk ? 'sim' :
+        (DIAG.login === 'sem-sessao' ? 'NÃO — entre NESTE app com e-mail e senha' :
+         DIAG.login === 'recusado' ? 'NÃO — login venceu; saia e entre de novo com e-mail e senha' : 'renovando…')),
       (rt ? '✅' : '⚠️') + ' Tempo real: ' + (rt ? 'conectado' : 'desconectado (verificando a cada 10 s)'),
       '⬆️ Último envio: ' + hora(DIAG.envio) + ' · ⬇️ Última leitura: ' + hora(DIAG.baixou),
       (driveToken() ? '✅' : '📷') + ' Google Drive (fotos): ' + (driveToken() ? 'conectado' : (DRV.estado || 'verificando…')) +
         (DRV.pend >= 0 ? ' · ' + DRV.pend + ' foto(s) na fila' : '')
     ];
+    if (DRV.pend > 0 && DRV.erroFoto) linhas.push('<span style="color:#fde68a">📷 Erro da foto: ' + DRV.erroFoto.replace(/[<>&]/g, '').slice(0, 160) + '</span>');
     if (DIAG.erro) linhas.push('<span style="color:#fca5a5">⛔ ' + DIAG.erro.replace(/[<>&]/g, '') + '</span>');
-    el.innerHTML = linhas.join('<br>');
+    document.getElementById('f68DiagTxt').innerHTML = linhas.join('<br>');
+    formLogin(!tk && DIAG.login === 'sem-sessao');
     el.style.background = DIAG.erro || !tk ? 'rgba(127,29,29,.95)' : 'rgba(17,24,39,.94)';
     if (mostrar) {
       mostrarPainel(el);
       clearTimeout(tPainel);
       tPainel = setTimeout(function () { if (!DIAG.erro && token()) esconderPainel(el); }, 25000);
     }
+  }
+  // Mini-apps (Rotas do Dia, Despesas) não têm tela de login própria: quando o
+  // aparelho guarda os dados separados do app principal, entra-se por aqui uma vez.
+  function formLogin(mostrar) {
+    var box = document.getElementById('f68DiagLogin');
+    if (!box) return;
+    if (!mostrar) { if (box.innerHTML) box.innerHTML = ''; return; }
+    if (box.innerHTML) return;   // já está na tela (não apaga o que foi digitado)
+    var est = 'width:100%;box-sizing:border-box;margin:6px 0 0;padding:10px 12px;border-radius:10px;border:1px solid #cbd5e1;font-size:15px;color:#111;background:#fff';
+    box.innerHTML =
+      '<div style="margin-top:8px;font-weight:600">Entrar no banco (uma vez neste app)</div>' +
+      '<input id="f68Email" type="email" autocomplete="username" placeholder="E-mail da conta FAST" style="' + est + '">' +
+      '<input id="f68Senha" type="password" autocomplete="current-password" placeholder="Senha" style="' + est + '">' +
+      '<button id="f68Entrar" type="button" style="width:100%;margin-top:8px;min-height:44px;border:0;border-radius:10px;font-weight:700;font-size:15px;background:#22c55e;color:#06210f">Entrar</button>' +
+      '<div id="f68LoginMsg" style="margin-top:6px"></div>';
+    document.getElementById('f68Entrar').addEventListener('click', entrarBanco);
+  }
+  async function entrarBanco() {
+    var em = (document.getElementById('f68Email') || {}).value || '', se = (document.getElementById('f68Senha') || {}).value || '';
+    var msg = document.getElementById('f68LoginMsg');
+    if (!em.trim() || !se) { if (msg) msg.textContent = 'Preencha e-mail e senha.'; return; }
+    if (msg) msg.textContent = 'Entrando…';
+    try {
+      var base = String(SUPABASE_URL).replace(/\/rest\/v1\/?$/, '');
+      var r = await fetch(base + '/auth/v1/token?grant_type=password', {
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+        body: JSON.stringify({ email: em.trim(), password: se })
+      });
+      var d = {}; try { d = await r.json(); } catch (e) {}
+      if (!r.ok || !d.access_token) { if (msg) msg.textContent = 'Não entrou: ' + (d.error_description || d.msg || d.error || ('HTTP ' + r.status)); return; }
+      localStorage.setItem('fast_supa_session', JSON.stringify({
+        access_token: d.access_token, refresh_token: d.refresh_token,
+        expires_at: Date.now() + (Number(d.expires_in) || 3600) * 1000, user: d.user || null
+      }));
+      DIAG.login = 'ok';
+      var box = document.getElementById('f68DiagLogin'); if (box) box.innerHTML = '';
+      painel(true);
+      sincronizar(false);
+      setTimeout(function () { garantirDrive(true); }, 1500);
+    } catch (e) { if (msg) msg.textContent = 'Sem conexão. Tente de novo.'; }
   }
   function painelAberto(el) { try { if (el.showPopover) return el.matches(':popover-open'); } catch (e) {} return el.style.display !== 'none'; }
   function mostrarPainel(el) {
