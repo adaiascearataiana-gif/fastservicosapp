@@ -62,6 +62,22 @@ jobs:
           cp android/app/build/outputs/apk/despesas/release/app-despesas-release.apk Despesas-FAST-Android.apk
           cp android/app/build/outputs/apk/fast/release/app-fast-release.apk FAST-Servicos-Android.apk
           cp android/app/build/outputs/apk/limpo/release/app-limpo-release.apk FAST-Limpo-Android.apk
+      - name: Publicar APKs na pasta downloads do site
+        # O site baixa os apps de /downloads/. Sem este passo os APKs novos iam só
+        # para o Release e o site continuava entregando o APK antigo (4.0.8).
+        shell: bash
+        run: |
+          git config user.name "FAST-bot"
+          git config user.email "fast-bot@users.noreply.github.com"
+          git fetch origin main
+          git checkout -B publicar-apks origin/main
+          mkdir -p downloads
+          cp Cliente-FAST-Android.apk Motorista-FAST-Android.apk Rotas-do-Dia-FAST-Android.apk \
+             Despesas-FAST-Android.apk FAST-Servicos-Android.apk FAST-Limpo-Android.apk downloads/
+          git add downloads/*.apk
+          if git diff --cached --quiet; then echo "APKs iguais, nada a publicar"; exit 0; fi
+          git commit -m "APKs Android atualizados ($(date +%Y-%m-%d)) - biometria e camera"
+          git push origin publicar-apks:main
       - uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/') || inputs.release_tag != ''
         with:
