@@ -18,7 +18,9 @@
       cópia antiga local. Agora vale a edição feita de verdade.
    5) TEMPO REAL: conexão aberta com o Supabase Realtime. Quando um
       aparelho salva, os outros são avisados na hora e puxam em ~1-3 s.
-      Sem conexão em tempo real, verificação leve a cada 4 s.
+      Sem conexão em tempo real, verificação leve a cada 10 s.
+   7) ECONOMIA DE TRÁFEGO: baixa só as linhas alteradas (incremental) e
+      deixa clientes/destinos/motoristas para a sincronização de 10 min.
    6) Envio imediato (~0,3 s após salvar) e só do que mudou (delta), sem
       reenviar o banco inteiro a cada sincronização.
    7) Aviso claro quando o aparelho está sem login no banco.
@@ -55,10 +57,10 @@
   }
 
   /* ---------------- leitura paginada (sem limite de 1000) ---------------- */
-  async function getTudo(tabela, campos) {
+  async function getTudo(tabela, campos, filtro) {
     var saida = [], de = 0;
     for (var volta = 0; volta < 300; volta++) {
-      var r = await fetch(SUPABASE_URL + '/' + tabela + '?select=' + campos + '&order=id.asc', {
+      var r = await fetch(SUPABASE_URL + '/' + tabela + '?select=' + campos + (filtro ? '&' + filtro : '') + '&order=id.asc', {
         method: 'GET',
         headers: supabaseHeaders({ 'Range-Unit': 'items', 'Range': de + '-' + (de + PAGINA - 1) })
       });
@@ -70,6 +72,74 @@
       de += PAGINA;
     }
     return saida;
+  }
+
+  /* ---------------- download INCREMENTAL (economiza o limite de tráfego) ----------------
+     Guarda uma cópia da tabela no aparelho (IndexedDB) e, a cada sincronização,
+     baixa só as linhas alteradas desde a última vez (updated_at). Exclusões são
+     detectadas pela contagem. Cópia completa no máximo a cada 30 min. */
+  var CACHE = {}, IDB = null, COMPLETA_MS = 30 * 60 * 1000, SOBREPOR_MS = 2 * 60 * 1000;
+  function idb() {
+    if (IDB) return IDB;
+    IDB = new Promise(function (res) {
+      try {
+        var q = indexedDB.open('fast4068_cache', 1);
+        q.onupgradeneeded = function () { q.result.createObjectStore('c'); };
+        q.onsuccess = function () { res(q.result); };
+        q.onerror = function () { res(null); };
+      } catch (e) { res(null); }
+    });
+    return IDB;
+  }
+  async function idbLer(k) {
+    var db = await idb(); if (!db) return null;
+    return new Promise(function (res) {
+      try { var q = db.transaction('c', 'readonly').objectStore('c').get(k); q.onsuccess = function () { res(q.result || null); }; q.onerror = function () { res(null); }; }
+      catch (e) { res(null); }
+    });
+  }
+  async function idbGravar(k, v) {
+    var db = await idb(); if (!db) return;
+    try { db.transaction('c', 'readwrite').objectStore('c').put(v, k); } catch (e) {}
+  }
+  function quando(v) {
+    if (v == null || v === '') return 0;
+    var x = Date.parse(v);
+    if (isNaN(x)) x = Date.parse(String(v).replace(' ', 'T').replace(/([+-]\d\d)$/, '$1:00'));
+    return isNaN(x) ? 0 : x;
+  }
+  async function contar(tabela) {
+    try {
+      var r = await fetch(SUPABASE_URL + '/' + tabela + '?select=id&limit=1', { method: 'GET', cache: 'no-store', headers: supabaseHeaders({ 'Prefer': 'count=exact' }) });
+      if (!r.ok) return null;
+      var cr = r.headers.get('content-range') || '', n = parseInt(cr.split('/')[1], 10);
+      return isNaN(n) ? null : n;
+    } catch (e) { return null; }
+  }
+  async function getInc(tabela) {
+    var chaveC = String(SUPABASE_URL) + '|' + tabela;
+    var c = CACHE[tabela] || await idbLer(chaveC);
+    var agora = Date.now();
+    var completa = !c || !c.rows || agora - (c.full || 0) > COMPLETA_MS || restaurando();
+    if (!completa) {
+      var desde = new Date(Math.max(0, (c.wm || 0) - SOBREPOR_MS)).toISOString();
+      var novos = await getTudo(tabela, '*', 'updated_at=gte.' + encodeURIComponent(desde));
+      novos.forEach(function (r) { c.rows[String(r.id)] = r; c.wm = Math.max(c.wm || 0, quando(r.updated_at)); });
+      var total = await contar(tabela), qtd = Object.keys(c.rows).length;
+      if (total != null && total !== qtd) {
+        var ids = new Set((await getTudo(tabela, 'id')).map(function (r) { return String(r.id); }));
+        Object.keys(c.rows).forEach(function (k) { if (!ids.has(k)) delete c.rows[k]; });
+        if (ids.size !== Object.keys(c.rows).length) completa = true;   // faltou alguma linha: refaz tudo
+      }
+    }
+    if (completa) {
+      var todas = await getTudo(tabela, '*');
+      c = { rows: {}, wm: 0, full: agora };
+      todas.forEach(function (r) { c.rows[String(r.id)] = r; c.wm = Math.max(c.wm, quando(r.updated_at)); });
+    }
+    CACHE[tabela] = c;
+    idbGravar(chaveC, c);
+    return Object.keys(c.rows).map(function (k) { return c.rows[k]; });
   }
 
   /* ---------------- base: o que este aparelho já sincronizou ---------------- */
@@ -106,7 +176,16 @@
   function precisa(id, h, k) {
     if (restaurando()) return true;
     id = String(id);
-    if (N) return N[k][id] !== h;
+    if (N) {
+      // Fora da sincronização completa: linha que sumiu da nuvem e que este
+      // aparelho já tinha enviado sem mudar = provavelmente excluída em outro
+      // aparelho. Não reenvia (não "ressuscita"); a completa resolve pelas lápides.
+      if (N[k][id] === undefined && !W.__f68Pesada_on) {
+        var bb = lerBase();
+        if (bb && bb[k] && bb[k][id] === h) return false;
+      }
+      return N[k][id] !== h;
+    }
     var b = lerBase();
     return !(b && b[k] && b[k][id] === h);
   }
@@ -273,7 +352,8 @@
     if (arrumarLista(bancoDados.rotas, true)) gravarLocal();
     var locais = bancoDados.rotas || [], hs = {};
     var mud = locais.filter(function (r) { if (!r || r.id == null) return false; var h = camposRota(r); hs[String(r.id)] = h; return precisa(r.id, h, 'r'); });
-    var linhas = semRepetidos(mud.map(rotaToSupabase));
+    var agoraIso = new Date().toISOString();
+    var linhas = semRepetidos(mud.map(rotaToSupabase)).map(function (l) { l.updated_at = agoraIso; return l; });
     if (linhas.length) {
       await enviarLotes('rotas', linhas, legadoRotas, 'r101RotasColunasFaltando');
       if (N) linhas.forEach(function (l) { N.r[String(l.id)] = hs[String(l.id)]; });
@@ -285,7 +365,8 @@
     if (arrumarLista(bancoDados.despesas, false)) gravarLocal();
     var locais = bancoDados.despesas || [], hs = {};
     var mud = locais.filter(function (d) { if (!d || d.id == null) return false; var h = camposDesp(d); hs[String(d.id)] = h; return precisa(d.id, h, 'd'); });
-    var linhas = semRepetidos(mud.map(despesaToSupabase));
+    var agoraIso = new Date().toISOString();
+    var linhas = semRepetidos(mud.map(despesaToSupabase)).map(function (l) { l.updated_at = agoraIso; return l; });
     if (linhas.length) {
       await enviarLotes('despesas', linhas);
       if (N) linhas.forEach(function (l) { N.d[String(l.id)] = hs[String(l.id)]; });
@@ -340,9 +421,32 @@
   function instalarSync() {
     if (!pronto() || W.__f67SyncOk) return !!W.__f67SyncOk;
     try {
-      W.supabaseGetRotas = async function () { return (await getTudo('rotas', '*')).map(supabaseToRota); };
-      W.supabaseGetDespesas = async function () { return (await getTudo('despesas', '*')).map(supabaseToDespesa); };
-      W.supabaseGetSequencias = async function () { return rowsToSequencias(await getTudo('sequencias_itens', '*')); };
+      W.supabaseGetRotas = async function () { return (await getInc('rotas')).map(supabaseToRota); };
+      W.supabaseGetDespesas = async function () { return (await getInc('despesas')).map(supabaseToDespesa); };
+      W.supabaseGetSequencias = async function () { return rowsToSequencias(await getInc('sequencias_itens')); };
+
+      // sincronização LEVE: só rotas, despesas e Rotas do Dia; o resto (clientes,
+      // destinos, motoristas...) vai na sincronização completa, a cada 10 min.
+      var baixOrig = W.baixarDaNuvem;
+      if (typeof baixOrig === 'function' && !baixOrig.__f68) {
+        var bx = async function () {
+          if (W.__f68Leve && W.__f68Chaves) {
+            var tres = await Promise.all([W.supabaseGetRotas(), W.supabaseGetDespesas(), W.supabaseGetSequencias()]);
+            var copia = {};
+            W.__f68Chaves.forEach(function (k) {
+              if (k === 'rotas' || k === 'despesas' || k === 'sequencias') return;
+              try { copia[k] = JSON.parse(JSON.stringify(bancoDados[k] !== undefined ? bancoDados[k] : null)); } catch (e) { copia[k] = bancoDados[k]; }
+              if (copia[k] === null) delete copia[k];
+            });
+            copia.rotas = tres[0]; copia.despesas = tres[1]; copia.sequencias = tres[2];
+            return copia;
+          }
+          var r = await baixOrig.apply(this, arguments);
+          if (r && typeof r === 'object') { W.__f68Chaves = Object.keys(r); W.__f68Pesada = Date.now(); }
+          return r;
+        };
+        bx.__f68 = true; W.baixarDaNuvem = bx;
+      }
       W.supabaseSyncRotas = syncRotas;
       W.supabaseSyncDespesas = syncDespesas;
       W.supabaseSyncSequencias = syncSequencias;
@@ -361,7 +465,9 @@
       if (typeof envOrig === 'function' && !envOrig.__f67) {
         var e = async function () {
           var inicio = Date.now();
-          var r = await envOrig.apply(this, arguments);
+          var r;
+          if (W.__f68Leve) { await syncRotas(); await syncDespesas(); await syncSequencias(); r = true; }
+          else r = await envOrig.apply(this, arguments);
           if (r) { salvarBase(); W.__f67UltimoEnvio = inicio; }
           return r;
         };
@@ -379,8 +485,47 @@
     return !!W.__f67SyncOk;
   }
 
+  /* ---------------- lápides (exclusões) viajam junto com o aviso ---------------- */
+  var LAPS = ['rotasExcluidas', 'despesasExcluidas', 'seqItensExcluidos', 'seqRotasExcluidas'];
+  var lapConh = null;
+  function lapAtual() { var o = {}; LAPS.forEach(function (k) { o[k] = setStr(bancoDados[k]); }); return o; }
+  function lapNovas() {
+    if (!lapConh) return null;
+    var o = {}, tem = false;
+    LAPS.forEach(function (k) {
+      var n = []; setStr(bancoDados[k]).forEach(function (v) { if (!lapConh[k].has(v)) n.push(v); });
+      if (n.length) { o[k] = n.slice(-300); tem = true; }
+    });
+    return tem ? o : null;
+  }
+  function aplicarLapides(ex) {
+    if (!ex || typeof ex !== 'object') return;
+    LAPS.forEach(function (k) {
+      var l = ex[k]; if (!Array.isArray(l) || !l.length) return;
+      if (!Array.isArray(bancoDados[k])) bancoDados[k] = [];
+      var tem = setStr(bancoDados[k]);
+      l.forEach(function (v) { v = String(v); if (!tem.has(v)) { bancoDados[k].push(v); tem.add(v); } if (lapConh) lapConh[k].add(v); });
+    });
+  }
+  async function subirLapides(novas) {
+    try {
+      if (typeof R106_COLECOES === 'undefined' || typeof r106GetColecao !== 'function' || typeof r106SyncColecao !== 'function') return;
+      if (typeof r106DetectarModos === 'function') await r106DetectarModos();
+      for (var k in novas) {
+        var cfg = R106_COLECOES.filter(function (c) { return c.chave === k; })[0];
+        if (!cfg) continue;
+        var u = setStr(await r106GetColecao(cfg));
+        setStr(bancoDados[k]).forEach(function (v) { u.add(v); });
+        var arr = Array.from(u);
+        await r106SyncColecao(cfg, arr);
+        bancoDados[k] = arr;
+      }
+    } catch (e) { console.warn('FAST: lápides sobem na próxima sincronização completa', e); }
+  }
+
   /* ---------------- fila única: envio rápido e sincronização completa ---------------- */
   // Nunca rodam ao mesmo tempo; pedidos repetidos viram um só.
+  var PESADA_MS = 10 * 60 * 1000;
   var querPush = false, querSync = false, syncRemota = false, rodando = null;
   function pedir(tipo, remota) {
     if (tipo === 'push') querPush = true; else { querSync = true; if (remota) syncRemota = true; else syncRemota = false; }
@@ -405,10 +550,16 @@
     if (!pronto() || !token() || !navigator.onLine) return;
     var inicio = Date.now();
     W.__f68Enviados = 0;
+    var novas = lapNovas();
     try {
       await syncRotas(); await syncDespesas(); await syncSequencias();
       salvarBase(); W.__f67UltimoEnvio = inicio;
-      if (W.__f68Enviados > 0) avisarOutros();
+      if (novas) {
+        LAPS.forEach(function (k) { (novas[k] || []).forEach(function (v) { lapConh[k].add(String(v)); }); });
+        gravarLocal();
+      }
+      if (W.__f68Enviados > 0 || novas) avisarOutros(novas);
+      if (novas) subirLapides(novas);
       try { if (typeof atualizarStatusSync === 'function') atualizarStatusSync('ok', 'Sincronizado ✓ (Supabase)'); } catch (e) {}
     } catch (e) {
       console.warn('FAST: envio rápido falhou, tentando a sincronização completa', e);
@@ -420,10 +571,17 @@
     if (typeof f !== 'function') return;
     W.__f68Enviados = 0;
     W.__fastSyncRodando = true;
-    try { await f(); } catch (e) { console.warn('FAST sync:', e); }
-    finally { W.__fastSyncRodando = false; W.__fastSyncFim = Date.now(); }
+    W.__f68Leve = !!(W.__f68Chaves && W.__f68Pesada && Date.now() - W.__f68Pesada < PESADA_MS && !restaurando());
+    W.__f68Pesada_on = !W.__f68Leve;
+    W.__f68LeveUltima = W.__f68Leve;
+    var novas = W.__f68Leve ? lapNovas() : null;
+    var okSync = false;
+    try { await f(); okSync = true; } catch (e) { console.warn('FAST sync:', e); }
+    finally { W.__f68Pesada_on = false; W.__f68Leve = false; W.__fastSyncRodando = false; W.__fastSyncFim = Date.now(); }
+    if (okSync && !W.__f68LeveUltima) lapConh = lapAtual();          // completa: lápides já unidas com a nuvem
+    if (novas) { subirLapides(novas); LAPS.forEach(function (k) { (novas[k] || []).forEach(function (v) { if (lapConh) lapConh[k].add(String(v)); }); }); }
     // avisa os outros só se havia mudança DESTE aparelho (evita pingue-pongue)
-    if (!remota && W.__f68Enviados > 0) avisarOutros();
+    if (!remota && (W.__f68Enviados > 0 || novas)) avisarOutros(novas);
   }
   function sincronizar(remota) { pedir('sync', remota); }
 
@@ -511,7 +669,7 @@
       }
       if (m.event === 'broadcast' && m.topic === TOP_AVISO) {
         var p = m.payload && m.payload.payload;
-        if (p && p.de !== APARELHO) remoto();
+        if (p && p.de !== APARELHO) { try { if (p.excl) aplicarLapides(p.excl); } catch (e) {} remoto(); }
         return;
       }
       if (m.event === 'postgres_changes' && m.topic === TOP_DB) {
@@ -540,8 +698,10 @@
     clearTimeout(tRemoto);
     tRemoto = setTimeout(function () { sincronizar(true); }, 120);
   }
-  function avisarOutros() {
-    rtMandar(TOP_AVISO, 'broadcast', { type: 'broadcast', event: 'mudou', payload: { de: APARELHO, t: Date.now() } });
+  function avisarOutros(excl) {
+    var pl = { de: APARELHO, t: Date.now() };
+    if (excl) pl.excl = excl;
+    rtMandar(TOP_AVISO, 'broadcast', { type: 'broadcast', event: 'mudou', payload: pl });
   }
   // mantém a conexão viva e o login atualizado
   setInterval(function () {
@@ -560,12 +720,12 @@
   var assinaturaBase = null, fimVisto = 0, checando = false, avisouSemLogin = false, ultimaChecagem = 0;
   async function assinatura() {
     var partes = await Promise.all(TABS_RT.map(async function (t) {
-      var r = await fetch(SUPABASE_URL + '/' + t + '?select=id,updated_at&order=updated_at.desc.nullslast&limit=1', {
+      var r = await fetch(SUPABASE_URL + '/' + t + '?select=updated_at&order=updated_at.desc.nullslast&limit=1', {
         method: 'GET', cache: 'no-store', headers: supabaseHeaders({ 'Prefer': 'count=exact' })
       });
       if (!r.ok) return null;
       var j = await r.json();
-      return (r.headers.get('content-range') || '') + '|' + (j[0] ? j[0].id + '@' + j[0].updated_at : '');
+      return (r.headers.get('content-range') || '') + '|' + (j[0] ? j[0].updated_at : '');
     }));
     if (partes.indexOf(null) >= 0) return null;
     return partes.join('#');
@@ -573,7 +733,7 @@
   async function checar(forcar) {
     if (checando || document.hidden || !navigator.onLine || !pronto()) return;
     // com tempo real ativo, a verificação vira só reserva (a cada 15 s)
-    if (!forcar && rtConectado() && Date.now() - ultimaChecagem < 15000) return;
+    if (!forcar && Date.now() - ultimaChecagem < (rtConectado() ? 60000 : 10000)) return;
     if (!token()) {
       if (!avisouSemLogin) {
         avisouSemLogin = true;
