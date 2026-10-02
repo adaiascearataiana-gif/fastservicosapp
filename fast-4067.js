@@ -33,7 +33,7 @@
   W.__fast4067 = true;
 
   var BASE_KEY = 'fast4067_base_v1';
-  var VERSAO = 'v12';
+  var VERSAO = 'v14';
   var DIAG = W.__f68Diag = { erro: '', erroEm: 0, envio: 0, baixou: 0 };
   function falha(txt) { DIAG.erro = String(txt).slice(0, 160); DIAG.erroEm = Date.now(); try { painel(true); } catch (e) {} }
   var PAGINA = 1000;
@@ -565,6 +565,11 @@
   /* ---------------- fila única: envio rápido e sincronização completa ---------------- */
   // Nunca rodam ao mesmo tempo; pedidos repetidos viram um só.
   var PESADA_MS = 10 * 60 * 1000;
+  var forcarPesada = false, colHash = null, ultPesadaForcada = 0;
+  var COLS = ['clientes', 'destinos', 'motoristas', 'rh', 'despesasEmpresa', 'clientesExcluidos', 'destinosExcluidos', 'motoristasExcluidos', 'rhExcluidos', 'despesasEmpresaExcluidas'];
+  function hashColecoes() {
+    try { return hsh(JSON.stringify(COLS.map(function (k) { return bancoDados[k] || null; }))); } catch (e) { return null; }
+  }
   var assinaturaBase = null;
   var querPush = false, querSync = false, syncRemota = false, rodando = null;
   function pedir(tipo, remota) {
@@ -586,6 +591,11 @@
       }
       // registra como a nuvem ficou logo após o NOSSO trabalho, para a
       // verificação de reserva só reagir a mudanças de OUTROS aparelhos
+      // clientes, destinos, motoristas, funcionários ou despesas da empresa mudaram
+      // neste aparelho? então vai a sincronização COMPLETA agora (e avisa os outros)
+      if (!querPush && !querSync && colHash !== null && hashColecoes() !== colHash && Date.now() - ultPesadaForcada > 20000) {
+        ultPesadaForcada = Date.now(); forcarPesada = true; querSync = true; continue;
+      }
       if (!querPush && !querSync) { try { var sg = await assinatura(); if (sg) assinaturaBase = sg; } catch (e) {} }
     }
   }
@@ -617,7 +627,8 @@
     // O embrulho 4.0.66 (dentro do index) recusa rodar se esta marca estiver ligada.
     // Quem controla a fila agora é este arquivo, então liberamos antes de chamar.
     W.__fastSyncRodando = false;
-    W.__f68Leve = !!(W.__f68Chaves && W.__f68Pesada && Date.now() - W.__f68Pesada < PESADA_MS && !restaurando());
+    var pedirPesada = forcarPesada; forcarPesada = false;
+    W.__f68Leve = !pedirPesada && !!(W.__f68Chaves && W.__f68Pesada && Date.now() - W.__f68Pesada < PESADA_MS && !restaurando());
     W.__f68Pesada_on = !W.__f68Leve;
     W.__f68LeveUltima = W.__f68Leve;
     var novas = W.__f68Leve ? lapNovas() : null;
@@ -625,10 +636,12 @@
     var inicioSync = Date.now();
     try { await f(); okSync = true; DIAG.baixou = Date.now(); if (DIAG.erro && DIAG.erroEm < inicioSync) DIAG.erro = ''; } catch (e) { console.warn('FAST sync:', e); falha('Sincronização: ' + (e && e.message || e)); }
     finally { W.__f68Pesada_on = false; W.__f68Leve = false; W.__fastSyncFim = Date.now(); }
+    if (okSync && !W.__f68LeveUltima) colHash = hashColecoes();   // só a completa sincroniza essas listas
     if (okSync && !W.__f68LeveUltima) lapConh = lapAtual();          // completa: lápides já unidas com a nuvem
     if (novas) { subirLapides(novas); LAPS.forEach(function (k) { (novas[k] || []).forEach(function (v) { if (lapConh) lapConh[k].add(String(v)); }); }); }
     // avisa os outros só se havia mudança DESTE aparelho (evita pingue-pongue)
-    if (!remota && (W.__f68Enviados > 0 || novas)) avisarOutros(novas);
+    if (!remota && pedirPesada && okSync) avisarOutros(novas, true);
+    else if (!remota && (W.__f68Enviados > 0 || novas)) avisarOutros(novas);
   }
   function sincronizar(remota) { pedir('sync', remota); }
 
@@ -641,7 +654,10 @@
       var r = f.apply(this, arguments);
       if (!pendenteDesde) pendenteDesde = Date.now();
       clearTimeout(tPush);
-      tPush = setTimeout(function () { if (navigator.onLine) pedir('push'); }, 300);
+      tPush = setTimeout(function () {
+        if (!navigator.onLine) return;
+        pedir('push');
+      }, 300);
       return r;
     };
     Object.keys(f).forEach(function (k) { try { g[k] = f[k]; } catch (e) {} });
@@ -716,7 +732,7 @@
       }
       if (m.event === 'broadcast' && m.topic === TOP_AVISO) {
         var p = m.payload && m.payload.payload;
-        if (p && p.de !== APARELHO) { try { if (p.excl) aplicarLapides(p.excl); } catch (e) {} remoto(); }
+        if (p && p.de !== APARELHO) { try { if (p.excl) aplicarLapides(p.excl); } catch (e) {} if (p.pesada) forcarPesada = true; remoto(); }
         return;
       }
       if (m.event === 'postgres_changes' && m.topic === TOP_DB) {
@@ -745,8 +761,9 @@
     clearTimeout(tRemoto);
     tRemoto = setTimeout(function () { sincronizar(true); }, 120);
   }
-  function avisarOutros(excl) {
+  function avisarOutros(excl, pesada) {
     var pl = { de: APARELHO, t: Date.now() };
+    if (pesada) pl.pesada = 1;
     if (excl) pl.excl = excl;
     rtMandar(TOP_AVISO, 'broadcast', { type: 'broadcast', event: 'mudou', payload: pl });
   }
@@ -1208,6 +1225,14 @@
         access_token: d.access_token, refresh_token: d.refresh_token,
         expires_at: Date.now() + (Number(d.expires_in) || 3600) * 1000, user: d.user || null
       }));
+      // A "senha central" (4.0.66) compara a versão da senha guardada no aparelho com
+      // a do servidor e, se forem diferentes, APAGA o login — por isso ele "voltava".
+      // Quem acabou de entrar com a senha atual está com a versão certa: registramos.
+      try {
+        var meta = (d.user && d.user.user_metadata) || {};
+        localStorage.setItem('fast_senha_versao', String(meta.senha_alterada_em || ''));
+        localStorage.removeItem('fast_senha_mudou');
+      } catch (e) {}
       DIAG.login = 'ok';
       var box = document.getElementById('f68DiagLogin'); if (box) box.innerHTML = '';
       painel(true);
