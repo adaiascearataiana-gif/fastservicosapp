@@ -33,7 +33,7 @@
   W.__fast4067 = true;
 
   var BASE_KEY = 'fast4067_base_v1';
-  var VERSAO = 'v17';
+  var VERSAO = 'v18';
   var DIAG = W.__f68Diag = { erro: '', erroEm: 0, envio: 0, baixou: 0 };
   function falha(txt) { DIAG.erro = String(txt).slice(0, 160); DIAG.erroEm = Date.now(); try { painel(true); } catch (e) {} }
   var PAGINA = 1000;
@@ -1259,6 +1259,55 @@
       }).catch(function () {});
     }
   } catch (e) {}
+
+  /* ---------------- EDITAR ROTA: campos lado a lado ----------------
+     Cliente
+     Origem | Destino
+     Data | Tipo de volume
+     Qtd. volumes | Valor (com − +) | Forma de pag.
+     Status de pagamento | Status da rota                         */
+  (function () {
+    var css = document.createElement('style');
+    css.id = 'f68-editar-rota';
+    css.textContent = [
+      '#modalEditarRota .grid-form.f68er{display:grid!important;grid-template-columns:repeat(12,minmax(0,1fr))!important;gap:10px 10px!important}',
+      '#modalEditarRota .grid-form.f68er>*{grid-column:1/-1!important;min-width:0;margin:0!important}',
+      '#modalEditarRota .grid-form.f68er>.f68-meia{grid-column:span 6!important}',
+      '#modalEditarRota .grid-form.f68er>.f68-qtd{grid-column:span 2!important}',
+      '#modalEditarRota .grid-form.f68er>.f68-val{grid-column:span 6!important}',
+      '#modalEditarRota .grid-form.f68er>.f68-pag{grid-column:span 4!important}',
+      '#modalEditarRota .grid-form.f68er label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}',
+      '#modalEditarRota .grid-form.f68er input,#modalEditarRota .grid-form.f68er select{width:100%!important;min-width:0!important;box-sizing:border-box}',
+      '#modalEditarRota .grid-form.f68er .f68-qtd input{text-align:center;padding-left:4px!important;padding-right:4px!important}',
+      '#modalEditarRota .grid-form.f68er .f68-val>div{gap:4px!important}',
+      '#modalEditarRota .grid-form.f68er .f68-val input{flex:1 1 auto;padding-left:8px!important;padding-right:4px!important}',
+      '#modalEditarRota .grid-form.f68er .f68-val .fast-step-btn{flex:0 0 34px;width:34px!important;min-width:34px!important;padding:0!important;display:grid;place-items:center}',
+      '#modalEditarRota .grid-form.f68er .f68-pag select{padding-left:8px!important;padding-right:20px!important}',
+      '@media(max-width:380px){#modalEditarRota .grid-form.f68er label{font-size:11px!important}}'
+    ].join('\n');
+    (document.head || document.documentElement).appendChild(css);
+    function campo(id) { var e = document.getElementById(id); return e ? e.closest('#modalEditarRota .grid-form > *') : null; }
+    function rotulo(box, txt) { var l = box && box.querySelector('label'); if (l) l.textContent = txt; }
+    function arrumar() {
+      var grid = document.querySelector('#modalEditarRota .grid-form');
+      if (!grid || grid.classList.contains('f68er')) return;
+      var ori = campo('editTxtOrigem'), des = campo('editTxtDestino'), dat = campo('editDpDataRota'), tip = campo('editCbTipoVolume'),
+        qtd = campo('editTxtQtdMercadorias'), val = campo('editTxtValorRota'), pag = campo('editCbPagamento'),
+        stp = campo('editCbStatusRota'), str = campo('editCbStatusExecucao');
+      if (!ori || !des || !dat || !tip || !qtd || !val || !pag || !stp || !str) return;
+      // ordem: depois do cliente, na sequência pedida
+      var ref = ori;
+      [des, dat, tip, qtd, val, pag, stp, str].forEach(function (el) { ref.parentNode.insertBefore(el, ref.nextSibling); ref = el; });
+      [ori, des, dat, tip, stp, str].forEach(function (el) { el.classList.add('f68-meia'); });
+      qtd.classList.add('f68-qtd'); val.classList.add('f68-val'); pag.classList.add('f68-pag');
+      rotulo(qtd, 'Qtd.'); rotulo(val, 'Valor (R$):'); rotulo(pag, 'Pagamento:');
+      rotulo(stp, 'Status de pagamento:'); rotulo(str, 'Status da rota:'); rotulo(tip, 'Tipo de volume:');
+      grid.classList.add('f68er');
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', arrumar, { once: true }); else arrumar();
+    W.addEventListener('load', function () { arrumar(); setTimeout(arrumar, 1500); });
+    setInterval(arrumar, 3000);
+  })();
 
   /* ---------------- painel de diagnóstico (aparece 25 s ao abrir e quando há erro) ---------------- */
   function hora(t) { if (!t) return '—'; var d = new Date(t); return ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2) + ':' + ('0' + d.getSeconds()).slice(-2); }
