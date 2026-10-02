@@ -33,7 +33,7 @@
   W.__fast4067 = true;
 
   var BASE_KEY = 'fast4067_base_v1';
-  var VERSAO = 'v10';
+  var VERSAO = 'v12';
   var DIAG = W.__f68Diag = { erro: '', erroEm: 0, envio: 0, baixou: 0 };
   function falha(txt) { DIAG.erro = String(txt).slice(0, 160); DIAG.erroEm = Date.now(); try { painel(true); } catch (e) {} }
   var PAGINA = 1000;
@@ -936,7 +936,10 @@
             } catch (e) { return a; }
           }));
         } catch (e) {}
+        var tIni = Date.now() - 1000, item = args[1], qtd = (args[0] || []).length;
+        var refs = (item && Array.isArray(item.fotos)) ? item.fotos.slice(-qtd) : [];
         var r = await f.apply(this, args);
+        try { await ligarRefs(item, refs, tIni); } catch (e) {}
         clearTimeout(tEnf); tEnf = setTimeout(function () { garantirDrive(true); }, 800);
         return r;
       };
@@ -946,6 +949,190 @@
     W.addEventListener('load', function () { embrulharEnfileirar(); setTimeout(embrulharEnfileirar, 2000); });
     setInterval(embrulharEnfileirar, 5000);
   })();
+
+  /* ---------------- FOTOS ENTRE APARELHOS ----------------
+     A foto fica guardada no aparelho que a tirou ("idb:...") e uma cópia vai para
+     o Google Drive. Aqui registramos no banco (tabela fotos_drive) qual arquivo do
+     Drive corresponde a cada foto; os outros aparelhos baixam do Drive quando não
+     têm a foto. O download sai do Google, não do limite de tráfego do Supabase. */
+  var MAPA_KEY = 'fast68_fila_ref', PUB_KEY = 'fast68_fotos_pub';
+  function lerJSON(k, pad) { try { return JSON.parse(localStorage.getItem(k) || '') || pad; } catch (e) { return pad; } }
+  function gravarJSON(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+  async function lerStore(nome) {
+    if (typeof abrirDBFotos !== 'function') return [];
+    var db = await abrirDBFotos();
+    return new Promise(function (res) {
+      try { var q = db.transaction(nome, 'readonly').objectStore(nome).getAll(); q.onsuccess = function () { res(Array.isArray(q.result) ? q.result : []); }; q.onerror = function () { res([]); }; }
+      catch (e) { res([]); }
+    });
+  }
+  async function ligarRefs(item, refs, tIni) {
+    if (!item || !refs.length) return;
+    var fila = await lerStore('driveQueue');
+    var mapa = lerJSON(MAPA_KEY, {});
+    var novos = fila.filter(function (r) {
+      return r && String(r.itemId || '') === String(item.id) && !r.fotoRef && !mapa[r.id] && Date.parse(r.criadoEm || 0) >= tIni;
+    }).sort(function (a, b) { return String(a.id) < String(b.id) ? -1 : 1; });
+    novos.forEach(function (r, i) {
+      var m = String(r.id).match(/^drive_\d+_(\d+)_/);
+      var idx = m ? Number(m[1]) : i;
+      var ref = refs[idx];
+      if (ref && /^idb:/.test(ref)) mapa[r.id] = ref;
+    });
+    var ks = Object.keys(mapa); if (ks.length > 3000) ks.slice(0, ks.length - 3000).forEach(function (k) { delete mapa[k]; });
+    gravarJSON(MAPA_KEY, mapa);
+  }
+  var publicando = false;
+  async function publicarFotos() {
+    if (publicando || !token() || !navigator.onLine || !pronto()) return;
+    publicando = true;
+    try {
+      var led = await lerStore('driveLedger');
+      var mapa = lerJSON(MAPA_KEY, {}), pub = lerJSON(PUB_KEY, {});
+      var linhas = [];
+      led.forEach(function (e) {
+        if (!e || !e.driveId || pub[e.id]) return;
+        var ref = e.fotoRef || mapa[e.id];
+        if (!ref || !/^idb:/.test(ref)) return;
+        linhas.push({ ref: ref, drive_id: e.driveId, item_id: String(e.itemId || ''), nome: String(e.nome || '').slice(0, 200), _id: e.id });
+      });
+      for (var i = 0; i < linhas.length; i += 100) {
+        var lote = linhas.slice(i, i + 100);
+        var r = await fetch(SUPABASE_URL + '/fotos_drive', {
+          method: 'POST', headers: supabaseHeaders({ 'Prefer': 'resolution=merge-duplicates,return=minimal' }),
+          body: JSON.stringify(lote.map(function (l) { return { ref: l.ref, drive_id: l.drive_id, item_id: l.item_id, nome: l.nome }; }))
+        });
+        if (!r.ok) { DRV.fotosTabela = r.status === 404 ? 'falta' : 'erro ' + r.status; break; }
+        DRV.fotosTabela = 'ok';
+        lote.forEach(function (l) { pub[l._id] = 1; });
+        gravarJSON(PUB_KEY, pub);
+      }
+    } catch (e) {} finally { publicando = false; }
+  }
+  setInterval(publicarFotos, 20000);
+  W.addEventListener('load', function () { setTimeout(publicarFotos, 8000); });
+
+  var faltas = {}, buscando = {};
+  function blobParaDataURL(b) {
+    return new Promise(function (res, rej) { var fr = new FileReader(); fr.onload = function () { res(fr.result); }; fr.onerror = rej; fr.readAsDataURL(b); });
+  }
+  async function fotoDoDrive(chave) {
+    var ref = 'idb:' + chave;
+    if (faltas[ref] && Date.now() - faltas[ref] < 120000) return null;
+    if (buscando[ref]) return buscando[ref];
+    buscando[ref] = (async function () {
+      try {
+        if (!token() || !navigator.onLine) return null;
+        var r = await fetch(SUPABASE_URL + '/fotos_drive?select=drive_id&ref=eq.' + encodeURIComponent(ref) + '&limit=1', { headers: supabaseHeaders() });
+        if (!r.ok) { faltas[ref] = Date.now(); return null; }
+        var j = await r.json();
+        if (!j[0] || !j[0].drive_id) { faltas[ref] = Date.now(); return null; }
+        var tk = driveToken();
+        if (!tk) { await garantirDrive(true); tk = driveToken(); }
+        if (!tk) { faltas[ref] = Date.now(); return null; }
+        var d = await fetch('https://www.googleapis.com/drive/v3/files/' + encodeURIComponent(j[0].drive_id) + '?alt=media', { headers: { Authorization: 'Bearer ' + tk } });
+        if (!d.ok) { faltas[ref] = Date.now(); return null; }
+        var b64 = await blobParaDataURL(await d.blob());
+        try { if (typeof guardarFotoIndexedDB === 'function') await guardarFotoIndexedDB(chave, b64); } catch (e) {}
+        return b64;
+      } catch (e) { faltas[ref] = Date.now(); return null; }
+      finally { setTimeout(function () { delete buscando[ref]; }, 0); }
+    })();
+    return buscando[ref];
+  }
+  function instalarFotos() {
+    var f = W.obterFotoIndexedDB;
+    if (typeof f !== 'function' || f.__f68) return;
+    var g = async function (chave) {
+      var local = await f.apply(this, arguments);
+      if (local) return local;
+      return fotoDoDrive(String(chave));
+    };
+    g.__f68 = true; W.obterFotoIndexedDB = g;
+    W.__f68ObterLocal = f;
+  }
+
+  /* Fotos ANTIGAS (tiradas antes da v11): o aparelho que tem a foto guardada envia
+     uma cópia para a pasta "_FAST sincronização de fotos" do Drive e registra o
+     vínculo. Aos poucos (10 por vez), das mais recentes para as mais antigas. */
+  var OK_KEY = 'fast68_fotos_ok', migrando = false;
+  var PASTA_SYNC = '_FAST sincronização de fotos';
+  function refsLocais() {
+    var lista = [];
+    try {
+      var seq = bancoDados.sequencias || {};
+      Object.keys(seq).sort().reverse().forEach(function (dt) {
+        (seq[dt] || []).forEach(function (it) { (it && Array.isArray(it.fotos) ? it.fotos : []).forEach(function (f) { if (typeof f === 'string' && /^idb:/.test(f)) lista.push({ ref: f, item: it.id, data: dt }); }); });
+      });
+      (bancoDados.rotas || []).slice().reverse().forEach(function (r) {
+        (r && Array.isArray(r.fotos) ? r.fotos : []).forEach(function (f) { if (typeof f === 'string' && /^idb:/.test(f)) lista.push({ ref: f, item: r.id, data: r.data || '' }); });
+      });
+    } catch (e) {}
+    var vistos = {};
+    return lista.filter(function (x) { if (vistos[x.ref]) return false; vistos[x.ref] = 1; return true; });
+  }
+  var pastaSyncId = null;
+  async function pastaSync(tk) {
+    if (pastaSyncId) return pastaSyncId;
+    var pai = '';
+    try { pai = localStorage.getItem('fast_drive_folder_id') || ((bancoDados.integracoes || {}).googleDrive || {}).folderId || ''; } catch (e) {}
+    var q = "name='" + PASTA_SYNC + "' and mimeType='application/vnd.google-apps.folder' and trashed=false" + (pai ? " and '" + pai.replace(/'/g, "\\'") + "' in parents" : '');
+    var b = await fetch('https://www.googleapis.com/drive/v3/files?spaces=drive&fields=files(id)&q=' + encodeURIComponent(q), { headers: { Authorization: 'Bearer ' + tk } });
+    if (!b.ok) return null;
+    var j = await b.json();
+    if (j.files && j.files[0]) return (pastaSyncId = j.files[0].id);
+    var c = await fetch('https://www.googleapis.com/drive/v3/files?fields=id', {
+      method: 'POST', headers: { Authorization: 'Bearer ' + tk, 'Content-Type': 'application/json' },
+      body: JSON.stringify(pai ? { name: PASTA_SYNC, mimeType: 'application/vnd.google-apps.folder', parents: [pai] } : { name: PASTA_SYNC, mimeType: 'application/vnd.google-apps.folder' })
+    });
+    if (!c.ok) return null;
+    return (pastaSyncId = (await c.json()).id);
+  }
+  async function migrarFotosAntigas() {
+    if (migrando || !token() || !navigator.onLine || !pronto() || typeof W.__f68ObterLocal !== 'function') return;
+    if (DRV.fotosTabela === 'falta') return;
+    var tk = driveToken(); if (!tk) return;
+    migrando = true;
+    try {
+      var ok = lerJSON(OK_KEY, {});
+      var cand = refsLocais().filter(function (x) { return !ok[x.ref]; }).slice(0, 60);
+      if (!cand.length) { DRV.antigas = 'em dia'; return; }
+      // quais já têm vínculo no banco
+      var lista = cand.map(function (x) { return '"' + x.ref.replace(/"/g, '') + '"'; }).join(',');
+      var r = await fetch(SUPABASE_URL + '/fotos_drive?select=ref&ref=in.(' + encodeURIComponent(lista) + ')', { headers: supabaseHeaders() });
+      if (!r.ok) { if (r.status === 404) DRV.fotosTabela = 'falta'; return; }
+      (await r.json()).forEach(function (x) { ok[x.ref] = 1; });
+      gravarJSON(OK_KEY, ok);
+      var enviadas = 0;
+      for (var i = 0; i < cand.length && enviadas < 10; i++) {
+        var c = cand[i]; if (ok[c.ref]) continue;
+        var b64 = await W.__f68ObterLocal(c.ref.slice(4));
+        if (!b64) continue;                               // a foto não está neste aparelho
+        var pasta = await pastaSync(tk); if (!pasta) return;
+        var blob = await (await fetch(b64)).blob();
+        var bd = 'f68_' + Date.now();
+        var corpo = new Blob(['--' + bd + '\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n',
+          JSON.stringify({ name: c.ref.slice(4).replace(/[^\w.-]/g, '_') + '.jpg', parents: [pasta] }),
+          '\r\n--' + bd + '\r\nContent-Type: ' + (blob.type || 'image/jpeg') + '\r\n\r\n', blob, '\r\n--' + bd + '--'],
+          { type: 'multipart/related; boundary=' + bd });
+        var up = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id', {
+          method: 'POST', headers: { Authorization: 'Bearer ' + tk, 'Content-Type': 'multipart/related; boundary=' + bd }, body: corpo
+        });
+        if (!up.ok) { if (up.status === 401) { await garantirDrive(true); } return; }
+        var id = (await up.json()).id;
+        var ins = await fetch(SUPABASE_URL + '/fotos_drive', {
+          method: 'POST', headers: supabaseHeaders({ 'Prefer': 'resolution=ignore-duplicates,return=minimal' }),
+          body: JSON.stringify([{ ref: c.ref, drive_id: id, item_id: String(c.item), nome: 'sincronizacao' }])
+        });
+        if (!ins.ok) return;
+        ok[c.ref] = 1; gravarJSON(OK_KEY, ok);
+        enviadas++; DRV.antigasEnviadas = (DRV.antigasEnviadas || 0) + 1;
+      }
+      DRV.antigas = 'enviando';
+    } catch (e) {} finally { migrando = false; }
+  }
+  setInterval(migrarFotosAntigas, 90000);
+  W.addEventListener('load', function () { setTimeout(migrarFotosAntigas, 20000); });
 
   /* ---------------- painel de diagnóstico (aparece 25 s ao abrir e quando há erro) ---------------- */
   function hora(t) { if (!t) return '—'; var d = new Date(t); return ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2) + ':' + ('0' + d.getSeconds()).slice(-2); }
@@ -975,6 +1162,8 @@
       (driveToken() ? '✅' : '📷') + ' Google Drive (fotos): ' + (driveToken() ? 'conectado' : (DRV.estado || 'verificando…')) +
         (DRV.pend >= 0 ? ' · ' + DRV.pend + ' foto(s) na fila' : '')
     ];
+    if (DRV.antigasEnviadas) linhas.push('🖼️ Fotos antigas liberadas para os outros aparelhos: ' + DRV.antigasEnviadas + (DRV.antigas === 'em dia' ? ' (concluído)' : ' (continuando…)'));
+    if (DRV.fotosTabela === 'falta') linhas.push('<span style="color:#fde68a">🖼️ Fotos entre aparelhos: falta rodar o SQL da tabela fotos_drive</span>');
     if (DRV.pend > 0 && DRV.erroFoto) linhas.push('<span style="color:#fde68a">📷 Erro da foto: ' + DRV.erroFoto.replace(/[<>&]/g, '').slice(0, 160) + '</span>');
     if (DIAG.erro) linhas.push('<span style="color:#fca5a5">⛔ ' + DIAG.erro.replace(/[<>&]/g, '') + '</span>');
     document.getElementById('f68DiagTxt').innerHTML = linhas.join('<br>');
@@ -1050,7 +1239,7 @@
   }
 
   /* ---------------- partida ---------------- */
-  function tudo() { instalarSync(); instalarSalvar(); cardsBackup(); rtConectar(); ligarStatus(); }
+  function tudo() { instalarSync(); instalarSalvar(); cardsBackup(); rtConectar(); ligarStatus(); instalarFotos(); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', tudo, { once: true }); else tudo();
   W.addEventListener('load', function () { tudo(); setTimeout(tudo, 1500); setTimeout(tudo, 3500); });
   setInterval(cardsBackup, 2000);
