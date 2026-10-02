@@ -79,7 +79,8 @@
     '.frx-fotos{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px}.frx-fotos figure{margin:0;border-radius:12px;overflow:hidden;border:1px solid var(--border,#e2e8f0);background:#0001;aspect-ratio:1;display:grid;place-items:center;cursor:pointer}.frx-fotos img{width:100%;height:100%;object-fit:cover}',
     '#frxTools{margin:0 0 16px}#frxTools .frx-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}',
     '#frxTools .frx-tool{border:1px solid var(--border,#e2e8f0);background:var(--card-bg,#fff);color:inherit;border-radius:14px;padding:12px;text-align:left;font-weight:700;font-size:14px;cursor:pointer;min-height:56px}',
-    '#frxTools .frx-tool span{display:block;font-size:11px;font-weight:600;opacity:.65;margin-top:2px}',
+    '#frxTools .frx-tool{display:block!important;text-align:left!important;white-space:normal!important;line-height:1.3}',
+    '#frxTools .frx-tool span{display:block!important;font-size:11px;font-weight:600;opacity:.65;margin-top:3px}',
     '.frx-precohint{font-size:11px;font-weight:700;color:#16a34a;margin-top:4px}',
     '.frx-av{margin-left:6px}',
     '#frxPin{position:fixed;inset:0;z-index:2147483600;background:linear-gradient(160deg,#0f172a,#1e293b);display:flex;align-items:center;justify-content:center;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}',
@@ -672,6 +673,101 @@
     if (a === 'pin') W.fastConfigurarPin();
     if (a === 'bkp') W.fastBackupAgora().then(painelFerramentas);
   });
+
+  /* ---------------- PADRÃO DE CAMPOS LADO A LADO (Adicionar rota e Filtros) ----------------
+     Mesmo arranjo da janela Editar Rota:
+       Cliente | Origem · Destino | Data · Tipo | Qtd · Valor(− +) · Pagamento | Status pag. · Status rota */
+  (function () {
+    var st = document.createElement('style');
+    st.textContent = [
+      '.f68g{display:grid!important;grid-template-columns:repeat(12,minmax(0,1fr))!important;gap:10px!important;grid-template-areas:none!important}',
+      '.f68g>*{grid-column:1/-1!important;grid-area:auto!important;min-width:0;margin:0!important}',
+      '.f68g>.g6{grid-column:span 6!important}.f68g>.g4{grid-column:span 4!important}.f68g>.g2{grid-column:span 2!important}',
+      '.f68g>.g6>label,.f68g>.g4>label,.f68g>.g2>label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}',
+      '.f68g input,.f68g select{width:100%!important;min-width:0!important;box-sizing:border-box}',
+      '.f68g .g2 input{text-align:center;padding-left:4px!important;padding-right:4px!important}',
+      '.f68g .gv>div{gap:4px!important}.f68g .gv input{flex:1 1 auto;padding-left:8px!important;padding-right:4px!important}',
+      '.f68g .gv .fast-step-btn{flex:0 0 34px;width:34px!important;min-width:34px!important;padding:0!important;display:grid;place-items:center}',
+      '.f68g .g4 select,.f68g .g6 select{padding-left:8px!important;padding-right:20px!important}',
+      '@media(max-width:380px){.f68g>div>label{font-size:11px!important}}'
+    ].join('\n');
+    (document.head || document.documentElement).appendChild(st);
+    function bloco(grid, id) { var e = document.getElementById(id); if (!e) return null; while (e && e.parentNode !== grid) e = e.parentNode; return e; }
+    function rot(el, t) { var l = el && el.querySelector('label'); if (l && !l.querySelector('input')) l.textContent = t; }
+    function ordenar(grid, lista) {
+      var ref = lista[0];
+      for (var i = 1; i < lista.length; i++) { if (!lista[i]) continue; grid.insertBefore(lista[i], ref.nextSibling); ref = lista[i]; }
+    }
+    // estilos em linha com prioridade máxima: o app tem regras próprias (ordem, áreas e
+    // largura dos campos no celular) que venceriam uma folha de estilo comum
+    function fixar(grid) {
+      var imp = function (el, k, v) { el.style.setProperty(k, v, 'important'); };
+      imp(grid, 'display', 'grid'); imp(grid, 'grid-template-columns', 'repeat(12,minmax(0,1fr))'); imp(grid, 'grid-template-areas', 'none'); imp(grid, 'gap', '10px');
+      var largo = (grid.clientWidth || 0) >= 760;     // PAINEL no computador: campos mais compactos
+      Array.prototype.forEach.call(grid.children, function (el, i) {
+        var n = largo ? el.getAttribute('data-gd') : el.getAttribute('data-gm');
+        var span = n ? 'span ' + n : (el.classList.contains('g6') ? 'span 6' : el.classList.contains('g4') ? 'span 4' : el.classList.contains('g2') ? 'span 2' : '1 / -1');
+        imp(el, 'grid-area', 'auto');          // primeiro: "grid-area" zera a coluna
+        imp(el, 'grid-row', 'auto'); imp(el, 'grid-column', span); imp(el, 'order', String(i));
+        imp(el, 'min-width', '0'); imp(el, 'width', 'auto'); imp(el, 'max-width', 'none');
+      });
+    }
+    function formAdicionar() {
+      var f = document.getElementById('formRota'); var g = f && f.querySelector('.grid-form');
+      if (!g || g.classList.contains('f68g')) return;
+      var b = {}; ['txtCliente', 'txtOrigem', 'txtDestino', 'containerDestinosExtrasRota', 'dpDataRota', 'cbTipoVolume', 'txtQtdMercadorias', 'txtValorRota', 'cbPagamento', 'cbStatusRota', 'cbStatusExecucao'].forEach(function (id) { b[id] = bloco(g, id); });
+      if (!b.txtCliente || !b.txtOrigem || !b.txtDestino || !b.dpDataRota || !b.txtValorRota) return;
+      ordenar(g, [b.txtCliente, b.txtOrigem, b.txtDestino, b.containerDestinosExtrasRota, b.dpDataRota, b.cbTipoVolume, b.txtQtdMercadorias, b.txtValorRota, b.cbPagamento, b.cbStatusRota, b.cbStatusExecucao]);
+      [b.txtOrigem, b.txtDestino, b.dpDataRota, b.cbTipoVolume, b.cbStatusRota, b.cbStatusExecucao].forEach(function (e) { if (e) e.classList.add('g6'); });
+      if (b.txtQtdMercadorias) b.txtQtdMercadorias.classList.add('g2');
+      b.txtValorRota.classList.add('g6', 'gv');
+      if (b.cbPagamento) b.cbPagamento.classList.add('g4');
+      rot(b.txtQtdMercadorias, 'Qtd.'); rot(b.cbPagamento, 'Pagamento:'); rot(b.cbStatusRota, 'Status pag.:'); rot(b.cbStatusExecucao, 'Status rota:');
+      // celular | computador
+      var sp = { txtCliente: [12, 4], txtOrigem: [6, 4], txtDestino: [6, 4], dpDataRota: [6, 3], cbTipoVolume: [6, 3], txtQtdMercadorias: [2, 2], txtValorRota: [6, 4], cbPagamento: [4, 4], cbStatusRota: [6, 4], cbStatusExecucao: [6, 4] };
+      Object.keys(sp).forEach(function (k) { if (b[k]) { b[k].setAttribute('data-gm', sp[k][0]); b[k].setAttribute('data-gd', sp[k][1]); } });
+      g.classList.add('f68g'); fixar(g);
+    }
+    function filtros(grid, ids) {
+      if (!grid || grid.classList.contains('f68g')) return;
+      var b = {}; Object.keys(ids).forEach(function (k) { b[k] = bloco(grid, ids[k]); });
+      if (!b.cli || !b.ori || !b.des || !b.ini || !b.fim) return;
+      ordenar(grid, [b.cli, b.ori, b.des, b.ini, b.fim, b.tipo, b.pag, b.exec]);
+      [b.ori, b.des, b.ini, b.fim].forEach(function (e) { e.classList.add('g6'); });
+      [b.tipo, b.pag, b.exec].forEach(function (e) { if (e) e.classList.add('g4'); });
+      rot(b.cli, 'Cliente:'); rot(b.ori, 'Origem:'); rot(b.des, 'Destino:'); rot(b.ini, 'Data inicial:'); rot(b.fim, 'Data final:');
+      rot(b.tipo, 'Tipo:'); rot(b.pag, 'Pagamento:'); rot(b.exec, 'Status:');
+      var sp = { cli: [12, 4], ori: [6, 4], des: [6, 4], ini: [6, 3], fim: [6, 3], tipo: [4, 2], pag: [4, 2], exec: [4, 2] };
+      Object.keys(sp).forEach(function (k) { if (b[k]) { b[k].setAttribute('data-gm', sp[k][0]); b[k].setAttribute('data-gd', sp[k][1]); } });
+      grid.classList.add('f68g'); fixar(grid);
+    }
+    function arrumar() {
+      document.querySelectorAll('.f68g').forEach(function (g) { try { fixar(g); } catch (e) {} });
+      // "Esta rota é TESTE" não quebra letra por letra
+      ['chkRotaTeste', 'editChkRotaTeste'].forEach(function (id) { var c = document.getElementById(id), l = c && c.closest('label'); if (l) { l.style.setProperty('flex', '0 0 auto', 'important'); l.style.setProperty('white-space', 'nowrap', 'important'); } });
+      try { formAdicionar(); } catch (e) {}
+      try { var c = document.querySelector('.fast-filtros-rotas .grid-form'); filtros(c, { cli: 'filtroNome', ori: 'filtroRotaOrigem', des: 'filtroRotaDestino', ini: 'filtroDataInicio', fim: 'filtroDataFim', tipo: 'filtroTipoVolume', pag: 'filtroStatus', exec: 'filtroStatusRota' }); } catch (e) {}
+      try { var r = document.querySelector('.fast-route-report-filters'); filtros(r, { cli: 'fastRelFiltroCliente', ori: 'fastRelFiltroOrigem', des: 'fastRelFiltroDestino', ini: 'fastRelFiltroInicio', fim: 'fastRelFiltroFim', tipo: 'fastRelFiltroTipo', pag: 'fastRelFiltroStatus', exec: 'fastRelFiltroExec' }); } catch (e) {}
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', arrumar, { once: true }); else arrumar();
+    W.addEventListener('load', function () { arrumar(); setTimeout(arrumar, 1500); });
+    var tRz = 0; W.addEventListener('resize', function () { clearTimeout(tRz); tRz = setTimeout(arrumar, 200); });
+    setInterval(arrumar, 3000);
+  })();
+
+  /* ---------------- câmera ao vivo: garante que a imagem comece a rodar ----------------
+     O código original liga a câmera mas não manda o vídeo "tocar"; com economia de
+     bateria/dados o Chrome deixa parado e mostra só o símbolo ▶ cinza. */
+  function tocarCamera(v) {
+    if (!v || !v.srcObject || !v.paused) return;
+    v.muted = true; v.setAttribute('playsinline', ''); v.setAttribute('muted', '');
+    try { var p = v.play(); if (p && p.catch) p.catch(function () {}); } catch (e) {}
+  }
+  ['loadedmetadata', 'loadeddata', 'canplay'].forEach(function (ev) {
+    document.addEventListener(ev, function (e) { if (e.target && e.target.id === 'fastCameraAoVivoVideo') tocarCamera(e.target); }, true);
+  });
+  document.addEventListener('click', function (e) { if (e.target && e.target.id === 'fastCameraAoVivoVideo') tocarCamera(e.target); }, true);
+  setInterval(function () { var v = document.getElementById('fastCameraAoVivoVideo'); if (v) tocarCamera(v); }, 700);
 
   /* ---------------- ciclo: injeta botões quando as telas são redesenhadas ---------------- */
   var tPainel = 0;

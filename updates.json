@@ -1,7 +1,27 @@
 {
-  "version": "4.0.24",
-  "releasedAt": "2026-09-25T12:00:00-03:00",
+  "version": "5.0.0",
+  "releasedAt": "2026-10-02T21:00:00-03:00",
   "updates": [
+    {
+      "app": "fast",
+      "type": "novo",
+      "text": "5.0.0 (02/10/2026): nova numeração de versões. Sincronização em tempo real entre PAINEL, FAST, ROTAS e Despesas; Ferramentas FAST (busca, cobrança com PIX, fechamento com PDF, tabela de preços, PIN e backup semanal no Drive)."
+    },
+    {
+      "app": "rotas",
+      "type": "novo",
+      "text": "5.0.0 (02/10/2026): fotos das Rotas do Dia e do motorista aparecem na rota do PAINEL e no relatório, com uma única cópia no Google Drive."
+    },
+    {
+      "app": "motorista",
+      "type": "melhorado",
+      "text": "5.0.0 (02/10/2026): FAST Motorista na versão 5.0.0 — fotos enviadas sem duplicar e refletidas na hora no PAINEL e no relatório; biometria e câmera no app Android."
+    },
+    {
+      "app": "cliente",
+      "type": "novo",
+      "text": "5.0.0 (02/10/2026): Cliente FAST mostra as entregas de hoje ao vivo e a posição do motorista no mapa."
+    },
     {
       "app": "fast",
       "type": "novo",

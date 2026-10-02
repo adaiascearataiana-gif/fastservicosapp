@@ -33,7 +33,8 @@
   W.__fast4067 = true;
 
   var BASE_KEY = 'fast4067_base_v1';
-  var VERSAO = 'v20';
+  var VERSAO = 'v22';
+  function versaoApp() { try { return (document.querySelector('meta[name="fast-app-version"]') || {}).content || VERSAO; } catch (e) { return VERSAO; } }
   var DIAG = W.__f68Diag = { erro: '', erroEm: 0, envio: 0, baixou: 0 };
   function falha(txt) { DIAG.erro = String(txt).slice(0, 160); DIAG.erroEm = Date.now(); try { painel(true); } catch (e) {} }
   var PAGINA = 1000;
@@ -193,7 +194,12 @@
     delete o.updated_at;
     return hsh(JSON.stringify(o));
   }
-  function hSeq(l) { var o = Object.assign({}, l); delete o.updated_at; return hsh(JSON.stringify(o)); }
+  function hSeq(l) {
+    var o = Object.assign({}, l); delete o.updated_at;
+    // tabela sem as colunas novas (SQL r101 pendente): compara só o que a nuvem guarda
+    try { if (W.r101ColunasFaltando && typeof r101LinhasLegado === 'function') o = r101LinhasLegado([o])[0]; } catch (e) {}
+    return hsh(JSON.stringify(o));
+  }
   function linhasSeq() { try { return semRepetidos(sequenciasToRows(bancoDados.sequencias || {})); } catch (e) { return []; } }
   function restaurando() { try { return !!restaurandoBackup; } catch (e) { return false; } }
 
@@ -472,8 +478,19 @@
           var k = String(x.id), bh = bs[k];
           if (!bh || !hl[k] || !hc[k] || hl[k] !== bh || hc[k] === bh) continue;
           var c = nuvIt[k]; if (!c) continue;
-          if (c.d === d) arr[i] = Object.assign({}, c.it);
-          else { arr.splice(i, 1); i--; (seqRes[c.d] = seqRes[c.d] || []).push(Object.assign({}, c.it)); }
+          // adota a nuvem, mas NUNCA troca um valor/motorista/horário preenchido por vazio
+          // (a nuvem pode não ter essas colunas e devolvê-las zeradas)
+          var y = Object.assign({}, x, c.it);
+          ['valor', 'motorista', 'motoristaId', 'chegadaEm', 'dataConclusao', 'obs'].forEach(function (f) {
+            var cv = c.it[f], lv = x[f];
+            if ((cv == null || cv === '' || (f === 'valor' && !Number(cv))) && lv != null && lv !== '' && !(f === 'valor' && !Number(lv))) y[f] = lv;
+          });
+          var fu = []; [].concat(Array.isArray(c.it.fotos) ? c.it.fotos : [], Array.isArray(x.fotos) ? x.fotos : []).forEach(function (f) { if (f && fu.indexOf(f) < 0) fu.push(f); });
+          var bloq = [].concat(c.it.fotosExcluidas || [], x.fotosExcluidas || []).map(String);
+          y.fotos = fu.filter(function (f) { return bloq.indexOf(String(f)) < 0; });
+          if (y.fotos.length && !y.foto) y.foto = y.fotos[0];
+          if (c.d === d) arr[i] = y;
+          else { arr.splice(i, 1); i--; (seqRes[c.d] = seqRes[c.d] || []).push(y); }
         }
       });
     } catch (e) { console.warn('FAST 3 vias (dia):', e); }
@@ -542,7 +559,7 @@
         sw.__f68 = true; W.sincronizarAgora = sw;
       }
       W.__f67SyncOk = true;
-      console.info('FAST 4.0.67: sincronização segura + tempo real ativa.');
+      console.info('FAST 5.0.0: sincronização segura + tempo real ativa.');
     } catch (err) { console.warn('FAST 4.0.67: falha ao instalar', err); }
     return !!W.__f67SyncOk;
   }
@@ -659,7 +676,7 @@
     var inicioSync = Date.now();
     try { await f(); okSync = true; DIAG.baixou = Date.now(); if (DIAG.erro && DIAG.erroEm < inicioSync) DIAG.erro = ''; } catch (e) { console.warn('FAST sync:', e); falha('Sincronização: ' + (e && e.message || e)); }
     finally { W.__f68Pesada_on = false; W.__f68Leve = false; W.__fastSyncFim = Date.now(); }
-    if (okSync) reconciliarFotos();
+    if (okSync) { reconciliarFotos(); recuperarValores(); }
     if (okSync && !W.__f68LeveUltima) colHash = hashColecoes();   // só a completa sincroniza essas listas
     if (okSync && !W.__f68LeveUltima) lapConh = lapAtual();          // completa: lápides já unidas com a nuvem
     if (novas) { subirLapides(novas); LAPS.forEach(function (k) { (novas[k] || []).forEach(function (v) { if (lapConh) lapConh[k].add(String(v)); }); }); }
@@ -1500,6 +1517,73 @@
     ligar(); W.addEventListener('load', function () { ligar(); setTimeout(ligar, 2000); });
   })();
 
+  /* ---------------- RECUPERAR valores zerados das Rotas do Dia ----------------
+     Procura o valor certo de cada item zerado: na rota ligada a ele e nas cópias
+     de segurança que o próprio FAST guarda no aparelho (snapshots, autobackup,
+     última versão boa). Só preenche onde está 0 — nunca altera valor existente. */
+  var mapaValores = null;
+  function coletarValores(banco, quando, m) {
+    try {
+      if (typeof banco === 'string') banco = JSON.parse(banco);
+      if (banco && banco.data && !banco.sequencias) banco = banco.data;
+      if (typeof banco === 'string') banco = JSON.parse(banco);
+      var seq = banco && banco.sequencias; if (!seq) return;
+      Object.keys(seq).forEach(function (d) {
+        (seq[d] || []).forEach(function (it) {
+          if (!it || it.id == null || !(Number(it.valor) > 0)) return;
+          var k = String(it.id), e = m[k];
+          if (!e || quando >= e.t) m[k] = { v: Number(it.valor), t: quando };
+        });
+      });
+    } catch (e) {}
+  }
+  async function montarMapaValores() {
+    var m = {};
+    try { coletarValores(localStorage.getItem('fast_autobackup'), Date.parse(localStorage.getItem('fast_autobackup_data') || 0) || 1, m); } catch (e) {}
+    try { var lkg = JSON.parse(localStorage.getItem('fastapp_last_known_good') || 'null'); if (lkg) coletarValores(lkg, Number(lkg.savedAt) || 2, m); } catch (e) {}
+    try {
+      var db = await new Promise(function (res) { try { var q = indexedDB.open('fastapp_enterprise_db'); q.onsuccess = function () { res(q.result); }; q.onerror = function () { res(null); }; } catch (e) { res(null); } });
+      if (db) {
+        var nomes = Array.prototype.slice.call(db.objectStoreNames);
+        for (var i = 0; i < nomes.length; i++) {
+          if (!/snapshot|state/i.test(nomes[i])) continue;
+          var lst = await new Promise(function (res) { try { var q = db.transaction(nomes[i], 'readonly').objectStore(nomes[i]).getAll(); q.onsuccess = function () { res(q.result || []); }; q.onerror = function () { res([]); }; } catch (e) { res([]); } });
+          lst.forEach(function (x) { coletarValores(x, Number(x && (x.savedAt || x.criadoEm || x.ts)) || 3, m); });
+        }
+      }
+    } catch (e) {}
+    return m;
+  }
+  var recuperando = false;
+  async function recuperarValores() {
+    if (recuperando) return 0;
+    recuperando = true;
+    try {
+      var seq = bancoDados.sequencias || {}, zerados = [];
+      Object.keys(seq).forEach(function (d) { (seq[d] || []).forEach(function (it) { if (it && !(Number(it.valor) > 0)) zerados.push(it); }); });
+      if (!zerados.length) return 0;
+      if (!mapaValores) mapaValores = await montarMapaValores();
+      var rotasPorId = {}; (bancoDados.rotas || []).forEach(function (r) { if (r) rotasPorId[String(r.id)] = r; });
+      var n = 0;
+      zerados.forEach(function (it) {
+        var v = 0, e = mapaValores[String(it.id)];
+        if (e && e.v > 0) v = e.v;
+        else if (it.rotaId != null && rotasPorId[String(it.rotaId)] && Number(rotasPorId[String(it.rotaId)].valor) > 0) v = Number(rotasPorId[String(it.rotaId)].valor);
+        if (v > 0) { it.valor = v; n++; }
+      });
+      if (n) {
+        try { if (typeof salvarStorage === 'function') salvarStorage(); else gravarLocal(); } catch (e) { gravarLocal(); }
+        try { if (typeof renderizarSequencia === 'function') renderizarSequencia(); } catch (e) {}
+        try { if (typeof mostrarToastSync === 'function') mostrarToastSync('Valores das Rotas do Dia recuperados: ' + n + ' item(ns).', 'success'); } catch (e) {}
+        DIAG.valoresRecuperados = (DIAG.valoresRecuperados || 0) + n;
+      }
+      return n;
+    } catch (e) { return 0; } finally { recuperando = false; }
+  }
+  W.fastRecuperarValores = recuperarValores;
+  W.addEventListener('load', function () { setTimeout(recuperarValores, 6000); });
+  setInterval(recuperarValores, 60000);
+
   /* ---------------- painel de diagnóstico (aparece 25 s ao abrir e quando há erro) ---------------- */
   function hora(t) { if (!t) return '—'; var d = new Date(t); return ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2) + ':' + ('0' + d.getSeconds()).slice(-2); }
   var tPainel = 0;
@@ -1519,7 +1603,7 @@
     }
     var tk = !!token(), rt = rtConectado();
     var linhas = [
-      '<b>Sincronização ' + VERSAO + '</b> — toque para fechar',
+      '<b>FAST ' + versaoApp() + ' · Sincronização</b> — toque para fechar',
       (tk ? '✅' : '❌') + ' Login no banco: ' + (tk ? 'sim' :
         (DIAG.login === 'sem-sessao' ? 'NÃO — entre NESTE app com e-mail e senha' :
          DIAG.login === 'recusado' ? 'NÃO — login venceu; saia e entre de novo com e-mail e senha' : 'renovando…')),
