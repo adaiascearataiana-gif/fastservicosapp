@@ -33,6 +33,9 @@
   W.__fast4067 = true;
 
   var BASE_KEY = 'fast4067_base_v1';
+  var VERSAO = 'v7';
+  var DIAG = W.__f68Diag = { erro: '', erroEm: 0, envio: 0, baixou: 0 };
+  function falha(txt) { DIAG.erro = String(txt).slice(0, 160); DIAG.erroEm = Date.now(); try { painel(true); } catch (e) {} }
   var PAGINA = 1000;
   var LOTE_ENVIO = 150;
   var LOTE_DEL = 50;
@@ -65,7 +68,7 @@
         headers: supabaseHeaders({ 'Range-Unit': 'items', 'Range': de + '-' + (de + PAGINA - 1) })
       });
       if (r.status === 416) break;
-      if (!r.ok) throw new Error('GET ' + tabela + ': HTTP ' + r.status);
+      if (!r.ok) { falha('Download de ' + tabela + ' recusado (HTTP ' + r.status + ')'); throw new Error('GET ' + tabela + ': HTTP ' + r.status); }
       var linhas = await r.json();
       saida = saida.concat(linhas);
       if (linhas.length < PAGINA) break;
@@ -302,6 +305,7 @@
         if (legado && !W[flag] && typeof ehErroDeColunaSupabase === 'function' && ehErroDeColunaSupabase(r.status, t)) {
           W[flag] = true; i -= LOTE_ENVIO; continue;
         }
+        falha('Envio de ' + tabela + ' recusado (HTTP ' + r.status + ') ' + String(t).slice(0, 80));
         throw new Error('POST ' + tabela + ': HTTP ' + r.status + ' — ' + String(t).slice(0, 300));
       }
       marcarRecente(tabela, lote.map(function (l) { return l.id; }));
@@ -558,6 +562,7 @@
     try {
       await syncRotas(); await syncDespesas(); await syncSequencias();
       salvarBase(); W.__f67UltimoEnvio = inicio; W.__fastSyncFim = Date.now();
+      DIAG.envio = Date.now(); if (DIAG.erro && Date.now() - DIAG.erroEm > 2000) DIAG.erro = '';
       if (novas) {
         LAPS.forEach(function (k) { (novas[k] || []).forEach(function (v) { lapConh[k].add(String(v)); }); });
         gravarLocal();
@@ -582,7 +587,7 @@
     W.__f68LeveUltima = W.__f68Leve;
     var novas = W.__f68Leve ? lapNovas() : null;
     var okSync = false;
-    try { await f(); okSync = true; } catch (e) { console.warn('FAST sync:', e); }
+    try { await f(); okSync = true; DIAG.baixou = Date.now(); } catch (e) { console.warn('FAST sync:', e); falha('Sincronização: ' + (e && e.message || e)); }
     finally { W.__f68Pesada_on = false; W.__f68Leve = false; W.__fastSyncFim = Date.now(); }
     if (okSync && !W.__f68LeveUltima) lapConh = lapAtual();          // completa: lápides já unidas com a nuvem
     if (novas) { subirLapides(novas); LAPS.forEach(function (k) { (novas[k] || []).forEach(function (v) { if (lapConh) lapConh[k].add(String(v)); }); }); }
@@ -729,7 +734,7 @@
       var r = await fetch(SUPABASE_URL + '/' + t + '?select=updated_at&order=updated_at.desc.nullslast&limit=1', {
         method: 'GET', cache: 'no-store', headers: supabaseHeaders({ 'Prefer': 'count=exact' })
       });
-      if (!r.ok) return null;
+      if (!r.ok) { falha('Verificação recusada pelo banco (HTTP ' + r.status + ')'); return null; }
       var j = await r.json();
       return (r.headers.get('content-range') || '') + '|' + (j[0] ? j[0].updated_at : '');
     }));
@@ -812,8 +817,137 @@
     sec.classList.add('f67');
   }
 
+  /* ---------------- FOTOS: Google Drive no app (sem tela de login do Google) ----------------
+     O Google bloqueia a tela de login dentro de aplicativos. O FAST já tem a
+     "conexão permanente" (função google-drive-token no Supabase), mas cada
+     aparelho só a usava se ELE MESMO tivesse feito a conexão. Agora qualquer
+     aparelho logado no banco pede o acesso ao servidor e esvazia a fila de fotos. */
+  var DRV = { estado: '', ultima: 0, pend: -1, falhas: 0 };
+  function driveToken() {
+    try {
+      var exp = Number(localStorage.getItem('fast_drive_access_token_expires_at') || 0);
+      var t = sessionStorage.getItem('fast_drive_access_token') || localStorage.getItem('fast_drive_access_token') || '';
+      return t && (!exp || Date.now() < exp) ? t : '';
+    } catch (e) { return ''; }
+  }
+  async function fotosNaFila() {
+    try {
+      if (typeof abrirDBFotos !== 'function') return -1;
+      var db = await abrirDBFotos();
+      return await new Promise(function (res) {
+        try { var q = db.transaction('driveQueue', 'readonly').objectStore('driveQueue').count(); q.onsuccess = function () { res(q.result); }; q.onerror = function () { res(-1); }; }
+        catch (e) { res(-1); }
+      });
+    } catch (e) { return -1; }
+  }
+  var driveRodando = false;
+  async function garantirDrive(forcar) {
+    if (driveRodando || !navigator.onLine || !token()) return;
+    driveRodando = true;
+    try {
+      DRV.pend = await fotosNaFila();
+      if (driveToken()) {
+        DRV.estado = 'conectado'; DRV.falhas = 0;
+        if (DRV.pend > 0 && typeof W.fastDriveSincronizarPendentes === 'function') { try { await W.fastDriveSincronizarPendentes(); } catch (e) {} DRV.pend = await fotosNaFila(); }
+        return;
+      }
+      var espera = Math.min(15 * 60000, 60000 * Math.pow(2, DRV.falhas));     // 1, 2, 4... até 15 min
+      if (!forcar && Date.now() - DRV.ultima < espera) return;
+      DRV.ultima = Date.now();
+      if (typeof W.fastDriveRenovarServidor !== 'function') { DRV.estado = 'função de conexão não encontrada'; return; }
+      try { if (localStorage.getItem('fast_drive_servidor') !== '1') localStorage.setItem('fast_drive_servidor', '1'); } catch (e) {}
+      var ok = false;
+      try { ok = await W.fastDriveRenovarServidor(); } catch (e) {}
+      if (ok || driveToken()) {
+        DRV.estado = 'conectado (permanente)'; DRV.falhas = 0;
+        if (DRV.pend > 0 && typeof W.fastDriveSincronizarPendentes === 'function') { try { await W.fastDriveSincronizarPendentes(); } catch (e) {} DRV.pend = await fotosNaFila(); }
+      } else {
+        DRV.falhas++;
+        DRV.estado = 'NÃO conectado — faça a conexão permanente uma vez pelo navegador';
+      }
+    } finally { driveRodando = false; }
+  }
+  W.fastGarantirDrive = function () { return garantirDrive(true); };
+  setInterval(function () { garantirDrive(false); }, 30000);
+  W.addEventListener('load', function () { setTimeout(function () { garantirDrive(true); }, 5000); });
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) setTimeout(function () { garantirDrive(false); }, 1500); });
+  // foto escolhida: tenta subir na hora
+  (function () {
+    var tEnf = 0;
+    function embrulharEnfileirar() {
+      var f = W.fastDriveEnfileirarArquivos;
+      if (typeof f !== 'function' || f.__f68) return;
+      var g = async function () {
+        var r = await f.apply(this, arguments);
+        clearTimeout(tEnf); tEnf = setTimeout(function () { garantirDrive(true); }, 800);
+        return r;
+      };
+      g.__f68 = true; W.fastDriveEnfileirarArquivos = g;
+    }
+    embrulharEnfileirar();
+    W.addEventListener('load', function () { embrulharEnfileirar(); setTimeout(embrulharEnfileirar, 2000); });
+    setInterval(embrulharEnfileirar, 5000);
+  })();
+
+  /* ---------------- painel de diagnóstico (aparece 25 s ao abrir e quando há erro) ---------------- */
+  function hora(t) { if (!t) return '—'; var d = new Date(t); return ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2) + ':' + ('0' + d.getSeconds()).slice(-2); }
+  var tPainel = 0;
+  function painel(mostrar) {
+    if (!document.body) return;
+    var el = document.getElementById('f68Diag');
+    if (!el) {
+      el = document.createElement('div'); el.id = 'f68Diag';
+      el.setAttribute('role', 'status');
+      el.style.cssText = 'position:fixed;inset:auto 10px calc(10px + env(safe-area-inset-bottom,0px)) 10px;z-index:2147483000;max-width:460px;width:auto;height:auto;margin:0 auto;padding:10px 14px;border:0;border-radius:12px;font:13px/1.45 system-ui,sans-serif;color:#fff;background:rgba(17,24,39,.94);box-shadow:0 6px 24px rgba(0,0,0,.35);overflow:visible';
+      // camada do topo (fica por cima até da tela de login)
+      try { el.setAttribute('popover', 'manual'); } catch (e) {}
+      ['visibility', 'opacity', 'pointer-events'].forEach(function (k, i) { el.style.setProperty(k, ['visible', '1', 'auto'][i], 'important'); });
+      el.addEventListener('click', function () { esconderPainel(el); });
+      document.body.appendChild(el);
+    }
+    var tk = !!token(), rt = rtConectado();
+    var linhas = [
+      '<b>Sincronização ' + VERSAO + '</b> — toque para fechar',
+      (tk ? '✅' : '❌') + ' Login no banco: ' + (tk ? 'sim' : 'NÃO (saia e entre com e-mail e senha)'),
+      (rt ? '✅' : '⚠️') + ' Tempo real: ' + (rt ? 'conectado' : 'desconectado (verificando a cada 10 s)'),
+      '⬆️ Último envio: ' + hora(DIAG.envio) + ' · ⬇️ Última leitura: ' + hora(DIAG.baixou),
+      (driveToken() ? '✅' : '📷') + ' Google Drive (fotos): ' + (driveToken() ? 'conectado' : (DRV.estado || 'verificando…')) +
+        (DRV.pend >= 0 ? ' · ' + DRV.pend + ' foto(s) na fila' : '')
+    ];
+    if (DIAG.erro) linhas.push('<span style="color:#fca5a5">⛔ ' + DIAG.erro.replace(/[<>&]/g, '') + '</span>');
+    el.innerHTML = linhas.join('<br>');
+    el.style.background = DIAG.erro || !tk ? 'rgba(127,29,29,.95)' : 'rgba(17,24,39,.94)';
+    if (mostrar) {
+      mostrarPainel(el);
+      clearTimeout(tPainel);
+      tPainel = setTimeout(function () { if (!DIAG.erro && token()) esconderPainel(el); }, 25000);
+    }
+  }
+  function painelAberto(el) { try { if (el.showPopover) return el.matches(':popover-open'); } catch (e) {} return el.style.display !== 'none'; }
+  function mostrarPainel(el) {
+    try { if (el.showPopover) { if (!el.matches(':popover-open')) el.showPopover(); return; } } catch (e) {}
+    el.style.display = 'block';
+  }
+  function esconderPainel(el) {
+    try { if (el.hidePopover) { if (el.matches(':popover-open')) el.hidePopover(); return; } } catch (e) {}
+    el.style.display = 'none';
+  }
+  W.fastDiagnosticoSync = function () { painel(true); };
+  setInterval(function () { try { var el = document.getElementById('f68Diag'); if (el && painelAberto(el)) painel(false); } catch (e) {} }, 2000);
+  W.addEventListener('load', function () { setTimeout(function () { painel(true); }, 4000); });
+  var stOrig = null;
+  function ligarStatus() {
+    var f = W.atualizarStatusSync;
+    if (typeof f !== 'function' || f.__f68) return;
+    var g = function (tipo, msg) {
+      try { if (tipo === 'error') falha(msg || 'Erro na sincronização'); } catch (e) {}
+      return f.apply(this, arguments);
+    };
+    g.__f68 = true; W.atualizarStatusSync = g;
+  }
+
   /* ---------------- partida ---------------- */
-  function tudo() { instalarSync(); instalarSalvar(); cardsBackup(); rtConectar(); }
+  function tudo() { instalarSync(); instalarSalvar(); cardsBackup(); rtConectar(); ligarStatus(); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', tudo, { once: true }); else tudo();
   W.addEventListener('load', function () { tudo(); setTimeout(tudo, 1500); setTimeout(tudo, 3500); });
   setInterval(cardsBackup, 2000);
