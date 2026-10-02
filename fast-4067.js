@@ -33,7 +33,7 @@
   W.__fast4067 = true;
 
   var BASE_KEY = 'fast4067_base_v1';
-  var VERSAO = 'v15';
+  var VERSAO = 'v16';
   var DIAG = W.__f68Diag = { erro: '', erroEm: 0, envio: 0, baixou: 0 };
   function falha(txt) { DIAG.erro = String(txt).slice(0, 160); DIAG.erroEm = Date.now(); try { painel(true); } catch (e) {} }
   var PAGINA = 1000;
@@ -1199,6 +1199,67 @@
     setTimeout(function () { if (FT.abriu === abriu && FT.escolheu < abriu && Date.now() - abriu < 5 * 60000) { try { painel(true); } catch (e) {} } }, 3000);
   });
 
+  /* ---------------- CÂMERA: quando o app não libera a câmera ao vivo ----------------
+     O ROTAS recusa a câmera ao vivo ("Permission denied"). O código original então
+     tentava abrir a câmera do celular, mas DEPOIS do aviso — e o Android só abre a
+     câmera/galeria logo após um toque, então nada acontecia. Agora: aparece um botão
+     para abrir a câmera do celular (com toque), e das próximas vezes vai direto nela. */
+  var CAM_KEY = 'fast68_cam_ao_vivo_negada', ultimoFallback = null;
+  function abrirCameraDoCelular(id) {
+    var inp = id ? document.getElementById(id) : null;
+    if (inp) { inp.click(); return true; }
+    return false;
+  }
+  function avisoCamera(id) {
+    var velho = document.getElementById('f68CamAviso'); if (velho) velho.remove();
+    var d = document.createElement('div'); d.id = 'f68CamAviso';
+    d.style.cssText = 'position:fixed;inset:0;z-index:2147483001;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;padding:20px';
+    d.innerHTML = '<div style="background:#fff;color:#111;border-radius:16px;padding:20px;max-width:380px;width:100%;font:15px/1.45 system-ui,sans-serif">' +
+      '<b style="font-size:17px">A câmera ao vivo está bloqueada neste app</b>' +
+      '<p style="margin:8px 0 14px">Use a câmera do celular — a foto entra na rota normalmente.</p>' +
+      '<button type="button" id="f68CamAbrir" style="width:100%;min-height:48px;border:0;border-radius:12px;background:#4f46e5;color:#fff;font-weight:700;font-size:16px">📷 Abrir câmera do celular</button>' +
+      '<button type="button" id="f68CamFechar" style="width:100%;min-height:44px;margin-top:8px;border:1px solid #cbd5e1;border-radius:12px;background:#fff;color:#111;font-size:15px">Cancelar</button></div>';
+    try { d.setAttribute('popover', 'manual'); } catch (e) {}
+    document.body.appendChild(d);
+    try { if (d.showPopover) d.showPopover(); } catch (e) {}
+    document.getElementById('f68CamAbrir').addEventListener('click', function () { d.remove(); abrirCameraDoCelular(id); });
+    document.getElementById('f68CamFechar').addEventListener('click', function () { d.remove(); });
+  }
+  function instalarCamera() {
+    var f = W.abrirCameraAoVivo;
+    if (typeof f === 'function' && !f.__f68) {
+      var g = function (dataSel, index, fallbackId) {
+        ultimoFallback = fallbackId || null;
+        var negada = false; try { negada = localStorage.getItem(CAM_KEY) === '1'; } catch (e) {}
+        if (negada && abrirCameraDoCelular(fallbackId)) return;   // direto na câmera do celular (ainda dentro do toque)
+        return f.apply(this, arguments);
+      };
+      g.__f68 = true; W.abrirCameraAoVivo = g;
+    }
+    var a = W.alert;
+    if (typeof a === 'function' && !a.__f68) {
+      var al = function (msg) {
+        if (/^Não foi possível acessar a câmera do aparelho/.test(String(msg || ''))) {
+          try { localStorage.setItem(CAM_KEY, '1'); } catch (e) {}
+          var id = ultimoFallback;
+          setTimeout(function () { avisoCamera(id); }, 50);
+          return;
+        }
+        return a.apply(this, arguments);
+      };
+      al.__f68 = true; W.alert = al;
+    }
+  }
+  // se um dia a câmera ao vivo for liberada, volta a usá-la
+  try {
+    if (navigator.permissions && navigator.permissions.query) {
+      navigator.permissions.query({ name: 'camera' }).then(function (st) {
+        function ver() { if (st.state === 'granted') { try { localStorage.removeItem(CAM_KEY); } catch (e) {} } }
+        ver(); st.onchange = ver;
+      }).catch(function () {});
+    }
+  } catch (e) {}
+
   /* ---------------- painel de diagnóstico (aparece 25 s ao abrir e quando há erro) ---------------- */
   function hora(t) { if (!t) return '—'; var d = new Date(t); return ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2) + ':' + ('0' + d.getSeconds()).slice(-2); }
   var tPainel = 0;
@@ -1321,7 +1382,7 @@
   }
 
   /* ---------------- partida ---------------- */
-  function tudo() { instalarSync(); instalarSalvar(); cardsBackup(); rtConectar(); ligarStatus(); instalarFotos(); ligarFeedbackFoto(); }
+  function tudo() { instalarSync(); instalarSalvar(); cardsBackup(); rtConectar(); ligarStatus(); instalarFotos(); ligarFeedbackFoto(); instalarCamera(); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', tudo, { once: true }); else tudo();
   W.addEventListener('load', function () { tudo(); setTimeout(tudo, 1500); setTimeout(tudo, 3500); });
   setInterval(cardsBackup, 2000);
