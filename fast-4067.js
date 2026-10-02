@@ -526,6 +526,7 @@
   /* ---------------- fila única: envio rápido e sincronização completa ---------------- */
   // Nunca rodam ao mesmo tempo; pedidos repetidos viram um só.
   var PESADA_MS = 10 * 60 * 1000;
+  var assinaturaBase = null;
   var querPush = false, querSync = false, syncRemota = false, rodando = null;
   function pedir(tipo, remota) {
     if (tipo === 'push') querPush = true; else { querSync = true; if (remota) syncRemota = true; else syncRemota = false; }
@@ -544,6 +545,9 @@
         var remota = syncRemota; syncRemota = false;
         await completa(remota);
       }
+      // registra como a nuvem ficou logo após o NOSSO trabalho, para a
+      // verificação de reserva só reagir a mudanças de OUTROS aparelhos
+      if (!querPush && !querSync) { try { var sg = await assinatura(); if (sg) assinaturaBase = sg; } catch (e) {} }
     }
   }
   async function empurrar() {
@@ -553,7 +557,7 @@
     var novas = lapNovas();
     try {
       await syncRotas(); await syncDespesas(); await syncSequencias();
-      salvarBase(); W.__f67UltimoEnvio = inicio;
+      salvarBase(); W.__f67UltimoEnvio = inicio; W.__fastSyncFim = Date.now();
       if (novas) {
         LAPS.forEach(function (k) { (novas[k] || []).forEach(function (v) { lapConh[k].add(String(v)); }); });
         gravarLocal();
@@ -570,14 +574,16 @@
     var f = W.__f68SyncOrig;
     if (typeof f !== 'function') return;
     W.__f68Enviados = 0;
-    W.__fastSyncRodando = true;
+    // O embrulho 4.0.66 (dentro do index) recusa rodar se esta marca estiver ligada.
+    // Quem controla a fila agora é este arquivo, então liberamos antes de chamar.
+    W.__fastSyncRodando = false;
     W.__f68Leve = !!(W.__f68Chaves && W.__f68Pesada && Date.now() - W.__f68Pesada < PESADA_MS && !restaurando());
     W.__f68Pesada_on = !W.__f68Leve;
     W.__f68LeveUltima = W.__f68Leve;
     var novas = W.__f68Leve ? lapNovas() : null;
     var okSync = false;
     try { await f(); okSync = true; } catch (e) { console.warn('FAST sync:', e); }
-    finally { W.__f68Pesada_on = false; W.__f68Leve = false; W.__fastSyncRodando = false; W.__fastSyncFim = Date.now(); }
+    finally { W.__f68Pesada_on = false; W.__f68Leve = false; W.__fastSyncFim = Date.now(); }
     if (okSync && !W.__f68LeveUltima) lapConh = lapAtual();          // completa: lápides já unidas com a nuvem
     if (novas) { subirLapides(novas); LAPS.forEach(function (k) { (novas[k] || []).forEach(function (v) { if (lapConh) lapConh[k].add(String(v)); }); }); }
     // avisa os outros só se havia mudança DESTE aparelho (evita pingue-pongue)
@@ -717,7 +723,7 @@
   W.fastTempoReal = function () { return { conectado: rtConectado(), aviso: RT.avisoOk, banco: RT.dbOk, aparelho: APARELHO }; };
 
   /* ---------------- verificação leve (reserva do tempo real) ---------------- */
-  var assinaturaBase = null, fimVisto = 0, checando = false, avisouSemLogin = false, ultimaChecagem = 0;
+  var checando = false, avisouSemLogin = false, ultimaChecagem = 0;
   async function assinatura() {
     var partes = await Promise.all(TABS_RT.map(async function (t) {
       var r = await fetch(SUPABASE_URL + '/' + t + '?select=updated_at&order=updated_at.desc.nullslast&limit=1', {
@@ -746,8 +752,8 @@
     try {
       var sig = await assinatura();
       if (!sig) return;
-      var fim = W.__fastSyncFim || W.__f67UltimoEnvio || 0;
-      if (assinaturaBase === null || fim > fimVisto) { fimVisto = fim; assinaturaBase = sig; return; }
+      if (rodando) return;                       // a fila registra a base ao terminar
+      if (assinaturaBase === null) { assinaturaBase = sig; return; }
       if (sig !== assinaturaBase) { assinaturaBase = sig; sincronizar(true); }
     } catch (e) {} finally { checando = false; }
   }
