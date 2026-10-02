@@ -33,7 +33,7 @@
   W.__fast4067 = true;
 
   var BASE_KEY = 'fast4067_base_v1';
-  var VERSAO = 'v18';
+  var VERSAO = 'v20';
   var DIAG = W.__f68Diag = { erro: '', erroEm: 0, envio: 0, baixou: 0 };
   function falha(txt) { DIAG.erro = String(txt).slice(0, 160); DIAG.erroEm = Date.now(); try { painel(true); } catch (e) {} }
   var PAGINA = 1000;
@@ -381,7 +381,7 @@
 
   function legadoRotas(lote) {
     var cols = (typeof R101_ROTAS_COLS_LEGADO !== 'undefined') ? R101_ROTAS_COLS_LEGADO : ['whatsapp_message_id', 'origem_importacao'];
-    return lote.map(function (p) { var c = Object.assign({}, p); cols.forEach(function (k) { delete c[k]; }); return c; });
+    return lote.map(function (p) { var c = Object.assign({}, p); cols.forEach(function (k) { delete c[k]; }); delete c.fotos_refs; return c; });
   }
   function legadoSeq(lote) {
     return (typeof r101LinhasLegado === 'function') ? r101LinhasLegado(lote) : lote;
@@ -448,12 +448,35 @@
     ajustar(res.rotas, base.r || {}, local.rotas, nuvem.rotas, camposRota, function (x, c) {
       var y = Object.assign({}, x);
       CAMPOS_ROTA.forEach(function (k) { if (c[k] !== undefined) y[k] = c[k]; });
+      if (Array.isArray(c.fotos)) { y.fotos = c.fotos.slice(); y.fotosDoDia = []; }   // fotos próprias vindas de outro aparelho
       if (c.updatedAt) y.updatedAt = c.updatedAt;
       return y;
     });
     ajustar(res.despesas, base.d || {}, local.despesas, nuvem.despesas, camposDesp, function (x, c) {
       return Object.assign({}, x, c);
     });
+    // Rotas do Dia: se ESTE aparelho não mexeu no item desde a última sincronização
+    // e outro aparelho mudou (cliente, destino, valor, motorista...), adota a versão
+    // da nuvem. Antes valia sempre "o local ganha" e a edição do outro não chegava.
+    try {
+      var bs = base.s || {};
+      var hl = {}, hc = {}, nuvIt = {};
+      sequenciasToRows(local.sequencias || {}).forEach(function (l) { hl[String(l.id)] = hSeq(l); });
+      sequenciasToRows(nuvem.sequencias || {}).forEach(function (l) { hc[String(l.id)] = hSeq(l); });
+      Object.keys(nuvem.sequencias || {}).forEach(function (d) { (nuvem.sequencias[d] || []).forEach(function (it) { if (it) nuvIt[String(it.id)] = { d: d, it: it }; }); });
+      var seqRes = res.sequencias || {};
+      Object.keys(seqRes).forEach(function (d) {
+        var arr = seqRes[d] || [];
+        for (var i = 0; i < arr.length; i++) {
+          var x = arr[i]; if (!x) continue;
+          var k = String(x.id), bh = bs[k];
+          if (!bh || !hl[k] || !hc[k] || hl[k] !== bh || hc[k] === bh) continue;
+          var c = nuvIt[k]; if (!c) continue;
+          if (c.d === d) arr[i] = Object.assign({}, c.it);
+          else { arr.splice(i, 1); i--; (seqRes[c.d] = seqRes[c.d] || []).push(Object.assign({}, c.it)); }
+        }
+      });
+    } catch (e) { console.warn('FAST 3 vias (dia):', e); }
   }
 
   /* ---------------- instalação das correções ---------------- */
@@ -636,6 +659,7 @@
     var inicioSync = Date.now();
     try { await f(); okSync = true; DIAG.baixou = Date.now(); if (DIAG.erro && DIAG.erroEm < inicioSync) DIAG.erro = ''; } catch (e) { console.warn('FAST sync:', e); falha('Sincronização: ' + (e && e.message || e)); }
     finally { W.__f68Pesada_on = false; W.__f68Leve = false; W.__fastSyncFim = Date.now(); }
+    if (okSync) reconciliarFotos();
     if (okSync && !W.__f68LeveUltima) colHash = hashColecoes();   // só a completa sincroniza essas listas
     if (okSync && !W.__f68LeveUltima) lapConh = lapAtual();          // completa: lápides já unidas com a nuvem
     if (novas) { subirLapides(novas); LAPS.forEach(function (k) { (novas[k] || []).forEach(function (v) { if (lapConh) lapConh[k].add(String(v)); }); }); }
@@ -653,6 +677,7 @@
     var g = function () {
       var r = f.apply(this, arguments);
       if (!pendenteDesde) pendenteDesde = Date.now();
+      reconciliarLogo();
       clearTimeout(tPush);
       tPush = setTimeout(function () {
         if (!navigator.onLine) return;
@@ -1069,83 +1094,77 @@
     W.__f68ObterLocal = f;
   }
 
-  /* Fotos ANTIGAS (tiradas antes da v11): o aparelho que tem a foto guardada envia
-     uma cópia para a pasta "_FAST sincronização de fotos" do Drive e registra o
-     vínculo. Aos poucos (10 por vez), das mais recentes para as mais antigas. */
-  var OK_KEY = 'fast68_fotos_ok', migrando = false;
-  var PASTA_SYNC = '_FAST sincronização de fotos';
-  function refsLocais() {
+  /* Fotos ANTIGAS (tiradas antes da v11): procura no registro de envios deste
+     aparelho o arquivo do Drive que JÁ É dessa foto e registra o vínculo — sem
+     criar cópia (uma única imagem no Drive, na pasta da rota). Cópias criadas
+     pela v12 na pasta "_FAST sincronização de fotos" são trocadas pelo original
+     e vão para a lixeira do Drive. */
+  var OK_KEY = 'fast68_fotos_ok2', migrando = false;
+  function itensComFotos() {
     var lista = [];
     try {
       var seq = bancoDados.sequencias || {};
-      Object.keys(seq).sort().reverse().forEach(function (dt) {
-        (seq[dt] || []).forEach(function (it) { (it && Array.isArray(it.fotos) ? it.fotos : []).forEach(function (f) { if (typeof f === 'string' && /^idb:/.test(f)) lista.push({ ref: f, item: it.id, data: dt }); }); });
-      });
-      (bancoDados.rotas || []).slice().reverse().forEach(function (r) {
-        (r && Array.isArray(r.fotos) ? r.fotos : []).forEach(function (f) { if (typeof f === 'string' && /^idb:/.test(f)) lista.push({ ref: f, item: r.id, data: r.data || '' }); });
-      });
+      Object.keys(seq).forEach(function (dt) { (seq[dt] || []).forEach(function (it) { if (it && Array.isArray(it.fotos) && it.fotos.length) lista.push({ id: it.id, fotos: it.fotos }); }); });
+      (bancoDados.rotas || []).forEach(function (r) { var pr = r ? proprias(r) : []; if (pr.length) lista.push({ id: r.id, fotos: pr }); });
     } catch (e) {}
-    var vistos = {};
-    return lista.filter(function (x) { if (vistos[x.ref]) return false; vistos[x.ref] = 1; return true; });
+    return lista;
   }
-  var pastaSyncId = null;
-  async function pastaSync(tk) {
-    if (pastaSyncId) return pastaSyncId;
-    var pai = '';
-    try { pai = localStorage.getItem('fast_drive_folder_id') || ((bancoDados.integracoes || {}).googleDrive || {}).folderId || ''; } catch (e) {}
-    var q = "name='" + PASTA_SYNC + "' and mimeType='application/vnd.google-apps.folder' and trashed=false" + (pai ? " and '" + pai.replace(/'/g, "\\'") + "' in parents" : '');
-    var b = await fetch('https://www.googleapis.com/drive/v3/files?spaces=drive&fields=files(id)&q=' + encodeURIComponent(q), { headers: { Authorization: 'Bearer ' + tk } });
-    if (!b.ok) return null;
-    var j = await b.json();
-    if (j.files && j.files[0]) return (pastaSyncId = j.files[0].id);
-    var c = await fetch('https://www.googleapis.com/drive/v3/files?fields=id', {
-      method: 'POST', headers: { Authorization: 'Bearer ' + tk, 'Content-Type': 'application/json' },
-      body: JSON.stringify(pai ? { name: PASTA_SYNC, mimeType: 'application/vnd.google-apps.folder', parents: [pai] } : { name: PASTA_SYNC, mimeType: 'application/vnd.google-apps.folder' })
-    });
-    if (!c.ok) return null;
-    return (pastaSyncId = (await c.json()).id);
-  }
+  function numeroDoNome(n) { var m = String(n || '').match(/Foto\s*(\d+)/i); return m ? Number(m[1]) : 0; }
   async function migrarFotosAntigas() {
-    if (migrando || !token() || !navigator.onLine || !pronto() || typeof W.__f68ObterLocal !== 'function') return;
+    if (migrando || !token() || !navigator.onLine || !pronto()) return;
     if (DRV.fotosTabela === 'falta') return;
-    var tk = driveToken(); if (!tk) return;
     migrando = true;
     try {
       var ok = lerJSON(OK_KEY, {});
-      var cand = refsLocais().filter(function (x) { return !ok[x.ref]; }).slice(0, 60);
-      if (!cand.length) { DRV.antigas = 'em dia'; return; }
-      // quais já têm vínculo no banco
-      var lista = cand.map(function (x) { return '"' + x.ref.replace(/"/g, '') + '"'; }).join(',');
-      var r = await fetch(SUPABASE_URL + '/fotos_drive?select=ref&ref=in.(' + encodeURIComponent(lista) + ')', { headers: supabaseHeaders() });
-      if (!r.ok) { if (r.status === 404) DRV.fotosTabela = 'falta'; return; }
-      (await r.json()).forEach(function (x) { ok[x.ref] = 1; });
+      var led = (await lerStore('driveLedger')).filter(function (e) { return e && e.driveId; });
+      if (!led.length) { DRV.antigas = 'em dia'; return; }
+      var porItem = {};
+      led.forEach(function (e) { var k = String(e.itemId || ''); (porItem[k] = porItem[k] || []).push(e); });
+      var mapa = lerJSON(MAPA_KEY, {});
+      var achados = [];   // {ref, drive_id, item}
+      itensComFotos().forEach(function (it) {
+        var es = porItem[String(it.id)] || [];
+        if (!es.length) return;
+        it.fotos.forEach(function (ref, idx) {
+          if (typeof ref !== 'string' || !/^idb:/.test(ref) || ok[ref]) return;
+          // 1) vínculo exato (envio já sabia qual foto era)
+          var e = es.filter(function (x) { return x.fotoRef === ref || mapa[x.id] === ref; })[0];
+          // 2) pela numeração "Foto NN" — só quando a quantidade bate (nenhuma foto apagada depois)
+          if (!e && es.length === it.fotos.length) e = es.filter(function (x) { return numeroDoNome(x.nome) === idx + 1; })[0];
+          if (e) achados.push({ ref: ref, drive_id: e.driveId, item_id: String(it.id), nome: String(e.nome || '').slice(0, 200) });
+          else ok[ref] = 1;   // não há como saber qual arquivo é: fica só neste aparelho (sem cópia)
+        });
+      });
       gravarJSON(OK_KEY, ok);
-      var enviadas = 0;
-      for (var i = 0; i < cand.length && enviadas < 10; i++) {
-        var c = cand[i]; if (ok[c.ref]) continue;
-        var b64 = await W.__f68ObterLocal(c.ref.slice(4));
-        if (!b64) continue;                               // a foto não está neste aparelho
-        var pasta = await pastaSync(tk); if (!pasta) return;
-        var blob = await (await fetch(b64)).blob();
-        var bd = 'f68_' + Date.now();
-        var corpo = new Blob(['--' + bd + '\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n',
-          JSON.stringify({ name: c.ref.slice(4).replace(/[^\w.-]/g, '_') + '.jpg', parents: [pasta] }),
-          '\r\n--' + bd + '\r\nContent-Type: ' + (blob.type || 'image/jpeg') + '\r\n\r\n', blob, '\r\n--' + bd + '--'],
-          { type: 'multipart/related; boundary=' + bd });
-        var up = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id', {
-          method: 'POST', headers: { Authorization: 'Bearer ' + tk, 'Content-Type': 'multipart/related; boundary=' + bd }, body: corpo
+      if (!achados.length) { DRV.antigas = 'em dia'; return; }
+      achados = achados.slice(0, 50);
+      var lista = achados.map(function (x) { return '"' + x.ref.replace(/"/g, '') + '"'; }).join(',');
+      var r = await fetch(SUPABASE_URL + '/fotos_drive?select=ref,drive_id,nome&ref=in.(' + encodeURIComponent(lista) + ')', { headers: supabaseHeaders() });
+      if (!r.ok) { if (r.status === 404) DRV.fotosTabela = 'falta'; return; }
+      var existentes = {}; (await r.json()).forEach(function (x) { existentes[x.ref] = x; });
+      var gravar = [], lixo = [];
+      achados.forEach(function (a) {
+        var ex = existentes[a.ref];
+        if (!ex) gravar.push(a);
+        else if (ex.nome === 'sincronizacao' && ex.drive_id !== a.drive_id) { gravar.push(a); lixo.push(ex.drive_id); }
+        else ok[a.ref] = 1;
+      });
+      if (gravar.length) {
+        var up = await fetch(SUPABASE_URL + '/fotos_drive', {
+          method: 'POST', headers: supabaseHeaders({ 'Prefer': 'resolution=merge-duplicates,return=minimal' }),
+          body: JSON.stringify(gravar)
         });
-        if (!up.ok) { if (up.status === 401) { await garantirDrive(true); } return; }
-        var id = (await up.json()).id;
-        var ins = await fetch(SUPABASE_URL + '/fotos_drive', {
-          method: 'POST', headers: supabaseHeaders({ 'Prefer': 'resolution=ignore-duplicates,return=minimal' }),
-          body: JSON.stringify([{ ref: c.ref, drive_id: id, item_id: String(c.item), nome: 'sincronizacao' }])
-        });
-        if (!ins.ok) return;
-        ok[c.ref] = 1; gravarJSON(OK_KEY, ok);
-        enviadas++; DRV.antigasEnviadas = (DRV.antigasEnviadas || 0) + 1;
+        if (!up.ok) return;
+        gravar.forEach(function (a) { ok[a.ref] = 1; });
+        DRV.antigasEnviadas = (DRV.antigasEnviadas || 0) + gravar.length;
       }
-      DRV.antigas = 'enviando';
+      gravarJSON(OK_KEY, ok);
+      // cópias antigas da v12 vão para a lixeira do Drive (o original continua)
+      var tk = driveToken();
+      if (tk) for (var i = 0; i < lixo.length; i++) {
+        try { await fetch('https://www.googleapis.com/drive/v3/files/' + encodeURIComponent(lixo[i]), { method: 'PATCH', headers: { Authorization: 'Bearer ' + tk, 'Content-Type': 'application/json' }, body: JSON.stringify({ trashed: true }) }); } catch (e) {}
+      }
+      DRV.antigas = achados.length < 50 ? 'em dia' : 'enviando';
     } catch (e) {} finally { migrando = false; }
   }
   setInterval(migrarFotosAntigas, 90000);
@@ -1309,6 +1328,178 @@
     setInterval(arrumar, 3000);
   })();
 
+  /* ---------------- RELATÓRIO DE ROTAS: contar as fotos tiradas nas Rotas do Dia ----------------
+     O relatório só contava as fotos gravadas na própria rota. As fotos tiradas pelo
+     card das Rotas do Dia ficam no item do dia (ligado à rota por rotaId) — agora
+     entram na contagem, no total "Fotos" e no botão "Abrir fotos" do Drive. */
+  var idxSeq = { ref: null, em: 0, mapa: {} };
+  function itensDaRota(id) {
+    var seq = bancoDados.sequencias || {};
+    if (idxSeq.ref !== seq || Date.now() - idxSeq.em > 3000) {
+      var m = {};
+      Object.keys(seq).forEach(function (d) {
+        (seq[d] || []).forEach(function (it) { if (it && it.rotaId != null) { var k = String(it.rotaId); (m[k] = m[k] || []).push(it); } });
+      });
+      idxSeq = { ref: seq, em: Date.now(), mapa: m };
+    }
+    return idxSeq.mapa[String(id)] || [];
+  }
+  function instalarRelatorio() {
+    var f = W.fastRelatorioDriveInfo;
+    if (typeof f !== 'function' || f.__f68) return;
+    var g = function (rota, mapa) {
+      var base = f.apply(this, arguments);
+      try {
+        var itens = itensDaRota(rota && rota.id);
+        if (!itens.length) return base;
+        var ids = {}; ids[String(rota.id)] = 1;
+        itens.forEach(function (it) { ids[String(it.id)] = 1; });
+        var vistas = {}, total = 0;
+        var todas = [].concat(Array.isArray(rota.fotos) ? rota.fotos : (rota.foto ? [rota.foto] : []));
+        itens.forEach(function (it) { if (Array.isArray(it.fotos)) todas = todas.concat(it.fotos); });
+        todas.forEach(function (x) { if (x && !vistas[x]) { vistas[x] = 1; total++; } });
+        var led = ((mapa && mapa.ledger) || []).filter(function (x) { return ids[String(x.itemId || '')]; });
+        var q = ((mapa && mapa.queue) || []).filter(function (x) { return ids[String(x.itemId || '')]; });
+        var link = base.link || '';
+        if (!link) {
+          var pasta = led.filter(function (x) { return x.driveFolderLink || x.driveFolderId; })[0];
+          if (pasta) link = pasta.driveFolderLink || ('https://drive.google.com/drive/folders/' + encodeURIComponent(pasta.driveFolderId));
+          else { var arq = led.filter(function (x) { return x.link; })[0]; if (arq) link = arq.link; }
+        }
+        return { total: Math.max(total, base.total || 0), enviados: led.length, pendentes: q.length, link: link };
+      } catch (e) { return base; }
+    };
+    g.__f68 = true; W.fastRelatorioDriveInfo = g;
+  }
+
+  /* ---------------- FOTOS DO ROTAS → ROTA DO PAINEL (e relatório) ----------------
+     Foto inserida numa Rota do Dia aparece na rota ligada a ela (aba Rotas, coluna
+     Imagem, janela Editar Rota e relatório), em qualquer aparelho. As fotos tiradas
+     direto na rota também passam a sincronizar (coluna fotos_refs da tabela rotas). */
+  function fotosDe(r) { return Array.isArray(r.fotos) ? r.fotos : (r.foto ? [r.foto] : []); }
+  function proprias(r) {
+    var dia = Array.isArray(r.fotosDoDia) ? r.fotosDoDia : [];
+    return fotosDe(r).filter(function (f) { return typeof f === 'string' && f && dia.indexOf(f) < 0; });
+  }
+  function instalarFotosRota() {
+    var t = W.rotaToSupabase;
+    if (typeof t === 'function' && !t.__f68) {
+      var t2 = function (r) {
+        var row = t.apply(this, arguments);
+        try { row.fotos_refs = proprias(r || {}).filter(function (f) { return /^(idb:|https?:)/.test(f); }); } catch (e) {}
+        return row;
+      };
+      t2.__f68 = true; W.rotaToSupabase = t2;
+    }
+    var v = W.supabaseToRota;
+    if (typeof v === 'function' && !v.__f68) {
+      var v2 = function (row) {
+        var r = v.apply(this, arguments);
+        try { if (row && Array.isArray(row.fotos_refs) && row.fotos_refs.length) { r.fotos = row.fotos_refs.slice(); r.fotosDoDia = []; } } catch (e) {}
+        return r;
+      };
+      v2.__f68 = true; W.supabaseToRota = v2;
+    }
+  }
+  var tRedesenho = 0;
+  function redesenharRotas() {
+    clearTimeout(tRedesenho);
+    tRedesenho = setTimeout(function () {
+      try { if (typeof W.renderizar === 'function') W.renderizar(); } catch (e) {}
+      try { if (typeof W.fastRelatorioRotasRender === 'function') W.fastRelatorioRotasRender(); } catch (e) {}
+      try {
+        var m = document.getElementById('modalEditarRota'), idEl = document.getElementById('editRotaId');
+        if (m && idEl && idEl.value && getComputedStyle(m).display !== 'none' && typeof W.renderizarGaleriaEdicaoRota === 'function') {
+          var rr = (bancoDados.rotas || []).filter(function (x) { return String(x.id) === String(idEl.value); })[0];
+          if (rr) W.renderizarGaleriaEdicaoRota(rr);
+        }
+      } catch (e) {}
+    }, 250);
+  }
+  function reconciliarFotos() {
+    try {
+      var seq = bancoDados.sequencias || {}, dia = {};
+      Object.keys(seq).sort().forEach(function (d) {
+        (seq[d] || []).forEach(function (it) {
+          if (!it || it.rotaId == null) return;
+          var k = String(it.rotaId), a = dia[k] || (dia[k] = []);
+          fotosDe(it).forEach(function (f) { if (f && a.indexOf(f) < 0) a.push(f); });
+        });
+      });
+      var mudou = false;
+      (bancoDados.rotas || []).forEach(function (r) {
+        if (!r) return;
+        var d = dia[String(r.id)] || [], prev = Array.isArray(r.fotosDoDia) ? r.fotosDoDia : [];
+        if (!d.length && !prev.length) return;
+        var novo = proprias(r);
+        d.forEach(function (f) { if (novo.indexOf(f) < 0) novo.push(f); });
+        if (JSON.stringify(novo) !== JSON.stringify(fotosDe(r)) || JSON.stringify(d) !== JSON.stringify(prev)) {
+          r.fotos = novo; r.foto = novo[0] || ''; r.fotosDoDia = d.slice(); mudou = true;
+        }
+      });
+      if (mudou) { gravarLocal(); redesenharRotas(); }
+      return mudou;
+    } catch (e) { return false; }
+  }
+  W.fastReconciliarFotos = reconciliarFotos;
+  var tRec = 0;
+  function reconciliarLogo() { clearTimeout(tRec); tRec = setTimeout(reconciliarFotos, 300); }
+  setInterval(reconciliarFotos, 15000);
+
+  /* ---------------- FOTOS DO MOTORISTA: um único aparelho processa cada foto ----------------
+     Vários aparelhos abertos buscavam as mesmas fotos pendentes do motorista ao mesmo
+     tempo e podiam gravar a foto duas vezes (e mandar duas cópias ao Drive). Agora o
+     aparelho "reserva" a foto no banco antes; só quem conseguiu reservar processa.
+     E espera a Rota do Dia chegar ao aparelho (até 2 min), para a foto entrar na rota
+     certa — e daí na rota do PAINEL e no relatório. */
+  (function () {
+    var f0 = W.fetch;
+    if (typeof f0 !== 'function' || f0.__f68) return;
+    var vistoEm = {};
+    function temItem(id) {
+      try {
+        var seq = bancoDados.sequencias || {};
+        return Object.keys(seq).some(function (d) { return (seq[d] || []).some(function (x) { return x && String(x.id) === String(id); }); });
+      } catch (e) { return false; }
+    }
+    var fx = async function (input, init) {
+      var url = typeof input === 'string' ? input : ((input && input.url) || '');
+      var metodo = String((init && init.method) || 'GET').toUpperCase();
+      if (metodo !== 'GET' || url.indexOf('/motorista_fotos?') < 0 || url.indexOf('processado=eq.false') < 0) return f0.apply(this, arguments);
+      var r = await f0.apply(this, arguments);
+      if (!r.ok) return r;
+      var linhas; try { linhas = await r.clone().json(); } catch (e) { return r; }
+      if (!Array.isArray(linhas) || !linhas.length) return r;
+      var base = url.split('/motorista_fotos')[0], cab = Object.assign({}, (init && init.headers) || {});
+      cab['Prefer'] = 'return=representation'; cab['Content-Type'] = 'application/json';
+      var minhas = [];
+      for (var i = 0; i < linhas.length; i++) {
+        var l = linhas[i]; if (!l || l.id == null) continue;
+        var k = String(l.id); if (!vistoEm[k]) vistoEm[k] = Date.now();
+        if (l.item_id != null && !temItem(l.item_id) && Date.now() - vistoEm[k] < 120000) continue;   // a rota ainda não chegou aqui
+        try {
+          var c = await f0(base + '/motorista_fotos?id=eq.' + encodeURIComponent(l.id) + '&processado=eq.false', { method: 'PATCH', headers: cab, body: JSON.stringify({ processado: true }) });
+          if (c.ok) { var j = await c.json(); if (Array.isArray(j) && j.length) minhas.push(l); }
+        } catch (e) {}
+      }
+      return new Response(JSON.stringify(minhas), { status: 200, headers: { 'Content-Type': 'application/json' } });
+    };
+    fx.__f68 = true; W.fetch = fx;
+  })();
+
+  /* ---------------- downloads dos APKs sempre do arquivo mais novo ----------------
+     O link levava "?v=4.0.66" fixo: o celular podia reaproveitar um APK antigo
+     guardado. Agora cada download pede o arquivo atual. */
+  (function () {
+    function ligar() {
+      var f = W.fastUrlAndroid;
+      if (typeof f !== 'function' || f.__f68) return;
+      var g = function () { var u = f.apply(this, arguments); return u + (u.indexOf('?') >= 0 ? '&' : '?') + 't=' + Date.now(); };
+      g.__f68 = true; W.fastUrlAndroid = g;
+    }
+    ligar(); W.addEventListener('load', function () { ligar(); setTimeout(ligar, 2000); });
+  })();
+
   /* ---------------- painel de diagnóstico (aparece 25 s ao abrir e quando há erro) ---------------- */
   function hora(t) { if (!t) return '—'; var d = new Date(t); return ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2) + ':' + ('0' + d.getSeconds()).slice(-2); }
   var tPainel = 0;
@@ -1346,7 +1537,7 @@
       if (FT.msg && FT.msgEm >= FT.escolheu) linhas.push('💬 ' + FT.msg.replace(/[<>&]/g, '').slice(0, 120));
       if (FT.erroJs) linhas.push('<span style="color:#fca5a5">⛔ Erro ao processar: ' + FT.erroJs.replace(/[<>&]/g, '').slice(0, 140) + '</span>');
     }
-    if (DRV.antigasEnviadas) linhas.push('🖼️ Fotos antigas liberadas para os outros aparelhos: ' + DRV.antigasEnviadas + (DRV.antigas === 'em dia' ? ' (concluído)' : ' (continuando…)'));
+    if (DRV.antigasEnviadas) linhas.push('🖼️ Fotos antigas ligadas ao Drive (sem cópia): ' + DRV.antigasEnviadas + (DRV.antigas === 'em dia' ? ' (concluído)' : ' (continuando…)'));
     if (DRV.fotosTabela === 'falta') linhas.push('<span style="color:#fde68a">🖼️ Fotos entre aparelhos: falta rodar o SQL da tabela fotos_drive</span>');
     if (DRV.pend > 0 && DRV.erroFoto) linhas.push('<span style="color:#fde68a">📷 Erro da foto: ' + DRV.erroFoto.replace(/[<>&]/g, '').slice(0, 160) + '</span>');
     if (DIAG.erro) linhas.push('<span style="color:#fca5a5">⛔ ' + DIAG.erro.replace(/[<>&]/g, '') + '</span>');
@@ -1431,7 +1622,7 @@
   }
 
   /* ---------------- partida ---------------- */
-  function tudo() { instalarSync(); instalarSalvar(); cardsBackup(); rtConectar(); ligarStatus(); instalarFotos(); ligarFeedbackFoto(); instalarCamera(); }
+  function tudo() { instalarSync(); instalarSalvar(); cardsBackup(); rtConectar(); ligarStatus(); instalarFotos(); ligarFeedbackFoto(); instalarCamera(); instalarRelatorio(); instalarFotosRota(); reconciliarLogo(); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', tudo, { once: true }); else tudo();
   W.addEventListener('load', function () { tudo(); setTimeout(tudo, 1500); setTimeout(tudo, 3500); });
   setInterval(cardsBackup, 2000);
