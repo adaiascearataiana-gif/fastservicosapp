@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="fast-app-version" content="4.0.33">
+<meta name="fast-app-version" content="4.0.67">
 <meta name="theme-color" content="#16a34a">
 <title>Cliente FAST — Histórico</title>
 <style>
@@ -22,6 +22,7 @@ main{max-width:1100px;margin:auto;padding:16px}.gate{min-height:100vh;display:gr
 <div class="toprow"><div><div class="who" id="clienteNome">Carregando...</div><div style="font-size:12px;color:var(--muted)" id="clienteContato"></div></div><button class="btn secondary logout" onclick="logout()">Sair</button></div>
 <div id="loading" class="loading">Carregando histórico...</div>
 <div id="content" class="hidden">
+<div id="hojeBox" class="tablewrap hidden" style="margin-bottom:14px"><div class="tabletitle">🚚 Entregas de hoje</div><div id="hojeLista"></div></div>
 <div class="cards"><div class="stat"><small>Rotas</small><strong id="sRotas">0</strong></div><div class="stat"><small>Total faturado</small><strong id="sTotal">R$ 0,00</strong></div><div class="stat"><small>Já pago</small><strong id="sPago">R$ 0,00</strong></div><div class="stat"><small>Pendente</small><strong id="sPendente">R$ 0,00</strong></div></div>
 <div class="filters"><div style="font-weight:900;margin-bottom:10px">Filtros do histórico</div><div class="filtergrid"><div class="field" style="margin:0"><label>Período inicial</label><input id="de" type="date" onchange="render()"></div><div class="field" style="margin:0"><label>Período final</label><input id="ate" type="date" onchange="render()"></div><div class="field" style="margin:0"><label>Pagamento</label><select id="pag" onchange="render()"><option value="">Todos</option><option value="Recebido">Recebido</option><option value="Pendente">Pendente</option></select></div><div class="field" style="margin:0"><label>Execução</label><select id="exec" onchange="render()"><option value="">Todas</option><option value="CONCLUÍDA">Concluída</option><option value="EM ROTA">Em rota</option></select></div></div></div>
 <div class="tablewrap"><div class="tabletitle">Histórico de rotas</div><div id="table"></div></div>
@@ -38,10 +39,46 @@ async function rest(table,query=''){const r=await fetch(PROJECT+'/rest/v1/'+tabl
 async function auth(path,body){const r=await fetch(PROJECT+'/auth/v1/'+path,{method:'POST',headers:{'Content-Type':'application/json',apikey:KEY},body:JSON.stringify(body)});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.msg||d.message||'Usuário ou senha incorretos.');return d}
 async function login(){const email=$('email').value.trim().toLowerCase(),password=$('password').value;$('loginErr').textContent='';if(!email||!password){$('loginErr').textContent='Informe e-mail e senha.';return}$('loginBtn').disabled=true;try{session=await auth('token?grant_type=password',{email,password});localStorage.setItem('fast_cliente_session',JSON.stringify(session));await iniciar()}catch(e){$('loginErr').textContent=e.message||'Não foi possível entrar.'}finally{$('loginBtn').disabled=false}}
 function logout(){session=null;localStorage.removeItem('fast_cliente_session');location.reload()}
-async function iniciar(){ $('gate').classList.add('hidden');$('app').classList.remove('hidden');try{const user=session.user||{};const email=norm(user.email||'');const meta=user.user_metadata||{};const nomeMeta=norm(meta.fast_user||meta.nome||'');const clientes=await rest('clientes','select=id,dados&limit=1000');cliente=clientes.map(x=>({...x,...(x.dados||{})})).find(c=>norm(c.email)===email || (nomeMeta&&norm(c.nome)===nomeMeta));if(!cliente)throw new Error('Seu acesso foi autenticado, mas o cadastro de Cliente FAST correspondente não foi encontrado.');$('clienteNome').textContent=cliente.nome||cliente.razaoSocial||user.email;$('clienteContato').textContent=[cliente.email,cliente.telefone||cliente.whatsapp].filter(Boolean).join(' • ');const rs=await rest('rotas','select=id,cliente,origem,destino,data,pagamento,status,statusexecucao,valor,tipovolume,qtdmercadorias,descricao&order=data.desc&limit=5000');rotas=rs.filter(r=>norm(r.cliente)===norm(cliente.nome));$('loading').classList.add('hidden');$('content').classList.remove('hidden');render()}catch(e){$('loading').textContent=e.message||'Não foi possível carregar o histórico.'}}
+async function iniciar(){ $('gate').classList.add('hidden');$('app').classList.remove('hidden');try{const user=session.user||{};const email=norm(user.email||'');const meta=user.user_metadata||{};const nomeMeta=norm(meta.fast_user||meta.nome||'');let clientes=[];try{clientes=await rest('clientes','select=id,dados&dados->>email=ilike.'+encodeURIComponent(user.email||'')+'&limit=5')}catch(e){}cliente=clientes.map(x=>({...x,...(x.dados||{})})).find(c=>norm(c.email)===email);if(!cliente){clientes=await rest('clientes','select=id,dados&limit=1000');cliente=clientes.map(x=>({...x,...(x.dados||{})})).find(c=>norm(c.email)===email || (nomeMeta&&norm(c.nome)===nomeMeta));}if(!cliente)throw new Error('Seu acesso foi autenticado, mas o cadastro de Cliente FAST correspondente não foi encontrado.');$('clienteNome').textContent=cliente.nome||cliente.razaoSocial||user.email;$('clienteContato').textContent=[cliente.email,cliente.telefone||cliente.whatsapp].filter(Boolean).join(' • ');const CAMPOS='select=id,cliente,origem,destino,data,pagamento,status,statusexecucao,valor,tipovolume,qtdmercadorias,descricao&order=data.desc&limit=5000';let rs=[];try{rs=await rest('rotas',CAMPOS+'&cliente=ilike.'+encodeURIComponent(cliente.nome||''))}catch(e){}if(!rs.length)rs=await rest('rotas',CAMPOS);rotas=rs.filter(r=>norm(r.cliente)===norm(cliente.nome));$('loading').classList.add('hidden');$('content').classList.remove('hidden');render();carregarHoje()}catch(e){$('loading').textContent=e.message||'Não foi possível carregar o histórico.'}}
 function render(){let a=rotas.slice();const de=$('de').value,ate=$('ate').value,pag=$('pag').value,exec=$('exec').value;if(de)a=a.filter(r=>String(r.data||'').slice(0,10)>=de);if(ate)a=a.filter(r=>String(r.data||'').slice(0,10)<=ate);if(pag)a=a.filter(r=>String(r.status||'')===pag);if(exec)a=a.filter(r=>String(r.statusexecucao||'')===exec);const total=a.reduce((s,r)=>s+(Number(r.valor)||0),0),pago=a.filter(r=>norm(r.status)==='recebido').reduce((s,r)=>s+(Number(r.valor)||0),0),pend= a.filter(r=>norm(r.status)==='pendente').reduce((s,r)=>s+(Number(r.valor)||0),0);$('sRotas').textContent=a.length;$('sTotal').textContent=money(total);$('sPago').textContent=money(pago);$('sPendente').textContent=money(pend);if(!a.length){$('table').innerHTML='<div class="empty">Nenhuma rota encontrada para os filtros selecionados.</div>';return}let html='<table><thead><tr><th>Data</th><th>Origem</th><th>Destino</th><th>Volumes</th><th>Pagamento</th><th>Execução</th><th>Valor</th></tr></thead><tbody>';a.forEach(r=>{const p=norm(r.status)==='recebido'?'paid':'pending';const e=norm(r.statusexecucao)==='concluida'?'done':'route';html+=`<tr><td>${dateBR(r.data)}</td><td>${esc(r.origem)}</td><td>${esc(r.destino)}</td><td>${esc(r.qtdmercadorias||0)} ${esc(r.tipovolume||'')}</td><td><span class="badge ${p}">${esc(r.status||'—')}</span></td><td><span class="badge ${e}">${esc(r.statusexecucao||'—')}</span></td><td><strong>${money(r.valor)}</strong></td></tr>`});html+='</tbody></table>';$('table').innerHTML=html}
 function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 (async()=>{try{const s=JSON.parse(localStorage.getItem('fast_cliente_session')||'null');if(s&&s.access_token){session=s;await iniciar()}}catch(e){localStorage.removeItem('fast_cliente_session')}})();
+</script>
+
+<style>
+.hj{padding:12px 14px;border-top:1px solid var(--border)}.hj:first-child{border-top:0}
+.hj b{font-size:15px}.hj small{color:var(--muted)}
+.passos{display:flex;gap:6px;margin:10px 0 6px}.passos span{flex:1;height:6px;border-radius:9px;background:#e2e8f0}.passos span.on{background:var(--green)}
+.hjst{font-weight:800;font-size:13px}.hjmap{display:inline-block;margin-top:6px;font-weight:800;color:var(--green2);text-decoration:none}
+</style>
+<script>
+/* 4.0.67: acompanhamento das entregas do dia (status ao vivo + posição do motorista) */
+const hojeISO=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+const hora=s=>{try{return new Date(s).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}catch(e){return ''}};
+let hojeTimer=null;
+async function carregarHoje(){
+  if(!cliente)return;
+  try{
+    const itens=(await rest('sequencias_itens','select=id,cliente,origem,destino,status,chegada_em,data_conclusao,motorista,motorista_id&data_seq=eq.'+hojeISO()+'&order=id.asc')).filter(i=>norm(i.cliente)===norm(cliente.nome));
+    if(!itens.length){$('hojeBox').classList.add('hidden');return}
+    const pos={};
+    for(const mid of [...new Set(itens.filter(i=>i.motorista_id&&!/CONCLU/i.test(i.status||'')).map(i=>String(i.motorista_id)))]){
+      try{const r=await rest('rastreamento','select=lat,lng,updated_at&motorista_id=eq.'+encodeURIComponent(mid)+'&limit=1');if(r[0])pos[mid]=r[0]}catch(e){}
+    }
+    $('hojeLista').innerHTML=itens.map(i=>{
+      const conc=/CONCLU/i.test(i.status||''),cheg=!!i.chegada_em,saiu=!!i.motorista;
+      const passo=conc?3:(cheg?2:(saiu?1:0));
+      const txt=conc?'✅ Entregue'+(i.data_conclusao?' às '+hora(i.data_conclusao):''):(cheg?'📍 Motorista chegou às '+hora(i.chegada_em):(saiu?'🚚 A caminho':'🕒 Programada'));
+      const p=pos[String(i.motorista_id)];
+      const min=p?Math.round((Date.now()-Date.parse(p.updated_at))/60000):null;
+      const mapa=(p&&!conc&&min!=null&&min<30)?'<a class="hjmap" target="_blank" rel="noopener" href="https://www.google.com/maps?q='+p.lat+','+p.lng+'">🗺️ Ver o motorista no mapa'+(min<=1?' (agora)':' (há '+min+' min)')+'</a>':'';
+      return '<div class="hj"><b>'+esc(i.destino||'Entrega')+'</b>'+(i.origem?' <small>saindo de '+esc(i.origem)+'</small>':'')+'<div class="passos">'+[0,1,2,3].map(n=>'<span class="'+(n<=passo?'on':'')+'"></span>').join('')+'</div><div class="hjst">'+txt+'</div>'+(i.motorista?'<small>Motorista: '+esc(i.motorista)+'</small><br>':'')+mapa+'</div>';
+    }).join('');
+    $('hojeBox').classList.remove('hidden');
+  }catch(e){console.warn('hoje:',e)}
+  clearTimeout(hojeTimer);hojeTimer=setTimeout(()=>{if(!document.hidden)carregarHoje()},30000);
+}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&cliente)carregarHoje()});
 </script>
 <script>window.FAST_BIO_CFG={app:"cliente",sessao:"fast_cliente_session",nome:"Cliente FAST"};</script>
 <!-- 4.0.65: bloqueio por biometria (digital / rosto / bloqueio de tela) -->
