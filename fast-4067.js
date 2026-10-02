@@ -33,7 +33,7 @@
   W.__fast4067 = true;
 
   var BASE_KEY = 'fast4067_base_v1';
-  var VERSAO = 'v16';
+  var VERSAO = 'v17';
   var DIAG = W.__f68Diag = { erro: '', erroEm: 0, envio: 0, baixou: 0 };
   function falha(txt) { DIAG.erro = String(txt).slice(0, 160); DIAG.erroEm = Date.now(); try { painel(true); } catch (e) {} }
   var PAGINA = 1000;
@@ -1215,9 +1215,10 @@
     var d = document.createElement('div'); d.id = 'f68CamAviso';
     d.style.cssText = 'position:fixed;inset:0;z-index:2147483001;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;padding:20px';
     d.innerHTML = '<div style="background:#fff;color:#111;border-radius:16px;padding:20px;max-width:380px;width:100%;font:15px/1.45 system-ui,sans-serif">' +
-      '<b style="font-size:17px">A câmera ao vivo está bloqueada neste app</b>' +
-      '<p style="margin:8px 0 14px">Use a câmera do celular — a foto entra na rota normalmente.</p>' +
-      '<button type="button" id="f68CamAbrir" style="width:100%;min-height:48px;border:0;border-radius:12px;background:#4f46e5;color:#fff;font-weight:700;font-size:16px">📷 Abrir câmera do celular</button>' +
+      '<b style="font-size:17px">A câmera está bloqueada para este app</b>' +
+      '<p style="margin:8px 0 6px">Para tirar foto direto daqui, libere a permissão de <b>Câmera</b> do app nas configurações do celular (Configurações → Apps → este app → Permissões → Câmera → Permitir) e abra o app de novo.</p>' +
+      '<p style="margin:0 0 14px;color:#475569">Enquanto isso, você pode escolher a foto pela galeria.</p>' +
+      '<button type="button" id="f68CamAbrir" style="width:100%;min-height:48px;border:0;border-radius:12px;background:#4f46e5;color:#fff;font-weight:700;font-size:16px">🖼️ Escolher foto</button>' +
       '<button type="button" id="f68CamFechar" style="width:100%;min-height:44px;margin-top:8px;border:1px solid #cbd5e1;border-radius:12px;background:#fff;color:#111;font-size:15px">Cancelar</button></div>';
     try { d.setAttribute('popover', 'manual'); } catch (e) {}
     document.body.appendChild(d);
@@ -1230,8 +1231,7 @@
     if (typeof f === 'function' && !f.__f68) {
       var g = function (dataSel, index, fallbackId) {
         ultimoFallback = fallbackId || null;
-        var negada = false; try { negada = localStorage.getItem(CAM_KEY) === '1'; } catch (e) {}
-        if (negada && abrirCameraDoCelular(fallbackId)) return;   // direto na câmera do celular (ainda dentro do toque)
+        // sempre tenta a câmera ao vivo: assim que a permissão for liberada, ela funciona
         return f.apply(this, arguments);
       };
       g.__f68 = true; W.abrirCameraAoVivo = g;
