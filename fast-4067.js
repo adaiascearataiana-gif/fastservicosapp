@@ -33,7 +33,7 @@
   W.__fast4067 = true;
 
   var BASE_KEY = 'fast4067_base_v1';
-  var VERSAO = 'v14';
+  var VERSAO = 'v15';
   var DIAG = W.__f68Diag = { erro: '', erroEm: 0, envio: 0, baixou: 0 };
   function falha(txt) { DIAG.erro = String(txt).slice(0, 160); DIAG.erroEm = Date.now(); try { painel(true); } catch (e) {} }
   var PAGINA = 1000;
@@ -1151,6 +1151,54 @@
   setInterval(migrarFotosAntigas, 90000);
   W.addEventListener('load', function () { setTimeout(migrarFotosAntigas, 20000); });
 
+  /* ---------------- diagnóstico das FOTOS (o que acontece ao escolher uma imagem) ---------------- */
+  var FT = { abriu: 0, escolheu: 0, qtd: -1, tipos: '', msg: '', msgEm: 0, erroJs: '', idb: '' };
+  document.addEventListener('click', function (e) {
+    var t = e.target;
+    if (t && t.tagName === 'INPUT' && t.type === 'file' && /image/.test(t.accept || '')) FT.abriu = Date.now();
+  }, true);
+  // inputs abertos por código (botões Câmera/Galeria) também passam por aqui
+  try {
+    var clickOrig = HTMLInputElement.prototype.click;
+    if (!clickOrig.__f68) {
+      var novoClick = function () { try { if (this.type === 'file' && /image/.test(this.accept || '')) FT.abriu = Date.now(); } catch (e) {} return clickOrig.apply(this, arguments); };
+      novoClick.__f68 = true; HTMLInputElement.prototype.click = novoClick;
+    }
+  } catch (e) {}
+  document.addEventListener('change', function (e) {
+    var t = e.target;
+    if (!t || t.tagName !== 'INPUT' || t.type !== 'file' || !/image/.test(t.accept || '')) return;
+    FT.escolheu = Date.now();
+    FT.qtd = t.files ? t.files.length : 0;
+    FT.tipos = Array.prototype.map.call(t.files || [], function (f) { return (f.type || '?') + ' ' + Math.round((f.size || 0) / 1024) + 'KB'; }).join(', ');
+    FT.msg = ''; FT.erroJs = '';
+    setTimeout(function () { try { painel(true); } catch (e) {} }, 2500);
+  }, true);
+  W.addEventListener('error', function (e) { if (Date.now() - FT.escolheu < 20000) FT.erroJs = String((e && e.message) || 'erro'); });
+  W.addEventListener('unhandledrejection', function (e) { if (Date.now() - FT.escolheu < 20000) FT.erroJs = String((e && e.reason && (e.reason.message || e.reason)) || 'erro'); });
+  function ligarFeedbackFoto() {
+    var f = W.mostrarFeedbackFoto;
+    if (typeof f !== 'function' || f.__f68) return;
+    var g = function (id, msg) { try { FT.msg = String(msg || ''); FT.msgEm = Date.now(); } catch (e) {} return f.apply(this, arguments); };
+    g.__f68 = true; W.mostrarFeedbackFoto = g;
+  }
+  async function checarIDB() {
+    try {
+      if (typeof abrirDBFotos !== 'function') { FT.idb = 'função ausente'; return; }
+      var db = await abrirDBFotos();
+      var n = await new Promise(function (res) { try { var q = db.transaction('fotosBase64', 'readonly').objectStore('fotosBase64').count(); q.onsuccess = function () { res(q.result); }; q.onerror = function () { res(-1); }; } catch (e) { res(-1); } });
+      FT.idb = n >= 0 ? 'ok (' + n + ' foto(s) guardadas neste aparelho)' : 'ERRO ao ler';
+    } catch (e) { FT.idb = 'ERRO: ' + ((e && e.message) || e); }
+  }
+  W.addEventListener('load', function () { setTimeout(checarIDB, 3000); });
+  setInterval(checarIDB, 30000);
+  // voltou da galeria/câmera sem que a imagem chegasse: mostra o quadro
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden || !FT.abriu) return;
+    var abriu = FT.abriu;
+    setTimeout(function () { if (FT.abriu === abriu && FT.escolheu < abriu && Date.now() - abriu < 5 * 60000) { try { painel(true); } catch (e) {} } }, 3000);
+  });
+
   /* ---------------- painel de diagnóstico (aparece 25 s ao abrir e quando há erro) ---------------- */
   function hora(t) { if (!t) return '—'; var d = new Date(t); return ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2) + ':' + ('0' + d.getSeconds()).slice(-2); }
   var tPainel = 0;
@@ -1179,6 +1227,15 @@
       (driveToken() ? '✅' : '📷') + ' Google Drive (fotos): ' + (driveToken() ? 'conectado' : (DRV.estado || 'verificando…')) +
         (DRV.pend >= 0 ? ' · ' + DRV.pend + ' foto(s) na fila' : '')
     ];
+    linhas.push('🗂️ Armazenamento de fotos: ' + (FT.idb || 'verificando…'));
+    if (FT.abriu || FT.escolheu) {
+      var sel = FT.escolheu >= FT.abriu && FT.escolheu
+        ? (FT.qtd > 0 ? '✅ ' + FT.qtd + ' imagem(ns) recebida(s) às ' + hora(FT.escolheu) + ' (' + FT.tipos.slice(0, 60) + ')' : '❌ a seleção voltou VAZIA às ' + hora(FT.escolheu))
+        : '⚠️ galeria/câmera aberta às ' + hora(FT.abriu) + ', mas o app NÃO devolveu a imagem';
+      linhas.push('📎 Última foto: ' + sel);
+      if (FT.msg && FT.msgEm >= FT.escolheu) linhas.push('💬 ' + FT.msg.replace(/[<>&]/g, '').slice(0, 120));
+      if (FT.erroJs) linhas.push('<span style="color:#fca5a5">⛔ Erro ao processar: ' + FT.erroJs.replace(/[<>&]/g, '').slice(0, 140) + '</span>');
+    }
     if (DRV.antigasEnviadas) linhas.push('🖼️ Fotos antigas liberadas para os outros aparelhos: ' + DRV.antigasEnviadas + (DRV.antigas === 'em dia' ? ' (concluído)' : ' (continuando…)'));
     if (DRV.fotosTabela === 'falta') linhas.push('<span style="color:#fde68a">🖼️ Fotos entre aparelhos: falta rodar o SQL da tabela fotos_drive</span>');
     if (DRV.pend > 0 && DRV.erroFoto) linhas.push('<span style="color:#fde68a">📷 Erro da foto: ' + DRV.erroFoto.replace(/[<>&]/g, '').slice(0, 160) + '</span>');
@@ -1264,7 +1321,7 @@
   }
 
   /* ---------------- partida ---------------- */
-  function tudo() { instalarSync(); instalarSalvar(); cardsBackup(); rtConectar(); ligarStatus(); instalarFotos(); }
+  function tudo() { instalarSync(); instalarSalvar(); cardsBackup(); rtConectar(); ligarStatus(); instalarFotos(); ligarFeedbackFoto(); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', tudo, { once: true }); else tudo();
   W.addEventListener('load', function () { tudo(); setTimeout(tudo, 1500); setTimeout(tudo, 3500); });
   setInterval(cardsBackup, 2000);
