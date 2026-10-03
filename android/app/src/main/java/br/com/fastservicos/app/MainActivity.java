@@ -7,7 +7,9 @@ import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricPrompt;
 import android.os.CancellationSignal;
 import android.content.ActivityNotFoundException;
+import android.content.ContentValues;
 import android.content.Intent;
+import android.provider.MediaStore;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
@@ -33,6 +35,10 @@ import java.util.ArrayList;
 public class MainActivity extends Activity {
     private WebView webView;
     private ValueCallback<Uri[]> fileCallback;
+    // 5.0.1: foto pela câmera do próprio celular (o WebView ignorava o "capture")
+    private Uri cameraUri;
+    private WebChromeClient.FileChooserParams pendingChooserParams;
+    private static final int CAMERA_FILE_REQUEST = 405;
     private static final int FILE_REQUEST = 401;
     private static final int VOICE_REQUEST = 403;
     private static final int CAMERA_REQUEST = 404;
@@ -102,7 +108,7 @@ public class MainActivity extends Activity {
         settings.setBuiltInZoomControls(false);
         settings.setDisplayZoomControls(false);
         settings.setTextZoom(100);
-        settings.setUserAgentString(settings.getUserAgentString() + " FASTAndroid/5.0.0");
+        settings.setUserAgentString(settings.getUserAgentString() + " FASTAndroid/5.0.1");
         CookieManager.getInstance().setAcceptCookie(true);
         CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
         webView.addJavascriptInterface(new VoiceBridge(), "FASTVoice");
@@ -147,14 +153,69 @@ public class MainActivity extends Activity {
             @Override public boolean onShowFileChooser(WebView view, ValueCallback<Uri[]> callback, FileChooserParams params) {
                 if (fileCallback != null) fileCallback.onReceiveValue(null);
                 fileCallback = callback;
-                try { startActivityForResult(params.createIntent(), FILE_REQUEST); }
-                catch (ActivityNotFoundException e) { fileCallback = null; return false; }
-                return true;
+                // Câmera: o Android exige a permissão CAMERA antes de abrir a câmera do celular.
+                if (aceitaImagem(params) && Build.VERSION.SDK_INT >= 29 &&
+                    checkSelfPermission(Manifest.permission.CAMERA) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                    pendingChooserParams = params;
+                    requestPermissions(new String[]{Manifest.permission.CAMERA}, CAMERA_FILE_REQUEST);
+                    return true;
+                }
+                return abrirSeletor(params);
             }
         });
         if (state == null) webView.loadUrl(BuildConfig.APP_URL); else webView.restoreState(state);
         requestPermissionsIfNeeded();
         getOnBackPressedDispatcherCompat();
+    }
+
+    private boolean aceitaImagem(WebChromeClient.FileChooserParams p) {
+        String[] t = p == null ? null : p.getAcceptTypes();
+        if (t == null || t.length == 0) return true;
+        for (String s : t) { if (s == null || s.trim().isEmpty() || s.startsWith("image") || "*/*".equals(s)) return true; }
+        return false;
+    }
+
+    // Câmera do próprio celular, gravando a foto em Imagens/FAST (Android 10+ não precisa de permissão de armazenamento).
+    private Intent criarIntentCamera() {
+        if (Build.VERSION.SDK_INT < 29) return null;
+        if (checkSelfPermission(Manifest.permission.CAMERA) != android.content.pm.PackageManager.PERMISSION_GRANTED) return null;
+        try {
+            ContentValues cv = new ContentValues();
+            cv.put(MediaStore.Images.Media.DISPLAY_NAME, "FAST_" + System.currentTimeMillis() + ".jpg");
+            cv.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
+            cv.put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/FAST");
+            cameraUri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, cv);
+            if (cameraUri == null) return null;
+            Intent i = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            i.putExtra(MediaStore.EXTRA_OUTPUT, cameraUri);
+            i.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            return i;
+        } catch (Exception e) { apagarFotoVazia(); return null; }
+    }
+
+    private void apagarFotoVazia() {
+        if (cameraUri == null) return;
+        try { getContentResolver().delete(cameraUri, null, null); } catch (Exception e) {}
+        cameraUri = null;
+    }
+
+    // "Câmera" (capture) abre direto a câmera; "Galeria" abre a escolha com a opção Câmera junto.
+    private boolean abrirSeletor(WebChromeClient.FileChooserParams params) {
+        Intent camera = aceitaImagem(params) ? criarIntentCamera() : null;
+        Intent destino;
+        if (params != null && params.isCaptureEnabled() && camera != null) destino = camera;
+        else {
+            Intent galeria = params != null ? params.createIntent() : new Intent(Intent.ACTION_GET_CONTENT).setType("image/*");
+            galeria.addCategory(Intent.CATEGORY_OPENABLE);
+            destino = Intent.createChooser(galeria, "Escolher foto");
+            if (camera != null) destino.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[]{camera});
+        }
+        try { startActivityForResult(destino, FILE_REQUEST); return true; }
+        catch (Exception e) {
+            apagarFotoVazia();
+            try { startActivityForResult(params.createIntent(), FILE_REQUEST); return true; }
+            catch (Exception e2) { if (fileCallback != null) fileCallback.onReceiveValue(null); fileCallback = null; return false; }
+        }
     }
 
     private void getOnBackPressedDispatcherCompat() {
@@ -169,6 +230,12 @@ public class MainActivity extends Activity {
 
     @Override public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == CAMERA_FILE_REQUEST) {
+            WebChromeClient.FileChooserParams p = pendingChooserParams;
+            pendingChooserParams = null;
+            if (fileCallback != null && !abrirSeletor(p)) { /* sem seletor disponível */ }
+            return;
+        }
         if (requestCode == CAMERA_REQUEST && pendingCameraRequest != null) {
             PermissionRequest request = pendingCameraRequest;
             pendingCameraRequest = null;
@@ -278,12 +345,25 @@ public class MainActivity extends Activity {
             } else voiceError("cancelled");
             return;
         }
-        if (requestCode == FILE_REQUEST && fileCallback != null) {
-            fileCallback.onReceiveValue(WebChromeClient.FileChooserParams.parseResult(resultCode, data));
+        if (requestCode == FILE_REQUEST) {
+            Uri[] res = null;
+            boolean temDados = data != null && (data.getData() != null || data.getClipData() != null);
+            if (resultCode == RESULT_OK) {
+                if (temDados) res = WebChromeClient.FileChooserParams.parseResult(resultCode, data);
+                else if (cameraUri != null) res = new Uri[]{cameraUri};
+            }
+            // foto da câmera não usada (cancelou ou escolheu da galeria): apaga o arquivo vazio
+            if (cameraUri != null && (res == null || res.length == 0 || !cameraUri.equals(res[0]))) apagarFotoVazia();
+            cameraUri = null;
+            if (fileCallback != null) fileCallback.onReceiveValue(res);
             fileCallback = null;
         }
     }
 
-    @Override protected void onSaveInstanceState(Bundle state) { webView.saveState(state); super.onSaveInstanceState(state); }
+    @Override protected void onSaveInstanceState(Bundle state) {
+        webView.saveState(state);
+        if (cameraUri != null) state.putString("fast_camera_uri", cameraUri.toString());
+        super.onSaveInstanceState(state);
+    }
     @Override public void onBackPressed() { if (webView.canGoBack()) webView.goBack(); else super.onBackPressed(); }
 }
