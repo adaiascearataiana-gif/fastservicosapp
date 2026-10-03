@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="fast-app-version" content="5.0.0">
+<meta name="fast-app-version" content="5.1.0">
 <meta name="theme-color" content="#16a34a">
 <title>Cliente FAST — Histórico</title>
 <style>
@@ -161,4 +161,11 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden&&cliente)c
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',iniciar,{once:true});else iniciar();
 })();
 </script>
+<script>window.FAST_SUPORTE_CFG={origem:'cliente',
+  token:function(){try{return (JSON.parse(localStorage.getItem('fast_cliente_session')||'null')||{}).access_token||''}catch(e){return ''}},
+  nome:function(){try{return (typeof cliente!=='undefined'&&cliente&&cliente.nome)||''}catch(e){return ''}},
+  email:function(){try{return ((JSON.parse(localStorage.getItem('fast_cliente_session')||'null')||{}).user||{}).email||''}catch(e){return ''}},
+  contato:function(){try{return (typeof cliente!=='undefined'&&cliente&&(cliente.whatsapp||cliente.telefone))||''}catch(e){return ''}},
+  visivel:function(){var c=document.getElementById('content');return !!(c&&!c.classList.contains('hidden'))}};</script>
+<script src="../suporte-fast.js?v=1"></script>
 </body></html>
