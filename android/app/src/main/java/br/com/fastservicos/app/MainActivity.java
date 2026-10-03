@@ -7,6 +7,7 @@ import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricPrompt;
 import android.os.CancellationSignal;
 import android.content.ActivityNotFoundException;
+import android.content.ClipData;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.provider.MediaStore;
@@ -108,12 +109,14 @@ public class MainActivity extends Activity {
         settings.setBuiltInZoomControls(false);
         settings.setDisplayZoomControls(false);
         settings.setTextZoom(100);
-        settings.setUserAgentString(settings.getUserAgentString() + " FASTAndroid/5.0.1");
+        settings.setUserAgentString(settings.getUserAgentString() + " FASTAndroid/5.1.0");
         CookieManager.getInstance().setAcceptCookie(true);
         CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
         webView.addJavascriptInterface(new VoiceBridge(), "FASTVoice");
         // 4.0.65: biometria nativa do Android (digital / rosto / PIN do aparelho) para o app web.
         webView.addJavascriptInterface(new BioBridge(), "FASTBiometria");
+        // 5.0.2: compartilhar fotos (WhatsApp etc.) — o WebView não tem o "compartilhar" do navegador.
+        webView.addJavascriptInterface(new ShareBridge(), "FASTCompartilhar");
         webView.setWebViewClient(new WebViewClient() {
             @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 Uri uri = request.getUrl();
@@ -216,6 +219,83 @@ public class MainActivity extends Activity {
             try { startActivityForResult(params.createIntent(), FILE_REQUEST); return true; }
             catch (Exception e2) { if (fileCallback != null) fileCallback.onReceiveValue(null); fileCallback = null; return false; }
         }
+    }
+
+    // ---------------- 5.0.2: compartilhamento de fotos ----------------
+    private final ArrayList<Uri> ultimosEnvios = new ArrayList<>();
+
+    private class ShareBridge {
+        @JavascriptInterface public boolean disponivel() { return Build.VERSION.SDK_INT >= 29; }
+        @JavascriptInterface public void compartilhar(final String json, final String id) {
+            new Thread(() -> {
+                try {
+                    JSONObject o = new JSONObject(json);
+                    String texto = o.optString("texto", "");
+                    org.json.JSONArray arr = o.optJSONArray("arquivos");
+                    limparEnviosAnteriores();
+                    ArrayList<Uri> uris = new ArrayList<>();
+                    if (arr != null) for (int i = 0; i < arr.length(); i++) {
+                        JSONObject f = arr.getJSONObject(i);
+                        byte[] bytes = android.util.Base64.decode(f.optString("base64", ""), android.util.Base64.DEFAULT);
+                        Uri u = salvarParaEnvio(bytes, f.optString("nome", "foto_" + (i + 1) + ".jpg"), f.optString("tipo", "image/jpeg"));
+                        if (u != null) uris.add(u);
+                    }
+                    synchronized (ultimosEnvios) { ultimosEnvios.addAll(uris); }
+                    runOnUiThread(() -> abrirCompartilhamento(uris, texto, id));
+                } catch (Throwable e) { responderCompartilhar(id, false, String.valueOf(e.getMessage())); }
+            }).start();
+        }
+    }
+
+    private void limparEnviosAnteriores() {
+        ArrayList<Uri> antigos;
+        synchronized (ultimosEnvios) { antigos = new ArrayList<>(ultimosEnvios); ultimosEnvios.clear(); }
+        for (Uri u : antigos) { try { getContentResolver().delete(u, null, null); } catch (Exception e) {} }
+    }
+
+    private Uri salvarParaEnvio(byte[] bytes, String nome, String tipo) {
+        if (Build.VERSION.SDK_INT < 29 || bytes == null || bytes.length == 0) return null;
+        Uri u = null;
+        try {
+            ContentValues cv = new ContentValues();
+            cv.put(MediaStore.Images.Media.DISPLAY_NAME, nome);
+            cv.put(MediaStore.Images.Media.MIME_TYPE, tipo);
+            cv.put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/FAST/Envios");
+            u = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, cv);
+            if (u == null) return null;
+            java.io.OutputStream os = getContentResolver().openOutputStream(u);
+            if (os == null) return null;
+            try { os.write(bytes); } finally { os.close(); }
+            return u;
+        } catch (Exception e) {
+            if (u != null) { try { getContentResolver().delete(u, null, null); } catch (Exception ignored) {} }
+            return null;
+        }
+    }
+
+    private void abrirCompartilhamento(ArrayList<Uri> uris, String texto, String id) {
+        if (uris.isEmpty()) { responderCompartilhar(id, false, "sem_arquivos"); return; }
+        Intent it;
+        if (uris.size() == 1) { it = new Intent(Intent.ACTION_SEND); it.putExtra(Intent.EXTRA_STREAM, uris.get(0)); }
+        else { it = new Intent(Intent.ACTION_SEND_MULTIPLE); it.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris); }
+        it.setType("image/*");
+        if (texto != null && !texto.isEmpty()) it.putExtra(Intent.EXTRA_TEXT, texto);
+        ClipData clip = ClipData.newRawUri("fotos", uris.get(0));
+        for (int i = 1; i < uris.size(); i++) clip.addItem(new ClipData.Item(uris.get(i)));
+        it.setClipData(clip);
+        it.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        Intent escolha = Intent.createChooser(it, "Enviar fotos");
+        escolha.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        try { startActivity(escolha); responderCompartilhar(id, true, ""); }
+        catch (Exception e) { responderCompartilhar(id, false, String.valueOf(e.getMessage())); }
+    }
+
+    private void responderCompartilhar(String id, boolean ok, String msg) {
+        runOnUiThread(() -> {
+            if (webView == null) return;
+            webView.evaluateJavascript("window.fastCompartilharResultado&&window.fastCompartilharResultado(" +
+                JSONObject.quote(id) + "," + ok + "," + JSONObject.quote(msg == null ? "" : msg) + ")", null);
+        });
     }
 
     private void getOnBackPressedDispatcherCompat() {
