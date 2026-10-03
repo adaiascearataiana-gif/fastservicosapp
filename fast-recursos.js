@@ -60,13 +60,15 @@
   css.textContent = [
     '.frx-ov{position:fixed;inset:0;z-index:2147482000;background:rgba(15,23,42,.55);display:flex;align-items:flex-end;justify-content:center;padding:0}',
     '@media(min-width:720px){.frx-ov{align-items:center;padding:20px}}',
-    '.frx-cx{background:var(--card-bg,#fff);color:var(--text-main,#0f172a);width:100%;max-width:760px;max-height:92vh;display:flex;flex-direction:column;border-radius:20px 20px 0 0;box-shadow:0 20px 60px rgba(0,0,0,.35);font-family:inherit}',
+    '.frx-cx{background:var(--card-bg,#fff);color:var(--text-main,#0f172a);width:100%;max-width:760px;max-height:88vh;max-height:calc(100dvh - 24px);display:flex;flex-direction:column;border-radius:20px 20px 0 0;box-shadow:0 20px 60px rgba(0,0,0,.35);font-family:inherit}',
     '@media(min-width:720px){.frx-cx{border-radius:20px}}',
     '.frx-hd{display:flex;align-items:center;gap:10px;padding:16px 18px;border-bottom:1px solid var(--border,#e2e8f0)}',
     '.frx-hd h3{margin:0;font-size:17px;font-weight:800;flex:1}',
     '.frx-x{border:1px solid var(--border,#e2e8f0);background:transparent;color:inherit;border-radius:10px;width:40px;height:40px;font-size:18px;cursor:pointer}',
     '.frx-bd{padding:14px 18px;overflow:auto;flex:1}',
-    '.frx-ft{padding:12px 18px calc(12px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--border,#e2e8f0);display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}',
+    '.frx-ft{flex:0 0 auto;padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--border,#e2e8f0);display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;background:inherit;border-radius:0 0 20px 20px}',
+    '.frx-hd{flex:0 0 auto}.frx-bd{min-height:0}',
+    '@media(max-width:560px){.frx-ft .frx-btn{flex:1 1 auto}}',
     '.frx-btn{border:0;border-radius:12px;padding:11px 16px;font-weight:700;font-size:14px;cursor:pointer;background:#4f46e5;color:#fff;min-height:44px}',
     '.frx-btn.sec{background:transparent;color:inherit;border:1px solid var(--border,#cbd5e1)}',
     '.frx-btn.ok{background:#16a34a}.frx-btn.wa{background:#22c55e;color:#052e16}.frx-btn.pq{padding:7px 10px;min-height:36px;font-size:13px}',
@@ -106,7 +108,7 @@
     ov.querySelector('.frx-x').onclick = fechar;
     ov.addEventListener('click', function (e) { if (e.target === ov) fechar(); });
     ov.style.setProperty('visibility', 'visible', 'important');
-    try { ov.setAttribute('popover', 'manual'); ov.style.cssText += ';margin:0;border:0;width:100vw;height:100vh;max-width:none;max-height:none;'; } catch (e) {}
+    try { ov.setAttribute('popover', 'manual'); ov.style.cssText += ';margin:0;border:0;width:100vw;height:100vh;height:100dvh;max-width:none;max-height:none;padding-bottom:env(safe-area-inset-bottom,0px);box-sizing:border-box;'; } catch (e) {}
     document.body.appendChild(ov);
     try { if (ov.showPopover) ov.showPopover(); } catch (e) {}
     return { el: ov, corpo: b, fechar: fechar };
@@ -533,7 +535,7 @@
     var d = document.createElement('div'); d.id = 'frxPin';
     d.innerHTML = '<div class="c"><div style="font-size:42px">🔒</div><h2></h2><p></p><div class="dots"></div><div class="kp"></div><div class="err"></div>' + (permitirSair ? '<button class="lk" type="button" id="frxPinSair">Esqueci o PIN — entrar com e-mail e senha</button>' : '<button class="lk" type="button" id="frxPinCanc">Cancelar</button>') + '</div>';
     d.querySelector('h2').textContent = titulo; d.querySelector('p').textContent = sub;
-    try { d.setAttribute('popover', 'manual'); d.style.cssText = 'margin:0;border:0;width:100vw;height:100vh;max-width:none;max-height:none;'; } catch (e) {}
+    try { d.setAttribute('popover', 'manual'); d.style.cssText = 'margin:0;border:0;width:100vw;height:100vh;height:100dvh;max-width:none;max-height:none;'; } catch (e) {}
     d.style.setProperty('visibility', 'visible', 'important');
     document.body.appendChild(d); try { if (d.showPopover) d.showPopover(); } catch (e) {}
     var digitado = '', tam = 6;
@@ -755,10 +757,99 @@
     setInterval(arrumar, 3000);
   })();
 
+  /* ---------------- QUANTIDADE: ao tocar, o campo fica vazio para digitar o novo número ----------------
+     Se sair sem digitar nada, volta o número que estava. */
+  var CAMPOS_QTD = { editTxtQtdMercadorias: 1, txtQtdMercadorias: 1 };
+  document.addEventListener('focusin', function (e) {
+    var el = e.target; if (!el || !CAMPOS_QTD[el.id]) return;
+    el.setAttribute('data-qtd-anterior', el.value);
+    el.value = '';
+    try { el.setAttribute('inputmode', 'numeric'); } catch (er) {}
+  }, true);
+  document.addEventListener('focusout', function (e) {
+    var el = e.target; if (!el || !CAMPOS_QTD[el.id]) return;
+    if (String(el.value).trim() === '') {
+      el.value = el.getAttribute('data-qtd-anterior') || '';
+      try { el.dispatchEvent(new Event('input', { bubbles: true })); } catch (er) {}
+    }
+    el.removeAttribute('data-qtd-anterior');
+  }, true);
+
+  /* ---------------- EDITAR ROTA → reflete em TUDO (Rotas do Dia, relatório, lista) ----------------
+     O FAST já levava a edição para a Rota do Dia ligada, exceto quando ela estava
+     CONCLUÍDA. Agora qualquer campo editado (cliente, origem, destino, valor, qtd.,
+     descrição) vai também para a Rota do Dia concluída — mantendo status, horário
+     e fotos — e o relatório é redesenhado na hora. Nos outros aparelhos, a mudança
+     chega pela sincronização e o relatório se atualiza sozinho. */
+  function propagarEdicao(id) {
+    var r = (bd().rotas || []).filter(function (x) { return String(x.id) === String(id); })[0];
+    if (!r) return false;
+    var seq = bd().sequencias || {}, mudou = false;
+    Object.keys(seq).forEach(function (d) {
+      (seq[d] || []).forEach(function (it) {
+        if (!it || it.agrupado) return;
+        var liga = (it.rotaId != null && String(it.rotaId) === String(id)) || (it.rotaId == null && String(it.id) === String(id));
+        if (!liga) return;
+        var novo = { cliente: r.cliente || '', origem: r.origem || '', destino: r.destino || '', valor: Number(r.valor) || 0, qtdMercadorias: Number(r.qtdMercadorias) || 1, obs: r.descricao || '' };
+        Object.keys(novo).forEach(function (k) {
+          if (String(it[k] == null ? '' : it[k]) !== String(novo[k])) { it[k] = novo[k]; mudou = true; }
+        });
+        if (mudou) { it.updatedAt = new Date().toISOString(); }
+      });
+    });
+    return mudou;
+  }
+  function redesenharTudo() {
+    try { if (typeof renderizarSequencia === 'function') renderizarSequencia(); } catch (e) {}
+    try { if (typeof W.fastRelatorioRotasRender === 'function') W.fastRelatorioRotasRender(); } catch (e) {}
+  }
+  function instalarEdicaoTotal() {
+    var f = W.salvarEdicaoRotaModal;
+    if (typeof f !== 'function' || f.__frx) return;
+    var g = function () {
+      var id = ($('editRotaId') || {}).value;
+      var r = f.apply(this, arguments);
+      try {
+        if (id && propagarEdicao(id)) { try { salvarStorage(); } catch (e) {} }
+        setTimeout(redesenharTudo, 150);
+      } catch (e) {}
+      return r;
+    };
+    g.__frx = true; W.salvarEdicaoRotaModal = g;
+    try { var form = $('formEditarRota') || ($('editRotaId') && $('editRotaId').form); if (form && form.getAttribute('onsubmit') && form.getAttribute('onsubmit').indexOf('salvarEdicaoRotaModal') >= 0) form.onsubmit = function (ev) { return W.salvarEdicaoRotaModal(ev); }; } catch (e) {}
+  }
+  W.addEventListener('load', function () { setTimeout(instalarEdicaoTotal, 1000); });
+  setInterval(instalarEdicaoTotal, 5000);
+  // dados que mudaram (aqui ou vindos de outro aparelho) → relatório redesenhado
+  var refRotas = null, refSeq = null, tRel = 0;
+  setInterval(function () {
+    var b = bd();
+    if (b.rotas === refRotas && b.sequencias === refSeq) return;
+    var primeira = refRotas === null;
+    refRotas = b.rotas; refSeq = b.sequencias;
+    if (primeira) return;
+    var corpo = $('fastRelatorioRotasBody');
+    if (corpo && corpo.offsetParent) { clearTimeout(tRel); tRel = setTimeout(function () { try { W.fastRelatorioRotasRender(); } catch (e) {} }, 300); }
+  }, 2000);
+  // salvou algo neste aparelho (Rotas do Dia, edição, foto) → relatório atualizado
+  (function () {
+    var t = 0;
+    function ligar() {
+      var f = W.salvarStorage; if (typeof f !== 'function' || f.__frxRel) return;
+      var g = function () { var r = f.apply(this, arguments); clearTimeout(t); t = setTimeout(function () { var c = $('fastRelatorioRotasBody'); if (c && c.offsetParent) { try { W.fastRelatorioRotasRender(); } catch (e) {} } }, 500); return r; };
+      Object.keys(f).forEach(function (k) { try { g[k] = f[k]; } catch (e) {} });
+      g.__frxRel = true; W.salvarStorage = g;
+    }
+    W.addEventListener('load', function () { setTimeout(ligar, 1500); });
+    setInterval(ligar, 5000);
+  })();
+
   /* ---------------- câmera ao vivo: garante que a imagem comece a rodar ----------------
      O código original liga a câmera mas não manda o vídeo "tocar"; com economia de
      bateria/dados o Chrome deixa parado e mostra só o símbolo ▶ cinza. */
+  var POSTER_VAZIO = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
   function tocarCamera(v) {
+    if (v && !v.getAttribute('poster')) v.setAttribute('poster', POSTER_VAZIO);   // sem o "▶" cinza do Android
     if (!v || !v.srcObject || !v.paused) return;
     v.muted = true; v.setAttribute('playsinline', ''); v.setAttribute('muted', '');
     try { var p = v.play(); if (p && p.catch) p.catch(function () {}); } catch (e) {}
@@ -768,6 +859,28 @@
   });
   document.addEventListener('click', function (e) { if (e.target && e.target.id === 'fastCameraAoVivoVideo') tocarCamera(e.target); }, true);
   setInterval(function () { var v = document.getElementById('fastCameraAoVivoVideo'); if (v) tocarCamera(v); }, 700);
+
+  /* No app Android 5.0.1+, o botão Câmera abre a câmera do PRÓPRIO celular (mais rápida e
+     confiável que a câmera ao vivo dentro do app). A foto volta direto para a rota. */
+  function versaoApk() {
+    var m = String(navigator.userAgent || '').match(/FASTAndroid\/(\d+)\.(\d+)\.(\d+)/);
+    return m ? (+m[1]) * 10000 + (+m[2]) * 100 + (+m[3]) : 0;
+  }
+  function instalarCameraNativa() {
+    var f = W.abrirCameraAoVivo;
+    if (typeof f !== 'function' || f.__frxNativa) return;
+    var g = function (dataSel, index, fallbackId) {
+      if (versaoApk() >= 50001) {
+        var inp = fallbackId ? document.getElementById(fallbackId) : null;
+        if (inp) { inp.click(); return; }
+      }
+      return f.apply(this, arguments);
+    };
+    g.__frxNativa = true; g.__f68 = true; W.abrirCameraAoVivo = g;
+  }
+  // instala por último (depois do arquivo de sincronização), para ficar por cima dele
+  W.addEventListener('load', function () { setTimeout(instalarCameraNativa, 1200); setTimeout(instalarCameraNativa, 3000); });
+  setInterval(instalarCameraNativa, 5000);
 
   /* ---------------- ciclo: injeta botões quando as telas são redesenhadas ---------------- */
   var tPainel = 0;
@@ -792,5 +905,7 @@
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', iniciar, { once: true }); else iniciar();
   W.addEventListener('load', function () { setTimeout(rodada, 1500); });
-  setInterval(function () { try { painelFerramentas(); } catch (e) {} }, 60000);
+  setInterval(function () { try { if (!document.hidden && $('frxTools') && $('frxTools').offsetParent) painelFerramentas(); } catch (e) {} }, 15000);
+  [4000, 10000, 20000].forEach(function (t) { setTimeout(function () { try { painelFerramentas(); } catch (e) {} }, t); });
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) setTimeout(function () { try { painelFerramentas(); } catch (e) {} }, 800); });
 })();

@@ -33,7 +33,7 @@
   W.__fast4067 = true;
 
   var BASE_KEY = 'fast4067_base_v1';
-  var VERSAO = 'v22';
+  var VERSAO = 'v24';
   function versaoApp() { try { return (document.querySelector('meta[name="fast-app-version"]') || {}).content || VERSAO; } catch (e) { return VERSAO; } }
   var DIAG = W.__f68Diag = { erro: '', erroEm: 0, envio: 0, baixou: 0 };
   function falha(txt) { DIAG.erro = String(txt).slice(0, 160); DIAG.erroEm = Date.now(); try { painel(true); } catch (e) {} }
@@ -932,15 +932,18 @@
       if (typeof abrirDBFotos !== 'function') return -1;
       var db = await abrirDBFotos();
       return await new Promise(function (res) {
+        // percorre a fila sem carregar tudo de uma vez (fila grande deixava o app lento)
         try {
-          var q = db.transaction('driveQueue', 'readonly').objectStore('driveQueue').getAll();
-          q.onsuccess = function () {
-            var l = Array.isArray(q.result) ? q.result : [];
-            var comErro = l.filter(function (r) { return r && r.ultimoErro; });
-            DRV.erroFoto = comErro.length ? (comErro[0].ultimoErro + ' (' + (comErro[0].tentativas || 0) + ' tentativa(s))') : '';
-            res(l.length);
+          var st = db.transaction('driveQueue', 'readonly').objectStore('driveQueue'), n = 0, achou = '';
+          var cur = st.openCursor();
+          cur.onsuccess = function () {
+            var c = cur.result;
+            if (!c) { DRV.erroFoto = achou; res(n); return; }
+            n++;
+            if (!achou && c.value && c.value.ultimoErro) achou = c.value.ultimoErro + ' (' + (c.value.tentativas || 0) + ' tentativa(s))';
+            c.continue();
           };
-          q.onerror = function () { res(-1); };
+          cur.onerror = function () { res(-1); };
         } catch (e) { res(-1); }
       });
     } catch (e) { return -1; }
@@ -1077,7 +1080,7 @@
   }
   async function fotoDoDrive(chave) {
     var ref = 'idb:' + chave;
-    if (faltas[ref] && Date.now() - faltas[ref] < 120000) return null;
+    if (faltas[ref] && Date.now() - faltas[ref] < 15000) return null;
     if (buscando[ref]) return buscando[ref];
     buscando[ref] = (async function () {
       try {
@@ -1099,6 +1102,31 @@
     })();
     return buscando[ref];
   }
+  // Foto que ainda não tinha subido para o Drive quando a tela foi desenhada: tenta de
+  // novo a cada 15 s (consulta em lote) e redesenha as telas assim que ela chega.
+  var buscandoFaltas = false;
+  setInterval(async function () {
+    if (buscandoFaltas || !token() || !navigator.onLine || document.hidden) return;
+    var agora = Date.now(), refs = Object.keys(faltas).filter(function (r) { return agora - faltas[r] < 30 * 60000; }).slice(0, 40);
+    if (!refs.length) return;
+    buscandoFaltas = true;
+    try {
+      var lista = refs.map(function (r) { return '"' + r.replace(/"/g, '') + '"'; }).join(',');
+      var q = await fetch(SUPABASE_URL + '/fotos_drive?select=ref&ref=in.(' + encodeURIComponent(lista) + ')', { headers: supabaseHeaders() });
+      if (!q.ok) return;
+      var achadas = (await q.json()).map(function (x) { return x.ref; });
+      var ok = 0;
+      for (var i = 0; i < achadas.length; i++) {
+        delete faltas[achadas[i]];
+        if (await fotoDoDrive(achadas[i].replace(/^idb:/, ''))) ok++;
+      }
+      if (ok) {
+        try { if (typeof renderizarSequencia === 'function') renderizarSequencia(); } catch (e) {}
+        try { if (typeof W.renderizarGaleriaEdicaoRota === 'function' && document.getElementById('modalEditarRota') && getComputedStyle(document.getElementById('modalEditarRota')).display !== 'none') W.renderizarGaleriaEdicaoRota(); } catch (e) {}
+      }
+    } catch (e) {} finally { buscandoFaltas = false; }
+  }, 15000);
+
   function instalarFotos() {
     var f = W.obterFotoIndexedDB;
     if (typeof f !== 'function' || f.__f68) return;
