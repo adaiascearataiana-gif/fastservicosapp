@@ -1,7 +1,17 @@
 {
-  "version": "5.0.0",
-  "releasedAt": "2026-10-02T21:00:00-03:00",
+  "version": "5.1.0",
+  "releasedAt": "2026-10-03T20:00:00-03:00",
   "updates": [
+    {
+      "app": "motorista",
+      "type": "novo",
+      "text": "5.1.0 (03/10/2026): botão NAVEGAR (Mapa do FAST, Google Maps ou Waze), Música e YouTube (vídeo só parado) e Central de Atendimento."
+    },
+    {
+      "app": "cliente",
+      "type": "novo",
+      "text": "5.1.0 (03/10/2026): Central de Atendimento e entregas de hoje ao vivo."
+    },
     {
       "app": "fast",
       "type": "novo",

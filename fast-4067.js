@@ -633,7 +633,7 @@
       // verificação de reserva só reagir a mudanças de OUTROS aparelhos
       // clientes, destinos, motoristas, funcionários ou despesas da empresa mudaram
       // neste aparelho? então vai a sincronização COMPLETA agora (e avisa os outros)
-      if (!querPush && !querSync && colHash !== null && hashColecoes() !== colHash && Date.now() - ultPesadaForcada > 20000) {
+      if (!querPush && !querSync && colHash !== null && W.__frxSalvouLocal && Date.now() - ultPesadaForcada > 20000 && (W.__frxSalvouLocal = false, hashColecoes() !== colHash)) {
         ultPesadaForcada = Date.now(); forcarPesada = true; querSync = true; continue;
       }
       if (!querPush && !querSync) { try { var sg = await assinatura(); if (sg) assinaturaBase = sg; } catch (e) {} }
@@ -694,6 +694,7 @@
     var g = function () {
       var r = f.apply(this, arguments);
       if (!pendenteDesde) pendenteDesde = Date.now();
+      W.__frxSalvouLocal = true;
       reconciliarLogo();
       clearTimeout(tPush);
       tPush = setTimeout(function () {
@@ -1071,7 +1072,7 @@
       }
     } catch (e) {} finally { publicando = false; }
   }
-  setInterval(publicarFotos, 20000);
+  setInterval(function () { if (!document.hidden) publicarFotos(); }, 20000);
   W.addEventListener('load', function () { setTimeout(publicarFotos, 8000); });
 
   var faltas = {}, buscando = {};
@@ -1121,7 +1122,7 @@
         if (await fotoDoDrive(achadas[i].replace(/^idb:/, ''))) ok++;
       }
       if (ok) {
-        try { if (typeof renderizarSequencia === 'function') renderizarSequencia(); } catch (e) {}
+        try { if (typeof renderizarSequencia === 'function') { W.__frxForcarLista = true; renderizarSequencia(); } } catch (e) {}
         try { if (typeof W.renderizarGaleriaEdicaoRota === 'function' && document.getElementById('modalEditarRota') && getComputedStyle(document.getElementById('modalEditarRota')).display !== 'none') W.renderizarGaleriaEdicaoRota(); } catch (e) {}
       }
     } catch (e) {} finally { buscandoFaltas = false; }
@@ -1212,7 +1213,8 @@
       DRV.antigas = achados.length < 50 ? 'em dia' : 'enviando';
     } catch (e) {} finally { migrando = false; }
   }
-  setInterval(migrarFotosAntigas, 90000);
+  var ultMigr = 0;
+  setInterval(function () { if (document.hidden) return; if (DRV.antigas === 'em dia' && Date.now() - ultMigr < 600000) return; ultMigr = Date.now(); migrarFotosAntigas(); }, 90000);
   W.addEventListener('load', function () { setTimeout(migrarFotosAntigas, 20000); });
 
   /* ---------------- diagnóstico das FOTOS (o que acontece ao escolher uma imagem) ---------------- */
@@ -1721,7 +1723,11 @@
   }
   W.fastDiagnosticoSync = function () { painel(true); };
   setInterval(function () { try { var el = document.getElementById('f68Diag'); if (el && painelAberto(el)) painel(false); } catch (e) {} }, 2000);
-  W.addEventListener('load', function () { setTimeout(function () { painel(true); }, 4000); });
+  // abre sozinho só quando há algo a resolver (sem login, erro, ou fotos presas sem Drive);
+  // com tudo certo fica escondido — dá para abrir em Ferramentas FAST → Sincronização
+  W.addEventListener('load', function () { setTimeout(function () {
+    if (!token() || DIAG.erro || (!driveToken() && DRV.pend > 0)) painel(true);
+  }, 6000); });
   var stOrig = null;
   function ligarStatus() {
     var f = W.atualizarStatusSync;

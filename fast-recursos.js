@@ -85,6 +85,10 @@
     '#frxTools .frx-tool span{display:block!important;font-size:11px;font-weight:600;opacity:.65;margin-top:3px}',
     '.frx-precohint{font-size:11px;font-weight:700;color:#16a34a;margin-top:4px}',
     '.frx-av{margin-left:6px}',
+    '#frxEnvios{margin:0 0 14px}.frx-env{border:2px dashed #22c55e;border-radius:18px;padding:14px;margin-bottom:10px;background:var(--card-bg,#fff)}',
+    '.frx-env-hd{font-weight:800;font-size:16px;margin-bottom:6px}.frx-env-lista{margin:0 0 8px;padding-left:18px;font-size:13px}.frx-env-lista li{margin:2px 0}',
+    '.frx-env-fotos{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;align-items:center}.frx-env-fotos img{width:58px;height:58px;object-fit:cover;border-radius:10px;border:1px solid var(--border,#e2e8f0)}',
+    '.frx-env-bt{display:flex;gap:8px;flex-wrap:wrap}.frx-env-bt .frx-btn{flex:1 1 auto}',
     '#frxPin{position:fixed;inset:0;z-index:2147483600;background:linear-gradient(160deg,#0f172a,#1e293b);display:flex;align-items:center;justify-content:center;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}',
     '#frxPin .c{width:min(340px,92vw);text-align:center;color:#fff}#frxPin h2{margin:6px 0 4px;font-size:20px}#frxPin p{margin:0 0 14px;opacity:.75;font-size:14px}',
     '#frxPin .dots{display:flex;gap:12px;justify-content:center;margin:12px 0 18px}#frxPin .dots i{width:14px;height:14px;border-radius:50%;border:2px solid #fff;display:block}#frxPin .dots i.on{background:#fff}',
@@ -329,7 +333,7 @@
           : 'Olá ' + (it.cliente || '') + '! 🚚 Sua entrega para ' + (it.destino || 'o destino') + ' está a caminho com a FAST' + (it.motorista ? ' (motorista ' + it.motorista + ')' : '') + '.\nAcompanhe em tempo real pelo app: ' + LINK_CLIENTE;
         abrirWhats(telefoneDe(it.cliente), txt);
       };
-      ref.parentNode.insertBefore(b, ref.nextSibling);
+      ref.parentNode.appendChild(b);
     });
   }
 
@@ -662,6 +666,9 @@
       '<button type="button" class="frx-tool" data-a="fech">🧾 Fechamento<span>dia, semana, mês + PDF</span></button>' +
       '<button type="button" class="frx-tool" data-a="preco">💲 Tabela de preços<span>valor por destino</span></button>' +
       '<button type="button" class="frx-tool" data-a="pin">🔢 Bloqueio por PIN<span>' + (pinCfg() ? 'ativado' : 'desativado') + '</span></button>' +
+      '<button type="button" class="frx-tool" data-a="sup">🎧 Central de Suporte<span>' + (SUP.abertos ? SUP.abertos + ' aguardando resposta' : 'clientes e motoristas') + '</span></button>' +
+      '<button type="button" class="frx-tool" data-a="diag">🩺 Sincronização<span>login, tempo real, fotos</span></button>' +
+      '<button type="button" class="frx-tool" data-a="conf">🔎 Conferir rotas<span>somas erradas, repetidas, teste</span></button>' +
       '<button type="button" class="frx-tool" data-a="bkp">☁️ Backup no Drive<span>' + (ult ? 'último: ' + new Date(ult).toLocaleDateString('pt-BR') : 'semanal, automático') + '</span></button>' +
       '</div>' + (cfgFalta ? '<p class="frx-muted" style="margin-top:8px">⚠️ Falta rodar o SQL da tabela fast_config para a tabela de preços e o PIX valerem em todos os aparelhos.</p>' : '');
   }
@@ -669,6 +676,9 @@
     var b = e.target.closest && e.target.closest('#frxTools [data-a]'); if (!b) return;
     var a = b.getAttribute('data-a');
     if (a === 'busca') W.fastBuscaCompleta();
+    if (a === 'conf') W.fastConferirRotas();
+    if (a === 'sup') W.fastCentralSuporte();
+    if (a === 'diag' && W.fastDiagnosticoSync) W.fastDiagnosticoSync();
     if (a === 'cob') W.fastCobranca();
     if (a === 'fech') W.fastFechamentoPeriodo();
     if (a === 'preco') W.fastTabelaPrecos();
@@ -703,6 +713,9 @@
     // estilos em linha com prioridade máxima: o app tem regras próprias (ordem, áreas e
     // largura dos campos no celular) que venceriam uma folha de estilo comum
     function fixar(grid) {
+      var assin = (grid.clientWidth >= 760 ? 'L' : 'S') + grid.children.length;
+      if (grid.__frxAssin === assin) return;
+      grid.__frxAssin = assin;
       var imp = function (el, k, v) { el.style.setProperty(k, v, 'important'); };
       imp(grid, 'display', 'grid'); imp(grid, 'grid-template-columns', 'repeat(12,minmax(0,1fr))'); imp(grid, 'grid-template-areas', 'none'); imp(grid, 'gap', '10px');
       var largo = (grid.clientWidth || 0) >= 760;     // PAINEL no computador: campos mais compactos
@@ -757,22 +770,39 @@
     setInterval(arrumar, 3000);
   })();
 
-  /* ---------------- QUANTIDADE: ao tocar, o campo fica vazio para digitar o novo número ----------------
-     Se sair sem digitar nada, volta o número que estava. */
-  var CAMPOS_QTD = { editTxtQtdMercadorias: 1, txtQtdMercadorias: 1 };
+  /* ---------------- CAMPOS DE NÚMERO: ao tocar, ficam vazios para digitar o novo ----------------
+     Vale para quantidade, valor (R$), desconto, salário, km… em todo o sistema.
+     Se sair sem digitar nada, volta o número que estava. Não vale para telefone,
+     CEP, documentos e número de endereço (esses a gente costuma só corrigir). */
+  var NAO_LIMPAR = /(telefone|whats|celular|fone|cep|cpf|cnpj|rg\b|motoristarg|cnh|rntrc|renavam|placa|numero$|ano$|pin|senha|cartao|agencia|conta|documento|codigo|search|busca|filtro)/i;
+  function campoNumerico(el) {
+    if (!el || el.tagName !== 'INPUT' || el.readOnly || el.disabled) return false;
+    var id = String(el.id || '') + ' ' + String(el.name || '') + ' ' + String(el.className || '');
+    if ([el.id, el.name].some(function (x) { return x && NAO_LIMPAR.test(String(x)); })) return false;
+    if (/(telefone|whats|celular|cep|cpf|cnpj|placa|senha|pin)/i.test(String(el.className || '') + ' ' + (el.getAttribute('placeholder') || ''))) return false;
+    if (el.type === 'number') return true;
+    var foco = el.getAttribute('onfocus') || '', inp = el.getAttribute('oninput') || '';
+    if (/fastMoeda/.test(foco + inp)) return true;
+    if (/(^|[\s_-])(qtd|quant|valor|preco|desconto|multa|salario|km|litros?)/i.test(id) && /numeric|decimal/.test(el.getAttribute('inputmode') || '')) return true;
+    return false;
+  }
+  function vazioOuZero(v) { var t = String(v || '').trim(); return !t; }
   document.addEventListener('focusin', function (e) {
-    var el = e.target; if (!el || !CAMPOS_QTD[el.id]) return;
-    el.setAttribute('data-qtd-anterior', el.value);
+    var el = e.target; if (!campoNumerico(el)) return;
+    if (el.hasAttribute('data-num-anterior')) return;
+    if (vazioOuZero(el.value)) return;
+    el.setAttribute('data-num-anterior', el.value);
     el.value = '';
-    try { el.setAttribute('inputmode', 'numeric'); } catch (er) {}
   }, true);
-  document.addEventListener('focusout', function (e) {
-    var el = e.target; if (!el || !CAMPOS_QTD[el.id]) return;
+  // "blur" na captura roda ANTES das rotinas do próprio campo (ex.: formatar R$),
+  // então o número antigo volta antes de qualquer formatação
+  document.addEventListener('blur', function (e) {
+    var el = e.target; if (!el || el.tagName !== 'INPUT' || !el.hasAttribute('data-num-anterior')) return;
+    var ant = el.getAttribute('data-num-anterior'); el.removeAttribute('data-num-anterior');
     if (String(el.value).trim() === '') {
-      el.value = el.getAttribute('data-qtd-anterior') || '';
+      el.value = ant;
       try { el.dispatchEvent(new Event('input', { bubbles: true })); } catch (er) {}
     }
-    el.removeAttribute('data-qtd-anterior');
   }, true);
 
   /* ---------------- EDITAR ROTA → reflete em TUDO (Rotas do Dia, relatório, lista) ----------------
@@ -844,6 +874,718 @@
     setInterval(ligar, 5000);
   })();
 
+  /* ---------------- ENVIAR FOTOS (WhatsApp) ----------------
+     1) No app Android 5.0.2+, o "compartilhar" do navegador não existe dentro do app:
+        aqui ele passa a usar o compartilhamento do próprio Android (FASTCompartilhar),
+        então todos os botões "Enviar Fotos" (uma rota, agrupada ou várias) funcionam.
+     2) Nenhuma etapa de preparo pode travar o botão em "Preparando…": cada foto tem
+        tempo-limite; se o carimbo do destino demorar, vai a foto sem carimbo. */
+  function comLimite(prom, ms, valorSeEstourar) {
+    return new Promise(function (res) {
+      var feito = false;
+      var t = setTimeout(function () { if (!feito) { feito = true; res(valorSeEstourar); } }, ms);
+      Promise.resolve(prom).then(function (v) { if (!feito) { feito = true; clearTimeout(t); res(v); } }, function () { if (!feito) { feito = true; clearTimeout(t); res(valorSeEstourar); } });
+    });
+  }
+  function instalarLimitesFotos() {
+    var c = W.fastCarimbarDestino;
+    if (typeof c === 'function' && !c.__frx) {
+      var c2 = function (file) { return comLimite(c.apply(this, arguments), 10000, file); };
+      c2.__frx = true; W.fastCarimbarDestino = c2;
+    }
+    var r = W.resolverFotoParaFile;
+    if (typeof r === 'function' && !r.__frx) {
+      var r2 = function () { return comLimite(r.apply(this, arguments), 25000, null); };
+      r2.__frx = true; W.resolverFotoParaFile = r2;
+    }
+  }
+  W.addEventListener('load', function () { instalarLimitesFotos(); setTimeout(instalarLimitesFotos, 2500); });
+  setInterval(instalarLimitesFotos, 6000);
+
+  (function () {
+    var ponte = W.FASTCompartilhar;
+    if (!ponte || typeof ponte.compartilhar !== 'function') return;
+    try { if (typeof ponte.disponivel === 'function' && !ponte.disponivel()) return; } catch (e) {}
+    var pend = {};
+    W.fastCompartilharResultado = function (id, ok, msg) {
+      var p = pend[id]; if (!p) return; delete pend[id];
+      if (ok) p.res(); else { var e = new Error(msg || 'Não foi possível compartilhar'); p.rej(e); }
+    };
+    function paraBase64(file) {
+      return new Promise(function (res, rej) {
+        var fr = new FileReader();
+        fr.onload = function () { res(String(fr.result || '').split(',')[1] || ''); };
+        fr.onerror = function () { rej(fr.error || new Error('leitura')); };
+        fr.readAsDataURL(file);
+      });
+    }
+    function canShare(d) { return !!(d && ((d.files && d.files.length) || d.text || d.url)); }
+    async function share(d) {
+      d = d || {};
+      var arqs = [];
+      var lista = Array.prototype.slice.call(d.files || []);
+      for (var i = 0; i < lista.length; i++) {
+        var f = lista[i];
+        arqs.push({ nome: f.name || ('foto_' + (i + 1) + '.jpg'), tipo: f.type || 'image/jpeg', base64: await paraBase64(f) });
+      }
+      var texto = [d.text || '', d.url || ''].filter(Boolean).join('\n');
+      if (!arqs.length) { location.href = 'https://api.whatsapp.com/send?text=' + encodeURIComponent(texto || d.title || ''); return; }
+      var id = 'c' + Date.now() + Math.random().toString(36).slice(2, 7);
+      return new Promise(function (res, rej) {
+        pend[id] = { res: res, rej: rej };
+        try { ponte.compartilhar(JSON.stringify({ texto: texto, arquivos: arqs }), id); }
+        catch (e) { delete pend[id]; rej(e); return; }
+        setTimeout(function () { if (pend[id]) { delete pend[id]; res(); } }, 30000);
+      });
+    }
+    try { Object.defineProperty(navigator, 'share', { value: share, configurable: true, writable: true }); } catch (e) { try { navigator.share = share; } catch (er) {} }
+    try { Object.defineProperty(navigator, 'canShare', { value: canShare, configurable: true, writable: true }); } catch (e) { try { navigator.canShare = canShare; } catch (er) {} }
+    W.__fastShareNativo = true;
+  })();
+
+  /* =====================================================================
+     AGRUPAR = só para ENVIAR AS FOTOS JUNTAS
+     Não cria mais uma "rota" (sem Concluir, Navegar etc.): sobe um card de envio
+     no topo das Rotas do Dia, com as fotos de todas as rotas escolhidas e a
+     legenda com cada destino. As rotas continuam normais, cada uma no seu card.
+     ===================================================================== */
+  var ENV_KEY = 'envios_agrupados';
+  function envios() { var e = CFG[ENV_KEY]; return (e && typeof e === 'object') ? e : {}; }
+  function dataSeqAtual() { return ($('dpDataSequencia') || {}).value || hojeISO(); }
+  function itemPorId(data, id) { return ((bd().sequencias || {})[data] || []).filter(function (x) { return x && String(x.id) === String(id); })[0] || null; }
+  function fotosDoItem(it) {
+    try {
+      var r = it && it.rotaId != null ? (bd().rotas || []).filter(function (x) { return String(x.id) === String(it.rotaId); })[0] : null;
+      if (typeof W.obterFotosDoItem === 'function') return (W.obterFotosDoItem(it, r) || []).filter(Boolean);
+    } catch (e) {}
+    return [].concat(it && it.fotos || []).filter(Boolean);
+  }
+  async function salvarEnvios(obj) {
+    // limpa grupos com mais de 7 dias
+    var lim = hojeISO(new Date(Date.now() - 7 * 86400000));
+    Object.keys(obj).forEach(function (k) { if (!obj[k] || String(obj[k].data || '') < lim) delete obj[k]; });
+    await cfgSalvar(ENV_KEY, obj);
+    desenharEnvios(true);
+  }
+  function criarEnvioAgrupado() {
+    var data = dataSeqAtual(), lista = (bd().sequencias || {})[data] || [];
+    var idx = Array.prototype.slice.call(document.querySelectorAll('.seq-checkbox:checked')).map(function (cb) { return Number(cb.value); })
+      .filter(function (i, p, a) { return Number.isInteger(i) && lista[i] && a.indexOf(i) === p; });
+    if (idx.length < 2) { aviso('Selecione pelo menos 2 rotas para juntar as fotos.', 'warning'); return; }
+    var ids = idx.map(function (i) { return String(lista[i].id); });
+    var obj = Object.assign({}, envios());
+    var id = 'env_' + Date.now().toString(36);
+    obj[id] = { id: id, data: data, itens: ids, criadoEm: new Date().toISOString() };
+    salvarEnvios(obj);
+    try { if (typeof limparSelecaoSeq === 'function') limparSelecaoSeq(); else document.querySelectorAll('.seq-checkbox:checked').forEach(function (c) { c.checked = false; c.dispatchEvent(new Event('change', { bubbles: true })); }); } catch (e) {}
+    try { if (typeof fecharModalAgrupar === 'function') fecharModalAgrupar(); } catch (e) {}
+    var nf = ids.reduce(function (s2, x) { return s2 + fotosDoItem(itemPorId(data, x)).length; }, 0);
+    aviso('Fotos de ' + ids.length + ' rotas juntas (' + nf + ' fotos) no card de envio, no topo das Rotas do Dia.');
+    setTimeout(function () { var el = $('frxEnvios'); if (el && el.scrollIntoView) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 300);
+  }
+  async function enviarGrupo(g, btn) {
+    var html = btn ? btn.innerHTML : '';
+    if (btn) { btn.disabled = true; btn.innerHTML = 'Preparando…'; }
+    try {
+      var arquivos = [], pares = [], n = 0;
+      for (var a = 0; a < g.itens.length; a++) {
+        var it = itemPorId(g.data, g.itens[a]); if (!it) continue;
+        var refs = fotosDoItem(it);
+        for (var b2 = 0; b2 < refs.length; b2++) {
+          var dest = (W.fastFotoDestino ? W.fastFotoDestino(it, refs[b2], '') : '') || it.destino || 'Destino';
+          var f = W.resolverFotoParaFile ? await W.resolverFotoParaFile(refs[b2], 'foto_' + (n + 1) + '.jpg') : null;
+          if (!f) continue;
+          if (W.fastCarimbarDestino) f = await W.fastCarimbarDestino(f, dest);
+          n++;
+          var nome = String(dest).replace(/[\\/:*?"<>|]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 60) + ' ' + n + '.jpg';
+          try { f = new File([f], nome, { type: f.type || 'image/jpeg' }); } catch (e) {}
+          arquivos.push(f); pares.push({ destino: dest });
+          if (btn) btn.innerHTML = 'Preparando ' + n + '…';
+        }
+      }
+      if (!arquivos.length) { aviso('Essas rotas ainda não têm fotos.', 'warning'); return; }
+      var legenda = W.fastLegendaLista ? W.fastLegendaLista(pares) : pares.map(function (p, i) { return 'Foto ' + (i + 1) + ': ' + p.destino; }).join('\n');
+      var pode = false; try { pode = !!(navigator.share && navigator.canShare && navigator.canShare({ files: arquivos })); } catch (e) {}
+      if (pode) {
+        if (btn) btn.innerHTML = 'Enviando ' + arquivos.length + ' fotos…';
+        try { await navigator.share({ files: arquivos, title: 'Fotos das entregas', text: legenda }); }
+        catch (e) { if (!(e && e.name === 'AbortError')) throw e; return; }
+        aviso('As ' + arquivos.length + ' fotos foram enviadas juntas, com a legenda de cada destino.');
+      } else {
+        arquivos.forEach(function (f2, i) { setTimeout(function () { var u = URL.createObjectURL(f2), l = document.createElement('a'); l.href = u; l.download = f2.name; document.body.appendChild(l); l.click(); l.remove(); setTimeout(function () { URL.revokeObjectURL(u); }, 3000); }, i * 300); });
+        abrirWhats('', legenda);
+        aviso(arquivos.length + ' fotos baixadas com o nome do destino. Anexe no WhatsApp que abriu.');
+      }
+    } catch (e) { aviso('Não foi possível enviar as fotos: ' + ((e && e.message) || e), 'error'); }
+    finally { if (btn) { btn.disabled = false; btn.innerHTML = html; } }
+  }
+  var assinaturaEnvios = '';
+  function desenharEnvios(forcar) {
+    var cont = $('containerSequencia'); if (!cont) return;
+    var data = dataSeqAtual();
+    var grupos = Object.keys(envios()).map(function (k) { return envios()[k]; }).filter(function (g) { return g && g.data === data; })
+      .sort(function (a, b) { return String(b.criadoEm).localeCompare(String(a.criadoEm)); });
+    var caixa = $('frxEnvios');
+    var sig = data + '|' + JSON.stringify(grupos) + '|' + grupos.map(function (g) { return g.itens.map(function (x) { var it = itemPorId(data, x); return it ? fotosDoItem(it).length + (it.destino || '') : '-'; }).join(','); }).join(';');
+    if (!grupos.length) { if (caixa) caixa.remove(); assinaturaEnvios = ''; return; }
+    if (caixa && caixa.parentNode === cont && cont.firstChild === caixa && sig === assinaturaEnvios && !forcar) return;
+    assinaturaEnvios = sig;
+    if (!caixa) { caixa = document.createElement('div'); caixa.id = 'frxEnvios'; }
+    if (cont.firstChild !== caixa) cont.insertBefore(caixa, cont.firstChild);
+    caixa.innerHTML = grupos.map(function (g) {
+      var linhas = [], total = 0;
+      g.itens.forEach(function (x) { var it = itemPorId(data, x); if (!it) return; var nf = fotosDoItem(it).length; total += nf; linhas.push('<li><b>' + esc(it.destino || '—') + '</b> <span class="frx-muted">· ' + esc(it.cliente || '') + ' · ' + nf + ' foto(s)</span></li>'); });
+      return '<div class="frx-env" data-g="' + esc(g.id) + '"><div class="frx-env-hd">📦 Envio agrupado <span class="frx-muted">· ' + linhas.length + ' rotas · ' + total + ' fotos</span></div>' +
+        '<ul class="frx-env-lista">' + (linhas.join('') || '<li class="frx-muted">As rotas deste grupo foram removidas.</li>') + '</ul>' +
+        '<div class="frx-env-fotos" data-fotos="' + esc(g.id) + '"></div>' +
+        '<div class="frx-env-bt"><button type="button" class="frx-btn wa" data-env="' + esc(g.id) + '">💬 Enviar todas as fotos</button><button type="button" class="frx-btn sec" data-desf="' + esc(g.id) + '">Desfazer</button></div></div>';
+    }).join('');
+    grupos.forEach(function (g) {
+      var alvo = caixa.querySelector('[data-fotos="' + g.id + '"]'); if (!alvo) return;
+      var refs = []; g.itens.forEach(function (x) { var it = itemPorId(data, x); if (it) fotosDoItem(it).forEach(function (r) { if (refs.indexOf(r) < 0) refs.push(r); }); });
+      refs.slice(0, 12).forEach(function (r) {
+        var im = document.createElement('img'); im.alt = ''; alvo.appendChild(im);
+        urlFoto(r).then(function (u) { if (u) im.src = u; else im.remove(); });
+      });
+      if (refs.length > 12) { var mais = document.createElement('span'); mais.className = 'frx-muted'; mais.textContent = '+' + (refs.length - 12); alvo.appendChild(mais); }
+    });
+  }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('#frxEnvios [data-env], #frxEnvios [data-desf]'); if (!b) return;
+    var gid = b.getAttribute('data-env') || b.getAttribute('data-desf'), g = envios()[gid]; if (!g) return;
+    if (b.hasAttribute('data-env')) enviarGrupo(g, b);
+    else { var obj = Object.assign({}, envios()); delete obj[gid]; salvarEnvios(obj); aviso('Envio agrupado desfeito. As rotas continuam normais.'); }
+  });
+  // "Enviar Fotos" com várias rotas selecionadas: tudo num ÚNICO envio (antes abria
+  // o WhatsApp uma vez para cada foto)
+  function enviarSelecionadasJuntas(btn) {
+    var data = dataSeqAtual(), lista = (bd().sequencias || {})[data] || [];
+    var idx = Array.prototype.slice.call(document.querySelectorAll('.seq-checkbox:checked')).map(function (cb) { return Number(cb.value); })
+      .filter(function (i, p2, a2) { return Number.isInteger(i) && lista[i] && a2.indexOf(i) === p2; });
+    if (!idx.length) { aviso('Selecione as rotas para enviar as fotos.', 'warning'); return; }
+    return enviarGrupo({ data: data, itens: idx.map(function (i) { return String(lista[i].id); }) }, btn && btn.tagName ? btn : null);
+  }
+  function instalarAgrupar() {
+    var es = W.enviarFotosSelecionadasWhatsApp;
+    if (typeof es === 'function' && !es.__frx) {
+      var es2 = function (btn) { return enviarSelecionadasJuntas(btn || (W.event && W.event.target && W.event.target.closest && W.event.target.closest('button'))); };
+      es2.__frx = true; W.enviarFotosSelecionadasWhatsApp = es2;
+    }
+    if (W.confirmarAgrupamento && W.confirmarAgrupamento.__frx && W.abrirModalAgrupar && W.abrirModalAgrupar.__frx) return;
+    var f1 = function () { criarEnvioAgrupado(); }; f1.__frx = true;
+    W.confirmarAgrupamento = f1;
+    var f2 = function () { criarEnvioAgrupado(); }; f2.__frx = true;
+    W.abrirModalAgrupar = f2;
+  }
+  W.addEventListener('load', function () { setTimeout(instalarAgrupar, 1500); setTimeout(instalarAgrupar, 4000); });
+  setInterval(instalarAgrupar, 6000);
+  document.addEventListener('change', function (e) { if (e.target && e.target.id === 'dpDataSequencia') setTimeout(function () { desenharEnvios(true); }, 300); }, true);
+
+  /* ---------------- PUXAR A ÚLTIMA ROTA DO CLIENTE: sempre uma rota INDIVIDUAL ----------------
+     Ao escolher o cliente, o FAST preenche os campos com a última rota dele. Ele
+     podia pegar um card AGRUPADO antigo — que guarda a SOMA das rotas (ex.: Qtd. 4,
+     valor somado e "Centro, Japão, Austrália…") — e trazer esses totais para a rota
+     nova. Agora só rotas individuais servem de modelo; a soma fica só nos totais
+     do cliente (relatório, ficha, fechamento). */
+  function nomeChave(v) { try { return destNormalizarNome(v); } catch (e) { return norm(v); } }
+  function ehAgrupado(it) { return !!(it && (it.agrupado || Array.isArray(it.itensOriginais) || Array.isArray(it.rotasOriginais) || Array.isArray(it.itensAgrupados))); }
+  function ultimaIndividual(nome) {
+    var k = nomeChave(nome); if (!k) return null;
+    var cands = [];
+    (bd().rotas || []).forEach(function (r) { if (r && !r.teste && !ehAgrupado(r) && nomeChave(r.cliente) === k) cands.push({ o: r, data: String(r.data || ''), id: Number(r.id) || 0 }); });
+    var seqs = bd().sequencias || {};
+    Object.keys(seqs).forEach(function (d) { (seqs[d] || []).forEach(function (it) { if (it && !it.teste && !ehAgrupado(it) && nomeChave(it.cliente) === k) cands.push({ o: Object.assign({ data: d }, it), data: d, id: Number(String(it.id).replace(/\D/g, '').slice(0, 13)) || 0 }); }); });
+    if (!cands.length) return null;
+    cands.sort(function (a, b) { return a.data !== b.data ? b.data.localeCompare(a.data) : b.id - a.id; });
+    var base = Object.assign({}, cands[0].o);
+    ['origem', 'destino', 'qtdMercadorias', 'descricao', 'obs', 'motorista', 'pagamento'].forEach(function (f) {
+      if (base[f] == null || base[f] === '') { for (var i = 1; i < cands.length; i++) { var v = cands[i].o[f]; if (v != null && v !== '') { base[f] = v; break; } } }
+    });
+    if (!(Number(base.valor) > 0)) { for (var j = 1; j < cands.length; j++) { if (Number(cands[j].o.valor) > 0) { base.valor = Number(cands[j].o.valor); break; } } }
+    return base;
+  }
+  function instalarUltimaIndividual() {
+    if (W.obterUltimaRotaCliente && W.obterUltimaRotaCliente.__frx && W.preencherPreviewRota && W.preencherPreviewRota.__frx) return;
+    var o = function (nome) { return ultimaIndividual(nome); }; o.__frx = true;
+    W.obterUltimaRotaCliente = o; W.fastUltimaRotaCompleta = o;
+    var p = function (nomeCliente) {
+      var idEd = String(($('seqItemId') || {}).value || '').trim();
+      if (idEd) {
+        var dd = ($('dpDataSequencia') || {}).value || '';
+        var existe = ((bd().sequencias || {})[dd] || []).some(function (i) { return i && String(i.id) === idEd; });
+        if (existe) { try { atualizarPreviewAba2(); } catch (e) {} return; }
+        $('seqItemId').value = '';
+      }
+      var u = ultimaIndividual(nomeCliente);
+      if (!u) { try { atualizarPreviewAba2(); } catch (e) {} return; }
+      var set = function (id, v) { var el = $(id); if (el) el.value = v == null ? '' : v; };
+      set('seqOrigem', u.origem || '');
+      set('seqDestino', u.destino || '');
+      var qtd = u.qtdMercadorias != null && u.qtdMercadorias !== '' ? u.qtdMercadorias : (u.qtdVolumes || 1);
+      set('seqQtdDestino', qtd);
+      var valor = Number(u.valor) || 0;
+      try { fastSetMoeda('seqValorDestino', valor); } catch (e) {}
+      try { fastSetMoeda('seqValor', valor); } catch (e) {}
+      set('seqQtdVolumes', qtd);
+      set('seqObs', u.descricao || u.obs || u.observacao || '');
+      var mot = $('seqMotorista');
+      if (mot && u.motorista) { var alvo = nomeChave(u.motorista), ok = false; Array.prototype.forEach.call(mot.options, function (op) { if (!ok && (nomeChave(op.value) === alvo || nomeChave(op.text) === alvo)) { mot.value = op.value; ok = true; } }); }
+      try { atualizarPreviewAba2(); } catch (e) {}
+    };
+    p.__frx = true; W.preencherDadosClienteSeq = p;
+    // Aba Rotas: a pré-visualização puxava o LOTE inteiro do último lançamento (ex.: as 4
+    // rotas Centro, Japão, Austrália e Brasil, com o valor somado). Agora puxa só a última
+    // rota, individual, com a quantidade e o valor dela.
+    var pv = W.preencherPreviewRota;
+    if (typeof pv === 'function' && !pv.__frx) {
+      var pv2 = function (nome) {
+        var k = nomeChave(nome), lista = (bd().rotas || []).filter(function (r) { return r && !r.teste && !ehAgrupado(r) && nomeChave(r.cliente) === k; });
+        if (!lista.length) return pv.apply(this, arguments);
+        lista.sort(function (a, b) { var d = String(b.data || '').localeCompare(String(a.data || '')); return d || (Number(b.id) || 0) - (Number(a.id) || 0); });
+        var u = lista[0], orig = W.obterRotasDoCliente;
+        W.obterRotasDoCliente = function () { return [u]; };
+        try { return pv.apply(this, arguments); } finally { W.obterRotasDoCliente = orig; }
+      };
+      pv2.__frx = true; W.preencherPreviewRota = pv2;
+    }
+  }
+  W.addEventListener('load', function () { setTimeout(instalarUltimaIndividual, 1200); setTimeout(instalarUltimaIndividual, 3500); });
+  setInterval(instalarUltimaIndividual, 6000);
+
+  /* =====================================================================
+     CONFERIR ROTAS — procura o que pode estar somando errado no painel de
+     Rotas e no Relatório: rotas de TESTE, rotas "juntadas" que repetem
+     outras, rotas repetidas e Qtd. copiada para todas as rotas de um lote.
+     ===================================================================== */
+  function auditarRotas() {
+    var rs = (bd().rotas || []).filter(Boolean), out = { teste: [], compostas: [], repetidas: [], qtdLote: [] };
+    rs.forEach(function (r) { if (r.teste) out.teste.push(r); });
+    var reais = rs.filter(function (r) { return !r.teste; });
+    // rotas com vários destinos num campo só que repetem rotas individuais do mesmo dia
+    reais.forEach(function (r) {
+      var partes = String(r.destino || '').split(/\s*[,;|]\s*|\s+\+\s+/).map(function (x) { return norm(x); }).filter(Boolean);
+      if (partes.length < 2) return;
+      var irmas = reais.filter(function (o) { return o !== r && norm(o.cliente) === norm(r.cliente) && String(o.data) === String(r.data) && partes.indexOf(norm(o.destino)) >= 0; });
+      if (irmas.length >= 2) out.compostas.push({ r: r, irmas: irmas });
+    });
+    // repetidas: mesmo cliente, data, origem, destino e valor
+    var vistos = {};
+    reais.slice().sort(function (a2, b2) { return (Number(a2.id) || 0) - (Number(b2.id) || 0); }).forEach(function (r) {
+      var k = [norm(r.cliente), r.data, norm(r.origem), norm(r.destino), Number(r.valor) || 0].join('|');
+      if (vistos[k]) out.repetidas.push({ r: r, original: vistos[k] }); else vistos[k] = r;
+    });
+    // lote (mesmo cliente, data e origem, criadas juntas) em que TODAS têm Qtd. = nº de rotas do lote
+    var lotes = {};
+    reais.forEach(function (r) { var k = [norm(r.cliente), r.data, norm(r.origem)].join('|'); (lotes[k] = lotes[k] || []).push(r); });
+    Object.keys(lotes).forEach(function (k) {
+      var l = lotes[k].slice().sort(function (a2, b2) { return (Number(a2.id) || 0) - (Number(b2.id) || 0); });
+      var grupo = [l[0]];
+      for (var i = 1; i <= l.length; i++) {
+        var r = l[i];
+        if (r && Math.abs((Number(r.id) || 0) - (Number(grupo[grupo.length - 1].id) || 0)) < 5000) { grupo.push(r); continue; }
+        if (grupo.length >= 2 && grupo.every(function (x) { return Number(x.qtdMercadorias) === grupo.length; })) out.qtdLote.push(grupo.slice());
+        if (r) grupo = [r];
+      }
+    });
+    return out;
+  }
+  W.fastAuditarRotas = auditarRotas;
+  W.fastConferirRotas = function () {
+    var a = auditarRotas(), soma = function (l) { return l.reduce(function (t, r) { return t + (Number(r.valor) || 0); }, 0); };
+    var linha = function (r, extra) {
+      return '<div style="border:1px solid var(--border,#e2e8f0);border-radius:12px;padding:10px 12px;margin:6px 0">' +
+        '<div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><b>' + esc(r.cliente || '—') + ' → ' + esc(r.destino || '—') + '</b><b>' + moeda(r.valor) + '</b></div>' +
+        '<div class="frx-muted">' + dataBR(r.data) + (extra ? ' · ' + extra : '') + '</div>' +
+        '<div style="display:flex;gap:6px;margin-top:8px"><button type="button" class="frx-btn sec pq" data-ver="' + esc(r.id) + '">Ver</button><button type="button" class="frx-btn pq" style="background:#dc2626" data-exc="' + esc(r.id) + '">Excluir</button></div></div>';
+    };
+    var tabela = function (corpo) { return corpo; };
+    var html = '';
+    var nada = !a.teste.length && !a.compostas.length && !a.repetidas.length && !a.qtdLote.length;
+    if (nada) html = '<p style="font-size:16px">✅ Nada somando errado. Todas as ' + (bd().rotas || []).length + ' rotas são individuais, sem repetições, sem rotas de teste e sem Qtd. copiada.</p>';
+    if (a.compostas.length) html += '<h4 style="margin:6px 0">🔁 Rotas que juntam outras (' + a.compostas.length + ') — somam ' + moeda(soma(a.compostas.map(function (x) { return x.r; }))) + ' a mais</h4><p class="frx-muted">Têm vários destinos num campo só e repetem rotas individuais do mesmo dia.</p>' +
+      tabela(a.compostas.map(function (x) { return linha(x.r, 'repete: ' + x.irmas.map(function (o) { return esc(o.destino) + ' (' + moeda(o.valor) + ')'; }).join(', ')); }).join(''));
+    if (a.repetidas.length) html += '<h4 style="margin:12px 0 6px">📄 Rotas repetidas (' + a.repetidas.length + ') — somam ' + moeda(soma(a.repetidas.map(function (x) { return x.r; }))) + ' a mais</h4><p class="frx-muted">Mesmo cliente, data, origem, destino e valor de outra rota. Confira antes de excluir: pode ser um serviço feito duas vezes.</p>' +
+      tabela(a.repetidas.map(function (x) { return linha(x.r, 'igual à rota de ' + dataBR(x.original.data)); }).join(''));
+    if (a.teste.length) html += '<h4 style="margin:12px 0 6px">🧪 Rotas de TESTE (' + a.teste.length + ') — somam ' + moeda(soma(a.teste)) + ' nos totais</h4><p class="frx-muted">Rotas marcadas como teste entram no relatório e no painel de Rotas até serem apagadas.</p>' + tabela(a.teste.map(function (r) { return linha(r); }).join('')) +
+      '<div style="margin:6px 0 12px"><button type="button" class="frx-btn pq" style="background:#dc2626" data-limpateste="1">Apagar as ' + a.teste.length + ' rotas de teste</button></div>';
+    if (a.qtdLote.length) html += '<h4 style="margin:12px 0 6px">🔢 Qtd. copiada para todas as rotas de um lançamento (' + a.qtdLote.length + ')</h4><p class="frx-muted">Ex.: 4 destinos lançados juntos e cada rota ficou com Qtd. 4 (o total), em vez da quantidade de cada uma.</p>' +
+      a.qtdLote.map(function (g, gi) { return tabela(g.map(function (r) { return linha(r, 'Qtd. ' + r.qtdMercadorias); }).join('')) + '<div style="margin:6px 0 12px"><button type="button" class="frx-btn ok pq" data-qtd="' + gi + '">Deixar Qtd. 1 em cada uma destas ' + g.length + ' rotas</button></div>'; }).join('');
+    var j = janela('🔎 Conferir rotas', html, [{ txt: 'Fechar', cls: 'sec', fn: function (f) { f(); } }]);
+    j.corpo.addEventListener('click', function (e) {
+      var v = e.target.getAttribute('data-ver'), x = e.target.getAttribute('data-exc'), q = e.target.getAttribute('data-qtd');
+      if (v) { j.fechar(); try { abrirModalEditarRota(String(v)); } catch (er) {} }
+      if (x) { j.fechar(); try { deletarRota(String(x)); } catch (er) {} }
+      if (e.target.getAttribute('data-limpateste')) {
+        try {
+          var b2 = bd(), ids = {}; a.teste.forEach(function (r) { ids[String(r.id)] = 1; try { if (typeof W.fastLixeiraGuardar === 'function') W.fastLixeiraGuardar(r.data || '', null, r); } catch (er) {} });
+          if (!Array.isArray(b2.rotasExcluidas)) b2.rotasExcluidas = [];
+          Object.keys(ids).forEach(function (k) { if (b2.rotasExcluidas.indexOf(k) < 0) b2.rotasExcluidas.push(k); });
+          b2.rotas = (b2.rotas || []).filter(function (r) { return !(r && ids[String(r.id)]); });
+          var sq = b2.sequencias || {};
+          Object.keys(sq).forEach(function (d) { sq[d] = (sq[d] || []).filter(function (it) { return !(it && it.rotaId != null && ids[String(it.rotaId)]); }); });
+          salvarStorage(); try { renderizar(); } catch (er) {} try { renderizarSequencia(); } catch (er) {} try { W.fastRelatorioRotasRender(); } catch (er) {}
+          aviso(a.teste.length + ' rota(s) de teste apagada(s). Ficam na lixeira, se precisar recuperar.');
+        } catch (er) {}
+        e.target.disabled = true; e.target.textContent = '✓ Apagadas';
+      }
+      if (q != null) {
+        a.qtdLote[+q].forEach(function (r) { r.qtdMercadorias = 1; r.updatedAt = new Date().toISOString(); });
+        try { salvarStorage(); } catch (er) {}
+        try { renderizar(); } catch (er) {}
+        e.target.disabled = true; e.target.textContent = '✓ Ajustado';
+      }
+    });
+  };
+
+
+  /* =====================================================================
+     ROTAS DO DIA SEM "PISCAR" (botões no lugar)
+     A lista era redesenhada a cada sincronização — mesmo sem nada mudar — e o
+     botão "Avisar cliente" entrava um instante depois, empurrando os outros.
+     Agora: (1) só redesenha quando algo mudou de verdade; (2) enquanto você edita
+     uma rota (ou digita), o redesenho espera você terminar; (3) os botões extras
+     entram no mesmo instante, sempre no fim, sem mexer nos outros; (4) a tela
+     não pula de posição.
+     ===================================================================== */
+  var ultimaAcao = 0;
+  ['pointerdown', 'keydown', 'change'].forEach(function (ev) { document.addEventListener(ev, function () { ultimaAcao = Date.now(); }, true); });
+  function editandoAgora() {
+    try {
+      if (String(($('seqItemId') || {}).value || '').trim()) return true;
+      var m = $('modalSequencia'); if (m && m.classList.contains('active')) return true;
+      var er = $('modalEditarRota'); if (er && getComputedStyle(er).display !== 'none' && er.offsetParent !== null) return true;
+      var a = document.activeElement;
+      if (a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) && a.closest && a.closest('#rotasDia') && !a.closest('.rd-filter-driver,#fastFiltroSeqStatusWrap') && a.type !== 'checkbox' && a.type !== 'date') return true;
+    } catch (e) {}
+    return false;
+  }
+  function assinaturaLista() {
+    try {
+      var d = ($('dpDataSequencia') || {}).value || '';
+      var filtros = Array.prototype.map.call(document.querySelectorAll('#rotasDia .rd-filter-driver select, #rotasDia #fastFiltroSeqStatus, #rotasDia input[type=search]'), function (x) { return x.value; }).join('|');
+      var itens = ((bd().sequencias || {})[d] || []).map(function (it) {
+        if (!it) return '';
+        var o = Object.assign({}, it); delete o.updatedAt; delete o.ultimaModificacao;
+        return JSON.stringify(o);
+      }).join('\n');
+      return d + '#' + filtros + '#' + hsh(itens) + '#' + itens.length;
+    } catch (e) { return String(Math.random()); }
+  }
+  function hsh(t) { var h = 0; for (var i = 0; i < t.length; i++) { h = ((h << 5) - h + t.charCodeAt(i)) | 0; } return String(h); }
+  var sigLista = '', esperandoRender = false;
+  function instalarListaEstavel() {
+    var f = W.renderizarSequencia;
+    if (typeof f !== 'function' || f.__frxEst) return;
+    var g = function () {
+      var cont = $('containerSequencia');
+      var porUsuario = Date.now() - ultimaAcao < 1200 || W.__frxForcarLista === true;
+      W.__frxForcarLista = false;
+      // 1) editando: espera terminar (salvar/fechar), depois redesenha uma vez só
+      if (!porUsuario && editandoAgora()) {
+        if (!esperandoRender) {
+          esperandoRender = true;
+          var t = setInterval(function () { if (!editandoAgora()) { clearInterval(t); esperandoRender = false; g(); } }, 400);
+        }
+        return;
+      }
+      // 2) nada mudou: não redesenha (era isso que fazia os botões piscarem)
+      var sig = assinaturaLista();
+      if (!porUsuario && sig === sigLista && cont && cont.children.length) return;
+      // 3) redesenha mantendo a posição da tela
+      var y = W.scrollY;
+      var r = f.apply(this, arguments);
+      sigLista = sig;
+      try { botoesAvisar(); } catch (e) {}
+      try { desenharEnvios(true); } catch (e) {}
+      if (!porUsuario && Math.abs(W.scrollY - y) > 2) { try { W.scrollTo(0, y); } catch (e) {} }
+      return r;
+    };
+    Object.keys(f).forEach(function (k) { try { g[k] = f[k]; } catch (e) {} });
+    g.__frxEst = true; W.renderizarSequencia = g;
+  }
+  instalarListaEstavel();
+  W.addEventListener('load', function () { instalarListaEstavel(); setTimeout(instalarListaEstavel, 1500); setTimeout(instalarListaEstavel, 4000); });
+  setInterval(instalarListaEstavel, 5000);
+
+  /* ---------------- ROTAS DO DIA: botões do formulário ----------------
+     Carregar | Marcar Todos
+     Agrupar  | Desmembrar Rotas
+     LIMPAR   | Salvar e Adicionar Outra                                  */
+  function limparFormSeq() {
+    try {
+      var f = $('formModalSeq'); if (f) f.reset();
+      try { limparDestinosExtras(); } catch (e) {}
+      var ce = $('containerCamposExtras'); if (ce) ce.innerHTML = '';
+      ['seqItemId', 'seqQtdDestino', 'seqValorDestino'].forEach(function (id) { var el = $(id); if (el) el.value = ''; });
+      var t = $('modalSeqTitulo'); if (t) t.innerHTML = '<i class="fa-solid fa-calendar-plus"></i> Criação de rotas';
+      var ls = $('listaSugestoesSeq'); if (ls) { ls.innerHTML = ''; ls.style.display = 'none'; }
+      try { atualizarPreviewAba2(); } catch (e) {}
+      var c = $('seqCliente'); if (c) c.focus();
+    } catch (e) {}
+  }
+  W.fastLimparFormSeq = limparFormSeq;
+  function arrumarBotoesSeq() {
+    var form = $('formModalSeq'); if (!form) return;
+    var grid = form.querySelector('.rd-actions-grid'); if (!grid) return;
+    var agr = grid.querySelector('[onclick*="abrirModalAgrupar"]'), desm = grid.querySelector('[onclick*="desmembrarRotas"]');
+    if (agr && desm && agr.nextElementSibling !== desm) { grid.insertBefore(desm, agr.nextSibling); }
+    if (desm) { desm.style.removeProperty('grid-column'); desm.style.setProperty('grid-column', 'auto', 'important'); }
+    var acoes = grid.parentNode, salvar = acoes && acoes.querySelector('button[type=submit]');
+    if (salvar && !acoes.querySelector('.frx-limpar-seq')) {
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'btn-secondary ripple frx-limpar-seq';
+      // (o "\u200B" impede outra rotina antiga de esconder botões chamados só "Limpar")
+      b.innerHTML = '<i class="fa-solid fa-eraser"></i> Limpar\u200B';
+      b.onclick = limparFormSeq;
+      acoes.insertBefore(b, salvar);
+    }
+    if (salvar && !acoes.__frxFlex) {
+      acoes.__frxFlex = true;
+      var linha = document.createElement('div'); linha.className = 'frx-linha-salvar';
+      linha.style.cssText = 'display:grid;grid-template-columns:1fr 2fr;gap:10px;width:100%;margin-top:10px';
+      var lp = acoes.querySelector('.frx-limpar-seq');
+      acoes.insertBefore(linha, salvar); linha.appendChild(lp); linha.appendChild(salvar);
+      [lp, salvar].forEach(function (x) { x.style.setProperty('width', '100%', 'important'); x.style.setProperty('min-height', '48px', 'important'); x.style.setProperty('margin', '0', 'important'); });
+    }
+  }
+  W.addEventListener('load', function () { arrumarBotoesSeq(); setTimeout(arrumarBotoesSeq, 1500); });
+  setInterval(arrumarBotoesSeq, 4000);
+
+  /* ---------------- SUGESTÕES nos filtros (só o nome já cadastrado) ---------------- */
+  var CAMPOS_SUG = {
+    filtroSeqCliente: 'cliente', filtroSeqOrigem: 'origem', filtroSeqDestino: 'destino',
+    filtroRotaOrigem: 'origem', filtroRotaDestino: 'destino',
+    fastRelFiltroCliente: 'cliente', fastRelFiltroOrigem: 'origem', fastRelFiltroDestino: 'destino'
+  };
+  var cacheSug = { em: 0, d: null };
+  function valoresSug() {
+    if (cacheSug.d && Date.now() - cacheSug.em < 15000) return cacheSug.d;
+    var m = { cliente: {}, origem: {}, destino: {} };
+    function add(t, v) { v = String(v == null ? '' : v).trim(); if (!v || v === '-' || /[,;|]/.test(v)) return; var k = norm(v); if (!k) return; var e = m[t][k] || (m[t][k] = { n: 0, nomes: {} }); e.n++; e.nomes[v] = (e.nomes[v] || 0) + 1; }
+    (bd().rotas || []).forEach(function (r) { if (!r || r.teste) return; add('cliente', r.cliente); add('origem', r.origem); add('destino', r.destino); });
+    var sq = bd().sequencias || {}; Object.keys(sq).forEach(function (d) { (sq[d] || []).forEach(function (it) { if (!it || ehAgrupado(it)) return; add('cliente', it.cliente); add('origem', it.origem); add('destino', it.destino); }); });
+    (bd().clientes || []).forEach(function (c) { if (c) add('cliente', c.nome); });
+    (bd().destinos || []).forEach(function (x) { if (x) add('destino', x.nome); });
+    var out = {};
+    Object.keys(m).forEach(function (t) {
+      out[t] = Object.keys(m[t]).map(function (k) { var e = m[t][k], melhor = Object.keys(e.nomes).sort(function (a2, b2) { return e.nomes[b2] - e.nomes[a2]; })[0]; return { k: k, nome: melhor, n: e.n }; });
+    });
+    cacheSug = { em: Date.now(), d: out };
+    return out;
+  }
+  var caixaSug = null, campoSug = null;
+  function fecharSug() { if (caixaSug) caixaSug.style.display = 'none'; }
+  function mostrarSug(inp) {
+    var tipo = CAMPOS_SUG[inp.id]; if (!tipo) return;
+    var q = norm(inp.value);
+    if (!q) { fecharSug(); return; }
+    var lista = valoresSug()[tipo].filter(function (x) { return x.k.indexOf(q) >= 0 && x.k !== q; })
+      .sort(function (a2, b2) { var pa = a2.k.indexOf(q) === 0 ? 0 : 1, pb = b2.k.indexOf(q) === 0 ? 0 : 1; return pa - pb || b2.n - a2.n || a2.nome.localeCompare(b2.nome, 'pt-BR'); }).slice(0, 8);
+    if (!lista.length) { fecharSug(); return; }
+    if (!caixaSug) {
+      caixaSug = document.createElement('div'); caixaSug.className = 'suggestions-list frx-sug';
+      caixaSug.style.cssText = 'position:absolute;z-index:60;left:0;right:0;top:100%;display:none';
+      caixaSug.addEventListener('mousedown', function (e) { e.preventDefault(); });
+      caixaSug.addEventListener('click', function (e) {
+        var it = e.target.closest && e.target.closest('[data-v]'); if (!it || !campoSug) return;
+        campoSug.value = it.getAttribute('data-v'); fecharSug();
+        try { campoSug.dispatchEvent(new Event('input', { bubbles: true })); campoSug.dispatchEvent(new Event('change', { bubbles: true })); } catch (er) {}
+      });
+    }
+    var pai = inp.parentNode; if (getComputedStyle(pai).position === 'static') pai.style.position = 'relative';
+    if (caixaSug.parentNode !== pai) pai.appendChild(caixaSug);
+    campoSug = inp;
+    caixaSug.innerHTML = lista.map(function (x) { return '<div class="suggestion-item" role="option" data-v="' + esc(x.nome) + '">' + esc(x.nome) + '</div>'; }).join('');
+    caixaSug.style.display = 'block';
+  }
+  document.addEventListener('input', function (e) { if (e.target && CAMPOS_SUG[e.target.id]) mostrarSug(e.target); }, true);
+  document.addEventListener('focusin', function (e) { if (e.target && CAMPOS_SUG[e.target.id] && e.target.value) mostrarSug(e.target); }, true);
+  document.addEventListener('focusout', function (e) { var inp = e.target; if (inp && CAMPOS_SUG[inp.id]) setTimeout(function () { if (campoSug === inp && document.activeElement !== inp) fecharSug(); }, 150); }, true);
+
+  /* ---------------- BOTÕES FUNCIONAM NO PRIMEIRO TOQUE, COM O TECLADO ABERTO ----------------
+     Ao tocar num botão com o teclado aberto, o campo perdia o foco ANTES do clique:
+     o teclado fechava, a tela se reajustava e o botão "fugia" do dedo — o toque se
+     perdia e era preciso tocar de novo. Agora o toque no botão não tira o foco do
+     campo (a tela não se mexe), o botão funciona na hora e, se for de salvar/
+     concluir, o teclado fecha logo depois. */
+  function campoDeTexto(el) {
+    if (!el) return false;
+    if (el.isContentEditable) return true;
+    if (el.tagName === 'TEXTAREA') return true;
+    if (el.tagName !== 'INPUT') return false;
+    return /^(text|search|email|tel|number|password|url|)$/i.test(el.type || '');
+  }
+  function alvoBotao(t) {
+    var b = t && t.closest && t.closest('button, [role="button"], .btn-primary, .btn-secondary, .btn-success, .btn-danger, .btn-warning, .btn-whatsapp, .frx-btn');
+    if (!b) return null;
+    if (b.closest('.suggestions-list, .frx-sug, #frxPin')) return null;      // listas de sugestão já cuidam disso
+    if (b.tagName === 'INPUT' || b.tagName === 'LABEL') return null;
+    return b;
+  }
+  function segurarFoco(e) {
+    var ativo = document.activeElement;
+    if (!campoDeTexto(ativo)) return;
+    var b = alvoBotao(e.target);
+    if (!b || b.disabled || b.contains(ativo)) return;
+    e.preventDefault();   // não deixa o campo perder o foco agora (a tela não se mexe)
+  }
+  document.addEventListener('pointerdown', segurarFoco, true);
+  document.addEventListener('mousedown', segurarFoco, true);
+  // No clique (antes da ação do botão), o campo é confirmado: formatação, valor
+  // digitado e "mudou" rodam primeiro — e o teclado fecha em seguida.
+  document.addEventListener('click', function (e) {
+    var b = alvoBotao(e.target); if (!b || b.disabled) return;
+    var a2 = document.activeElement;
+    if (campoDeTexto(a2) && !b.contains(a2)) { try { a2.blur(); } catch (er) {} }
+  }, true);
+
+  /* =====================================================================
+     CENTRAL DE SUPORTE (PAINEL) — responde os atendimentos dos apps Cliente e
+     Motorista e edita o que eles veem (contatos, horário, aviso, perguntas).
+     ===================================================================== */
+  var SUP = { abertos: 0, ultimoAviso: 0, falta: false };
+  async function supGet(caminho) {
+    var r = await fetch(SUPABASE_URL + '/' + caminho, { headers: cab(), cache: 'no-store' });
+    if (r.status === 404) { SUP.falta = true; throw new Error('Falta rodar o SQL da Central de Atendimento no Supabase.'); }
+    if (!r.ok) throw new Error('Sem permissão ou falha (' + r.status + ').');
+    return r.json();
+  }
+  async function supEnviar(metodo, caminho, corpo, prefer) {
+    var r = await fetch(SUPABASE_URL + '/' + caminho, { method: metodo, headers: cab({ 'Prefer': prefer || 'return=minimal' }), body: JSON.stringify(corpo) });
+    if (!r.ok) { var t = ''; try { t = await r.text(); } catch (e) {} throw new Error('Falha (' + r.status + ') ' + t.slice(0, 120)); }
+  }
+  async function supContar() {
+    if (!token() || !navigator.onLine) return;
+    try {
+      var l = await supGet('suporte_chamados?select=id,nao_lidas_empresa,status&or=(status.eq.aberto,nao_lidas_empresa.gt.0)&limit=200');
+      var n = l.filter(function (x) { return x.nao_lidas_empresa > 0 || x.status === 'aberto'; }).length;
+      var novas = l.reduce(function (t, x) { return t + (x.nao_lidas_empresa || 0); }, 0);
+      if (novas > SUP.ultimoAviso) aviso('🎧 Nova mensagem na Central de Suporte (' + novas + ').', 'info');
+      SUP.ultimoAviso = novas; SUP.abertos = n;
+      var sp = document.querySelector('#frxTools [data-a="sup"] span'); if (sp) sp.textContent = n ? n + ' aguardando resposta' : 'clientes e motoristas';
+    } catch (e) {}
+  }
+  setTimeout(supContar, 9000); setInterval(function () { if (!document.hidden) supContar(); }, 60000);
+  function quandoBR(s2) { try { var d = new Date(s2); return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }); } catch (e) { return ''; } }
+
+  W.fastCentralSuporte = function () {
+    var div = document.createElement('div');
+    div.innerHTML = '<div class="frx-row"><button type="button" class="frx-btn pq" data-aba="at">Atendimentos</button><button type="button" class="frx-btn sec pq" data-aba="ct">O que aparece nos apps</button></div><div id="frxSupCorpo"></div>';
+    var j = janela('🎧 Central de Suporte', div, [{ txt: 'Fechar', cls: 'sec', fn: function (f) { clearInterval(tSup); f(); } }]);
+    var corpoS = $('frxSupCorpo'), filtro = 'abertos', tSup = 0, atual = null;
+    function abas(qual) { div.querySelectorAll('[data-aba]').forEach(function (b2) { b2.className = 'frx-btn pq' + (b2.getAttribute('data-aba') === qual ? '' : ' sec'); }); }
+    async function lista() {
+      abas('at'); atual = null; clearInterval(tSup);
+      corpoS.innerHTML = '<p class="frx-muted">Carregando…</p>';
+      try {
+        var l = await supGet('suporte_chamados?select=*&order=atualizado_em.desc&limit=150' + (filtro === 'abertos' ? '&status=neq.fechado' : ''));
+        corpoS.innerHTML = '<div class="frx-row"><button type="button" class="frx-btn ' + (filtro === 'abertos' ? '' : 'sec ') + 'pq" data-f="abertos">Em andamento</button><button type="button" class="frx-btn ' + (filtro === 'todos' ? '' : 'sec ') + 'pq" data-f="todos">Todos</button></div>' +
+          (l.map(function (x) {
+            var tag = x.status === 'fechado' ? '✔️ Encerrado' : x.status === 'respondido' ? '💬 Respondido' : '🟡 Aguardando';
+            return '<div data-c="' + x.id + '" style="border:1px solid var(--border,#e2e8f0);border-radius:12px;padding:10px 12px;margin:6px 0;cursor:pointer">' +
+              '<div style="display:flex;justify-content:space-between;gap:8px"><b>' + (x.origem === 'motorista' ? '🚚 ' : '👤 ') + esc(x.nome || 'Sem nome') + '</b><span class="frx-muted">' + tag + '</span></div>' +
+              '<div>' + esc(x.assunto || '') + (x.nao_lidas_empresa ? ' <span class="frx-pill" style="background:#fee2e2;color:#991b1b">' + x.nao_lidas_empresa + ' nova(s)</span>' : '') + '</div>' +
+              '<div class="frx-muted">' + esc([x.email, x.contato].filter(Boolean).join(' · ')) + ' · ' + quandoBR(x.atualizado_em) + '</div></div>';
+          }).join('') || '<p class="frx-muted">Nenhum atendimento ' + (filtro === 'abertos' ? 'em andamento' : '') + '.</p>');
+      } catch (e) { corpoS.innerHTML = '<p style="color:#b91c1c;font-weight:700">' + esc(e.message) + '</p>'; }
+    }
+    async function conversa(id) {
+      atual = id;
+      try {
+        var c = (await supGet('suporte_chamados?select=*&id=eq.' + id))[0]; if (!c) return lista();
+        var m = await supGet('suporte_mensagens?select=*&chamado_id=eq.' + id + '&order=id.asc');
+        corpoS.innerHTML = '<div class="frx-row"><button type="button" class="frx-btn sec pq" data-voltar>← Voltar</button>' + (c.status !== 'fechado' ? '<button type="button" class="frx-btn sec pq" data-encerrar>Encerrar atendimento</button>' : '') + '</div>' +
+          '<div style="margin-bottom:8px"><b>' + (c.origem === 'motorista' ? '🚚 Motorista ' : '👤 Cliente ') + esc(c.nome || '') + '</b><div class="frx-muted">' + esc([c.assunto, c.email, c.contato].filter(Boolean).join(' · ')) + '</div></div>' +
+          '<div id="frxSupMsgs" style="max-height:46vh;overflow:auto">' + m.map(function (x) {
+            var emp = x.autor === 'empresa';
+            return '<div style="max-width:85%;margin:6px 0;' + (emp ? 'margin-left:auto;background:#4f46e5;color:#fff' : 'background:#f1f5f9;color:#0f172a') + ';padding:9px 12px;border-radius:14px;white-space:pre-wrap">' + esc(x.texto) + '<div style="font-size:11px;opacity:.7;margin-top:3px">' + (emp ? 'FAST · ' : '') + quandoBR(x.criado_em) + '</div></div>';
+          }).join('') + '</div>' +
+          '<textarea class="frx-in" id="frxSupResp" rows="3" maxlength="2000" placeholder="Responder…" style="margin-top:8px"></textarea>' +
+          '<div class="frx-row" style="margin-top:8px"><button type="button" class="frx-btn ok" data-responder style="flex:1">Enviar resposta</button></div>';
+        var cx = $('frxSupMsgs'); if (cx) cx.scrollTop = cx.scrollHeight;
+        if (c.nao_lidas_empresa) { try { await supEnviar('PATCH', 'suporte_chamados?id=eq.' + id, { nao_lidas_empresa: 0 }); } catch (e) {} supContar(); }
+        clearInterval(tSup); tSup = setInterval(function () { var ta = $('frxSupResp'); if (atual === id && !(ta && ta.value) && document.body.contains(corpoS)) conversa(id); }, 20000);
+        corpoS.__chamado = c;
+      } catch (e) { corpoS.innerHTML = '<p style="color:#b91c1c;font-weight:700">' + esc(e.message) + '</p>'; }
+    }
+    async function conteudoTela() {
+      abas('ct'); atual = null; clearInterval(tSup);
+      corpoS.innerHTML = '<p class="frx-muted">Carregando…</p>';
+      var c = {};
+      try { var l = await supGet('suporte_conteudo?select=dados&id=eq.1'); c = (l[0] && l[0].dados) || {}; } catch (e) { corpoS.innerHTML = '<p style="color:#b91c1c;font-weight:700">' + esc(e.message) + '</p>'; return; }
+      var perguntas = Array.isArray(c.perguntas) ? c.perguntas.slice() : [];
+      function campo(id, rot, v, tipo) { return '<label class="frx-muted" style="display:block;margin-top:10px">' + rot + '</label>' + (tipo === 'area' ? '<textarea class="frx-in" id="' + id + '" rows="3">' + esc(v || '') + '</textarea>' : '<input class="frx-in" id="' + id + '" value="' + esc(v || '') + '">'); }
+      function desenharPerg() {
+        $('frxSupPerg').innerHTML = perguntas.map(function (p2, i) {
+          return '<div style="border:1px solid var(--border,#e2e8f0);border-radius:12px;padding:10px;margin:6px 0"><input class="frx-in" data-pq="' + i + '" placeholder="Pergunta" value="' + esc(p2.pergunta || '') + '">' +
+            '<textarea class="frx-in" data-pr="' + i + '" rows="2" placeholder="Resposta" style="margin-top:6px">' + esc(p2.resposta || '') + '</textarea>' +
+            '<div class="frx-row" style="margin:6px 0 0"><select class="frx-in" data-pp="' + i + '" style="flex:1"><option value="todos">Para todos</option><option value="cliente">Só clientes</option><option value="motorista">Só motoristas</option></select><button type="button" class="frx-btn sec pq" data-prm="' + i + '">Remover</button></div></div>';
+        }).join('') || '<p class="frx-muted">Nenhuma pergunta ainda.</p>';
+        perguntas.forEach(function (p2, i) { var sl = corpoS.querySelector('[data-pp="' + i + '"]'); if (sl) sl.value = p2.para || 'todos'; });
+      }
+      corpoS.innerHTML = '<p class="frx-muted" style="margin:0">Isto aparece na Central de Atendimento dos apps Cliente e Motorista.</p>' +
+        campo('frxSupAviso', '📢 Aviso em destaque (deixe vazio para não mostrar)', c.aviso, 'area') +
+        campo('frxSupWa', '💬 WhatsApp de atendimento (com DDD)', c.whatsapp) +
+        campo('frxSupTel', '📞 Telefone para ligar', c.telefone) +
+        campo('frxSupEmail', '✉️ E-mail', c.email) +
+        campo('frxSupHor', '🕒 Horário de atendimento', c.horario || 'Segunda a sábado, das 8h às 18h') +
+        campo('frxSupMsg', 'Mensagem de boas-vindas', c.mensagem, 'area') +
+        campo('frxSupAss', 'Assuntos para escolher (um por linha; vazio = padrão)', (c.assuntos || []).join('\n'), 'area') +
+        '<h4 style="margin:14px 0 4px">Perguntas frequentes</h4><div id="frxSupPerg"></div><button type="button" class="frx-btn sec pq" data-padd>➕ Adicionar pergunta</button>' +
+        '<div class="frx-row" style="margin-top:14px"><button type="button" class="frx-btn ok" data-salvar-ct style="flex:1">Salvar o que aparece nos apps</button></div>';
+      desenharPerg();
+      corpoS.__perguntas = perguntas; corpoS.__desenharPerg = desenharPerg;
+    }
+    j.corpo.addEventListener('input', function (e) {
+      var pg = corpoS.__perguntas; if (!pg) return;
+      var a2 = e.target.getAttribute('data-pq'), b2 = e.target.getAttribute('data-pr');
+      if (a2 != null) pg[+a2].pergunta = e.target.value; if (b2 != null) pg[+b2].resposta = e.target.value;
+    });
+    j.corpo.addEventListener('change', function (e) { var pg = corpoS.__perguntas, c2 = e.target.getAttribute('data-pp'); if (pg && c2 != null) pg[+c2].para = e.target.value; });
+    j.corpo.addEventListener('click', async function (e) {
+      var t = e.target;
+      var ab = t.getAttribute('data-aba'); if (ab === 'at') return lista(); if (ab === 'ct') return conteudoTela();
+      var f2 = t.getAttribute('data-f'); if (f2) { filtro = f2; return lista(); }
+      var c3 = t.closest && t.closest('[data-c]'); if (c3) return conversa(c3.getAttribute('data-c'));
+      if (t.hasAttribute('data-voltar')) return lista();
+      if (t.hasAttribute('data-padd')) { corpoS.__perguntas.push({ pergunta: '', resposta: '', para: 'todos' }); return corpoS.__desenharPerg(); }
+      var rm = t.getAttribute('data-prm'); if (rm != null) { corpoS.__perguntas.splice(+rm, 1); return corpoS.__desenharPerg(); }
+      if (t.hasAttribute('data-encerrar') && atual) { try { await supEnviar('PATCH', 'suporte_chamados?id=eq.' + atual, { status: 'fechado', atualizado_em: new Date().toISOString() }); aviso('Atendimento encerrado.'); lista(); } catch (er) { aviso(er.message, 'error'); } return; }
+      if (t.hasAttribute('data-responder') && atual) {
+        var ta = $('frxSupResp'), v = (ta.value || '').trim(); if (!v) return;
+        t.disabled = true;
+        try {
+          var c4 = corpoS.__chamado || {};
+          await supEnviar('POST', 'suporte_mensagens', [{ chamado_id: Number(atual), autor: 'empresa', texto: v.slice(0, 2000) }]);
+          await supEnviar('PATCH', 'suporte_chamados?id=eq.' + atual, { status: 'respondido', atualizado_em: new Date().toISOString(), nao_lidas_empresa: 0, nao_lidas_usuario: (Number(c4.nao_lidas_usuario) || 0) + 1 });
+          ta.value = ''; conversa(atual);
+        } catch (er) { aviso(er.message, 'error'); t.disabled = false; }
+        return;
+      }
+      if (t.hasAttribute('data-salvar-ct')) {
+        var val = function (id) { return (($(id) || {}).value || '').trim(); };
+        var dados = { aviso: val('frxSupAviso'), whatsapp: val('frxSupWa'), telefone: val('frxSupTel'), email: val('frxSupEmail'), horario: val('frxSupHor'), mensagem: val('frxSupMsg'),
+          assuntos: val('frxSupAss').split('\n').map(function (x) { return x.trim(); }).filter(Boolean),
+          perguntas: (corpoS.__perguntas || []).filter(function (p3) { return p3 && String(p3.pergunta || '').trim(); }) };
+        t.disabled = true;
+        try { await supEnviar('POST', 'suporte_conteudo', [{ id: 1, dados: dados, updated_at: new Date().toISOString() }], 'resolution=merge-duplicates,return=minimal'); aviso('Salvo. Já aparece nos apps Cliente e Motorista.'); }
+        catch (er) { aviso(er.message, 'error'); }
+        t.disabled = false;
+      }
+    });
+    lista();
+  };
+
+  /* ---------------- NAVEGAR: Mapa do FAST, Google Maps ou Waze (com "usar sempre") ---------------- */
+  function instalarNavegar() {
+    var f = W.navAbrirGpsDropdown;
+    if (typeof W.fastNavegar !== 'function' || (f && f.__frx)) return;
+    var g = function (ev, destino) { try { if (ev && ev.stopPropagation) ev.stopPropagation(); } catch (e) {} W.fastNavegar(destino); };
+    g.__frx = true; W.navAbrirGpsDropdown = g;
+  }
+  W.addEventListener('load', function () { instalarNavegar(); setTimeout(instalarNavegar, 2000); });
+  setInterval(instalarNavegar, 5000);
+
   /* ---------------- câmera ao vivo: garante que a imagem comece a rodar ----------------
      O código original liga a câmera mas não manda o vídeo "tocar"; com economia de
      bateria/dados o Chrome deixa parado e mostra só o símbolo ▶ cinza. */
@@ -885,6 +1627,7 @@
   /* ---------------- ciclo: injeta botões quando as telas são redesenhadas ---------------- */
   var tPainel = 0;
   function rodada() {
+    try { desenharEnvios(false); } catch (e) {}
     try { botoesClientes(); } catch (e) {}
     try { botoesAvisar(); } catch (e) {}
     if (!$('frxTools')) { clearTimeout(tPainel); tPainel = setTimeout(function () { try { painelFerramentas(); } catch (e) {} }, 400); }
@@ -900,7 +1643,15 @@
         // ignora mudanças feitas por este próprio arquivo
         for (var i = 0; i < muts.length; i++) { var t = muts[i].target; if (t && t.closest && (t.closest('#frxTools') || t.closest('.frx-ov') || t.closest('#frxPin'))) continue; clearTimeout(pend); pend = setTimeout(rodada, 250); return; }
       });
-      obs.observe(document.body, { childList: true, subtree: true });
+      // só observa as áreas onde estes botões entram (antes era a página inteira,
+      // o que rodava a cada mudança mínima da tela)
+      var observados = [];
+      var ligarObs = function () {
+        ['containerSequencia', 'tabelaClientesBody', 'central'].forEach(function (id) {
+          var el = $(id); if (el && observados.indexOf(el) < 0) { observados.push(el); obs.observe(el, { childList: true, subtree: id !== 'central' }); }
+        });
+      };
+      ligarObs(); setTimeout(ligarObs, 2000); setTimeout(ligarObs, 6000);
     }
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', iniciar, { once: true }); else iniciar();
