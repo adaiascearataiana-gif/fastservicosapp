@@ -1355,8 +1355,18 @@
   var CAMPOS_SUG = {
     filtroSeqCliente: 'cliente', filtroSeqOrigem: 'origem', filtroSeqDestino: 'destino',
     filtroRotaOrigem: 'origem', filtroRotaDestino: 'destino',
-    fastRelFiltroCliente: 'cliente', fastRelFiltroOrigem: 'origem', fastRelFiltroDestino: 'destino'
+    fastRelFiltroCliente: 'cliente', fastRelFiltroOrigem: 'origem', fastRelFiltroDestino: 'destino',
+    // edição de rota (aba Rotas), editor rápido das Rotas do Dia e destino do Adicionar rota
+    editTxtCliente: 'cliente', editTxtOrigem: 'origem', editTxtDestino: 'destino',
+    f66eCli: 'cliente', f66eOri: 'origem', f66eDes: 'destino', txtDestino: 'destino'
   };
+  function tipoCampo(el) {
+    if (!el || el.tagName !== 'INPUT') return '';
+    if (CAMPOS_SUG[el.id]) return CAMPOS_SUG[el.id];
+    // destinos extras (Adicionar rota e Rotas do Dia) e o destino principal das Rotas do Dia
+    if (el.classList && (el.classList.contains('destino-extra-input') || el.classList.contains('destino-extra-rota-input') || el.classList.contains('seq-destino-input'))) return 'destino';
+    return '';
+  }
   var cacheSug = { em: 0, d: null };
   function valoresSug() {
     if (cacheSug.d && Date.now() - cacheSug.em < 15000) return cacheSug.d;
@@ -1376,7 +1386,7 @@
   var caixaSug = null, campoSug = null;
   function fecharSug() { if (caixaSug) caixaSug.style.display = 'none'; }
   function mostrarSug(inp) {
-    var tipo = CAMPOS_SUG[inp.id]; if (!tipo) return;
+    var tipo = tipoCampo(inp); if (!tipo) return;
     var q = norm(inp.value);
     if (!q) { fecharSug(); return; }
     var lista = valoresSug()[tipo].filter(function (x) { return x.k.indexOf(q) >= 0 && x.k !== q; })
@@ -1384,7 +1394,7 @@
     if (!lista.length) { fecharSug(); return; }
     if (!caixaSug) {
       caixaSug = document.createElement('div'); caixaSug.className = 'suggestions-list frx-sug';
-      caixaSug.style.cssText = 'position:absolute;z-index:60;left:0;right:0;top:100%;display:none';
+      caixaSug.style.cssText = 'position:absolute;z-index:100050;left:0;right:0;top:100%;display:none;max-height:260px';
       caixaSug.addEventListener('mousedown', function (e) { e.preventDefault(); });
       caixaSug.addEventListener('click', function (e) {
         var it = e.target.closest && e.target.closest('[data-v]'); if (!it || !campoSug) return;
@@ -1398,9 +1408,9 @@
     caixaSug.innerHTML = lista.map(function (x) { return '<div class="suggestion-item" role="option" data-v="' + esc(x.nome) + '">' + esc(x.nome) + '</div>'; }).join('');
     caixaSug.style.display = 'block';
   }
-  document.addEventListener('input', function (e) { if (e.target && CAMPOS_SUG[e.target.id]) mostrarSug(e.target); }, true);
-  document.addEventListener('focusin', function (e) { if (e.target && CAMPOS_SUG[e.target.id] && e.target.value) mostrarSug(e.target); }, true);
-  document.addEventListener('focusout', function (e) { var inp = e.target; if (inp && CAMPOS_SUG[inp.id]) setTimeout(function () { if (campoSug === inp && document.activeElement !== inp) fecharSug(); }, 150); }, true);
+  document.addEventListener('input', function (e) { if (tipoCampo(e.target)) mostrarSug(e.target); }, true);
+  document.addEventListener('focusin', function (e) { if (tipoCampo(e.target) && e.target.value) mostrarSug(e.target); }, true);
+  document.addEventListener('focusout', function (e) { var inp = e.target; if (tipoCampo(inp)) setTimeout(function () { if (campoSug === inp && document.activeElement !== inp) fecharSug(); }, 150); }, true);
 
   /* ---------------- BOTÕES FUNCIONAM NO PRIMEIRO TOQUE, COM O TECLADO ABERTO ----------------
      Ao tocar num botão com o teclado aberto, o campo perdia o foco ANTES do clique:
