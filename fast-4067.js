@@ -33,7 +33,7 @@
   W.__fast4067 = true;
 
   var BASE_KEY = 'fast4067_base_v1';
-  var VERSAO = 'v24';
+  var VERSAO = 'v27';
   function versaoApp() { try { return (document.querySelector('meta[name="fast-app-version"]') || {}).content || VERSAO; } catch (e) { return VERSAO; } }
   var DIAG = W.__f68Diag = { erro: '', erroEm: 0, envio: 0, baixou: 0 };
   function falha(txt) { DIAG.erro = String(txt).slice(0, 160); DIAG.erroEm = Date.now(); try { painel(true); } catch (e) {} }
@@ -536,6 +536,7 @@
           try { if (nuvem) fotoNuvem(nuvem); } catch (e) {}
           var res = mergeOrig.apply(this, arguments);
           try { tresVias(local, nuvem, res); } catch (e) { console.warn('f67 merge:', e); }
+          try { colecoes3Vias(local, nuvem, res); } catch (e) { console.warn('f512 coleções:', e); }
           return res;
         };
         m.__f67 = true; W.mergeDados = m;
@@ -1613,6 +1614,124 @@
   W.fastRecuperarValores = recuperarValores;
   W.addEventListener('load', function () { setTimeout(recuperarValores, 6000); });
   setInterval(recuperarValores, 60000);
+
+  /* =====================================================================
+     5.1.2 — CLIENTES, LUGARES, MOTORISTAS, FUNCIONÁRIOS E DESPESAS DA EMPRESA
+     Antes: cada aparelho enviava a lista INTEIRA e apagava da nuvem o que ele não
+     tinha. Um celular com dados antigos desfazia edições/unificações feitas no
+     computador, e lugares excluídos voltavam. Os lugares ainda falhavam com
+     "HTTP 500" quando a lista tinha o mesmo código duas vezes.
+     Agora (como já é nas rotas): envia só o que mudou neste aparelho, só apaga da
+     nuvem o que FOI apagado aqui, e ao receber adota a versão da nuvem quando
+     este aparelho não mexeu naquele registro.
+     ===================================================================== */
+  var COL_KEY = 'fast512_base_colecoes';
+  var COLS_SYNC = { clientes: 'clientes', motoristas: 'motoristas', rh: 'rh', despesasEmpresa: 'despesas_empresa' };
+  function estavel(v) {
+    if (v === null || typeof v !== 'object') return JSON.stringify(v === undefined ? null : v);
+    if (Array.isArray(v)) return '[' + v.map(estavel).join(',') + ']';
+    return '{' + Object.keys(v).filter(function (k) { return !/^(updated_?at|updatedAt|ultimaModificacao|usadoEm|usado_em|ultimaUso|ultima_uso)$/.test(k) && v[k] !== undefined; }).sort()
+      .map(function (k) { return JSON.stringify(k) + ':' + estavel(v[k]); }).join(',') + '}';
+  }
+  function hCol(chave, item) {
+    try { if (chave === 'destinos' && typeof destinoToSupabase === 'function') return hsh(estavel(destinoToSupabase(item))); } catch (e) {}
+    return hsh(estavel(item));
+  }
+  function tsItem(x) { if (!x) return 0; var t = Date.parse(x.ultimaModificacao || x.updatedAt || x.updated_at || x.atualizadoEm || ''); return isNaN(t) ? 0 : t; }
+  function lerBaseCol() { try { return JSON.parse(localStorage.getItem(COL_KEY) || '{}') || {}; } catch (e) { return {}; } }
+  function gravarBaseCol(chave, lista) {
+    try {
+      var b = lerBaseCol(), m = {};
+      (lista || []).forEach(function (x) { if (x && x.id != null) m[String(x.id)] = hCol(chave, x); });
+      b[chave] = m; localStorage.setItem(COL_KEY, JSON.stringify(b));
+    } catch (e) {}
+  }
+  function semIdsRepetidos(lista) {
+    var m = new Map();
+    (lista || []).forEach(function (x) { if (x && x.id != null && x.id !== '') m.set(String(x.id), x); });
+    return Array.from(m.values());
+  }
+  function colecoes3Vias(local, nuvem, res) {
+    if (W.__f68Leve || !nuvem || !res) return;          // a sincronização leve não traz estas listas
+    var bases = lerBaseCol();
+    ['clientes', 'motoristas', 'rh', 'despesasEmpresa', 'destinos'].forEach(function (c) {
+      var nv = nuvem[c], arr = res[c];
+      if (!Array.isArray(nv) || !Array.isArray(arr)) return;
+      var cl = {}; nv.forEach(function (x) { if (x && x.id != null) cl[String(x.id)] = x; });
+      var lo = {}; (local[c] || []).forEach(function (x) { if (x && x.id != null) lo[String(x.id)] = x; });
+      var base = bases[c];
+      var nuvemConfiavel = nv.length > 0 && (!base || nv.length >= Object.keys(base).length * 0.5);
+      for (var i = 0; i < arr.length; i++) {
+        var x = arr[i]; if (!x || x.id == null) continue;
+        var k = String(x.id), c1 = cl[k];
+        if (!base) {                                             // 1ª vez neste aparelho: vale a versão mais nova
+          if (c1 && hCol(c, c1) !== hCol(c, x) && !(tsItem(lo[k] || x) > tsItem(c1) + 1000)) arr[i] = c1;
+          continue;
+        }
+        var bh = base[k]; if (!bh || !lo[k] || hCol(c, lo[k]) !== bh) continue;   // mexido aqui: fica o daqui
+        if (c1) { if (hCol(c, c1) !== bh) arr[i] = c1; }        // mudou em outro aparelho: adota
+        else if (nuvemConfiavel) { arr.splice(i, 1); i--; }      // apagado/unificado em outro aparelho
+      }
+      // o mesmo código não pode ficar duas vezes (ex.: nome trocado aqui e o antigo vindo da nuvem)
+      var vistos = {}, final = [];
+      arr.forEach(function (x) {
+        if (!x || x.id == null) { final.push(x); return; }
+        var k = String(x.id);
+        if (!(k in vistos)) { vistos[k] = final.length; final.push(x); return; }
+        var atual = final[vistos[k]], l = lo[k];
+        var mexidoAqui = l && (!base || !base[k] || hCol(c, l) !== base[k]);
+        if (mexidoAqui && hCol(c, x) === hCol(c, l)) final[vistos[k]] = x;            // fica a versão deste aparelho
+        else if (!mexidoAqui && cl[k] && hCol(c, x) === hCol(c, cl[k])) final[vistos[k]] = x; // fica a da nuvem
+        else if (tsItem(x) > tsItem(atual)) final[vistos[k]] = x;
+      });
+      arr.length = 0; Array.prototype.push.apply(arr, final);
+    });
+  }
+  async function enviarColecao(chave, tabela, lista, montar) {
+    lista = semIdsRepetidos(lista);
+    var base = lerBaseCol()[chave] || null;
+    var envio = base ? lista.filter(function (x) { return base[String(x.id)] !== hCol(chave, x); }) : lista;
+    for (var i = 0; i < envio.length; i += 200) {
+      var lote = envio.slice(i, i + 200).map(montar);
+      var r = await fetch(SUPABASE_URL + '/' + tabela, { method: 'POST', headers: supabaseHeaders({ 'Prefer': 'resolution=merge-duplicates,return=minimal' }), body: JSON.stringify(lote) });
+      if (!r.ok) { var t = ''; try { t = await r.text(); } catch (e) {} throw new Error('POST ' + tabela + ': HTTP ' + r.status + ' — ' + t.slice(0, 200)); }
+    }
+    if (base) {
+      var tem = {}; lista.forEach(function (x) { tem[String(x.id)] = 1; });
+      var apagar = Object.keys(base).filter(function (k) { return !tem[k] && /^-?\d+$/.test(k); });
+      for (var j = 0; j < apagar.length; j += 50) {
+        await fetch(SUPABASE_URL + '/' + tabela + '?id=in.(' + apagar.slice(j, j + 50).join(',') + ')', { method: 'DELETE', headers: supabaseHeaders({ 'Prefer': 'return=minimal' }) });
+      }
+    }
+    gravarBaseCol(chave, lista);
+    W.__f68Enviados = (W.__f68Enviados || 0) + envio.length;
+    return true;
+  }
+  function instalarColecoes() {
+    var f = W.r106SyncColecao;
+    if (typeof f === 'function' && !f.__f512) {
+      var g = async function (cfg, listaLocal) {
+        if (cfg && COLS_SYNC[cfg.chave] && typeof r106Modo !== 'undefined' && r106Modo[cfg.chave] === 'tabela') {
+          return enviarColecao(cfg.chave, cfg.tabela, Array.isArray(listaLocal) ? listaLocal : [], function (item) {
+            return { id: Number(item.id) || Date.now(), dados: item, updated_at: new Date().toISOString() };
+          });
+        }
+        return f.apply(this, arguments);
+      };
+      g.__f512 = true; W.r106SyncColecao = g;
+    }
+    var d = W.supabaseSyncDestinos;
+    if (typeof d === 'function' && !d.__f512) {
+      var d2 = async function () {
+        try { if (typeof destDeduplicarBase === 'function') destDeduplicarBase(true); } catch (e) {}
+        return enviarColecao('destinos', 'destinos', bancoDados.destinos || [], function (x) { return destinoToSupabase(x); });
+      };
+      d2.__f512 = true; W.supabaseSyncDestinos = d2;
+    }
+  }
+  instalarColecoes();
+  W.addEventListener('load', function () { instalarColecoes(); setTimeout(instalarColecoes, 2000); });
+  setInterval(instalarColecoes, 6000);
 
   /* ---------------- painel de diagnóstico (aparece 25 s ao abrir e quando há erro) ---------------- */
   function hora(t) { if (!t) return '—'; var d = new Date(t); return ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2) + ':' + ('0' + d.getSeconds()).slice(-2); }

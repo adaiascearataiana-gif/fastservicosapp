@@ -304,11 +304,36 @@
     tb.querySelectorAll('input.cli-sel-linha[data-cli-nome]').forEach(function (cb) {
       var tr = cb.closest('tr'); if (!tr || tr.querySelector('.frx-cli')) return;
       var td = tr.children[1] || tr.children[0];
-      var b = document.createElement('button'); b.type = 'button'; b.className = 'frx-btn sec pq frx-cli'; b.style.marginTop = '6px';
-      b.textContent = '📊 Histórico'; b.onclick = function (ev) { ev.stopPropagation(); W.fastFichaCliente(cb.getAttribute('data-cli-nome')); };
-      td.appendChild(b);
+      // na MESMA linha dos botões Editar/Excluir (antes ia embaixo e deixava a linha alta)
+      var ref = td.querySelector('button:last-of-type') || td.lastElementChild;
+      var linha = ref ? ref.parentNode : td;
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'frx-cli';
+      b.title = 'Histórico do cliente';
+      // (os botões desta coluna têm letra "zerada" pelo tema; por isso o tamanho vai no próprio texto)
+      b.innerHTML = '<span style="font-size:15px;line-height:1">📊</span><span class="frx-cli-txt" style="font-size:12px;line-height:1"> Histórico</span>';
+      var h = ref && ref.offsetHeight ? ref.offsetHeight : 32;
+      b.style.cssText = 'height:' + h + 'px;min-height:0;padding:0 10px;margin:0;border-radius:8px;border:1px solid var(--border,#cbd5e1);background:var(--card-bg,#fff);color:inherit;font-weight:700;font-size:12px;white-space:nowrap;display:inline-flex;align-items:center;gap:2px;cursor:pointer;vertical-align:middle';
+      // o tema força 30 px e sem espaçamento nos botões desta coluna: este precisa caber o texto
+      [['width', 'auto'], ['min-width', 'auto'], ['max-width', 'none'], ['flex', '0 0 auto'], ['padding', '0 10px'], ['overflow', 'visible'], ['justify-content', 'center']]
+        .forEach(function (kv) { b.style.setProperty(kv[0], kv[1], 'important'); });
+      b.style.setProperty('font-size', '12px', 'important');
+      b.onclick = function (ev) { ev.stopPropagation(); W.fastFichaCliente(cb.getAttribute('data-cli-nome')); };
+      linha.appendChild(b);
+      linha.style.setProperty('display', 'inline-flex', 'important'); linha.style.setProperty('flex-wrap', 'nowrap', 'important');
+      linha.style.setProperty('align-items', 'center', 'important'); linha.style.setProperty('gap', '6px', 'important');
+      td.style.setProperty('white-space', 'nowrap', 'important');
     });
   }
+  // tabela de clientes mais compacta (linhas e colunas com menos espaço sobrando)
+  (function () {
+    var css = document.createElement('style');
+    css.textContent = '#clientesTable th,#clientesTable td{padding-top:6px!important;padding-bottom:6px!important;padding-left:8px!important;padding-right:8px!important}' +
+      '#clientesTable td{vertical-align:middle!important}#clientesTable{border-spacing:0!important}' +
+      '#clientesTable td .actions-cell{overflow:visible!important;max-width:none!important}' +
+      '@media(min-width:701px){#clientesTable tr>td:nth-child(2),#clientesTable tr>th:nth-child(2){min-width:190px!important;width:190px!important;overflow:visible!important}}' +
+      '@media(max-width:700px){#clientesTable .frx-cli .frx-cli-txt{display:none}#clientesTable tr>td:nth-child(2){min-width:112px!important;overflow:visible!important}}';
+    (document.head || document.documentElement).appendChild(css);
+  })();
 
   /* =====================================================================
      6) AVISAR CLIENTE (acompanhamento) — botão em cada card das Rotas do Dia
@@ -667,6 +692,7 @@
       '<button type="button" class="frx-tool" data-a="preco">💲 Tabela de preços<span>valor por destino</span></button>' +
       '<button type="button" class="frx-tool" data-a="pin">🔢 Bloqueio por PIN<span>' + (pinCfg() ? 'ativado' : 'desativado') + '</span></button>' +
       '<button type="button" class="frx-tool" data-a="sup">🎧 Central de Suporte<span>' + (SUP.abertos ? SUP.abertos + ' aguardando resposta' : 'clientes e motoristas') + '</span></button>' +
+      '<button type="button" class="frx-tool" data-a="atalhos">⌨️ Atalhos do teclado<span>no computador: Alt+Shift+letra</span></button>' +
       '<button type="button" class="frx-tool" data-a="diag">🩺 Sincronização<span>login, tempo real, fotos</span></button>' +
       '<button type="button" class="frx-tool" data-a="conf">🔎 Conferir rotas<span>somas erradas, repetidas, teste</span></button>' +
       '<button type="button" class="frx-tool" data-a="bkp">☁️ Backup no Drive<span>' + (ult ? 'último: ' + new Date(ult).toLocaleDateString('pt-BR') : 'semanal, automático') + '</span></button>' +
@@ -679,6 +705,7 @@
     if (a === 'conf') W.fastConferirRotas();
     if (a === 'sup') W.fastCentralSuporte();
     if (a === 'diag' && W.fastDiagnosticoSync) W.fastDiagnosticoSync();
+    if (a === 'atalhos') W.fastAtalhos();
     if (a === 'cob') W.fastCobranca();
     if (a === 'fech') W.fastFechamentoPeriodo();
     if (a === 'preco') W.fastTabelaPrecos();
@@ -1595,6 +1622,130 @@
   }
   W.addEventListener('load', function () { instalarNavegar(); setTimeout(instalarNavegar, 2000); });
   setInterval(instalarNavegar, 5000);
+
+  /* ---------------- NOMES: primeira letra de cada palavra maiúscula, o resto como digitado ----------------
+     "jose adailton de medeiros" → "Jose Adailton De Medeiros"; siglas digitadas em
+     maiúsculas continuam assim (WM, FCF, CE, MGZ). Antes, o cadastro de clientes e
+     de motoristas deixava o resto em minúsculas ("Fcf", "Wm"). */
+  function primeiraMaiuscula(txt) {
+    return String(txt).replace(/(^|[\s\-\/(])([a-zà-ÿ])/g, function (m, sep, l) { return sep + l.toUpperCase(); });
+  }
+  function aplicarNome(el) {
+    if (!el || el.value == null) return;
+    var novo = primeiraMaiuscula(el.value);
+    if (novo === el.value) return;
+    var p1 = el.selectionStart, p2 = el.selectionEnd;
+    el.value = novo;
+    try { if (p1 != null) el.setSelectionRange(p1, p2); } catch (e) {}
+  }
+  var CAMPOS_NOME = {
+    txtCliente: 1, txtOrigem: 1, txtDestino: 1, seqCliente: 1, seqOrigem: 1, seqDestino: 1,
+    editTxtCliente: 1, editTxtOrigem: 1, editTxtDestino: 1, f66eCli: 1, f66eOri: 1, f66eDes: 1,
+    clienteNome: 1, clienteApelido: 1, clienteResponsavel: 1, clienteLogradouro: 1, clienteBairro: 1, clienteCidadeUf: 1,
+    motoristaNome: 1, motoristaLogradouro: 1, motoristaBairro: 1, motoristaCidadeUf: 1, motoristaVeiculo: 1, motoristaCor: 1,
+    editDestinoNome: 1, editDestinoBairro: 1, editDestinoEndereco: 1, empNomeFantasia: 1, empBairro: 1
+  };
+  function campoDeNome(el) {
+    if (!el || el.tagName !== 'INPUT' || (el.type && el.type !== 'text' && el.type !== 'search')) return false;
+    if (CAMPOS_NOME[el.id]) return true;
+    var c = el.classList; return !!(c && (c.contains('destino-extra-input') || c.contains('destino-extra-rota-input') || c.contains('seq-destino-input')));
+  }
+  document.addEventListener('input', function (e) {
+    if (e.isComposing || W.__fastIMECompondo) return;      // ditado por voz: espera terminar
+    if (campoDeNome(e.target)) aplicarNome(e.target);
+  });
+  document.addEventListener('compositionend', function (e) { if (campoDeNome(e.target)) setTimeout(function () { aplicarNome(e.target); }, 0); }, true);
+  (function () {
+    function ligar() {
+      var f = W.capitalizarNome; if (typeof f !== 'function' || f.__frx) return;
+      var g = function (input) { if (W.__fastIMECompondo) return f.apply(this, arguments); aplicarNome(input); };
+      g.__frx = true; W.capitalizarNome = g;
+    }
+    ligar(); W.addEventListener('load', function () { ligar(); setTimeout(ligar, 2000); });
+  })();
+
+  /* ---------------- ATALHOS DE TECLADO (computador) ----------------
+     Alt + Shift + letra. Não usa Ctrl+A/C/V/X/Z/Y/S/P/F nem outros de edição,
+     nem os do navegador (Alt+Shift+B, I, T, A). Ctrl + / abre os comandos. */
+  function irPara(aba, foco) {
+    try { if (typeof W.proIr === 'function') W.proIr(aba); else trocarAba(null, aba); } catch (e) { try { trocarAba(null, aba); } catch (er) {} }
+    if (foco) setTimeout(function () { var el = $(foco); if (el) el.focus(); }, 350);
+  }
+  var ATALHOS = [
+    ['KeyH', 'Início (Centro de Operações)', function () { irPara('central'); }, 'central'],
+    ['KeyN', 'Nova rota', function () { irPara('rotas', 'txtCliente'); }, 'rotas'],
+    ['KeyR', 'Rotas', function () { irPara('rotas'); }, null],
+    ['KeyD', 'Rotas do Dia', function () { irPara('rotasDia', 'seqCliente'); }, 'rotasDia'],
+    ['KeyM', 'Mapa & Rastreamento', function () { irPara('rastreamento'); }, 'rastreamento'],
+    ['KeyG', 'Dashboard (gráficos)', function () { irPara('dashboard'); }, 'dashboard'],
+    ['KeyE', 'Despesas', function () { irPara('despesas'); }, 'despesas'],
+    ['KeyC', 'Clientes', function () { irPara('clientes'); }, 'clientes'],
+    ['KeyO', 'Motoristas', function () { irPara('motoristas'); }, 'motoristas'],
+    ['KeyL', 'Lugares', function () { irPara('lugares'); }, 'lugares'],
+    ['KeyU', 'Recursos Humanos', function () { irPara('rh'); }, 'rh'],
+    ['KeyQ', 'Buscar em tudo', function () { W.fastBuscaCompleta(); }, null],
+    ['KeyK', 'Cobrança', function () { W.fastCobranca(); }, null],
+    ['KeyF', 'Fechamento do período', function () { W.fastFechamentoPeriodo(); }, null],
+    ['KeyP', 'Tabela de preços', function () { W.fastTabelaPrecos(); }, null],
+    ['KeyV', 'Conferir rotas', function () { W.fastConferirRotas(); }, null],
+    ['KeyS', 'Central de Suporte', function () { W.fastCentralSuporte(); }, null],
+    ['KeyY', 'Sincronização', function () { if (W.fastDiagnosticoSync) W.fastDiagnosticoSync(); }, null],
+    ['KeyJ', 'Configurações', function () { irPara('configuracoes'); }, 'configuracoes']
+  ];
+  function rotuloAtalho(code) { return 'Alt+Shift+' + code.replace('Key', ''); }
+  document.addEventListener('keydown', function (e) {
+    if (!e.altKey || !e.shiftKey || e.ctrlKey || e.metaKey || e.repeat) return;
+    var a = ATALHOS.filter(function (x) { return x[0] === e.code; })[0]; if (!a) return;
+    e.preventDefault(); e.stopPropagation();
+    try { if (typeof W.proFecharComandos === 'function') W.proFecharComandos(); } catch (er) {}
+    try { a[2](); } catch (er) {}
+  }, true);
+  W.fastAtalhos = function () {
+    janela('⌨️ Atalhos do teclado', '<p class="frx-muted" style="margin:0 0 10px">Segure <b>Alt</b> e <b>Shift</b> e aperte a letra. <b>Ctrl + /</b> abre os comandos.</p>' +
+      '<div class="frx-wrap"><table class="frx-tb"><tbody>' + ATALHOS.map(function (x) { return '<tr><td><kbd style="font:700 12px monospace;background:#eef2ff;border:1px solid #c7d2fe;border-radius:6px;padding:2px 6px;white-space:nowrap">' + rotuloAtalho(x[0]) + '</kbd></td><td>' + esc(x[1]) + '</td></tr>'; }).join('') + '</tbody></table></div>',
+      [{ txt: 'Fechar', cls: 'sec', fn: function (f) { f(); } }]);
+  };
+  // atalhos aparecem na lista de comandos (Ctrl + /), que também ganha as Ferramentas FAST
+  function instalarComandos() {
+    var f = W.proFiltrarComandos;
+    if (typeof f !== 'function' || f.__frx) return;
+    var g = function (q) {
+      var r = f.apply(this, arguments);
+      try {
+        var box = $('proCmdList'); if (!box) return r;
+        var qq = norm(q || '');
+        var presentes = {};
+        box.querySelectorAll('.pro-cmd-item').forEach(function (it) {
+          var m = String(it.getAttribute('onclick') || '').match(/proIr\('([^']+)'\)/);
+          if (m) presentes[m[1]] = 1;
+          var a = m && ATALHOS.filter(function (x) { return x[3] === m[1]; })[0];
+          if (a && !it.querySelector('.frx-kbd')) { var k = document.createElement('kbd'); k.className = 'frx-kbd'; k.textContent = rotuloAtalho(a[0]); it.appendChild(k); }
+        });
+        ATALHOS.filter(function (x) { return (!x[3] || !presentes[x[3]]) && x[0] !== 'KeyR' && (!qq || norm(x[1]).indexOf(qq) >= 0); }).forEach(function (x) {
+          var bt = document.createElement('button'); bt.type = 'button'; bt.className = 'pro-cmd-item';
+          bt.innerHTML = '<span>⚙️ ' + esc(x[1]) + '</span><kbd class="frx-kbd">' + rotuloAtalho(x[0]) + '</kbd>';
+          bt.onclick = function () { try { W.proFecharComandos(); } catch (e) {} x[2](); };
+          box.appendChild(bt);
+        });
+        if (!qq || 'atalhos teclado'.indexOf(qq) >= 0) {
+          var at = document.createElement('button'); at.type = 'button'; at.className = 'pro-cmd-item';
+          at.innerHTML = '<span>⌨️ Ver todos os atalhos do teclado</span><kbd class="frx-kbd">Ctrl+/</kbd>';
+          at.onclick = function () { try { W.proFecharComandos(); } catch (e) {} W.fastAtalhos(); };
+          box.appendChild(at);
+        }
+      } catch (e) {}
+      return r;
+    };
+    g.__frx = true; W.proFiltrarComandos = g;
+  }
+  (function () {
+    var css = document.createElement('style');
+    css.textContent = '.frx-kbd{margin-left:auto;font:700 11px/1 ui-monospace,monospace;background:#eef2ff;color:#3730a3;border:1px solid #c7d2fe;border-radius:6px;padding:3px 6px;white-space:nowrap}' +
+      '@media(hover:none),(max-width:820px){.frx-kbd{display:none}}';
+    (document.head || document.documentElement).appendChild(css);
+  })();
+  W.addEventListener('load', function () { instalarComandos(); setTimeout(instalarComandos, 2000); });
+  setInterval(instalarComandos, 6000);
 
   /* ---------------- câmera ao vivo: garante que a imagem comece a rodar ----------------
      O código original liga a câmera mas não manda o vídeo "tocar"; com economia de
