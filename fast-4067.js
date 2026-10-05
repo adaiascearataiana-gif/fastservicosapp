@@ -33,7 +33,7 @@
   W.__fast4067 = true;
 
   var BASE_KEY = 'fast4067_base_v1';
-  var VERSAO = 'v27';
+  var VERSAO = 'v28';
   function versaoApp() { try { return (document.querySelector('meta[name="fast-app-version"]') || {}).content || VERSAO; } catch (e) { return VERSAO; } }
   var DIAG = W.__f68Diag = { erro: '', erroEm: 0, envio: 0, baixou: 0 };
   function falha(txt) { DIAG.erro = String(txt).slice(0, 160); DIAG.erroEm = Date.now(); try { painel(true); } catch (e) {} }
@@ -413,7 +413,16 @@
     var agoraIso = new Date().toISOString();
     var linhas = semRepetidos(mud.map(despesaToSupabase)).map(function (l) { l.updated_at = agoraIso; return l; });
     if (linhas.length) {
-      await enviarLotes('despesas', linhas);
+      // o banco só aceita lotes com as mesmas colunas: separa quem tem forma de pagamento
+      var grupos = {}; linhas.forEach(function (l) { var k = Object.keys(l).sort().join(','); (grupos[k] = grupos[k] || []).push(l); });
+      for (var gk in grupos) {
+        try { await enviarLotes('despesas', grupos[gk]); }
+        catch (e) {
+          if (!/forma_pgto|nome_cartao|PGRST204|column/i.test(String(e && e.message))) throw e;
+          W.__f513SemPgto = true;   // falta rodar o SQL: envia sem a forma de pagamento
+          await enviarLotes('despesas', grupos[gk].map(function (l) { var c = Object.assign({}, l); delete c.forma_pgto; delete c.nome_cartao; return c; }));
+        }
+      }
       if (N) linhas.forEach(function (l) { N.d[String(l.id)] = hs[String(l.id)]; });
     }
     var base = lerBase();
@@ -459,7 +468,9 @@
       return y;
     });
     ajustar(res.despesas, base.d || {}, local.despesas, nuvem.despesas, camposDesp, function (x, c) {
-      return Object.assign({}, x, c);
+      var y = Object.assign({}, x, c);
+      if (!c.formaPgto && x.formaPgto) { y.formaPgto = x.formaPgto; if (x.nomeCartao) y.nomeCartao = x.nomeCartao; }
+      return y;
     });
     // Rotas do Dia: se ESTE aparelho não mexeu no item desde a última sincronização
     // e outro aparelho mudou (cliente, destino, valor, motorista...), adota a versão
@@ -500,6 +511,26 @@
   function instalarSync() {
     if (!pronto() || W.__f67SyncOk) return !!W.__f67SyncOk;
     try {
+      // 5.1.3: forma de pagamento da despesa (PIX, dinheiro, débito, crédito…) passa a ir para a nuvem
+      var dts = W.despesaToSupabase;
+      if (typeof dts === 'function' && !dts.__f513) {
+        var dts2 = function (d) {
+          var o = dts.apply(this, arguments);
+          var f = d && (d.formaPgto || '');
+          if (f && !W.__f513SemPgto) { o.forma_pgto = String(f); o.nome_cartao = String(d.nomeCartao || ''); }
+          return o;
+        };
+        dts2.__f513 = true; W.despesaToSupabase = dts2;
+      }
+      var std = W.supabaseToDespesa;
+      if (typeof std === 'function' && !std.__f513) {
+        var std2 = function (row) {
+          var o = std.apply(this, arguments);
+          if (row && row.forma_pgto) { o.formaPgto = row.forma_pgto; if (row.nome_cartao) o.nomeCartao = row.nome_cartao; }
+          return o;
+        };
+        std2.__f513 = true; W.supabaseToDespesa = std2;
+      }
       W.supabaseGetRotas = async function () { return (await getInc('rotas')).map(supabaseToRota); };
       W.supabaseGetDespesas = async function () { return (await getInc('despesas')).map(supabaseToDespesa); };
       W.supabaseGetSequencias = async function () { return rowsToSequencias(await getInc('sequencias_itens')); };
@@ -1733,6 +1764,61 @@
   W.addEventListener('load', function () { instalarColecoes(); setTimeout(instalarColecoes, 2000); });
   setInterval(instalarColecoes, 6000);
 
+  /* =====================================================================
+     5.1.3 — ESPAÇO NO APARELHO ("exceeded the quota" ao salvar)
+     O navegador dá ~5 MB por site. O FAST guardava os dados TRÊS vezes nesse
+     espaço: os dados em si, a "última versão boa" e o "autobackup". As duas
+     cópias extras já existem no banco interno do aparelho (IndexedDB, com 12
+     versões), então saem daqui — e, se o espaço acabar, o FAST libera sozinho
+     antes de desistir de salvar.
+     ===================================================================== */
+  var COPIAS_EXTRAS = ['fast_autobackup', 'fastapp_last_known_good', 'fast_rotas_backup_pre_adaias_v201'];
+  function usoLocal() {
+    var t = 0;
+    try { for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i); t += (k.length + (localStorage.getItem(k) || '').length) * 2; } } catch (e) {}
+    return t;
+  }
+  function liberarEspaco(alvo) {
+    var livres = 0;
+    COPIAS_EXTRAS.forEach(function (k) {
+      if (k === alvo) return;
+      try { var v = localStorage.getItem(k); if (v != null) { livres += v.length * 2; ORIG_REMOVE.call(localStorage, k); } } catch (e) {}
+    });
+    if (livres) DIAG.espacoLiberado = (DIAG.espacoLiberado || 0) + livres;
+    return livres;
+  }
+  var ORIG_SET = Storage.prototype.setItem, ORIG_REMOVE = Storage.prototype.removeItem;
+  if (!ORIG_SET.__f513) {
+    var novoSet = function (k, v) {
+      if (this === W.localStorage && COPIAS_EXTRAS.indexOf(String(k)) >= 0 && String(v).length > 200000) {
+        // cópia de segurança grande: fica só no banco interno do aparelho (IndexedDB)
+        try { ORIG_REMOVE.call(this, k); } catch (e) {}
+        return;
+      }
+      try { return ORIG_SET.call(this, k, v); }
+      catch (err) {
+        if (this !== W.localStorage) throw err;
+        liberarEspaco(String(k));
+        try { return ORIG_SET.call(this, k, v); }
+        catch (err2) {
+          if (COPIAS_EXTRAS.indexOf(String(k)) >= 0) return;   // cópia extra: sem problema não gravar
+          throw err2;
+        }
+      }
+    };
+    novoSet.__f513 = true;
+    try { Storage.prototype.setItem = novoSet; } catch (e) {}
+  }
+  // ao abrir: tira as cópias grandes que já estão ocupando espaço
+  (function () {
+    try {
+      COPIAS_EXTRAS.forEach(function (k) { var v = localStorage.getItem(k); if (v && v.length > 200000) { DIAG.espacoLiberado = (DIAG.espacoLiberado || 0) + v.length * 2; ORIG_REMOVE.call(localStorage, k); } });
+      // e regrava os dados, caso a última gravação tenha falhado por falta de espaço
+      if (W.bancoDados) { try { localStorage.setItem('banco_gestao_local', JSON.stringify(W.bancoDados)); } catch (e) {} }
+    } catch (e) {}
+  })();
+  W.fastUsoArmazenamento = usoLocal;
+
   /* ---------------- painel de diagnóstico (aparece 25 s ao abrir e quando há erro) ---------------- */
   function hora(t) { if (!t) return '—'; var d = new Date(t); return ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2) + ':' + ('0' + d.getSeconds()).slice(-2); }
   var tPainel = 0;
@@ -1773,6 +1859,8 @@
     if (DRV.antigasEnviadas) linhas.push('🖼️ Fotos antigas ligadas ao Drive (sem cópia): ' + DRV.antigasEnviadas + (DRV.antigas === 'em dia' ? ' (concluído)' : ' (continuando…)'));
     if (DRV.fotosTabela === 'falta') linhas.push('<span style="color:#fde68a">🖼️ Fotos entre aparelhos: falta rodar o SQL da tabela fotos_drive</span>');
     if (DRV.pend > 0 && DRV.erroFoto) linhas.push('<span style="color:#fde68a">📷 Erro da foto: ' + DRV.erroFoto.replace(/[<>&]/g, '').slice(0, 160) + '</span>');
+    var mb = usoLocal() / 1048576;
+    linhas.push((mb > 4.2 ? '⚠️' : '💾') + ' Espaço do app no aparelho: ' + mb.toFixed(1).replace('.', ',') + ' MB de ~5 MB' + (DIAG.espacoLiberado ? ' (liberados ' + (DIAG.espacoLiberado / 1048576).toFixed(1).replace('.', ',') + ' MB)' : ''));
     if (DIAG.erro) linhas.push('<span style="color:#fca5a5">⛔ ' + DIAG.erro.replace(/[<>&]/g, '') + '</span>');
     document.getElementById('f68DiagTxt').innerHTML = linhas.join('<br>');
     formLogin(!tk && DIAG.login === 'sem-sessao');

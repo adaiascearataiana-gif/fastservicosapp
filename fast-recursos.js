@@ -1747,6 +1747,96 @@
   W.addEventListener('load', function () { instalarComandos(); setTimeout(instalarComandos, 2000); });
   setInterval(instalarComandos, 6000);
 
+  /* ---------------- UMA SÓ LISTA DE LETRAS ----------------
+     Lugares (e Motoristas, RH, Clientes) tinham duas fileiras de letras: a antiga
+     "Filtrar por letra" e a nova "Letra: Todos (N)", que mostra a contagem e
+     trabalha junto com as páginas e o Unificar. Fica só a nova. */
+  function umaListaDeLetras() {
+    document.querySelectorAll('.tab-content').forEach(function (aba) {
+      if (!aba.querySelector('[id^="f47bar_"]')) return;
+      aba.querySelectorAll('.fast118-alpha, #alfabetoFiltro').forEach(function (velha) {
+        if (velha.__frxOculta) return;
+        // antes de esconder, volta a antiga para "Todos" (para não ficar filtrando escondida)
+        var ativa = velha.querySelector('button.active[data-l]:not([data-l=""]), button.ativo[data-letra]:not([data-letra=""])');
+        if (ativa) { var todos = velha.querySelector('button[data-l=""], button[data-letra=""]'); if (todos) todos.click(); }
+        velha.style.setProperty('display', 'none', 'important');
+        velha.__frxOculta = true;
+      });
+    });
+  }
+  W.addEventListener('load', function () { umaListaDeLetras(); setTimeout(umaListaDeLetras, 1500); setTimeout(umaListaDeLetras, 4000); });
+  setInterval(umaListaDeLetras, 3000);
+
+  /* =====================================================================
+     DESPESAS — FORMA DE PAGAMENTO
+     • Mostra com ícone e cor: PIX (verde), DINHEIRO (âmbar), DÉBITO (azul),
+       CRÉDITO (roxo, com o nome do cartão), BOLETO (cinza).
+     • Despesas antigas que guardaram a forma em outro campo (pagamento,
+       formaPagamento, tipoPagamento…) passam a mostrar na coluna.
+     ===================================================================== */
+  function normalizarForma(v) {
+    var t = norm(v); if (!t) return '';
+    if (/\bpix\b/.test(t)) return 'PIX';
+    if (/cred/.test(t)) return 'CARTAO CREDITO';
+    if (/deb/.test(t)) return 'CARTAO DEBITO';
+    if (/dinheiro|a vista|avista|especie|cash/.test(t)) return 'A VISTA';
+    if (/boleto/.test(t)) return 'BOLETO';
+    if (/^(cartao|card)$/.test(t)) return 'CARTAO DEBITO';
+    return 'OUTROS';
+  }
+  function completarFormas() {
+    var mudou = 0;
+    (bd().despesas || []).forEach(function (d) {
+      if (!d) return;
+      if (d.formaPgto) { var n = normalizarForma(d.formaPgto); if (n && n !== 'OUTROS' && n !== d.formaPgto) { d.formaPgto = n; mudou++; } return; }
+      var alt = d.formaPagamento || d.tipoPagamento || d.pagamento || d.meioPagamento || d.formaDePagamento || d.pgto || '';
+      var n2 = normalizarForma(alt);
+      if (n2) { d.formaPgto = n2; mudou++; }
+    });
+    if (mudou) { try { salvarStorage(); } catch (e) {} try { renderizar(); } catch (e) {} }
+    return mudou;
+  }
+  W.fastCompletarFormasPgto = completarFormas;
+  W.addEventListener('load', function () { setTimeout(completarFormas, 7000); });
+  setInterval(function () { if (!document.hidden) completarFormas(); }, 120000);
+
+  var FORMAS = {
+    'PIX': ['fa-bolt', 'PIX', '#16a34a', '#dcfce7'],
+    'A VISTA': ['fa-money-bill-wave', 'DINHEIRO', '#b45309', '#fef3c7'],
+    'CARTAO DEBITO': ['fa-credit-card', 'DÉBITO', '#1d4ed8', '#dbeafe'],
+    'CARTAO CREDITO': ['fa-credit-card', 'CRÉDITO', '#7c3aed', '#ede9fe'],
+    'BOLETO': ['fa-barcode', 'BOLETO', '#475569', '#f1f5f9'],
+    'OUTROS': ['fa-ellipsis', 'OUTROS', '#475569', '#f1f5f9']
+  };
+  function instalarFormas() {
+    var f = W.fastFormatarPgtoDespesa;
+    if (typeof f !== 'function' || f.__frx) return;
+    var g = function (d) {
+      try {
+        var k = normalizarForma(d && (d.formaPgto || d.formaPagamento || d.tipoPagamento || d.pagamento));
+        if (!k) return '<span style="color:var(--text-faint);font-size:12px;">&mdash;</span>';
+        var x = FORMAS[k] || FORMAS.OUTROS;
+        var cartao = (k === 'CARTAO CREDITO' && d && d.nomeCartao) ? '<br><span style="font-size:11px;color:var(--text-faint);">' + esc(String(d.nomeCartao).trim()) + '</span>' : '';
+        return '<span style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:800;color:' + x[2] + ';background:' + x[3] + ';border-radius:999px;padding:3px 9px;white-space:nowrap"><i class="fa-solid ' + x[0] + '"></i>' + x[1] + '</span>' + cartao;
+      } catch (e) { return f.apply(this, arguments); }
+    };
+    g.__frx = true; W.fastFormatarPgtoDespesa = g;
+    // nomes mais claros no formulário (os valores gravados continuam os mesmos)
+    ['cbFormaPgtoDespesa', 'editFormaPgtoDespesa'].forEach(function (id) {
+      var sel = $(id); if (!sel) return;
+      Array.prototype.forEach.call(sel.options, function (o) {
+        if (o.value === 'A VISTA') o.textContent = 'Dinheiro (à vista)';
+        if (o.value === 'CARTAO DEBITO') o.textContent = 'Cartão de débito';
+        if (o.value === 'CARTAO CREDITO') o.textContent = 'Cartão de crédito';
+        if (o.value === 'BOLETO') o.textContent = 'Boleto';
+        if (o.value === 'OUTROS') o.textContent = 'Outros';
+      });
+    });
+    try { renderizar(); } catch (e) {}
+  }
+  W.addEventListener('load', function () { setTimeout(instalarFormas, 1500); setTimeout(instalarFormas, 4000); });
+  setInterval(instalarFormas, 6000);
+
   /* ---------------- câmera ao vivo: garante que a imagem comece a rodar ----------------
      O código original liga a câmera mas não manda o vídeo "tocar"; com economia de
      bateria/dados o Chrome deixa parado e mostra só o símbolo ▶ cinza. */
