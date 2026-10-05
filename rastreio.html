@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Rastrear mercadoria · FAST Serviços</title>
+<meta name="description" content="Acompanhe sua entrega com o código de rastreio da FAST Serviços.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📦</text></svg>">
+<style>
+  :root{--bg:#0f172a;--card:#fff;--txt:#0f172a}
+  *{box-sizing:border-box}
+  body{margin:0;min-height:100vh;min-height:100dvh;background:linear-gradient(160deg,#0f172a,#1e3a8a 60%,#0f766e);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--txt);display:flex;align-items:flex-start;justify-content:center;padding:calc(28px + env(safe-area-inset-top,0px)) 16px calc(28px + env(safe-area-inset-bottom,0px))}
+  .cx{width:100%;max-width:520px}
+  .marca{color:#fff;font-weight:900;font-size:22px;margin:0 0 4px;display:flex;align-items:center;gap:8px}
+  .sub{color:#cbd5e1;margin:0 0 18px;font-size:14px}
+  .card{background:var(--card);border-radius:20px;padding:18px;box-shadow:0 20px 50px rgba(0,0,0,.35)}
+  .rod{color:#cbd5e1;font-size:12px;text-align:center;margin-top:16px}
+</style>
+</head>
+<body>
+<main class="cx">
+  <h1 class="marca">⚡ FAST Serviços</h1>
+  <p class="sub">Rastreie sua mercadoria com o código que você recebeu.</p>
+  <section class="card"><div id="rastreio"></div></section>
+  <p class="rod">O código tem 5 ou mais letras e números. Não usamos as letras I, L, O e U — se digitar, o sistema entende como 1 e 0.</p>
+</main>
+<script src="rastreio-fast.js?v=2"></script>
+<script>fastRastreio.montar(document.getElementById('rastreio'), { param: 'c' });</script>
+</body>
+</html>

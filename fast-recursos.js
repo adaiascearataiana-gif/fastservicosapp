@@ -355,7 +355,7 @@
         var concl = /CONCLU/i.test(String(it.status || ''));
         var txt = concl
           ? 'Olá ' + (it.cliente || '') + '! ✅ Sua entrega para ' + (it.destino || 'o destino') + ' foi concluída pela FAST.' + (it.dataConclusao ? ' (' + new Date(it.dataConclusao).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) + ')' : '') + '\nVeja o histórico e as entregas no app: ' + LINK_CLIENTE
-          : 'Olá ' + (it.cliente || '') + '! 🚚 Sua entrega para ' + (it.destino || 'o destino') + ' está a caminho com a FAST' + (it.motorista ? ' (motorista ' + it.motorista + ')' : '') + '.\nAcompanhe em tempo real pelo app: ' + LINK_CLIENTE;
+          : 'Olá ' + (it.cliente || '') + '! 🚚 Sua entrega para ' + (it.destino || 'o destino') + ' está a caminho com a FAST' + (it.motorista ? ' (motorista ' + it.motorista + ')' : '') + '.' + (it.codigoRastreio ? '\n📦 Código de rastreio: *' + it.codigoRastreio + '*\nRastreie aqui: ' + W.fastLinkRastreio(it.codigoRastreio) : '') + '\nAcompanhe também pelo app: ' + LINK_CLIENTE;
         abrirWhats(telefoneDe(it.cliente), txt);
       };
       ref.parentNode.appendChild(b);
@@ -692,6 +692,7 @@
       '<button type="button" class="frx-tool" data-a="preco">💲 Tabela de preços<span>valor por destino</span></button>' +
       '<button type="button" class="frx-tool" data-a="pin">🔢 Bloqueio por PIN<span>' + (pinCfg() ? 'ativado' : 'desativado') + '</span></button>' +
       '<button type="button" class="frx-tool" data-a="sup">🎧 Central de Suporte<span>' + (SUP.abertos ? SUP.abertos + ' aguardando resposta' : 'clientes e motoristas') + '</span></button>' +
+      '<button type="button" class="frx-tool" data-a="rastreios">📦 Rastreios e coletas<span>códigos, motoristas e fotos</span></button>' +
       '<button type="button" class="frx-tool" data-a="atalhos">⌨️ Atalhos do teclado<span>no computador: Alt+Shift+letra</span></button>' +
       '<button type="button" class="frx-tool" data-a="diag">🩺 Sincronização<span>login, tempo real, fotos</span></button>' +
       '<button type="button" class="frx-tool" data-a="conf">🔎 Conferir rotas<span>somas erradas, repetidas, teste</span></button>' +
@@ -706,6 +707,7 @@
     if (a === 'sup') W.fastCentralSuporte();
     if (a === 'diag' && W.fastDiagnosticoSync) W.fastDiagnosticoSync();
     if (a === 'atalhos') W.fastAtalhos();
+    if (a === 'rastreios') W.fastRastreios();
     if (a === 'cob') W.fastCobranca();
     if (a === 'fech') W.fastFechamentoPeriodo();
     if (a === 'preco') W.fastTabelaPrecos();
@@ -1115,7 +1117,7 @@
      nova. Agora só rotas individuais servem de modelo; a soma fica só nos totais
      do cliente (relatório, ficha, fechamento). */
   function nomeChave(v) { try { return destNormalizarNome(v); } catch (e) { return norm(v); } }
-  function ehAgrupado(it) { return !!(it && (it.agrupado || Array.isArray(it.itensOriginais) || Array.isArray(it.rotasOriginais) || Array.isArray(it.itensAgrupados))); }
+  function ehAgrupado(it) { var c = function (x) { return Array.isArray(x) && x.length > 0; }; return !!(it && (it.agrupado === true || c(it.itensOriginais) || c(it.rotasOriginais) || c(it.itensAgrupados))); }
   function ultimaIndividual(nome) {
     var k = nomeChave(nome); if (!k) return null;
     var cands = [];
@@ -1323,6 +1325,7 @@
       var r = f.apply(this, arguments);
       sigLista = sig;
       try { botoesAvisar(); } catch (e) {}
+      try { botoesColeta(false); } catch (e) {}
       try { desenharEnvios(true); } catch (e) {}
       if (!porUsuario && Math.abs(W.scrollY - y) > 2) { try { W.scrollTo(0, y); } catch (e) {} }
       return r;
@@ -1411,7 +1414,7 @@
     return out;
   }
   var caixaSug = null, campoSug = null;
-  function fecharSug() { if (caixaSug) caixaSug.style.display = 'none'; }
+  function fecharSug() { if (caixaSug) caixaSug.style.setProperty('display', 'none', 'important'); }
   function mostrarSug(inp) {
     var tipo = tipoCampo(inp); if (!tipo) return;
     var q = norm(inp.value);
@@ -1420,20 +1423,39 @@
       .sort(function (a2, b2) { var pa = a2.k.indexOf(q) === 0 ? 0 : 1, pb = b2.k.indexOf(q) === 0 ? 0 : 1; return pa - pb || b2.n - a2.n || a2.nome.localeCompare(b2.nome, 'pt-BR'); }).slice(0, 8);
     if (!lista.length) { fecharSug(); return; }
     if (!caixaSug) {
-      caixaSug = document.createElement('div'); caixaSug.className = 'suggestions-list frx-sug';
-      caixaSug.style.cssText = 'position:absolute;z-index:100050;left:0;right:0;top:100%;display:none;max-height:260px';
+      // a lista fica "solta" na tela, logo abaixo do campo (antes ficava dentro da linha
+      // do campo e, nas Rotas do Dia, espremia o Destino e aparecia ao lado)
+      caixaSug = document.createElement('div'); caixaSug.className = 'frx-sug'; caixaSug.setAttribute('role', 'listbox');
+      [['position', 'fixed'], ['z-index', '2147483000'], ['display', 'none'], ['background', 'var(--card-bg,#fff)'], ['border', '1px solid var(--border,#cbd5e1)'],
+       ['border-radius', '12px'], ['box-shadow', '0 12px 30px rgba(15,23,42,.18)'], ['overflow', 'hidden auto'], ['max-height', '260px'], ['margin', '0'], ['padding', '0']]
+        .forEach(function (kv) { caixaSug.style.setProperty(kv[0], kv[1], 'important'); });
       caixaSug.addEventListener('mousedown', function (e) { e.preventDefault(); });
+      caixaSug.addEventListener('pointerdown', function (e) { e.preventDefault(); });
       caixaSug.addEventListener('click', function (e) {
         var it = e.target.closest && e.target.closest('[data-v]'); if (!it || !campoSug) return;
         campoSug.value = it.getAttribute('data-v'); fecharSug();
         try { campoSug.dispatchEvent(new Event('input', { bubbles: true })); campoSug.dispatchEvent(new Event('change', { bubbles: true })); } catch (er) {}
       });
+      document.body.appendChild(caixaSug);
+      var reposicionar = function () { if (caixaSug.style.display !== 'none' && campoSug) posicionarSug(campoSug); };
+      W.addEventListener('scroll', reposicionar, true); W.addEventListener('resize', reposicionar);
+      if (W.visualViewport) { W.visualViewport.addEventListener('resize', reposicionar); W.visualViewport.addEventListener('scroll', reposicionar); }
     }
-    var pai = inp.parentNode; if (getComputedStyle(pai).position === 'static') pai.style.position = 'relative';
-    if (caixaSug.parentNode !== pai) pai.appendChild(caixaSug);
     campoSug = inp;
     caixaSug.innerHTML = lista.map(function (x) { return '<div class="suggestion-item" role="option" data-v="' + esc(x.nome) + '">' + esc(x.nome) + '</div>'; }).join('');
-    caixaSug.style.display = 'block';
+    caixaSug.style.setProperty('display', 'block', 'important');
+    posicionarSug(inp);
+  }
+  function posicionarSug(inp) {
+    var r = inp.getBoundingClientRect();
+    if (!r.width || r.bottom < 0) { fecharSug(); return; }
+    var vv = W.visualViewport, altTela = vv ? vv.height + vv.offsetTop : W.innerHeight, largTela = W.innerWidth;
+    var larg = Math.min(Math.max(r.width, 220), largTela - 16), esq = Math.min(Math.max(8, r.left), largTela - larg - 8);
+    var alt = Math.min(caixaSug.scrollHeight || 200, 260);
+    var embaixo = altTela - r.bottom, top = (embaixo < alt + 12 && r.top > embaixo) ? (r.top - alt - 4) : (r.bottom + 4);   // sem espaço (teclado): abre para cima
+    caixaSug.style.setProperty('left', esq + 'px', 'important');
+    caixaSug.style.setProperty('top', top + 'px', 'important');
+    caixaSug.style.setProperty('width', larg + 'px', 'important');
   }
   document.addEventListener('input', function (e) { if (tipoCampo(e.target)) mostrarSug(e.target); }, true);
   document.addEventListener('focusin', function (e) { if (tipoCampo(e.target) && e.target.value) mostrarSug(e.target); }, true);
@@ -1690,7 +1712,8 @@
     ['KeyV', 'Conferir rotas', function () { W.fastConferirRotas(); }, null],
     ['KeyS', 'Central de Suporte', function () { W.fastCentralSuporte(); }, null],
     ['KeyY', 'Sincronização', function () { if (W.fastDiagnosticoSync) W.fastDiagnosticoSync(); }, null],
-    ['KeyJ', 'Configurações', function () { irPara('configuracoes'); }, 'configuracoes']
+    ['KeyJ', 'Configurações', function () { irPara('configuracoes'); }, 'configuracoes'],
+    ['KeyW', 'Rastreios e coletas', function () { W.fastRastreios(); }, null]
   ];
   function rotuloAtalho(code) { return 'Alt+Shift+' + code.replace('Key', ''); }
   document.addEventListener('keydown', function (e) {
@@ -1808,6 +1831,13 @@
     'BOLETO': ['fa-barcode', 'BOLETO', '#475569', '#f1f5f9'],
     'OUTROS': ['fa-ellipsis', 'OUTROS', '#475569', '#f1f5f9']
   };
+  // mesmo selo das despesas para a forma de pagamento das ROTAS (lista e relatório)
+  W.fastFormaPgtoHtml = function (v) {
+    var k = normalizarForma(v);
+    if (!k) return '<span style="color:var(--text-faint);font-size:12px;">&mdash;</span>';
+    var x = FORMAS[k] || FORMAS.OUTROS;
+    return '<span style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:800;color:' + x[2] + ';background:' + x[3] + ';border-radius:999px;padding:3px 9px;white-space:nowrap"><i class="fa-solid ' + x[0] + '"></i>' + x[1] + '</span>';
+  };
   function instalarFormas() {
     var f = W.fastFormatarPgtoDespesa;
     if (typeof f !== 'function' || f.__frx) return;
@@ -1835,7 +1865,488 @@
     try { renderizar(); } catch (e) {}
   }
   W.addEventListener('load', function () { setTimeout(instalarFormas, 1500); setTimeout(instalarFormas, 4000); });
+
+  /* ROTAS e RELATÓRIO DE ROTAS: a forma de pagamento com o mesmo ícone e cor das
+     despesas (PIX, DINHEIRO, DÉBITO, CRÉDITO, BOLETO). Usa o que já está gravado. */
+  function pillForma(txt) {
+    var k = normalizarForma(txt); if (!k || k === 'OUTROS') return '';
+    var x = FORMAS[k];
+    return '<span class="frx-pgto" style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:800;color:' + x[2] + ';background:' + x[3] + ';border-radius:999px;padding:3px 9px;white-space:nowrap"><i class="fa-solid ' + x[0] + '"></i>' + x[1] + '</span>';
+  }
+  W.fastPillFormaPgto = pillForma;
+  function decorarPagamentos() {
+    ['tabelaRotasBody', 'fastRelatorioRotasBody'].forEach(function (id) {
+      var tb = $(id); if (!tb) return;
+      var tabela = tb.closest('table'); if (!tabela) return;
+      var ths = Array.prototype.slice.call(tabela.querySelectorAll('thead th'));
+      var cols = []; ths.forEach(function (th, i) { var t = norm(th.textContent); if ((/pagamento|pgto/.test(t)) && !/status/.test(t)) cols.push(i); });
+      if (!cols.length) return;
+      Array.prototype.forEach.call(tb.rows, function (tr) {
+        cols.forEach(function (ci) {
+          var td = tr.cells[ci]; if (!td || td.querySelector('.frx-pgto') || td.querySelector('.badge-status')) return;
+          var p = pillForma(td.textContent.trim()); if (p) td.innerHTML = p;
+        });
+      });
+    });
+  }
+  W.fastDecorarPagamentos = decorarPagamentos;
+  (function () {
+    var obs = new MutationObserver(function () { clearTimeout(obs.__t); obs.__t = setTimeout(decorarPagamentos, 60); });
+    function ligar() { ['tabelaRotasBody', 'fastRelatorioRotasBody'].forEach(function (id) { var el = $(id); if (el && !el.__frxPg) { el.__frxPg = true; obs.observe(el, { childList: true }); } }); decorarPagamentos(); }
+    W.addEventListener('load', function () { ligar(); setTimeout(ligar, 2000); });
+    setInterval(ligar, 4000);
+  })();
   setInterval(instalarFormas, 6000);
+
+  /* =====================================================================
+     CÓDIGO DE RASTREIO (5.1.4)
+     • 5 caracteres no alfabeto "Base32 de Crockford" (0-9 e A-Z sem I, L, O, U):
+       fácil de ler e ditar, sem confundir 0/O ou 1/I/L. 32^5 ≈ 33,5 milhões.
+     • Cada rota ganha o seu; a Rota do Dia ligada usa o da rota; a Rota do Dia
+       avulsa ganha um próprio. O código é calculado a partir do número da rota,
+       então todos os aparelhos chegam ao MESMO código.
+     • Quando 1/4 dos códigos de 5 caracteres estiver em uso, os novos passam a
+       ter 6 (e assim por diante). Se dois coincidirem, o novo pega outro.
+     ===================================================================== */
+  var ALFA = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
+  function fnv(str, semente) { var h = semente >>> 0; for (var i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; } return h >>> 0; }
+  function montarCodigo(chave, tentativa, L) {
+    var base = 'FAST|' + chave + '|' + tentativa, a = fnv(base, 2166136261), b = fnv(base, 3735928559), out = '';
+    for (var i = 0; i < L; i++) { var bits = i < 6 ? (a >>> (i * 5)) : (b >>> ((i - 6) * 5)); out += ALFA.charAt(bits & 31); }
+    return out;
+  }
+  function limparCodigo(t) { return String(t || '').toUpperCase().replace(/[^0-9A-Z]/g, '').replace(/O/g, '0').replace(/[IL]/g, '1'); }
+  W.fastLimparCodigo = limparCodigo;
+  var usoCod = null;
+  function mapaCodigos() {
+    var m = {};
+    (bd().rotas || []).forEach(function (r) { if (r && r.codigoRastreio) m[r.codigoRastreio] = 'R' + r.id; });
+    var sq = bd().sequencias || {};
+    Object.keys(sq).forEach(function (d) { (sq[d] || []).forEach(function (it) { if (it && it.codigoRastreio && it.rotaId == null) m[it.codigoRastreio] = m[it.codigoRastreio] || ('S' + it.id); }); });
+    return m;
+  }
+  function novoCodigo(chave, usados) {
+    var total = Object.keys(usados).length, L = 5;
+    while (total > 0.25 * Math.pow(32, L) && L < 12) L++;
+    for (; L <= 12; L++) {
+      for (var t = 0; t < 6; t++) { var c = montarCodigo(chave, t, L); if (!usados[c] || usados[c] === chave) return c; }
+    }
+    return montarCodigo(chave + Date.now(), 0, 12);
+  }
+  W.fastCodigoPara = function (obj, tipo) {
+    try {
+      if (!obj) return null;
+      if (obj.codigoRastreio) return obj.codigoRastreio;
+      if (tipo === 'seq' && obj.rotaId != null) {
+        var r = (bd().rotas || []).filter(function (x) { return String(x.id) === String(obj.rotaId); })[0];
+        if (r) return r.codigoRastreio || W.fastCodigoPara(r, 'rota');
+      }
+      if (!usoCod) usoCod = mapaCodigos();
+      var chave = (tipo === 'rota' ? 'R' : 'S') + obj.id, c = novoCodigo(chave, usoCod);
+      usoCod[c] = chave;
+      return c;
+    } catch (e) { return null; }
+  };
+  function garantirCodigos() {
+    var b2 = bd(); if (!Array.isArray(b2.rotas)) return 0;
+    usoCod = mapaCodigos();
+    var mud = 0;
+    b2.rotas.slice().sort(function (x, y) { return (Number(x.id) || 0) - (Number(y.id) || 0); }).forEach(function (r) {
+      if (r && !r.codigoRastreio && r.id != null) { r.codigoRastreio = W.fastCodigoPara(r, 'rota'); mud++; }
+    });
+    var porId = {}; b2.rotas.forEach(function (r) { if (r) porId[String(r.id)] = r; });
+    var sq = b2.sequencias || {};
+    Object.keys(sq).sort().forEach(function (d) {
+      (sq[d] || []).forEach(function (it) {
+        if (!it || it.id == null) return;
+        var r = it.rotaId != null ? porId[String(it.rotaId)] : null;
+        var c = r ? r.codigoRastreio : (it.codigoRastreio || W.fastCodigoPara(it, 'seq'));
+        if (c && it.codigoRastreio !== c) { it.codigoRastreio = c; mud++; }
+      });
+    });
+    if (mud) { try { salvarStorage(); } catch (e) {} }
+    return mud;
+  }
+  W.fastGarantirCodigos = garantirCodigos;
+  setTimeout(garantirCodigos, 800);
+  W.addEventListener('load', function () { setTimeout(garantirCodigos, 2500); });
+  setInterval(function () { if (!document.hidden) garantirCodigos(); }, 30000);
+  (function () {   // rota nova/salva: código na hora
+    function ligar() {
+      var f = W.salvarStorage; if (typeof f !== 'function' || f.__frxCod) return;
+      var t = 0;
+      var g = function () { var r = f.apply(this, arguments); clearTimeout(t); t = setTimeout(garantirCodigos, 400); return r; };
+      Object.keys(f).forEach(function (k) { try { g[k] = f[k]; } catch (e) {} });
+      g.__frxCod = true; W.salvarStorage = g;
+    }
+    W.addEventListener('load', function () { setTimeout(ligar, 1800); });
+    setInterval(ligar, 6000);
+  })();
+
+  var URL_RASTREIO = 'https://adaiascearataiana-gif.github.io/fastservicosapp/rastreio.html';
+  W.fastLinkRastreio = function (c) { return URL_RASTREIO + '?c=' + encodeURIComponent(c || ''); };
+  function seloCodigo(c) {
+    return '<span class="frx-cod" title="Código de rastreio — toque para copiar" data-cod="' + esc(c) + '">📦 ' + esc(c) + '</span>';
+  }
+  document.addEventListener('click', function (e) {
+    var el = e.target.closest && e.target.closest('.frx-cod'); if (!el) return;
+    e.stopPropagation();
+    var c = el.getAttribute('data-cod'), txt = c + ' — ' + W.fastLinkRastreio(c);
+    try { navigator.clipboard.writeText(txt).then(function () { aviso('Código ' + c + ' copiado (com o link de rastreio).'); }, function () { prompt('Código de rastreio:', txt); }); }
+    catch (er) { prompt('Código de rastreio:', txt); }
+  }, true);
+  (function () {
+    var css = document.createElement('style');
+    css.textContent = '.frx-cod{display:inline-flex;align-items:center;gap:3px;font:800 11px/1 ui-monospace,Menlo,Consolas,monospace;letter-spacing:.06em;color:#0f766e;background:#ccfbf1;border:1px solid #99f6e4;border-radius:999px;padding:3px 8px;cursor:pointer;white-space:nowrap;vertical-align:middle}';
+    (document.head || document.documentElement).appendChild(css);
+  })();
+  // mostra o código nos cards das Rotas do Dia e na janela Editar Rota
+  function mostrarCodigos() {
+    var data = ($('dpDataSequencia') || {}).value, lista = (bd().sequencias || {})[data] || [];
+    document.querySelectorAll('#containerSequencia .seq-item[data-item-id]').forEach(function (card) {
+      if (card.querySelector('.frx-cod')) return;
+      var it = lista.filter(function (x) { return x && String(x.id) === card.getAttribute('data-item-id'); })[0];
+      if (!it || !it.codigoRastreio) return;
+      var alvo = card.querySelector('.seq-item-header, .seq-header, .seq-card-head') || card.firstElementChild;
+      var w = document.createElement('div'); w.style.cssText = 'margin:6px 0 2px'; w.innerHTML = seloCodigo(it.codigoRastreio);
+      if (alvo && alvo.parentNode === card) card.insertBefore(w, alvo.nextSibling); else card.insertBefore(w, card.firstChild);
+    });
+    var id = ($('editRotaId') || {}).value, modal = $('modalEditarRota');
+    if (id && modal && !modal.querySelector('.frx-cod-ed')) {
+      var r = (bd().rotas || []).filter(function (x) { return String(x.id) === String(id); })[0];
+      if (r && r.codigoRastreio) {
+        var form = $('formEditarRotaModal');
+        var d = document.createElement('div'); d.className = 'frx-cod-ed'; d.style.cssText = 'margin:0 0 10px';
+        d.innerHTML = '<span style="font-size:12px;font-weight:700;color:var(--text-muted)">Código de rastreio: </span>' + seloCodigo(r.codigoRastreio);
+        if (form) form.insertBefore(d, form.firstChild);
+      }
+    }
+    if (!id && modal) { var v = modal.querySelector('.frx-cod-ed'); if (v) v.remove(); }
+  }
+  setInterval(mostrarCodigos, 1200);
+  (function () {   // abrir outra rota no Editar: troca o código mostrado
+    var f = W.abrirModalEditarRota;
+    function ligar() { var orig = W.abrirModalEditarRota; if (typeof orig !== 'function' || orig.__frxCod) return; var g = function () { var m = $('modalEditarRota'); if (m) { var v = m.querySelector('.frx-cod-ed'); if (v) v.remove(); } return orig.apply(this, arguments); }; g.__frxCod = true; W.abrirModalEditarRota = g; }
+    W.addEventListener('load', function () { setTimeout(ligar, 1500); }); setInterval(ligar, 6000);
+  })();
+
+  /* ---------------- DESPESAS ANTIGAS: busca a forma de pagamento nas cópias de segurança do aparelho ---------------- */
+  async function formasDasCopias() {
+    var faltam = (bd().despesas || []).filter(function (d) { return d && !d.formaPgto; });
+    if (!faltam.length) return 0;
+    var achadas = {};
+    function olhar(dados) {
+      try { var o = typeof dados === 'string' ? JSON.parse(dados) : dados; (o && o.despesas || []).forEach(function (d) { if (d && d.id != null && d.formaPgto && !achadas[String(d.id)]) achadas[String(d.id)] = d; }); } catch (e) {}
+    }
+    try {
+      var db = await new Promise(function (res) { try { var q = indexedDB.open('fastapp_enterprise_db'); q.onsuccess = function () { res(q.result); }; q.onerror = function () { res(null); }; } catch (e) { res(null); } });
+      if (db) {
+        var nomes = Array.prototype.slice.call(db.objectStoreNames);
+        for (var i = 0; i < nomes.length; i++) {
+          if (!/snapshot|state/i.test(nomes[i])) continue;
+          var todos = await new Promise(function (res) { try { var r = db.transaction(nomes[i], 'readonly').objectStore(nomes[i]).getAll(); r.onsuccess = function () { res(r.result || []); }; r.onerror = function () { res([]); }; } catch (e) { res([]); } });
+          todos.forEach(function (x) { olhar(x && (x.dados || x.data || x.payload || x.estado || x.value || x)); });
+        }
+      }
+    } catch (e) {}
+    ['fast_autobackup', 'fastapp_last_known_good'].forEach(function (k) { try { var v = localStorage.getItem(k); if (v) olhar(v); } catch (e) {} });
+    var n = 0;
+    faltam.forEach(function (d) { var a = achadas[String(d.id)]; if (a) { d.formaPgto = a.formaPgto; if (a.nomeCartao && !d.nomeCartao) d.nomeCartao = a.nomeCartao; n++; } });
+    if (n) { try { salvarStorage(); } catch (e) {} try { renderizar(); } catch (e) {} aviso(n + ' despesa(s) antigas recuperaram a forma de pagamento.'); }
+    return n;
+  }
+  W.fastRecuperarFormasPgto = formasDasCopias;
+  W.addEventListener('load', function () { setTimeout(formasDasCopias, 9000); });
+
+  /* =====================================================================
+     5.1.5 — FOTO DA COLETA (o motorista pegou a mercadoria)
+     A foto ganha uma faixa com: COLETA · motorista · destino · cliente · data e
+     hora, e vai para o Google Drive em
+       <pasta do FAST> / FAST - Coletas dos motoristas / <nome do motorista>
+     com o nome "Coleta - 05-10-2026 14h32 - Destino - Motorista.jpg" e a mesma
+     legenda na descrição do arquivo. Vale para o app do Motorista (a foto chega
+     pelo banco e o PAINEL/FAST manda para o Drive) e para o botão 📦 Coleta das
+     Rotas do Dia.
+     ===================================================================== */
+  var PASTA_COLETAS = 'FAST - Coletas dos motoristas';
+  W.fastPodeColeta = function () { return !!driveTk() && navigator.onLine; };
+  // hora como se escreve em português: 16h38min (sem dois-pontos, sem espaço, sem ponto)
+  function horaPT(d) { d = d ? new Date(d) : new Date(); var p = function (n) { return (n < 10 ? '0' : '') + n; }; return p(d.getHours()) + 'h' + p(d.getMinutes()) + 'min'; }
+  W.fastHoraPT = horaPT;
+  function dataHoraBR(d) { d = d ? new Date(d) : new Date(); return d.toLocaleDateString('pt-BR') + ', às ' + horaPT(d); }
+  function legendaColeta(m) {
+    return ['📦 COLETA DA MERCADORIA', 'Motorista: ' + (m.motorista || '—'), 'Destino: ' + (m.destino || '—') + (m.cliente ? ' · Cliente: ' + m.cliente : ''), (m.codigo ? 'Rastreio: ' + m.codigo + ' · ' : '') + dataHoraBR(m.em)];
+  }
+  W.fastLegendaColeta = legendaColeta;
+  // desenha a faixa com a legenda na parte de baixo da foto
+  function carimbarColeta(fonte, linhas) {
+    return new Promise(function (res, rej) {
+      var url = typeof fonte === 'string' ? fonte : URL.createObjectURL(fonte), img = new Image();
+      img.onload = function () {
+        try {
+          var max = 1600, w = img.naturalWidth, h = img.naturalHeight, e = Math.min(1, max / Math.max(w, h));
+          w = Math.round(w * e); h = Math.round(h * e);
+          var fs = Math.max(14, Math.round(w / 34)), pad = Math.round(fs * 0.6), alt = linhas.length * fs * 1.35 + pad * 2;
+          var cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+          var cx = cv.getContext('2d'); cx.drawImage(img, 0, 0, w, h);
+          cx.fillStyle = 'rgba(15,23,42,.78)'; cx.fillRect(0, h - alt, w, alt);
+          cx.fillStyle = '#fff'; cx.textBaseline = 'top';
+          linhas.forEach(function (t, i) { cx.font = (i === 0 ? '800 ' : '600 ') + fs + 'px system-ui, sans-serif'; cx.fillText(t, pad, h - alt + pad + i * fs * 1.35, w - pad * 2); });
+          if (typeof fonte !== 'string') URL.revokeObjectURL(url);
+          cv.toBlob(function (b) { b ? res(b) : rej(new Error('foto')); }, 'image/jpeg', 0.85);
+        } catch (er) { rej(er); }
+      };
+      img.onerror = function () { rej(new Error('imagem inválida')); };
+      img.src = url;
+    });
+  }
+  W.fastCarimbarColeta = carimbarColeta;
+  async function pastaDrive(nome, pai, tk) {
+    var ck = 'fast515_pasta_' + (pai || 'raiz') + '_' + nome;
+    try { var c = localStorage.getItem(ck); if (c) return c; } catch (e) {}
+    var q = "name='" + String(nome).replace(/'/g, "\\'") + "' and mimeType='application/vnd.google-apps.folder' and trashed=false" + (pai ? " and '" + pai + "' in parents" : '');
+    var j = await gapi('https://www.googleapis.com/drive/v3/files?spaces=drive&fields=files(id)&q=' + encodeURIComponent(q), {}, tk);
+    var id = j.files && j.files[0] && j.files[0].id;
+    if (!id) id = (await gapi('https://www.googleapis.com/drive/v3/files?fields=id', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(pai ? { name: nome, mimeType: 'application/vnd.google-apps.folder', parents: [pai] } : { name: nome, mimeType: 'application/vnd.google-apps.folder' }) }, tk)).id;
+    try { localStorage.setItem(ck, id); } catch (e) {}
+    return id;
+  }
+  async function enviarColetaDrive(blob, m) {
+    var tk = driveTk(); if (!tk) throw new Error('Google Drive não conectado neste aparelho.');
+    var raiz = localStorage.getItem('fast_drive_folder_id') || ((bd().integracoes || {}).googleDrive || {}).folderId || '';
+    var p1 = await pastaDrive(PASTA_COLETAS, raiz, tk);
+    var p2 = await pastaDrive(String(m.motorista || 'Sem motorista').trim() || 'Sem motorista', p1, tk);
+    var d = new Date(m.em || Date.now());
+    var quando = d.toLocaleDateString('pt-BR').replace(/\//g, '-') + ' ' + horaPT(d);
+    var nome = ('Coleta - ' + quando + ' - ' + (m.destino || 'Destino') + ' - ' + (m.motorista || 'Motorista')).replace(/[\\/:*?"<>|]+/g, ' ').slice(0, 150) + '.jpg';
+    var meta = { name: nome, parents: [p2], description: legendaColeta(m).join('\n') };
+    var bdr = 'frxcol' + Date.now();
+    var corpo = new Blob(['--' + bdr + '\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n' + JSON.stringify(meta) + '\r\n--' + bdr + '\r\nContent-Type: image/jpeg\r\n\r\n', blob, '\r\n--' + bdr + '--'], { type: 'multipart/related; boundary=' + bdr });
+    var r = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id', { method: 'POST', headers: { Authorization: 'Bearer ' + tk, 'Content-Type': 'multipart/related; boundary=' + bdr }, body: corpo });
+    if (!r.ok) throw new Error('Drive ' + r.status);
+    return (await r.json()).id;
+  }
+  function marcarColeta(itemId, m, driveId) {
+    var sq = bd().sequencias || {}, info = { em: m.em, motorista: m.motorista || '', foto: driveId || '' };
+    Object.keys(sq).forEach(function (d) { (sq[d] || []).forEach(function (it) { if (it && String(it.id) === String(itemId)) { it.coleta = info; it.updatedAt = new Date().toISOString(); } }); });
+    try { var reg = JSON.parse(localStorage.getItem('fast515_coletas') || '{}'); reg[String(itemId)] = info; localStorage.setItem('fast515_coletas', JSON.stringify(reg)); } catch (e) {}
+    try { salvarStorage(); } catch (e) {}   // a coleta vai para os outros aparelhos junto com a Rota do Dia
+  }
+  W.fastLinkFotoDrive = function (id) { return id ? 'https://drive.google.com/file/d/' + encodeURIComponent(id) + '/view' : ''; };
+  // foto de coleta que veio do app do Motorista (tabela motorista_fotos, tipo = coleta)
+  W.fastProcessarColeta = async function (l) {
+    var m = { motorista: l.motorista_nome || '', destino: l.destino || '', cliente: l.cliente || '', em: l.criado_em || new Date().toISOString(), codigo: '' };
+    var sq = bd().sequencias || {};
+    Object.keys(sq).forEach(function (d) { (sq[d] || []).forEach(function (it) { if (it && String(it.id) === String(l.item_id)) m.codigo = it.codigoRastreio || ''; }); });
+    var blob;
+    if (l.legenda) {   // o app do Motorista já carimbou na hora da coleta
+      var bin = atob(String(l.foto || '').split(',').pop()), arr = new Uint8Array(bin.length);
+      for (var i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+      blob = new Blob([arr], { type: 'image/jpeg' });
+    } else blob = await carimbarColeta(l.foto, legendaColeta(m));
+    var idDrive = await enviarColetaDrive(blob, m);
+    marcarColeta(l.item_id, m, idDrive);
+    aviso('📦 Coleta registrada: ' + (m.motorista || 'motorista') + ' pegou a mercadoria para ' + (m.destino || 'o destino') + '. Foto no Drive.');
+    return true;
+  };
+  // botão 📦 Coleta nos cards das Rotas do Dia (FAST / ROTAS / PAINEL)
+  var inpColeta = null, itemColeta = null;
+  function abrirColeta(itemId) {
+    var data = ($('dpDataSequencia') || {}).value, it = ((bd().sequencias || {})[data] || []).filter(function (x) { return x && String(x.id) === String(itemId); })[0];
+    if (!it) return;
+    if (!driveTk()) { aviso('Conecte o Google Drive neste aparelho para guardar a foto da coleta.', 'warning'); return; }
+    itemColeta = it;
+    if (!inpColeta) {
+      inpColeta = document.createElement('input'); inpColeta.type = 'file'; inpColeta.accept = 'image/*'; inpColeta.setAttribute('capture', 'environment'); inpColeta.style.display = 'none';
+      document.body.appendChild(inpColeta);
+      inpColeta.addEventListener('change', async function () {
+        var f = inpColeta.files && inpColeta.files[0], it2 = itemColeta; inpColeta.value = '';
+        if (!f || !it2) return;
+        var m = { motorista: it2.motorista || '', destino: it2.destino || '', cliente: it2.cliente || '', em: new Date().toISOString(), codigo: it2.codigoRastreio || '' };
+        if (!m.motorista) { var nm = prompt('Quem pegou a mercadoria? (nome do motorista)', ''); if (nm == null) return; m.motorista = nm.trim(); }
+        aviso('Enviando a foto da coleta para o Google Drive…', 'info');
+        try { var blob = await carimbarColeta(f, legendaColeta(m)); var idDr = await enviarColetaDrive(blob, m); marcarColeta(it2.id, m, idDr); aviso('📦 Coleta registrada e salva no Drive (' + PASTA_COLETAS + ' / ' + (m.motorista || 'Sem motorista') + ').'); botoesColeta(true); }
+        catch (e) { aviso('Não foi possível salvar a coleta: ' + (e.message || e), 'error'); }
+      });
+    }
+    inpColeta.click();
+  }
+  W.fastFotoColeta = abrirColeta;
+  function botoesColeta(forcar) {
+    var data = ($('dpDataSequencia') || {}).value, lista = (bd().sequencias || {})[data] || [], reg = {};
+    try { reg = JSON.parse(localStorage.getItem('fast515_coletas') || '{}'); } catch (e) {}
+    document.querySelectorAll('#containerSequencia .seq-item[data-item-id]').forEach(function (card) {
+      var id = card.getAttribute('data-item-id'), it = lista.filter(function (x) { return x && String(x.id) === id; })[0];
+      if (!it) return;
+      var ok = it.coleta || reg[id], b = card.querySelector('.frx-coleta');
+      if (b && !forcar) return;
+      if (!b) {
+        var ref = card.querySelector('.btn-whatsapp') || card.querySelector('.frx-av'); if (!ref) return;
+        b = document.createElement('button'); b.type = 'button'; b.className = 'btn-secondary ripple frx-coleta';
+        b.onclick = function (ev) {
+          ev.stopPropagation();
+          var dd = ($('dpDataSequencia') || {}).value, x = ((bd().sequencias || {})[dd] || []).filter(function (y) { return y && String(y.id) === id; })[0], c2 = x && x.coleta;
+          if (!c2 || !c2.foto) { abrirColeta(id); return; }
+          janela('📦 Coleta da mercadoria', '<p style="margin:0 0 6px"><b>' + esc(c2.motorista || 'Motorista') + '</b> pegou a mercadoria para <b>' + esc(x.destino || '') + '</b></p><p class="frx-muted" style="margin:0">' + dataHoraBR(c2.em) + '</p>',
+            [{ txt: 'Tirar outra foto', cls: 'sec', fn: function (f) { f(); abrirColeta(id); } }, { txt: '🖼️ Ver a foto no Drive', fn: function (f) { f(); W.open(W.fastLinkFotoDrive(c2.foto), '_blank'); } }]);
+        };
+        ref.parentNode.appendChild(b);
+      }
+      b.innerHTML = ok ? '📦 Coletada às ' + horaPT(ok.em) + (ok.motorista ? ' · ' + esc(String(ok.motorista).split(' ')[0]) : '') : '📦 Foto da coleta';
+      b.title = ok ? 'Coleta registrada — toque para tirar outra foto' : 'O motorista pegou a mercadoria: tire a foto (vai para o Google Drive)';
+    });
+  }
+  setInterval(function () { botoesColeta(false); }, 1500);
+
+  /* =====================================================================
+     📦 RASTREIOS E COLETAS (PAINEL) — todas as mercadorias com o código de
+     rastreio, o motorista, a coleta (com a foto no Drive) e a entrega.
+     ===================================================================== */
+  function listaRastreios() {
+    var sq = bd().sequencias || {}, porRota = {}, avulsos = [];
+    Object.keys(sq).forEach(function (d) { (sq[d] || []).forEach(function (it) { if (!it || ehAgrupado(it)) return; var o = Object.assign({ __data: d }, it); if (it.rotaId != null) porRota[String(it.rotaId)] = o; else avulsos.push(o); }); });
+    var out = [];
+    (bd().rotas || []).forEach(function (r) {
+      if (!r || r.teste) return;
+      var it = porRota[String(r.id)] || {};
+      out.push({ codigo: r.codigoRastreio || it.codigoRastreio || '', data: r.data || it.__data || '', cliente: r.cliente || it.cliente || '', origem: r.origem || it.origem || '', destino: r.destino || it.destino || '',
+        motorista: it.motorista || r.motorista || '', status: it.status || r.statusExecucao || '', chegada: it.chegadaEm || '', entregue: it.dataConclusao || '', coleta: it.coleta || null, rotaId: r.id });
+    });
+    avulsos.forEach(function (it) {
+      out.push({ codigo: it.codigoRastreio || '', data: it.__data, cliente: it.cliente || '', origem: it.origem || '', destino: it.destino || '', motorista: it.motorista || '', status: it.status || '', chegada: it.chegadaEm || '', entregue: it.dataConclusao || '', coleta: it.coleta || null });
+    });
+    return out.sort(function (a2, b2) { return String(b2.data).localeCompare(String(a2.data)); });
+  }
+  W.fastListaRastreios = listaRastreios;
+  W.fastRastreios = function () {
+    var todos = listaRastreios(), mots = {};
+    todos.forEach(function (x) { if (x.motorista) mots[x.motorista] = 1; });
+    var html = '<div class="frx-grid2"><input class="frx-in" data-q placeholder="Código, cliente ou destino">' +
+      '<select class="frx-in" data-m><option value="">Todos os motoristas</option>' + Object.keys(mots).sort().map(function (m) { return '<option>' + esc(m) + '</option>'; }).join('') + '</select>' +
+      '<input class="frx-in" type="date" data-de><input class="frx-in" type="date" data-ate></div><div class="frx-muted" data-n style="margin:8px 0"></div><div data-lista></div>';
+    var j = janela('📦 Rastreios e coletas', html, [{ txt: 'Fechar', cls: 'sec', fn: function (f) { f(); } }]);
+    var limite = 60;
+    function desenhar() {
+      var q = norm(j.corpo.querySelector('[data-q]').value), mo = j.corpo.querySelector('[data-m]').value, de = j.corpo.querySelector('[data-de]').value, ate = j.corpo.querySelector('[data-ate]').value;
+      var f = todos.filter(function (x) {
+        if (mo && x.motorista !== mo) return false;
+        if (de && String(x.data) < de) return false;
+        if (ate && String(x.data) > ate) return false;
+        if (q && norm([x.codigo, x.cliente, x.destino, x.origem, x.motorista].join(' ')).indexOf(q) < 0) return false;
+        return true;
+      });
+      j.corpo.querySelector('[data-n]').textContent = f.length + ' mercadoria(s)' + (f.filter(function (x) { return x.coleta; }).length ? ' · ' + f.filter(function (x) { return x.coleta; }).length + ' com foto da coleta' : '');
+      j.corpo.querySelector('[data-lista]').innerHTML = f.slice(0, limite).map(function (x) {
+        var st = x.entregue ? '✅ Entregue ' + dataHoraBR(x.entregue) : x.chegada ? '📍 Chegou ' + dataHoraBR(x.chegada) : (x.status || 'Programada');
+        return '<div style="border:1px solid var(--border,#e2e8f0);border-radius:12px;padding:10px 12px;margin:6px 0">' +
+          '<div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:center">' + (x.codigo ? seloCodigo(x.codigo) : '<span class="frx-muted">sem código</span>') + '<span class="frx-muted">' + dataBR(x.data) + '</span></div>' +
+          '<div style="margin-top:6px"><b>' + esc(x.cliente || '—') + '</b> → ' + esc(x.destino || '—') + '</div>' +
+          '<div class="frx-muted">' + (x.motorista ? '🚚 ' + esc(x.motorista) + ' · ' : '') + esc(st) + '</div>' +
+          (x.coleta ? '<div style="margin-top:4px">📦 Coletada por <b>' + esc(x.coleta.motorista || '—') + '</b> em ' + dataHoraBR(x.coleta.em) + (x.coleta.foto ? ' · <a href="' + W.fastLinkFotoDrive(x.coleta.foto) + '" target="_blank" rel="noopener">ver foto</a>' : '') + '</div>' : '') +
+          (x.codigo ? '<div style="margin-top:6px"><a href="' + W.fastLinkRastreio(x.codigo) + '" target="_blank" rel="noopener" style="font-weight:700">Abrir o rastreio ›</a></div>' : '') + '</div>';
+      }).join('') + (f.length > limite ? '<button type="button" class="frx-btn sec" data-mais style="width:100%">Mostrar mais</button>' : '') || '<p class="frx-muted">Nada encontrado.</p>';
+    }
+    j.corpo.addEventListener('input', function () { limite = 60; desenhar(); });
+    j.corpo.addEventListener('change', function () { limite = 60; desenhar(); });
+    j.corpo.addEventListener('click', function (e) { if (e.target.hasAttribute('data-mais')) { limite += 60; desenhar(); } });
+    desenhar();
+  };
+
+  /* ---------------- ROTAS: forma de pagamento com o mesmo ícone e cor das despesas ----------------
+     Vale para a lista de Rotas, o Relatório de Rotas e o histórico do cliente.
+     Usa o que já está gravado em cada rota (PIX, Dinheiro/À vista, Débito,
+     Crédito, Boleto…), sem mudar os dados. */
+  function pilulaPgto(txt) {
+    var k = normalizarForma(txt); if (!k) return '';
+    var x = FORMAS[k] || FORMAS.OUTROS;
+    var rot = k === 'OUTROS' ? esc(String(txt).trim().toUpperCase()) : x[1];
+    return '<span class="frx-pgto" style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:800;color:' + x[2] + ';background:' + x[3] + ';border-radius:999px;padding:3px 9px;white-space:nowrap"><i class="fa-solid ' + x[0] + '"></i>' + rot + '</span>';
+  }
+  W.fastPilulaPgto = pilulaPgto;
+  function decorarPgtoRotas() {
+    [['tabelaRotasBody', 9], ['fastRelatorioRotasBody', null], ['tabelaHistoricoClienteBody', null]].forEach(function (cfg) {
+      var tb = $(cfg[0]); if (!tb) return;
+      var tabela = tb.closest('table'); if (!tabela) return;
+      var idx = -1;
+      Array.prototype.forEach.call(tabela.querySelectorAll('thead th'), function (th, i) { if (idx < 0 && /^pagamento$/i.test((th.textContent || '').trim())) idx = i; });
+      if (idx < 0) return;
+      Array.prototype.forEach.call(tb.rows, function (tr) {
+        var td = tr.cells[idx]; if (!td || td.querySelector('.frx-pgto') || td.colSpan > 1) return;
+        // troca só o TEXTO da forma de pagamento (o que mais houver na célula, como o status, fica)
+        var nos = [], w = document.createTreeWalker(td, NodeFilter.SHOW_TEXT);
+        while (w.nextNode()) nos.push(w.currentNode);
+        nos.some(function (n) {
+          var t = (n.nodeValue || '').trim(); if (!t || t === '—' || t === '-') return false;
+          var k = normalizarForma(t); if (!k || k === 'OUTROS') return false;
+          var span = document.createElement('span'); span.innerHTML = pilulaPgto(t);
+          n.parentNode.replaceChild(span.firstChild, n);
+          return true;
+        });
+      });
+    });
+  }
+  W.fastDecorarPgtoRotas = decorarPgtoRotas;
+  setInterval(function () { if (!document.hidden) decorarPgtoRotas(); }, 1200);
+  function instalarPgtoRotas() {
+    var f = W.renderizar;
+    if (typeof f === 'function' && !f.__frxPg) {
+      var g = function () { var r = f.apply(this, arguments); try { decorarPgtoRotas(); } catch (e) {} return r; };
+      Object.keys(f).forEach(function (k) { try { g[k] = f[k]; } catch (e) {} });
+      g.__frxPg = true; W.renderizar = g;
+    }
+    var rr = W.fastRelatorioRotasRender;
+    if (typeof rr === 'function' && !rr.__frxPg) {
+      var rr2 = function () { var p = rr.apply(this, arguments); Promise.resolve(p).then(function () { try { decorarPgtoRotas(); } catch (e) {} }); return p; };
+      Object.keys(rr).forEach(function (k) { try { rr2[k] = rr[k]; } catch (e) {} });
+      rr2.__frxPg = true; W.fastRelatorioRotasRender = rr2;
+    }
+  }
+  W.addEventListener('load', function () { setTimeout(instalarPgtoRotas, 2000); });
+  setInterval(instalarPgtoRotas, 6000);
+
+  /* ---------------- EDITAR ROTA DO DIA → vale também para a rota ligada ----------------
+     A janela "Editar rota do dia" mudava só o card do dia. Como a ROTA é a
+     principal, a sincronização seguinte copiava os dados dela de volta para o
+     card — e a edição "voltava ao que estava" segundos depois. Agora a mesma
+     edição vai também para a rota ligada. */
+  function levarParaRota(it) {
+    if (!it || it.rotaId == null) return false;
+    var r = (bd().rotas || []).filter(function (x) { return x && String(x.id) === String(it.rotaId); })[0];
+    if (!r) return false;
+    var mudou = false, par = [['cliente', 'cliente'], ['origem', 'origem'], ['destino', 'destino'], ['obs', 'descricao'], ['valor', 'valor'], ['qtdMercadorias', 'qtdMercadorias'], ['motorista', 'motorista']];
+    par.forEach(function (p) {
+      var v = it[p[0]]; if (v === undefined) return;
+      if (p[0] === 'valor' || p[0] === 'qtdMercadorias') v = Number(v) || 0;
+      if (String(r[p[1]] == null ? '' : r[p[1]]) !== String(v == null ? '' : v)) { r[p[1]] = v; mudou = true; }
+    });
+    if (mudou) r.updatedAt = new Date().toISOString();
+    return mudou;
+  }
+  W.fastLevarSeqParaRota = levarParaRota;
+  function instalarEditarSeq() {
+    var f = W.abrirModalEditarSeq;
+    if (typeof f !== 'function' || f.__frxRota) return;
+    var g = function (itemId) {
+      var r = f.apply(this, arguments);
+      try {
+        var ok = $('f66eOk');
+        if (ok && !ok.__frx) {
+          ok.__frx = true;
+          ok.addEventListener('click', function () {
+            setTimeout(function () {
+              var sq = bd().sequencias || {}, it = null;
+              Object.keys(sq).some(function (d) { it = (sq[d] || []).filter(function (x) { return x && String(x.id) === String(itemId); })[0]; return !!it; });
+              if (levarParaRota(it)) { try { salvarStorage(); } catch (e) {} try { renderizar(); } catch (e) {} }
+            }, 0);
+          });
+        }
+      } catch (e) {}
+      return r;
+    };
+    g.__frxRota = true; W.abrirModalEditarSeq = g;
+  }
+  W.addEventListener('load', function () { setTimeout(instalarEditarSeq, 1500); setTimeout(instalarEditarSeq, 4000); });
+  setInterval(instalarEditarSeq, 5000);
 
   /* ---------------- câmera ao vivo: garante que a imagem comece a rodar ----------------
      O código original liga a câmera mas não manda o vídeo "tocar"; com economia de

@@ -1,7 +1,12 @@
 {
-  "version": "5.1.0",
-  "releasedAt": "2026-10-03T20:00:00-03:00",
+  "version": "5.1.5",
+  "releasedAt": "2026-10-05T22:00:00-03:00",
   "updates": [
+    {
+      "app": "motorista",
+      "type": "novo",
+      "text": "5.1.5 (05/10/2026): botão COLETA (foto da mercadoria ao pegar, com motorista, destino, data e hora) e Histórico das minhas entregas com os códigos de rastreio."
+    },
     {
       "app": "motorista",
       "type": "novo",

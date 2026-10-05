@@ -33,7 +33,7 @@
   W.__fast4067 = true;
 
   var BASE_KEY = 'fast4067_base_v1';
-  var VERSAO = 'v28';
+  var VERSAO = 'v32';
   function versaoApp() { try { return (document.querySelector('meta[name="fast-app-version"]') || {}).content || VERSAO; } catch (e) { return VERSAO; } }
   var DIAG = W.__f68Diag = { erro: '', erroEm: 0, envio: 0, baixou: 0 };
   function falha(txt) { DIAG.erro = String(txt).slice(0, 160); DIAG.erroEm = Date.now(); try { painel(true); } catch (e) {} }
@@ -80,6 +80,23 @@
   W.fastRenovarLoginBanco = function () { return renovarLogin(true); };
   setInterval(function () { if (navigator.onLine) renovarLogin(false); }, 60000);
   document.addEventListener('visibilitychange', function () { if (!document.hidden && navigator.onLine) renovarLogin(false); });
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) return;
+    try {
+      if (!souDono()) {
+        var raw = localStorage.getItem('banco_gestao_local');
+        if (raw && raw !== JSON.stringify(W.bancoDados)) {
+          var novo = JSON.parse(raw);
+          W.bancoDados = typeof fastNormalizarBanco === 'function' ? fastNormalizarBanco(novo) : novo;
+          W.__frxForcarLista = true;
+          try { if (typeof renderizar === 'function') renderizar(); } catch (e) {}
+          try { if (typeof renderizarSequencia === 'function') renderizarSequencia(); } catch (e) {}
+          try { if (typeof W.fastRelatorioRotasRender === 'function') W.fastRelatorioRotasRender(); } catch (e) {}
+        }
+      }
+    } catch (e) {}
+    if (esperandoTela || true) { esperandoTela = false; setTimeout(function () { try { pedir('sync'); } catch (e) {} }, 300); }
+  });
 
   function hsh(s) {
     try { if (typeof fastChecksum === 'function') return fastChecksum(s); } catch (e) {}
@@ -200,6 +217,12 @@
     try { if (W.r101ColunasFaltando && typeof r101LinhasLegado === 'function') o = r101LinhasLegado([o])[0]; } catch (e) {}
     return hsh(JSON.stringify(o));
   }
+  /* 5.1.5 — mescla CAMPO A CAMPO: se dois aparelhos mexem em campos diferentes do
+     mesmo registro (um no destino, outro no valor), as duas mudanças ficam. */
+  var CAMPOS_R = ['cliente', 'origem', 'destino', 'data', 'tipoVolume', 'qtdMercadorias', 'pagamento', 'status', 'statusExecucao', 'valor', 'descricao', 'codigoRastreio'];
+  var CAMPOS_D = ['descricao', 'local', 'categoria', 'data', 'valor', 'formaPgto', 'nomeCartao', 'obs'];
+  var CAMPOS_S = ['cliente', 'origem', 'destino', 'valor', 'qtdMercadorias', 'motorista', 'motoristaId', 'status', 'chegadaEm', 'dataConclusao', 'obs', 'codigoRastreio', 'rotaId'];
+  function sigCampos(o, campos) { return campos.map(function (f) { var v = o ? o[f] : null; return hsh(JSON.stringify(v == null ? '' : v)).slice(-6); }).join('|'); }
   function linhasSeq() { try { return semRepetidos(sequenciasToRows(bancoDados.sequencias || {})); } catch (e) { return []; } }
   function restaurando() { try { return !!restaurandoBackup; } catch (e) { return false; } }
 
@@ -243,12 +266,30 @@
     return !!t && Date.now() - t < 10000;
   }
   function salvarBase() {
+    // 5.1.5 — "EDITEI E VOLTOU": a base (o que este aparelho e a nuvem têm em comum)
+    // era copiada do aparelho no FIM do envio. Uma edição feita durante o envio
+    // (ainda não enviada) entrava na base como se já estivesse na nuvem; na
+    // sincronização seguinte a versão antiga da nuvem "vencia" e desfazia a edição.
+    // Agora a base guarda só o que a nuvem CONFIRMOU; o que ainda não subiu fica
+    // de fora e continua valendo o deste aparelho.
     try {
+      var ant = lerBase() || { r: {}, d: {}, s: {} };
       var b = { r: {}, d: {}, s: {}, em: Date.now() };
-      (bancoDados.rotas || []).forEach(function (r) { if (r && r.id != null) b.r[String(r.id)] = camposRota(r); });
-      (bancoDados.despesas || []).forEach(function (d) { if (d && d.id != null) b.d[String(d.id)] = camposDesp(d); });
+      var conf = function (mapaN, mapaAnt, k, h) {
+        if (N && mapaN) { if (mapaN[k] === undefined) return undefined; return mapaN[k] === h ? h : mapaN[k]; }
+        return h;
+      };
+      b.rf = {}; b.df = {}; b.sf = {};
+      var antF = function (m, k) { return ant && ant[m] ? ant[m][k] : undefined; };
+      (bancoDados.rotas || []).forEach(function (r) { if (r && r.id != null) { var k = String(r.id), h = camposRota(r), v = conf(N && N.r, ant.r, k, h); if (v !== undefined) { b.r[k] = v; var sf = v === h ? sigCampos(r, CAMPOS_R) : antF('rf', k); if (sf) b.rf[k] = sf; } } });
+      (bancoDados.despesas || []).forEach(function (d) { if (d && d.id != null) { var k = String(d.id), h = camposDesp(d), v = conf(N && N.d, ant.d, k, h); if (v !== undefined) { b.d[k] = v; var sf = v === h ? sigCampos(d, CAMPOS_D) : antF('df', k); if (sf) b.df[k] = sf; } } });
+      try {
+        var itens = {}; Object.keys(bancoDados.sequencias || {}).forEach(function (dd) { (bancoDados.sequencias[dd] || []).forEach(function (it) { if (it) itens[String(Math.floor(Number(it.id)))] = it; }); });
+        b.__itens = itens;
+      } catch (e) {}
       var seq = bancoDados.sequencias || {};
-      linhasSeq().forEach(function (l) { b.s[String(l.id)] = hSeq(l); });
+      linhasSeq().forEach(function (l) { var k = String(l.id), h = hSeq(l), v = conf(N && N.s, ant.s, k, h); if (v !== undefined) { b.s[k] = v; var it = b.__itens && b.__itens[k]; var sf = (v === h && it) ? sigCampos(it, CAMPOS_S) : antF('sf', k); if (sf) b.sf[k] = sf; } });
+      delete b.__itens;
       localStorage.setItem(BASE_KEY, JSON.stringify(b));
     } catch (e) {
       // sem espaço: sem base, só lápides apagam da nuvem (modo mais seguro)
@@ -342,6 +383,13 @@
       });
       if (!r.ok) {
         var t = await r.text();
+        // 5.1.4: banco ainda sem a coluna do código de rastreio → envia sem ela (e avisa para rodar o SQL)
+        if (/codigo_rastreio/i.test(t) && lote.some(function (l) { return l && 'codigo_rastreio' in l; })) {
+          W.__f514SemCodigo = true;
+          lote.forEach(function (l) { delete l.codigo_rastreio; });
+          linhas = linhas.map(function (l) { var c = Object.assign({}, l); delete c.codigo_rastreio; return c; });
+          i -= LOTE_ENVIO; continue;
+        }
         if (legado && !W[flag] && typeof ehErroDeColunaSupabase === 'function' && ehErroDeColunaSupabase(r.status, t)) {
           W[flag] = true; i -= LOTE_ENVIO; continue;
         }
@@ -447,17 +495,33 @@
   function tresVias(local, nuvem, res) {
     var base = lerBase();
     if (!base || !token() || !res || !nuvem) return;
-    function ajustar(lista, baseMap, locArr, nuvArr, hashFn, combinar) {
+    function juntarCampos(x, l, c, sigBase, campos) {
+      // cada campo: se ESTE aparelho não mexeu nele, vale o da nuvem; se mexeu, fica o daqui
+      if (!sigBase) return x;
+      var bsig = sigBase.split('|'), y = Object.assign({}, x);
+      campos.forEach(function (f, i) {
+        var sl = sigCampos({ v: l[f] }, ['v']), sc = sigCampos({ v: c[f] }, ['v']);
+        if (sl === bsig[i] && sc !== bsig[i]) y[f] = c[f];
+      });
+      return y;
+    }
+    function ajustar(lista, baseMap, locArr, nuvArr, hashFn, combinar, sigMap, campos) {
       if (!Array.isArray(lista)) return;
       var lm = mapaPorId(locArr), nm = mapaPorId(nuvArr);
+      // a lista da nuvem é a cópia completa (o cache confere a contagem); só confia nela se não veio "vazia demais"
+      var nuvemOk = Array.isArray(nuvArr) && nuvArr.length > 0 && nuvArr.length >= Object.keys(baseMap).length * 0.5;
       for (var i = 0; i < lista.length; i++) {
         var x = lista[i]; if (!x) continue;
         var k = String(x.id), bh = baseMap[k], l = lm[k], c = nm[k];
+        // 5.1.5: apagado em outro aparelho (estava sincronizado, não mexi aqui e sumiu da nuvem) → apaga aqui também
+        if (bh && l && !c && nuvemOk) { var hl0; try { hl0 = hashFn(l); } catch (e) { hl0 = null; } if (hl0 === bh) { lista.splice(i, 1); i--; } continue; }
         if (!bh || !l || !c) continue;
         var hl, hc;
         try { hl = hashFn(l); hc = hashFn(c); } catch (e) { continue; }
         // aqui ninguém mexeu localmente desde a última sincronização, mas a nuvem mudou
         if (hl === bh && hc !== bh) lista[i] = combinar(x, c);
+        // os dois mudaram: junta campo a campo (o envio seguinte leva o resultado para a nuvem)
+        else if (hl !== bh && hc !== bh && sigMap && sigMap[k]) lista[i] = juntarCampos(x, l, c, sigMap[k], campos);
       }
     }
     ajustar(res.rotas, base.r || {}, local.rotas, nuvem.rotas, camposRota, function (x, c) {
@@ -466,12 +530,12 @@
       if (Array.isArray(c.fotos)) { y.fotos = c.fotos.slice(); y.fotosDoDia = []; }   // fotos próprias vindas de outro aparelho
       if (c.updatedAt) y.updatedAt = c.updatedAt;
       return y;
-    });
+    }, base.rf, CAMPOS_R);
     ajustar(res.despesas, base.d || {}, local.despesas, nuvem.despesas, camposDesp, function (x, c) {
       var y = Object.assign({}, x, c);
       if (!c.formaPgto && x.formaPgto) { y.formaPgto = x.formaPgto; if (x.nomeCartao) y.nomeCartao = x.nomeCartao; }
       return y;
-    });
+    }, base.df, CAMPOS_D);
     // Rotas do Dia: se ESTE aparelho não mexeu no item desde a última sincronização
     // e outro aparelho mudou (cliente, destino, valor, motorista...), adota a versão
     // da nuvem. Antes valia sempre "o local ganha" e a edição do outro não chegava.
@@ -487,6 +551,11 @@
         for (var i = 0; i < arr.length; i++) {
           var x = arr[i]; if (!x) continue;
           var k = String(x.id), bh = bs[k];
+          if (bh && hl[k] && hc[k] && hl[k] !== bh && hc[k] !== bh && base.sf && base.sf[k] && nuvIt[k]) {
+            var locIt = null; Object.keys(local.sequencias || {}).forEach(function (dd) { (local.sequencias[dd] || []).forEach(function (z) { if (z && String(Math.floor(Number(z.id))) === k) locIt = z; }); });
+            if (locIt) arr[i] = juntarCampos(x, locIt, nuvIt[k].it, base.sf[k], CAMPOS_S);
+            continue;
+          }
           if (!bh || !hl[k] || !hc[k] || hl[k] !== bh || hc[k] === bh) continue;
           var c = nuvIt[k]; if (!c) continue;
           // adota a nuvem, mas NUNCA troca um valor/motorista/horário preenchido por vazio
@@ -531,7 +600,66 @@
         };
         std2.__f513 = true; W.supabaseToDespesa = std2;
       }
+      // 5.1.4: código de rastreio das rotas e das Rotas do Dia
+      [['rotaToSupabase', function (o, r) { if (!W.__f514SemCodigo) o.codigo_rastreio = (r && r.codigoRastreio) ? String(r.codigoRastreio) : ((r && W.fastCodigoPara) ? W.fastCodigoPara(r, 'rota') : null); }],
+       ['supabaseToRota', function (o, row) { if (row && row.codigo_rastreio) o.codigoRastreio = row.codigo_rastreio; }]].forEach(function (par) {
+        var f0 = W[par[0]]; if (typeof f0 !== 'function' || f0.__f514) return;
+        var f1 = function (x) { var o = f0.apply(this, arguments); try { par[1](o, x); } catch (e) {} return o; };
+        f1.__f514 = true; W[par[0]] = f1;
+      });
+      var s2r = W.sequenciasToRows;
+      if (typeof s2r === 'function' && !s2r.__f514) {
+        var s2r2 = function (seq) {
+          var rows = s2r.apply(this, arguments);
+          if (W.__f514SemCodigo) return rows;
+          var mapa = {};
+          Object.keys(seq || {}).forEach(function (d) { (seq[d] || []).forEach(function (it) { if (it && it.id != null) mapa[String(Math.floor(Number(it.id)))] = it.codigoRastreio || (W.fastCodigoPara ? W.fastCodigoPara(it, 'seq') : null); }); });
+          rows.forEach(function (r) { r.codigo_rastreio = mapa[String(r.id)] || null; });
+          colocarColeta(seq, rows);
+          return rows;
+        };
+        s2r2.__f514 = true; W.sequenciasToRows = s2r2;
+      }
+      var r2s = W.rowsToSequencias;
+      if (typeof r2s === 'function' && !r2s.__f514) {
+        var r2s2 = function (rows) {
+          var seq = r2s.apply(this, arguments);
+          try {
+            var cod = {}; (rows || []).forEach(function (r) { if (r && r.codigo_rastreio) cod[String(r.id)] = r.codigo_rastreio; });
+            Object.keys(seq || {}).forEach(function (d) { (seq[d] || []).forEach(function (it) { var c = it && cod[String(Math.floor(Number(it.id)))]; if (c) it.codigoRastreio = c; }); });
+          } catch (e) {}
+          lerColeta(rows, seq);
+          return seq;
+        };
+        r2s2.__f514 = true; W.rowsToSequencias = r2s2;
+      }
       W.supabaseGetRotas = async function () { return (await getInc('rotas')).map(supabaseToRota); };
+      function colocarColeta(seq, rows) {
+        try {
+          var col = {};
+          Object.keys(seq || {}).forEach(function (d) { (seq[d] || []).forEach(function (it) { if (it && it.coleta) col[String(Math.floor(Number(it.id)))] = it.coleta; }); });
+          rows.forEach(function (r) {
+            var c = col[String(r.id)]; if (!c) return;
+            var ex = []; try { ex = typeof r.extras === 'string' ? JSON.parse(r.extras) : (r.extras || []); } catch (e) { ex = []; }
+            var meta = ex.filter(function (x) { return x && x.__fastMeta; })[0];
+            if (!meta) { meta = { __fastMeta: {} }; ex.push(meta); }
+            meta.__fastMeta.coleta = c;
+            r.extras = typeof r.extras === 'string' || r.extras == null ? JSON.stringify(ex) : ex;
+          });
+        } catch (e) {}
+      }
+      function lerColeta(rows, seq) {
+        try {
+          var col = {};
+          (rows || []).forEach(function (r) {
+            if (!r || !r.extras) return;
+            var ex; try { ex = typeof r.extras === 'string' ? JSON.parse(r.extras) : r.extras; } catch (e) { return; }
+            var meta = (ex || []).filter(function (x) { return x && x.__fastMeta; })[0];
+            if (meta && meta.__fastMeta.coleta) col[String(r.id)] = meta.__fastMeta.coleta;
+          });
+          Object.keys(seq || {}).forEach(function (d) { (seq[d] || []).forEach(function (it) { var c = it && col[String(Math.floor(Number(it.id)))]; if (c) it.coleta = c; }); });
+        } catch (e) {}
+      }
       W.supabaseGetDespesas = async function () { return (await getInc('despesas')).map(supabaseToDespesa); };
       W.supabaseGetSequencias = async function () { return rowsToSequencias(await getInc('sequencias_itens')); };
 
@@ -649,9 +777,11 @@
     if (!rodando) rodando = bomba().finally(function () { rodando = null; });
     return rodando;
   }
+  var esperandoTela = false;
   async function bomba() {
     await Promise.resolve();
     while (querPush || querSync) {
+      if (!podeEscrever()) { esperandoTela = true; querPush = false; querSync = false; break; }
       if (querPush) {
         querPush = false;
         if (!N) { querSync = true; continue; }      // ainda não conhece a nuvem: faz a completa
@@ -870,6 +1000,22 @@
     if (partes.indexOf(null) >= 0) return null;
     return partes.join('#');
   }
+  async function precisaBaixar() {
+    var res = await Promise.all(TABS_RT.map(async function (t) {
+      var r = await fetch(SUPABASE_URL + '/' + t + '?select=updated_at&order=updated_at.desc.nullslast&limit=1', {
+        method: 'GET', cache: 'no-store', headers: supabaseHeaders({ 'Prefer': 'count=exact' })
+      });
+      if (r.status === 401) { renovarLogin(true); return null; }
+      if (!r.ok) { falha('Verificação recusada pelo banco (HTTP ' + r.status + ')'); return null; }
+      var j = await r.json(), n = parseInt(((r.headers.get('content-range') || '').split('/')[1]), 10);
+      var c = CACHE[t]; if (!c || !c.rows) return true;
+      if (j[0] && quando(j[0].updated_at) > (c.wm || 0)) return true;          // tem algo mais novo que o que já baixei
+      if (!isNaN(n) && n !== Object.keys(c.rows).length) return true;          // linhas apagadas ou novas
+      return false;
+    }));
+    if (res.indexOf(null) >= 0) return null;
+    return res.some(Boolean);
+  }
   async function checar(forcar) {
     if (checando || document.hidden || !navigator.onLine || !pronto()) return;
     // com tempo real ativo, a verificação vira só reserva (a cada 15 s)
@@ -885,11 +1031,12 @@
     if (rodando) return;
     checando = true; ultimaChecagem = Date.now();
     try {
-      var sig = await assinatura();
-      if (!sig) return;
-      if (rodando) return;                       // a fila registra a base ao terminar
-      if (assinaturaBase === null) { assinaturaBase = sig; return; }
-      if (sig !== assinaturaBase) { assinaturaBase = sig; sincronizar(true); }
+      // 5.1.5: compara a nuvem com o que ESTE aparelho já baixou (e não com uma
+      // "foto" tirada depois da sincronização). Antes, uma alteração de outro
+      // aparelho que chegasse durante a nossa sincronização passava despercebida.
+      var p = await precisaBaixar();
+      if (p === null || rodando) return;
+      if (p) sincronizar(true);
     } catch (e) {} finally { checando = false; }
   }
   setInterval(function () { checar(false); }, 3000);
@@ -1555,10 +1702,24 @@
       for (var i = 0; i < linhas.length; i++) {
         var l = linhas[i]; if (!l || l.id == null) continue;
         var k = String(l.id); if (!vistoEm[k]) vistoEm[k] = Date.now();
-        if (l.item_id != null && !temItem(l.item_id) && Date.now() - vistoEm[k] < 120000) continue;   // a rota ainda não chegou aqui
+        var coleta = l.tipo === 'coleta';
+        // 5.1.5: foto da COLETA vai para a pasta dos motoristas no Drive — só pega quem tem o Drive conectado
+        if (coleta && !(W.fastPodeColeta && W.fastPodeColeta())) continue;
+        if (!coleta && l.item_id != null && !temItem(l.item_id) && Date.now() - vistoEm[k] < 120000) continue;   // a rota ainda não chegou aqui
         try {
           var c = await f0(base + '/motorista_fotos?id=eq.' + encodeURIComponent(l.id) + '&processado=eq.false', { method: 'PATCH', headers: cab, body: JSON.stringify({ processado: true }) });
-          if (c.ok) { var j = await c.json(); if (Array.isArray(j) && j.length) minhas.push(l); }
+          if (c.ok) {
+            var j = await c.json();
+            if (Array.isArray(j) && j.length) {
+              if (!coleta) minhas.push(l);
+              else {
+                try { await W.fastProcessarColeta(l); }
+                catch (e) {   // não deu: devolve para a fila, outra tentativa depois
+                  try { await f0(base + '/motorista_fotos?id=eq.' + encodeURIComponent(l.id), { method: 'PATCH', headers: cab, body: JSON.stringify({ processado: false }) }); } catch (er) {}
+                }
+              }
+            }
+          }
         } catch (e) {}
       }
       return new Response(JSON.stringify(minhas), { status: 200, headers: { 'Content-Type': 'application/json' } });
@@ -1720,6 +1881,9 @@
   }
   async function enviarColecao(chave, tabela, lista, montar) {
     lista = semIdsRepetidos(lista);
+    // retrato do que está sendo enviado AGORA (edição feita durante o envio não entra na base)
+    var retrato = {}; lista.forEach(function (x) { retrato[String(x.id)] = hCol(chave, x); });
+    lista = lista.map(function (x) { try { return JSON.parse(JSON.stringify(x)); } catch (e) { return x; } });
     var base = lerBaseCol()[chave] || null;
     var envio = base ? lista.filter(function (x) { return base[String(x.id)] !== hCol(chave, x); }) : lista;
     for (var i = 0; i < envio.length; i += 200) {
@@ -1734,7 +1898,7 @@
         await fetch(SUPABASE_URL + '/' + tabela + '?id=in.(' + apagar.slice(j, j + 50).join(',') + ')', { method: 'DELETE', headers: supabaseHeaders({ 'Prefer': 'return=minimal' }) });
       }
     }
-    gravarBaseCol(chave, lista);
+    try { var bc = lerBaseCol(); bc[chave] = retrato; localStorage.setItem(COL_KEY, JSON.stringify(bc)); } catch (e) {}
     W.__f68Enviados = (W.__f68Enviados || 0) + envio.length;
     return true;
   }
@@ -1788,12 +1952,29 @@
     return livres;
   }
   var ORIG_SET = Storage.prototype.setItem, ORIG_REMOVE = Storage.prototype.removeItem;
+  /* 5.1.6 — EDIÇÃO QUE "VOLTAVA" SOZINHA
+     FAST, ROTAS, Despesas e o PAINEL instalados pelo navegador dividem o MESMO
+     armazenamento do aparelho, mas cada um tem a sua cópia na memória. Um deles
+     aberto em segundo plano (com dados velhos) regravava tudo por cima da edição
+     feita no outro — e ainda reenviava a versão velha para a nuvem. Agora só
+     escreve e sincroniza quem está na tela, ou quem fez a última gravação; quem
+     volta para a tela primeiro pega os dados mais novos. */
+  var INSTANCIA = Math.random().toString(36).slice(2, 10);
+  function donoAtual() { try { return String(localStorage.getItem('fast516_dono') || '').split(':')[0]; } catch (e) { return ''; } }
+  function souDono() { var d = donoAtual(); return !d || d === INSTANCIA; }
+  function podeEscrever() { return !document.hidden || souDono() || W.__frxPermitirOculto === true; }
+  W.fastPodeEscrever = podeEscrever;
   if (!ORIG_SET.__f513) {
     var novoSet = function (k, v) {
       if (this === W.localStorage && COPIAS_EXTRAS.indexOf(String(k)) >= 0 && String(v).length > 200000) {
         // cópia de segurança grande: fica só no banco interno do aparelho (IndexedDB)
         try { ORIG_REMOVE.call(this, k); } catch (e) {}
         return;
+      }
+      if (this === W.localStorage && String(k) === 'banco_gestao_local') {
+        if (!podeEscrever()) { DIAG.bloqueadas = (DIAG.bloqueadas || 0) + 1; return; }   // cópia velha em segundo plano: não grava
+        try { ORIG_SET.call(this, k, v); ORIG_SET.call(this, 'fast516_dono', INSTANCIA + ':' + Date.now()); return; }
+        catch (err0) { liberarEspaco(String(k)); ORIG_SET.call(this, k, v); ORIG_SET.call(this, 'fast516_dono', INSTANCIA + ':' + Date.now()); return; }
       }
       try { return ORIG_SET.call(this, k, v); }
       catch (err) {
