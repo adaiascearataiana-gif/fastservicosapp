@@ -1277,11 +1277,20 @@
      não pula de posição.
      ===================================================================== */
   var ultimaAcao = 0;
+  document.addEventListener('change', function (e) {
+    var t = e.target;
+    if (t && t.type === 'file' && t.closest && t.closest('#containerSequencia, .seq-item')) {
+      [1500, 4000].forEach(function (ms) { setTimeout(function () { W.__frxForcarLista = true; try { renderizarSequencia(); } catch (er) {} }, ms); });
+    }
+  }, true);
   ['pointerdown', 'keydown', 'change'].forEach(function (ev) { document.addEventListener(ev, function () { ultimaAcao = Date.now(); }, true); });
   function editandoAgora() {
     try {
-      if (String(($('seqItemId') || {}).value || '').trim()) return true;
+      // (antes: "há um item em edição no formulário" — se a edição era abandonada sem
+      // salvar, a lista NUNCA mais era redesenhada, e a foto escolhida na galeria não
+      // aparecia no card. Agora só conta se você estiver mesmo digitando no formulário.)
       var m = $('modalSequencia'); if (m && m.classList.contains('active')) return true;
+      var f6 = $('f66SeqEdit'); if (f6 && f6.offsetParent !== null && getComputedStyle(f6).display !== 'none') return true;
       var er = $('modalEditarRota'); if (er && getComputedStyle(er).display !== 'none' && er.offsetParent !== null) return true;
       var a = document.activeElement;
       if (a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) && a.closest && a.closest('#rotasDia') && !a.closest('.rd-filter-driver,#fastFiltroSeqStatusWrap') && a.type !== 'checkbox' && a.type !== 'date') return true;
@@ -1313,7 +1322,9 @@
       if (!porUsuario && editandoAgora()) {
         if (!esperandoRender) {
           esperandoRender = true;
-          var t = setInterval(function () { if (!editandoAgora()) { clearInterval(t); esperandoRender = false; g(); } }, 400);
+          var desde = Date.now();
+          // espera terminar a edição — mas nunca mais que 2 minutos
+          var t = setInterval(function () { if (!editandoAgora() || Date.now() - desde > 120000) { clearInterval(t); esperandoRender = false; W.__frxForcarLista = true; g(); } }, 400);
         }
         return;
       }
@@ -2303,6 +2314,82 @@
   }
   W.addEventListener('load', function () { setTimeout(instalarPgtoRotas, 2000); });
   setInterval(instalarPgtoRotas, 6000);
+
+  /* ---------------- FOTO PELA GALERIA: sempre entra no card certo ----------------
+     1) O card guarda a POSIÇÃO da rota na lista; se a lista mudou (sincronização)
+        e a tela ainda não tinha sido redesenhada, a foto ia para OUTRA rota ou
+        não achava nenhuma. Agora a rota é achada pelo próprio card tocado.
+     2) Conferência: se em 12 s a foto não apareceu no card, ela é salva por um
+        caminho alternativo (reduz a foto, guarda no aparelho e manda para o Drive). */
+  function comprimirSimples(file, max, q) {
+    return new Promise(function (res, rej) {
+      var url = URL.createObjectURL(file), img = new Image();
+      img.onload = function () {
+        try {
+          var w = img.naturalWidth, h = img.naturalHeight, e = Math.min(1, max / Math.max(w, h));
+          var cv = document.createElement('canvas'); cv.width = Math.round(w * e); cv.height = Math.round(h * e);
+          cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+          URL.revokeObjectURL(url); res(cv.toDataURL('image/jpeg', q));
+        } catch (er) { URL.revokeObjectURL(url); rej(er); }
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); rej(new Error('formato de imagem não suportado (' + (file.type || file.name) + ')')); };
+      img.src = url;
+    });
+  }
+  async function salvarFotoAlternativo(item, files, dataSel) {
+    var refs = [], erros = [];
+    for (var i = 0; i < files.length; i++) {
+      try {
+        var b64 = await comprimirSimples(files[i], 1920, 0.88), chave = item.id + '_' + Date.now() + '_' + i;
+        var ok = await guardarFotoIndexedDB(chave, b64);
+        if (ok) refs.push('idb:' + chave); else erros.push('armazenamento do aparelho cheio');
+      } catch (e) { erros.push(e.message || String(e)); }
+    }
+    if (refs.length) {
+      if (!Array.isArray(item.fotos)) item.fotos = [];
+      refs.forEach(function (r) { if (item.fotos.indexOf(r) < 0) item.fotos.push(r); });
+      item.foto = item.fotos[0] || ''; item.updatedAt = new Date().toISOString();
+      var rv = item.rotaId != null ? (bd().rotas || []).filter(function (x) { return String(x.id) === String(item.rotaId); })[0] : null;
+      if (rv) { rv.fotos = item.fotos.slice(); rv.foto = item.foto; }
+      try { salvarStorage(); } catch (e) {}
+      W.__frxForcarLista = true; try { renderizarSequencia(); } catch (e) {}
+      try { if (typeof W.fastDriveEnfileirarArquivos === 'function') W.fastDriveEnfileirarArquivos(files, item, dataSel).catch(function () {}); } catch (e) {}
+      aviso('📷 ' + refs.length + ' foto(s) salva(s) no card.');
+    }
+    if (erros.length) aviso('Não foi possível salvar ' + erros.length + ' foto(s): ' + erros[0], 'error');
+  }
+  function instalarFotoGaleria() {
+    var f = W.salvarFotoRota;
+    if (typeof f !== 'function' || f.__frx) return;
+    var g = function (dataSel, index, ev) {
+      var alvo = null, files = [];
+      try {
+        files = Array.prototype.slice.call((ev && ev.target && ev.target.files) || []);
+        var lista = (bd().sequencias || {})[dataSel] || [];
+        var card = ev && ev.target && ev.target.closest && ev.target.closest('[data-item-id]');
+        var idCard = card && card.getAttribute('data-item-id');
+        var pelaCard = idCard ? lista.filter(function (x) { return x && String(x.id) === String(idCard); })[0] : null;
+        if (pelaCard && lista[index] !== pelaCard) index = lista.indexOf(pelaCard);   // posição velha: corrige
+        alvo = pelaCard || lista[index] || null;
+      } catch (e) {}
+      var antes = alvo ? [].concat(alvo.fotos || []).length : 0, idAlvo = alvo ? String(alvo.id) : '';
+      var r = f.call(this, dataSel, index, ev);
+      if (idAlvo && files.length) {
+        setTimeout(function () {
+          // a sincronização pode ter trocado os objetos: procura a rota de novo pelo código
+          var sq = bd().sequencias || {}, atual = null;
+          Object.keys(sq).some(function (d) { atual = (sq[d] || []).filter(function (x) { return x && String(x.id) === idAlvo; })[0]; return !!atual; });
+          if (!atual || [].concat(atual.fotos || []).length > antes) return;   // entrou normalmente
+          salvarFotoAlternativo(atual, files, dataSel);
+        }, 12000);
+      }
+      return r;
+    };
+    g.__frx = true; W.salvarFotoRota = g;
+  }
+  instalarFotoGaleria();
+  W.addEventListener('load', function () { instalarFotoGaleria(); setTimeout(instalarFotoGaleria, 2000); });
+  setInterval(instalarFotoGaleria, 5000);
 
   /* ---------------- EDITAR ROTA DO DIA → vale também para a rota ligada ----------------
      A janela "Editar rota do dia" mudava só o card do dia. Como a ROTA é a

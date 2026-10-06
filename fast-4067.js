@@ -1248,10 +1248,37 @@
         DRV.fotosTabela = 'ok';
         lote.forEach(function (l) { pub[l._id] = 1; });
         gravarJSON(PUB_KEY, pub);
+        await liberarVisualizacao(lote.map(function (l) { return l.drive_id; }));
       }
     } catch (e) {} finally { publicando = false; }
   }
-  setInterval(function () { if (!document.hidden) publicarFotos(); }, 20000);
+  // 5.1.5: a foto fica visível por link (sem precisar do Google Drive conectado em cada
+  // aparelho). Quem não tem o link não acha a foto — o código do arquivo é longo e aleatório.
+  var COMP_KEY = 'fast515_fotos_link';
+  async function liberarVisualizacao(ids) {
+    var tk = driveToken(); if (!tk || !ids || !ids.length) return;
+    var feitos = lerJSON(COMP_KEY, {});
+    for (var i = 0; i < ids.length; i++) {
+      var id = ids[i]; if (!id || feitos[id]) continue;
+      try {
+        var r = await fetch('https://www.googleapis.com/drive/v3/files/' + encodeURIComponent(id) + '/permissions?fields=id', {
+          method: 'POST', headers: { Authorization: 'Bearer ' + tk, 'Content-Type': 'application/json' }, body: JSON.stringify({ role: 'reader', type: 'anyone' })
+        });
+        if (r.ok) feitos[id] = 1;
+      } catch (e) {}
+    }
+    gravarJSON(COMP_KEY, feitos);
+  }
+  // fotos antigas já publicadas também ficam visíveis por link (aos poucos, sem pesar)
+  setInterval(async function () {
+    if (document.hidden || !driveToken() || !navigator.onLine) return;
+    try {
+      var led = await lerStore('driveLedger'), feitos = lerJSON(COMP_KEY, {});
+      var ids = led.map(function (e) { return e && e.driveId; }).filter(function (x) { return x && !feitos[x]; }).slice(0, 15);
+      if (ids.length) await liberarVisualizacao(ids);
+    } catch (e) {}
+  }, 30000);
+  setInterval(function () { if (!document.hidden) publicarFotos(); }, 8000);
   W.addEventListener('load', function () { setTimeout(publicarFotos, 8000); });
 
   var faltas = {}, buscando = {};
@@ -1260,7 +1287,7 @@
   }
   async function fotoDoDrive(chave) {
     var ref = 'idb:' + chave;
-    if (faltas[ref] && Date.now() - faltas[ref] < 15000) return null;
+    if (faltas[ref] && Date.now() - faltas[ref] < 8000) return null;
     if (buscando[ref]) return buscando[ref];
     buscando[ref] = (async function () {
       try {
@@ -1271,9 +1298,20 @@
         if (!j[0] || !j[0].drive_id) { faltas[ref] = Date.now(); return null; }
         var tk = driveToken();
         if (!tk) { await garantirDrive(true); tk = driveToken(); }
-        if (!tk) { faltas[ref] = Date.now(); return null; }
-        var d = await fetch('https://www.googleapis.com/drive/v3/files/' + encodeURIComponent(j[0].drive_id) + '?alt=media', { headers: { Authorization: 'Bearer ' + tk } });
-        if (!d.ok) { faltas[ref] = Date.now(); return null; }
+        var d = tk ? await fetch('https://www.googleapis.com/drive/v3/files/' + encodeURIComponent(j[0].drive_id) + '?alt=media', { headers: { Authorization: 'Bearer ' + tk } }).catch(function () { return null; }) : null;
+        if (!d || !d.ok) {
+          // sem Drive neste aparelho (ou a foto é de outra conta): usa o link de visualização
+          var pub = 'https://lh3.googleusercontent.com/d/' + encodeURIComponent(j[0].drive_id) + '=w1600';
+          try {
+            var p2 = await fetch(pub, { mode: 'cors', cache: 'force-cache' });
+            if (p2.ok && /^image\//.test(p2.headers.get('content-type') || '')) {
+              var b2 = await blobParaDataURL(await p2.blob());
+              try { if (typeof guardarFotoIndexedDB === 'function') await guardarFotoIndexedDB(chave, b2); } catch (e) {}
+              return b2;
+            }
+          } catch (e) {}
+          return pub;   // a tela mostra direto pelo link
+        }
         var b64 = await blobParaDataURL(await d.blob());
         try { if (typeof guardarFotoIndexedDB === 'function') await guardarFotoIndexedDB(chave, b64); } catch (e) {}
         return b64;
@@ -1305,7 +1343,7 @@
         try { if (typeof W.renderizarGaleriaEdicaoRota === 'function' && document.getElementById('modalEditarRota') && getComputedStyle(document.getElementById('modalEditarRota')).display !== 'none') W.renderizarGaleriaEdicaoRota(); } catch (e) {}
       }
     } catch (e) {} finally { buscandoFaltas = false; }
-  }, 15000);
+  }, 8000);
 
   function instalarFotos() {
     var f = W.obterFotoIndexedDB;
