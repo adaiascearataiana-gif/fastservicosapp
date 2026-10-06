@@ -109,7 +109,7 @@ public class MainActivity extends Activity {
         settings.setBuiltInZoomControls(false);
         settings.setDisplayZoomControls(false);
         settings.setTextZoom(100);
-        settings.setUserAgentString(settings.getUserAgentString() + " FASTAndroid/5.1.0");
+        settings.setUserAgentString(settings.getUserAgentString() + " FASTAndroid/5.1.6");
         CookieManager.getInstance().setAcceptCookie(true);
         CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
         webView.addJavascriptInterface(new VoiceBridge(), "FASTVoice");
@@ -166,7 +166,11 @@ public class MainActivity extends Activity {
                 return abrirSeletor(params);
             }
         });
-        if (state == null) webView.loadUrl(BuildConfig.APP_URL); else webView.restoreState(state);
+        // 5.1.6: sempre abre o FAST pelo endereço (os dados ficam no próprio site).
+        // Guardar o "estado" do WebView ao sair do app podia passar do limite do Android
+        // e fechar o app com "apresenta falhas continuamente".
+        webView.loadUrl(BuildConfig.APP_URL);
+        if (state != null) { String cu = state.getString("fast_camera_uri"); if (cu != null) { try { cameraUri = Uri.parse(cu); } catch (Exception e) {} } }
         requestPermissionsIfNeeded();
         getOnBackPressedDispatcherCompat();
     }
@@ -441,9 +445,9 @@ public class MainActivity extends Activity {
     }
 
     @Override protected void onSaveInstanceState(Bundle state) {
-        webView.saveState(state);
-        if (cameraUri != null) state.putString("fast_camera_uri", cameraUri.toString());
+        // não guarda o WebView inteiro (podia ficar grande demais e derrubar o app em segundo plano)
         super.onSaveInstanceState(state);
+        try { if (cameraUri != null) state.putString("fast_camera_uri", cameraUri.toString()); } catch (Exception e) {}
     }
     @Override public void onBackPressed() { if (webView.canGoBack()) webView.goBack(); else super.onBackPressed(); }
 }
