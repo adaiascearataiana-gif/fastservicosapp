@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
 <meta name="theme-color" content="#374151">
 <meta name="description" content="FAST Motorista — rotas do dia, botão CHEGUEI, fotos pela câmera e conclusão de rotas direto do celular do motorista.">
-<meta name="fast-app-version" content="5.1.0">
+<meta name="fast-app-version" content="5.1.5">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -244,7 +244,7 @@ html.fast-installed body::after{content:"";position:fixed;inset:0;z-index:214748
     <div class="ms-logo"><img src="../assets/app-motorista-512.png?v=r4010" alt="FAST Motorista"></div>
     <div class="ms-name">FAST MOTORISTA</div>
     <div class="ms-tag">ROTAS E ENTREGAS</div>
-    <div class="ms-ver">Versão <span id="motSplashVersion">5.1.0</span></div>
+    <div class="ms-ver">Versão <span id="motSplashVersion">5.1.5</span></div>
   </div>
   <div class="ms-loader"><span></span></div>
 </div>
@@ -257,7 +257,7 @@ html.fast-installed body::after{content:"";position:fixed;inset:0;z-index:214748
       <div class="gate-logo app-identity"><img src="../assets/gate-motorista-512.png?v=r4010" alt="FAST Motorista"></div>
       <h1>FAST Motorista</h1>
       <p>FAST SERVIÇOS · SOLUÇÕES EM LOGÍSTICA</p>
-      <div class="gate-version">Versão <span>5.1.0</span></div>
+      <div class="gate-version">Versão <span>5.1.5</span></div>
     </div>
     <div class="gate-field">
       <label for="motUser">Usuário</label>
@@ -324,6 +324,7 @@ html.fast-installed body::after{content:"";position:fixed;inset:0;z-index:214748
     <button class="mh-btn" id="motInstallBtn" onclick="motInstalar()" title="Instalar aplicativo" style="display:none"><i class="fa-solid fa-download"></i></button>
     <button class="mh-btn mot-head-pref" onclick="motAbrirPainel('notificacoes')" title="Notificações"><i class="fa-solid fa-bell"></i><span id="motNotifyCount" class="mot-notify-count hide">0</span></button>
     <button class="mh-btn mot-head-pref" onclick="motAbrirPainel('configuracoes')" title="Configurações"><i class="fa-solid fa-gear"></i></button>
+    <button class="mh-btn" onclick="motHistorico()" title="Histórico das minhas entregas"><i class="fa-solid fa-clock-rotate-left"></i></button>
     <button class="mh-btn" onclick="motAtualizar()" title="Atualizar rotas"><i class="fa-solid fa-rotate"></i></button>
     <button class="mh-btn" onclick="motSair()" title="Sair"><i class="fa-solid fa-right-from-bracket"></i></button>
   </header>
@@ -351,6 +352,7 @@ html.fast-installed body::after{content:"";position:fixed;inset:0;z-index:214748
       <div class="mr-card pend"><div class="mr-num" id="mrPend">0</div><div class="mr-lbl"><i class="fa-solid fa-clock"></i> Pendentes</div></div>
       <div class="mr-card foto"><div class="mr-num" id="mrFotos">0</div><div class="mr-lbl"><i class="fa-solid fa-camera"></i> Fotos</div></div>
     </div>
+    <button type="button" onclick="motHistorico()" style="width:100%;min-height:48px;margin:0 0 12px;border:1px solid #cbd5e1;border-radius:14px;background:#fff;color:#0f172a;font-weight:800;font-size:15px"><i class="fa-solid fa-clock-rotate-left"></i> Histórico das minhas entregas</button>
 
     <div class="mot-databar">
       <button class="db-nav" onclick="motMoverDia(-1)" aria-label="Dia anterior"><i class="fa-solid fa-chevron-left"></i></button>
@@ -371,7 +373,7 @@ html.fast-installed body::after{content:"";position:fixed;inset:0;z-index:214748
   </main>
 
   <footer class="mot-footer">
-    FAST MOTORISTA · <span id="motVersaoRodape">5.1.0</span><br>
+    FAST MOTORISTA · <span id="motVersaoRodape">5.1.5</span><br>
     Rotas · CHEGUEI · Fotos · Conclusão — tudo sincronizado com o patrão 🏍️
   </footer>
 </div>
@@ -399,7 +401,7 @@ html.fast-installed body::after{content:"";position:fixed;inset:0;z-index:214748
 'use strict';
 var SB_URL='https://yhxuplhohhetzloxvgku.supabase.co/rest/v1';
 var SB_KEY='sb_publishable_jlsorkXci3_0Hla7gt8z1g_pe6zOT19';
-var VER='5.1.0';
+var VER='5.1.5';
 var K_SESSAO='mot_sessao_v1';
 var K_FILA='mot_fila_fotos_v1';
 var K_ACOES='mot_acoes_pendentes_v1';
@@ -731,9 +733,41 @@ function tentarEnvios(){
 
 /* ---------- CÂMERA / FOTOS ---------- */
 var motFotoItemId=null;
+/* 5.1.5 — FOTO DA COLETA: o motorista registra que pegou a mercadoria.
+   A foto ganha uma faixa com motorista, destino, cliente, data e hora e vai
+   para o Google Drive do patrão, na pasta "FAST - Coletas dos motoristas". */
+var motFotoTipo='';
+function motHoraPT(d){d=new Date(d);var p=function(n){return(n<10?'0':'')+n};return p(d.getHours())+'h'+p(d.getMinutes())+'min'}
+function motColetada(itemId){try{var c=jget('mot_coletas_v1',{})[String(itemId)];return c?motHoraPT(c):''}catch(e){return ''}}
+function motFotoColeta(itemId){
+  var input=$('motInputFoto');
+  motFotoItemId=itemId;motFotoTipo='coleta';
+  input.removeAttribute('multiple');
+  input.value='';
+  input.click();
+}
+window.motFotoColeta=motFotoColeta;
+function motLegendaColeta(item,quando){
+  var d=new Date(quando);
+  return ['COLETA DA MERCADORIA','Motorista: '+((ESTADO.sessao&&ESTADO.sessao.employee_name)||'—'),'Destino: '+(item.destino||'—')+(item.cliente?' · Cliente: '+item.cliente:''),d.toLocaleDateString('pt-BR')+', às '+motHoraPT(d)];
+}
+function motCarimbar(b64,linhas){
+  return new Promise(function(res,rej){
+    var img=new Image();
+    img.onload=function(){try{
+      var w=img.naturalWidth,h=img.naturalHeight,fs=Math.max(14,Math.round(w/34)),pad=Math.round(fs*.6),alt=linhas.length*fs*1.35+pad*2;
+      var cv=document.createElement('canvas');cv.width=w;cv.height=h;var cx=cv.getContext('2d');cx.drawImage(img,0,0,w,h);
+      cx.fillStyle='rgba(15,23,42,.78)';cx.fillRect(0,h-alt,w,alt);cx.fillStyle='#fff';cx.textBaseline='top';
+      linhas.forEach(function(t,i){cx.font=(i===0?'800 ':'600 ')+fs+'px system-ui,sans-serif';cx.fillText(t,pad,h-alt+pad+i*fs*1.35,w-pad*2)});
+      res(cv.toDataURL('image/jpeg',.8));
+    }catch(e){rej(e)}};
+    img.onerror=function(){rej(new Error('imagem'))};img.src=b64;
+  });
+}
 function motTirarFoto(itemId){
   var input=$('motInputFoto');
-  motFotoItemId=itemId;
+  motFotoItemId=itemId;motFotoTipo='';
+  input.setAttribute('multiple','');
   input.value='';
   input.click();
 }
@@ -747,6 +781,20 @@ window.motTirarFoto=motTirarFoto;
     var item=acharItem(itemId);
     if(!item){toast('Rota não encontrada para anexar a foto.','erro');return}
     toast(files.length>1?(files.length+' fotos na fila! 📸'):'Foto capturada! 📸','ok');
+    if(motFotoTipo==='coleta'){
+      motFotoTipo='';
+      var quando=new Date().toISOString();
+      comprimir(files[0],1280,0.8).then(function(b64){
+        var leg=motLegendaColeta(item,quando);
+        return motCarimbar(b64,leg).then(function(b2){
+          var m=jget('mot_coletas_v1',{});m[String(item.id)]=quando;jset('mot_coletas_v1',m);
+          enfileirarFoto(itemId,b2,{tipo:'coleta',legenda:leg.join('\n'),criado_em:quando});
+          toast('📦 Coleta registrada! A foto vai para o Drive do patrão.','ok');
+        });
+      }).catch(function(e){console.warn('coleta:',e);toast('Não deu para processar a foto da coleta.','erro')});
+      inp.value='';
+      return;
+    }
     files.forEach(function(f){
       comprimir(f,720,0.72).then(function(b64){
         enfileirarFoto(itemId,b64);
@@ -779,13 +827,14 @@ function acharItem(itemId){
   for(var i=0;i<ESTADO.rotas.length;i++){if(String(ESTADO.rotas[i].id)===String(itemId))return ESTADO.rotas[i]}
   return null;
 }
-function enfileirarFoto(itemId,b64){
+function enfileirarFoto(itemId,b64,extra){
   var item=acharItem(itemId);
   if(!item)return;
   var fila=jget(K_FILA,[]);
-  var agora=new Date().toISOString();
+  var agora=(extra&&extra.criado_em)||new Date().toISOString();
   var rec={id:Date.now()+fila.length,itemId:item.id,data_seq:item.data_seq,cliente:item.cliente||'',destino:item.destino||'',
     foto:b64,criado_em:agora,status:'pendente',tentativas:0};
+  if(extra&&extra.tipo){rec.tipo=extra.tipo;rec.legenda=extra.legenda||''}
   fila.push(rec);jset(K_FILA,fila);
   if(!ESTADO.fotosLocais[item.id])ESTADO.fotosLocais[item.id]=[];
   ESTADO.fotosLocais[item.id].push({blobUrl:b64,status:'pendente',hora:agora,recId:rec.id});
@@ -808,6 +857,7 @@ function enviarFotoPendente(rec){
     cliente:rec.cliente, destino:rec.destino,
     foto:rec.foto, criado_em:rec.criado_em, processado:false
   };
+  if(rec.tipo){reg.tipo=rec.tipo;reg.legenda=rec.legenda||''}
   fetch(SB_URL+'/motorista_fotos',{method:'POST',headers:hdrs({'Prefer':'return=minimal'}),body:JSON.stringify(reg)})
     .then(function(r){return r.text().then(function(t){
       if(!r.ok){
@@ -991,6 +1041,7 @@ function cardHTML(item,done){
       (chegou
         ? '<button class="mbtn b-cheguei off" disabled><i class="fa-solid fa-location-dot"></i> CHEGUEI '+fmtHora(chegou)+'</button>'
         : '<button class="mbtn b-cheguei" onclick="motCheguei('+itemArg(item)+')"><i class="fa-solid fa-location-dot"></i> CHEGUEI</button>')+
+      '<button class="mbtn b-coleta" onclick="motFotoColeta(\''+esc(String(item.id))+'\')" style="background:'+(motColetada(item.id)?'#0f766e':'#f59e0b')+';color:#fff"><i class="fa-solid fa-box"></i> '+(motColetada(item.id)?'COLETADA ÀS '+motColetada(item.id):'COLETA')+'</button>'+
       '<button class="mbtn b-foto" onclick="motTirarFoto(\''+esc(String(item.id))+'\')"><i class="fa-solid fa-camera"></i> FOTO</button>'+
       '<button class="mbtn b-concluir" onclick="motConcluir('+itemArg(item)+')"><i class="fa-solid fa-circle-check"></i> CONCLUIR</button>'+
     '</div>';
@@ -1138,12 +1189,12 @@ window.motInstalar=motInstalar;
 (function(){var hash=new URLSearchParams(location.hash.slice(1)),query=new URLSearchParams(location.search);if(hash.get('type')==='signup'||query.get('email-confirmado')==='1'){setTimeout(function(){var e=document.getElementById('motGateErr');if(e){e.style.color='#86efac';e.textContent='E-mail confirmado com sucesso. Entre com seu e-mail e senha para concluir a sincronização do cadastro.'}},700)}})();
 </script>
 <script id="mot-novidades-exclusivas">
-(function(){fetch('../updates.json?v=5.1.0',{cache:'no-store'}).then(function(r){return r.json()}).then(function(data){var rows=(data.updates||[]).filter(function(x){return x.app==='motorista'}),card=document.getElementById('motUpdatesCard'),list=document.getElementById('motUpdatesList');if(!rows.length||!card||!list)return;list.innerHTML=rows.map(function(x){return '<div class="mot-update-item"><b>'+(x.type==='corrigido'?'Corrigido':'Melhorado')+'</b><br>'+esc(x.text)+'</div>'}).join('');card.classList.remove('hide')}).catch(function(){})})();
+(function(){fetch('../updates.json?v=5.1.5',{cache:'no-store'}).then(function(r){return r.json()}).then(function(data){var rows=(data.updates||[]).filter(function(x){return x.app==='motorista'}),card=document.getElementById('motUpdatesCard'),list=document.getElementById('motUpdatesList');if(!rows.length||!card||!list)return;list.innerHTML=rows.map(function(x){return '<div class="mot-update-item"><b>'+(x.type==='corrigido'?'Corrigido':'Melhorado')+'</b><br>'+esc(x.text)+'</div>'}).join('');card.classList.remove('hide')}).catch(function(){})})();
 </script>
 <style>.mot-update-balloon{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:999;width:min(92vw,390px);border:1px solid #ffffff55;border-radius:15px;padding:12px 14px;background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;box-shadow:0 14px 38px #312e8166;display:none;align-items:center;gap:10px;text-align:left;font:inherit}.mot-update-balloon b{display:block;font-size:13px}.mot-update-balloon small{opacity:.9}.mot-update-panel{position:fixed;inset:0;z-index:1000;background:#0f172acc;display:none;place-items:center;padding:18px}.mot-update-panel.show{display:grid}.mot-update-box{width:min(100%,390px);background:#fff;color:#0f172a;border-radius:20px;padding:20px}.mot-update-progress{height:9px;background:#e2e8f0;border-radius:99px;overflow:hidden;margin:14px 0}.mot-update-progress span{display:block;width:0;height:100%;background:linear-gradient(90deg,#4f46e5,#7c3aed);transition:width .35s}</style>
 <button id="motUpdateBalloon" class="mot-update-balloon" type="button" onclick="motAbrirAtualizacao()"><span style="font-size:22px">⇩</span><span style="flex:1"><b>NOVA VERSÃO DISPONÍVEL</b><small id="motUpdateVer">Toque para atualizar</small></span><span>›</span></button>
 <div id="motUpdatePanel" class="mot-update-panel" role="dialog" aria-modal="true" aria-label="Atualização obrigatória"><div class="mot-update-box"><h2>Nova versão obrigatória</h2><p id="motUpdateText">É necessário atualizar o FAST Motorista para continuar.</p><div class="mot-update-progress"><span id="motUpdateBar"></span></div><button id="motForceUpdateBtn" class="gate-btn" onclick="motAtualizarObrigatorio()">Atualizar agora</button><small>Seus dados, preferências, fotos pendentes e cadastro serão mantidos.</small></div></div>
-<script>(function(){var ATUAL='5.1.0';window.motAbrirAtualizacao=function(){document.getElementById('motUpdatePanel').classList.add('show')};window.motAtualizarAgora=async function(){var b=document.getElementById('motUpdateBar'),t=document.getElementById('motUpdateText');b.style.width='18%';t.textContent='Preparando atualização…';try{var regs=await navigator.serviceWorker.getRegistrations();await Promise.all(regs.map(function(r){return r.update()}));b.style.width='72%';t.textContent='Instalando nova versão…';setTimeout(function(){b.style.width='100%';location.replace(location.pathname+'?v='+Date.now())},700)}catch(e){location.replace(location.pathname+'?v='+Date.now())}};setTimeout(async function(){try{var h=await fetch('./?fast_check='+Date.now(),{cache:'no-store'}).then(function(r){return r.text()}),m=h.match(/name=["']fast-app-version["']\s+content=["']([^"']+)/i),nova=m&&m[1];if(nova&&nova!==ATUAL){document.getElementById('motUpdateVer').textContent=ATUAL+' → '+nova+' · Toque para atualizar';document.getElementById('motUpdateBalloon').style.display='flex'}}catch(e){}},2200)})();</script>
+<script>(function(){var ATUAL='5.1.5';window.motAbrirAtualizacao=function(){document.getElementById('motUpdatePanel').classList.add('show')};window.motAtualizarAgora=async function(){var b=document.getElementById('motUpdateBar'),t=document.getElementById('motUpdateText');b.style.width='18%';t.textContent='Preparando atualização…';try{var regs=await navigator.serviceWorker.getRegistrations();await Promise.all(regs.map(function(r){return r.update()}));b.style.width='72%';t.textContent='Instalando nova versão…';setTimeout(function(){b.style.width='100%';location.replace(location.pathname+'?v='+Date.now())},700)}catch(e){location.replace(location.pathname+'?v='+Date.now())}};setTimeout(async function(){try{var h=await fetch('./?fast_check='+Date.now(),{cache:'no-store'}).then(function(r){return r.text()}),m=h.match(/name=["']fast-app-version["']\s+content=["']([^"']+)/i),nova=m&&m[1];if(nova&&nova!==ATUAL){document.getElementById('motUpdateVer').textContent=ATUAL+' → '+nova+' · Toque para atualizar';document.getElementById('motUpdateBalloon').style.display='flex'}}catch(e){}},2200)})();</script>
 <style id="mot-update-required-css">html.mot-update-required,html.mot-update-required body{overflow:hidden!important}.mot-update-required #motUpdatePanel{display:grid!important;z-index:2147483647!important;pointer-events:auto!important}.mot-update-required #motUpdateBalloon{display:none!important}.mot-update-required #motUpdatePanel .mot-update-box{box-shadow:0 28px 90px #0008}.mot-update-required #motForceUpdateBtn{width:100%;margin:8px 0 10px}.mot-update-required #motForceUpdateBtn:disabled{opacity:.7;cursor:wait}</style>
 <script id="mot-update-required">
 (function(){
@@ -1262,5 +1313,77 @@ window.motInstalar=motInstalar;
 <script>window.FAST_MIDIA_CFG={visivel:function(){var a=document.getElementById('motApp');return !!(a&&!a.classList.contains('hide'))}};</script>
 <script src="../motorista-midia.js?v=1"></script>
 <script src="../navegacao-fast.js?v=1"></script>
+<script id="fast515-historico-motorista">
+/* 5.1.5 — HISTÓRICO DO MOTORISTA: todas as entregas que ele fez, com o código de
+   rastreio de cada mercadoria, a coleta e a hora da entrega. */
+(function(){
+  var cache=null;
+  function hp(d){d=new Date(d);if(isNaN(d))return '';var p=function(n){return(n<10?'0':'')+n};return p(d.getHours())+'h'+p(d.getMinutes())+'min'}
+  function dbr(v){var t=String(v||'');if(/^\d{4}-\d{2}-\d{2}/.test(t)){var x=t.slice(0,10).split('-');return x[2]+'/'+x[1]+'/'+x[0]}return t}
+  function e(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+  function n(v){return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase()}
+  var st=document.createElement('style');
+  st.textContent='#motHist{position:fixed;inset:0;z-index:9994;background:rgba(15,23,42,.55);display:none;align-items:flex-end;justify-content:center;font-family:inherit}#motHist.on{display:flex}'+
+    '#motHist .cx{background:#fff;color:#0f172a;width:100%;max-width:640px;height:calc(100dvh - 20px);border-radius:20px 20px 0 0;display:flex;flex-direction:column;overflow:hidden}'+
+    '#motHist .hd{display:flex;gap:10px;align-items:center;padding:14px 16px;border-bottom:1px solid #e2e8f0}#motHist .hd b{flex:1;font-size:17px}#motHist .x{border:1px solid #e2e8f0;background:#fff;border-radius:10px;width:40px;height:40px;font-size:18px}'+
+    '#motHist .bd{flex:1;overflow:auto;padding:12px 16px calc(16px + env(safe-area-inset-bottom,0px))}#motHist input{width:100%;box-sizing:border-box;border:1px solid #cbd5e1;border-radius:12px;padding:11px 12px;font-size:16px;margin-bottom:10px}'+
+    '#motHist .dia{font-weight:800;color:#475569;margin:14px 0 6px;font-size:13px;text-transform:uppercase}#motHist .it{border:1px solid #e2e8f0;border-radius:12px;padding:10px 12px;margin-bottom:8px}'+
+    '#motHist .cod{display:inline-block;font:800 12px ui-monospace,monospace;letter-spacing:.06em;color:#0f766e;background:#ccfbf1;border:1px solid #99f6e4;border-radius:999px;padding:3px 8px}'+
+    '#motHist .ok{color:#15803d;font-weight:700}#motHist .mut{color:#64748b;font-size:13px}#motHist .res{display:flex;gap:8px;margin-bottom:6px}#motHist .res div{flex:1;background:#f1f5f9;border-radius:12px;padding:8px;text-align:center;font-size:12px;color:#475569}#motHist .res b{display:block;font-size:20px;color:#0f172a}';
+  document.head.appendChild(st);
+  var ov=document.createElement('div');ov.id='motHist';
+  ov.innerHTML='<div class="cx"><div class="hd"><b>📋 Histórico das minhas entregas</b><button type="button" class="x" data-f>✕</button></div><div class="bd"><input data-q placeholder="Procurar: código, cliente ou destino"><div data-l class="mut">Carregando…</div></div></div>';
+  document.body.appendChild(ov);
+  ov.querySelector('[data-f]').onclick=function(){ov.classList.remove('on')};
+  ov.querySelector('[data-q]').addEventListener('input',desenhar);
+  function filtro(){
+    var s=ESTADO.sessao||{};
+    if(s.motorista_id)return 'motorista_id=eq.'+encodeURIComponent(s.motorista_id);
+    return 'motorista=eq.'+encodeURIComponent(s.employee_name||'');
+  }
+  function buscar(comCodigo){
+    var cols='id,data_seq,cliente,origem,destino,status,chegada_em,data_conclusao,extras'+(comCodigo?',codigo_rastreio':'');
+    return fetch(SB_URL+'/sequencias_itens?select='+cols+'&'+filtro()+'&order=data_seq.desc,id.desc&limit=500',{headers:hdrs()})
+      .then(function(r){return r.text().then(function(t){
+        if(!r.ok){if(comCodigo&&/codigo_rastreio/.test(t))return buscar(false);throw new Error('HTTP '+r.status)}
+        return JSON.parse(t||'[]');
+      })});
+  }
+  function coletaDe(r){
+    try{var ex=typeof r.extras==='string'?JSON.parse(r.extras):(r.extras||[]);var m=(ex||[]).filter(function(x){return x&&x.__fastMeta})[0];if(m&&m.__fastMeta.coleta)return m.__fastMeta.coleta.em}catch(er){}
+    try{return jget('mot_coletas_v1',{})[String(r.id)]||''}catch(er){return ''}
+  }
+  function desenhar(){
+    var box=ov.querySelector('[data-l]');
+    if(!cache){return}
+    var q=n(ov.querySelector('[data-q]').value);
+    var lst=cache.filter(function(r){return !q||n([r.codigo_rastreio,r.cliente,r.destino,r.origem].join(' ')).indexOf(q)>=0});
+    var feitas=cache.filter(function(r){return r.data_conclusao||/CONCLU/i.test(r.status||'')}).length;
+    var h='<div class="res"><div><b>'+cache.length+'</b>rotas</div><div><b>'+feitas+'</b>entregues</div><div><b>'+cache.filter(coletaDe).length+'</b>coletas</div></div>';
+    var dia='';
+    lst.forEach(function(r){
+      if(r.data_seq!==dia){dia=r.data_seq;h+='<div class="dia">'+dbr(dia)+'</div>'}
+      var ent=r.data_conclusao?'<span class="ok">✅ Entregue às '+hp(r.data_conclusao)+'</span>':(r.chegada_em?'📍 Chegou às '+hp(r.chegada_em):'🚚 '+e(r.status||'Em rota'));
+      var col=coletaDe(r);
+      h+='<div class="it">'+(r.codigo_rastreio?'<span class="cod" data-cod="'+e(r.codigo_rastreio)+'">📦 '+e(r.codigo_rastreio)+'</span>':'')+
+        '<div style="margin-top:6px"><b>'+e(r.destino||'—')+'</b> <span class="mut">· '+e(r.cliente||'')+'</span></div>'+
+        '<div class="mut">'+ent+(col?' · 📦 Coletada às '+hp(col):'')+'</div></div>';
+    });
+    box.innerHTML=lst.length?h:(cache.length?'<p>Nada encontrado.</p>':'<p>Nenhuma entrega registrada ainda.</p>');
+  }
+  ov.addEventListener('click',function(ev){
+    var c=ev.target.closest&&ev.target.closest('[data-cod]');if(!c)return;
+    var cod=c.getAttribute('data-cod'),link='https://adaiascearataiana-gif.github.io/fastservicosapp/rastreio.html?c='+cod;
+    try{navigator.clipboard.writeText(cod+' — '+link).then(function(){toast('Código '+cod+' copiado.','ok')})}catch(er){prompt('Código de rastreio:',cod+' — '+link)}
+  });
+  window.motHistorico=function(){
+    ov.classList.add('on');
+    if(!ESTADO.sessao)return;
+    ov.querySelector('[data-l]').innerHTML='<p class="mut">Carregando…</p>';
+    if(!navigator.onLine&&cache){desenhar();return}
+    buscar(true).then(function(rows){cache=rows||[];desenhar()}).catch(function(er){ov.querySelector('[data-l]').innerHTML='<p>Não foi possível carregar agora ('+e(er.message)+'). Confira a internet.</p>'});
+  };
+})();
+</script>
 </body>
 </html>
