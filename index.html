@@ -20566,6 +20566,25 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
     // --- Converte uma referencia de foto em um objeto File (para Web Share API) ---
     // Usado por enviarFotosSelecionadasWhatsApp() para compartilhar fotos DIRETAMENTE
     // no WhatsApp sem precisar baixar. Retorna um File real ou null.
+    /* FIX ENVIAR FOTOS travado em "Preparando...":
+       antes o fetch das fotos (agora URLs remotas do Supabase Storage, r108)
+       nao tinha tempo limite. Se uma foto demorasse/CORS/offline, o await
+       nunca resolvia e o botao ficava preso em "Preparando..." para sempre,
+       sem enviar nada e sem restaurar o botao. Agora todo fetch tem limite
+       de tempo (AbortController) e sempre termina: a foto que falhar vira
+       null e o fluxo continua ou avisa o erro, restaurando o botao. */
+    function fetchComTimeout(url, ms, opts) {
+      ms = ms || 25000;
+      opts = opts || {};
+      if (typeof AbortController === 'undefined') return fetch(url, opts);
+      const ctrl = new AbortController();
+      const timer = setTimeout(function(){ try { ctrl.abort(); } catch(e){} }, ms);
+      const o = {};
+      for (const k in opts) o[k] = opts[k];
+      o.signal = ctrl.signal;
+      return fetch(url, o).finally(function(){ clearTimeout(timer); });
+    }
+
     async function resolverFotoParaFile(ref, nomeArquivo) {
       if (!ref) return null;
       // Garantir extensao .jpg no nome do arquivo
@@ -20577,7 +20596,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
       // base64 direto (data:image/...)
       if (ref.startsWith('data:image/')) {
         try {
-          const resp = await fetch(ref);
+          const resp = await fetchComTimeout(ref, 25000);
           const blob = await resp.blob();
           const tipo = blob.type || 'image/jpeg';
           return new File([blob], nomeArquivo, { type: tipo });
@@ -20593,7 +20612,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
           const chave = ref.substring(4);
           const b64 = await obterFotoIndexedDB(chave);
           if (!b64) return null;
-          const resp = await fetch(b64);
+          const resp = await fetchComTimeout(b64, 25000);
           const blob = await resp.blob();
           const tipo = blob.type || 'image/jpeg';
           return new File([blob], nomeArquivo, { type: tipo });
@@ -20623,12 +20642,12 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
 
       // Qualquer outra string (URL http/https ou base64 sem prefixo)
       try {
-        const resp = await fetch(ref);
+        const resp = await fetchComTimeout(ref, 25000);
         const blob = await resp.blob();
         const tipo = blob.type || 'image/jpeg';
         return new File([blob], nomeArquivo, { type: tipo });
       } catch (e) {
-        console.warn('Erro ao converter referencia para File:', ref, e);
+        console.warn('Erro ao converter referencia para File (timeout/rede):', ref, e);
         return null;
       }
     }
@@ -37114,17 +37133,86 @@ body.fast-exclusive-app main { padding-bottom: 12px !important; }
   function extensao(file){var m=String(file&&file.name||'').match(/\.(jpe?g|png|webp|gif)$/i);if(m)return m[0].toLowerCase();var t=String(file&&file.type||'').toLowerCase();return t.indexOf('png')>=0?'.png':t.indexOf('webp')>=0?'.webp':t.indexOf('gif')>=0?'.gif':'.jpg'}
   function renomear(file,nome){try{return new File([file],nome,{type:file.type||'image/jpeg',lastModified:file.lastModified||Date.now()})}catch(e){file.fastNome=nome;return file}}
   function baixar(file){var a=document.createElement('a'),url=URL.createObjectURL(file);a.href=url;a.download=file.name||file.fastNome||'foto.jpg';document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url)},2500)}
+  // (r110) ENVIO DIRETO PELO WHATSAPP — ignora o compartilhamento nativo.
+  // Motivo técnico: o navegador NÃO anexa arquivos de imagem ao WhatsApp sem a
+  // folha de compartilhamento. Para enviar "direto", abrimos o WhatsApp já com a
+  // mensagem contendo os LINKS públicos de cada foto (bucket público do Supabase
+  // Storage), identificados pelo destino. Fotos que ainda só existem no aparelho
+  // (sem link na nuvem) são BAIXADAS para anexo manual, pois não há link a enviar.
+  function urlPublicaFoto(ref){ return /^https?:\/\//i.test(String(ref||'')); }
   window.enviarFotosItemWhatsApp=async function(data,idx,btn){
     var lista=listaAtual(data),item=lista[idx];if(!item){alert('Rota nao encontrada.');return}
-    var refs=fotosItem(item);if(refs.length<=1)return typeof envioAnterior==='function'?envioAnterior.apply(this,arguments):avisar('Esta rota nao possui fotos.','warning');
-    var html=btn?btn.innerHTML:'',arquivos=[];if(btn){btn.disabled=true;btn.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> Preparando '+refs.length+' fotos...'}
+    var refs=fotosItem(item);if(!refs.length)return avisar('Esta rota nao possui fotos.','warning');
+    var html=btn?btn.innerHTML:'';if(btn){btn.disabled=true;btn.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> Preparando '+refs.length+' foto(s)...'}
     try{
-      var pares66=[];for(var i=0;i<refs.length;i++){var destino=(window.fastFotoDestino?window.fastFotoDestino(item,refs[i],''):'')||(Array.isArray(item.fotoNomesDestino)&&item.fotoNomesDestino[i])||item.destino||'Destino';var temporario=await window.resolverFotoParaFile(refs[i],'foto_'+(i+1)+'.jpg');if(temporario){/* 5.1.6: o destino de CADA foto vai escrito na própria foto */if(window.fastCarimbarDestino)temporario=await window.fastCarimbarDestino(temporario,destino);arquivos.push(renomear(temporario,nomeSeguro(destino)+' '+(i+1)+extensao(temporario)));pares66.push({destino:destino})}}
-      if(arquivos.length!==refs.length)throw new Error('Nem todas as fotos puderam ser carregadas.');
-      var pode=!!(navigator.share&&navigator.canShare&&navigator.canShare({files:arquivos}));
-      if(pode){if(btn)btn.innerHTML='<i class="fa-solid fa-paper-plane"></i> Enviando '+arquivos.length+' fotos...';await navigator.share({files:arquivos,title:'Fotos da rota - '+(item.cliente||'Cliente'),text:(window.fastLegendaLista?window.fastLegendaLista(pares66):(item.destino||''))});avisar('Todas as '+arquivos.length+' fotos foram encaminhadas juntas e renomeadas pelo destino.','success')}
-      else{arquivos.forEach(baixar);window.open('https://api.whatsapp.com/send?text='+encodeURIComponent('Fotos da rota - '+(item.cliente||'Cliente')+' - '+(item.destino||'')),'_blank');avisar(arquivos.length+' fotos foram baixadas com o nome do destino. Anexe todas no WhatsApp aberto.','success')}
-    }catch(e){if(!(e&&e.name==='AbortError')){console.error('FAST 2.3.31 - envio multiplo:',e);avisar('Nao foi possivel enviar todas as fotos: '+(e.message||e),'error')}}finally{if(btn){btn.disabled=false;btn.innerHTML=html}}
+      var linhas=[],locais=[];
+      for(var i=0;i<refs.length;i++){
+        var destino=(window.fastFotoDestino?window.fastFotoDestino(item,refs[i],''):'')||(Array.isArray(item.fotoNomesDestino)&&item.fotoNomesDestino[i])||item.destino||'Destino';
+        if(urlPublicaFoto(refs[i])){
+          linhas.push('📷 Foto '+(i+1)+(destino?(' — '+destino):'')+':\n'+refs[i]);
+        } else {
+          locais.push({ref:refs[i],destino:destino,n:i+1});
+        }
+      }
+      // Fotos ainda sem link na nuvem: não dá para linkar, então baixa para anexo manual.
+      if(locais.length){
+        if(btn)btn.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> Baixando '+locais.length+' foto(s)...';
+        for(var j=0;j<locais.length;j++){
+          try{
+            var f=await window.resolverFotoParaFile(locais[j].ref,'foto_'+locais[j].n+'.jpg');
+            if(f){ if(window.fastCarimbarDestino)f=await window.fastCarimbarDestino(f,locais[j].destino); baixar(renomear(f,nomeSeguro(locais[j].destino)+' '+locais[j].n+extensao(f))); }
+          }catch(eLoc){ console.warn('r110 download foto local:', eLoc); }
+        }
+      }
+      var cab='*📸 Fotos da rota*'+(item.cliente?('\nCliente: '+item.cliente):'');
+      var corpo=linhas.length?('\n\n'+linhas.join('\n\n')):'';
+      var aviso=locais.length?('\n\n('+locais.length+' foto(s) foram baixadas neste aparelho para você anexar — elas ainda não têm link na nuvem.)'):'';
+      if(btn)btn.innerHTML='<i class="fa-brands fa-whatsapp"></i> Abrindo WhatsApp...';
+      window.open('https://api.whatsapp.com/send?text='+encodeURIComponent(cab+corpo+aviso),'_blank');
+      if(linhas.length)avisar('WhatsApp aberto com '+linhas.length+' foto(s) por link'+(locais.length?(' e '+locais.length+' baixada(s) para anexar'):'')+'.','success');
+      else avisar('WhatsApp aberto. As '+locais.length+' foto(s) foram baixadas para anexar manualmente (ainda sem link na nuvem).','info');
+    }catch(e){if(!(e&&e.name==='AbortError')){console.error('FAST r110 - envio direto WhatsApp:',e);avisar('Nao foi possivel preparar o envio: '+(e.message||e),'error')}}finally{if(btn){btn.disabled=false;btn.innerHTML=html}}
+  };
+
+  // (r111) ENVIAR FOTOS do BALAO de selecao/agrupamento — MESMA funcionalidade
+  // do botao ENVIAR FOTOS por item (r110): abre o WhatsApp direto com os LINKS
+  // publicos de cada foto (bucket publico do Supabase). Fotos que ainda so
+  // existem no aparelho (sem link na nuvem) sao BAIXADAS para anexo manual.
+  // Agora percorre TODAS as rotas selecionadas (marcadas com a caixinha).
+  window.enviarFotosAgrupadasPorClienteWhatsApp=async function(){
+    var data=dataAtual(),lista=listaAtual(data),indices=indicesSelecionados(lista);
+    if(!indices.length)return avisar('Selecione ao menos uma rota (marque a caixinha) para enviar as fotos.','warning');
+    var itens=indices.map(function(i){return lista[i]}).filter(Boolean);
+    var btn=document.getElementById('btnEnviarFotosWhatsAppCliente');var html=btn?btn.innerHTML:'';
+    if(btn){btn.disabled=true;btn.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> Preparando...'}
+    try{
+      var linhas=[],locais=[],totalFotos=0,contador=0;
+      itens.forEach(function(item){var refs=fotosItem(item);totalFotos+=refs.length;
+        for(var i=0;i<refs.length;i++){
+          var destino=(window.fastFotoDestino?window.fastFotoDestino(item,refs[i],''):'')||(Array.isArray(item.fotoNomesDestino)&&item.fotoNomesDestino[i])||item.destino||'Destino';
+          var cli=item.cliente?(item.cliente+' \u2014 '):'';
+          if(urlPublicaFoto(refs[i])){contador++;linhas.push('\ud83d\udcf7 Foto '+contador+' \u2014 '+cli+destino+':\n'+refs[i]);}
+          else{locais.push({ref:refs[i],destino:(cli+destino),n:(locais.length+1)});}
+        }
+      });
+      if(!totalFotos){if(btn){btn.disabled=false;btn.innerHTML=html}return avisar('Nenhuma das rotas selecionadas possui fotos.','warning')}
+      if(locais.length){
+        if(btn)btn.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> Baixando '+locais.length+' foto(s)...';
+        for(var j=0;j<locais.length;j++){
+          try{var f=await window.resolverFotoParaFile(locais[j].ref,'foto_'+locais[j].n+'.jpg');
+            if(f){if(window.fastCarimbarDestino)f=await window.fastCarimbarDestino(f,locais[j].destino);baixar(renomear(f,nomeSeguro(locais[j].destino)+' '+locais[j].n+extensao(f)));}
+          }catch(eLoc){console.warn('r111 download foto local:',eLoc)}
+        }
+      }
+      var clientes=itens.map(function(i){return i.cliente}).filter(function(v,p,a){return v&&a.indexOf(v)===p});
+      var cab='*\ud83d\udcf8 Fotos das rotas*'+(clientes.length?('\nClientes: '+clientes.join(', ')):'')+'\nRotas selecionadas: '+itens.length;
+      var corpo=linhas.length?('\n\n'+linhas.join('\n\n')):'';
+      var aviso=locais.length?('\n\n('+locais.length+' foto(s) foram baixadas neste aparelho para voce anexar \u2014 elas ainda nao tem link na nuvem.)'):'';
+      if(btn)btn.innerHTML='<i class="fa-brands fa-whatsapp"></i> Abrindo WhatsApp...';
+      window.open('https://api.whatsapp.com/send?text='+encodeURIComponent(cab+corpo+aviso),'_blank');
+      if(linhas.length)avisar('WhatsApp aberto com '+linhas.length+' foto(s) por link'+(locais.length?(' e '+locais.length+' baixada(s) para anexar'):'')+'.','success');
+      else avisar('WhatsApp aberto. As '+locais.length+' foto(s) foram baixadas para anexar manualmente (ainda sem link na nuvem).','info');
+    }catch(e){if(!(e&&e.name==='AbortError')){console.error('FAST r111 - envio direto grupo WhatsApp:',e);avisar('Nao foi possivel preparar o envio: '+(e.message||e),'error')}}finally{if(btn){btn.disabled=false;btn.innerHTML=html}}
   };
 
   function aplicarIdentidadeGate(){try{var p=new URLSearchParams(location.search),modo=p.get('exclusive')||p.get('atalho')||'';if(modo==='rotasDia')modo='rotas-dia';if(modo!=='rotas-dia'&&modo!=='despesas')return;document.body.classList.add('fast-exclusive-brand');var src=modo==='rotas-dia'?'assets/fast-rotas-512.png?v='+VERSAO:'assets/fast-despesas-512.png?art=20260929&v='+VERSAO;var alt=modo==='rotas-dia'?'Rotas do Dia':'Despesas';document.querySelectorAll('#fastLoginGate .fast-gate-logo img').forEach(function(img){img.src=src;img.alt=alt;img.removeAttribute('style')})}catch(e){}}
