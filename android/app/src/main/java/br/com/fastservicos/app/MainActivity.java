@@ -109,7 +109,7 @@ public class MainActivity extends Activity {
         settings.setBuiltInZoomControls(false);
         settings.setDisplayZoomControls(false);
         settings.setTextZoom(100);
-        settings.setUserAgentString(settings.getUserAgentString() + " FASTAndroid/5.1.6");
+        settings.setUserAgentString(settings.getUserAgentString() + " FASTAndroid/5.1.9");
         CookieManager.getInstance().setAcceptCookie(true);
         CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
         webView.addJavascriptInterface(new VoiceBridge(), "FASTVoice");
@@ -278,7 +278,16 @@ public class MainActivity extends Activity {
     }
 
     private void abrirCompartilhamento(ArrayList<Uri> uris, String texto, String id) {
-        if (uris.isEmpty()) { responderCompartilhar(id, false, "sem_arquivos"); return; }
+        if (uris.isEmpty()) {
+            if (texto == null || texto.isEmpty()) { responderCompartilhar(id, false, "sem_arquivos"); return; }
+            // só texto (links das fotos): também abre a lista de apps para escolher
+            Intent t = new Intent(Intent.ACTION_SEND);
+            t.setType("text/plain");
+            t.putExtra(Intent.EXTRA_TEXT, texto);
+            try { startActivity(Intent.createChooser(t, "Enviar fotos")); responderCompartilhar(id, true, ""); }
+            catch (Exception e) { responderCompartilhar(id, false, String.valueOf(e.getMessage())); }
+            return;
+        }
         Intent it;
         if (uris.size() == 1) { it = new Intent(Intent.ACTION_SEND); it.putExtra(Intent.EXTRA_STREAM, uris.get(0)); }
         else { it = new Intent(Intent.ACTION_SEND_MULTIPLE); it.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris); }
