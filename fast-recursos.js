@@ -960,7 +960,7 @@
         arqs.push({ nome: f.name || ('foto_' + (i + 1) + '.jpg'), tipo: f.type || 'image/jpeg', base64: await paraBase64(f) });
       }
       var texto = [d.text || '', d.url || ''].filter(Boolean).join('\n');
-      if (!arqs.length) { location.href = 'https://api.whatsapp.com/send?text=' + encodeURIComponent(texto || d.title || ''); return; }
+      if (!arqs.length && !texto) return;
       var id = 'c' + Date.now() + Math.random().toString(36).slice(2, 7);
       return new Promise(function (res, rej) {
         pend[id] = { res: res, rej: rej };
@@ -1086,10 +1086,14 @@
     return c.prom;
   }
   W.fastPrepararEnvioGrupo = prepararGrupo;
+  // sem fotos como arquivo: manda os LINKS — também pela gaveta de apps do aparelho
   function enviarPorLinks(pares) {
     var linhas = [], n = 0;
     pares.forEach(function (p) { if (/^https?:\/\//i.test(String(p.ref))) { n++; linhas.push('📷 Foto ' + n + ' — ' + p.destino + ':\n' + p.ref); } });
-    W.open('https://api.whatsapp.com/send?text=' + encodeURIComponent((linhas.length ? linhas.join('\n\n') + '\n\n' : '') + legendaDestinos(pares)), '_blank');
+    var texto = (linhas.length ? linhas.join('\n\n') + '\n\n' : '') + legendaDestinos(pares);
+    var abrirWhats = function () { W.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(texto), '_blank'); };
+    if (navigator.share) { try { navigator.share({ text: texto }).catch(function (e) { if (!(e && e.name === 'AbortError')) abrirWhats(); }); return; } catch (e) {} }
+    abrirWhats();
   }
   async function enviarGrupo(g, btn) {
     var chave = g.id || '_', pares = paresDoGrupo(g);
@@ -1103,7 +1107,9 @@
     if (!c.pronto) { if (btn) btn.disabled = true; await c.prom; if (btn) btn.disabled = false; }
     if (!c.files.length) { enviarPorLinks(pares); aviso('Não foi possível preparar as fotos como arquivo: o WhatsApp abriu com os links.'); return; }
     var dados = { files: c.files, text: c.legenda };
-    try { if (navigator.canShare && !navigator.canShare(dados)) { enviarPorLinks(pares); return; } } catch (e) {}
+    var aceita = true; try { if (navigator.canShare) aceita = navigator.canShare(dados); } catch (e) {}
+    if (!aceita) { try { aceita = navigator.canShare({ files: [c.files[0]] }); } catch (e) { aceita = false; } }
+    if (!aceita) { enviarPorLinks(pares); aviso('Este aparelho não aceita enviar estas fotos como arquivo; abri a lista de apps com os links.'); return; }
     try {
       await navigator.share(dados);
       aviso('As ' + c.files.length + ' fotos foram enviadas juntas, cada uma com o nome do destino.' + (c.erros ? ' (' + c.erros + ' não puderam ser preparadas.)' : ''));
