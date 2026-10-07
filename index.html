@@ -10701,12 +10701,19 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
           };
           const pend = arr.filter(function(it){ return !conc(it); });
           const concl = arr.filter(function(it){ return conc(it); });
+          // (r109 FIX-ORDEM) ordena os PENDENTES pela ordem manual persistida
+          // (campo `ordem`), com fallback estável para a posição original.
+          const _pendDec = pend.map(function(it, i){
+            return { it: it, o: (typeof it.ordem === 'number' && isFinite(it.ordem)) ? it.ordem : 1e9, i: i };
+          });
+          _pendDec.sort(function(a,b){ return (a.o - b.o) || (a.i - b.i); });
+          const pendOrdenada = _pendDec.map(function(x){ return x.it; });
           concl.sort(function(a,b){
             const ta = Date.parse(a.dataConclusao || '') || 0;
             const tb = Date.parse(b.dataConclusao || '') || 0;
             return ta - tb;
           });
-          bd.sequencias[d] = pend.concat(concl);
+          bd.sequencias[d] = pendOrdenada.concat(concl);
         });
       } catch(e) { console.warn('fastReordenarFilasSeq:', e); }
     }
@@ -13413,10 +13420,13 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
     function sequenciasToRows(sequencias) {
       const rows = [];
       Object.keys(sequencias || {}).forEach(dataSeq => {
-        (sequencias[dataSeq] || []).forEach(item => {
+        (sequencias[dataSeq] || []).forEach((item, _idxSeq) => {
           // Garantir normalização de fotos antes de exportar
           normalizarFotosItem(item);
           const extrasPersistidos = Array.isArray(item.extras) ? item.extras.slice() : [];
+          // (r109 FIX-ORDEM) persiste a ordem manual da fila dentro de __fastMeta;
+          // usa o campo explícito se existir, senão o índice atual do array.
+          const _ordemSeq = (typeof item.ordem === 'number' && isFinite(item.ordem)) ? item.ordem : _idxSeq;
           extrasPersistidos.push({ __fastMeta: {
             agrupado: !!item.agrupado,
             itensAgrupados: item.itensAgrupados || [],
@@ -13424,7 +13434,8 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
             itensOriginais: item.itensOriginais || [],
             fotosExcluidas: item.fotosExcluidas || [],
             qtdMercadorias: Number(item.qtdMercadorias) || 1,
-            campoAgrupamento: item.campoAgrupamento || ''
+            campoAgrupamento: item.campoAgrupamento || '',
+            ordem: _ordemSeq
           }});
           rows.push({
             id: Math.floor(Number(item.id)) || Date.now(),
@@ -13497,7 +13508,9 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
           rotasOriginais: fastMeta.rotasOriginais || [],
           itensOriginais: fastMeta.itensOriginais || [],
           fotosExcluidas: fastMeta.fotosExcluidas || [],
-          campoAgrupamento: fastMeta.campoAgrupamento || ''
+          campoAgrupamento: fastMeta.campoAgrupamento || '',
+          // (r109 FIX-ORDEM) relê a ordem manual gravada na nuvem
+          ordem: (typeof fastMeta.ordem === 'number' && isFinite(fastMeta.ordem)) ? fastMeta.ordem : undefined
         });
       });
       return seq;
@@ -14382,6 +14395,18 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
             if (merged.foto && (fotosExcluidasSet.has(String(merged.foto)) || fotosBloqueadasItem.has(String(merged.foto)))) merged.foto = '';
             if (merged.fotos.length === 0 && merged.foto) merged.fotos = [merged.foto];
             if (merged.fotos.length > 0 && !merged.foto) merged.foto = merged.fotos[0];
+            // (r109 FIX-ORDEM) PORTABILIDADE: preservar a ordem manual entre
+            // aparelhos. O spread acima faz o LOCAL vencer, mas um aparelho que
+            // NUNCA reordenou não tem `ordem` válida e apagaria a ordem que OUTRO
+            // aparelho acabou de definir. Regra: se o local tem ordem numérica,
+            // ele vence (comando deste aparelho); senão adota a ordem da nuvem.
+            {
+              const _ordLoc = (typeof item.ordem === 'number' && isFinite(item.ordem)) ? item.ordem : null;
+              const _ordRem = (typeof existente.ordem === 'number' && isFinite(existente.ordem)) ? existente.ordem : null;
+              if (_ordLoc != null) merged.ordem = _ordLoc;
+              else if (_ordRem != null) merged.ordem = _ordRem;
+              else delete merged.ordem;
+            }
             itemMap.set(idStr, merged);
           } else {
             const copia = { ...item };
@@ -14829,12 +14854,18 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
               };
               const pend = arrSeq.filter(function(it){ return !conc(it); });
               const concl = arrSeq.filter(function(it){ return conc(it); });
+              // (r109 FIX-ORDEM) pós-merge: preserva a ordem manual dos pendentes.
+              const _pendDec = pend.map(function(it, i){
+                return { it: it, o: (typeof it.ordem === 'number' && isFinite(it.ordem)) ? it.ordem : 1e9, i: i };
+              });
+              _pendDec.sort(function(a,b){ return (a.o - b.o) || (a.i - b.i); });
+              const pendOrdenada = _pendDec.map(function(x){ return x.it; });
               concl.sort(function(a,b){
                 const ta = Date.parse(a.dataConclusao || '') || 0;
                 const tb = Date.parse(b.dataConclusao || '') || 0;
                 return ta - tb;
               });
-              bancoDados.sequencias[dSeq] = pend.concat(concl);
+              bancoDados.sequencias[dSeq] = pendOrdenada.concat(concl);
             });
           }
         } catch(eOrd) { console.warn('r138 ordem pós-merge:', eOrd); }
@@ -14926,6 +14957,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
     window.addEventListener('online', () => {
       atualizarStatusSync('pending', 'Online — sincronizando...');
       sincronizarAgora();
+      setTimeout(function(){ try { fastFotosGarantirNuvem(); } catch(e){} }, 3000);
     });
     window.addEventListener('offline', () => {
       atualizarStatusSync('offline', 'Offline — dados locais');
@@ -19789,6 +19821,137 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
     window.abrirCameraAoVivo = abrirCameraAoVivo;
     window.fastFecharCameraAoVivo = fastFecharCameraAoVivo;
 
+    /* ============================================================
+       (r108) MÓDULO DE FOTOS NA NUVEM — Supabase Storage
+       Fonte única: toda foto nova sobe para o bucket público
+       'rotas-fotos' e passa a ser referenciada por URL http, que
+       sincroniza em TODOS os apps (PAINEL/FAST/ROTAS/Cliente/
+       Motorista) e abre em qualquer dispositivo. Fotos antigas
+       (idb:/file:) migram sozinhas assim que houver internet.
+       ============================================================ */
+    var FAST_FOTOS_BUCKET = 'rotas-fotos';
+    function fastStorageBase() {
+      try { return SUPABASE_URL.replace(/\/rest\/v1\/?$/, '') + '/storage/v1'; }
+      catch (e) { return 'https://yhxuplhohhetzloxvgku.supabase.co/storage/v1'; }
+    }
+    function fastStorageHeaders(extra) {
+      var tokenUsuario = (typeof window.fastObterTokenSupabase === 'function') ? window.fastObterTokenSupabase() : null;
+      var h = { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + (tokenUsuario || SUPABASE_KEY) };
+      if (extra) Object.assign(h, extra);
+      return h;
+    }
+    function fastBase64ParaBlob(base64) {
+      try {
+        var partes = String(base64).split(',');
+        var mime = (partes[0].match(/data:([^;]+)/) || [])[1] || 'image/jpeg';
+        var bin = atob(partes[1] || partes[0]);
+        var arr = new Uint8Array(bin.length);
+        for (var i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+        return new Blob([arr], { type: mime });
+      } catch (e) { return null; }
+    }
+    // Sobe um base64/dataURL e devolve a URL pública http da foto.
+    function fastFotoSubirNuvem(base64, prefixo) {
+      return new Promise(function (resolve, reject) {
+        if (!navigator.onLine) { reject(new Error('offline')); return; }
+        var blob = fastBase64ParaBlob(base64);
+        if (!blob) { reject(new Error('base64 inválido')); return; }
+        var caminho = (prefixo || 'rota') + '/' + Date.now() + '_' + Math.random().toString(36).slice(2, 10) + '.jpg';
+        fetch(fastStorageBase() + '/object/' + FAST_FOTOS_BUCKET + '/' + caminho, {
+          method: 'POST',
+          headers: fastStorageHeaders({ 'Content-Type': blob.type || 'image/jpeg', 'x-upsert': 'true' }),
+          body: blob
+        }).then(function (r) {
+          if (!r.ok) return r.text().then(function (t) { throw new Error('upload ' + r.status + ' ' + t); });
+          resolve(fastStorageBase() + '/object/public/' + FAST_FOTOS_BUCKET + '/' + caminho);
+        }).catch(reject);
+      });
+    }
+    window.fastFotoSubirNuvem = fastFotoSubirNuvem;
+
+    // Fila de fotos locais (idb:/file:) ainda não enviadas à nuvem.
+    var FAST_FILA_FOTOS = 'fast_fotos_pendentes_nuvem';
+    function fastFotoEnfileirarPendente(ref) {
+      try {
+        var fila = JSON.parse(localStorage.getItem(FAST_FILA_FOTOS) || '[]');
+        if (fila.indexOf(ref) < 0) { fila.push(ref); localStorage.setItem(FAST_FILA_FOTOS, JSON.stringify(fila)); }
+      } catch (e) {}
+    }
+    // Substitui uma referência antiga (idb:/file:) pela URL nova em TODO o banco.
+    function fastFotoSubstituirRef(refAntiga, urlNova) {
+      var trocou = false;
+      try {
+        var seq = (bancoDados && bancoDados.sequencias) || {};
+        Object.keys(seq).forEach(function (data) {
+          (seq[data] || []).forEach(function (item) {
+            if (Array.isArray(item.fotos)) {
+              for (var i = 0; i < item.fotos.length; i++) { if (item.fotos[i] === refAntiga) { item.fotos[i] = urlNova; trocou = true; } }
+            }
+            if (item.foto === refAntiga) { item.foto = urlNova; trocou = true; }
+          });
+        });
+        var rotas = (bancoDados && bancoDados.rotas) || [];
+        rotas.forEach(function (r) {
+          if (Array.isArray(r.fotos)) { for (var j = 0; j < r.fotos.length; j++) { if (r.fotos[j] === refAntiga) { r.fotos[j] = urlNova; trocou = true; } } }
+          if (r.foto === refAntiga) { r.foto = urlNova; trocou = true; }
+        });
+      } catch (e) {}
+      return trocou;
+    }
+    // Migra as fotos locais pendentes para a nuvem (quando houver internet).
+    var fastMigrandoFotos = false;
+    function fastFotosGarantirNuvem() {
+      if (fastMigrandoFotos || !navigator.onLine) return Promise.resolve();
+      var refs = {};
+      try { JSON.parse(localStorage.getItem(FAST_FILA_FOTOS) || '[]').forEach(function (r) { if (r) refs[r] = 1; }); } catch (e) {}
+      try {
+        var seq = (bancoDados && bancoDados.sequencias) || {};
+        Object.keys(seq).forEach(function (data) {
+          (seq[data] || []).forEach(function (item) {
+            (item.fotos || []).forEach(function (r) { if (/^(idb:|file:)/.test(String(r))) refs[r] = 1; });
+            if (/^(idb:|file:)/.test(String(item.foto || ''))) refs[item.foto] = 1;
+          });
+        });
+      } catch (e) {}
+      var lista = Object.keys(refs);
+      if (!lista.length) return Promise.resolve();
+      fastMigrandoFotos = true;
+      var seqP = Promise.resolve();
+      var migradas = 0;
+      lista.slice(0, 25).forEach(function (ref) {
+        seqP = seqP.then(function () {
+          return resolverFotoParaURL(ref).then(function (dataUrl) {
+            if (!dataUrl || /^https?:/.test(dataUrl)) return;
+            return (function () {
+              if (/^data:/.test(dataUrl)) return Promise.resolve(dataUrl);
+              return fetch(dataUrl).then(function (r) { return r.blob(); }).then(function (b) {
+                return new Promise(function (res) { var fr = new FileReader(); fr.onload = function () { res(fr.result); }; fr.readAsDataURL(b); });
+              });
+            })().then(function (b64) {
+              return fastFotoSubirNuvem(b64, 'migr').then(function (url) {
+                if (fastFotoSubstituirRef(ref, url)) migradas++;
+                try { var fila = JSON.parse(localStorage.getItem(FAST_FILA_FOTOS) || '[]').filter(function (x) { return x !== ref; }); localStorage.setItem(FAST_FILA_FOTOS, JSON.stringify(fila)); } catch (e) {}
+              });
+            });
+          }).catch(function (e) { console.warn('r108: migração de foto falhou', ref, e); });
+        });
+      });
+      return seqP.then(function () {
+        fastMigrandoFotos = false;
+        if (migradas > 0) {
+          try { if (typeof salvarStorage === 'function') salvarStorage(); } catch (e) {}
+          try { if (typeof renderizarSequencia === 'function') renderizarSequencia(); } catch (e) {}
+          try { mudancasPendentes = true; if (typeof sincronizarAgora === 'function') sincronizarAgora(); } catch (e) {}
+          console.log('r108: ' + migradas + ' foto(s) migrada(s) para a nuvem.');
+        }
+      }).catch(function () { fastMigrandoFotos = false; });
+    }
+    window.fastFotosGarantirNuvem = fastFotosGarantirNuvem;
+    try {
+      setTimeout(function () { try { fastFotosGarantirNuvem(); } catch (e) {} }, 8000);
+      setInterval(function () { try { fastFotosGarantirNuvem(); } catch (e) {} }, 120000);
+    } catch (e) {}
+
     function salvarFotoRota(dataSel, index, event) {
       // Suporta um ou múltiplos arquivos (input com ou sem "multiple")
       const files = event.target.files;
@@ -19833,76 +19996,35 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
         const file = fileList[i];
         const modoFotos = obterModoArmazenamentoFotos();
 
-        // Modo Compatível (auto): salvar direto no IndexedDB — sem popup, sem permissão
-        if (modoFotos === 'auto') {
-          comprimirImagem(file, 1920, 0.92).then(base64Compact => {
-            const chaveIdb = item.id + '_' + Date.now() + '_' + i;
-            guardarFotoIndexedDB(chaveIdb, base64Compact).then(ok => {
-              if (ok) {
-                novasRefs.push('idb:' + chaveIdb);
-                processadas++;
-                mostrarFeedbackFoto(item.id, '⏳ ' + processadas + '/' + totalArquivos + ' foto(s) salvas (modo compatível)...', 'sucesso');
-              } else {
-                const tempItem = { fotos: item.fotos.slice(), foto: item.foto };
-                tempItem.fotos.push(base64Compact);
-                const testeSalvo = tentarSalvarStorageCom(tempItem);
-                if (testeSalvo) {
-                  novasRefs.push(base64Compact);
-                  processadas++;
-                } else {
-                  errosCount++;
-                }
-              }
-              processarProximo(i + 1);
-            }).catch(() => { errosCount++; processarProximo(i + 1); });
+        // (r108) NUVEM-FIRST: sobe a foto ao Supabase Storage e guarda a URL
+        // pública (sincroniza em todos os apps). Offline: guarda local e
+        // enfileira para subir à nuvem assim que reconectar.
+        function fast108FallbackLocal(base64Compact) {
+          const chaveIdb = item.id + '_' + Date.now() + '_' + i;
+          guardarFotoIndexedDB(chaveIdb, base64Compact).then(ok => {
+            if (ok) {
+              novasRefs.push('idb:' + chaveIdb);
+              fastFotoEnfileirarPendente('idb:' + chaveIdb);
+              processadas++;
+              mostrarFeedbackFoto(item.id, '⏳ ' + processadas + '/' + totalArquivos + ' foto(s) salvas — enviam à nuvem ao reconectar...', 'sucesso');
+            } else {
+              const tempItem = { fotos: item.fotos.slice(), foto: item.foto };
+              tempItem.fotos.push(base64Compact);
+              const testeSalvo = tentarSalvarStorageCom(tempItem);
+              if (testeSalvo) { novasRefs.push(base64Compact); processadas++; } else { errosCount++; }
+            }
+            processarProximo(i + 1);
           }).catch(() => { errosCount++; processarProximo(i + 1); });
-          return;
         }
 
-        // Modo Pasta: tentar File System Access API (solicita permissão ao salvar)
-        salvarFotoEmArquivo(file, item).then(resultado => {
-          if (resultado.sucesso) {
-            novasRefs.push(resultado.referencia);
+        comprimirImagem(file, 1920, 0.92).then(base64Compact => {
+          fastFotoSubirNuvem(base64Compact, 'rota').then(urlNuvem => {
+            novasRefs.push(urlNuvem);
             processadas++;
-            mostrarFeedbackFoto(item.id, '⏳ ' + processadas + '/' + totalArquivos + ' foto(s) salvas na pasta APP FAST...', 'sucesso');
-          } else {
-            // Fallback: comprimir e guardar base64 no IndexedDB
-            comprimirImagem(file, 1920, 0.92).then(base64Compact => {
-              const chaveIdb = item.id + '_' + Date.now() + '_' + i;
-              guardarFotoIndexedDB(chaveIdb, base64Compact).then(ok => {
-                if (ok) {
-                  novasRefs.push('idb:' + chaveIdb);
-                  processadas++;
-                  mostrarFeedbackFoto(item.id, '⏳ ' + processadas + '/' + totalArquivos + ' foto(s) (modo compatível)...', 'sucesso');
-                } else {
-                  // Último recurso: base64 pequeno direto (apenas se localStorage tiver espaço)
-                  const tempItem = { fotos: item.fotos.slice(), foto: item.foto };
-                  tempItem.fotos.push(base64Compact);
-                  const testeSalvo = tentarSalvarStorageCom(tempItem);
-                  if (testeSalvo) {
-                    novasRefs.push(base64Compact);
-                    processadas++;
-                  } else {
-                    errosCount++;
-                    console.warn('Não foi possível salvar a foto ' + (i+1) + ': armazenamento cheio.');
-                  }
-                }
-                processarProximo(i + 1);
-              }).catch(() => {
-                errosCount++;
-                processarProximo(i + 1);
-              });
-            }).catch(() => {
-              errosCount++;
-              processarProximo(i + 1);
-            });
-            return;
-          }
-          processarProximo(i + 1);
-        }).catch(() => {
-          errosCount++;
-          processarProximo(i + 1);
-        });
+            mostrarFeedbackFoto(item.id, '⏳ ' + processadas + '/' + totalArquivos + ' foto(s) enviadas à nuvem...', 'sucesso');
+            processarProximo(i + 1);
+          }).catch(() => { fast108FallbackLocal(base64Compact); });
+        }).catch(() => { errosCount++; processarProximo(i + 1); });
       }
 
       function tentarSalvarStorageCom(tempItem) {
@@ -22410,8 +22532,43 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
       lista[index] = lista[novoIndex];
       lista[novoIndex] = temp;
 
+      /* (r109 FIX-ORDEM) A ordem manual (Subir/Descer) precisa SOBREVIVER ao
+         sync com a nuvem. O array era só um índice volátil, então o merge
+         (nuvem-first) devolvia a ordem do servidor e a fila "voltava ao lugar".
+         Agora gravamos um campo explícito `ordem` em CADA item da lista; esse
+         campo é persistido dentro de extras.__fastMeta (coluna JSON já
+         sincronizada) e relido na volta, fixando a sequência escolhida. */
+      for (let _k = 0; _k < lista.length; _k++) {
+        if (lista[_k]) lista[_k].ordem = _k;
+      }
+
+      /* (fix-scroll) Ao mover rotas com as setas, a reconstrucao do
+         containerSequencia (innerHTML='') colapsa a altura e zera a rolagem,
+         jogando a tela para o topo. Capturamos a posicao do scroll ANTES do
+         render e a restauramos DEPOIS que ele conclui, para o usuario
+         continuar editando exatamente onde estava. */
+      const _mainEl = document.querySelector('main');
+      const _scrollMain = _mainEl ? _mainEl.scrollTop : 0;
+      const _scrollWin = window.scrollY || window.pageYOffset || 0;
+      const _restaurarScroll = () => {
+        try {
+          if (_mainEl && _scrollMain > 0) _mainEl.scrollTop = _scrollMain;
+          if (_scrollWin > 0) window.scrollTo(0, _scrollWin);
+        } catch (e) {}
+      };
+
       fastSalvarSemBloquear(160);
       fastAgendarRenderizacaoCompleta(true, 80);
+
+      /* O render e agendado via setTimeout(80); restauramos logo apos ele
+         concluir e novamente no proximo quadro, cobrindo o reflow do layout. */
+      setTimeout(() => {
+        _restaurarScroll();
+        requestAnimationFrame(() => {
+          _restaurarScroll();
+          requestAnimationFrame(_restaurarScroll);
+        });
+      }, 100);
     }
 
     function removerSeq(dataSel, index) {
@@ -24812,14 +24969,23 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
         }
         const file = fileList[i];
         comprimirImagem(file, 1920, 0.92).then(base64Compact => {
-          const chaveIdb = 'editrota_' + Date.now() + '_' + i + '_' + Math.random().toString(36).slice(2, 8);
-          guardarFotoIndexedDB(chaveIdb, base64Compact).then(ok => {
-            var refNova = ok ? ('idb:' + chaveIdb) : base64Compact;
-            _editRotaFotos.push(refNova);
-            try { (window.__fast63Nomes = window.__fast63Nomes || {})[refNova] = file && file.name ? file.name : ''; } catch (e) {}
+          // (r108) NUVEM-FIRST: sobe para o Storage e guarda a URL pública.
+          fastFotoSubirNuvem(base64Compact, 'editrota').then(urlNuvem => {
+            _editRotaFotos.push(urlNuvem);
+            try { (window.__fast63Nomes = window.__fast63Nomes || {})[urlNuvem] = file && file.name ? file.name : ''; } catch (e) {}
             processadas++;
             proximo(i + 1);
-          }).catch(() => { _editRotaFotos.push(base64Compact); processadas++; proximo(i + 1); });
+          }).catch(() => {
+            const chaveIdb = 'editrota_' + Date.now() + '_' + i + '_' + Math.random().toString(36).slice(2, 8);
+            guardarFotoIndexedDB(chaveIdb, base64Compact).then(ok => {
+              var refNova = ok ? ('idb:' + chaveIdb) : base64Compact;
+              _editRotaFotos.push(refNova);
+              if (ok) fastFotoEnfileirarPendente(refNova);
+              try { (window.__fast63Nomes = window.__fast63Nomes || {})[refNova] = file && file.name ? file.name : ''; } catch (e) {}
+              processadas++;
+              proximo(i + 1);
+            }).catch(() => { _editRotaFotos.push(base64Compact); processadas++; proximo(i + 1); });
+          });
         }).catch(() => { erros++; proximo(i + 1); });
       }
       proximo(0);
@@ -34905,7 +35071,12 @@ window.fastMobileNav = function(ev, abaId, botao) {
       var arquivo;
       try{ arquivo=new File([blob],nomeArq,{type:blob.type||'image/jpeg'}); }
       catch(e){ arquivo=blob; } // navegadores antigos: fallback File-like
-      return guardarBase64(f.foto).then(function(ref){
+      // (r108) Sobe o base64 do motorista para o Storage e usa a URL pública
+      // (sincroniza em todos os apps). Se falhar, cai no IndexedDB local.
+      var obterRefMot = (window.fastFotoSubirNuvem
+        ? window.fastFotoSubirNuvem(f.foto, 'mot').catch(function(){ return guardarBase64(f.foto); })
+        : guardarBase64(f.foto));
+      return Promise.resolve(obterRefMot).then(function(ref){
         if(item){
           if(!Array.isArray(item.fotos))item.fotos=[];
           if(item.fotos.indexOf(ref)<0)item.fotos.push(ref);
@@ -42305,4 +42476,94 @@ html body #modalEditarRota .modal-content{margin:0 auto!important;top:auto!impor
 <script src="fast-4067.js?v=33"></script>
 <script src="navegacao-fast.js?v=1"></script>
 <script src="fast-recursos.js?v=34"></script>
+<!-- (r108) Painel de diagnostico de fotos na nuvem -->
+<style id="fast108-diag-css">
+#fast108Btn{position:fixed;right:14px;bottom:84px;z-index:2147483000;background:#16a34a;color:#fff;border:0;border-radius:999px;padding:11px 14px;font:800 13px system-ui,-apple-system,Segoe UI,Roboto,sans-serif;box-shadow:0 6px 20px rgba(0,0,0,.28);cursor:pointer}
+#fast108Mask{position:fixed;inset:0;z-index:2147483001;background:rgba(15,23,42,.55);display:none;align-items:flex-end;justify-content:center;padding:12px}
+#fast108Mask.on{display:flex}
+#fast108Panel{width:min(460px,100%);max-height:86vh;overflow:auto;background:#fff;border-radius:18px;padding:16px;box-shadow:0 20px 60px rgba(0,0,0,.4);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:#0f172a}
+#fast108Panel h3{margin:0 0 4px;font-size:17px}
+#fast108Panel .sub{color:#64748b;font-size:12px;margin-bottom:12px}
+#fast108Panel .row{display:flex;gap:8px;margin-bottom:10px}
+#fast108Panel button.act{flex:1;border:0;border-radius:12px;padding:12px;font-weight:800;font-size:14px;cursor:pointer}
+#fast108Panel .pri{background:#16a34a;color:#fff}
+#fast108Panel .sec{background:#f1f5f9;color:#334155}
+#fast108Out{background:#0f172a;color:#e2e8f0;border-radius:12px;padding:12px;font:600 12px ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap;word-break:break-word;min-height:80px;max-height:46vh;overflow:auto}
+#fast108Panel .fechar{width:100%;margin-top:12px;border:0;border-radius:12px;padding:12px;font-weight:800;background:#e2e8f0;color:#334155;cursor:pointer}
+</style>
+<script id="fast108-diag-js">
+(function(){
+  'use strict';
+  function el(id){return document.getElementById(id);}
+  function montar(){
+    if(el('fast108Btn'))return;
+    var b=document.createElement('button');
+    b.id='fast108Btn';b.type='button';b.textContent='\uD83E\uDE7A Fotos';
+    var mask=document.createElement('div');mask.id='fast108Mask';
+    mask.innerHTML='<div id="fast108Panel" role="dialog" aria-label="Diagnostico de fotos">'
+      +'<h3>\uD83E\uDE7A Diagn\u00f3stico de fotos na nuvem</h3>'
+      +'<div class="sub">Testa o envio ao bucket, a migra\u00e7\u00e3o das fotos antigas e o estado da fila. Precisa de internet ligada.</div>'
+      +'<div class="row"><button class="act pri" id="fast108Teste">Testar envio \u00e0 nuvem</button><button class="act sec" id="fast108Mig">Migrar fotos antigas</button></div>'
+      +'<div class="row"><button class="act sec" id="fast108Estado">Ver estado das fotos</button></div>'
+      +'<div id="fast108Out">Toque em um bot\u00e3o para come\u00e7ar.</div>'
+      +'<button class="fechar" id="fast108Fechar">Fechar</button></div>';
+    (document.body||document.documentElement).appendChild(b);
+    (document.body||document.documentElement).appendChild(mask);
+    function log(t,limpar){var o=el('fast108Out');if(!o)return;if(limpar)o.textContent='';o.textContent+=(o.textContent&&!limpar?'\n':'')+t;o.scrollTop=o.scrollHeight;}
+    b.addEventListener('click',function(){mask.classList.add('on');});
+    mask.addEventListener('click',function(e){if(e.target===mask)mask.classList.remove('on');});
+    el('fast108Fechar').addEventListener('click',function(){mask.classList.remove('on');});
+
+    el('fast108Teste').addEventListener('click',function(){
+      log('\u23f3 Enviando imagem de teste ao bucket rotas-fotos...',true);
+      if(!navigator.onLine){log('\u274c Sem internet agora. Ligue a conex\u00e3o e tente de novo.');return;}
+      if(typeof fastFotoSubirNuvem!=='function'){log('\u274c M\u00f3dulo de nuvem n\u00e3o encontrado (arquivo antigo em uso?).');return;}
+      var px='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+M8AAAMBAQDJ/pLvAAAAAElFTkSuQmCC';
+      fastFotoSubirNuvem(px,'teste').then(function(url){
+        log('\u2705 ENVIO OK! A foto virou um link p\u00fablico:');
+        log(url);
+        log('\nAbra esse link no navegador: a imagem precisa abrir. Se abrir, o sincronismo est\u00e1 funcionando.');
+      }).catch(function(e){
+        var m=String((e&&e.message)||e);
+        log('\u274c ENVIO FALHOU: '+m);
+        if(/40[13]/.test(m)) log('\n\u2192 Isso \u00e9 permiss\u00e3o do bucket. Confirme no Supabase que o bucket "rotas-fotos" \u00e9 p\u00fablico e tem policies de INSERT e leitura.');
+        else if(/offline/.test(m)) log('\n\u2192 Sem internet no momento.');
+      });
+    });
+
+    el('fast108Mig').addEventListener('click',function(){
+      log('\u23f3 Procurando fotos antigas presas no aparelho e enviando \u00e0 nuvem...',true);
+      if(typeof fastFotosGarantirNuvem!=='function'){log('\u274c M\u00f3dulo de nuvem n\u00e3o encontrado.');return;}
+      var antes=0;try{antes=JSON.parse(localStorage.getItem('fast_fotos_pendentes_nuvem')||'[]').length;}catch(e){}
+      fastFotosGarantirNuvem().then(function(){
+        var depois=0;try{depois=JSON.parse(localStorage.getItem('fast_fotos_pendentes_nuvem')||'[]').length;}catch(e){}
+        log('\u2705 Migra\u00e7\u00e3o executada.');
+        log('Fila pendente antes: '+antes+' \u2014 agora: '+depois+'.');
+        if(depois>0) log('\nAinda h\u00e1 fotos na fila (sobem sozinhas ao reconectar ou a cada 2 min; toque de novo para continuar).');
+        else log('\nNenhuma foto pendente: tudo na nuvem.');
+      }).catch(function(e){log('\u274c Falha na migra\u00e7\u00e3o: '+String((e&&e.message)||e));});
+    });
+
+    el('fast108Estado').addEventListener('click',function(){
+      log('\uD83D\uDCCA Estado das fotos:',true);
+      var fila=0;try{fila=JSON.parse(localStorage.getItem('fast_fotos_pendentes_nuvem')||'[]').length;}catch(e){}
+      var nuvem=0,local=0,total=0;
+      try{
+        var seq=(window.bancoDados&&bancoDados.sequencias)||{};
+        Object.keys(seq).forEach(function(d){(seq[d]||[]).forEach(function(it){
+          var refs=(it.fotos||[]).concat(it.foto?[it.foto]:[]);
+          refs.forEach(function(r){if(!r)return;total++;if(/^https?:/.test(String(r)))nuvem++;else if(/^(idb:|file:)/.test(String(r)))local++;});
+        });});
+      }catch(e){}
+      log('Fotos na nuvem (URL): '+nuvem);
+      log('Fotos ainda locais (idb/file): '+local);
+      log('Fila aguardando envio: '+fila);
+      log('Total de fotos nas rotas do dia: '+total);
+      if(local>0||fila>0) log('\n\u2192 Toque em "Migrar fotos antigas" (online) para enviar as que faltam.');
+      else if(total>0) log('\n\u2705 Todas as fotos j\u00e1 est\u00e3o na nuvem e sincronizam em todos os apps.');
+    });
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',montar,{once:true});else montar();
+})();
+</script>
 </body></html>
