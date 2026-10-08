@@ -1385,5 +1385,61 @@ window.motInstalar=motInstalar;
   };
 })();
 </script>
+<!-- (coleta) exibe Destino final no card quando o item traz os campos (aditivo/seguro) -->
+<script id="motorista-coleta-modo">
+(function(){'use strict';
+  function n(s){return String(s||'').trim().toLowerCase()}
+  function isColeta(r){return r&&(n(r.tipo)==='coleta'||n(r.tipo_rota)==='coleta'||n(r.tiporota)==='coleta'||!!(r.destinofinal||r.destino_final||r.destinoFinal))}
+  function df(r){return r.destinofinal||r.destino_final||r.destinoFinal||''}
+  function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+  var st=document.createElement('style');st.textContent='.fc-df{display:flex;align-items:center;gap:6px;margin-top:4px;font-size:12px;font-weight:800;color:#b45309}.fc-badge{display:inline-block;background:#f59e0b;color:#fff;font-weight:800;font-size:10px;padding:1px 7px;border-radius:999px;margin-left:6px}';document.head.appendChild(st);
+  function enhance(){try{
+    var lista=(window.ESTADO&&ESTADO.rotas)||[];if(!lista.length)return;
+    var map={};lista.forEach(function(it){if(isColeta(it))map[String(it.id)]={df:df(it)}});
+    if(!Object.keys(map).length)return;
+    document.querySelectorAll('.mot-card[data-item]').forEach(function(card){
+      var id=card.getAttribute('data-item');var info=map[id];if(!info)return;
+      var dest=card.querySelector('.mc-linha.dest span');if(dest&&!dest.querySelector('.fc-badge'))dest.insertAdjacentHTML('beforeend','<span class="fc-badge">COLETA</span>');
+      if(info.df&&!card.querySelector('.fc-df')){var ref=card.querySelector('.mc-linha.dest');var el=document.createElement('div');el.className='fc-df';el.innerHTML='<i class="fa-solid fa-flag-checkered"></i> Destino final: '+esc(info.df);if(ref&&ref.parentNode)ref.parentNode.insertBefore(el,ref.nextSibling);}
+    });
+  }catch(e){}}
+  var _r=window.renderizar;if(typeof _r==='function'&&!_r.__fc){var nw=function(){var x=_r.apply(this,arguments);setTimeout(enhance,30);return x};nw.__fc=1;window.renderizar=nw;}
+  setInterval(enhance,3000);
+})();
+</script>
+<!-- (realtime) SINCRONISMO INSTANTANEO via Supabase Realtime — as rotas do motorista atualizam na hora -->
+<script id="motorista-realtime-sync">
+(function(){
+  'use strict';
+  var URL='https://yhxuplhohhetzloxvgku.supabase.co';
+  var KEY='sb_publishable_jlsorkXci3_0Hla7gt8z1g_pe6zOT19';
+  var TABLES=['sequencias_itens','rotas'];
+  function debounce(fn,ms){var t;return function(){clearTimeout(t);t=setTimeout(fn,ms)}}
+  var pedir=debounce(function(){try{if(window.ESTADO&&ESTADO.sessao&&typeof motAtualizar==='function')motAtualizar(true);}catch(e){}},500);
+  function conectar(opts){
+    var ws,hb,ref=0,vivo=false,back=1000,parado=false,rt=null;
+    function env(o){try{ws.send(JSON.stringify(o))}catch(e){}}
+    function abrir(){
+      var tok=(opts.token&&opts.token())||opts.key;
+      try{ws=new WebSocket(opts.url.replace(/^http/,'ws')+'/realtime/v1/websocket?apikey='+encodeURIComponent(opts.key)+'&vsn=1.0.0');}catch(e){reagendar();return;}
+      ws.onopen=function(){
+        vivo=true;back=1000;
+        var pc=opts.tables.map(function(t){return {event:'*',schema:'public',table:t}});
+        env({topic:'realtime:motorista-sync',event:'phx_join',payload:{config:{broadcast:{ack:false},presence:{key:''},postgres_changes:pc},access_token:tok},ref:String(++ref)});
+        clearInterval(hb);hb=setInterval(function(){env({topic:'phoenix',event:'heartbeat',payload:{},ref:String(++ref)})},25000);
+      };
+      ws.onmessage=function(ev){var m;try{m=JSON.parse(ev.data)}catch(e){return;}if(m&&m.event==='postgres_changes'){try{opts.onChange(m.payload)}catch(e){}}};
+      ws.onclose=function(){vivo=false;clearInterval(hb);if(!parado)reagendar();};
+      ws.onerror=function(){try{ws.close()}catch(e){}};
+    }
+    function reagendar(){clearTimeout(rt);back=Math.min(back*1.6,15000);rt=setTimeout(abrir,back);}
+    abrir();
+    window.addEventListener('online',function(){if(!vivo)abrir()});
+    document.addEventListener('visibilitychange',function(){if(!document.hidden&&!vivo)abrir()});
+  }
+  function boot(){if(typeof WebSocket==='undefined')return;conectar({url:URL,key:KEY,tables:TABLES,onChange:pedir});}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){setTimeout(boot,2000)},{once:true});else setTimeout(boot,2000);
+})();
+</script>
 </body>
 </html>
