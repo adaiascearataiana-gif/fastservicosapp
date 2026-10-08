@@ -201,4 +201,64 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden&&cliente)c
 <script src="../suporte-fast.js?v=1"></script>
 <script src="../rastreio-fast.js?v=2"></script>
 <script>try{fastRastreio.montar(document.getElementById('rastreioWidget'),{param:'rastreio'})}catch(e){}</script>
+<!-- (coleta) exibe COLETA + Destino final quando a rota traz esses campos (aditivo/seguro) -->
+<script id="cliente-coleta-modo">
+(function(){'use strict';
+  function n(s){return String(s||'').trim().toLowerCase()}
+  function isColeta(r){return r&&(n(r.tipo)==='coleta'||n(r.tipo_rota)==='coleta'||n(r.tiporota)==='coleta'||!!(r.destinofinal||r.destino_final||r.destinoFinal))}
+  function df(r){return r.destinofinal||r.destino_final||r.destinoFinal||''}
+  var st=document.createElement('style');st.textContent='.fc-badge{display:inline-block;background:#f59e0b;color:#fff;font-weight:800;font-size:10px;padding:1px 7px;border-radius:999px;margin-left:4px}.fc-df{display:block;font-size:11px;color:#b45309;font-weight:800;margin-top:2px}';document.head.appendChild(st);
+  function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+  function enhance(){try{
+    if(typeof rotas==='undefined'||!rotas)return;
+    var cole=rotas.filter(isColeta);if(!cole.length)return;
+    var map={};cole.forEach(function(r){map[n(r.destino)]=df(r)});
+    var tb=document.querySelector('#table tbody');if(!tb)return;
+    Array.prototype.forEach.call(tb.querySelectorAll('tr'),function(tr){
+      var td=tr.children[2];if(!td||td.querySelector('.fc-badge'))return;
+      var k=n(td.textContent);
+      if(Object.prototype.hasOwnProperty.call(map,k)){td.insertAdjacentHTML('beforeend',' <span class="fc-badge">COLETA</span>'+(map[k]?'<span class="fc-df">Destino final: '+esc(map[k])+'</span>':''));}
+    });
+  }catch(e){}}
+  var _r=window.render;if(typeof _r==='function'&&!_r.__fc){var nw=function(){var x=_r.apply(this,arguments);setTimeout(enhance,30);return x};nw.__fc=1;window.render=nw;}
+  setInterval(enhance,3000);
+})();
+</script>
+<!-- (realtime) SINCRONISMO INSTANTANEO via Supabase Realtime — refresh imediato quando o patrão lança/edita rota ou o motorista conclui -->
+<script id="cliente-realtime-sync">
+(function(){
+  'use strict';
+  var URL='https://yhxuplhohhetzloxvgku.supabase.co';
+  var KEY='sb_publishable_jlsorkXci3_0Hla7gt8z1g_pe6zOT19';
+  var TABLES=['rotas','sequencias_itens'];
+  function debounce(fn,ms){var t;return function(){clearTimeout(t);t=setTimeout(fn,ms)}}
+  function recarregarHoje(){try{if(typeof carregarHoje==='function')carregarHoje()}catch(e){}}
+  function recarregarHistorico(){try{if(typeof window.iniciar==='function'&&typeof session!=='undefined'&&session)window.iniciar()}catch(e){}}
+  var pedirHoje=debounce(recarregarHoje,400);
+  var pedirFull=debounce(recarregarHistorico,800);
+  function conectar(opts){
+    var ws,hb,ref=0,vivo=false,back=1000,parado=false,rt=null;
+    function env(o){try{ws.send(JSON.stringify(o))}catch(e){}}
+    function abrir(){
+      var tok=(opts.token&&opts.token())||opts.key;
+      try{ws=new WebSocket(opts.url.replace(/^http/,'ws')+'/realtime/v1/websocket?apikey='+encodeURIComponent(opts.key)+'&vsn=1.0.0');}catch(e){reagendar();return;}
+      ws.onopen=function(){
+        vivo=true;back=1000;
+        var pc=opts.tables.map(function(t){return {event:'*',schema:'public',table:t}});
+        env({topic:'realtime:cliente-sync',event:'phx_join',payload:{config:{broadcast:{ack:false},presence:{key:''},postgres_changes:pc},access_token:tok},ref:String(++ref)});
+        clearInterval(hb);hb=setInterval(function(){env({topic:'phoenix',event:'heartbeat',payload:{},ref:String(++ref)})},25000);
+      };
+      ws.onmessage=function(ev){var m;try{m=JSON.parse(ev.data)}catch(e){return;}if(m&&m.event==='postgres_changes'){opts.onChange(m.payload)}};
+      ws.onclose=function(){vivo=false;clearInterval(hb);if(!parado)reagendar();};
+      ws.onerror=function(){try{ws.close()}catch(e){}};
+    }
+    function reagendar(){clearTimeout(rt);back=Math.min(back*1.6,15000);rt=setTimeout(abrir,back);}
+    abrir();
+    window.addEventListener('online',function(){if(!vivo)abrir()});
+    document.addEventListener('visibilitychange',function(){if(!document.hidden&&!vivo)abrir()});
+  }
+  function boot(){if(typeof WebSocket==='undefined')return;conectar({url:URL,key:KEY,tables:TABLES,token:function(){try{return(session&&session.access_token)||KEY}catch(e){return KEY}},onChange:function(p){if(!p||!p.table)return;if(p.table==='rotas'){pedirHoje();pedirFull();}else if(p.table==='sequencias_itens'){pedirHoje();}}});}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){setTimeout(boot,2000)},{once:true});else setTimeout(boot,2000);
+})();
+</script>
 </body></html>
