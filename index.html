@@ -32197,6 +32197,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
                 <button type="button" class="btn-success ripple" onclick="fastDriveSalvarEConectar()" style="user-select: none;"><i class="fa-brands fa-google-drive"></i> Conectar Google Drive</button>
                 <button type="button" class="btn-secondary ripple" onclick="fastDriveAbrirPastaExterna()" style="user-select: none;"><i class="fa-brands fa-google-drive"></i> Abrir pasta do Drive</button>
                 <button type="button" class="btn-secondary ripple" onclick="fastDriveSincronizarPendentes()" style="user-select: none;"><i class="fa-solid fa-rotate"></i> Sincronizar pendentes</button>
+                <button type="button" class="btn-secondary ripple" onclick="fastDriveConfirmarLimpeza()" style="user-select: none;" title="Remove as cópias repetidas da mesma foto no Drive, mantendo 1 de cada"><i class="fa-solid fa-broom"></i> Limpar duplicatas</button>
                 <button type="button" class="btn-secondary ripple" onclick="fastDriveDesconectar()" style="user-select: none;"><i class="fa-solid fa-link-slash"></i> Desconectar</button>
               </div>
               <div id="fastDriveStatus" style="margin-top: 12px; padding: 10px 12px; border-color: rgb(110, 231, 183); border-radius: 8px; font-size: 13px; font-weight: 700; color: rgb(4, 120, 87);">✅ Drive conectado. 0 foto(s) aguardando backup.</div>
@@ -33960,6 +33961,13 @@ window.fastMobileNav = function(ev, abaId, botao) {
         if(tipo.indexOf('png')>=0)return 'png'; if(tipo.indexOf('webp')>=0)return 'webp'; if(tipo.indexOf('heic')>=0)return 'heic';
         return 'jpg';
       }
+      // Marca ESTÁVEL por foto (independe de nome/número/destino): usada para nunca
+      // reenviar a mesma imagem para o Drive, mesmo que o nome do arquivo mude.
+      function chaveFoto(itemId,fotoRef,fotoIndex){
+        var r=String(fotoRef||'');
+        var base=r?('r:'+r):('i:'+String(fotoIndex==null?'':fotoIndex));
+        return ('k:'+String(itemId||'')+'|'+base).slice(0,110);
+      }
       async function pendentesStatus(prefixo){
         var n=(await filaGetAll()).length;
         status((prefixo?prefixo+' ':'')+(token()?'✅ Drive conectado. ':'⏳ Drive não conectado. ')+n+' foto(s) aguardando backup.',token()?'ok':'');
@@ -33970,19 +33978,37 @@ window.fastMobileNav = function(ev, abaId, botao) {
         var metaRota=metadados(item,dataSel,item&&item.id,new Date().toISOString()), destino=metaRota.destino;
         var totalFotos=item&&Array.isArray(item.fotos)?item.fotos.length:files.length;
         var inicio=Math.max(1,totalFotos-files.length+1);
+        var itemId=item&&item.id!=null?String(item.id):'';
+        // (dedup) carrega fila + ledger para não enfileirar a mesma foto duas vezes.
+        var _ledgerAll=await (async function(){try{var db=await abrirDB();return await new Promise(function(res){var tx=db.transaction('driveLedger','readonly'),rq=tx.objectStore('driveLedger').getAll();rq.onsuccess=function(){res(rq.result||[])};rq.onerror=function(){res([])}})}catch(e){return[]}})();
+        var _filaAll=await filaGetAll();
+        var _todos=_filaAll.concat(_ledgerAll);
+        var _vistosId=new Set(_todos.map(function(x){return String(x.id||'')}));
+        var _vistosNome=new Set(_todos.map(function(x){return String(x.itemId||'')+'|'+String(x.nome||'')}));
+        var _vistosKey=new Set(_todos.map(function(x){return String(x.fotoKey||'')}).filter(Boolean));
+        var _fotos=(item&&Array.isArray(item.fotos))?item.fotos:[];
+        var _adicionou=0;
         for(var i=0;i<files.length;i++){
           var arq=files[i];
           var numero=String(inicio+i).padStart(2,'0');
+          var fIdx=(inicio+i-1);
+          var fRef=String((_fotos[fIdx]!=null?_fotos[fIdx]:'')||'');
+          var fKey=chaveFoto(itemId,fRef,fIdx);
           var nome=metaRota.data+' - '+destino+' - Foto '+numero+'.'+extensao(arq);
+          // id DETERMINÍSTICO por rota+foto: reenfileirar a mesma foto gera o mesmo id.
+          var idDet='drive_'+(itemId||'sem')+'_'+numero+'_'+extensao(arq);
+          var chaveNome=itemId+'|'+nome;
+          if(_vistosId.has(idDet)||_vistosNome.has(chaveNome)||(fKey&&_vistosKey.has(fKey)))continue; // já na fila ou já enviada
           await filaPut({
-            id:'drive_'+Date.now()+'_'+i+'_'+Math.random().toString(36).slice(2),
+            id:idDet,
             nome:nome, blob:arq, tipo:arq.type||'image/jpeg', criadoEm:new Date().toISOString(),
-            itemId:item&&item.id!=null?String(item.id):'', clientePasta:metaRota.cliente, dataPasta:metaRota.data,
-            destinoPasta:destino, fotoNumero:numero, tentativas:0, ultimoErro:''
+            itemId:itemId, clientePasta:metaRota.cliente, dataPasta:metaRota.data,
+            destinoPasta:destino, fotoNumero:numero, fotoIndex:fIdx, fotoRef:fRef, fotoKey:fKey, tentativas:0, ultimoErro:''
           });
+          _vistosId.add(idDet); _vistosNome.add(chaveNome); if(fKey)_vistosKey.add(fKey); _adicionou++;
         }
         await pendentesStatus('Fotos protegidas localmente.');
-        if(token() && navigator.onLine) window.fastDriveSincronizarPendentes();
+        if(_adicionou && token() && navigator.onLine) window.fastDriveSincronizarPendentes();
       };
       function qDrive(s){return String(s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");}
       async function pastaDrive(nome,parentId){
@@ -34020,7 +34046,26 @@ window.fastMobileNav = function(ev, abaId, botao) {
       async function enviar(reg){
         var cfg=config(), boundary='fast_'+Date.now()+'_'+Math.random().toString(36).slice(2);
         var destinoId=await pastaFinal(reg);
+        var fastKey=reg.fotoKey||chaveFoto(reg.itemId,reg.fotoRef,reg.fotoIndex);
+        // (dedup FORTE) procura pela MARCA da foto (appProperties) nesta pasta do Drive:
+        // reenvios com nome/numero/destino diferentes NÃO geram cópia nova.
+        if(fastKey){try{
+          var qK="appProperties has { key='fastKey' and value='"+qDrive(fastKey)+"' } and '"+qDrive(destinoId)+"' in parents and trashed=false";
+          var rK=await fetch('https://www.googleapis.com/drive/v3/files?spaces=drive&fields=files(id,name,webViewLink)&q='+encodeURIComponent(qK),{headers:{Authorization:'Bearer '+token()}});
+          if(rK.status===401){salvarToken('');if(window.fastDriveReconectarSilencioso)try{window.fastDriveReconectarSilencioso();}catch(e){}throw new Error('Autorização do Google expirada. Reconectando automaticamente…');}
+          if(rK.ok){var dK=await rK.json();if(dK.files&&dK.files[0]){return {id:dK.files[0].id,name:dK.files[0].name,webViewLink:dK.files[0].webViewLink||'',jaExistia:true};}}
+        }catch(eK){ if(/expirada/i.test(String(eK&&eK.message)))throw eK; }}
+        // (dedup) Se já existe um arquivo com esse nome nesta pasta do Drive, NÃO reenviar.
+        // Garante que uma foto enviada uma vez nunca seja duplicada, mesmo que a fila
+        // tenha entradas repetidas ou de sessões antigas sem registro no ledger.
+        try{
+          var qJa="name='"+qDrive(reg.nome)+"' and '"+qDrive(destinoId)+"' in parents and trashed=false";
+          var rJa=await fetch('https://www.googleapis.com/drive/v3/files?spaces=drive&fields=files(id,name,webViewLink)&q='+encodeURIComponent(qJa),{headers:{Authorization:'Bearer '+token()}});
+          if(rJa.status===401){salvarToken('');if(window.fastDriveReconectarSilencioso)try{window.fastDriveReconectarSilencioso();}catch(e){}throw new Error('Autorização do Google expirada. Reconectando automaticamente…');}
+          if(rJa.ok){var dJa=await rJa.json();if(dJa.files&&dJa.files[0]){return {id:dJa.files[0].id,name:dJa.files[0].name,webViewLink:dJa.files[0].webViewLink||'',jaExistia:true};}}
+        }catch(eJa){ if(/expirada/i.test(String(eJa&&eJa.message)))throw eJa; /* consulta falhou: segue o fluxo normal */ }
         var meta={name:reg.nome,parents:[destinoId]};
+        if(fastKey)meta.appProperties={fastKey:fastKey};
         var corpo=new Blob([
           '--'+boundary+'\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n',JSON.stringify(meta),'\r\n',
           '--'+boundary+'\r\nContent-Type: '+(reg.tipo||'image/jpeg')+'\r\n\r\n',reg.blob,'\r\n--'+boundary+'--'
@@ -34081,6 +34126,76 @@ window.fastMobileNav = function(ev, abaId, botao) {
           }
           await pendentesStatus(ok?'✅ '+ok+' foto(s) enviadas.':'');
         }finally{processando=false;}
+      };
+      // 4.0.37: Limpeza das duplicatas JÁ criadas no Drive (rotas com a mesma foto 20x+).
+      // Varre a pasta raiz do FAST, agrupa arquivos por pasta+nome e mantém apenas 1
+      // (o mais antigo); os demais vão para a LIXEIRA do Drive (reversível por ~30 dias).
+      window.fastDriveLimparDuplicatas=async function(onProg){
+        if(!token()){status('Conecte o Google Drive para limpar duplicatas.','erro');return {erro:'sem_token'};}
+        if(!navigator.onLine){status('Sem internet para limpar duplicatas.','erro');return {erro:'offline'};}
+        var cfg=config(); var raiz=cfg.folderId; if(!raiz)return {erro:'sem_pasta'};
+        var prog=typeof onProg==='function'?onProg:function(m){status(m,'');};
+        async function listar(parentId){
+          var itens=[],pageToken='';
+          do{
+            var q="'"+qDrive(parentId)+"' in parents and trashed=false";
+            var url='https://www.googleapis.com/drive/v3/files?spaces=drive&pageSize=1000&fields=nextPageToken,files(id,name,mimeType,createdTime,md5Checksum)&q='+encodeURIComponent(q)+(pageToken?'&pageToken='+encodeURIComponent(pageToken):'');
+            var r=await fetch(url,{headers:{Authorization:'Bearer '+token()}});
+            if(r.status===401){salvarToken('');if(window.fastDriveReconectarSilencioso)try{window.fastDriveReconectarSilencioso();}catch(e){}throw new Error('Autorização do Google expirada. Reconectando automaticamente…');}
+            if(!r.ok)throw new Error('Falha ao listar o Drive ('+r.status+').');
+            var d=await r.json(); itens=itens.concat(d.files||[]); pageToken=d.nextPageToken||'';
+          }while(pageToken);
+          return itens;
+        }
+        async function paraLixeira(id){
+          var r=await fetch('https://www.googleapis.com/drive/v3/files/'+encodeURIComponent(id)+'?fields=id',{method:'PATCH',headers:{Authorization:'Bearer '+token(),'Content-Type':'application/json'},body:JSON.stringify({trashed:true})});
+          return r.ok;
+        }
+        var FOLDER='application/vnd.google-apps.folder';
+        var pilha=[raiz], removidos=0, pastasVistas=0, visitadas=new Set();
+        while(pilha.length){
+          var atual=pilha.pop(); if(visitadas.has(atual))continue; visitadas.add(atual);
+          var filhos; try{filhos=await listar(atual);}catch(e){ if(/expirada/i.test(String(e&&e.message))){status(String(e.message),'erro');return {erro:'token',removidos:removidos};} else {continue;} }
+          pastasVistas++;
+          var porChave={};
+          for(var j=0;j<filhos.length;j++){
+            var f=filhos[j];
+            if(f.mimeType===FOLDER){pilha.push(f.id);continue;}
+            // agrupa por CONTEÚDO (md5) quando disponível — pega cópias idênticas
+            // mesmo com nomes diferentes; senão, cai no nome do arquivo.
+            var chave=f.md5Checksum?('md5:'+f.md5Checksum):('nome:'+f.name);
+            (porChave[chave]=porChave[chave]||[]).push(f);
+          }
+          var nomes=Object.keys(porChave);
+          for(var n=0;n<nomes.length;n++){
+            var grupo=porChave[nomes[n]]; if(grupo.length<2)continue;
+            grupo.sort(function(a,b){return String(a.createdTime||'').localeCompare(String(b.createdTime||''));});
+            for(var g=1;g<grupo.length;g++){ // mantém grupo[0] (mais antigo)
+              try{ if(await paraLixeira(grupo[g].id)){removidos++; prog('Limpando duplicatas… '+removidos+' cópia(s) removida(s).'); } }catch(e2){}
+            }
+          }
+        }
+        status(removidos?('✅ Limpeza concluída: '+removidos+' cópia(s) duplicada(s) enviada(s) à lixeira do Drive.'):'✅ Nenhuma duplicata encontrada no Drive.','ok');
+        return {removidos:removidos,pastas:pastasVistas};
+      };
+      window.fastDriveConfirmarLimpeza=async function(){
+        if(!token()){status('Conecte o Google Drive primeiro para limpar duplicatas.','erro');return;}
+        var ok=window.confirm('Limpar duplicatas no Google Drive?\n\nIsto mantém 1 cópia de cada foto e envia as repetidas para a LIXEIRA do Drive (recuperável por ~30 dias). Nenhum dado do app é alterado.\n\nDeseja continuar?');
+        if(!ok)return;
+        try{ await window.fastDriveLimparDuplicatas(); }catch(e){ status('Falha ao limpar duplicatas: '+(e&&e.message||e),'erro'); }
+      };
+      // Limpeza AUTOMÁTICA e silenciosa das duplicatas: no máximo 1x por dia,
+      // só com Drive conectado e online. Agrupa por conteúdo (md5) e envia as
+      // cópias repetidas para a lixeira do Drive (recuperável por ~30 dias).
+      window.fastDriveLimpezaAutomatica=async function(){
+        try{
+          if(!token()||!navigator.onLine||processando)return;
+          var ULT='fast_drive_limpeza_auto', agora=Date.now();
+          var ultimo=parseInt(localStorage.getItem(ULT)||'0',10)||0;
+          if(agora-ultimo < 24*60*60*1000)return;
+          localStorage.setItem(ULT,String(agora));
+          await window.fastDriveLimparDuplicatas(function(){});
+        }catch(e){ console.warn('Limpeza automática Drive:',e); }
       };
       window.fastDriveSalvarEConectar=async function(){
         var cfg=salvarConfig();
@@ -34295,6 +34410,8 @@ window.fastMobileNav = function(ev, abaId, botao) {
       });
       // Nova tentativa periódica enquanto o aplicativo estiver aberto.
       setInterval(function(){if(token()&&navigator.onLine)window.fastDriveSincronizarPendentes();},60000);
+      setTimeout(function(){if(token()&&navigator.onLine)window.fastDriveLimpezaAutomatica();},15000);
+      setInterval(function(){if(token()&&navigator.onLine)window.fastDriveLimpezaAutomatica();},6*60*60*1000);
     })();
   </script>
   <style id="r70-preparacao-style">
@@ -34334,7 +34451,7 @@ window.fastMobileNav = function(ev, abaId, botao) {
     window.fast70CentralFotos=async function(){
       abrir('Central de Segurança das Fotos','<p>Verificando armazenamento, rotas e Google Drive…</p>');
       try{var d=await diagnostico(),protegidas=Math.max(0,d.totalFotos-d.ausentes.length),linhas=d.itens.filter(function(x){return fotosItem(x.item).length}).map(function(x){var n=fotosItem(x.item).length,q=d.fila.filter(function(f){return String(f.itemId)===String(x.item.id)}).length,l=d.ledger.filter(function(f){return String(f.itemId)===String(x.item.id)}).length;return '<tr><td>'+esc(x.data)+'</td><td>'+esc(x.item.cliente||'-')+'</td><td>'+esc(x.item.destino||'-')+'</td><td>'+n+'</td><td><span class="fast70-badge '+(q?'fast70-warn':l?'fast70-ok':'fast70-warn')+'">'+(q?q+' pendente(s)':l+' no Drive')+'</span></td></tr>'}).join('');
-        abrir('Central de Segurança das Fotos','<div class="fast70-grid"><div class="fast70-kpi">Fotos referenciadas<b>'+d.totalFotos+'</b></div><div class="fast70-kpi">Cópias locais válidas<b>'+protegidas+'</b></div><div class="fast70-kpi">Fila do Drive<b>'+d.fila.length+'</b></div><div class="fast70-kpi">Enviadas ao Drive<b>'+d.ledger.length+'</b></div></div><div style="display:flex;gap:9px;flex-wrap:wrap;margin:14px 0"><button class="btn-success" onclick="fastDriveSincronizarPendentes()"><i class="fa-solid fa-rotate"></i> Reenviar pendentes</button><button class="btn-secondary" onclick="fast70Integridade()"><i class="fa-solid fa-shield-halved"></i> Diagnóstico completo</button></div><div style="overflow:auto"><table class="fast70-table"><thead><tr><th>Data</th><th>Cliente</th><th>Destino</th><th>Fotos</th><th>Backup</th></tr></thead><tbody>'+linhas+'</tbody></table></div>');
+        abrir('Central de Segurança das Fotos','<div class="fast70-grid"><div class="fast70-kpi">Fotos referenciadas<b>'+d.totalFotos+'</b></div><div class="fast70-kpi">Cópias locais válidas<b>'+protegidas+'</b></div><div class="fast70-kpi">Fila do Drive<b>'+d.fila.length+'</b></div><div class="fast70-kpi">Enviadas ao Drive<b>'+d.ledger.length+'</b></div></div><div style="display:flex;gap:9px;flex-wrap:wrap;margin:14px 0"><button class="btn-success" onclick="fastDriveSincronizarPendentes()"><i class="fa-solid fa-rotate"></i> Reenviar pendentes</button><button class="btn-secondary" onclick="fast70Integridade()"><i class="fa-solid fa-shield-halved"></i> Diagnóstico completo</button><button class="btn-secondary" onclick="fastDriveConfirmarLimpeza()"><i class="fa-solid fa-broom"></i> Limpar duplicatas do Drive</button></div><div style="overflow:auto"><table class="fast70-table"><thead><tr><th>Data</th><th>Cliente</th><th>Destino</th><th>Fotos</th><th>Backup</th></tr></thead><tbody>'+linhas+'</tbody></table></div>');
       }catch(e){abrir('Central de Segurança','<p class="fast70-err" style="padding:12px">Falha no diagnóstico: '+esc(e.message||e)+'</p>')}
     };
     window.fast70Integridade=async function(){
@@ -42720,6 +42837,7 @@ html body #modalEditarRota .modal-content{margin:0 auto!important;top:auto!impor
         var l=(window.bancoDados&&bancoDados.sequencias&&bancoDados.sequencias[data])||[];
         for(var i=antes;i<l.length;i++){if(l[i]){l[i].tipo='coleta';if(df)l[i].destinoFinal=df;var rv=l[i].rotaId?(bancoDados.rotas||[]).find(function(x){return String(x.id)===String(l[i].rotaId)}):null;if(rv){rv.tipo='coleta';if(df)rv.destinoFinal=df}}}
         if(window.fastSalvarSemBloquear)window.fastSalvarSemBloquear(60);
+        setTimeout(fcSyncColunas,1500);
       }catch(err){console.warn('coleta tag',err)}},150)}
       return r;
     };
@@ -42764,7 +42882,21 @@ html body #modalEditarRota .modal-content{margin:0 auto!important;top:auto!impor
   function observeBody(sel){var t=document.querySelector(sel);if(!t)return;var b=t.querySelector('tbody');if(!b||b.__fcObs)return;b.__fcObs=1;try{new MutationObserver(function(){if(ligado())setTimeout(function(){augment(t)},40)}).observe(b,{childList:true})}catch(e){}}
 
   function aplicarTudo(){try{aplicarLanc()}catch(e){}applyTables();}
-  function boot(){try{montarSwitchLanc()}catch(e){}try{montarSwitchRotas()}catch(e){}try{hookSalvar()}catch(e){}applyTables();observeBody('#rotasTable');observeBody('#fastRouteReportCard table');syncSwitches();}
+  /* grava tipo/destinofinal nas colunas do Supabase (best-effort; ignora se as colunas ainda nao existem) */
+  var FC_URL='https://yhxuplhohhetzloxvgku.supabase.co/rest/v1';
+  var FC_KEY='sb_publishable_jlsorkXci3_0Hla7gt8z1g_pe6zOT19';
+  var fcColsOff=false;
+  function fcHeaders(){return {apikey:FC_KEY,Authorization:'Bearer '+FC_KEY,'Content-Type':'application/json','Prefer':'return=minimal'}}
+  function fcPatch(tabela,id,corpo){return fetch(FC_URL+'/'+tabela+'?id=eq.'+encodeURIComponent(id),{method:'PATCH',headers:fcHeaders(),body:JSON.stringify(corpo)}).then(function(r){if(r.status===400){fcColsOff=true;}return r;}).catch(function(){})}
+  function fcSyncColunas(){
+    if(fcColsOff)return;
+    try{
+      ((window.bancoDados&&bancoDados.rotas)||[]).forEach(function(r){if(r&&String(r.tipo).toLowerCase()==='coleta'&&r.id!=null){fcPatch('rotas',r.id,{tipo:'coleta',destinofinal:r.destinoFinal||r.destinofinal||''});}});
+      var seq=(window.bancoDados&&bancoDados.sequencias)||{};
+      Object.keys(seq).forEach(function(d){(seq[d]||[]).forEach(function(it){if(it&&String(it.tipo).toLowerCase()==='coleta'&&it.id!=null){fcPatch('sequencias_itens',it.id,{tipo:'coleta',destinofinal:it.destinoFinal||it.destinofinal||''});}});});
+    }catch(e){}
+  }
+  function boot(){try{montarSwitchLanc()}catch(e){}try{montarSwitchRotas()}catch(e){}try{hookSalvar()}catch(e){}applyTables();observeBody('#rotasTable');observeBody('#fastRouteReportCard table');syncSwitches();setTimeout(fcSyncColunas,3000);}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){setTimeout(boot,400)},{once:true});else setTimeout(boot,400);
   setInterval(function(){try{montarSwitchLanc()}catch(e){}try{montarSwitchRotas()}catch(e){}try{hookSalvar()}catch(e){}observeBody('#rotasTable');observeBody('#fastRouteReportCard table');},2500);
 })();
