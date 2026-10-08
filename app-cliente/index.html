@@ -209,6 +209,8 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden&&cliente)c
   function df(r){return r.destinofinal||r.destino_final||r.destinoFinal||''}
   var st=document.createElement('style');st.textContent='.fc-badge{display:inline-block;background:#f59e0b;color:#fff;font-weight:800;font-size:10px;padding:1px 7px;border-radius:999px;margin-left:4px}.fc-df{display:block;font-size:11px;color:#b45309;font-weight:800;margin-top:2px}';document.head.appendChild(st);
   function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+  var colsOff=false;
+  function mergeCols(){if(colsOff)return;try{if(typeof rest!=='function'||typeof rotas==='undefined'||!rotas||!rotas.length)return;rest('rotas','select=id,tipo,destinofinal&limit=5000').then(function(rows){var map={};(rows||[]).forEach(function(x){map[String(x.id)]={tipo:x.tipo,destinofinal:x.destinofinal}});rotas.forEach(function(r){var m=map[String(r.id)];if(m){r.tipo=m.tipo;r.destinofinal=m.destinofinal;}});setTimeout(enhance,20);}).catch(function(){colsOff=true;});}catch(e){}}
   function enhance(){try{
     if(typeof rotas==='undefined'||!rotas)return;
     var cole=rotas.filter(isColeta);if(!cole.length)return;
@@ -221,6 +223,7 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden&&cliente)c
     });
   }catch(e){}}
   var _r=window.render;if(typeof _r==='function'&&!_r.__fc){var nw=function(){var x=_r.apply(this,arguments);setTimeout(enhance,30);return x};nw.__fc=1;window.render=nw;}
+  setTimeout(mergeCols,1500);setInterval(mergeCols,10000);
   setInterval(enhance,3000);
 })();
 </script>
