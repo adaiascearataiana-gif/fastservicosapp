@@ -1,4 +1,4 @@
-name: Gerar Cliente e Motorista para Android
+name: Gerar apps Android (FAST, ROTAS, Despesas, Cliente, Motorista)
 
 on:
   workflow_dispatch:
