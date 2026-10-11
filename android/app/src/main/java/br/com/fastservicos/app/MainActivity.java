@@ -109,7 +109,7 @@ public class MainActivity extends Activity {
         settings.setBuiltInZoomControls(false);
         settings.setDisplayZoomControls(false);
         settings.setTextZoom(100);
-        settings.setUserAgentString(settings.getUserAgentString() + " FASTAndroid/5.1.9");
+        settings.setUserAgentString(settings.getUserAgentString() + " FASTAndroid/5.2.3");
         CookieManager.getInstance().setAcceptCookie(true);
         CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
         webView.addJavascriptInterface(new VoiceBridge(), "FASTVoice");
@@ -118,6 +118,17 @@ public class MainActivity extends Activity {
         // 5.0.2: compartilhar fotos (WhatsApp etc.) — o WebView não tem o "compartilhar" do navegador.
         webView.addJavascriptInterface(new ShareBridge(), "FASTCompartilhar");
         webView.setWebViewClient(new WebViewClient() {
+            // 5.2.3: se o Android encerrar só a parte que desenha a página (pouca memória),
+            // o app NÃO fecha mais com erro: reabre a tela e o FAST volta para onde você estava.
+            @Override public boolean onRenderProcessGone(WebView view, android.webkit.RenderProcessGoneDetail detail) {
+                try {
+                    android.view.ViewParent pai = view.getParent();
+                    if (pai instanceof ViewGroup) ((ViewGroup) pai).removeView(view);
+                    view.destroy();
+                } catch (Exception e) {}
+                runOnUiThread(() -> { try { recreate(); } catch (Exception e) {} });
+                return true;
+            }
             @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 Uri uri = request.getUrl();
                 String host = uri.getHost() == null ? "" : uri.getHost();
