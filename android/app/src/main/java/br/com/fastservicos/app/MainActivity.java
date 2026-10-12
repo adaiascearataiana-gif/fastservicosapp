@@ -114,12 +114,13 @@ public class MainActivity extends Activity {
         settings.setBuiltInZoomControls(false);
         settings.setDisplayZoomControls(false);
         settings.setTextZoom(100);
-        settings.setUserAgentString(settings.getUserAgentString() + " FASTAndroid/5.2.4");
+        settings.setUserAgentString(settings.getUserAgentString() + " FASTAndroid/5.3.0");
         CookieManager.getInstance().setAcceptCookie(true);
         CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
         webView.addJavascriptInterface(new VoiceBridge(), "FASTVoice");
         // 4.0.65: biometria nativa do Android (digital / rosto / PIN do aparelho) para o app web.
         webView.addJavascriptInterface(new BioBridge(), "FASTBiometria");
+        webView.addJavascriptInterface(new NotifBridge(), "FASTNotificacao");
         // 5.0.2: compartilhar fotos (WhatsApp etc.) — o WebView não tem o "compartilhar" do navegador.
         webView.addJavascriptInterface(new ShareBridge(), "FASTCompartilhar");
         webView.setWebViewClient(new WebViewClient() {
@@ -362,7 +363,8 @@ public class MainActivity extends Activity {
     private void requestPermissionsIfNeeded() {
         // A camera pede autorização quando o motorista toca em Câmera.
         // Pedir tudo no início não libera automaticamente o acesso do WebView.
-        if (Build.VERSION.SDK_INT >= 23) requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.RECORD_AUDIO}, 402);
+        if (Build.VERSION.SDK_INT >= 33) requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.RECORD_AUDIO, "android.permission.POST_NOTIFICATIONS"}, 402);
+        else if (Build.VERSION.SDK_INT >= 23) requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.RECORD_AUDIO}, 402);
     }
 
     @Override public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
@@ -411,6 +413,41 @@ public class MainActivity extends Activity {
     // o app web chama window.FASTBiometria.autenticar(id, titulo) e recebe o
     // resultado em window.fastNativeBioResult(id, ok, codigo).
     // ------------------------------------------------------------------
+    // 5.2.8: avisos do celular (fora do app) — pedidos e cadastros de clientes
+    private class NotifBridge {
+        @JavascriptInterface public boolean disponivel() { return true; }
+        @JavascriptInterface public boolean permitido() {
+            if (Build.VERSION.SDK_INT >= 33) return checkSelfPermission("android.permission.POST_NOTIFICATIONS") == android.content.pm.PackageManager.PERMISSION_GRANTED;
+            return true;
+        }
+        @JavascriptInterface public void pedirPermissao() {
+            if (Build.VERSION.SDK_INT >= 33) runOnUiThread(() -> { try { requestPermissions(new String[]{"android.permission.POST_NOTIFICATIONS"}, 433); } catch (Exception e) {} });
+        }
+        @JavascriptInterface public void mostrar(String titulo, String texto, int id, boolean som) {
+            try {
+                android.app.NotificationManager nm = (android.app.NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+                if (nm == null) return;
+                String canal = som ? "fast_pedidos" : "fast_pedidos_mudo";
+                if (Build.VERSION.SDK_INT >= 26 && nm.getNotificationChannel(canal) == null) {
+                    android.app.NotificationChannel ch = new android.app.NotificationChannel(canal, som ? "Pedidos e cadastros" : "Pedidos e cadastros (sem som)",
+                        som ? android.app.NotificationManager.IMPORTANCE_HIGH : android.app.NotificationManager.IMPORTANCE_LOW);
+                    ch.setDescription("Avisos de novos pedidos e cadastros de clientes");
+                    if (!som) ch.setSound(null, null);
+                    nm.createNotificationChannel(ch);
+                }
+                Intent abrir = new Intent(MainActivity.this, MainActivity.class);
+                abrir.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                android.app.PendingIntent pi = android.app.PendingIntent.getActivity(MainActivity.this, 0, abrir,
+                    android.app.PendingIntent.FLAG_UPDATE_CURRENT | (Build.VERSION.SDK_INT >= 23 ? android.app.PendingIntent.FLAG_IMMUTABLE : 0));
+                android.app.Notification.Builder b = Build.VERSION.SDK_INT >= 26 ? new android.app.Notification.Builder(MainActivity.this, canal) : new android.app.Notification.Builder(MainActivity.this);
+                b.setSmallIcon(getApplicationInfo().icon).setContentTitle(titulo).setContentText(texto)
+                 .setStyle(new android.app.Notification.BigTextStyle().bigText(texto)).setAutoCancel(true).setContentIntent(pi);
+                if (Build.VERSION.SDK_INT < 26 && som) b.setDefaults(android.app.Notification.DEFAULT_ALL);
+                nm.notify(id, b.build());
+            } catch (Exception e) {}
+        }
+    }
+
     private class BioBridge {
         @JavascriptInterface public boolean disponivel() {
             try {
