@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="fast-app-version" content="5.3.3">
+<meta name="fast-app-version" content="5.3.4">
 <meta name="theme-color" content="#16a34a">
 <title>Cliente FAST — Histórico</title>
 <style>
@@ -295,8 +295,10 @@ window.fastBioLockAtivo=function(){return !!cfg()};window.fastBioSuportado=funct
   document.head.appendChild(st);
   // ---------- dados para completar ----------
   var LUG=[], ORI=[];
+  var lugTempo=0;
   async function carregarLugares(){
-    try{var r=await fetch(PROJECT+'/rest/v1/lugares_publicos?select=nome,endereco,bairro&limit=5000',{headers:cab()});if(r.ok)LUG=await r.json()}catch(e){}
+    lugTempo=Date.now();
+    try{var r=await fetch(PROJECT+'/rest/v1/lugares_publicos?select=nome,endereco,bairro&order=nome&limit=5000',{headers:cab()});if(r.ok){var novos=await r.json();if(Array.isArray(novos)&&novos.length)LUG=novos}}catch(e){}
     try{(typeof rotas!=='undefined'?rotas:[]).forEach(function(x){if(x.origem&&ORI.indexOf(x.origem)<0)ORI.push(x.origem);if(x.destino&&!LUG.some(function(l){return nn(l.nome)===nn(x.destino)}))LUG.push({nome:x.destino,endereco:''})})}catch(e){}
     var rp=retirada(); if(rp&&rp.nome&&ORI.indexOf(rp.nome)<0)ORI.unshift(rp.nome);
   }
@@ -307,14 +309,24 @@ window.fastBioLockAtivo=function(){return !!cfg()};window.fastBioSuportado=funct
   function sugerir(inp,fonte,aoEscolher){
     var box=null;
     function fechar(){if(box){box.remove();box=null}}
-    inp.addEventListener('input',function(){
-      var q=nn(inp.value); fechar(); if(q.length<2)return;
-      var l=fonte().filter(function(x){return nn(x.nome||x).indexOf(q)>=0}).slice(0,8); if(!l.length)return;
+    // 5.3.4: se a lista estiver vazia ou com mais de 5 min, busca de novo ao tocar no campo
+    inp.addEventListener('focus',function(){var t=Date.now()-lugTempo;if((!LUG.length&&t>15000)||t>5*60000)carregarLugares()});
+    function mostrarSug(){
+      var q=nn(inp.value); fechar(); if(q.length<1)return;
+      // primeiro os que COMEÇAM com o que foi digitado, depois os que contêm (nome ou endereço)
+      var todos=fonte(), ini=[], meio=[];
+      todos.forEach(function(x){var n=nn(x.nome||x);if(n.indexOf(q)===0)ini.push(x);else if(q.length>=2&&(n.indexOf(q)>=0||nn([x.endereco,x.bairro].filter(Boolean).join(' ')).indexOf(q)>=0))meio.push(x)});
+      var l=ini.concat(meio).slice(0,10); if(!l.length)return;
       box=document.createElement('div');box.className='pdSug';
       box.innerHTML=l.map(function(x,i){var nome=x.nome||x;return '<div data-i="'+i+'"><b>'+h(nome)+'</b>'+(x.endereco?'<small>'+h([x.endereco,x.bairro].filter(Boolean).join(' - '))+'</small>':'')+'</div>'}).join('');
       box.addEventListener('mousedown',function(e){e.preventDefault()});
       box.addEventListener('click',function(e){var d=e.target.closest('[data-i]');if(!d)return;var x=l[+d.getAttribute('data-i')];inp.value=x.nome||x;fechar();aoEscolher&&aoEscolher(x)});
       inp.parentNode.appendChild(box);
+    }
+    inp.addEventListener('input',function(){
+      mostrarSug();
+      // lista ainda chegando: tenta de novo assim que carregar
+      if(!box&&!LUG.length&&Date.now()-lugTempo>15000){carregarLugares().then(function(){if(document.activeElement===inp)mostrarSug()})}
     });
     inp.addEventListener('blur',function(){setTimeout(fechar,150);var x=fonte().filter(function(y){return nn(y.nome||y)===nn(inp.value)})[0];inp.value=x?(x.nome||x):capitalizar(inp.value);if(x&&aoEscolher)aoEscolher(x,true)});
   }
@@ -338,7 +350,7 @@ window.fastBioLockAtivo=function(){return !!cfg()};window.fastBioSuportado=funct
   // ---------- destinos ----------
   function linha(){
     var d=document.createElement('div');d.className='pdRow';
-    d.innerHTML='<div class="lin"><div style="position:relative;flex:1"><input class="pdIn ds" placeholder="Destino" autocomplete="off"></div><input class="pdIn en" placeholder="Endereço" style="flex:1.3"></div>'+
+    d.innerHTML='<div class="lin" style="position:relative"><div style="flex:1;min-width:0"><input class="pdIn ds" placeholder="Destino" autocomplete="off"></div><input class="pdIn en" placeholder="Endereço" style="flex:1.3"></div>'+
       '<div class="lin"><input class="pdIn qtd" type="number" min="1" value="1" inputmode="numeric" title="Volumes"><input class="pdIn ob" placeholder="Observação (opcional)" style="flex:1;min-width:0"></div>'+
       (el('pedDestinos').children.length?'<button type="button" class="x" title="Remover">✕</button>':'');
     var ds=d.querySelector('.ds'),en=d.querySelector('.en');
