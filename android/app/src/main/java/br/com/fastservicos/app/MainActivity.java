@@ -114,7 +114,7 @@ public class MainActivity extends Activity {
         settings.setBuiltInZoomControls(false);
         settings.setDisplayZoomControls(false);
         settings.setTextZoom(100);
-        settings.setUserAgentString(settings.getUserAgentString() + " FASTAndroid/5.3.0");
+        settings.setUserAgentString(settings.getUserAgentString() + " FASTAndroid/5.3.3");
         CookieManager.getInstance().setAcceptCookie(true);
         CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
         webView.addJavascriptInterface(new VoiceBridge(), "FASTVoice");
@@ -139,6 +139,7 @@ public class MainActivity extends Activity {
                 Uri uri = request.getUrl();
                 String host = uri.getHost() == null ? "" : uri.getHost();
                 if (host.endsWith("github.io") || host.endsWith("supabase.co") || host.endsWith("googleapis.com")) return false;
+                if (abrirWhatsApp(uri)) return true;
                 try { startActivity(new Intent(Intent.ACTION_VIEW, uri)); } catch (ActivityNotFoundException ignored) {}
                 return true;
             }
@@ -329,7 +330,7 @@ public class MainActivity extends Activity {
             Intent t = new Intent(Intent.ACTION_SEND);
             t.setType("text/plain");
             t.putExtra(Intent.EXTRA_TEXT, texto);
-            try { startActivity(Intent.createChooser(t, "Enviar fotos")); responderCompartilhar(id, true, ""); }
+            try { startActivity(Intent.createChooser(t, "Compartilhar")); responderCompartilhar(id, true, ""); }
             catch (Exception e) { responderCompartilhar(id, false, String.valueOf(e.getMessage())); }
             return;
         }
@@ -342,7 +343,7 @@ public class MainActivity extends Activity {
         for (int i = 1; i < uris.size(); i++) clip.addItem(new ClipData.Item(uris.get(i)));
         it.setClipData(clip);
         it.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        Intent escolha = Intent.createChooser(it, "Enviar fotos");
+        Intent escolha = Intent.createChooser(it, "Compartilhar");
         escolha.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         try { startActivity(escolha); responderCompartilhar(id, true, ""); }
         catch (Exception e) { responderCompartilhar(id, false, String.valueOf(e.getMessage())); }
@@ -387,6 +388,44 @@ public class MainActivity extends Activity {
                 new VoiceBridge().startSpeech();
             else voiceError("permission");
         }
+    }
+
+    // 5.3.3: links do WhatsApp abrem a gaveta para escolher WhatsApp ou WhatsApp Business
+    private boolean instalado(String pkg) {
+        try { getPackageManager().getPackageInfo(pkg, 0); return true; } catch (Exception e) { return false; }
+    }
+    private boolean abrirWhatsApp(Uri uri) {
+        String host = uri.getHost() == null ? "" : uri.getHost().toLowerCase();
+        String esquema = uri.getScheme() == null ? "" : uri.getScheme().toLowerCase();
+        boolean wa = host.equals("wa.me") || host.endsWith("whatsapp.com") || esquema.equals("whatsapp");
+        if (!wa) return false;
+        // sem número (só texto): abre a gaveta de apps com TODOS os apps para compartilhar
+        String fone = "";
+        try {
+            if (host.equals("wa.me")) { String pth = uri.getPath() == null ? "" : uri.getPath(); fone = pth.replaceAll("\\D", ""); }
+            else { String q = uri.getQueryParameter("phone"); fone = q == null ? "" : q.replaceAll("\\D", ""); }
+        } catch (Exception ignored) {}
+        if (fone.isEmpty()) {
+            String txt = ""; try { String q = uri.getQueryParameter("text"); txt = q == null ? "" : q; } catch (Exception ignored) {}
+            Intent t = new Intent(Intent.ACTION_SEND); t.setType("text/plain"); t.putExtra(Intent.EXTRA_TEXT, txt);
+            try { startActivity(Intent.createChooser(t, "Compartilhar")); } catch (Exception ignored) {}
+            return true;
+        }
+        ArrayList<Intent> alvos = new ArrayList<>();
+        for (String pkg : new String[]{"com.whatsapp", "com.whatsapp.w4b"}) {
+            if (!instalado(pkg)) continue;
+            Intent i = new Intent(Intent.ACTION_VIEW, uri); i.setPackage(pkg); alvos.add(i);
+        }
+        try {
+            if (alvos.isEmpty()) startActivity(new Intent(Intent.ACTION_VIEW, uri));
+            else if (alvos.size() == 1) startActivity(alvos.get(0));
+            else {
+                Intent escolha = Intent.createChooser(alvos.remove(0), "Abrir com");
+                escolha.putExtra(Intent.EXTRA_INITIAL_INTENTS, alvos.toArray(new android.os.Parcelable[0]));
+                startActivity(escolha);
+            }
+        } catch (ActivityNotFoundException ignored) {}
+        return true;
     }
 
     private class VoiceBridge {
