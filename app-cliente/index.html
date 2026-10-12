@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="fast-app-version" content="5.2.4">
+<meta name="fast-app-version" content="5.2.5">
 <meta name="theme-color" content="#16a34a">
 <title>Cliente FAST — Histórico</title>
 <style>
@@ -17,7 +17,24 @@ main{max-width:1100px;margin:auto;padding:16px}.gate{min-height:100vh;display:gr
 </style>
 </head>
 <body>
-<div id="gate" class="gate"><div class="login"><div style="font-size:34px">🟩</div><h1>Cliente FAST</h1><p>Acesse para consultar seu cadastro, histórico de rotas e resumo financeiro.</p><div class="field"><label>E-mail</label><input id="email" type="email" autocomplete="email" placeholder="seuemail@exemplo.com"></div><div class="field"><label>Senha</label><input id="password" type="password" autocomplete="current-password" placeholder="Sua senha"></div><button class="btn primary" id="loginBtn" onclick="login()">Entrar</button><div id="loginErr" class="error"></div></div></div>
+<div id="gate" class="gate"><div class="login"><div style="font-size:34px">🟩</div><h1>Cliente FAST</h1><p>Acesse para consultar seu cadastro, histórico de rotas e resumo financeiro.</p><div class="field"><label>E-mail</label><input id="email" type="email" autocomplete="email" placeholder="seuemail@exemplo.com"></div><div class="field"><label>Senha</label><input id="password" type="password" autocomplete="current-password" placeholder="Sua senha"></div><button class="btn primary" id="loginBtn" onclick="login()">Entrar</button><div id="loginErr" class="error"></div>
+<div id="cadOk" style="display:none;margin-top:10px;padding:10px;border-radius:12px;background:#dcfce7;color:#166534;font-weight:700;font-size:14px"></div>
+<button type="button" class="btn secondary" id="cadAbrir" style="margin-top:10px" onclick="cliCadAbrir(true)">Não tem conta? Criar minha conta</button>
+<div id="cadBox" style="display:none;text-align:left;margin-top:12px">
+<div class="field"><label>Nome ou empresa *</label><input id="cadNome" autocomplete="name" placeholder="Como aparece nas suas entregas"></div>
+<div class="field"><label>WhatsApp *</label><input id="cadWhats" type="tel" inputmode="tel" autocomplete="tel" placeholder="(85) 99999-9999"></div>
+<div class="field"><label>E-mail *</label><input id="cadEmail" type="email" autocomplete="email" placeholder="seuemail@exemplo.com"></div>
+<div style="display:flex;gap:8px"><div class="field" style="flex:3"><label>Endereço *</label><input id="cadEnd" autocomplete="address-line1" placeholder="Rua, avenida…"></div><div class="field" style="flex:1;min-width:80px"><label>Número</label><input id="cadNum" inputmode="numeric" placeholder="Nº"></div></div>
+<div class="field"><label>Complemento</label><input id="cadComp" placeholder="Sala, bloco, referência"></div>
+<div style="display:flex;gap:8px"><div class="field" style="flex:1"><label>Bairro</label><input id="cadBairro"></div><div class="field" style="flex:1"><label>Cidade/UF</label><input id="cadCidade" placeholder="Fortaleza/CE"></div></div>
+<div class="field"><label>Senha *</label><input id="cadSenha" type="password" autocomplete="new-password" placeholder="Mínimo de 8 caracteres"></div>
+<div class="field"><label>Repita a senha *</label><input id="cadSenha2" type="password" autocomplete="new-password"></div>
+<label style="display:flex;align-items:center;gap:6px;font-size:13px;margin:-4px 0 10px"><input type="checkbox" onchange="['cadSenha','cadSenha2'].forEach(function(i){document.getElementById(i).type=this.checked?'text':'password'},this)"> Mostrar senha</label>
+<div id="cadRegras" style="font-size:12px;color:var(--muted);margin-bottom:10px">A senha precisa de 8 caracteres, letra maiúscula, letra minúscula e número ou símbolo.</div>
+<button type="button" class="btn primary" id="cadBtn" onclick="cliCadEnviar()">Criar minha conta</button>
+<div id="cadErr" class="error"></div>
+<button type="button" class="btn secondary" style="margin-top:8px" onclick="cliCadAbrir(false)">Já tenho conta — entrar</button>
+</div></div></div>
 <div id="app" class="hidden"><header><div class="head"><div class="logo">FAST</div><div><div class="title">Cliente FAST</div><div class="sub">Histórico, rotas e pagamentos</div></div></div></header><main>
 <div class="toprow"><div><div class="who" id="clienteNome">Carregando...</div><div style="font-size:12px;color:var(--muted)" id="clienteContato"></div></div><button class="btn secondary logout" onclick="logout()">Sair</button></div>
 <div id="loading" class="loading">Carregando histórico...</div>
@@ -48,7 +65,7 @@ async function rest(table,query=''){const r=await fetch(PROJECT+'/rest/v1/'+tabl
 async function auth(path,body){const r=await fetch(PROJECT+'/auth/v1/'+path,{method:'POST',headers:{'Content-Type':'application/json',apikey:KEY},body:JSON.stringify(body)});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.msg||d.message||'Usuário ou senha incorretos.');return d}
 async function login(){const email=$('email').value.trim().toLowerCase(),password=$('password').value;$('loginErr').textContent='';if(!email||!password){$('loginErr').textContent='Informe e-mail e senha.';return}$('loginBtn').disabled=true;try{session=await auth('token?grant_type=password',{email,password});localStorage.setItem('fast_cliente_session',JSON.stringify(session));await iniciar()}catch(e){$('loginErr').textContent=e.message||'Não foi possível entrar.'}finally{$('loginBtn').disabled=false}}
 function logout(){session=null;localStorage.removeItem('fast_cliente_session');location.reload()}
-async function iniciar(){ $('gate').classList.add('hidden');$('app').classList.remove('hidden');try{const user=session.user||{};const email=norm(user.email||'');const meta=user.user_metadata||{};const nomeMeta=norm(meta.fast_user||meta.nome||'');let clientes=[];try{clientes=await rest('clientes','select=id,dados&dados->>email=ilike.'+encodeURIComponent(user.email||'')+'&limit=5')}catch(e){}cliente=clientes.map(x=>({...x,...(x.dados||{})})).find(c=>norm(c.email)===email);if(!cliente){clientes=await rest('clientes','select=id,dados&limit=1000');cliente=clientes.map(x=>({...x,...(x.dados||{})})).find(c=>norm(c.email)===email || (nomeMeta&&norm(c.nome)===nomeMeta));}if(!cliente)throw new Error('Seu acesso foi autenticado, mas o cadastro de Cliente FAST correspondente não foi encontrado.');$('clienteNome').textContent=cliente.nome||cliente.razaoSocial||user.email;$('clienteContato').textContent=[cliente.email,cliente.telefone||cliente.whatsapp].filter(Boolean).join(' • ');const CAMPOS='select=id,cliente,origem,destino,data,pagamento,status,statusexecucao,valor,tipovolume,qtdmercadorias,descricao&order=data.desc&limit=5000';let rs=[];try{rs=await rest('rotas',CAMPOS+'&cliente=ilike.'+encodeURIComponent(cliente.nome||''))}catch(e){}if(!rs.length)rs=await rest('rotas',CAMPOS);rotas=rs.filter(r=>norm(r.cliente)===norm(cliente.nome));$('loading').classList.add('hidden');$('content').classList.remove('hidden');render();carregarHoje()}catch(e){$('loading').textContent=e.message||'Não foi possível carregar o histórico.'}}
+async function iniciar(){ $('gate').classList.add('hidden');$('app').classList.remove('hidden');try{const user=session.user||{};const email=norm(user.email||'');const meta=user.user_metadata||{};const nomeMeta=norm(meta.fast_user||meta.nome||'');let clientes=[];try{clientes=await rest('clientes','select=id,dados&dados->>email=ilike.'+encodeURIComponent(user.email||'')+'&limit=5')}catch(e){}cliente=clientes.map(x=>({...x,...(x.dados||{})})).find(c=>norm(c.email)===email);if(!cliente){clientes=await rest('clientes','select=id,dados&limit=1000');cliente=clientes.map(x=>({...x,...(x.dados||{})})).find(c=>norm(c.email)===email || (nomeMeta&&norm(c.nome)===nomeMeta));}if(!cliente){await window.cliCadSituacao(user);return}$('clienteNome').textContent=cliente.nome||cliente.razaoSocial||user.email;$('clienteContato').textContent=[cliente.email,cliente.telefone||cliente.whatsapp].filter(Boolean).join(' • ');const CAMPOS='select=id,cliente,origem,destino,data,pagamento,status,statusexecucao,valor,tipovolume,qtdmercadorias,descricao&order=data.desc&limit=5000';let rs=[];try{rs=await rest('rotas',CAMPOS+'&cliente=ilike.'+encodeURIComponent(cliente.nome||''))}catch(e){}if(!rs.length)rs=await rest('rotas',CAMPOS);rotas=rs.filter(r=>norm(r.cliente)===norm(cliente.nome));$('loading').classList.add('hidden');$('content').classList.remove('hidden');render();carregarHoje()}catch(e){$('loading').textContent=e.message||'Não foi possível carregar o histórico.'}}
 function render(){let a=rotas.slice();const de=$('de').value,ate=$('ate').value,pag=$('pag').value,exec=$('exec').value;if(de)a=a.filter(r=>String(r.data||'').slice(0,10)>=de);if(ate)a=a.filter(r=>String(r.data||'').slice(0,10)<=ate);if(pag)a=a.filter(r=>String(r.status||'')===pag);if(exec)a=a.filter(r=>String(r.statusexecucao||'')===exec);const total=a.reduce((s,r)=>s+(Number(r.valor)||0),0),pago=a.filter(r=>norm(r.status)==='recebido').reduce((s,r)=>s+(Number(r.valor)||0),0),pend= a.filter(r=>norm(r.status)==='pendente').reduce((s,r)=>s+(Number(r.valor)||0),0);$('sRotas').textContent=a.length;$('sTotal').textContent=money(total);$('sPago').textContent=money(pago);$('sPendente').textContent=money(pend);if(!a.length){$('table').innerHTML='<div class="empty">Nenhuma rota encontrada para os filtros selecionados.</div>';return}let html='<table><thead><tr><th>Data</th><th>Origem</th><th>Destino</th><th>Volumes</th><th>Pagamento</th><th>Execução</th><th>Valor</th></tr></thead><tbody>';a.forEach(r=>{const p=norm(r.status)==='recebido'?'paid':'pending';const e=norm(r.statusexecucao)==='concluida'?'done':'route';html+=`<tr><td>${dateBR(r.data)}</td><td>${esc(r.origem)}</td><td>${esc(r.destino)}${r.codigo_rastreio?`<br><a href="#" onclick="try{fastRastreio&&document.getElementById('rastreioWidget')&&(window.scrollTo({top:0,behavior:'smooth'}),fastRastreio.montar(document.getElementById('rastreioWidget'),{codigo:'${esc(r.codigo_rastreio)}'}))}catch(e){};return false" style="font:800 11px ui-monospace,monospace;color:#0f766e;text-decoration:none">📦 ${esc(r.codigo_rastreio)}</a>`:''}</td><td>${esc(r.qtdmercadorias||0)} ${esc(r.tipovolume||'')}</td><td><span class="badge ${p}">${esc(r.status||'—')}</span></td><td><span class="badge ${e}">${esc(r.statusexecucao||'—')}</span></td><td><strong>${money(r.valor)}</strong></td></tr>`});html+='</tbody></table>';$('table').innerHTML=html}
 function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 (async()=>{try{const s=JSON.parse(localStorage.getItem('fast_cliente_session')||'null');if(s&&s.access_token){session=s;await iniciar()}}catch(e){localStorage.removeItem('fast_cliente_session')}})();
@@ -231,6 +248,110 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden&&cliente)c
   var feito=false;
   setInterval(function(){ if(!feito&&typeof session!=='undefined'&&session&&session.access_token){feito=true;carregar()} },1500);
   setInterval(function(){ if(!document.hidden)carregar() },60000);
+  document.addEventListener('fast-mudou',carregar);
 })();
 </script>
+<script id="cliente525-cadastro">
+/* 5.2.5 — CRIAR CONTA (como era antes) + APROVAÇÃO NO FAST
+   1) o cliente cria a conta (e-mail + senha + dados) e confirma o e-mail;
+   2) ao entrar, o cadastro vai para o FAST como PENDENTE;
+   3) depois que o FAST aprova, ele usa o app normalmente (pedidos e rastreio). */
+(function(){
+  var CONFIRM_URL='https://adaiascearataiana-gif.github.io/fastservicosapp/app-cliente/?email-confirmado=1';
+  function el(id){return document.getElementById(id)}
+  function h(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+  window.cliCadAbrir=function(abrir){
+    el('cadBox').style.display=abrir?'block':'none'; el('cadAbrir').style.display=abrir?'none':'';
+    ['email','password','loginBtn'].forEach(function(i){var x=el(i);if(!x)return;var f=x.closest('.field');(f||x).style.display=abrir?'none':''});
+    el('loginErr').textContent=''; el('cadErr').textContent='';
+  };
+  function senhaOk(p){return p.length>=8&&/[A-Z]/.test(p)&&/[a-z]/.test(p)&&/[0-9\W_]/.test(p)}
+  function soDig(v){return String(v||'').replace(/\D/g,'').replace(/^55(?=\d{10,11}$)/,'')}
+  window.cliCadEnviar=async function(){
+    var err=el('cadErr'); err.textContent='';
+    var d={nome:el('cadNome').value.trim(),whatsapp:soDig(el('cadWhats').value),email:el('cadEmail').value.trim().toLowerCase(),endereco:el('cadEnd').value.trim(),
+      numero:el('cadNum').value.trim(),complemento:el('cadComp').value.trim(),bairro:el('cadBairro').value.trim(),cidade:el('cadCidade').value.trim()};
+    var s1=el('cadSenha').value,s2=el('cadSenha2').value;
+    if(!d.nome||!d.whatsapp||!d.email||!d.endereco){err.textContent='Preencha os campos com *.';return}
+    if(d.whatsapp.length<10){err.textContent='Confira o WhatsApp com DDD.';return}
+    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(d.email)){err.textContent='E-mail inválido.';return}
+    if(!senhaOk(s1)){err.textContent='A senha não atende às regras abaixo dela.';return}
+    if(s1!==s2){err.textContent='As duas senhas não são iguais.';return}
+    var bt=el('cadBtn');bt.disabled=true;bt.textContent='Criando conta…';
+    try{
+      d.app='cliente'; d.fast_user=d.nome;
+      var r=await fetch(PROJECT+'/auth/v1/signup?redirect_to='+encodeURIComponent(CONFIRM_URL),{method:'POST',headers:{'Content-Type':'application/json',apikey:KEY},body:JSON.stringify({email:d.email,password:s1,data:d})});
+      var j=await r.json().catch(function(){return{}});
+      if(!r.ok)throw new Error(/registered|already/i.test(j.msg||j.message||'')?'Este e-mail já tem conta. Use "Já tenho conta — entrar".':(j.msg||j.message||'Não foi possível criar a conta.'));
+      try{localStorage.setItem('cli525_cadastro',JSON.stringify(d))}catch(e){}
+      if(j.access_token){ session=j; try{localStorage.setItem('fast_cliente_session',JSON.stringify(j))}catch(e){} if(typeof iniciar==='function')return iniciar(); }
+      cliCadAbrir(false); el('email').value=d.email;
+      var ok=el('cadOk');ok.style.display='block';ok.textContent='✅ Conta criada! Enviamos um e-mail para '+d.email+'. Toque no link de confirmação e depois entre aqui com sua senha.';
+    }catch(e){err.textContent=e.message||String(e)}
+    finally{bt.disabled=false;bt.textContent='Criar minha conta'}
+  };
+  // depois do login, sem cliente aprovado: manda o cadastro ao FAST e mostra a situação
+  window.cliCadSituacao=async function(user){
+    var load=el('loading'), tk=session&&session.access_token, cab={apikey:KEY,Authorization:'Bearer '+tk};
+    var meta=user.user_metadata||{}; var guardado={}; try{guardado=JSON.parse(localStorage.getItem('cli525_cadastro')||'{}')}catch(e){}
+    var d=Object.assign({},guardado,meta);
+    el('clienteNome').textContent=d.nome||user.email||'Cliente';
+    var reg=null;
+    try{var r=await fetch(PROJECT+'/rest/v1/cadastros_clientes?select=*&user_id=eq.'+encodeURIComponent(user.id)+'&limit=1',{headers:cab});if(r.ok){var a=await r.json();reg=a[0]||null}}catch(e){}
+    if(!reg){
+      try{
+        var body={id:Date.now(),nome:d.nome||d.fast_user||'',whatsapp:d.whatsapp||'',email:user.email||d.email||'',endereco:d.endereco||'',numero:d.numero||'',complemento:d.complemento||'',bairro:d.bairro||'',cidade:d.cidade||''};
+        var r2=await fetch(PROJECT+'/rest/v1/cadastros_clientes',{method:'POST',headers:Object.assign({'Content-Type':'application/json',Prefer:'return=representation'},cab),body:JSON.stringify(body)});
+        if(r2.ok){var b=await r2.json();reg=b[0]||Object.assign({status:'pendente'},body)}
+      }catch(e){}
+    }
+    var st=reg&&reg.status||'pendente';
+    var msg=st==='recusado'?'<b>Seu cadastro não foi aprovado.</b><br>Fale com a FAST pelo WhatsApp para mais informações.':
+      (st==='aprovado'?'<b>Seu cadastro foi aprovado!</b><br>Saia e entre de novo para começar a usar.':
+      '<b>⏳ Cadastro em análise</b><br>Recebemos seu cadastro'+(reg&&reg.nome?' (<b>'+h(reg.nome)+'</b>)':'')+'. Assim que a FAST aprovar, você poderá pedir entregas e coletas e acompanhar tudo por aqui.');
+    load.innerHTML='<div style="text-align:center;padding:24px 12px;line-height:1.5">'+msg+'<br><br><button type="button" class="btn secondary" onclick="location.reload()">Verificar de novo</button></div>';
+    load.classList.remove('hidden');
+  };
+  if(/email-confirmado/.test(location.search+location.hash)){
+    setTimeout(function(){var ok=el('cadOk');if(ok){ok.style.display='block';ok.textContent='✅ E-mail confirmado! Agora entre com seu e-mail e senha.'}},300);
+  }
+})();
+</script>
+<script id="fast526-tempo-real">
+/* 5.2.5 — TEMPO REAL entre os apps (FAST, ROTAS, PAINEL, Motorista e Cliente)
+   Escuta o mesmo canal de avisos do FAST: quando qualquer aparelho grava algo, este
+   app atualiza na hora (sem esperar o minuto da atualização automática). E, quando
+   ESTE app grava (chegada, entrega, foto, pedido), avisa os outros na mesma hora. */
+(function(){
+  var URLWS='wss://yhxuplhohhetzloxvgku.supabase.co/realtime/v1/websocket?apikey='+encodeURIComponent('sb_publishable_jlsorkXci3_0Hla7gt8z1g_pe6zOT19')+'&vsn=1.0.0';
+  var TOP='realtime:fast-sync-aviso', EU='cliente-'+Math.random().toString(36).slice(2,9);
+  var ws=null, ref=0, jref=null, hb=0, falhas=0, tAtual=0;
+  function mandar(ev,payload){ if(!ws||ws.readyState!==1)return false; var r=String(++ref); if(ev==='phx_join')jref=r; try{ws.send(JSON.stringify({topic:TOP,event:ev,payload:payload,ref:r,join_ref:jref}));return true}catch(e){return false} }
+  function atualizar(){ clearTimeout(tAtual); tAtual=setTimeout(function(){ try{ if(typeof session!=='undefined'&&session&&session.access_token){ if(typeof carregarHoje==='function')carregarHoje(); document.dispatchEvent(new Event('fast-mudou')); } }catch(e){} },700); }
+  function conectar(){
+    if(ws||!navigator.onLine||!('WebSocket' in window))return;
+    try{ ws=new WebSocket(URLWS); }catch(e){ agendar(); return; }
+    ws.onopen=function(){ falhas=0; mandar('phx_join',{config:{broadcast:{self:false,ack:false},presence:{key:''},postgres_changes:[],private:false}}); clearInterval(hb); hb=setInterval(function(){ try{ws.send(JSON.stringify({topic:'phoenix',event:'heartbeat',payload:{},ref:String(++ref)}))}catch(e){} },25000); };
+    ws.onmessage=function(ev){ var m; try{m=JSON.parse(ev.data)}catch(e){return} if(m&&m.event==='broadcast'&&m.topic===TOP){ var p=m.payload&&m.payload.payload; if(!p||p.de!==EU)atualizar(); } };
+    ws.onclose=function(){ clearInterval(hb); ws=null; agendar(); };
+    ws.onerror=function(){ try{ws.close()}catch(e){} };
+  }
+  function agendar(){ falhas++; setTimeout(conectar,Math.min(15000,500*Math.pow(2,Math.min(falhas,5)))); }
+  window.fastAvisarApps=function(){ mandar('broadcast',{type:'broadcast',event:'mudou',payload:{de:EU,t:Date.now()}}); };
+  // depois de gravar no banco, avisa os outros apps
+  var f0=window.fetch;
+  window.fetch=function(u,o){
+    var m=String((o&&o.method)||'GET').toUpperCase(), s=String(u&&u.url||u||'');
+    var p=f0.apply(this,arguments);
+    if(m!=='GET'&&/\/rest\/v1\/(sequencias_itens|motorista_fotos|solicitacoes|cadastros_clientes|rastreamento_x)/.test(s)){
+      p.then(function(r){ if(r&&r.ok)setTimeout(window.fastAvisarApps,150); }).catch(function(){});
+    }
+    return p;
+  };
+  document.addEventListener('visibilitychange',function(){ if(!document.hidden){ if(!ws)conectar(); atualizar(); } });
+  window.addEventListener('online',function(){ conectar(); atualizar(); });
+  setTimeout(conectar,1500);
+})();
+</script>
+
 </body></html>
