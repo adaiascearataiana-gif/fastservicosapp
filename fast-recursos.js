@@ -989,7 +989,7 @@
         arqs.push({ nome: f.name || ('foto_' + (i + 1) + '.jpg'), tipo: f.type || 'image/jpeg', base64: await paraBase64(f) });
       }
       var texto = [d.text || '', d.url || ''].filter(Boolean).join('\n');
-      if (!arqs.length) { location.href = 'https://api.whatsapp.com/send?text=' + encodeURIComponent(texto || d.title || ''); return; }
+      if (!arqs.length && !texto) texto = d.title || '';
       var id = 'c' + Date.now() + Math.random().toString(36).slice(2, 7);
       return new Promise(function (res, rej) {
         pend[id] = { res: res, rej: rej };

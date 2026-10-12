@@ -1,7 +1,12 @@
 {
-  "version": "5.3.1",
-  "releasedAt": "2026-10-13T18:00:00-03:00",
+  "version": "5.3.3",
+  "releasedAt": "2026-10-13T20:00:00-03:00",
   "updates": [
+    {
+      "app": "motorista",
+      "type": "melhorado",
+      "text": "5.3.3 (13/10/2026): compartilhar abre a gaveta de apps do celular."
+    },
     {
       "app": "motorista",
       "type": "novo",

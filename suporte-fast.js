@@ -37,6 +37,49 @@
   }
   async function meus() { return (await rpc('suporte_meus', { p_chaves: chaves() })) || []; }
 
+  /* ---------- 5.3.3: no app instalado, todo “compartilhar” abre a gaveta de apps do Android ---------- */
+  (function () {
+    if (W.__fastShareNativo) return;
+    var ponte = W.FASTCompartilhar;
+    if (!ponte || typeof ponte.compartilhar !== 'function') return;
+    try { if (typeof ponte.disponivel === 'function' && !ponte.disponivel()) return; } catch (e) {}
+    var pend = {};
+    W.fastCompartilharResultado = function (id, ok, msg) {
+      var p = pend[id]; if (!p) return; delete pend[id];
+      if (ok) p.res(); else { var e = new Error(msg || 'Não foi possível compartilhar'); p.rej(e); }
+    };
+    function paraBase64(file) {
+      return new Promise(function (res, rej) {
+        var fr = new FileReader();
+        fr.onload = function () { res(String(fr.result || '').split(',')[1] || ''); };
+        fr.onerror = function () { rej(fr.error || new Error('leitura')); };
+        fr.readAsDataURL(file);
+      });
+    }
+    function canShare(d) { return !!(d && ((d.files && d.files.length) || d.text || d.url)); }
+    async function share(d) {
+      d = d || {};
+      var arqs = [];
+      var lista = Array.prototype.slice.call(d.files || []);
+      for (var i = 0; i < lista.length; i++) {
+        var f = lista[i];
+        arqs.push({ nome: f.name || ('foto_' + (i + 1) + '.jpg'), tipo: f.type || 'image/jpeg', base64: await paraBase64(f) });
+      }
+      var texto = [d.text || '', d.url || ''].filter(Boolean).join('\n');
+      if (!arqs.length && !texto) texto = d.title || '';
+      var id = 'c' + Date.now() + Math.random().toString(36).slice(2, 7);
+      return new Promise(function (res, rej) {
+        pend[id] = { res: res, rej: rej };
+        try { ponte.compartilhar(JSON.stringify({ texto: texto, arquivos: arqs }), id); }
+        catch (e) { delete pend[id]; rej(e); return; }
+        setTimeout(function () { if (pend[id]) { delete pend[id]; res(); } }, 30000);
+      });
+    }
+    try { Object.defineProperty(navigator, 'share', { value: share, configurable: true, writable: true }); } catch (e) { try { navigator.share = share; } catch (er) {} }
+    try { Object.defineProperty(navigator, 'canShare', { value: canShare, configurable: true, writable: true }); } catch (e) { try { navigator.canShare = canShare; } catch (er) {} }
+    W.__fastShareNativo = true;
+  })();
+
   /* ---------- 5.2.7: imagens no atendimento + visualizador (Salvar / Compartilhar) ---------- */
   var URL_BASE = URL_REST.replace(/\/rest\/v1$/, '');
   function comprimir(file) {
