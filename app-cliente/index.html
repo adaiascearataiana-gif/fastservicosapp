@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="fast-app-version" content="5.3.1">
+<meta name="fast-app-version" content="5.3.2">
 <meta name="theme-color" content="#16a34a">
 <title>Cliente FAST — Histórico</title>
 <style>
@@ -71,13 +71,19 @@ main{padding:14px 12px 90px}
 <div id="rastreioBox" class="tablewrap" style="margin-bottom:14px;padding:14px"><div class="tabletitle" style="margin-bottom:10px">📦 Rastrear mercadoria</div><div id="rastreioWidget"></div></div>
 <div id="pedidoBox" class="tablewrap" style="margin-bottom:14px;padding:14px"><div class="tabletitle" style="margin-bottom:10px">📝 Pedir entrega ou coleta</div>
 <div style="display:flex;gap:8px;margin-bottom:10px"><label class="pdTipo"><input type="radio" name="pedTipo" value="entrega" checked> 🚚 Entrega</label><label class="pdTipo"><input type="radio" name="pedTipo" value="coleta"> 📦 Coleta</label></div>
-<label class="pdL">Retirar em</label>
+<label class="pdL" id="pedLabOrig">Retirar em</label>
 <div style="position:relative"><input id="pedOrigem" class="pdIn" placeholder="Nome do local de retirada" autocomplete="off"></div>
 <button type="button" id="pedMeuPonto" class="pdChip" style="display:none">📍 Retirar no meu endereço</button>
 <div id="pedOrigemEnd" class="pdPrev" style="display:none"></div>
-<label class="pdL" style="margin-top:12px">Destino / endereço</label>
+<label class="pdL" id="pedLabDest" style="margin-top:12px">Destino / endereço</label>
 <div id="pedDestinos"></div>
 <button type="button" id="pedAdd" class="pdAdd">➕ Adicionar destino</button>
+<div id="pedAnexosBox" style="display:none;margin-top:12px;border:1px dashed #14b8a6;background:#f0fdfa;border-radius:14px;padding:10px 12px">
+<div style="font-weight:800;color:#0f766e">📎 Comprovantes para a retirada</div>
+<div style="font-size:13px;color:#475569;margin:2px 0 8px">Nota fiscal, comprovante de coleta, autorização, documento… Fotos ou PDF. Mande o que tiver.</div>
+<input type="file" id="pedAnexosIn" accept="image/*,application/pdf" multiple hidden>
+<button type="button" id="pedAnexosBt" class="pdAdd" style="background:#fff">📎 Anexar comprovantes</button>
+<div id="pedAnexosLista" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px"></div></div>
 <button type="button" id="pedEnviar" class="pdEnviar">Enviar pedido</button>
 <div id="pedMsg" style="margin-top:8px;font-weight:700"></div>
 <div id="pedLista" style="margin-top:10px"></div></div>
@@ -251,6 +257,7 @@ window.fastBioLockAtivo=function(){return !!cfg()};window.fastBioSuportado=funct
   email:function(){try{return ((JSON.parse(localStorage.getItem('fast_cliente_session')||'null')||{}).user||{}).email||''}catch(e){return ''}},
   contato:function(){try{return (typeof cliente!=='undefined'&&cliente&&(cliente.whatsapp||cliente.telefone))||''}catch(e){return ''}},
   visivel:function(){var c=document.getElementById('content');return !!(c&&!c.classList.contains('hidden'))}};</script>
+<script src="../recibo-fast.js?v=1"></script>
 <script src="../suporte-fast.js?v=4"></script>
 <script src="../rastreio-fast.js?v=3"></script>
 <script>try{fastRastreio.montar(document.getElementById('rastreioWidget'),{param:'rastreio'})}catch(e){}</script>
@@ -326,7 +333,7 @@ window.fastBioLockAtivo=function(){return !!cfg()};window.fastBioSuportado=funct
     if(usandoPonto){el('pedOrigem').value=r.nome||'Meu endereço';el('pedOrigemEnd').textContent='📍 '+r.endereco;el('pedOrigemEnd').style.display='block'}
     else{el('pedOrigem').value='';el('pedOrigemEnd').style.display='none'}
   };
-  sugerir(el('pedOrigem'),function(){return ORI.map(function(o){return{nome:o,endereco:window.cliEnderecoDe(o)}})},function(x){var e=x.endereco||window.cliEnderecoDe(x.nome);el('pedOrigemEnd').textContent=e?'📍 '+e:'';el('pedOrigemEnd').style.display=e?'block':'none'});
+  sugerir(el('pedOrigem'),function(){var l=ORI.map(function(o){return{nome:o,endereco:window.cliEnderecoDe(o)}});LUG.forEach(function(x){if(!l.some(function(y){return nn(y.nome)===nn(x.nome)}))l.push(x)});return l},function(x){var e=x.endereco||window.cliEnderecoDe(x.nome);el('pedOrigemEnd').textContent=e?'📍 '+e:'';el('pedOrigemEnd').style.display=e?'block':'none'});
   el('pedOrigem').addEventListener('input',function(){if(usandoPonto){usandoPonto=false;el('pedMeuPonto').classList.remove('on')}});
   // ---------- destinos ----------
   function linha(){
@@ -342,6 +349,31 @@ window.fastBioLockAtivo=function(){return !!cfg()};window.fastBioSuportado=funct
   }
   linha();
   el('pedAdd').onclick=function(){linha().querySelector('.ds').focus()};
+  // ---------- 5.3.2: COLETA em transportadora (dados do cliente + comprovantes) ----------
+  var ANEXOS=[];
+  function meusDados(){var r=retirada()||{},c=(typeof cliente!=='undefined'&&cliente)||{};return {nome:r.nome||c.nome||'',endereco:r.endereco||[c.endereco,c.numero].filter(Boolean).join(', ')||'',whats:c.whatsapp||c.telefone||''}}
+  function modoTipo(){
+    var col=((document.querySelector('input[name=pedTipo]:checked')||{}).value==='coleta');
+    el('pedLabOrig').textContent=col?'Retirar em (transportadora)':'Retirar em';
+    el('pedOrigem').placeholder=col?'Ex.: WM Transportes':'Nome do local de retirada';
+    el('pedLabDest').textContent=col?'Entregar para (seus dados)':'Destino / endereço';
+    el('pedAnexosBox').style.display=col?'block':'none';
+    var r1=document.querySelector('#pedDestinos .pdRow');
+    if(col&&r1){var d=meusDados(),ds=r1.querySelector('.ds'),en=r1.querySelector('.en');if(!ds.value&&d.nome){ds.value=d.nome;ds.dataset.meu='1'}if(!en.value&&d.endereco){en.value=d.endereco;en.dataset.meu='1'}}
+    if(!col&&r1){var ds2=r1.querySelector('.ds'),en2=r1.querySelector('.en');if(ds2.dataset.meu==='1'){ds2.value='';ds2.dataset.meu=''}if(en2.dataset.meu==='1'){en2.value='';en2.dataset.meu=''}}
+  }
+  document.querySelectorAll('input[name=pedTipo]').forEach(function(x){x.addEventListener('change',modoTipo)});
+  function desenharAnexos(){el('pedAnexosLista').innerHTML=ANEXOS.map(function(f,i){var img=/^image\//.test(f.type);return '<span style="display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid #cbd5e1;border-radius:10px;padding:4px 8px;font-size:12px;font-weight:700">'+(img?'🖼':'📄')+' '+h(f.name.slice(0,22))+' <button type="button" data-ax="'+i+'" style="border:0;background:#fee2e2;color:#b91c1c;border-radius:50%;width:20px;height:20px;font-weight:900">✕</button></span>'}).join('')}
+  el('pedAnexosBt').onclick=function(){el('pedAnexosIn').click()};
+  el('pedAnexosIn').onchange=function(){Array.prototype.forEach.call(this.files||[],function(f){if(ANEXOS.length<10)ANEXOS.push(f)});this.value='';desenharAnexos()};
+  el('pedAnexosLista').onclick=function(e){var b=e.target.closest('[data-ax]');if(!b)return;ANEXOS.splice(+b.getAttribute('data-ax'),1);desenharAnexos()};
+  async function subirAnexo(f){
+    if(/^image\//.test(f.type)&&window.fastSuporteSubirImagem){return {url:await window.fastSuporteSubirImagem(f),nome:f.name,tipo:'image/jpeg'}}
+    var base=PROJECT,ext=(f.name.split('.').pop()||'pdf').toLowerCase().replace(/[^a-z0-9]/g,''),nome='coletas/'+Date.now()+'_'+Math.random().toString(36).slice(2,7)+'.'+ext;
+    var r=await fetch(base+'/storage/v1/object/suporte/'+nome,{method:'POST',headers:cab({'Content-Type':f.type||'application/octet-stream','x-upsert':'true'}),body:f});
+    if(!r.ok)throw new Error('não foi possível enviar '+f.name+' ('+r.status+')');
+    return {url:base+'/storage/v1/object/public/suporte/'+nome,nome:f.name,tipo:f.type||''};
+  }
   // ---------- enviar (um pedido por destino) ----------
   el('pedEnviar').onclick=async function(){
     var msg=el('pedMsg'),tipo=(document.querySelector('input[name=pedTipo]:checked')||{}).value||'entrega';
@@ -352,11 +384,16 @@ window.fastBioLockAtivo=function(){return !!cfg()};window.fastBioSuportado=funct
     if(!itens.length)itens=[{destino:'',destino_endereco:'',qtd:1,obs:''}];
     if(!tk()){msg.style.color='#b91c1c';msg.textContent='Entre na sua conta para fazer o pedido.';return}
     var bt=this;bt.disabled=true;bt.textContent='Enviando…';msg.textContent='';
+    var anexos=[];
+    if(tipo==='coleta'&&ANEXOS.length){try{bt.textContent='Enviando comprovantes…';for(var a=0;a<ANEXOS.length;a++)anexos.push(await subirAnexo(ANEXOS[a]));bt.textContent='Enviando…'}catch(e){bt.disabled=false;bt.textContent='Enviar pedido';msg.style.color='#b91c1c';msg.textContent='Não foi possível enviar os comprovantes ('+(e.message||e)+'). Tente de novo.';return}}
+    var md=meusDados(), extraObs=tipo==='coleta'?'Retirada em nome de: '+(md.nome||'')+(md.whats?' · WhatsApp '+md.whats:''):'';
     var nome=(typeof cliente!=='undefined'&&cliente&&cliente.nome)||'',email=(session.user&&session.user.email)||'',base=Date.now(),ok=0,err='';
     for(var i=0;i<itens.length;i++){
-      var corpo={id:base+i,cliente_nome:nome,cliente_email:email,tipo:tipo,origem:origem,origem_endereco:origemEnd||'',destino:itens[i].destino,destino_endereco:itens[i].destino_endereco,qtd:itens[i].qtd,obs:itens[i].obs};
+      var corpo={id:base+i,cliente_nome:nome,cliente_email:email,tipo:tipo,origem:origem,origem_endereco:origemEnd||'',destino:itens[i].destino,destino_endereco:itens[i].destino_endereco,qtd:itens[i].qtd,obs:[itens[i].obs,extraObs].filter(Boolean).join(' · ')};
+      if(anexos.length)corpo.anexos=anexos;
       try{
         var x=await fetch(PROJECT+'/rest/v1/solicitacoes',{method:'POST',headers:cab({'Content-Type':'application/json',Prefer:'return=minimal'}),body:JSON.stringify(corpo)});
+        if(x.status===400&&corpo.anexos){delete corpo.anexos;corpo.obs=[corpo.obs,'Comprovantes: '+anexos.map(function(q){return q.url}).join(' ')].filter(Boolean).join(' · ');x=await fetch(PROJECT+'/rest/v1/solicitacoes',{method:'POST',headers:cab({'Content-Type':'application/json',Prefer:'return=minimal'}),body:JSON.stringify(corpo)})}
         if(x.status===400){delete corpo.origem_endereco;delete corpo.destino_endereco;if(itens[i].destino_endereco)corpo.obs=[corpo.obs,'Endereço: '+itens[i].destino_endereco].filter(Boolean).join(' · ');x=await fetch(PROJECT+'/rest/v1/solicitacoes',{method:'POST',headers:cab({'Content-Type':'application/json',Prefer:'return=minimal'}),body:JSON.stringify(corpo)})}
         if(x.ok)ok++;else err='HTTP '+x.status;
       }catch(e){err=e.message||String(e)}
@@ -364,6 +401,7 @@ window.fastBioLockAtivo=function(){return !!cfg()};window.fastBioSuportado=funct
     bt.disabled=false;bt.textContent='Enviar pedido';
     if(ok){msg.textContent='';balao('✅ '+(ok>1?ok+' pedidos enviados':'Pedido enviado')+'! Avisaremos quando for confirmado.');
       el('pedDestinos').innerHTML='';linha();if(!usandoPonto){el('pedOrigem').value='';el('pedOrigemEnd').style.display='none'}
+      ANEXOS=[];desenharAnexos();modoTipo();
       document.dispatchEvent(new Event('fast-mudou'));}
     if(err){msg.style.color='#b91c1c';msg.textContent='Não foi possível enviar '+(itens.length-ok)+' pedido(s) ('+err+').'}
   };
@@ -573,7 +611,7 @@ html.cli-escuro{filter:invert(.92) hue-rotate(180deg);background:#111}html.cli-e
     var sl=document.createElement('span');sl.id='fsupSlot';ac.appendChild(sl);
     var b=document.createElement('button');b.id='cliMenuBtn';b.className='cliAc';b.type='button';b.setAttribute('aria-label','Menu');b.innerHTML='<span>☰</span>';ac.appendChild(b);b.onclick=function(e){e.stopPropagation();el('cliMenu').classList.toggle('on')};
   }
-  var itens=[['inicio','🏠 Início'],['pagar','💳 Pagar com PIX'],['resumo','📊 Resumo e gráficos'],['dados','👤 Dados pessoais'],['seguranca','🔒 Segurança'],['historico','🧾 Histórico de rotas'],['precos','💲 Tabela de preços'],['notificacoes','🔔 Notificações'],['aparencia','🎨 Aparência'],['dispositivos','📱 Conectar dispositivos'],['whats','💬 WhatsApp da FAST'],['sobre','ℹ️ Atendimento e sobre'],['-'],['sair','↪ Sair']];
+  var itens=[['inicio','🏠 Início'],['pagar','💳 Pagar com PIX'],['resumo','📊 Resumo e gráficos'],['dados','👤 Dados pessoais'],['seguranca','🔒 Segurança'],['historico','🧾 Histórico de rotas'],['precos','💲 Tabela de preços'],['notificacoes','🔔 Notificações'],['aparencia','🎨 Aparência'],['dispositivos','📱 Conectar dispositivos'],['recibos','🧾 Meus recibos'],['whats','💬 WhatsApp da FAST'],['sobre','ℹ️ Atendimento e sobre'],['-'],['sair','↪ Sair']];
   el('cliMenu').innerHTML=itens.map(function(i){return i[0]==='-'?'<hr>':'<button type="button" data-m="'+i[0]+'">'+i[1]+(i[0]==='notificacoes'?' <span id="cliNotN" style="margin-left:auto;background:#ef4444;color:#fff;border-radius:999px;padding:1px 7px;font-size:12px;display:none"></span>':'')+'</button>'}).join('');
   document.addEventListener('click',function(e){var m=el('cliMenu');if(m.classList.contains('on')&&!m.contains(e.target)&&e.target.id!=='cliMenuBtn')m.classList.remove('on')});
   el('cliMenu').addEventListener('click',function(e){var b=e.target.closest('[data-m]');if(!b)return;el('cliMenu').classList.remove('on');abrir(b.getAttribute('data-m'))});
@@ -586,7 +624,7 @@ html.cli-escuro{filter:invert(.92) hue-rotate(180deg);background:#111}html.cli-e
   function abrir(q){
     if(q==='inicio'){window.scrollTo({top:0,behavior:'smooth'});return}
     if(q==='sair'){if(confirm('Sair da sua conta neste aparelho?'))logout();return}
-    ({whats:function(){if(window.fastSuporteWhatsApp)window.fastSuporteWhatsApp()},pagar:function(){window.cliPagar()},dispositivos:function(){window.cliDispositivos()},resumo:function(){window.cliResumo()},dados:dados,seguranca:seguranca,historico:historico,precos:precos,notificacoes:notificacoes,aparencia:aparencia,sobre:sobre})[q]();
+    ({recibos:function(){window.cliRecibos()},whats:function(){if(window.fastSuporteWhatsApp)window.fastSuporteWhatsApp()},pagar:function(){window.cliPagar()},dispositivos:function(){window.cliDispositivos()},resumo:function(){window.cliResumo()},dados:dados,seguranca:seguranca,historico:historico,precos:precos,notificacoes:notificacoes,aparencia:aparencia,sobre:sobre})[q]();
   }
   window.cliAbrirMenu=abrir;
   // ---------- 👤 DADOS PESSOAIS ----------
@@ -784,7 +822,7 @@ html.cli-escuro{filter:invert(.92) hue-rotate(180deg);background:#111}html.cli-e
       if(antes['p'+p.id]==='pendente'&&p.status==='aceita')notificar('confirmado','Seu pedido para '+(p.destino||'o destino')+' foi confirmado.');
       if(antes['p'+p.id]==='pendente'&&p.status==='recusada')notificar('recusado','Seu pedido para '+(p.destino||'o destino')+' não pôde ser aceito. Fale com a FAST.')})}catch(e){}
     try{(await get('pagamentos_clientes?select=id,status,valor&order=criado_em.desc&limit=30')).forEach(function(p){var k='g'+p.id;agora[k]=p.status;var v='R$ '+(Number(p.valor)||0).toFixed(2).replace('.',',');
-      if(antes[k]==='informado'&&p.status==='confirmado')notificar('pago','✅ Seu pagamento de '+v+' foi confirmado. Obrigado!');
+      if(antes[k]==='informado'&&p.status==='confirmado'){notificar('pago','✅ Pagamento de '+v+' confirmado! Seu recibo está em ☰ → Meus recibos.');try{window.cliRecibosAtualizar&&cliRecibosAtualizar()}catch(e){}}
       if(antes[k]==='informado'&&p.status==='recusado')notificar('pagnao','Seu pagamento de '+v+' não foi identificado. Fale com a FAST.')})}catch(e){}
     try{var hj=new Date(),dk=hj.toISOString().slice(0,10);
       if(hj.getHours()>=17&&antes.lembrete!==dk&&typeof rotas!=='undefined'){var pend=rotas.filter(function(r){return !/recebid|pago/i.test(String(r.status||''))&&Number(r.valor)>0}),tv=pend.reduce(function(t,r){return t+(Number(r.valor)||0)},0);
@@ -1259,43 +1297,48 @@ html.cli-escuro{filter:invert(.92) hue-rotate(180deg);background:#111}html.cli-e
   async function abrirPagar(){
     await informados();
     var pd=pendentes(), cfg=null;
-    try{var r=await fetch(PROJECT+'/rest/v1/pagamento_config?select=chave,nome,cidade&id=eq.1',{headers:cab()});if(r.ok)cfg=(await r.json())[0]}catch(e){}
+    try{var r=await fetch(PROJECT+'/rest/v1/pagamento_config?select=chave,nome,cidade,tipo&id=eq.1',{headers:cab()});if(r.ok)cfg=(await r.json())[0]}catch(e){}
     var f=document.createElement('div');f.className='cliSheet on';f.id='cliF_pagar';f.addEventListener('click',function(e){if(e.target===f)f.remove()});document.body.appendChild(f);
-    if(!cfg||!cfg.chave){f.innerHTML='<div class="cx"><div class="hd"><b>💳 Pagar com PIX</b><button type="button" class="x" onclick="this.closest(\'.cliSheet\').remove()">✕</button></div><p>O pagamento por PIX ainda não foi ativado pela FAST. Fale com a FAST pelo Atendimento 🎧.</p></div>';return}
-    f.innerHTML='<div class="cx"><div class="hd"><b>💳 Pagar com PIX</b><button type="button" class="x" onclick="this.closest(\'.cliSheet\').remove()">✕</button></div>'+
-      '<div class="cliMut" style="margin-bottom:6px">Escolha as rotas que vai pagar agora:</div><div id="pgLista">'+
-      pd.map(function(r){var em=INF[String(r.id)];return '<label class="cliSw" style="'+(em?'opacity:.6':'')+'"><span><b>'+h(r.destino||'—')+'</b> <span class="cliMut">'+dbr(r.data)+'</span>'+(em?'<br><span style="color:#b45309;font-size:12px">⏳ pagamento informado — em conferência</span>':'')+'</span><span style="display:flex;align-items:center;gap:8px"><b>'+brl(r.valor)+'</b><input type="checkbox" data-r="'+h(r.id)+'" data-v="'+Number(r.valor)+'" '+(em?'disabled':'checked')+'></span></label>'}).join('')+'</div>'+
-      '<div style="display:flex;justify-content:space-between;align-items:center;margin:12px 0"><b style="font-size:16px">Total</b><b id="pgTot" style="font-size:22px;color:#0f766e"></b></div>'+
-      '<div id="pgQr" style="text-align:center"></div>'+
-      '<button type="button" class="cliBtn" id="pgGerar">Gerar QR Code do PIX</button><div class="cliMsg" id="pgMsg"></div></div>';
-    function soma(){var t=0;f.querySelectorAll('[data-r]:checked').forEach(function(c){t+=Number(c.getAttribute('data-v'))||0});el('pgTot').textContent=brl(t);return t}
-    soma(); f.querySelectorAll('[data-r]').forEach(function(c){c.onchange=function(){soma();el('pgQr').innerHTML='';el('pgGerar').style.display=''}});
-    el('pgGerar').onclick=async function(){
-      var t=soma(), ids=Array.prototype.map.call(f.querySelectorAll('[data-r]:checked'),function(c){return c.getAttribute('data-r')});
-      if(!(t>0)){el('pgMsg').style.color='#b91c1c';el('pgMsg').textContent='Escolha pelo menos uma rota.';return}
-      var txid='FAST'+Date.now().toString(36).toUpperCase(), cod=pixCodigo(cfg,t,txid);
+    var topo='<div class="hd"><b>💳 Pagar com PIX</b><button type="button" class="x" onclick="this.closest(\'.cliSheet\').remove()">✕</button></div>';
+    if(!cfg||!cfg.chave){f.innerHTML='<div class="cx">'+topo+'<p>O pagamento por PIX ainda não foi ativado pela FAST. Fale com a FAST pelo Atendimento 🎧 ou pelo WhatsApp.</p></div>';return}
+    var livres=pd.filter(function(r){return !INF[String(r.id)]}), emConf=pd.filter(function(r){return INF[String(r.id)]});
+    if(!livres.length){f.innerHTML='<div class="cx">'+topo+'<p style="text-align:center;font-size:40px;margin:6px 0">✅</p><p style="text-align:center">Você não tem valores a pagar agora.'+(emConf.length?'<br><span class="cliMut">'+emConf.length+' pagamento(s) em conferência pela FAST.</span>':'')+'</p></div>';return}
+    var tipoNome={cnpj:'CNPJ',cpf:'CPF',email:'E-mail',telefone:'Telefone',aleatoria:'Chave aleatória'}[cfg.tipo]||'Chave PIX';
+    f.innerHTML='<div class="cx">'+topo+
+      '<div style="text-align:center;background:linear-gradient(135deg,#0b3d3a,#0f766e 55%,#14b8a6);color:#fff;border-radius:18px;padding:14px"><div style="opacity:.9;font-weight:700">Total a pagar</div><div id="pgTot" style="font-size:34px;font-weight:900;letter-spacing:.5px"></div><div id="pgQtd" style="opacity:.9;font-size:13px"></div></div>'+
+      '<div style="text-align:center;margin-top:12px"><div id="pgQr" style="display:inline-block;width:230px;min-height:230px;background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:10px">Gerando…</div>'+
+        '<div class="cliMut" style="margin-top:4px">No app do banco: <b>PIX → Ler QR Code</b></div></div>'+
+      '<label class="l" style="margin-top:14px">PIX copia e cola</label><div style="display:flex;gap:8px"><input type="text" readonly id="pgCod" style="flex:1;min-width:0;font:12px ui-monospace,monospace"><button type="button" class="cliBtn" id="pgCopiar" style="width:auto;margin:0;padding:0 14px">📋 Copiar</button></div>'+
+      '<label class="l">'+h(tipoNome)+' (chave PIX)</label><div style="display:flex;gap:8px"><input type="text" readonly id="pgChave" value="'+h(cfg.chave)+'" style="flex:1;min-width:0;font-weight:700"><button type="button" class="cliBtn sec" id="pgCopChave" style="width:auto;margin:0;padding:0 14px">📋 Copiar</button></div>'+
+      '<div class="cliMut" style="margin-top:6px">Recebedor: <b>'+h(cfg.nome||'')+'</b>. Se pagar pela chave, digite o valor exato do total.</div>'+
+      '<details style="margin-top:12px;border:1px solid #e2e8f0;border-radius:14px;padding:8px 12px" open><summary style="font-weight:800;cursor:pointer">🧾 Serviços incluídos</summary><div id="pgLista">'+
+        livres.map(function(r){return '<label class="cliSw"><span><b>'+h(r.destino||'—')+'</b> <span class="cliMut">'+dbr(r.data)+'</span></span><span style="display:flex;align-items:center;gap:8px"><b>'+brl(r.valor)+'</b><input type="checkbox" data-r="'+h(r.id)+'" data-v="'+Number(r.valor)+'" checked></span></label>'}).join('')+
+        (emConf.length?'<div class="cliMut" style="margin-top:6px">⏳ '+emConf.length+' rota(s) já informada(s), em conferência.</div>':'')+'</div></details>'+
+      '<div style="border-top:1px solid #e2e8f0;margin-top:14px;padding-top:12px"><b>Depois de pagar</b><div class="cliMut">Toque em “Já paguei”. O comprovante é opcional, mas ajuda a FAST a conferir mais rápido.</div>'+
+        '<input type="file" accept="image/*" id="pgComp" hidden><button type="button" class="cliBtn sec" id="pgCompBt">📎 Anexar comprovante</button><span id="pgCompNome" class="cliMut"></span>'+
+        '<button type="button" class="cliBtn" id="pgPaguei">✅ Já paguei</button></div><div class="cliMsg" id="pgMsg"></div></div>';
+    var cod='',txid='FAST'+Date.now().toString(36).toUpperCase(),total=0,ids=[];
+    async function gerar(){
+      total=0;ids=[];f.querySelectorAll('[data-r]:checked').forEach(function(c){total+=Number(c.getAttribute('data-v'))||0;ids.push(c.getAttribute('data-r'))});
+      el('pgTot').textContent=brl(total);el('pgQtd').textContent=ids.length+' serviço(s) selecionado(s)';
+      if(!(total>0)){el('pgQr').innerHTML='<span class="cliMut">Escolha pelo menos um serviço.</span>';el('pgCod').value='';return}
+      cod=pixCodigo(cfg,total,txid);el('pgCod').value=cod;
+      try{el('pgQr').innerHTML=await qrSvg(cod,230)}catch(e){el('pgQr').innerHTML='<span class="cliMut">Sem internet para desenhar o QR Code — use o copia e cola.</span>'}
+    }
+    f.querySelectorAll('[data-r]').forEach(function(c){c.onchange=gerar}); gerar();
+    function copiar(t,msg){(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).catch(function(){var x=document.createElement('textarea');x.value=t;document.body.appendChild(x);x.select();document.execCommand('copy');x.remove()}).then(function(){if(window.cliBalao)cliBalao(msg)})}
+    el('pgCopiar').onclick=function(){if(cod)copiar(cod,'📋 Código PIX copiado — cole no app do seu banco')};
+    el('pgCopChave').onclick=function(){copiar(cfg.chave,'📋 Chave PIX copiada')};
+    var arq=null; el('pgCompBt').onclick=function(){el('pgComp').click()}; el('pgComp').onchange=function(){arq=this.files&&this.files[0];el('pgCompNome').textContent=arq?' ✅ '+arq.name:''};
+    el('pgPaguei').onclick=async function(){
+      var b=this,m=el('pgMsg');if(!(total>0)){m.style.color='#b91c1c';m.textContent='Escolha pelo menos um serviço.';return}
+      b.disabled=true;b.textContent='Enviando…';
       try{
-        el('pgQr').innerHTML='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:12px;display:inline-block;width:240px">'+(await qrSvg(cod,240))+'</div>'+
-          '<div class="cliMut" style="margin:6px 0">Abra o app do seu banco → <b>PIX</b> → <b>Ler QR Code</b>, ou copie o código abaixo.</div>'+
-          '<textarea readonly id="pgCod" style="width:100%;box-sizing:border-box;font:12px ui-monospace,monospace;border:1px solid #cbd5e1;border-radius:12px;padding:8px;height:70px">'+h(cod)+'</textarea>'+
-          '<button type="button" class="cliBtn" id="pgCopiar">📋 Copiar código PIX (copia e cola)</button>'+
-          '<div class="cliMut" style="margin-top:6px">Recebedor: <b>'+h(cfg.nome||'')+'</b> · Valor: <b>'+brl(t)+'</b></div>'+
-          '<div style="border-top:1px solid #e2e8f0;margin-top:14px;padding-top:12px"><b>Já pagou?</b><div class="cliMut">Envie o comprovante (opcional) para a FAST conferir mais rápido.</div>'+
-          '<input type="file" accept="image/*" id="pgComp" hidden><button type="button" class="cliBtn sec" id="pgCompBt">📎 Anexar comprovante</button><span id="pgCompNome" class="cliMut"></span>'+
-          '<button type="button" class="cliBtn" id="pgPaguei">✅ Já paguei</button></div>';
-        el('pgGerar').style.display='none';
-      }catch(e){el('pgMsg').style.color='#b91c1c';el('pgMsg').textContent=e.message||String(e);return}
-      el('pgCopiar').onclick=async function(){try{await navigator.clipboard.writeText(cod)}catch(e){var ta=el('pgCod');ta.select();document.execCommand('copy')}if(window.cliBalao)cliBalao('📋 Código PIX copiado — cole no app do seu banco')};
-      var arq=null; el('pgCompBt').onclick=function(){el('pgComp').click()}; el('pgComp').onchange=function(){arq=this.files&&this.files[0];el('pgCompNome').textContent=arq?' ✅ '+arq.name:''};
-      el('pgPaguei').onclick=async function(){
-        var b=this,m=el('pgMsg');b.disabled=true;b.textContent='Enviando…';
-        try{
-          var url='';if(arq&&window.fastSuporteSubirImagem)url=await window.fastSuporteSubirImagem(arq);
-          var r=await fetch(PROJECT+'/rest/v1/pagamentos_clientes',{method:'POST',headers:cab({'Content-Type':'application/json',Prefer:'return=minimal'}),body:JSON.stringify({id:Date.now(),cliente_nome:(typeof cliente!=='undefined'&&cliente&&cliente.nome)||'',cliente_email:(session.user&&session.user.email)||'',valor:t,rotas:ids,txid:txid,comprovante:url})});
-          if(!r.ok)throw new Error('HTTP '+r.status);
-          ids.forEach(function(id){INF[id]=1}); f.remove(); faixa(); if(window.cliBalao)cliBalao('✅ Pagamento informado! A FAST vai conferir e dar baixa.');
-        }catch(e){m.style.color='#b91c1c';m.textContent='Não foi possível informar agora ('+(e.message||e)+').';b.disabled=false;b.textContent='✅ Já paguei'}
-      };
+        var url='';if(arq&&window.fastSuporteSubirImagem)url=await window.fastSuporteSubirImagem(arq);
+        var r=await fetch(PROJECT+'/rest/v1/pagamentos_clientes',{method:'POST',headers:cab({'Content-Type':'application/json',Prefer:'return=minimal'}),body:JSON.stringify({id:Date.now(),cliente_nome:(typeof cliente!=='undefined'&&cliente&&cliente.nome)||'',cliente_email:(session.user&&session.user.email)||'',valor:total,rotas:ids,txid:txid,comprovante:url})});
+        if(!r.ok)throw new Error('HTTP '+r.status);
+        ids.forEach(function(id){INF[id]=1}); f.remove(); faixa(); if(window.cliBalao)cliBalao('✅ Pagamento informado! A FAST vai conferir e enviar o seu recibo.');
+      }catch(e){m.style.color='#b91c1c';m.textContent='Não foi possível informar agora ('+(e.message||e)+').';b.disabled=false;b.textContent='✅ Já paguei'}
     };
   }
   window.cliPagar=abrirPagar;
@@ -1342,6 +1385,42 @@ html.cli-escuro{filter:invert(.92) hue-rotate(180deg);background:#111}html.cli-e
       history.replaceState(null,'',location.pathname); location.reload();
     }catch(e){}
   })();
+})();
+</script>
+
+<script id="cliente532-recibos">
+/* 5.3.2 — MEUS RECIBOS: lista no menu e aviso na tela inicial quando sai um recibo novo */
+(function(){
+  function el(id){return document.getElementById(id)}
+  function h(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+  function brl(v){return 'R$ '+(Number(v)||0).toFixed(2).replace('.',',').replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+  function tk(){try{return session&&session.access_token}catch(e){return ''}}
+  var LISTA=[];
+  async function carregar(){
+    if(!tk())return;
+    try{var r=await fetch(PROJECT+'/rest/v1/pagamentos_clientes?select=id,valor,recibo,recibo_numero,confirmado_em&status=eq.confirmado&order=confirmado_em.desc.nullslast&limit=100',{headers:{apikey:KEY,Authorization:'Bearer '+tk()}});if(r.ok)LISTA=(await r.json()).filter(function(p){return p.recibo})}catch(e){}
+    cartao();
+  }
+  window.cliRecibosAtualizar=carregar;
+  function cartao(){
+    var ct=el('content'); if(!ct)return; var b=el('cliRecibo'), ult=LISTA[0];
+    var novo=ult&&ult.confirmado_em&&(Date.now()-new Date(ult.confirmado_em).getTime()<7*864e5)&&localStorage.getItem('cli532_visto')!==String(ult.id);
+    if(!novo){if(b)b.remove();return}
+    if(!b){b=document.createElement('div');b.id='cliRecibo';b.style.cssText='border-radius:20px;padding:14px 16px;margin-bottom:14px;background:#fff;box-shadow:0 6px 20px rgba(15,23,42,.08);border-left:6px solid #16a34a;display:flex;align-items:center;gap:12px;cursor:pointer';
+      var ref=el('cliPagar')||el('cliOla');ct.insertBefore(b,ref?ref.nextSibling:ct.firstChild)}
+    b.innerHTML='<div style="font-size:30px">🧾</div><div style="flex:1"><div style="font-weight:900">Pagamento confirmado · '+brl(ult.valor)+'</div><div style="color:#64748b;font-size:13px">Recibo Nº '+h(ult.recibo_numero||'')+' disponível</div></div><div style="background:#16a34a;color:#fff;font-weight:800;border-radius:12px;padding:10px 12px">Ver</div>';
+    b.onclick=function(){try{localStorage.setItem('cli532_visto',String(ult.id))}catch(e){}if(window.fastRecibo)fastRecibo.abrir(ult.recibo);b.remove()};
+  }
+  window.cliRecibos=async function(){
+    await carregar();
+    var f=document.createElement('div');f.className='cliSheet on';f.id='cliF_recibos';f.addEventListener('click',function(e){if(e.target===f)f.remove()});document.body.appendChild(f);
+    f.innerHTML='<div class="cx"><div class="hd"><b>🧾 Meus recibos</b><button type="button" class="x" onclick="this.closest(\'.cliSheet\').remove()">✕</button></div>'+
+      (LISTA.length?LISTA.map(function(p){return '<div class="cliCard" data-rc="'+h(p.id)+'" style="display:flex;justify-content:space-between;gap:8px;align-items:center"><div><b>Recibo Nº '+h(p.recibo_numero||'')+'</b><div class="cliMut">'+(p.confirmado_em?new Date(p.confirmado_em).toLocaleDateString('pt-BR'):'')+' · '+((p.recibo.itens||[]).length)+' serviço(s) · '+h(p.recibo.forma||'PIX')+'</div></div><b style="color:#15803d;white-space:nowrap">'+brl(p.valor)+' ›</b></div>'}).join('')
+        :'<p class="cliMut">Você ainda não tem recibos. Eles aparecem aqui assim que a FAST confirma um pagamento.</p>')+'</div>';
+    f.addEventListener('click',function(e){var d=e.target.closest('[data-rc]');if(!d)return;var p=LISTA.filter(function(y){return String(y.id)===d.getAttribute('data-rc')})[0];if(p&&window.fastRecibo)fastRecibo.abrir(p.recibo)});
+  };
+  setTimeout(function t(){if(tk()&&el('content')&&!el('content').classList.contains('hidden'))carregar();else setTimeout(t,1500)},2500);
+  setInterval(function(){if(!document.hidden)carregar()},120000);
 })();
 </script>
 
