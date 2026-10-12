@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="fast-linux-desktop" data-fast-version="5.3.3" data-fast-enter-navigation="1"><head>
+<html lang="pt-BR" class="fast-linux-desktop" data-fast-version="5.3.4" data-fast-enter-navigation="1"><head>
 <script id="fast-4065-bio-nativa">
 /* 5.1.6: ponte para a biometria NATIVA do Android (APK). No WebView do APK o
    WebAuthn não existe; o APK expõe window.FASTBiometria e o app usa a digital/rosto
@@ -51,7 +51,7 @@
   <meta name="fast-github-branch" content="main">
   <meta name="fast-github-path" content="index.html">
   <meta name="fast-github-token-env" content="GH_TOKEN">
-  <meta name="fast-app-version" content="5.3.3">
+  <meta name="fast-app-version" content="5.3.4">
   <script id="fast-version-source-of-truth">try{var __m=document.querySelector('meta[name="fast-app-version"]');if(__m)document.documentElement.setAttribute("data-fast-version",__m.content)}catch(e){}</script>
   <meta name="fast-app-date" content="2026-10-05T18:00:00-03:00">
   <meta name="fast-latest-update" content="5.1.6: fotos da galeria sempre no card certo e fotos visíveis em todos os aparelhos.">
@@ -40913,7 +40913,7 @@ body.fast-home-reveal .tab-content.active{
 <script id="fast-4035-update-note">
 (function(){
   'use strict';
-  var V='5.3.3';
+  var V='5.3.4';
   var meta=document.querySelector('meta[name="fast-app-version"]');if(meta)meta.content=V;
   var latest=document.querySelector('meta[name="fast-latest-update"]');if(latest)latest.content='4.0.43: relatório geral de rotas, filtro por cliente, links diretos do Google Drive e sincronização das fotos de rotas avulsas; artes oficiais reaplicadas nos quatro aplicativos.';
   var log=document.querySelector('meta[name="fast-app-changelog"]');if(log){try{var a=JSON.parse(log.content||'[]');a.unshift({type:'novo',text:'4.0.36 (26/09/2026): Relatório Geral de Rotas com histórico completo, filtro por cliente/data/status, valores, fotos e link direto para a pasta do Google Drive.'},{type:'melhorado',text:'4.0.36 (26/09/2026): fotos adicionadas pela edição de ROTAS passam a usar a mesma fila de sincronização do Google Drive das ROTAS DO DIA; rotas antigas com fotos são verificadas e colocadas na fila automaticamente.'},{type:'melhorado',text:'4.0.36 (26/09/2026): artes oficiais azul, vermelha, laranja e verde reaplicadas nos locais de Rotas do Dia, Despesas, Cliente FAST e Motorista FAST, incluindo central de downloads e identidade de acesso.'});log.content=JSON.stringify(a.slice(0,40));}catch(e){}}
@@ -44978,7 +44978,7 @@ body.fx-apk .fx-gal-ajuda{display:flex}
         try{salvarStorage()}catch(e){} try{if(typeof sincronizarAgora==='function')setTimeout(sincronizarAgora,300)}catch(e){}
         var x={cliente_nome:k.nome,cliente_email:k.email||'',txid:''}, rec=await montarRecibo(x,itens); rec.forma=$('rcForma').value;
         try{var r=await fetch(url()+'/pagamentos_clientes',{method:'POST',headers:hdr({'Content-Type':'application/json','Prefer':'return=minimal'}),body:JSON.stringify({id:Date.now(),user_id:null,cliente_nome:k.nome,cliente_email:k.email||'',valor:rec.total,rotas:ids,status:'confirmado',recibo:rec,recibo_numero:rec.numero,confirmado_em:rec.emitido_em})});
-          if(!r.ok)throw new Error(r.status===400||r.status===403?'rode o SQL 5.3.3 no Supabase':'HTTP '+r.status);
+          if(!r.ok)throw new Error(r.status===400||r.status===403?'rode o SQL 5.3.2 no Supabase':'HTTP '+r.status);
           toast('🧾 Recibo Nº '+rec.numero+' gerado'+(k.email?' — o cliente já vê no app.':'. (O cliente não tem e-mail no cadastro — envie pelo WhatsApp.)'));
           W.fastRecibo&&W.fastRecibo.abrir(rec); W.fastRecibos();}
         catch(e){toast('Não foi possível gerar o recibo ('+(e.message||e)+').','error');b.disabled=false}
@@ -45045,7 +45045,7 @@ body.fx-apk .fx-gal-ajuda{display:flex}
         empresa_nome:$('pxEmpresa').value.trim(),documento:$('pxDoc').value.trim(),telefone:$('pxTel').value.trim(),endereco:$('pxEnd').value.trim(),logo:logoUrl};
       try{var r=await fetch(url()+'/pagamento_config',{method:'POST',headers:hdr({'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'}),body:JSON.stringify(corpo)});
         if(r.status===400){['empresa_nome','documento','telefone','endereco','logo'].forEach(function(k){delete corpo[k]});r=await fetch(url()+'/pagamento_config',{method:'POST',headers:hdr({'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'}),body:JSON.stringify(corpo)});if(r.ok){m.style.color='#b45309';m.textContent='PIX salvo. Para salvar os dados do recibo e a logo, rode o SQL 5.3.3 no Supabase.';return}}
-        if(!r.ok)throw new Error(r.status===404?'rode o SQL 5.3.3 no Supabase':'HTTP '+r.status);m.style.color='#15803d';m.textContent='✅ Salvo! Os clientes já podem pagar por PIX no app.'}
+        if(!r.ok)throw new Error(r.status===404?'rode o SQL 5.3.0 no Supabase':'HTTP '+r.status);m.style.color='#15803d';m.textContent='✅ Salvo! Os clientes já podem pagar por PIX no app.'}
       catch(e){m.style.color='#b91c1c';m.textContent='Não foi possível salvar: '+(e.message||e)}
     };
   };
@@ -45063,7 +45063,6 @@ body.fx-apk .fx-gal-ajuda{display:flex}
       }
       sigPrecos=sig;
     }catch(e){}
-    publicarLugares();
   }
   // lugares/destinos do FAST para o app do Cliente completar o endereço (sem telefone)
   var sigLug='';
@@ -45079,6 +45078,10 @@ body.fx-apk .fx-gal-ajuda{display:flex}
     }catch(e){}
   }
   setTimeout(publicarPrecos,20000); setInterval(publicarPrecos,10*60000);
+  // 5.3.4: os lugares são publicados SOZINHOS (antes dependiam da tabela de preços
+  // existir e ter mudado — por isso o app do Cliente não sugeria nenhum destino)
+  setTimeout(publicarLugares,8000); setInterval(publicarLugares,5*60000);
+  document.addEventListener('visibilitychange',function(){if(!document.hidden)setTimeout(publicarLugares,3000)});
   function iniciar(){ ligar(); marcarCards(); }
   setInterval(iniciar,2000); setTimeout(iniciar,800);
   setInterval(buscarPedidos,15000); setTimeout(buscarPedidos,4000);

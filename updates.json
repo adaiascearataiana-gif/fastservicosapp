@@ -1,7 +1,17 @@
 {
-  "version": "5.3.3",
-  "releasedAt": "2026-10-13T20:00:00-03:00",
+  "version": "5.3.4",
+  "releasedAt": "2026-10-12T21:00:00-03:00",
   "updates": [
+    {
+      "app": "cliente",
+      "type": "corrigido",
+      "text": "5.3.4 (12/10/2026): ao digitar o destino no pedido, aparecem as sugestões dos lugares do FAST e o endereço é preenchido com um toque."
+    },
+    {
+      "app": "geral",
+      "type": "corrigido",
+      "text": "5.3.4 (12/10/2026): o FAST publica os lugares para o app do Cliente sozinho, sem depender da tabela de preços."
+    },
     {
       "app": "motorista",
       "type": "melhorado",
