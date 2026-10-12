@@ -15,6 +15,7 @@
 
   function esc(v) { return String(v == null ? '' : v).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function limpar(t) { return String(t || '').toUpperCase().replace(/[^0-9A-Z]/g, '').replace(/O/g, '0').replace(/[IL]/g, '1'); }
+  function horaHMS(v) { var d = new Date(v); if (isNaN(d)) return ''; var p = function (n) { return (n < 10 ? '0' : '') + n; }; return p(d.getHours()) + ':' + p(d.getMinutes()) + ':' + p(d.getSeconds()); }
   function dataBR(v) {
     if (!v) return '';
     var s = String(v);
@@ -66,11 +67,18 @@
         if (!r) { res.innerHTML = '<div class="frs-er">Código ' + esc(c) + ' não encontrado. Confira as letras e números.</div>'; return; }
         var e = etapa(r);
         var passos = [
-          ['Pedido registrado', r.data ? 'Programado para ' + dataBR(r.data) : ''],
+          ['Pedido registrado', [r.registrado_em ? 'Registrado em ' + dataBR(String(new Date(r.registrado_em).toLocaleDateString('sv'))) + ' às ' + horaHMS(r.registrado_em) : '', r.data ? 'Programado para ' + dataBR(r.data) : ''].filter(Boolean).join(' · ')],
           ['A caminho', r.motorista ? 'Motorista ' + r.motorista : ''],
           ['Chegou ao destino', r.chegada_em ? dataBR(r.chegada_em) : ''],
           ['Entregue', r.concluida_em ? dataBR(r.concluida_em) : '']
         ];
+        // 5.2.4: o pedido do cliente (pelo app ou pelo WhatsApp) aparece antes do registro no sistema
+        if (r.solicitado_em) {
+          var canal = r.canal === 'app' ? 'pelo app' : (r.canal === 'whatsapp' ? 'pelo WhatsApp' : '');
+          passos.unshift(['Pedido solicitado' + (canal ? ' ' + canal : ''), dataBR(String(new Date(r.solicitado_em).toLocaleDateString('sv'))) + ' às ' + horaHMS(r.solicitado_em)]);
+          passos[1][0] = 'Registrado no sistema';
+          e = e + 1;
+        }
         res.innerHTML = '<span class="frs-cod">📦 ' + esc(r.codigo) + '</span>' +
           '<div class="frs-dest">' + esc(r.destino || 'Destino') + '</div>' +
           (r.origem ? '<div class="frs-mut">Saindo de ' + esc(r.origem) + '</div>' : '') +

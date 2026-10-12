@@ -74,6 +74,13 @@
     '.frx-btn.ok{background:#16a34a}.frx-btn.wa{background:#22c55e;color:#052e16}.frx-btn.pq{padding:7px 10px;min-height:36px;font-size:13px}',
     '.frx-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:12px}',
     '.frx-kpi{border:1px solid var(--border,#e2e8f0);border-radius:14px;padding:10px 12px}.frx-kpi small{display:block;font-size:11px;font-weight:700;opacity:.7;text-transform:uppercase}.frx-kpi b{font-size:17px}',
+    // tabela de preços: compacta, tudo centralizado e a coluna Destino do tamanho do maior nome
+    '.frx-precos{display:table!important;width:auto!important;min-width:100%;table-layout:auto!important;margin:0 auto!important}' +
+    '.frx-precos thead{display:table-header-group!important}.frx-precos tbody{display:table-row-group!important}.frx-precos tr{display:table-row!important;height:auto!important}' +
+    '.frx-precos th,.frx-precos td{display:table-cell!important;padding:6px 8px!important;text-align:center!important;vertical-align:middle!important;height:auto!important;min-height:0!important;line-height:1.3!important}' +
+    '.frx-precos td::before{content:none!important;display:none!important}' +
+    '.frx-precos th:first-child,.frx-precos td:first-child{white-space:nowrap!important;width:1%!important;font-weight:600}' +
+    '.frx-precos input.frx-in{width:96px!important;min-width:0!important;height:36px!important;min-height:0!important;padding:4px 6px!important;text-align:center!important;margin:0 auto!important;display:block}',
     '.frx-tb{width:100%;border-collapse:collapse;font-size:13px}.frx-tb th,.frx-tb td{padding:8px 6px;border-bottom:1px solid var(--border,#e2e8f0);text-align:left;vertical-align:top}.frx-tb th{font-size:11px;text-transform:uppercase;opacity:.7}',
     '.frx-wrap{overflow-x:auto}.frx-in{width:100%;box-sizing:border-box;padding:10px 12px;border-radius:10px;border:1px solid var(--border,#cbd5e1);background:var(--input-bg,#fff);color:inherit;font-size:15px}',
     '.frx-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px}.frx-row>label{font-size:12px;font-weight:700;opacity:.75}',
@@ -183,7 +190,7 @@
     div.innerHTML = '<p class="frx-muted" style="margin:0 0 10px">Preços sugeridos pelo valor mais cobrado de cada destino nas rotas já cadastradas. Mude o que quiser — o valor entra sozinho ao digitar o destino numa rota nova.</p>' +
       '<div class="frx-row"><input class="frx-in" id="frxPrecoBusca" placeholder="Buscar destino…"></div>' +
       '<div class="frx-row"><input class="frx-in" id="frxNovoDest" placeholder="Novo destino" style="flex:2;min-width:140px"><input class="frx-in" id="frxNovoVal" inputmode="decimal" placeholder="R$ 0,00" style="flex:1;min-width:90px"><button type="button" class="frx-btn pq" id="frxNovoAdd">Adicionar</button></div>' +
-      '<div class="frx-wrap"><table class="frx-tb"><thead><tr><th>Destino</th><th>Usos</th><th style="width:120px">Valor</th><th></th></tr></thead><tbody id="frxPrecoBody"></tbody></table></div>';
+      '<div class="frx-wrap"><table class="frx-tb frx-precos"><thead><tr><th>Destino</th><th>Usos</th><th>Valor</th><th></th></tr></thead><tbody id="frxPrecoBody"></tbody></table></div>';
     var edits = {};
     function desenhar() {
       var q = norm(($('frxPrecoBusca') || {}).value || '');
@@ -692,7 +699,6 @@
       '<button type="button" class="frx-tool" data-a="preco">💲 Tabela de preços<span>valor por destino</span></button>' +
       '<button type="button" class="frx-tool" data-a="pin">🔢 Bloqueio por PIN<span>' + (pinCfg() ? 'ativado' : 'desativado') + '</span></button>' +
       '<button type="button" class="frx-tool" data-a="sup">🎧 Central de Suporte<span>' + (SUP.abertos ? SUP.abertos + ' aguardando resposta' : 'clientes e motoristas') + '</span></button>' +
-      '<button type="button" class="frx-tool" data-a="whats">📲 WhatsApp (captura)<span>estado do serviço no Render</span></button>' +
       '<button type="button" class="frx-tool" data-a="rastreios">📦 Rastreios e coletas<span>códigos, motoristas e fotos</span></button>' +
       '<button type="button" class="frx-tool" data-a="atalhos">⌨️ Atalhos do teclado<span>no computador: Alt+Shift+letra</span></button>' +
       '<button type="button" class="frx-tool" data-a="diag">🩺 Sincronização<span>login, tempo real, fotos</span></button>' +
@@ -709,7 +715,6 @@
     if (a === 'diag' && W.fastDiagnosticoSync) W.fastDiagnosticoSync();
     if (a === 'atalhos') W.fastAtalhos();
     if (a === 'rastreios') W.fastRastreios();
-    if (a === 'whats') W.fastWhatsappEstado();
     if (a === 'cob') W.fastCobranca();
     if (a === 'fech') W.fastFechamentoPeriodo();
     if (a === 'preco') W.fastTabelaPrecos();
@@ -960,7 +965,7 @@
         arqs.push({ nome: f.name || ('foto_' + (i + 1) + '.jpg'), tipo: f.type || 'image/jpeg', base64: await paraBase64(f) });
       }
       var texto = [d.text || '', d.url || ''].filter(Boolean).join('\n');
-      if (!arqs.length && !texto) return;
+      if (!arqs.length) { location.href = 'https://api.whatsapp.com/send?text=' + encodeURIComponent(texto || d.title || ''); return; }
       var id = 'c' + Date.now() + Math.random().toString(36).slice(2, 7);
       return new Promise(function (res, rej) {
         pend[id] = { res: res, rej: rej };
@@ -1014,110 +1019,41 @@
     aviso('Fotos de ' + ids.length + ' rotas juntas (' + nf + ' fotos) no card de envio, no topo das Rotas do Dia.');
     setTimeout(function () { var el = $('frxEnvios'); if (el && el.scrollIntoView) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 300);
   }
-  /* 5.1.7 — "Enviar todas as fotos" do card agrupado (e o Enviar Fotos de várias
-     rotas selecionadas) funcionam IGUAL ao botão Enviar Fotos de cada card (r110):
-     o WhatsApp abre NA HORA com o link de cada foto da nuvem, identificada pelo
-     cliente e destino. Fotos que ainda só existem no aparelho são baixadas para
-     anexar. (Antes: preparava as 12 fotos como arquivo, uma por uma, e ficava
-     preso em "Preparando…".) */
-  function baixarArquivo(f) {
-    try { var u = URL.createObjectURL(f), l = document.createElement('a'); l.href = u; l.download = f.name || 'foto.jpg'; document.body.appendChild(l); l.click(); l.remove(); setTimeout(function () { URL.revokeObjectURL(u); }, 4000); } catch (e) {}
-  }
-  function nomeSeguroArq(t) { return String(t || 'foto').replace(/[\\/:*?"<>|]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 60) || 'foto'; }
-  /* 5.1.8 — "Enviar todas as fotos": manda as FOTOS (não links), cada uma com o
-     nome do destino carimbado embaixo, e a legenda com a lista dos destinos:
-        Brasil
-        Japão
-        Ceará
-     As fotos são PREPARADAS ANTES (assim que o card agrupado aparece), para que,
-     no toque, o WhatsApp abra na hora (o navegador só deixa abrir o
-     compartilhamento logo depois do toque). */
-  var PREP = {};
-  function assinaturaGrupo(g) {
-    var refs = [];
-    (g.itens || []).forEach(function (id) { var it = itemPorId(g.data, id); if (it) fotosDoItem(it).forEach(function (r) { refs.push(String(r).slice(-40)); }); });
-    return refs.join('|');
-  }
-  function paresDoGrupo(g) {
-    var pares = [];
-    (g.itens || []).forEach(function (id) {
-      var it = itemPorId(g.data, id); if (!it) return;
-      fotosDoItem(it).forEach(function (ref) {
-        var dest = (W.fastFotoDestino ? W.fastFotoDestino(it, ref, '') : '') || it.destino || 'Destino';
-        pares.push({ ref: ref, destino: dest, item: it });
-      });
-    });
-    return pares;
-  }
-  function legendaDestinos(pares) {
-    try { if (W.fastLegendaLista) return W.fastLegendaLista(pares); } catch (e) {}
-    var out = [];
-    pares.forEach(function (p) { if (out[out.length - 1] !== p.destino) out.push(p.destino); });
-    return out.join('\n');
-  }
-  function rotuloBotao(g) {
-    var c = PREP[g.id || '_'], b = document.querySelector('#frxEnvios [data-env="' + (g.id || '') + '"]');
-    if (!b || b.disabled && !c) return;
-    if (!c || c.pronto) { b.innerHTML = '💬 Enviar todas as fotos'; b.style.opacity = ''; return; }
-    b.innerHTML = '⏳ Preparando ' + c.feitas + '/' + c.total + '…'; b.style.opacity = '.75';
-  }
-  function prepararGrupo(g) {
-    var chave = g.id || '_', sig = assinaturaGrupo(g), c = PREP[chave];
-    if (c && c.sig === sig) return c.prom;
-    var pares = paresDoGrupo(g);
-    c = PREP[chave] = { sig: sig, total: pares.length, feitas: 0, files: [], legenda: legendaDestinos(pares), pronto: false, erros: 0 };
-    rotuloBotao(g);
-    c.prom = (async function () {
-      for (var i = 0; i < pares.length; i++) {
-        if (PREP[chave] !== c) return c;            // o grupo mudou: a preparação nova assume
-        try {
-          var f = W.resolverFotoParaFile ? await comLimite(W.resolverFotoParaFile(pares[i].ref, 'foto_' + (i + 1) + '.jpg'), 30000, null) : null;
-          if (f) {
-            if (W.fastCarimbarDestino) f = await comLimite(W.fastCarimbarDestino(f, pares[i].destino), 12000, f);
-            try { f = new File([f], nomeSeguroArq(pares[i].destino) + ' ' + (i + 1) + '.jpg', { type: f.type || 'image/jpeg' }); } catch (e) {}
-            c.files.push(f);
-          } else c.erros++;
-        } catch (e) { c.erros++; }
-        c.feitas = i + 1; rotuloBotao(g);
-      }
-      c.pronto = true; rotuloBotao(g);
-      return c;
-    })();
-    return c.prom;
-  }
-  W.fastPrepararEnvioGrupo = prepararGrupo;
-  // sem fotos como arquivo: manda os LINKS — também pela gaveta de apps do aparelho
-  function enviarPorLinks(pares) {
-    var linhas = [], n = 0;
-    pares.forEach(function (p) { if (/^https?:\/\//i.test(String(p.ref))) { n++; linhas.push('📷 Foto ' + n + ' — ' + p.destino + ':\n' + p.ref); } });
-    var texto = (linhas.length ? linhas.join('\n\n') + '\n\n' : '') + legendaDestinos(pares);
-    var abrirWhats = function () { W.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(texto), '_blank'); };
-    if (navigator.share) { try { navigator.share({ text: texto }).catch(function (e) { if (!(e && e.name === 'AbortError')) abrirWhats(); }); return; } catch (e) {} }
-    abrirWhats();
-  }
   async function enviarGrupo(g, btn) {
-    var chave = g.id || '_', pares = paresDoGrupo(g);
-    if (!pares.length) { aviso('Essas rotas ainda não têm fotos.', 'warning'); return; }
-    var c = PREP[chave];
-    if (!c || c.sig !== assinaturaGrupo(g)) { prepararGrupo(g); c = PREP[chave]; }
-    var podeArquivos = !!(navigator.share && navigator.canShare);
-    var nativo = !!W.__fastShareNativo;          // app Android: abre o compartilhamento a qualquer momento
-    if (!podeArquivos) { enviarPorLinks(pares); aviso('Este aparelho não envia fotos como arquivo: o WhatsApp abriu com o link de cada foto.'); return; }
-    if (!c.pronto && !nativo) { aviso('Preparando as fotos (' + c.feitas + '/' + c.total + '). Toque de novo em "Enviar todas as fotos" assim que o botão ficar pronto.', 'info'); return; }
-    if (!c.pronto) { if (btn) btn.disabled = true; await c.prom; if (btn) btn.disabled = false; }
-    if (!c.files.length) { enviarPorLinks(pares); aviso('Não foi possível preparar as fotos como arquivo: o WhatsApp abriu com os links.'); return; }
-    var dados = { files: c.files, text: c.legenda };
-    var aceita = true; try { if (navigator.canShare) aceita = navigator.canShare(dados); } catch (e) {}
-    if (!aceita) { try { aceita = navigator.canShare({ files: [c.files[0]] }); } catch (e) { aceita = false; } }
-    if (!aceita) { enviarPorLinks(pares); aviso('Este aparelho não aceita enviar estas fotos como arquivo; abri a lista de apps com os links.'); return; }
+    var html = btn ? btn.innerHTML : '';
+    if (btn) { btn.disabled = true; btn.innerHTML = 'Preparando…'; }
     try {
-      await navigator.share(dados);
-      aviso('As ' + c.files.length + ' fotos foram enviadas juntas, cada uma com o nome do destino.' + (c.erros ? ' (' + c.erros + ' não puderam ser preparadas.)' : ''));
-    } catch (e) {
-      if (e && e.name === 'AbortError') return;
-      enviarPorLinks(pares);
-      aviso('O compartilhamento não abriu (' + ((e && e.message) || e) + '): o WhatsApp abriu com os links das fotos.', 'warning');
-    }
+      var arquivos = [], pares = [], n = 0;
+      for (var a = 0; a < g.itens.length; a++) {
+        var it = itemPorId(g.data, g.itens[a]); if (!it) continue;
+        var refs = fotosDoItem(it);
+        for (var b2 = 0; b2 < refs.length; b2++) {
+          var dest = (W.fastFotoDestino ? W.fastFotoDestino(it, refs[b2], '') : '') || it.destino || 'Destino';
+          var f = W.resolverFotoParaFile ? await W.resolverFotoParaFile(refs[b2], 'foto_' + (n + 1) + '.jpg') : null;
+          if (!f) continue;
+          if (W.fastCarimbarDestino) f = await W.fastCarimbarDestino(f, dest);
+          n++;
+          var nome = String(dest).replace(/[\\/:*?"<>|]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 60) + ' ' + n + '.jpg';
+          try { f = new File([f], nome, { type: f.type || 'image/jpeg' }); } catch (e) {}
+          arquivos.push(f); pares.push({ destino: dest });
+          if (btn) btn.innerHTML = 'Preparando ' + n + '…';
+        }
+      }
+      if (!arquivos.length) { aviso('Essas rotas ainda não têm fotos.', 'warning'); return; }
+      var legenda = W.fastLegendaLista ? W.fastLegendaLista(pares) : pares.map(function (p, i) { return 'Foto ' + (i + 1) + ': ' + p.destino; }).join('\n');
+      var pode = false; try { pode = !!(navigator.share && navigator.canShare && navigator.canShare({ files: arquivos })); } catch (e) {}
+      if (pode) {
+        if (btn) btn.innerHTML = 'Enviando ' + arquivos.length + ' fotos…';
+        try { await navigator.share({ files: arquivos, title: 'Fotos das entregas', text: legenda }); }
+        catch (e) { if (!(e && e.name === 'AbortError')) throw e; return; }
+        aviso('As ' + arquivos.length + ' fotos foram enviadas juntas, com a legenda de cada destino.');
+      } else {
+        arquivos.forEach(function (f2, i) { setTimeout(function () { var u = URL.createObjectURL(f2), l = document.createElement('a'); l.href = u; l.download = f2.name; document.body.appendChild(l); l.click(); l.remove(); setTimeout(function () { URL.revokeObjectURL(u); }, 3000); }, i * 300); });
+        abrirWhats('', legenda);
+        aviso(arquivos.length + ' fotos baixadas com o nome do destino. Anexe no WhatsApp que abriu.');
+      }
+    } catch (e) { aviso('Não foi possível enviar as fotos: ' + ((e && e.message) || e), 'error'); }
+    finally { if (btn) { btn.disabled = false; btn.innerHTML = html; } }
   }
   var assinaturaEnvios = '';
   function desenharEnvios(forcar) {
@@ -1140,7 +1076,6 @@
         '<div class="frx-env-fotos" data-fotos="' + esc(g.id) + '"></div>' +
         '<div class="frx-env-bt"><button type="button" class="frx-btn wa" data-env="' + esc(g.id) + '">💬 Enviar todas as fotos</button><button type="button" class="frx-btn sec" data-desf="' + esc(g.id) + '">Desfazer</button></div></div>';
     }).join('');
-    grupos.forEach(function (g) { try { prepararGrupo(g); rotuloBotao(g); } catch (e) {} });
     grupos.forEach(function (g) {
       var alvo = caixa.querySelector('[data-fotos="' + g.id + '"]'); if (!alvo) return;
       var refs = []; g.itens.forEach(function (x) { var it = itemPorId(data, x); if (it) fotosDoItem(it).forEach(function (r) { if (refs.indexOf(r) < 0) refs.push(r); }); });
@@ -2387,105 +2322,6 @@
   W.addEventListener('load', function () { setTimeout(instalarPgtoRotas, 2000); });
   setInterval(instalarPgtoRotas, 6000);
 
-  /* =====================================================================
-     📲 WHATSAPP (Render) — estado da captura automática de mensagens que
-     descobre cliente, origem e destino novos.
-     ===================================================================== */
-  W.fastWhatsappEstado = function () {
-    var cfg = {}; try { cfg = W.fastWaCfg ? W.fastWaCfg() : {}; } catch (e) {}
-    var temFn = typeof W.fastWaExtrair === 'function';
-    var html = '<div data-cfg></div><div class="frx-row" style="margin:10px 0"><button type="button" class="frx-btn ok" data-testar style="flex:1">🔎 Testar agora</button>' +
-      '<button type="button" class="frx-btn sec" data-config style="flex:1">⚙️ Configurar</button></div><div data-res></div>';
-    var j = janela('📲 WhatsApp · captura automática', html, [{ txt: 'Fechar', cls: 'sec', fn: function (f) { f(); } }]);
-    function cfgHtml() {
-      try { cfg = W.fastWaCfg ? W.fastWaCfg() : {}; } catch (e) {}
-      var ult = cfg.ultimaSync ? dataHoraBR(cfg.ultimaSync) : 'nunca';
-      j.corpo.querySelector('[data-cfg]').innerHTML =
-        '<div class="frx-kpis"><div class="frx-kpi"><small>Serviço</small><b style="font-size:13px;word-break:break-all">' + esc(String(cfg.backend || '—').replace(/^https?:\/\//, '')) + '</b></div>' +
-        '<div class="frx-kpi"><small>Captura automática</small><b>' + (cfg.auto ? '✅ ligada · ' + (cfg.intervalo || 30) + 's' : '⏸️ desligada') + '</b></div>' +
-        '<div class="frx-kpi"><small>Última verificação</small><b style="font-size:14px">' + esc(ult) + '</b></div>' +
-        '<div class="frx-kpi"><small>Mensagens já lidas</small><b>' + ((cfg.vistos || []).length) + '</b></div></div>' +
-        '<p class="frx-muted" style="margin:6px 0 0">O serviço gratuito do Render "dorme" depois de 15 min sem uso; a primeira busca depois disso pode levar até 1 minuto.</p>';
-    }
-    cfgHtml();
-    j.corpo.addEventListener('click', async function (e) {
-      if (e.target.hasAttribute('data-config')) { try { W.fastWhatsappConfigurar(); } catch (er) {} cfgHtml(); return; }
-      if (!e.target.hasAttribute('data-testar')) return;
-      var res = j.corpo.querySelector('[data-res]'), t0 = Date.now(), bt = e.target;
-      bt.disabled = true; res.innerHTML = '<p class="frx-muted">Consultando o serviço… (se ele estava dormindo, pode levar até 1 minuto)</p>';
-      try {
-        var ctl = new AbortController(), to = setTimeout(function () { ctl.abort(); }, 90000);
-        var r = await fetch(String(cfg.backend || '').replace(/\/+$/, '') + '/messages', { headers: { Accept: 'application/json' }, cache: 'no-store', signal: ctl.signal });
-        clearTimeout(to);
-        var seg = ((Date.now() - t0) / 1000).toFixed(1).replace('.', ',');
-        if (!r.ok) { res.innerHTML = '<p style="color:#b91c1c;font-weight:700">⛔ O serviço respondeu com erro HTTP ' + r.status + ' em ' + seg + ' s.</p><p class="frx-muted">' + (r.status === 503 || r.status === 502 ? 'O Render está reiniciando ou fora do ar — confira o painel do Render.' : 'Confira os registros (Logs) do serviço no Render.') + '</p>'; return; }
-        var raw = await r.json();
-        var arr = Array.isArray(raw) ? raw : (Array.isArray(raw.messages) ? raw.messages : (Array.isArray(raw.data) ? raw.data : []));
-        var vistos = new Set(cfg.vistos || []), novas = 0, cand = 0, linhas = [];
-        arr.slice(-200).forEach(function (m) {
-          var id = W.fastWaId ? W.fastWaId(m) : ''; var nova = id && !vistos.has(id); if (nova) novas++;
-          var x = null; try { x = temFn ? W.fastWaExtrair(m) : null; } catch (er) {}
-          if (x && x.score >= 6 && nova) cand++;
-          linhas.push({ m: m, x: x, nova: nova });
-        });
-        var ult = linhas.slice(-8).reverse();
-        res.innerHTML = '<p style="font-weight:800;color:#15803d">✅ Serviço respondeu em ' + seg + ' s · ' + arr.length + ' mensagem(ns) disponíveis · ' + novas + ' ainda não lidas · ' + cand + ' com cliente/destino reconhecido</p>' +
-          (ult.length ? '<h4 style="margin:10px 0 6px">Últimas mensagens</h4>' + ult.map(function (l) {
-            var t = W.fastWaTexto ? W.fastWaTexto(l.m) : '', tel = W.fastWaTelefone ? W.fastWaTelefone(l.m) : '';
-            var x = l.x || {};
-            return '<div style="border:1px solid var(--border,#e2e8f0);border-radius:12px;padding:8px 10px;margin:6px 0">' +
-              '<div class="frx-muted">' + (l.nova ? '🆕 ' : '') + esc(tel || '') + '</div><div style="white-space:pre-wrap;font-size:13px">' + esc(String(t).slice(0, 220)) + '</div>' +
-              ((x.cliente || x.origem || x.destino) ? '<div style="margin-top:4px;font-size:12px"><b>Reconheceu:</b> ' + esc([x.cliente && 'cliente ' + x.cliente, x.origem && 'origem ' + x.origem, x.destino && 'destino ' + x.destino].filter(Boolean).join(' · ')) + ' <span class="frx-muted">(' + ((x.score || 0) >= 6 ? 'vira rota' : 'dados insuficientes') + ')</span></div>' : '<div class="frx-muted" style="font-size:12px">Não reconheceu uma rota nesta mensagem.</div>') + '</div>';
-          }).join('') : '<p class="frx-muted">Nenhuma mensagem no serviço.</p>');
-      } catch (er) {
-        var s2 = ((Date.now() - t0) / 1000).toFixed(0);
-        res.innerHTML = '<p style="color:#b91c1c;font-weight:700">⛔ Não foi possível falar com o serviço (' + esc(er.name === 'AbortError' ? 'sem resposta em ' + s2 + ' s' : (er.message || er)) + ').</p><p class="frx-muted">Pode estar dormindo, suspenso ou sem permissão para o FAST. Abra o painel do Render e confira se o serviço está "Live".</p>';
-      } finally { bt.disabled = false; cfgHtml(); }
-    });
-  };
-
-  /* ---------------- "Falta criar tabela(s)": só quando a tabela falta MESMO ----------------
-     A conferência antiga, feita ao abrir o app, dizia que TODAS as tabelas faltavam
-     se a internet oscilasse ou o login ainda estivesse renovando naquele segundo.
-     Agora, antes de avisar, confere de novo tabela por tabela: só conta como
-     "falta" a resposta do banco dizendo que a tabela não existe. */
-  async function tabelaExiste(t) {
-    try {
-      var r = await fetch(SUPABASE_URL + '/' + t + '?select=id&limit=1', { headers: supabaseHeaders(), cache: 'no-store' });
-      if (r.ok) return true;
-      var tx = ''; try { tx = await r.text(); } catch (e) {}
-      if (r.status === 404 || /PGRST205|42P01|does not exist|Could not find the table/i.test(tx)) return false;
-      return null;   // outro problema (rede, login renovando…): não é tabela faltando
-    } catch (e) { return null; }
-  }
-  function instalarVerificacao() {
-    var f = W.verificarSupabase;
-    if (typeof f !== 'function' || f.__frx) return;
-    var g = async function () {
-      var ok = await f.apply(this, arguments);
-      if (ok) return ok;
-      var lista = [];
-      try { lista = (supabaseTabelasFaltando || []).slice(); } catch (e) {}
-      if (!lista.length) lista = ['rotas', 'despesas', 'destinos', 'dados_empresa'];
-      await new Promise(function (r) { setTimeout(r, 2500); });
-      var faltam = [];
-      for (var i = 0; i < lista.length; i++) { if ((await tabelaExiste(lista[i])) === false) faltam.push(lista[i]); }
-      if (faltam.length) { try { supabaseTabelasFaltando = faltam; } catch (e) {} return false; }
-      try { supabaseTabelasFaltando = []; supabaseDisponivel = true; supabaseVerificado = true; } catch (e) {}
-      try { var D = W.__f68Diag; if (D && /Falta criar/i.test(D.erro || '')) D.erro = ''; } catch (e) {}
-      return true;
-    };
-    g.__frx = true; W.verificarSupabase = g;
-  }
-  instalarVerificacao();
-  // o aviso que já apareceu some sozinho quando as tabelas são encontradas
-  setTimeout(async function () {
-    try {
-      var D = W.__f68Diag; if (!D || !/Falta criar/i.test(D.erro || '')) return;
-      if ((await tabelaExiste('rotas')) !== false) D.erro = '';
-    } catch (e) {}
-  }, 8000);
-
   /* ---------------- FOTO PELA GALERIA: sempre entra no card certo ----------------
      1) O card guarda a POSIÇÃO da rota na lista; se a lista mudou (sincronização)
         e a tela ainda não tinha sido redesenhada, a foto ia para OUTRA rota ou
@@ -2529,84 +2365,32 @@
     }
     if (erros.length) aviso('Não foi possível salvar ' + erros.length + ' foto(s): ' + erros[0], 'error');
   }
-  /* 5.1.7 — FOTO (galeria OU câmera) com o MESMO caminho seguro para todas:
-     - acha a rota pelo card tocado (ou pela posição, na câmera ao vivo);
-     - cada foto vai para a NUVEM (Supabase Storage, link público) e, sem
-       internet, fica no aparelho e sobe sozinha depois;
-     - ao terminar CADA foto, procura a rota de novo pelo código (a sincronização
-       pode ter trocado a lista enquanto a foto subia) e grava nela;
-     - grava e manda para os outros aparelhos na hora. */
-  function acharSeq(id) {
-    var sq = bd().sequencias || {}, achou = null, dia = '';
-    Object.keys(sq).some(function (d) { achou = (sq[d] || []).filter(function (x) { return x && String(x.id) === String(id); })[0]; if (achou) dia = d; return !!achou; });
-    return achou ? { it: achou, data: dia } : null;
-  }
-  function comprimirFoto(file) {
-    if (typeof W.comprimirImagem === 'function') {
-      return W.comprimirImagem(file, 1600, 0.85).catch(function () { return comprimirSimples(file, 1600, 0.85); });
-    }
-    return comprimirSimples(file, 1600, 0.85);
-  }
-  async function guardarUmaFoto(b64, idItem, n) {
-    if (typeof W.fastFotoSubirNuvem === 'function' && navigator.onLine) {
-      try { return await W.fastFotoSubirNuvem(b64, 'rota'); } catch (e) {}
-    }
-    var chave = idItem + '_' + Date.now() + '_' + n;
-    var ok = false; try { ok = await guardarFotoIndexedDB(chave, b64); } catch (e) {}
-    if (!ok) throw new Error('não foi possível guardar a foto no aparelho');
-    try { if (typeof W.fastFotoEnfileirarPendente === 'function') W.fastFotoEnfileirarPendente('idb:' + chave); } catch (e) {}
-    try { var fila = JSON.parse(localStorage.getItem('fast_fotos_pendentes_nuvem') || '[]'); if (fila.indexOf('idb:' + chave) < 0) { fila.push('idb:' + chave); localStorage.setItem('fast_fotos_pendentes_nuvem', JSON.stringify(fila)); } } catch (e) {}
-    return 'idb:' + chave;
-  }
-  function gravarRefNaRota(idItem, ref) {
-    var a = acharSeq(idItem); if (!a) return false;
-    var it = a.it;
-    if (!Array.isArray(it.fotos)) it.fotos = [];
-    if (it.fotos.indexOf(ref) < 0) it.fotos.push(ref);
-    it.foto = it.fotos[0] || ''; it.updatedAt = new Date().toISOString();
-    if (it.rotaId != null) {
-      var r = (bd().rotas || []).filter(function (x) { return x && String(x.id) === String(it.rotaId); })[0];
-      if (r) { if (!Array.isArray(r.fotos)) r.fotos = []; if (r.fotos.indexOf(ref) < 0) r.fotos.push(ref); r.foto = r.fotos[0] || ''; r.updatedAt = it.updatedAt; }
-    }
-    try { W.mudancasPendentes = true; } catch (e) {}
-    try { salvarStorage(); } catch (e) {}
-    W.__frxForcarLista = true; try { renderizarSequencia(); } catch (e) {}
-    return true;
-  }
-  async function processarFotos(idItem, dataSel, files) {
-    var total = files.length, feitas = 0, erros = [];
-    var fb = function (t, tipo) { try { if (typeof W.mostrarFeedbackFoto === 'function') W.mostrarFeedbackFoto(idItem, t, tipo || 'sucesso'); } catch (e) {} };
-    fb('⏳ Enviando ' + total + ' foto(s)…');
-    for (var i = 0; i < files.length; i++) {
-      try {
-        var b64 = await comprimirFoto(files[i]);
-        var ref = await guardarUmaFoto(b64, idItem, i);
-        if (gravarRefNaRota(idItem, ref)) { feitas++; fb('⏳ ' + feitas + '/' + total + ' foto(s) no card' + (/^https?:/.test(ref) ? ' e na nuvem' : ' (sobem à nuvem ao reconectar)') + '…'); }
-        else erros.push('a rota não foi encontrada');
-      } catch (e) { erros.push((e && e.message) || String(e)); }
-    }
-    if (feitas) {
-      fb('✅ ' + feitas + ' foto(s) salva(s) e enviada(s) a todos os aparelhos.');
-      try { if (typeof sincronizarAgora === 'function') setTimeout(function () { try { sincronizarAgora(); } catch (e) {} }, 400); } catch (e) {}
-      // cópia no Google Drive (arquivo da rota), como antes
-      try { var a = acharSeq(idItem); if (a && typeof W.fastDriveEnfileirarArquivos === 'function') W.fastDriveEnfileirarArquivos(files, a.it, a.data || dataSel); } catch (e) {}
-    }
-    if (erros.length) aviso('Não foi possível salvar ' + erros.length + ' foto(s): ' + erros[0], 'error');
-  }
   function instalarFotoGaleria() {
     var f = W.salvarFotoRota;
     if (typeof f !== 'function' || f.__frx) return;
     var g = function (dataSel, index, ev) {
-      var files = [], idItem = '';
+      var alvo = null, files = [];
       try {
-        files = Array.prototype.slice.call((ev && ev.target && ev.target.files) || []).filter(function (x) { return x && (!x.type || /^image\//.test(x.type)); });
+        files = Array.prototype.slice.call((ev && ev.target && ev.target.files) || []);
         var lista = (bd().sequencias || {})[dataSel] || [];
         var card = ev && ev.target && ev.target.closest && ev.target.closest('[data-item-id]');
-        idItem = (card && card.getAttribute('data-item-id')) || (lista[index] ? String(lista[index].id) : '');
+        var idCard = card && card.getAttribute('data-item-id');
+        var pelaCard = idCard ? lista.filter(function (x) { return x && String(x.id) === String(idCard); })[0] : null;
+        if (pelaCard && lista[index] !== pelaCard) index = lista.indexOf(pelaCard);   // posição velha: corrige
+        alvo = pelaCard || lista[index] || null;
       } catch (e) {}
-      if (!files.length || !idItem || !acharSeq(idItem)) return f.apply(this, arguments);   // caso estranho: segue o caminho antigo
-      try { if (ev && ev.target && 'value' in ev.target) ev.target.value = ''; } catch (e) {}
-      processarFotos(idItem, dataSel, files);
+      var antes = alvo ? [].concat(alvo.fotos || []).length : 0, idAlvo = alvo ? String(alvo.id) : '';
+      var r = f.call(this, dataSel, index, ev);
+      if (idAlvo && files.length) {
+        setTimeout(function () {
+          // a sincronização pode ter trocado os objetos: procura a rota de novo pelo código
+          var sq = bd().sequencias || {}, atual = null;
+          Object.keys(sq).some(function (d) { atual = (sq[d] || []).filter(function (x) { return x && String(x.id) === idAlvo; })[0]; return !!atual; });
+          if (!atual || [].concat(atual.fotos || []).length > antes) return;   // entrou normalmente
+          salvarFotoAlternativo(atual, files, dataSel);
+        }, 12000);
+      }
+      return r;
     };
     g.__frx = true; W.salvarFotoRota = g;
   }
