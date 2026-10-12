@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="fast-app-version" content="5.2.5">
+<meta name="fast-app-version" content="5.2.7">
 <meta name="theme-color" content="#16a34a">
 <title>Cliente FAST — Histórico</title>
 <style>
@@ -17,13 +17,15 @@ main{max-width:1100px;margin:auto;padding:16px}.gate{min-height:100vh;display:gr
 </style>
 </head>
 <body>
-<div id="gate" class="gate"><div class="login"><div style="font-size:34px">🟩</div><h1>Cliente FAST</h1><p>Acesse para consultar seu cadastro, histórico de rotas e resumo financeiro.</p><div class="field"><label>E-mail</label><input id="email" type="email" autocomplete="email" placeholder="seuemail@exemplo.com"></div><div class="field"><label>Senha</label><input id="password" type="password" autocomplete="current-password" placeholder="Sua senha"></div><button class="btn primary" id="loginBtn" onclick="login()">Entrar</button><div id="loginErr" class="error"></div>
+<div id="gate" class="gate"><div class="login"><div style="font-size:34px">🟩</div><h1>Cliente FAST</h1><p>Acesse para consultar seu cadastro, histórico de rotas e resumo financeiro.</p><div class="field"><label>E-mail</label><input id="email" type="email" autocomplete="email" placeholder="seuemail@exemplo.com"></div><div class="field"><label>Senha</label><input id="password" type="password" autocomplete="current-password" placeholder="Sua senha"></div><label id="manterBox" style="display:flex;align-items:center;gap:8px;margin:2px 0 12px;font-weight:600;font-size:14px;cursor:pointer"><input type="checkbox" id="manterConectado" checked style="width:18px;height:18px"> Manter conectado neste aparelho</label>
+<button class="btn primary" id="loginBtn" onclick="login()">Entrar</button><div id="loginErr" class="error"></div>
 <div id="cadOk" style="display:none;margin-top:10px;padding:10px;border-radius:12px;background:#dcfce7;color:#166534;font-weight:700;font-size:14px"></div>
 <button type="button" class="btn secondary" id="cadAbrir" style="margin-top:10px" onclick="cliCadAbrir(true)">Não tem conta? Criar minha conta</button>
 <div id="cadBox" style="display:none;text-align:left;margin-top:12px">
 <div class="field"><label>Nome ou empresa *</label><input id="cadNome" autocomplete="name" placeholder="Como aparece nas suas entregas"></div>
 <div class="field"><label>WhatsApp *</label><input id="cadWhats" type="tel" inputmode="tel" autocomplete="tel" placeholder="(85) 99999-9999"></div>
 <div class="field"><label>E-mail *</label><input id="cadEmail" type="email" autocomplete="email" placeholder="seuemail@exemplo.com"></div>
+<div class="field"><label>CEP</label><div style="display:flex;gap:8px;align-items:center"><input id="cadCep" inputmode="numeric" autocomplete="postal-code" maxlength="9" placeholder="00000-000" style="flex:1"><span id="cadCepSt" style="font-size:12px;color:var(--muted);min-width:90px"></span></div></div>
 <div style="display:flex;gap:8px"><div class="field" style="flex:3"><label>Endereço *</label><input id="cadEnd" autocomplete="address-line1" placeholder="Rua, avenida…"></div><div class="field" style="flex:1;min-width:80px"><label>Número</label><input id="cadNum" inputmode="numeric" placeholder="Nº"></div></div>
 <div class="field"><label>Complemento</label><input id="cadComp" placeholder="Sala, bloco, referência"></div>
 <div style="display:flex;gap:8px"><div class="field" style="flex:1"><label>Bairro</label><input id="cadBairro"></div><div class="field" style="flex:1"><label>Cidade/UF</label><input id="cadCidade" placeholder="Fortaleza/CE"></div></div>
@@ -63,12 +65,35 @@ const money=n=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).
 const dateBR=s=>{if(!s)return '—';const p=String(s).slice(0,10).split('-');return p.length===3?p.reverse().join('/'):s};
 async function rest(table,query=''){const r=await fetch(PROJECT+'/rest/v1/'+table+'?'+query,{headers:{apikey:KEY,Authorization:'Bearer '+(session?.access_token||KEY)}});if(!r.ok)throw new Error('Não foi possível consultar os dados.');return r.json()}
 async function auth(path,body){const r=await fetch(PROJECT+'/auth/v1/'+path,{method:'POST',headers:{'Content-Type':'application/json',apikey:KEY},body:JSON.stringify(body)});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.msg||d.message||'Usuário ou senha incorretos.');return d}
-async function login(){const email=$('email').value.trim().toLowerCase(),password=$('password').value;$('loginErr').textContent='';if(!email||!password){$('loginErr').textContent='Informe e-mail e senha.';return}$('loginBtn').disabled=true;try{session=await auth('token?grant_type=password',{email,password});localStorage.setItem('fast_cliente_session',JSON.stringify(session));await iniciar()}catch(e){$('loginErr').textContent=e.message||'Não foi possível entrar.'}finally{$('loginBtn').disabled=false}}
-function logout(){session=null;localStorage.removeItem('fast_cliente_session');location.reload()}
-async function iniciar(){ $('gate').classList.add('hidden');$('app').classList.remove('hidden');try{const user=session.user||{};const email=norm(user.email||'');const meta=user.user_metadata||{};const nomeMeta=norm(meta.fast_user||meta.nome||'');let clientes=[];try{clientes=await rest('clientes','select=id,dados&dados->>email=ilike.'+encodeURIComponent(user.email||'')+'&limit=5')}catch(e){}cliente=clientes.map(x=>({...x,...(x.dados||{})})).find(c=>norm(c.email)===email);if(!cliente){clientes=await rest('clientes','select=id,dados&limit=1000');cliente=clientes.map(x=>({...x,...(x.dados||{})})).find(c=>norm(c.email)===email || (nomeMeta&&norm(c.nome)===nomeMeta));}if(!cliente){await window.cliCadSituacao(user);return}$('clienteNome').textContent=cliente.nome||cliente.razaoSocial||user.email;$('clienteContato').textContent=[cliente.email,cliente.telefone||cliente.whatsapp].filter(Boolean).join(' • ');const CAMPOS='select=id,cliente,origem,destino,data,pagamento,status,statusexecucao,valor,tipovolume,qtdmercadorias,descricao&order=data.desc&limit=5000';let rs=[];try{rs=await rest('rotas',CAMPOS+'&cliente=ilike.'+encodeURIComponent(cliente.nome||''))}catch(e){}if(!rs.length)rs=await rest('rotas',CAMPOS);rotas=rs.filter(r=>norm(r.cliente)===norm(cliente.nome));$('loading').classList.add('hidden');$('content').classList.remove('hidden');render();carregarHoje()}catch(e){$('loading').textContent=e.message||'Não foi possível carregar o histórico.'}}
+async function login(){const email=$('email').value.trim().toLowerCase(),password=$('password').value;$('loginErr').textContent='';if(!email||!password){$('loginErr').textContent='Informe e-mail e senha.';return}$('loginBtn').disabled=true;try{session=await auth('token?grant_type=password',{email,password});cliGuardarSessao(session,$('manterConectado')?$('manterConectado').checked:true);await iniciar()}catch(e){$('loginErr').textContent=e.message||'Não foi possível entrar.'}finally{$('loginBtn').disabled=false}}
+function logout(){session=null;localStorage.removeItem('fast_cliente_session');try{sessionStorage.removeItem('fast_cliente_session')}catch(e){}location.reload()}
+function cliGuardarSessao(s,manter){
+  try{
+    if(s&&s.expires_in&&!s.expires_at)s.expires_at=Math.floor(Date.now()/1000)+Number(s.expires_in);
+    localStorage.setItem('fast_cliente_manter',manter?'1':'0');
+    if(manter){localStorage.setItem('fast_cliente_session',JSON.stringify(s));sessionStorage.removeItem('fast_cliente_session')}
+    else{sessionStorage.setItem('fast_cliente_session',JSON.stringify(s));localStorage.removeItem('fast_cliente_session')}
+  }catch(e){}
+}
+// renova o acesso antes de vencer (o login do Supabase dura 1 hora)
+async function cliRenovar(forcar){
+  try{
+    if(!session||!session.refresh_token)return false;
+    var vence=(session.expires_at||0)*1000;
+    if(!forcar&&vence&&vence-Date.now()>5*60*1000)return true;
+    var novo=await auth('token?grant_type=refresh_token',{refresh_token:session.refresh_token});
+    if(novo&&novo.access_token){session=novo;cliGuardarSessao(novo,localStorage.getItem('fast_cliente_manter')!=='0');return true}
+  }catch(e){}
+  return false;
+}
+setInterval(function(){if(session)cliRenovar(false)},4*60*1000);
+document.addEventListener('visibilitychange',function(){if(!document.hidden&&session)cliRenovar(false)});
+async function iniciar(){ $('gate').classList.add('hidden');$('app').classList.remove('hidden');try{const user=session.user||{};const email=norm(user.email||'');const meta=user.user_metadata||{};const nomeMeta=norm(meta.fast_user||meta.nome||'');let clientes=[];try{clientes=await rest('clientes','select=id,dados&dados->>email=ilike.'+encodeURIComponent(user.email||'')+'&limit=5')}catch(e){}cliente=clientes.map(x=>({...x,...(x.dados||{})})).find(c=>norm(c.email)===email);if(!cliente){clientes=await rest('clientes','select=id,dados&limit=1000');cliente=clientes.map(x=>({...x,...(x.dados||{})})).find(c=>norm(c.email)===email || (nomeMeta&&norm(c.nome)===nomeMeta));}if(!cliente){cliente=await window.cliCadSituacao(user);if(!cliente)return;}$('clienteNome').textContent=cliente.nome||cliente.razaoSocial||user.email;$('clienteContato').textContent=[cliente.email,cliente.telefone||cliente.whatsapp].filter(Boolean).join(' • ');const CAMPOS='select=id,cliente,origem,destino,data,pagamento,status,statusexecucao,valor,tipovolume,qtdmercadorias,descricao,codigo_rastreio&order=data.desc&limit=5000';let rs=[];try{rs=await rest('rotas',CAMPOS+'&cliente=ilike.'+encodeURIComponent(cliente.nome||''))}catch(e){}if(!rs.length)rs=await rest('rotas',CAMPOS);rotas=rs.filter(r=>norm(r.cliente)===norm(cliente.nome));$('loading').classList.add('hidden');$('content').classList.remove('hidden');render();carregarHoje()}catch(e){$('loading').textContent=e.message||'Não foi possível carregar o histórico.'}}
 function render(){let a=rotas.slice();const de=$('de').value,ate=$('ate').value,pag=$('pag').value,exec=$('exec').value;if(de)a=a.filter(r=>String(r.data||'').slice(0,10)>=de);if(ate)a=a.filter(r=>String(r.data||'').slice(0,10)<=ate);if(pag)a=a.filter(r=>String(r.status||'')===pag);if(exec)a=a.filter(r=>String(r.statusexecucao||'')===exec);const total=a.reduce((s,r)=>s+(Number(r.valor)||0),0),pago=a.filter(r=>norm(r.status)==='recebido').reduce((s,r)=>s+(Number(r.valor)||0),0),pend= a.filter(r=>norm(r.status)==='pendente').reduce((s,r)=>s+(Number(r.valor)||0),0);$('sRotas').textContent=a.length;$('sTotal').textContent=money(total);$('sPago').textContent=money(pago);$('sPendente').textContent=money(pend);if(!a.length){$('table').innerHTML='<div class="empty">Nenhuma rota encontrada para os filtros selecionados.</div>';return}let html='<table><thead><tr><th>Data</th><th>Origem</th><th>Destino</th><th>Volumes</th><th>Pagamento</th><th>Execução</th><th>Valor</th></tr></thead><tbody>';a.forEach(r=>{const p=norm(r.status)==='recebido'?'paid':'pending';const e=norm(r.statusexecucao)==='concluida'?'done':'route';html+=`<tr><td>${dateBR(r.data)}</td><td>${esc(r.origem)}</td><td>${esc(r.destino)}${r.codigo_rastreio?`<br><a href="#" onclick="try{fastRastreio&&document.getElementById('rastreioWidget')&&(window.scrollTo({top:0,behavior:'smooth'}),fastRastreio.montar(document.getElementById('rastreioWidget'),{codigo:'${esc(r.codigo_rastreio)}'}))}catch(e){};return false" style="font:800 11px ui-monospace,monospace;color:#0f766e;text-decoration:none">📦 ${esc(r.codigo_rastreio)}</a>`:''}</td><td>${esc(r.qtdmercadorias||0)} ${esc(r.tipovolume||'')}</td><td><span class="badge ${p}">${esc(r.status||'—')}</span></td><td><span class="badge ${e}">${esc(r.statusexecucao||'—')}</span></td><td><strong>${money(r.valor)}</strong></td></tr>`});html+='</tbody></table>';$('table').innerHTML=html}
 function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
-(async()=>{try{const s=JSON.parse(localStorage.getItem('fast_cliente_session')||'null');if(s&&s.access_token){session=s;await iniciar()}}catch(e){localStorage.removeItem('fast_cliente_session')}})();
+(async()=>{try{const s=JSON.parse(localStorage.getItem('fast_cliente_session')||sessionStorage.getItem('fast_cliente_session')||'null');if(s&&s.access_token){session=s;
+  if(!session.expires_at||session.expires_at*1000-Date.now()<5*60*1000){var ok=await cliRenovar(true);if(!ok&&session.expires_at&&session.expires_at*1000<Date.now()){session=null;localStorage.removeItem('fast_cliente_session');return}}
+  await iniciar()}}catch(e){localStorage.removeItem('fast_cliente_session')}})();
 </script>
 
 <style>
@@ -262,7 +287,7 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden&&cliente)c
   function h(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
   window.cliCadAbrir=function(abrir){
     el('cadBox').style.display=abrir?'block':'none'; el('cadAbrir').style.display=abrir?'none':'';
-    ['email','password','loginBtn'].forEach(function(i){var x=el(i);if(!x)return;var f=x.closest('.field');(f||x).style.display=abrir?'none':''});
+    ['email','password','loginBtn','manterBox'].forEach(function(i){var x=el(i);if(!x)return;var f=x.closest('.field');(f||x).style.display=abrir?'none':''});
     el('loginErr').textContent=''; el('cadErr').textContent='';
   };
   function senhaOk(p){return p.length>=8&&/[A-Z]/.test(p)&&/[a-z]/.test(p)&&/[0-9\W_]/.test(p)}
@@ -270,7 +295,7 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden&&cliente)c
   window.cliCadEnviar=async function(){
     var err=el('cadErr'); err.textContent='';
     var d={nome:el('cadNome').value.trim(),whatsapp:soDig(el('cadWhats').value),email:el('cadEmail').value.trim().toLowerCase(),endereco:el('cadEnd').value.trim(),
-      numero:el('cadNum').value.trim(),complemento:el('cadComp').value.trim(),bairro:el('cadBairro').value.trim(),cidade:el('cadCidade').value.trim()};
+      numero:el('cadNum').value.trim(),complemento:el('cadComp').value.trim(),bairro:el('cadBairro').value.trim(),cidade:el('cadCidade').value.trim(),cep:(el('cadCep')||{value:''}).value.replace(/\D/g,'')};
     var s1=el('cadSenha').value,s2=el('cadSenha2').value;
     if(!d.nome||!d.whatsapp||!d.email||!d.endereco){err.textContent='Preencha os campos com *.';return}
     if(d.whatsapp.length<10){err.textContent='Confira o WhatsApp com DDD.';return}
@@ -300,18 +325,42 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden&&cliente)c
     try{var r=await fetch(PROJECT+'/rest/v1/cadastros_clientes?select=*&user_id=eq.'+encodeURIComponent(user.id)+'&limit=1',{headers:cab});if(r.ok){var a=await r.json();reg=a[0]||null}}catch(e){}
     if(!reg){
       try{
-        var body={id:Date.now(),nome:d.nome||d.fast_user||'',whatsapp:d.whatsapp||'',email:user.email||d.email||'',endereco:d.endereco||'',numero:d.numero||'',complemento:d.complemento||'',bairro:d.bairro||'',cidade:d.cidade||''};
+        var body={id:Date.now(),cep:d.cep||'',nome:d.nome||d.fast_user||'',whatsapp:d.whatsapp||'',email:user.email||d.email||'',endereco:d.endereco||'',numero:d.numero||'',complemento:d.complemento||'',bairro:d.bairro||'',cidade:d.cidade||''};
         var r2=await fetch(PROJECT+'/rest/v1/cadastros_clientes',{method:'POST',headers:Object.assign({'Content-Type':'application/json',Prefer:'return=representation'},cab),body:JSON.stringify(body)});
+        if(r2.status===400){ delete body.cep; r2=await fetch(PROJECT+'/rest/v1/cadastros_clientes',{method:'POST',headers:Object.assign({'Content-Type':'application/json',Prefer:'return=representation'},cab),body:JSON.stringify(body)}); }
         if(r2.ok){var b=await r2.json();reg=b[0]||Object.assign({status:'pendente'},body)}
       }catch(e){}
     }
     var st=reg&&reg.status||'pendente';
+    if(st==='aprovado'){   // aprovado: usa os dados do cadastro e segue normalmente
+      return {id:reg.cliente_id||reg.id,nome:reg.nome||d.nome||user.email,email:reg.email||user.email,whatsapp:reg.whatsapp||'',telefone:reg.whatsapp||'',
+        endereco:[reg.endereco,reg.numero].filter(Boolean).join(', ')+(reg.complemento?' - '+reg.complemento:'')};
+    }
     var msg=st==='recusado'?'<b>Seu cadastro não foi aprovado.</b><br>Fale com a FAST pelo WhatsApp para mais informações.':
       (st==='aprovado'?'<b>Seu cadastro foi aprovado!</b><br>Saia e entre de novo para começar a usar.':
       '<b>⏳ Cadastro em análise</b><br>Recebemos seu cadastro'+(reg&&reg.nome?' (<b>'+h(reg.nome)+'</b>)':'')+'. Assim que a FAST aprovar, você poderá pedir entregas e coletas e acompanhar tudo por aqui.');
     load.innerHTML='<div style="text-align:center;padding:24px 12px;line-height:1.5">'+msg+'<br><br><button type="button" class="btn secondary" onclick="location.reload()">Verificar de novo</button></div>';
     load.classList.remove('hidden');
+    return null;
   };
+  // CEP: preenche endereço, bairro e cidade sozinho (ViaCEP)
+  (function(){
+    var c=el('cadCep'); if(!c)return; var ult='';
+    c.addEventListener('input',async function(){
+      var v=c.value.replace(/\D/g,'').slice(0,8); c.value=v.length>5?v.slice(0,5)+'-'+v.slice(5):v;
+      var st=el('cadCepSt'); if(v.length<8){st.textContent='';return}
+      if(v===ult)return; ult=v; st.textContent='Buscando…';
+      try{
+        var r=await fetch('https://viacep.com.br/ws/'+v+'/json/'); var j=await r.json();
+        if(!r.ok||j.erro){st.textContent='CEP não encontrado';return}
+        if(j.logradouro)el('cadEnd').value=j.logradouro;
+        if(j.bairro)el('cadBairro').value=j.bairro;
+        if(j.localidade)el('cadCidade').value=j.localidade+(j.uf?'/'+j.uf:'');
+        if(j.complemento&&!el('cadComp').value)el('cadComp').value=j.complemento;
+        st.textContent='✅ Endereço preenchido'; el('cadNum').focus();
+      }catch(e){st.textContent='Sem conexão — preencha à mão'}
+    });
+  })();
   if(/email-confirmado/.test(location.search+location.hash)){
     setTimeout(function(){var ok=el('cadOk');if(ok){ok.style.display='block';ok.textContent='✅ E-mail confirmado! Agora entre com seu e-mail e senha.'}},300);
   }
@@ -351,6 +400,390 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden&&cliente)c
   document.addEventListener('visibilitychange',function(){ if(!document.hidden){ if(!ws)conectar(); atualizar(); } });
   window.addEventListener('online',function(){ conectar(); atualizar(); });
   setTimeout(conectar,1500);
+})();
+</script>
+
+<style id="cli526-css">
+#cliMenuBtn{margin-left:auto;border:0;background:rgba(255,255,255,.18);color:#fff;border-radius:12px;width:44px;height:44px;font-size:22px;cursor:pointer}
+#cliMenu{position:fixed;top:64px;right:10px;z-index:9990;background:#fff;color:#0f172a;border:1px solid #e2e8f0;border-radius:16px;box-shadow:0 18px 40px rgba(15,23,42,.22);min-width:250px;padding:6px;display:none}
+#cliMenu.on{display:block}#cliMenu button{display:flex;align-items:center;gap:10px;width:100%;border:0;background:none;text-align:left;padding:12px 12px;border-radius:12px;font-size:15px;font-weight:700;color:inherit;cursor:pointer}
+#cliMenu button:active,#cliMenu button:hover{background:#f1f5f9}#cliMenu hr{border:0;border-top:1px solid #e2e8f0;margin:4px 6px}
+.cliSheet{position:fixed;inset:0;z-index:9995;background:rgba(15,23,42,.5);display:none;align-items:flex-end;justify-content:center}.cliSheet.on{display:flex}
+.cliSheet .cx{overflow-x:hidden;box-sizing:border-box;background:#fff;color:#0f172a;width:100%;max-width:640px;max-height:92dvh;overflow:auto;border-radius:20px 20px 0 0;padding:16px 16px calc(18px + env(safe-area-inset-bottom,0px))}
+.cliSheet .hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}.cliSheet .hd b{font-size:18px}.cliSheet .x{border:1px solid #e2e8f0;background:#fff;border-radius:10px;width:40px;height:40px;font-size:18px}
+.cliSheet label.l{display:block;font-size:12px;font-weight:800;color:#475569;margin:10px 0 4px;text-transform:uppercase}
+.cliSheet input[type=text],.cliSheet input[type=email],.cliSheet input[type=tel],.cliSheet input[type=password],.cliSheet input[type=date],.cliSheet select{width:100%;box-sizing:border-box;padding:11px 12px;border:1px solid #cbd5e1;border-radius:12px;font-size:16px;background:#fff;color:#0f172a}
+.cliBtn{width:100%;min-height:46px;border:0;border-radius:12px;background:#0f766e;color:#fff;font-weight:800;font-size:16px;margin-top:12px;cursor:pointer}.cliBtn.sec{background:#f1f5f9;color:#0f172a}.cliBtn.red{background:#fee2e2;color:#b91c1c}
+.cliMsg{margin-top:10px;font-weight:700}.cliCard{border:1px solid #e2e8f0;border-radius:14px;padding:11px 12px;margin:8px 0;cursor:pointer}.cliCard:active{background:#f8fafc}
+.cliCod{display:inline-block;font:800 12px ui-monospace,monospace;color:#0f766e;background:#ccfbf1;border-radius:999px;padding:3px 8px}.cliMut{color:#64748b;font-size:13px}
+.cliFotos{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px}.cliFotos img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;cursor:pointer;background:#f1f5f9}
+.cliSw{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 2px;border-bottom:1px solid #f1f5f9;font-weight:600}.cliSw input{width:22px;height:22px}
+#cliZoom{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center}#cliZoom.on{display:flex}#cliZoom img{max-width:96vw;max-height:90vh;border-radius:8px}
+html.cli-t2{font-size:112%}html.cli-t3{font-size:125%}html.cli-t2 body{zoom:1.08}html.cli-t3 body{zoom:1.18}
+html.cli-escuro{filter:invert(.92) hue-rotate(180deg);background:#111}html.cli-escuro img,html.cli-escuro video,html.cli-escuro .leaflet-container{filter:invert(1) hue-rotate(180deg)}
+</style>
+<div id="cliMenu" role="menu"></div>
+<div id="cliZoom" onclick="this.classList.remove('on')"><img alt="Foto"></div>
+<script id="cli526-menu">
+/* 5.2.6 — MENU DO CLIENTE (igual ao do FAST): Início, Dados pessoais, Segurança,
+   Histórico (com busca e fotos do motorista), Tabela de preços, Notificações,
+   Aparência, Atendimento e Sair. Inclui troca de senha por e-mail. */
+(function(){
+  var RECUPERAR_URL='https://adaiascearataiana-gif.github.io/fastservicosapp/app-cliente/?nova-senha=1';
+  function el(id){return document.getElementById(id)}
+  function h(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+  function p2(n){return(n<10?'0':'')+n}
+  function quando(v){var d=new Date(v);return isNaN(d)?'':d.toLocaleDateString('pt-BR')+' às '+p2(d.getHours())+':'+p2(d.getMinutes())}
+  function dbr(v){var t=String(v||'');var m=t.match(/^(\d{4})-(\d{2})-(\d{2})/);return m?m[3]+'/'+m[2]+'/'+m[1]:t}
+  function brl(v){return 'R$ '+(Number(v)||0).toFixed(2).replace('.',',').replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+  function n(v){return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase()}
+  function tok(){try{return session&&session.access_token}catch(e){return ''}}
+  function cab(x){return Object.assign({apikey:KEY,Authorization:'Bearer '+(tok()||KEY)},x||{})}
+  function get(path){return fetch(PROJECT+'/rest/v1/'+path,{headers:cab(),cache:'no-store'}).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json()})}
+  function pref(k,d){try{var v=localStorage.getItem('cli526_'+k);return v===null?d:JSON.parse(v)}catch(e){return d}}
+  function setPref(k,v){try{localStorage.setItem('cli526_'+k,JSON.stringify(v))}catch(e){}}
+  // ---------- aparência (aplica já) ----------
+  function aplicarAparencia(){var r=document.documentElement;r.classList.remove('cli-t2','cli-t3');var t=pref('texto',1);if(t===2)r.classList.add('cli-t2');if(t===3)r.classList.add('cli-t3');r.classList.toggle('cli-escuro',pref('tema','claro')==='escuro')}
+  aplicarAparencia();
+  // ---------- botão ☰ e menu ----------
+  var head=document.querySelector('header .head');
+  if(head&&!el('cliMenuBtn')){var b=document.createElement('button');b.id='cliMenuBtn';b.type='button';b.setAttribute('aria-label','Menu');b.textContent='☰';head.appendChild(b);b.onclick=function(e){e.stopPropagation();el('cliMenu').classList.toggle('on')}}
+  var itens=[['inicio','🏠 Início'],['dados','👤 Dados pessoais'],['seguranca','🔒 Segurança'],['historico','🧾 Histórico de rotas'],['precos','💲 Tabela de preços'],['notificacoes','🔔 Notificações'],['aparencia','🎨 Aparência'],['sobre','ℹ️ Atendimento e sobre'],['-'],['sair','↪ Sair']];
+  el('cliMenu').innerHTML=itens.map(function(i){return i[0]==='-'?'<hr>':'<button type="button" data-m="'+i[0]+'">'+i[1]+(i[0]==='notificacoes'?' <span id="cliNotN" style="margin-left:auto;background:#ef4444;color:#fff;border-radius:999px;padding:1px 7px;font-size:12px;display:none"></span>':'')+'</button>'}).join('');
+  document.addEventListener('click',function(e){var m=el('cliMenu');if(m.classList.contains('on')&&!m.contains(e.target)&&e.target.id!=='cliMenuBtn')m.classList.remove('on')});
+  el('cliMenu').addEventListener('click',function(e){var b=e.target.closest('[data-m]');if(!b)return;el('cliMenu').classList.remove('on');abrir(b.getAttribute('data-m'))});
+  function folha(id,titulo,html){
+    var f=el('cliF_'+id);
+    if(!f){f=document.createElement('div');f.className='cliSheet';f.id='cliF_'+id;f.addEventListener('click',function(e){if(e.target===f)f.classList.remove('on')});document.body.appendChild(f)}
+    f.innerHTML='<div class="cx"><div class="hd"><b>'+titulo+'</b><button type="button" class="x" onclick="this.closest(\'.cliSheet\').classList.remove(\'on\')">✕</button></div>'+html+'</div>';
+    f.classList.add('on');return f;
+  }
+  function abrir(q){
+    if(q==='inicio'){window.scrollTo({top:0,behavior:'smooth'});return}
+    if(q==='sair'){if(confirm('Sair da sua conta neste aparelho?'))logout();return}
+    ({dados:dados,seguranca:seguranca,historico:historico,precos:precos,notificacoes:notificacoes,aparencia:aparencia,sobre:sobre})[q]();
+  }
+  window.cliAbrirMenu=abrir;
+  // ---------- 👤 DADOS PESSOAIS ----------
+  async function meuCadastro(){try{var u=session&&session.user;if(!u)return null;var a=await get('cadastros_clientes?select=*&user_id=eq.'+encodeURIComponent(u.id)+'&limit=1');return a[0]||null}catch(e){return null}}
+  async function dados(){
+    var c=(typeof cliente!=='undefined'&&cliente)||{}, reg=await meuCadastro(), d=Object.assign({},c,reg||{});
+    var f=folha('dados','👤 Dados pessoais',
+      (reg&&reg.status==='alteracao'?'<div class="cliMsg" style="color:#b45309;margin:0 0 6px">⏳ Você já enviou uma alteração — aguardando aprovação da FAST.</div>':'')+
+      '<label class="l">Nome ou empresa</label><input type="text" id="cdNome" value="'+h(d.nome||'')+'">'+
+      '<label class="l">WhatsApp</label><input type="tel" id="cdWhats" value="'+h(d.whatsapp||d.telefone||'')+'">'+
+      '<label class="l">E-mail</label><input type="email" id="cdEmail" value="'+h((session.user&&session.user.email)||d.email||'')+'" disabled>'+
+      '<label class="l">CEP</label><div style="display:flex;gap:8px;align-items:center"><input type="text" id="cdCep" inputmode="numeric" maxlength="9" value="'+h(d.cep||'')+'"><span id="cdCepSt" class="cliMut" style="min-width:110px"></span></div>'+
+      '<div style="display:flex;gap:8px"><div style="flex:3"><label class="l">Endereço</label><input type="text" id="cdEnd" value="'+h(reg?reg.endereco:(d.logradouro||d.endereco||''))+'"></div><div style="flex:1;min-width:80px"><label class="l">Número</label><input type="text" id="cdNum" value="'+h(d.numero||'')+'"></div></div>'+
+      '<label class="l">Complemento</label><input type="text" id="cdComp" value="'+h(d.complemento||'')+'">'+
+      '<div style="display:flex;gap:8px"><div style="flex:1"><label class="l">Bairro</label><input type="text" id="cdBairro" value="'+h(d.bairro||'')+'"></div><div style="flex:1"><label class="l">Cidade/UF</label><input type="text" id="cdCidade" value="'+h(d.cidade||d.cidadeUf||'')+'"></div></div>'+
+      '<button type="button" class="cliBtn" id="cdSalvar">Enviar alteração</button><div class="cliMut" style="margin-top:6px">As mudanças passam pela aprovação da FAST antes de valer.</div><div class="cliMsg" id="cdMsg"></div>');
+    var cep=f.querySelector('#cdCep');
+    cep.addEventListener('input',async function(){var v=cep.value.replace(/\D/g,'').slice(0,8);cep.value=v.length>5?v.slice(0,5)+'-'+v.slice(5):v;if(v.length<8)return;var st=el('cdCepSt');st.textContent='Buscando…';
+      try{var r=await fetch('https://viacep.com.br/ws/'+v+'/json/');var j=await r.json();if(j.erro){st.textContent='CEP não encontrado';return}
+        if(j.logradouro)el('cdEnd').value=j.logradouro;if(j.bairro)el('cdBairro').value=j.bairro;if(j.localidade)el('cdCidade').value=j.localidade+(j.uf?'/'+j.uf:'');st.textContent='✅ Preenchido';el('cdNum').focus()}catch(e){st.textContent='Sem conexão'}});
+    el('cdSalvar').onclick=async function(){
+      var bt=this,msg=el('cdMsg');bt.disabled=true;msg.textContent='Enviando…';msg.style.color='#475569';
+      var corpo={nome:el('cdNome').value.trim(),whatsapp:el('cdWhats').value.replace(/\D/g,''),email:(session.user&&session.user.email)||'',cep:el('cdCep').value.replace(/\D/g,''),
+        endereco:el('cdEnd').value.trim(),numero:el('cdNum').value.trim(),complemento:el('cdComp').value.trim(),bairro:el('cdBairro').value.trim(),cidade:el('cdCidade').value.trim(),
+        status:'alteracao',atualizado_em:new Date().toISOString()};
+      try{
+        var r;
+        if(reg) r=await fetch(PROJECT+'/rest/v1/cadastros_clientes?id=eq.'+encodeURIComponent(reg.id),{method:'PATCH',headers:cab({'Content-Type':'application/json',Prefer:'return=minimal'}),body:JSON.stringify(corpo)});
+        else { corpo.id=Date.now(); corpo.cliente_id=c.id||null; r=await fetch(PROJECT+'/rest/v1/cadastros_clientes',{method:'POST',headers:cab({'Content-Type':'application/json',Prefer:'return=minimal'}),body:JSON.stringify(corpo)}); }
+        if(r.status===400){delete corpo.cep; r=reg?await fetch(PROJECT+'/rest/v1/cadastros_clientes?id=eq.'+encodeURIComponent(reg.id),{method:'PATCH',headers:cab({'Content-Type':'application/json',Prefer:'return=minimal'}),body:JSON.stringify(corpo)}):await fetch(PROJECT+'/rest/v1/cadastros_clientes',{method:'POST',headers:cab({'Content-Type':'application/json',Prefer:'return=minimal'}),body:JSON.stringify(corpo)})}
+        if(!r.ok)throw new Error('HTTP '+r.status);
+        msg.style.color='#15803d';msg.textContent='✅ Alteração enviada. A FAST vai conferir e aprovar.';
+      }catch(e){msg.style.color='#b91c1c';msg.textContent='Não foi possível enviar agora ('+(e.message||e)+').'}
+      finally{bt.disabled=false}
+    };
+  }
+  // ---------- 🔒 SEGURANÇA ----------
+  async function recuperar(email){
+    var r=await fetch(PROJECT+'/auth/v1/recover?redirect_to='+encodeURIComponent(RECUPERAR_URL),{method:'POST',headers:{'Content-Type':'application/json',apikey:KEY},body:JSON.stringify({email:email})});
+    if(!r.ok){var j=await r.json().catch(function(){return{}});throw new Error(j.msg||j.message||('HTTP '+r.status))}
+  }
+  window.cliRecuperarSenha=recuperar;
+  function seguranca(){
+    var email=(session&&session.user&&session.user.email)||'';
+    var manter=localStorage.getItem('fast_cliente_manter')!=='0';
+    var f=folha('seguranca','🔒 Segurança',
+      '<div style="font-weight:800;margin:4px 0 6px">Trocar senha</div><div class="cliMut">Enviaremos um link para <b>'+h(email)+'</b>. Toque no link e crie a nova senha.</div>'+
+      '<button type="button" class="cliBtn" id="sgSenha">Enviar link para trocar a senha</button><div class="cliMsg" id="sgMsg"></div>'+
+      '<div style="font-weight:800;margin:18px 0 4px">Acesso neste aparelho</div>'+
+      '<label class="cliSw">Manter conectado <input type="checkbox" id="sgManter" '+(manter?'checked':'')+'></label>'+
+      '<button type="button" class="cliBtn red" id="sgTodos">Sair de todos os aparelhos</button>');
+    el('sgSenha').onclick=async function(){var m=el('sgMsg'),b=this;b.disabled=true;m.style.color='#475569';m.textContent='Enviando…';
+      try{await recuperar(email);m.style.color='#15803d';m.textContent='✅ Link enviado para '+email+'. Abra o e-mail neste celular e toque no link.'}catch(e){m.style.color='#b91c1c';m.textContent='Não deu para enviar: '+(e.message||e)}finally{b.disabled=false}};
+    el('sgManter').onchange=function(){try{cliGuardarSessao(session,this.checked)}catch(e){}};
+    el('sgTodos').onclick=async function(){if(!confirm('Sair desta conta em todos os aparelhos?'))return;try{await fetch(PROJECT+'/auth/v1/logout?scope=global',{method:'POST',headers:cab()})}catch(e){}logout()};
+  }
+  // volta do link do e-mail: criar a nova senha
+  (function(){
+    var hs=new URLSearchParams(String(location.hash||'').replace(/^#/,''));
+    if(hs.get('type')!=='recovery'||!hs.get('access_token'))return;
+    var at=hs.get('access_token');
+    var f=folha('novasenha','🔒 Criar nova senha',
+      '<label class="l">Nova senha</label><input type="password" id="nsA" autocomplete="new-password"><label class="l">Repita a nova senha</label><input type="password" id="nsB" autocomplete="new-password">'+
+      '<div class="cliMut" style="margin-top:6px">8 caracteres, letra maiúscula, letra minúscula e número ou símbolo.</div><button type="button" class="cliBtn" id="nsOk">Salvar nova senha</button><div class="cliMsg" id="nsMsg"></div>');
+    el('nsOk').onclick=async function(){
+      var a=el('nsA').value,b=el('nsB').value,m=el('nsMsg');m.style.color='#b91c1c';
+      if(!(a.length>=8&&/[A-Z]/.test(a)&&/[a-z]/.test(a)&&/[0-9\W_]/.test(a))){m.textContent='A senha não atende às regras.';return}
+      if(a!==b){m.textContent='As duas senhas não são iguais.';return}
+      try{var r=await fetch(PROJECT+'/auth/v1/user',{method:'PUT',headers:{'Content-Type':'application/json',apikey:KEY,Authorization:'Bearer '+at},body:JSON.stringify({password:a})});
+        if(!r.ok){var j=await r.json().catch(function(){return{}});throw new Error(j.msg||j.message||('HTTP '+r.status))}
+        try{history.replaceState(null,'',location.pathname)}catch(e){}
+        m.style.color='#15803d';m.textContent='✅ Senha alterada! Agora entre com a nova senha.';setTimeout(function(){f.classList.remove('on')},2200);
+      }catch(e){m.textContent='Não foi possível salvar: '+(e.message||e)+'. Peça um link novo.'}
+    };
+  })();
+  // "Esqueci minha senha" na tela de entrada
+  (function(){
+    var lb=el('loginBtn'); if(!lb||el('cliEsqueci'))return;
+    var a=document.createElement('button');a.type='button';a.id='cliEsqueci';a.className='btn secondary';a.style.marginTop='8px';a.textContent='Esqueci minha senha';
+    lb.parentNode.insertBefore(a,lb.nextSibling);
+    a.onclick=async function(){var e=(el('email').value||'').trim().toLowerCase(),err=el('loginErr');
+      if(!e){err.textContent='Digite seu e-mail acima e toque de novo em "Esqueci minha senha".';return}
+      try{await recuperar(e);err.style.color='#15803d';err.textContent='✅ Enviamos um link para '+e+'. Toque nele para criar a nova senha.'}catch(x){err.style.color='';err.textContent='Não deu para enviar: '+(x.message||x)}};
+  })();
+  // ---------- 🧾 HISTÓRICO ----------
+  function historico(){
+    var lista=(typeof rotas!=='undefined'&&rotas)||[];
+    var f=folha('historico','🧾 Histórico de rotas',
+      '<input type="text" id="hsQ" placeholder="Buscar destino, origem ou código">'+
+      '<div style="display:flex;gap:8px;margin-top:8px"><input type="date" id="hsDe" title="De"><input type="date" id="hsAte" title="Até"></div>'+
+      '<div style="display:flex;gap:8px;margin-top:8px"><select id="hsPg"><option value="">Pagamento: todos</option><option value="pago">Pagos</option><option value="pend">Pendentes</option></select><select id="hsSt"><option value="">Situação: todas</option><option value="ent">Entregues</option><option value="and">Em andamento</option></select></div>'+
+      '<div class="cliMut" id="hsN" style="margin:10px 0 2px"></div><div id="hsL"></div>');
+    function pago(r){return /pago|quitad|recebid/i.test(String(r.status||''))}
+    function entregue(r){return /conclu|entreg|finaliz/i.test(String(r.statusexecucao||r.status_execucao||''))}
+    function desenhar(){
+      var q=n(el('hsQ').value),de=el('hsDe').value,ate=el('hsAte').value,pg=el('hsPg').value,st=el('hsSt').value,tot=0;
+      var x=lista.filter(function(r){
+        if(de&&String(r.data)<de)return false; if(ate&&String(r.data)>ate)return false;
+        if(pg==='pago'&&!pago(r))return false; if(pg==='pend'&&pago(r))return false;
+        if(st==='ent'&&!entregue(r))return false; if(st==='and'&&entregue(r))return false;
+        if(q&&n([r.destino,r.origem,r.codigo_rastreio,r.descricao].join(' ')).indexOf(q)<0)return false; return true;
+      });
+      x.forEach(function(r){tot+=Number(r.valor)||0});
+      el('hsN').textContent=x.length+' rota(s) · '+brl(tot);
+      el('hsL').innerHTML=x.slice(0,300).map(function(r){return '<div class="cliCard" data-id="'+h(r.id)+'"><div style="display:flex;justify-content:space-between;gap:6px;flex-wrap:wrap"><b>'+h(r.destino||'—')+'</b><span class="cliMut">'+dbr(r.data)+'</span></div>'+
+        '<div class="cliMut">'+h(r.origem||'')+(r.qtdmercadorias?' · '+r.qtdmercadorias+' volume(s)':'')+' · '+brl(r.valor)+' · '+(pago(r)?'✅ pago':'⏳ a pagar')+'</div>'+
+        (r.codigo_rastreio?'<span class="cliCod">📦 '+h(r.codigo_rastreio)+'</span>':'')+'</div>'}).join('')||'<p class="cliMut">Nenhuma rota encontrada.</p>';
+    }
+    ['hsQ','hsDe','hsAte','hsPg','hsSt'].forEach(function(i){el(i).addEventListener('input',desenhar);el(i).addEventListener('change',desenhar)});
+    el('hsL').addEventListener('click',function(e){var c=e.target.closest('[data-id]');if(c)detalhe(c.getAttribute('data-id'))});
+    desenhar();
+  }
+  async function detalhe(id){
+    var r=((typeof rotas!=='undefined'&&rotas)||[]).filter(function(x){return String(x.id)===String(id)})[0]||{};
+    var f=folha('detalhe','🚚 Rota de '+dbr(r.data),'<p class="cliMut">Carregando…</p>');
+    var full=r,seq=[];
+    try{var a=await get('rotas?select=*&id=eq.'+encodeURIComponent(id)+'&limit=1');if(a[0])full=Object.assign({},r,a[0])}catch(e){}
+    try{seq=await get('sequencias_itens?select=*&rota_id=eq.'+encodeURIComponent(id))}catch(e){}
+    var fotos=[];
+    function junta(v){try{var arr=typeof v==='string'?JSON.parse(v):v;(Array.isArray(arr)?arr:[]).forEach(function(u){if(typeof u==='string'&&/^https?:\/\//.test(u)&&fotos.indexOf(u)<0)fotos.push(u)})}catch(e){if(typeof v==='string'&&/^https?:/.test(v))fotos.push(v)}}
+    junta(full.fotos);junta(full.foto);seq.forEach(function(s){junta(s.fotos);junta(s.foto)});
+    var s0=seq[0]||{};
+    var linhas=[['Data',dbr(full.data)],['Origem',full.origem],['Destino',full.destino],['Volumes',full.qtdmercadorias],['Valor',brl(full.valor)],['Pagamento',[full.pagamento,full.status].filter(Boolean).join(' · ')],
+      ['Situação',full.statusexecucao||s0.status],['Motorista',s0.motorista],['Chegou',s0.chegada_em?quando(s0.chegada_em):''],['Entregue',s0.data_conclusao?quando(s0.data_conclusao):''],['Pedido feito',full.solicitado_em?quando(full.solicitado_em):''],['Observação',full.descricao]]
+      .filter(function(l){return l[1]!==undefined&&l[1]!==null&&String(l[1]).trim()!==''});
+    f.querySelector('.cx').innerHTML='<div class="hd"><b>🚚 Rota de '+dbr(full.data)+'</b><button type="button" class="x" onclick="this.closest(\'.cliSheet\').classList.remove(\'on\')">✕</button></div>'+
+      (full.codigo_rastreio?'<div style="margin-bottom:8px"><span class="cliCod">📦 '+h(full.codigo_rastreio)+'</span> <a href="#" id="dtRast" style="font-weight:800;margin-left:6px">Rastrear ›</a></div>':'')+
+      '<table style="width:100%;border-collapse:collapse;font-size:14px">'+linhas.map(function(l){return '<tr><td style="padding:7px 6px;color:#64748b;white-space:nowrap;vertical-align:top;width:1%">'+h(l[0])+'</td><td style="padding:7px 6px;font-weight:600;word-break:break-word;overflow-wrap:anywhere">'+h(l[1])+'</td></tr>'}).join('')+'</table>'+
+      '<div style="font-weight:800;margin-top:12px">📷 Fotos da entrega</div>'+(fotos.length?'<div class="cliFotos">'+fotos.map(function(u){return '<img loading="lazy" src="'+h(u)+'" alt="Foto da entrega">'}).join('')+'</div>':'<p class="cliMut">O motorista ainda não enviou fotos desta rota.</p>');
+    f.querySelectorAll('.cliFotos img').forEach(function(im){im.onclick=function(){var z=el('cliZoom');z.querySelector('img').src=im.src;z.classList.add('on')}});
+    var rl=el('dtRast');if(rl)rl.onclick=function(e){e.preventDefault();f.classList.remove('on');document.querySelectorAll('.cliSheet.on').forEach(function(x){x.classList.remove('on')});var w=el('rastreioWidget'),inp=w&&w.querySelector('input');if(inp){inp.value=full.codigo_rastreio;var b=w.querySelector('button');if(b)b.click();el('rastreioBox').scrollIntoView({behavior:'smooth'})}};
+  }
+  // ---------- 💲 TABELA DE PREÇOS ----------
+  async function precos(){
+    var f=folha('precos','💲 Tabela de preços','<input type="text" id="prQ" placeholder="Digite o destino (bairro, cidade, empresa…)"><div class="cliMut" style="margin:8px 0">Valores de referência por entrega. O valor final é confirmado pela FAST.</div><div id="prL"><p class="cliMut">Carregando…</p></div>');
+    var t=[];try{t=await get('precos_publicos?select=destino,valor&order=destino.asc&limit=2000')}catch(e){}
+    function desenhar(){var q=n(el('prQ').value);var x=t.filter(function(p){return !q||n(p.destino).indexOf(q)>=0});
+      el('prL').innerHTML=x.length?'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:15px"><thead><tr><th style="text-align:left;padding:8px;border-bottom:1px solid #e2e8f0">Destino</th><th style="text-align:right;padding:8px;border-bottom:1px solid #e2e8f0">Valor</th><th></th></tr></thead><tbody>'+
+        x.slice(0,400).map(function(p){return '<tr><td style="padding:8px;border-bottom:1px solid #f1f5f9;white-space:nowrap">'+h(p.destino)+'</td><td style="padding:8px;border-bottom:1px solid #f1f5f9;text-align:right;font-weight:800">'+brl(p.valor)+'</td><td style="padding:4px;border-bottom:1px solid #f1f5f9"><button type="button" data-d="'+h(p.destino)+'" style="border:0;background:#ccfbf1;color:#0f766e;font-weight:800;border-radius:10px;padding:7px 10px">Pedir</button></td></tr>'}).join('')+'</tbody></table></div>'
+        :(t.length?'<p class="cliMut">Nenhum destino encontrado. Faça o pedido mesmo assim — a FAST informa o valor.</p>':'<p class="cliMut">A tabela de preços ainda não está disponível.</p>')}
+    el('prQ').addEventListener('input',desenhar);desenhar();
+    el('prL').addEventListener('click',function(e){var b=e.target.closest('[data-d]');if(!b)return;f.classList.remove('on');var d=el('pedDestino');if(d){d.value=b.getAttribute('data-d');el('pedidoBox').scrollIntoView({behavior:'smooth'});d.focus()}});
+  }
+  // ---------- 🔔 NOTIFICAÇÕES ----------
+  var TIPOS=[['confirmado','Pedido confirmado pela FAST'],['caminho','Motorista a caminho'],['chegou','Motorista chegou ao destino'],['entregue','Entrega concluída'],['foto','Foto do comprovante enviada']];
+  function avisosLista(){return pref('avisos',[])}
+  function contarNaoLidas(){var n0=avisosLista().filter(function(a){return !a.lido}).length,b=el('cliNotN');if(b){b.textContent=n0;b.style.display=n0?'inline-block':'none'}}
+  function notificar(tipo,texto){
+    if(pref('n_'+tipo,true)===false)return;
+    var l=avisosLista();l.unshift({t:Date.now(),texto:texto,lido:false});setPref('avisos',l.slice(0,60));contarNaoLidas();
+    try{if(pref('som',true)){var ctx=new (window.AudioContext||window.webkitAudioContext)(),o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.frequency.value=880;g.gain.value=.08;o.start();o.stop(ctx.currentTime+.18)}}catch(e){}
+    try{if(pref('celular',false)&&'Notification' in window&&Notification.permission==='granted')new Notification('Cliente FAST',{body:texto})}catch(e){}
+    try{var d=document.createElement('div');d.textContent='🔔 '+texto;d.style.cssText='position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#0f172a;color:#fff;padding:12px 16px;border-radius:14px;z-index:9999;font-weight:700;max-width:90vw;box-shadow:0 10px 30px rgba(0,0,0,.3)';document.body.appendChild(d);setTimeout(function(){d.remove()},5000)}catch(e){}
+  }
+  function notificacoes(){
+    var l=avisosLista();
+    var f=folha('notificacoes','🔔 Notificações',
+      '<div style="font-weight:800;margin-bottom:4px">Quero ser avisado quando:</div>'+TIPOS.map(function(t){return '<label class="cliSw">'+t[1]+' <input type="checkbox" data-n="'+t[0]+'" '+(pref('n_'+t[0],true)?'checked':'')+'></label>'}).join('')+
+      '<label class="cliSw">🔊 Som <input type="checkbox" id="ntSom" '+(pref('som',true)?'checked':'')+'></label>'+
+      '<label class="cliSw">📱 Aviso no celular (mesmo fora do app aberto) <input type="checkbox" id="ntCel" '+(pref('celular',false)?'checked':'')+'></label>'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin:16px 0 4px"><b>Avisos recebidos</b><button type="button" id="ntLimpa" style="border:0;background:none;color:#b91c1c;font-weight:800">Limpar</button></div>'+
+      (l.length?l.map(function(a){return '<div class="cliCard" style="cursor:default">'+h(a.texto)+'<div class="cliMut">'+quando(a.t)+'</div></div>'}).join(''):'<p class="cliMut">Nenhum aviso ainda.</p>'));
+    f.querySelectorAll('[data-n]').forEach(function(c){c.onchange=function(){setPref('n_'+c.getAttribute('data-n'),c.checked)}});
+    el('ntSom').onchange=function(){setPref('som',this.checked)};
+    el('ntCel').onchange=async function(){var c=this;if(c.checked&&'Notification' in window&&Notification.permission!=='granted'){var p=await Notification.requestPermission();if(p!=='granted'){c.checked=false;alert('Permita as notificações do Cliente FAST nas configurações do celular.')}}setPref('celular',c.checked)};
+    el('ntLimpa').onclick=function(){setPref('avisos',[]);contarNaoLidas();notificacoes()};
+    setPref('avisos',l.map(function(a){a.lido=true;return a}));contarNaoLidas();
+  }
+  // acompanha pedidos e entregas para avisar
+  var antes=pref('estado',{});
+  async function verificar(){
+    if(!tok()||document.hidden)return;
+    var agora={};
+    try{(await get('solicitacoes?select=id,status,destino&order=criado_em.desc&limit=30')).forEach(function(p){agora['p'+p.id]=p.status;if(antes['p'+p.id]==='pendente'&&p.status==='aceita')notificar('confirmado','Seu pedido para '+(p.destino||'o destino')+' foi confirmado.')})}catch(e){}
+    try{
+      var nome=(typeof cliente!=='undefined'&&cliente&&cliente.nome)||''; if(nome){
+        var d=new Date(),hoje=d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate());
+        (await get('sequencias_itens?select=id,destino,status,chegada_em,data_conclusao,motorista,fotos&cliente=ilike.'+encodeURIComponent(nome)+'&data_seq=eq.'+hoje)).forEach(function(s){
+          var nf=0;try{var a=typeof s.fotos==='string'?JSON.parse(s.fotos):s.fotos;nf=Array.isArray(a)?a.length:0}catch(e){}
+          var k='s'+s.id, est=[s.motorista?1:0,s.chegada_em?1:0,s.data_conclusao?1:0,nf].join('|'), v=antes[k];agora[k]=est;
+          if(v===undefined)return; var o=v.split('|'),q=est.split('|');
+          if(o[0]==='0'&&q[0]==='1')notificar('caminho','Motorista a caminho de '+(s.destino||'o destino')+'.');
+          if(o[1]==='0'&&q[1]==='1')notificar('chegou','O motorista chegou em '+(s.destino||'o destino')+'.');
+          if(o[2]==='0'&&q[2]==='1')notificar('entregue','Entrega concluída em '+(s.destino||'o destino')+'.');
+          if(Number(q[3])>Number(o[3]))notificar('foto','Foto do comprovante de '+(s.destino||'o destino')+' disponível.');
+        });
+      }
+    }catch(e){}
+    antes=Object.assign({},antes,agora);setPref('estado',antes);
+  }
+  setInterval(verificar,30000);setTimeout(verificar,5000);document.addEventListener('fast-mudou',verificar);contarNaoLidas();
+  // ---------- 🎨 APARÊNCIA ----------
+  function aparencia(){
+    var t=pref('texto',1),tm=pref('tema','claro');
+    var f=folha('aparencia','🎨 Aparência','<label class="l">Tamanho do texto</label><select id="apT"><option value="1">Normal</option><option value="2">Grande</option><option value="3">Muito grande</option></select>'+
+      '<label class="l">Tema</label><select id="apM"><option value="claro">Claro</option><option value="escuro">Escuro</option></select>');
+    el('apT').value=String(t);el('apM').value=tm;
+    el('apT').onchange=function(){setPref('texto',Number(this.value));aplicarAparencia()};
+    el('apM').onchange=function(){setPref('tema',this.value);aplicarAparencia()};
+  }
+  // ---------- ℹ️ ATENDIMENTO E SOBRE ----------
+  function sobre(){
+    var v=(document.querySelector('meta[name="fast-app-version"]')||{}).content||'';
+    folha('sobre','ℹ️ Atendimento e sobre','<button type="button" class="cliBtn" id="sbAt">🎧 Falar com a FAST (Atendimento)</button>'+
+      '<div class="cliMut" style="margin-top:14px">Cliente FAST · versão '+h(v)+'</div><div class="cliMut">Rastreio, pedidos de entrega e coleta, histórico e pagamentos.</div>');
+    el('sbAt').onclick=function(){document.querySelectorAll('.cliSheet.on').forEach(function(x){x.classList.remove('on')});
+      var b=Array.prototype.filter.call(document.querySelectorAll('button,a'),function(x){return /Atendimento/.test(x.textContent)&&x.id!=='sbAt'})[0];if(b)b.click();else alert('Abra o botão Atendimento no canto da tela.')};
+  }
+})();
+</script>
+
+<script id="fast524-toque">
+/* 5.2.5 — SENSIBILIDADE DO TOQUE (celular)
+   • Toque RÁPIDO e arrastar: rola o que estiver embaixo do dedo — a tabela dentro
+     do card (para cima/baixo) ou para os lados (rolagem horizontal), como sempre.
+   • Toque LONGO (segure ~0,35 s) e arraste: rola a TELA INTEIRA para cima e para
+     baixo, mesmo começando em cima de uma tabela ou card que tenha rolagem. */
+(function(){
+  if(!('ontouchstart' in window) && !(navigator.maxTouchPoints>0)) return;
+  var ESPERA=350, FOLGA=9, timer=0, ini=null, modo='', ultY=0, ultT=0, vel=0, raf=0;
+  var aviso=document.createElement('div');
+  aviso.id='fastToqueLongo';
+  aviso.style.cssText='position:fixed;right:10px;top:50%;transform:translateY(-50%);z-index:2147483000;background:rgba(15,23,42,.82);color:#fff;border-radius:999px;padding:8px 10px;font:700 18px/1 system-ui,sans-serif;display:none;pointer-events:none';
+  aviso.textContent='↕';
+  function montar(){ if(document.body) document.body.appendChild(aviso); else setTimeout(montar,200); } montar();
+  function rolavelInterno(el){
+    // existe uma caixa (tabela, card, lista) com rolagem própria embaixo do dedo?
+    for(var n=el; n && n!==document.body && n!==document.documentElement; n=n.parentElement){
+      var cs=getComputedStyle(n), oy=cs.overflowY, ox=cs.overflowX;
+      if((/auto|scroll/.test(oy) && n.scrollHeight>n.clientHeight+2) || (/auto|scroll/.test(ox) && n.scrollWidth>n.clientWidth+2)) return n;
+    }
+    return null;
+  }
+  function ignorar(el){
+    return !!(el && el.closest && el.closest('input,textarea,select,[contenteditable="true"],.leaflet-container,canvas,video,[draggable="true"],.sortable-ghost,#fnavMapa'));
+  }
+  function parar(){ clearTimeout(timer); timer=0; }
+  document.addEventListener('touchstart',function(e){
+    parar(); cancelAnimationFrame(raf); modo=''; aviso.style.display='none';
+    if(e.touches.length!==1 || ignorar(e.target) || !rolavelInterno(e.target)) return;
+    var t=e.touches[0]; ini={x:t.clientX,y:t.clientY};
+    timer=setTimeout(function(){
+      timer=0; modo='tela'; ultY=ini.y; ultT=Date.now(); vel=0;
+      aviso.style.display='block';
+      try{ if(navigator.vibrate) navigator.vibrate(12); }catch(er){}
+    },ESPERA);
+  },{passive:true});
+  document.addEventListener('touchmove',function(e){
+    if(!ini) return;
+    var t=e.touches[0];
+    if(modo!=='tela'){
+      // mexeu antes do tempo: é um toque rápido → a rolagem normal (tabela/lados) segue
+      if(timer && (Math.abs(t.clientX-ini.x)>FOLGA || Math.abs(t.clientY-ini.y)>FOLGA)){ parar(); ini=null; }
+      return;
+    }
+    e.preventDefault();            // a caixa de baixo não rola: quem rola é a tela
+    var agora=Date.now(), dy=t.clientY-ultY;
+    window.scrollBy(0,-dy*1.6);
+    vel=(-dy*1.6)/Math.max(1,agora-ultT); ultY=t.clientY; ultT=agora;
+  },{passive:false});
+  function fim(){
+    parar();
+    if(modo==='tela'){
+      aviso.style.display='none';
+      // continua deslizando um pouco ao soltar, como a rolagem normal
+      var v=vel*16;
+      (function deslizar(){ if(Math.abs(v)<0.6) return; window.scrollBy(0,v); v*=0.93; raf=requestAnimationFrame(deslizar); })();
+    }
+    modo=''; ini=null;
+  }
+  document.addEventListener('touchend',fim,{passive:true});
+  document.addEventListener('touchcancel',fim,{passive:true});
+  // no toque longo não abre o menu de "copiar/salvar imagem" do navegador
+  document.addEventListener('contextmenu',function(e){ if(modo==='tela'||timer){ e.preventDefault(); } },true);
+  window.fastToqueModo=function(){ return modo; };
+})();
+</script>
+<script id="fast527-versao-nova">
+/* 5.2.7 — AVISO DE VERSÃO NOVA (Cliente e Motorista)
+   O app instalado (APK) só abre o site; por isso NÃO é preciso baixar APK novo
+   a cada versão. O app confere sozinho se o site tem versão mais nova e mostra
+   o aviso "🔄 Nova versão" no topo. Um toque: limpa o que estava guardado e
+   recarrega já na versão nova, sem sair do login. */
+(function(){
+  function verLocal(){var m=document.querySelector('meta[name="fast-app-version"]');return m?String(m.content||'').trim():''}
+  function maior(a,b){var x=String(a).split(/[.\-]/).map(function(n){return parseInt(n,10)||0}),y=String(b).split(/[.\-]/).map(function(n){return parseInt(n,10)||0});for(var i=0;i<Math.max(x.length,y.length);i++){if((x[i]||0)>(y[i]||0))return true;if((x[i]||0)<(y[i]||0))return false}return false}
+  var aviso=null, nova='';
+  function mostrar(v){
+    nova=v;
+    if(!aviso){
+      aviso=document.createElement('button'); aviso.type='button'; aviso.id='fastVersaoNova';
+      aviso.style.cssText='position:fixed;left:50%;transform:translateX(-50%);top:calc(10px + env(safe-area-inset-top,0px));z-index:2147483647;border:0;border-radius:999px;padding:11px 18px;background:#16a34a;color:#fff;font:800 15px system-ui,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.28);cursor:pointer;max-width:92vw';
+      aviso.onclick=atualizar; document.body.appendChild(aviso);
+    }
+    aviso.textContent='🔄 Nova versão '+v+' disponível — toque para atualizar';
+    aviso.style.display='block';
+  }
+  async function atualizar(){
+    if(aviso){aviso.disabled=true;aviso.textContent='Atualizando…'}
+    try{ if(window.caches&&caches.keys){var ks=await caches.keys(); await Promise.all(ks.map(function(k){return caches.delete(k)}))} }catch(e){}
+    try{ if(navigator.serviceWorker&&navigator.serviceWorker.getRegistrations){var rs=await navigator.serviceWorker.getRegistrations(); await Promise.all(rs.map(function(r){return r.unregister()}))} }catch(e){}
+    try{ sessionStorage.setItem('fast527_atualizou',nova||'1') }catch(e){}
+    var u=location.pathname+'?v='+encodeURIComponent(nova||Date.now())+'&t='+Date.now()+location.hash;
+    location.replace(u);
+  }
+  window.fastAtualizarApp=atualizar;
+  var checando=false;
+  async function checar(){
+    if(checando||!navigator.onLine||document.hidden)return; checando=true;
+    try{
+      var r=await fetch(location.pathname+'?fastver='+Date.now(),{cache:'no-store'});
+      if(!r.ok)return;
+      var t=await r.text(), m=t.match(/<meta\s+name="fast-app-version"\s+content="([^"]+)"/i);
+      var v=m&&m[1].trim(), atual=verLocal();
+      if(v&&atual&&maior(v,atual))mostrar(v); else if(aviso)aviso.style.display='none';
+    }catch(e){} finally{checando=false}
+  }
+  // depois de atualizar, confirma rapidinho
+  try{var ok=sessionStorage.getItem('fast527_atualizou');if(ok){sessionStorage.removeItem('fast527_atualizou');setTimeout(function(){var d=document.createElement('div');d.textContent='✅ App atualizado para a versão '+verLocal();d.style.cssText='position:fixed;left:50%;transform:translateX(-50%);top:calc(10px + env(safe-area-inset-top,0px));z-index:2147483000;border-radius:999px;padding:10px 16px;background:#0f172a;color:#fff;font:700 14px system-ui,sans-serif';document.body.appendChild(d);setTimeout(function(){d.remove()},3500)},800)}}catch(e){}
+  setTimeout(checar,4000); setInterval(checar,5*60000);
+  document.addEventListener('visibilitychange',function(){if(!document.hidden)checar()});
+  window.fastChecarVersao=checar;
 })();
 </script>
 
