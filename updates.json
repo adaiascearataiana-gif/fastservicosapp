@@ -1,7 +1,12 @@
 {
-  "version": "5.1.5",
-  "releasedAt": "2026-10-05T22:00:00-03:00",
+  "version": "5.2.5",
+  "releasedAt": "2026-10-12T12:00:00-03:00",
   "updates": [
+    {
+      "app": "motorista",
+      "type": "melhorado",
+      "text": "5.2.5 (12/10/2026): rotas chegam na hora (tempo real) e cada chegada, entrega e foto avisa o escritório no mesmo instante."
+    },
     {
       "app": "motorista",
       "type": "novo",
