@@ -1,7 +1,12 @@
 {
-  "version": "5.2.5",
-  "releasedAt": "2026-10-12T12:00:00-03:00",
+  "version": "5.2.7",
+  "releasedAt": "2026-10-12T20:00:00-03:00",
   "updates": [
+    {
+      "app": "motorista",
+      "type": "novo",
+      "text": "5.2.7 (12/10/2026): aviso \"Nova versão\" no topo do app — um toque e ele se atualiza sozinho, sem baixar APK."
+    },
     {
       "app": "motorista",
       "type": "melhorado",
