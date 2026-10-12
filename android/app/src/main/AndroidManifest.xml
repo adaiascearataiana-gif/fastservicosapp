@@ -8,8 +8,10 @@
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.USE_BIOMETRIC" />
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
     <application
         android:allowBackup="false"
+        android:largeHeap="true"
         android:usesCleartextTraffic="false"
         android:icon="@mipmap/fast_app_icon_v408"
         android:roundIcon="@mipmap/fast_app_icon_v408_round"
