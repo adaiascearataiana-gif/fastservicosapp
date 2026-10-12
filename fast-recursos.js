@@ -713,6 +713,10 @@
       '<button type="button" class="frx-tool" data-a="cob">💰 Cobrança<span>pendentes + WhatsApp + PIX</span></button>' +
       '<button type="button" class="frx-tool" data-a="fech">🧾 Fechamento<span>dia, semana, mês + PDF</span></button>' +
       '<button type="button" class="frx-tool" data-a="preco">💲 Tabela de preços<span>valor por destino</span></button>' +
+      '<button type="button" class="frx-tool" data-a="pix">💳 Meu PIX<span>chave para receber dos clientes</span></button>' +
+      '<button type="button" class="frx-tool" data-a="recibos">🧾 Recibos<span>gerar, imprimir e enviar</span></button>' +
+      '<button type="button" class="frx-tool" data-a="pedcli">📥 Pedidos e pagamentos<span>dos clientes pelo app</span></button>' +
+      '<button type="button" class="frx-tool" data-a="avisos">🔔 Avisos de pedidos<span>som e notificação do celular</span></button>' +
       '<button type="button" class="frx-tool" data-a="pin">🔢 Bloqueio por PIN<span>' + (pinCfg() ? 'ativado' : 'desativado') + '</span></button>' +
       '<button type="button" class="frx-tool" data-a="sup">🎧 Central de Suporte<span>' + (SUP.abertos ? SUP.abertos + ' aguardando resposta' : 'clientes e motoristas') + '</span></button>' +
       '<button type="button" class="frx-tool" data-a="rastreios">📦 Rastreios e coletas<span>códigos, motoristas e fotos</span></button>' +
@@ -734,6 +738,10 @@
     if (a === 'cob') W.fastCobranca();
     if (a === 'fech') W.fastFechamentoPeriodo();
     if (a === 'preco') W.fastTabelaPrecos();
+    if (a === 'pix') { if (W.fastConfigPix) W.fastConfigPix(); }
+    if (a === 'recibos') { if (W.fastRecibos) W.fastRecibos(); }
+    if (a === 'pedcli') { if (W.fastPedidosClientes) W.fastPedidosClientes(); }
+    if (a === 'avisos') { if (W.fastAvisosConfig) W.fastAvisosConfig(); }
     if (a === 'pin') W.fastConfigurarPin();
     if (a === 'bkp') W.fastBackupAgora().then(painelFerramentas);
   });
