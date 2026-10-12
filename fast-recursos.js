@@ -182,6 +182,22 @@
   }
   function precoDe(destino) { var k = norm(destino); if (!k) return 0; var t = tabelaPrecos()[k]; return t ? t.valor : 0; }
   W.fastPrecoDestino = precoDe;
+  /* 5.2.7 — imagens no Atendimento (PAINEL) */
+  function supTexto(t) {
+    var s0 = String(t || ''), m = s0.match(/\[img\](https?:\/\/\S+)/);
+    if (!m) return esc(s0);
+    var resto = s0.replace(m[0], '').trim();
+    return (resto ? esc(resto) + '<br>' : '') + '<img src="' + esc(m[1]) + '" data-sup-ver="' + esc(m[1]) + '" alt="Imagem" style="max-width:220px;max-height:220px;border-radius:10px;margin-top:4px;cursor:pointer;display:block">';
+  }
+  function supVer(u) { if (typeof W.fastVerImagem === 'function') W.fastVerImagem(u); else W.open(u, '_blank'); }
+  async function supSubir(file) {
+    var b = await new Promise(function (res, rej) { var u = URL.createObjectURL(file), img = new Image(); img.onload = function () { var e = Math.min(1, 1600 / Math.max(img.naturalWidth, img.naturalHeight)), c = document.createElement('canvas'); c.width = Math.round(img.naturalWidth * e); c.height = Math.round(img.naturalHeight * e); c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(u); c.toBlob(function (x) { x ? res(x) : rej(new Error('imagem')); }, 'image/jpeg', 0.82); }; img.onerror = function () { rej(new Error('Formato de imagem não suportado')); }; img.src = u; });
+    var nome = 'empresa/' + Date.now() + '_' + Math.random().toString(36).slice(2, 8) + '.jpg', base = String(SUPABASE_URL).replace(/\/rest\/v1\/?$/, '');
+    var r = await fetch(base + '/storage/v1/object/suporte/' + nome, { method: 'POST', headers: Object.assign(supabaseHeaders(), { 'Content-Type': 'image/jpeg', 'x-upsert': 'true' }), body: b });
+    if (!r.ok) throw new Error('Não foi possível enviar a imagem (' + r.status + '). Rode o SQL 5.2.7.');
+    return base + '/storage/v1/object/public/suporte/' + nome;
+  }
+  W.fastTabelaPrecosDados = function () { try { return tabelaPrecos(); } catch (e) { return {}; } };
 
   W.fastTabelaPrecos = function () {
     var t = tabelaPrecos();
@@ -1575,10 +1591,10 @@
           '<div style="margin-bottom:8px"><b>' + (c.origem === 'motorista' ? '🚚 Motorista ' : '👤 Cliente ') + esc(c.nome || '') + '</b><div class="frx-muted">' + esc([c.assunto, c.email, c.contato].filter(Boolean).join(' · ')) + '</div></div>' +
           '<div id="frxSupMsgs" style="max-height:46vh;overflow:auto">' + m.map(function (x) {
             var emp = x.autor === 'empresa';
-            return '<div style="max-width:85%;margin:6px 0;' + (emp ? 'margin-left:auto;background:#4f46e5;color:#fff' : 'background:#f1f5f9;color:#0f172a') + ';padding:9px 12px;border-radius:14px;white-space:pre-wrap">' + esc(x.texto) + '<div style="font-size:11px;opacity:.7;margin-top:3px">' + (emp ? 'FAST · ' : '') + quandoBR(x.criado_em) + '</div></div>';
+            return '<div style="max-width:85%;margin:6px 0;' + (emp ? 'margin-left:auto;background:#4f46e5;color:#fff' : 'background:#f1f5f9;color:#0f172a') + ';padding:9px 12px;border-radius:14px;white-space:pre-wrap">' + supTexto(x.texto) + '<div style="font-size:11px;opacity:.7;margin-top:3px">' + (emp ? 'FAST · ' : '') + quandoBR(x.criado_em) + '</div></div>';
           }).join('') + '</div>' +
           '<textarea class="frx-in" id="frxSupResp" rows="3" maxlength="2000" placeholder="Responder…" style="margin-top:8px"></textarea>' +
-          '<div class="frx-row" style="margin-top:8px"><button type="button" class="frx-btn ok" data-responder style="flex:1">Enviar resposta</button></div>';
+          '<div class="frx-row" style="margin-top:8px"><button type="button" class="frx-btn sec" data-sup-anexo title="Enviar imagem da galeria" style="flex:0 0 54px">📎</button><input type="file" accept="image/*" id="frxSupAnexo" hidden><button type="button" class="frx-btn ok" data-responder style="flex:1">Enviar resposta</button></div>';
         var cx = $('frxSupMsgs'); if (cx) cx.scrollTop = cx.scrollHeight;
         if (c.nao_lidas_empresa) { try { await supEnviar('PATCH', 'suporte_chamados?id=eq.' + id, { nao_lidas_empresa: 0 }); } catch (e) {} supContar(); }
         clearInterval(tSup); tSup = setInterval(function () { var ta = $('frxSupResp'); if (atual === id && !(ta && ta.value) && document.body.contains(corpoS)) conversa(id); }, 20000);
@@ -1628,6 +1644,21 @@
       if (t.hasAttribute('data-padd')) { corpoS.__perguntas.push({ pergunta: '', resposta: '', para: 'todos' }); return corpoS.__desenharPerg(); }
       var rm = t.getAttribute('data-prm'); if (rm != null) { corpoS.__perguntas.splice(+rm, 1); return corpoS.__desenharPerg(); }
       if (t.hasAttribute('data-encerrar') && atual) { try { await supEnviar('PATCH', 'suporte_chamados?id=eq.' + atual, { status: 'fechado', atualizado_em: new Date().toISOString() }); aviso('Atendimento encerrado.'); lista(); } catch (er) { aviso(er.message, 'error'); } return; }
+      if (t.hasAttribute('data-sup-ver')) { supVer(t.getAttribute('data-sup-ver')); return; }
+      if (t.hasAttribute('data-sup-anexo') && atual) {
+        var fi = $('frxSupAnexo'); if (!fi) return;
+        fi.onchange = async function () {
+          var f = fi.files && fi.files[0]; fi.value = ''; if (!f) return;
+          t.disabled = true; t.textContent = '⏳';
+          try {
+            var u = await supSubir(f), leg = (($('frxSupResp') || {}).value || '').trim(), c5 = corpoS.__chamado || {};
+            await supEnviar('POST', 'suporte_mensagens', [{ chamado_id: Number(atual), autor: 'empresa', texto: ((leg ? leg + ' ' : '') + '[img]' + u).slice(0, 2000) }]);
+            await supEnviar('PATCH', 'suporte_chamados?id=eq.' + atual, { status: 'respondido', atualizado_em: new Date().toISOString(), nao_lidas_empresa: 0, nao_lidas_usuario: (Number(c5.nao_lidas_usuario) || 0) + 1 });
+            if ($('frxSupResp')) $('frxSupResp').value = ''; conversa(atual);
+          } catch (er) { aviso(er.message || er, 'error'); t.disabled = false; t.textContent = '📎'; }
+        };
+        fi.click(); return;
+      }
       if (t.hasAttribute('data-responder') && atual) {
         var ta = $('frxSupResp'), v = (ta.value || '').trim(); if (!v) return;
         t.disabled = true;
