@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="fast-app-version" content="5.3.2">
+<meta name="fast-app-version" content="5.3.3">
 <meta name="theme-color" content="#16a34a">
 <title>Cliente FAST — Histórico</title>
 <style>
@@ -258,7 +258,7 @@ window.fastBioLockAtivo=function(){return !!cfg()};window.fastBioSuportado=funct
   contato:function(){try{return (typeof cliente!=='undefined'&&cliente&&(cliente.whatsapp||cliente.telefone))||''}catch(e){return ''}},
   visivel:function(){var c=document.getElementById('content');return !!(c&&!c.classList.contains('hidden'))}};</script>
 <script src="../recibo-fast.js?v=1"></script>
-<script src="../suporte-fast.js?v=4"></script>
+<script src="../suporte-fast.js?v=5"></script>
 <script src="../rastreio-fast.js?v=3"></script>
 <script>try{fastRastreio.montar(document.getElementById('rastreioWidget'),{param:'rastreio'})}catch(e){}</script>
 <script id="cliente527-pedidos">
