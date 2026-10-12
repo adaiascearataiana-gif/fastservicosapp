@@ -70,6 +70,11 @@ public class MainActivity extends Activity {
         root.setFitsSystemWindows(false);
 
         webView = new WebView(this);
+        // 5.2.4: a página do FAST continua "importante" mesmo com o app em segundo plano —
+        // o Android deixa de encerrá-la primeiro quando você troca de app.
+        if (Build.VERSION.SDK_INT >= 26) {
+            try { webView.setRendererPriorityPolicy(WebView.RENDERER_PRIORITY_IMPORTANT, false); } catch (Exception e) {}
+        }
         webView.setBackgroundColor(Color.parseColor("#0F172A"));
         root.addView(webView, new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -109,7 +114,7 @@ public class MainActivity extends Activity {
         settings.setBuiltInZoomControls(false);
         settings.setDisplayZoomControls(false);
         settings.setTextZoom(100);
-        settings.setUserAgentString(settings.getUserAgentString() + " FASTAndroid/5.2.3");
+        settings.setUserAgentString(settings.getUserAgentString() + " FASTAndroid/5.2.4");
         CookieManager.getInstance().setAcceptCookie(true);
         CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
         webView.addJavascriptInterface(new VoiceBridge(), "FASTVoice");
@@ -183,7 +188,35 @@ public class MainActivity extends Activity {
         webView.loadUrl(BuildConfig.APP_URL);
         if (state != null) { String cu = state.getString("fast_camera_uri"); if (cu != null) { try { cameraUri = Uri.parse(cu); } catch (Exception e) {} } }
         requestPermissionsIfNeeded();
+        webView.postDelayed(this::pedirSemEconomiaDeBateria, 6000);
         getOnBackPressedDispatcherCompat();
+    }
+
+    // 5.2.4: o "economizar bateria" de muitos celulares (Motorola, Samsung, Xiaomi…) fecha
+    // apps em segundo plano. Pergunta UMA vez se pode deixar o FAST de fora disso.
+    private void pedirSemEconomiaDeBateria() {
+        try {
+            if (Build.VERSION.SDK_INT < 23) return;
+            android.os.PowerManager pm = (android.os.PowerManager) getSystemService(POWER_SERVICE);
+            if (pm == null || pm.isIgnoringBatteryOptimizations(getPackageName())) return;
+            android.content.SharedPreferences sp = getSharedPreferences("fast_app", MODE_PRIVATE);
+            if (sp.getBoolean("perguntou_bateria", false)) return;
+            sp.edit().putBoolean("perguntou_bateria", true).apply();
+            new android.app.AlertDialog.Builder(this)
+                .setTitle("Manter o FAST aberto")
+                .setMessage("Para o FAST continuar aberto na mesma tela quando você troca de app, permita que ele funcione sem a economia de bateria do celular.")
+                .setPositiveButton("Permitir", (d, w) -> {
+                    try {
+                        Intent i = new Intent(android.provider.Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+                        i.setData(Uri.parse("package:" + getPackageName()));
+                        startActivity(i);
+                    } catch (Exception e) {
+                        try { startActivity(new Intent(android.provider.Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)); } catch (Exception e2) {}
+                    }
+                })
+                .setNegativeButton("Agora não", null)
+                .show();
+        } catch (Exception e) {}
     }
 
     private boolean aceitaImagem(WebChromeClient.FileChooserParams p) {
