@@ -130,6 +130,10 @@ public class MainActivity extends Activity {
         webView.addJavascriptInterface(new ShareBridge(), "FASTCompartilhar");
         // 5.3.7: agenda do celular (sem pedir permissão: o Android só entrega o contato escolhido)
         webView.addJavascriptInterface(new ContactBridge(), "FASTContatos");
+        // 5.3.7: arquivos para baixar (ex.: APK novo) abrem no navegador, que baixa e oferece instalar
+        webView.setDownloadListener((url, ua, cd, mime, len) -> {
+            try { startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url))); } catch (ActivityNotFoundException ignored) {}
+        });
         webView.setWebViewClient(new WebViewClient() {
             // 5.2.3: se o Android encerrar só a parte que desenha a página (pouca memória),
             // o app NÃO fecha mais com erro: reabre a tela e o FAST volta para onde você estava.
