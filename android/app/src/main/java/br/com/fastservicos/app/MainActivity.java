@@ -11,6 +11,8 @@ import android.content.ClipData;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.provider.MediaStore;
+import android.provider.ContactsContract;
+import android.database.Cursor;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
@@ -40,6 +42,9 @@ public class MainActivity extends Activity {
     private Uri cameraUri;
     private WebChromeClient.FileChooserParams pendingChooserParams;
     private static final int CAMERA_FILE_REQUEST = 405;
+    // 5.3.7: escolher um contato da agenda (telefone de contato no pedido do Cliente)
+    private static final int CONTACT_REQUEST = 406;
+    private String contatoId = null;
     private static final int FILE_REQUEST = 401;
     private static final int VOICE_REQUEST = 403;
     private static final int CAMERA_REQUEST = 404;
@@ -114,7 +119,7 @@ public class MainActivity extends Activity {
         settings.setBuiltInZoomControls(false);
         settings.setDisplayZoomControls(false);
         settings.setTextZoom(100);
-        settings.setUserAgentString(settings.getUserAgentString() + " FASTAndroid/5.3.3");
+        settings.setUserAgentString(settings.getUserAgentString() + " FASTAndroid/5.3.7");
         CookieManager.getInstance().setAcceptCookie(true);
         CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
         webView.addJavascriptInterface(new VoiceBridge(), "FASTVoice");
@@ -123,6 +128,8 @@ public class MainActivity extends Activity {
         webView.addJavascriptInterface(new NotifBridge(), "FASTNotificacao");
         // 5.0.2: compartilhar fotos (WhatsApp etc.) — o WebView não tem o "compartilhar" do navegador.
         webView.addJavascriptInterface(new ShareBridge(), "FASTCompartilhar");
+        // 5.3.7: agenda do celular (sem pedir permissão: o Android só entrega o contato escolhido)
+        webView.addJavascriptInterface(new ContactBridge(), "FASTContatos");
         webView.setWebViewClient(new WebViewClient() {
             // 5.2.3: se o Android encerrar só a parte que desenha a página (pouca memória),
             // o app NÃO fecha mais com erro: reabre a tela e o FAST volta para onde você estava.
@@ -428,6 +435,24 @@ public class MainActivity extends Activity {
         return true;
     }
 
+    private class ContactBridge {
+        @JavascriptInterface public boolean disponivel() { return true; }
+        @JavascriptInterface public void escolher(final String id) {
+            runOnUiThread(() -> {
+                contatoId = id;
+                Intent pick = new Intent(Intent.ACTION_PICK, ContactsContract.CommonDataKinds.Phone.CONTENT_URI);
+                try { startActivityForResult(pick, CONTACT_REQUEST); }
+                catch (ActivityNotFoundException e) { contatoId = null; contatoResultado(id, "", "", "unavailable"); }
+            });
+        }
+    }
+
+    private void contatoResultado(String id, String nome, String tel, String erro) {
+        if (webView == null || id == null) return;
+        webView.evaluateJavascript("window.fastContatoResultado&&window.fastContatoResultado(" + JSONObject.quote(id) + ","
+            + JSONObject.quote(nome == null ? "" : nome) + "," + JSONObject.quote(tel == null ? "" : tel) + "," + JSONObject.quote(erro) + ")", null);
+    }
+
     private class VoiceBridge {
         @JavascriptInterface public void startSpeech() {
             runOnUiThread(() -> {
@@ -550,6 +575,22 @@ public class MainActivity extends Activity {
 
     @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == CONTACT_REQUEST) {
+            String id = contatoId; contatoId = null;
+            if (resultCode == RESULT_OK && data != null && data.getData() != null) {
+                String nome = "", tel = "";
+                Cursor c = null;
+                try {
+                    c = getContentResolver().query(data.getData(), new String[]{
+                        ContactsContract.CommonDataKinds.Phone.NUMBER,
+                        ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME}, null, null, null);
+                    if (c != null && c.moveToFirst()) { tel = c.getString(0); nome = c.getString(1); }
+                } catch (Exception e) {
+                } finally { if (c != null) c.close(); }
+                contatoResultado(id, nome, tel, "");
+            } else contatoResultado(id, "", "", "cancelled");
+            return;
+        }
         if (requestCode == VOICE_REQUEST) {
             if (resultCode == RESULT_OK && data != null) {
                 ArrayList<String> results = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
