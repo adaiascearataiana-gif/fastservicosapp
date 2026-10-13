@@ -3,6 +3,11 @@
   "releasedAt": "2026-10-12T21:00:00-03:00",
   "updates": [
     {
+      "app": "geral",
+      "type": "melhorado",
+      "text": "5.3.4 (12/10/2026): Tabela de preços por destino mais compacta — coluna Destino do tamanho do maior nome, Usos e Valor centralizados e campo de valor maior."
+    },
+    {
       "app": "cliente",
       "type": "corrigido",
       "text": "5.3.4 (12/10/2026): ao digitar o destino no pedido, aparecem as sugestões dos lugares do FAST e o endereço é preenchido com um toque."

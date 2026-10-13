@@ -81,6 +81,14 @@
     '.frx-precos td::before{content:none!important;display:none!important}' +
     '.frx-precos th:first-child,.frx-precos td:first-child{white-space:nowrap!important;width:1%!important;font-weight:600}' +
     '.frx-precos input.frx-in{width:96px!important;min-width:0!important;height:36px!important;min-height:0!important;padding:4px 6px!important;text-align:center!important;margin:0 auto!important;display:block}',
+    // 5.3.5: tabela de preços em grade própria — Destino do tamanho do maior nome, Usos e Valor centralizados
+    '.frx-pg{display:grid;grid-template-columns:fit-content(62%) auto auto;width:fit-content;max-width:100%;margin:0 auto;border:1px solid var(--border,#e2e8f0);border-radius:14px;overflow:hidden;font-size:15px}' +
+    '.frx-pg>div{padding:7px 12px;display:flex;align-items:center;min-width:0;border-bottom:1px solid var(--border,#e2e8f0)}' +
+    '.frx-pg>.h{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;opacity:.75;background:rgba(100,116,139,.10);padding-top:9px;padding-bottom:9px}' +
+    '.frx-pg>.n{font-weight:600;overflow-wrap:anywhere;line-height:1.25}.frx-pg>.u,.frx-pg>.v{justify-content:center;text-align:center}' +
+    '.frx-pg>.z{background:rgba(100,116,139,.06)}.frx-pg>.vazio{grid-column:1/-1;justify-content:center;opacity:.7}' +
+    '.frx-pg .v{gap:6px}.frx-pg .v input.frx-in{width:118px!important;min-width:0!important;height:42px!important;padding:4px 8px!important;text-align:center!important;font-size:16px!important;font-weight:700}' +
+    '.frx-pg .frx-volta{padding:3px 8px!important;min-height:0!important;margin-left:6px;flex:none;font-size:13px}.frx-pg .n .frx-pill{margin-left:6px;flex:none}',
     '.frx-tb{width:100%;border-collapse:collapse;font-size:13px}.frx-tb th,.frx-tb td{padding:8px 6px;border-bottom:1px solid var(--border,#e2e8f0);text-align:left;vertical-align:top}.frx-tb th{font-size:11px;text-transform:uppercase;opacity:.7}',
     '.frx-wrap{overflow-x:auto}.frx-in{width:100%;box-sizing:border-box;padding:10px 12px;border-radius:10px;border:1px solid var(--border,#cbd5e1);background:var(--input-bg,#fff);color:inherit;font-size:15px}',
     '.frx-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px}.frx-row>label{font-size:12px;font-weight:700;opacity:.75}',
@@ -206,16 +214,17 @@
     div.innerHTML = '<p class="frx-muted" style="margin:0 0 10px">Preços sugeridos pelo valor mais cobrado de cada destino nas rotas já cadastradas. Mude o que quiser — o valor entra sozinho ao digitar o destino numa rota nova.</p>' +
       '<div class="frx-row"><input class="frx-in" id="frxPrecoBusca" placeholder="Buscar destino…"></div>' +
       '<div class="frx-row"><input class="frx-in" id="frxNovoDest" placeholder="Novo destino" style="flex:2;min-width:140px"><input class="frx-in" id="frxNovoVal" inputmode="decimal" placeholder="R$ 0,00" style="flex:1;min-width:90px"><button type="button" class="frx-btn pq" id="frxNovoAdd">Adicionar</button></div>' +
-      '<div class="frx-wrap"><table class="frx-tb frx-precos"><thead><tr><th>Destino</th><th>Usos</th><th>Valor</th><th></th></tr></thead><tbody id="frxPrecoBody"></tbody></table></div>';
+      '<div class="frx-pg" id="frxPrecoBody"></div>';
     var edits = {};
     function desenhar() {
       var q = norm(($('frxPrecoBusca') || {}).value || '');
-      $('frxPrecoBody').innerHTML = chaves.filter(function (k) { return !q || k.indexOf(q) >= 0; }).slice(0, 400).map(function (k) {
-        var e = t[k], v = edits[k] != null ? edits[k] : e.valor;
-        return '<tr><td>' + esc(e.destino) + (e.manual ? ' <span class="frx-pill">editado</span>' : '') + '</td><td>' + (e.usos || 0) + '</td>' +
-          '<td><input class="frx-in" data-k="' + esc(k) + '" inputmode="decimal" value="' + esc(v ? v.toFixed(2).replace('.', ',') : '') + '" style="padding:7px 8px"></td>' +
-          '<td>' + (e.manual ? '<button type="button" class="frx-btn sec pq" data-r="' + esc(k) + '" title="Voltar ao valor sugerido">↺</button>' : '') + '</td></tr>';
-      }).join('') || '<tr><td colspan="4" class="frx-muted">Nenhum destino.</td></tr>';
+      var cab = '<div class="h">Destino</div><div class="h u">Usos</div><div class="h v">Valor</div>';
+      $('frxPrecoBody').innerHTML = cab + (chaves.filter(function (k) { return !q || k.indexOf(q) >= 0; }).slice(0, 400).map(function (k, i) {
+        var e = t[k], v = edits[k] != null ? edits[k] : e.valor, z = i % 2 ? ' z' : '';
+        return '<div class="n' + z + '">' + esc(e.destino) + (e.manual ? '<span class="frx-pill">editado</span><button type="button" class="frx-btn sec pq frx-volta" data-r="' + esc(k) + '" title="Voltar ao valor sugerido">↺</button>' : '') + '</div>' +
+          '<div class="u' + z + '">' + (e.usos || 0) + '</div>' +
+          '<div class="v' + z + '"><input class="frx-in" data-k="' + esc(k) + '" inputmode="decimal" value="' + esc(v ? v.toFixed(2).replace('.', ',') : '') + '"></div>';
+      }).join('') || '<div class="vazio">Nenhum destino.</div>');
     }
     var j = janela('💲 Tabela de preços por destino', div, [
       { txt: 'Fechar', cls: 'sec', fn: function (f) { f(); } },
