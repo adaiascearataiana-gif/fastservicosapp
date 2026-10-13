@@ -51,7 +51,7 @@
   <meta name="fast-github-branch" content="main">
   <meta name="fast-github-path" content="index.html">
   <meta name="fast-github-token-env" content="GH_TOKEN">
-  <meta name="fast-app-version" content="5.3.7">
+  <meta name="fast-app-version" content="5.3.8">
   <script id="fast-version-source-of-truth">try{var __m=document.querySelector('meta[name="fast-app-version"]');if(__m)document.documentElement.setAttribute("data-fast-version",__m.content)}catch(e){}</script>
   <meta name="fast-app-date" content="2026-10-05T18:00:00-03:00">
   <meta name="fast-latest-update" content="5.1.6: fotos da galeria sempre no card certo e fotos visíveis em todos os aparelhos.">
@@ -17408,6 +17408,87 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
         salvarStorage();
         mostrarToast(corrigidasDataEstrita+' rota(s) recolocada(s) na data cadastrada em ROTAS.', 'info');
       }
+      // (5.3.8) PENDENTES PASSAM PARA HOJE — pedido do administrador.
+      // Rota não concluída de um dia anterior entra no TOPO de hoje e passa a ter a
+      // data de hoje (conta nos relatórios de hoje). O administrador redireciona para
+      // outro dia pelo Editar rota. A contagem de atraso começa na abertura do
+      // expediente de hoje (08:00), pela regra de horas úteis da 5.1.8.
+      // Só vale para pendências a partir da instalação desta versão (o histórico
+      // antigo não é puxado).
+      try {
+        const K_DESDE = 'fast538_carrega_desde';
+        let desde = '';
+        try { desde = localStorage.getItem(K_DESDE) || ''; } catch(eL) {}
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(desde)) {
+          const ontem = new Date(); ontem.setDate(ontem.getDate() - 1);
+          desde = fastDataLocalYYYYMMDD(ontem);
+          try { localStorage.setItem(K_DESDE, desde); } catch(eL) {}
+        }
+        const agoraIso = new Date().toISOString();
+        const topo = [];
+        Object.keys(bancoDados.sequencias)
+          .filter(function(d){ return /^\d{4}-\d{2}-\d{2}$/.test(d) && d < hoje && d >= desde; })
+          .sort()
+          .forEach(function(d){
+            const fica = [];
+            (bancoDados.sequencias[d] || []).forEach(function(item){
+              if (!item || item.agrupado || fastEhConcluido(item, rotasRef)) { fica.push(item); return; }
+              const rv = item.rotaId != null ? rotasRef.find(function(r){ return String(r.id) === String(item.rotaId); }) : null;
+              // rota que o ADM mandou para um dia futuro não é puxada
+              if (rv && String(rv.data || '') > hoje) { fica.push(item); return; }
+              if (!item.dataOriginal) item.dataOriginal = d;
+              item.passouEm = agoraIso;
+              item.updatedAt = agoraIso;
+              if (rv) {
+                if (!rv.dataOriginal) rv.dataOriginal = d;
+                rv.data = hoje;
+                rv.updatedAt = agoraIso;
+                rv.ultimaModificacao = agoraIso;
+              }
+              topo.push(item);
+            });
+            bancoDados.sequencias[d] = fica;
+          });
+        if (topo.length) {
+          const chave = function(x){ return x && x.rotaId != null ? 'r' + x.rotaId : 'i' + (x && x.id); };
+          const ja = new Set(topo.map(chave));
+          const resto = (bancoDados.sequencias[hoje] || []).filter(function(x){ return !ja.has(chave(x)); });
+          bancoDados.sequencias[hoje] = topo.concat(resto);
+          try { if (typeof reordenarRotasPorData === 'function') reordenarRotasPorData(); } catch(eO) {}
+          salvarStorage();
+          mostrarToast(topo.length + ' rota(s) pendente(s) do dia anterior passaram para hoje.', 'success');
+        }
+      } catch (eP) { console.warn('pendentes para hoje:', eP); }
+      // (5.3.7) A limpeza de "concluídas de dias anteriores" ficava DEPOIS deste return
+      // e nunca rodava: rotas concluídas ontem continuavam em ROTAS DO DIA de hoje.
+      // Agora elas saem da lista de hoje (continuam no histórico do dia delas).
+      try {
+        // Não apaga nada: a cópia vai para a lista do dia certo (fotos e comprovantes ficam guardados).
+        const listaHoje = (bancoDados.sequencias[hoje] || []);
+        const ficam = [];
+        let tirou = 0;
+        listaHoje.forEach(function(item){
+          if (!item || !fastEhConcluido(item, rotasRef)) { ficam.push(item); return; }
+          const rv = item.rotaId != null ? rotasRef.find(function(r){ return String(r.id) === String(item.rotaId); }) : null;
+          const ts = (rv && rv.dataConclusao) || item.dataConclusao || '';
+          let diaConcl = '';
+          if (ts) { const dc = new Date(ts); if (!isNaN(dc.getTime())) diaConcl = fastDataLocalYYYYMMDD(dc); }
+          const dataRota = String((rv && rv.data) || '');
+          const destino = (dataRota && dataRota < hoje) ? dataRota : ((diaConcl && diaConcl < hoje) ? diaConcl : '');
+          if (!destino) { ficam.push(item); return; }
+          if (!bancoDados.sequencias[destino]) bancoDados.sequencias[destino] = [];
+          const ja = bancoDados.sequencias[destino].some(function(x){
+            return (x.rotaId != null && item.rotaId != null && String(x.rotaId) === String(item.rotaId)) || String(x.id) === String(item.id);
+          });
+          if (!ja) bancoDados.sequencias[destino].push(item);
+          tirou++;
+        });
+        if (tirou) {
+          bancoDados.sequencias[hoje] = ficam;
+          salvarStorage();
+          console.info('ROTAS: ' + tirou + ' concluída(s) de dia anterior voltaram para o dia delas.');
+        }
+      } catch (eF) { console.warn('limpeza concluídas antigas:', eF); }
       return;
 
       // Coleta todas as datas com sequências anteriores a hoje
@@ -19314,7 +19395,9 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
     }
     function fastSinalizadorRotaHtml(item, rota, dataSel) {
       var s = fastEstadoPrazoRota(item, rota, dataSel);
-      return '<span class="rd-route-signal rd-route-signal-' + s.classe + '" role="status" aria-label="' + s.texto + '" title="' + s.detalhe + '"><span></span><small>' + s.texto + '</small></span>';
+      var orig = String((item && item.dataOriginal) || (rota && rota.dataOriginal) || '');
+      var veio = (/^\d{4}-\d{2}-\d{2}$/.test(orig) && orig < String(dataSel || '')) ? ' <span class="rd-veio-de" title="Pendente que passou de ' + orig.split('-').reverse().join('/') + ' para este dia">⏪ De ' + orig.slice(8,10) + '/' + orig.slice(5,7) + '</span>' : '';
+      return '<span class="rd-route-signal rd-route-signal-' + s.classe + '" role="status" aria-label="' + s.texto + '" title="' + s.detalhe + '"><span></span><small>' + s.texto + '</small></span>' + veio;
     }
 
     /* Seleção persistente por data. Renderizações automáticas (sincronização,
@@ -40913,7 +40996,7 @@ body.fast-home-reveal .tab-content.active{
 <script id="fast-4035-update-note">
 (function(){
   'use strict';
-  var V='5.3.7';
+  var V='5.3.8';
   var meta=document.querySelector('meta[name="fast-app-version"]');if(meta)meta.content=V;
   var latest=document.querySelector('meta[name="fast-latest-update"]');if(latest)latest.content='4.0.43: relatório geral de rotas, filtro por cliente, links diretos do Google Drive e sincronização das fotos de rotas avulsas; artes oficiais reaplicadas nos quatro aplicativos.';
   var log=document.querySelector('meta[name="fast-app-changelog"]');if(log){try{var a=JSON.parse(log.content||'[]');a.unshift({type:'novo',text:'4.0.36 (26/09/2026): Relatório Geral de Rotas com histórico completo, filtro por cliente/data/status, valores, fotos e link direto para a pasta do Google Drive.'},{type:'melhorado',text:'4.0.36 (26/09/2026): fotos adicionadas pela edição de ROTAS passam a usar a mesma fila de sincronização do Google Drive das ROTAS DO DIA; rotas antigas com fotos são verificadas e colocadas na fila automaticamente.'},{type:'melhorado',text:'4.0.36 (26/09/2026): artes oficiais azul, vermelha, laranja e verde reaplicadas nos locais de Rotas do Dia, Despesas, Cliente FAST e Motorista FAST, incluindo central de downloads e identidade de acesso.'});log.content=JSON.stringify(a.slice(0,40));}catch(e){}}
@@ -45112,4 +45195,56 @@ body.fx-apk .fx-gal-ajuda{display:flex}
 })();
 </script>
 
+<script id="fast537-virada-rotas">
+/* 5.3.7/5.3.8 — ROTAS DO DIA vira o dia sozinho.
+   À meia-noite: as pendentes do dia anterior passam para hoje (verificarEVirarDia)
+   e a tela muda para o dia novo, já mostrando as rotas de hoje.
+   A contagem de horário/atraso só começa na abertura do expediente (08:00). */
+(function(){
+  var HORA_ABRE=8;
+  function hoje(){try{return fastDataLocalYYYYMMDD()}catch(e){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}}
+  function dp(){return document.getElementById('dpDataSequencia')}
+  try{localStorage.removeItem('fast537_rotas_ver_cedo')}catch(e){}
+  var ultimo=hoje();
+  function redesenhar(){window.__frxForcarLista=true;try{carregarSequenciaDia()}catch(e){}try{if(typeof renderizar==='function')renderizar()}catch(e){}}
+  function conferir(){
+    var h=hoje(), d=dp();
+    if(h===ultimo)return;
+    var antes=ultimo; ultimo=h;
+    try{if(typeof verificarEVirarDia==='function')verificarEVirarDia()}catch(e){console.warn('virada:',e)}
+    // só troca a data da tela se ela estava no "hoje" anterior (quem escolheu outra data não é mexido)
+    if(d&&(d.value===antes||!d.value)){d.value=h;var r=document.getElementById('dpDataRota');if(r&&r.value===antes)r.value=h;
+      if(typeof mostrarToast==='function')mostrarToast('Novo dia: ROTAS DO DIA de '+(typeof formatarDataBR==='function'?formatarDataBR(h):h)+'.','info')}
+    redesenhar();
+  }
+  function agendarMeiaNoite(){var a=new Date(),m=new Date(a.getFullYear(),a.getMonth(),a.getDate()+1,0,0,5);setTimeout(function(){conferir();agendarMeiaNoite()},m-a)}
+  // na abertura do expediente os sinais passam a contar o tempo
+  function agendarAbertura(){var a=new Date(),m=new Date(a.getFullYear(),a.getMonth(),a.getDate(),HORA_ABRE,0,5);if(m<=a)m.setDate(m.getDate()+1);setTimeout(function(){conferir();atualizarSinais();agendarAbertura()},m-a)}
+  agendarMeiaNoite(); agendarAbertura();
+  setInterval(conferir,30000);
+  document.addEventListener('visibilitychange',function(){if(!document.hidden)setTimeout(conferir,300)});
+  window.addEventListener('focus',function(){setTimeout(conferir,300)});
+  window.fastRotasConferirDia=conferir;
+  // sinais de prazo (Em andamento / Atrasada) se atualizam sozinhos, sem redesenhar a lista
+  function atualizarSinais(){
+    try{
+      if(document.hidden||typeof fastEstadoPrazoRota!=='function')return;
+      var d=dp(); if(!d||!d.value)return;
+      var lista=((bancoDados.sequencias||{})[d.value])||[], rotas=bancoDados.rotas||[];
+      document.querySelectorAll('#containerSequencia .seq-item[data-item-id]').forEach(function(card){
+        var sig=card.querySelector('.rd-route-signal'); if(!sig)return;
+        var id=card.getAttribute('data-item-id'), it=lista.find(function(x){return x&&String(x.id)===id}); if(!it)return;
+        var rv=it.rotaId!=null?rotas.find(function(r){return String(r.id)===String(it.rotaId)}):null;
+        var e=fastEstadoPrazoRota(it,rv,d.value), cls='rd-route-signal rd-route-signal-'+e.classe;
+        if(sig.className!==cls)sig.className=cls;
+        if(sig.getAttribute('title')!==e.detalhe){sig.setAttribute('title',e.detalhe);sig.setAttribute('aria-label',e.texto);var sm=sig.querySelector('small');if(sm)sm.textContent=e.texto}
+      });
+    }catch(er){}
+  }
+  setInterval(atualizarSinais,60000);
+  document.addEventListener('visibilitychange',function(){if(!document.hidden)setTimeout(atualizarSinais,800)});
+  window.fastRotasAtualizarSinais=atualizarSinais;
+})();
+</script>
+<style id="fast538-veio-de">.rd-veio-de{display:inline-flex;align-items:center;margin-left:6px;padding:2px 7px;border-radius:999px;font-size:11px;font-weight:800;background:#fef3c7;color:#92400e;border:1px solid #f59e0b;white-space:nowrap;vertical-align:middle}body.dark-mode .rd-veio-de,[data-theme="dark"] .rd-veio-de{background:#422006;color:#fcd34d;border-color:#b45309}</style>
 </body></html>

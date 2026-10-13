@@ -1,7 +1,27 @@
 {
-  "version": "5.3.7",
-  "releasedAt": "2026-10-13T11:00:00-03:00",
+  "version": "5.3.8",
+  "releasedAt": "2026-10-13T15:00:00-03:00",
   "updates": [
+    {
+      "app": "rotas",
+      "type": "melhorado",
+      "text": "5.3.8 (13/10/2026): rota não concluída passa sozinha para o dia seguinte à meia-noite, no topo da lista, com a etiqueta “⏪ De dd/mm”; para mandar para outro dia, é só mudar a data em Editar rota."
+    },
+    {
+      "app": "rotas",
+      "type": "melhorado",
+      "text": "5.3.8 (13/10/2026): à meia-noite as rotas do dia novo já aparecem; a contagem de horário e atraso começa na abertura do expediente (08:00), sem domingos e feriados."
+    },
+    {
+      "app": "rotas",
+      "type": "corrigido",
+      "text": "5.3.7 (13/10/2026): ROTAS DO DIA vira o dia sozinho à meia-noite (as concluídas do dia anterior somem, mesmo com o app aberto) e as rotas do dia novo aparecem a partir das 08:00, com botão Ver agora."
+    },
+    {
+      "app": "cliente",
+      "type": "novo",
+      "text": "5.3.7 (13/10/2026): aviso “📲 Atualize o aplicativo” quando sai um APK novo — um toque baixa e instala; também em ☰ → Atualizar aplicativo."
+    },
     {
       "app": "cliente",
       "type": "melhorado",
@@ -477,5 +497,11 @@
       "type": "melhorado",
       "text": "4.0.3 (21/09/2026): FAST Motorista usa o novo ícone cinza no Android, na abertura, no gate e no cabeçalho, com moldura cinza no aplicativo."
     }
-  ]
+  ],
+  "apk": {
+    "cliente": {
+      "versao": "5.3.7",
+      "url": "https://raw.githubusercontent.com/adaiascearataiana-gif/fastservicosapp/main/downloads/Cliente-FAST-Android.apk"
+    }
+  }
 }
