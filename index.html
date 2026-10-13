@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="fast-linux-desktop" data-fast-version="5.3.4" data-fast-enter-navigation="1"><head>
+<html lang="pt-BR" class="fast-linux-desktop" data-fast-version="5.3.7" data-fast-enter-navigation="1"><head>
 <script id="fast-4065-bio-nativa">
 /* 5.1.6: ponte para a biometria NATIVA do Android (APK). No WebView do APK o
    WebAuthn não existe; o APK expõe window.FASTBiometria e o app usa a digital/rosto
@@ -51,7 +51,7 @@
   <meta name="fast-github-branch" content="main">
   <meta name="fast-github-path" content="index.html">
   <meta name="fast-github-token-env" content="GH_TOKEN">
-  <meta name="fast-app-version" content="5.3.4">
+  <meta name="fast-app-version" content="5.3.7">
   <script id="fast-version-source-of-truth">try{var __m=document.querySelector('meta[name="fast-app-version"]');if(__m)document.documentElement.setAttribute("data-fast-version",__m.content)}catch(e){}</script>
   <meta name="fast-app-date" content="2026-10-05T18:00:00-03:00">
   <meta name="fast-latest-update" content="5.1.6: fotos da galeria sempre no card certo e fotos visíveis em todos os aparelhos.">
@@ -40913,7 +40913,7 @@ body.fast-home-reveal .tab-content.active{
 <script id="fast-4035-update-note">
 (function(){
   'use strict';
-  var V='5.3.4';
+  var V='5.3.7';
   var meta=document.querySelector('meta[name="fast-app-version"]');if(meta)meta.content=V;
   var latest=document.querySelector('meta[name="fast-latest-update"]');if(latest)latest.content='4.0.43: relatório geral de rotas, filtro por cliente, links diretos do Google Drive e sincronização das fotos de rotas avulsas; artes oficiais reaplicadas nos quatro aplicativos.';
   var log=document.querySelector('meta[name="fast-app-changelog"]');if(log){try{var a=JSON.parse(log.content||'[]');a.unshift({type:'novo',text:'4.0.36 (26/09/2026): Relatório Geral de Rotas com histórico completo, filtro por cliente/data/status, valores, fotos e link direto para a pasta do Google Drive.'},{type:'melhorado',text:'4.0.36 (26/09/2026): fotos adicionadas pela edição de ROTAS passam a usar a mesma fila de sincronização do Google Drive das ROTAS DO DIA; rotas antigas com fotos são verificadas e colocadas na fila automaticamente.'},{type:'melhorado',text:'4.0.36 (26/09/2026): artes oficiais azul, vermelha, laranja e verde reaplicadas nos locais de Rotas do Dia, Despesas, Cliente FAST e Motorista FAST, incluindo central de downloads e identidade de acesso.'});log.content=JSON.stringify(a.slice(0,40));}catch(e){}}
@@ -44998,10 +44998,33 @@ body.fx-apk .fx-gal-ajuda{display:flex}
         '<div style="flex:1"><button type="button" id="pxLogoBt" style="min-height:42px;border:1px solid #cbd5e1;border-radius:12px;background:#fff;color:#0f172a;font-weight:800;padding:0 14px">🖼 Enviar logo</button> <button type="button" id="pxLogoTira" style="min-height:42px;border:0;background:none;color:#b91c1c;font-weight:800">Remover</button><div style="color:#64748b;font-size:12px;margin-top:4px">PNG ou JPG, de preferência quadrada.</div></div><input type="file" accept="image/*" id="pxLogoIn" hidden></div>'+
       inp('pxEmpresa','NOME NO RECIBO',c.empresa_nome,'FAST Serviços')+inp('pxDoc','CNPJ / CPF',c.documento,'12.345.678/0001-90')+inp('pxTel','TELEFONE',c.telefone,'(85) 9 9999-9999')+inp('pxEnd','ENDEREÇO',c.endereco,'Rua…, nº – Bairro, Fortaleza/CE')+
       '<button type="button" id="pxSalvar" style="width:100%;min-height:46px;margin-top:14px;border:0;border-radius:12px;background:#0f766e;color:#fff;font-weight:800;font-size:16px">Salvar</button><div id="pxMsg" style="margin-top:8px;font-weight:700"></div>'+
-      '<div style="border-top:1px solid #e2e8f0;margin-top:16px;padding-top:12px"><b style="font-size:16px">📱 Gerar QR Code do PIX</b><p style="color:#64748b;font-size:13px;margin:4px 0 8px">Para mostrar, imprimir ou mandar a um cliente. Deixe o valor em branco para o cliente digitar o valor.</p>'+
+      '<div style="border-top:1px solid #e2e8f0;margin-top:16px;padding-top:12px"><b style="font-size:16px">📱 Gerar QR Code do PIX</b><p style="color:#64748b;font-size:13px;margin:4px 0 8px">Gerado sozinho a partir da sua chave. Digite um valor para o QR já sair com ele, ou deixe em branco para o cliente digitar.</p>'+
       '<div style="display:flex;gap:8px"><input id="pxValor" inputmode="decimal" placeholder="Valor (opcional) — ex.: 55,50" style="flex:1;min-width:0;padding:11px;border:1px solid #cbd5e1;border-radius:12px;font-size:16px"><input id="pxDesc" placeholder="Identificação (opcional)" maxlength="25" style="flex:1;min-width:0;padding:11px;border:1px solid #cbd5e1;border-radius:12px;font-size:16px"></div>'+
-      '<button type="button" id="pxGerar" style="width:100%;min-height:46px;margin-top:10px;border:0;border-radius:12px;background:linear-gradient(135deg,#0f766e,#14b8a6);color:#fff;font-weight:800;font-size:16px">Gerar QR Code</button><div id="pxQr" style="text-align:center;margin-top:10px"></div></div></div>';
+      '<button type="button" id="pxGerar" style="width:100%;min-height:46px;margin-top:10px;border:0;border-radius:12px;background:linear-gradient(135deg,#0f766e,#14b8a6);color:#fff;font-weight:800;font-size:16px">🔄 Atualizar QR Code</button><div id="pxQr" style="text-align:center;margin-top:10px"></div></div></div>';
     var logoUrl=c.logo||'';
+    // 5.3.4: máscaras — CPF 000.000.000-00, CNPJ 00.000.000/0000-00, telefone (85) 99999-9999
+    function soDig(v){return String(v||'').replace(/\D/g,'')}
+    function fmtDoc(v){var d=soDig(v).slice(0,14);
+      if(d.length<=11)return d.replace(/^(\d{3})(\d)/,'$1.$2').replace(/^(\d{3})\.(\d{3})(\d)/,'$1.$2.$3').replace(/\.(\d{3})(\d{1,2})$/,'.$1-$2');
+      return d.replace(/^(\d{2})(\d)/,'$1.$2').replace(/^(\d{2})\.(\d{3})(\d)/,'$1.$2.$3').replace(/\.(\d{3})(\d)/,'.$1/$2').replace(/(\d{4})(\d{1,2})$/,'$1-$2')}
+    function fmtTel(v){var d=soDig(v);if(d.length>11&&d.indexOf('55')===0)d=d.slice(2);d=d.slice(0,11);
+      if(d.length<=2)return d?'('+d:'';var dd='('+d.slice(0,2)+') ',r=d.slice(2);
+      if(d.length===11)return dd+r.slice(0,5)+'-'+r.slice(5);
+      return dd+(r.length>4?r.slice(0,4)+'-'+r.slice(4):r)}
+    function mascarar(el,fn){if(!el)return;el.value=el.value?fn(el.value):'';el.setAttribute('inputmode','numeric');el.addEventListener('input',function(){var v=fn(el.value);if(v!==el.value)el.value=v})}
+    mascarar($('pxDoc'),fmtDoc); mascarar($('pxTel'),fmtTel); $('pxTel').setAttribute('inputmode','tel');
+    // chave: máscara conforme o tipo escolhido
+    var chEl=$('pxChave');
+    function mascChave(){var t=$('pxTipo').value;
+      if(t==='cpf'||t==='cnpj'){chEl.setAttribute('inputmode','numeric');chEl.placeholder=t==='cpf'?'000.000.000-00':'00.000.000/0000-00';if(chEl.value)chEl.value=fmtDoc(chEl.value)}
+      else if(t==='telefone'){chEl.setAttribute('inputmode','tel');chEl.placeholder='(85) 99999-9999';if(chEl.value)chEl.value=fmtTel(chEl.value)}
+      else{chEl.setAttribute('inputmode',t==='email'?'email':'text');chEl.placeholder=t==='email'?'voce@empresa.com':'Chave aleatória'}}
+    chEl.addEventListener('input',function(){var t=$('pxTipo').value,v=t==='telefone'?fmtTel(chEl.value):(t==='cpf'||t==='cnpj')?fmtDoc(chEl.value):chEl.value;if(v!==chEl.value)chEl.value=v});
+    $('pxTipo').addEventListener('change',mascChave); mascChave();
+    // QR Code gerado sozinho: ao abrir (se já tem chave) e enquanto digita valor/identificação/chave
+    var qrT=null; function qrAuto(){clearTimeout(qrT);qrT=setTimeout(function(){if($('pxChave')&&$('pxChave').value.trim())$('pxGerar').onclick()},600)}
+    ['pxValor','pxDesc','pxChave','pxNome','pxCidade'].forEach(function(id){var e=$(id);if(e)e.addEventListener('input',qrAuto)});
+    $('pxTipo').addEventListener('change',qrAuto); setTimeout(qrAuto,50);
     $('pxLogoBt').onclick=function(){$('pxLogoIn').click()};
     $('pxLogoTira').onclick=function(){logoUrl='';$('pxLogoPrev').innerHTML='sem logo'};
     $('pxLogoIn').onchange=async function(){var f=this.files&&this.files[0];this.value='';if(!f)return;$('pxLogoPrev').textContent='enviando…';
@@ -45044,7 +45067,7 @@ body.fx-apk .fx-gal-ajuda{display:flex}
       var corpo={id:1,tipo:tipo,chave:ch,nome:$('pxNome').value.trim()||'FAST SERVICOS',cidade:$('pxCidade').value.trim()||'FORTALEZA',atualizado_em:new Date().toISOString(),
         empresa_nome:$('pxEmpresa').value.trim(),documento:$('pxDoc').value.trim(),telefone:$('pxTel').value.trim(),endereco:$('pxEnd').value.trim(),logo:logoUrl};
       try{var r=await fetch(url()+'/pagamento_config',{method:'POST',headers:hdr({'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'}),body:JSON.stringify(corpo)});
-        if(r.status===400){['empresa_nome','documento','telefone','endereco','logo'].forEach(function(k){delete corpo[k]});r=await fetch(url()+'/pagamento_config',{method:'POST',headers:hdr({'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'}),body:JSON.stringify(corpo)});if(r.ok){m.style.color='#b45309';m.textContent='PIX salvo. Para salvar os dados do recibo e a logo, rode o SQL 5.3.3 no Supabase.';return}}
+        if(r.status===400){['empresa_nome','documento','telefone','endereco','logo'].forEach(function(k){delete corpo[k]});r=await fetch(url()+'/pagamento_config',{method:'POST',headers:hdr({'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'}),body:JSON.stringify(corpo)});if(r.ok){m.style.color='#b45309';m.textContent='PIX salvo. Para salvar os dados do recibo e a logo, rode o SQL 5.3.2 no Supabase.';return}}
         if(!r.ok)throw new Error(r.status===404?'rode o SQL 5.3.0 no Supabase':'HTTP '+r.status);m.style.color='#15803d';m.textContent='✅ Salvo! Os clientes já podem pagar por PIX no app.'}
       catch(e){m.style.color='#b91c1c';m.textContent='Não foi possível salvar: '+(e.message||e)}
     };

@@ -1,7 +1,47 @@
 {
-  "version": "5.3.4",
-  "releasedAt": "2026-10-12T21:00:00-03:00",
+  "version": "5.3.7",
+  "releasedAt": "2026-10-13T11:00:00-03:00",
   "updates": [
+    {
+      "app": "cliente",
+      "type": "melhorado",
+      "text": "5.3.7 (13/10/2026): pedido com legendas Local e Endereço em todos os campos; coleta com vários locais de retirada (Qtd e comprovantes por local) e Dados para entrega com telefone de contato tirado da agenda."
+    },
+    {
+      "app": "cliente",
+      "type": "melhorado",
+      "text": "5.3.7 (13/10/2026): Entregas de hoje com 3, 5, 10, 15 ou 20 por página, páginas e fotos do comprovante; conclusões e comprovantes aparecem sozinhos."
+    },
+    {
+      "app": "cliente",
+      "type": "melhorado",
+      "text": "5.3.7 (13/10/2026): o pagamento por PIX aparece só para serviços concluídos (saiu do menu)."
+    },
+    {
+      "app": "cliente",
+      "type": "melhorado",
+      "text": "5.3.6 (13/10/2026): o pedido aparece no histórico na hora em que é enviado, com status, destino, endereço, tipo, volumes, observação e valor estimado; o histórico se atualiza sozinho quando a FAST confirma ou muda a rota."
+    },
+    {
+      "app": "cliente",
+      "type": "novo",
+      "text": "5.3.6 (13/10/2026): tempo para bloquear ao sair do app (1, 2 ou 5 minutos ou imediatamente) em ☰ → Segurança."
+    },
+    {
+      "app": "cliente",
+      "type": "melhorado",
+      "text": "5.3.5 (13/10/2026): miniaturas dos comprovantes anexados no pedido e no pagamento."
+    },
+    {
+      "app": "cliente",
+      "type": "melhorado",
+      "text": "5.3.5 (13/10/2026): tela Pagar com valor, QR Code, chave PIX e copia e cola com botões de copiar; dá para pagar um valor avulso."
+    },
+    {
+      "app": "geral",
+      "type": "melhorado",
+      "text": "5.3.5 (13/10/2026): Meu PIX com CNPJ/CPF e telefone formatados e QR Code gerado sozinho a partir da chave."
+    },
     {
       "app": "geral",
       "type": "melhorado",
