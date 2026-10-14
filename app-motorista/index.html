@@ -1006,13 +1006,50 @@ function renderizar(){
   if(!lista.length){box.innerHTML='';vazio.classList.remove('hide');return}
   vazio.classList.add('hide');
   var pendentes=lista.filter(function(x){return !ehConcluida(x)});
-  var concluidas=lista.filter(ehConcluida);
+  // 5.3.8: concluídas pela hora da conclusão — a que acabou de ser concluída vai para
+  // o ÚLTIMO lugar das concluídas e a fila de pendentes sobe
+  var concluidas=lista.filter(ehConcluida).map(function(it,i){return {it:it,i:i}}).sort(function(a,b){
+    return ((Date.parse(a.it.data_conclusao||'')||0)-(Date.parse(b.it.data_conclusao||'')||0))||(a.i-b.i);
+  }).map(function(x){return x.it});
   var html='';
   pendentes.forEach(function(it){html+=cardHTML(it,false)});
   concluidas.forEach(function(it){html+=cardHTML(it,true)});
-  box.innerHTML=html;
+  // 5.3.8: nada mudou → não redesenha (era o que fazia a tela piscar a cada atualização)
+  var fotosSig=lista.map(function(it){return (ESTADO.fotosLocais[it.id]||[]).map(function(f){return (f.recId||'')+':'+(f.status||'')+':'+(f.blobUrl||'').slice(-12)}).join('.')}).join(',');
+  if(box.__f538Html===html&&box.__f538Fotos===fotosSig&&box.children.length)return;
+  // 5.3.8: o card que está na tela continua exatamente no mesmo lugar
+  var anc=motAncora();
+  box.innerHTML=html;box.__f538Html=html;box.__f538Fotos=fotosSig;
   lista.forEach(renderFotosCard);
+  motSegurarAncora(anc);
 }
+var motToque={x:0,y:0,t:0},motTrava=0;
+document.addEventListener('pointerdown',function(e){motToque={x:e.clientX,y:e.clientY,t:Date.now()}},true);
+function motAncora(){
+  var box=$('motLista');if(!box)return null;
+  if(Date.now()-motToque.t<2500){var e=document.elementFromPoint(motToque.x,motToque.y),c=e&&e.closest&&e.closest('#motLista .mot-card');if(c)return {id:c.getAttribute('data-item'),y:c.getBoundingClientRect().top}}
+  var cs=box.querySelectorAll('.mot-card');for(var i=0;i<cs.length;i++){var r=cs[i].getBoundingClientRect();if(r.bottom>60)return {id:cs[i].getAttribute('data-item'),y:r.top}}
+  return null;
+}
+function motSegurarAncora(anc){
+  if(!anc)return;var ate=Date.now()+1200,rolou=0;
+  var se=document.scrollingElement||document.documentElement;
+  function parar(){rolou=1}
+  window.addEventListener('touchmove',parar,{passive:true,once:true});window.addEventListener('wheel',parar,{passive:true,once:true});
+  (function passo(){
+    if(rolou||Date.now()>ate)return;
+    var c=document.querySelector('#motLista .mot-card[data-item="'+(window.CSS&&CSS.escape?CSS.escape(anc.id):anc.id)+'"]');
+    if(c){var d=c.getBoundingClientRect().top-anc.y;if(Math.abs(d)>1)se.scrollTop+=d}
+    requestAnimationFrame(passo);
+  })();
+  if(Date.now()-motToque.t<2500)motTrava=Date.now()+600;
+}
+// toques acidentais logo após a lista se reorganizar são ignorados por um instante
+document.addEventListener('click',function(e){
+  if(Date.now()>=motTrava)return;
+  var t=e.target;if(!t||!t.closest||!t.closest('#motLista'))return;
+  e.preventDefault();e.stopPropagation();if(e.stopImmediatePropagation)e.stopImmediatePropagation();
+},true);
 function itemArg(item){
   // objeto seguro p/ onclick inline (id como string; campos essenciais)
   return '{id:'+JSON.stringify(String(item.id))+',data_seq:'+JSON.stringify(item.data_seq||ESTADO.dataSel)+
@@ -1335,7 +1372,7 @@ window.motInstalar=motInstalar;
   ov.innerHTML='<div class="cx"><div class="hd"><b>📋 Histórico das minhas entregas</b><button type="button" class="x" data-f>✕</button></div><div class="bd"><input data-q placeholder="Procurar: código, cliente ou destino"><div data-l class="mut">Carregando…</div></div></div>';
   document.body.appendChild(ov);
   ov.querySelector('[data-f]').onclick=function(){ov.classList.remove('on')};
-  ov.querySelector('[data-q]').addEventListener('input',desenhar);
+  (function(){var t=null;ov.querySelector('[data-q]').addEventListener('input',function(){clearTimeout(t);t=setTimeout(desenhar,150)})})(); /* 5.3.8: busca na pausa da digitação */
   function filtro(){
     var s=ESTADO.sessao||{};
     if(s.motorista_id)return 'motorista_id=eq.'+encodeURIComponent(s.motorista_id);
@@ -1470,5 +1507,15 @@ window.motInstalar=motInstalar;
 })();
 </script>
 
+<script id="fast538-leve-motorista">
+/* 5.3.8 — o teclado/navegador não guarda o que é digitado nos campos de busca e observação.
+   Campos de login/cadastro (e-mail, senha, nome, telefone) continuam com o preenchimento do celular. */
+(function(){
+  function semHistorico(el){if(!el||el.__fxAc||el.hasAttribute('autocomplete'))return;var t=(el.type||'').toLowerCase();if(el.tagName==='TEXTAREA'||/^(text|search|number|)$/.test(t)){el.setAttribute('autocomplete','off');el.__fxAc=1}}
+  document.addEventListener('focusin',function(e){var el=e.target;if(el&&(el.tagName==='INPUT'||el.tagName==='TEXTAREA'))semHistorico(el)},true);
+  function todos(){try{document.querySelectorAll('input,textarea').forEach(semHistorico)}catch(e){}}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',todos);else todos();
+})();
+</script>
 </body>
 </html>
