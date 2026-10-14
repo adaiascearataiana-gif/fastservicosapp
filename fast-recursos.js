@@ -1341,10 +1341,15 @@
     try {
       var d = ($('dpDataSequencia') || {}).value || '';
       var filtros = Array.prototype.map.call(document.querySelectorAll('#rotasDia .rd-filter-driver select, #rotasDia #fastFiltroSeqStatus, #rotasDia input[type=search]'), function (x) { return x.value; }).join('|');
+      // 5.3.8: assinatura "canônica" — ignora a ordem das chaves, campos vazios e carimbos
+      // de sincronização. Antes, cada sincronização trazia o MESMO item com as chaves em outra
+      // ordem (ou com campos vazios a mais) e a lista inteira era redesenhada à toa (tela piscando).
+      var ign = { updatedAt: 1, ultimaModificacao: 1, statusUpdatedAt: 1, ordem: 1, updated_at: 1, _sync: 1, sincronizadoEm: 1 };
+      function vazio(v) { return v === undefined || v === null || v === '' || v === false || (Array.isArray(v) && !v.length) || (v && typeof v === 'object' && !Array.isArray(v) && !Object.keys(v).length); }
       var itens = ((bd().sequencias || {})[d] || []).map(function (it) {
         if (!it) return '';
-        var o = Object.assign({}, it); delete o.updatedAt; delete o.ultimaModificacao;
-        return JSON.stringify(o);
+        var ks = Object.keys(it).filter(function (k) { return !ign[k] && !vazio(it[k]); }).sort();
+        return ks.map(function (k) { var v = it[k]; return k + '=' + (typeof v === 'object' ? JSON.stringify(v) : String(v)); }).join('&');
       }).join('\n');
       return d + '#' + filtros + '#' + hsh(itens) + '#' + itens.length;
     } catch (e) { return String(Math.random()); }
@@ -1356,7 +1361,8 @@
     if (typeof f !== 'function' || f.__frxEst) return;
     var g = function () {
       var cont = $('containerSequencia');
-      var porUsuario = Date.now() - ultimaAcao < 1200 || W.__frxForcarLista === true;
+      var forcado = W.__frxForcarLista === true;
+      var porUsuario = Date.now() - ultimaAcao < 1200 || forcado;
       W.__frxForcarLista = false;
       // 1) editando: espera terminar (salvar/fechar), depois redesenha uma vez só
       if (!porUsuario && editandoAgora()) {
@@ -1370,7 +1376,9 @@
       }
       // 2) nada mudou: não redesenha (era isso que fazia os botões piscarem)
       var sig = assinaturaLista();
-      if (!porUsuario && sig === sigLista && cont && cont.children.length) return;
+      // 5.3.8: mesmo logo após um toque, se nada mudou NÃO redesenha (eram 3 redesenhos
+      // seguidos ao concluir uma rota — a tela piscava e mexia).
+      if (!forcado && sig === sigLista && cont && cont.children.length) return;
       // 3) redesenha mantendo a posição da tela
       var y = W.scrollY;
       var r = f.apply(this, arguments);
@@ -1989,10 +1997,12 @@
     (bd().rotas || []).forEach(function (r) { if (r && r.codigoRastreio) m[r.codigoRastreio] = 'R' + r.id; });
     var sq = bd().sequencias || {};
     Object.keys(sq).forEach(function (d) { (sq[d] || []).forEach(function (it) { if (it && it.codigoRastreio && it.rotaId == null) m[it.codigoRastreio] = m[it.codigoRastreio] || ('S' + it.id); }); });
+    /* 5.3.8: contagem guardada (antes era recontada a cada código novo — muito lento com muitas rotas) */
+    try { Object.defineProperty(m, '__total', { value: Object.keys(m).length, writable: true, enumerable: false }); } catch (e) {}
     return m;
   }
   function novoCodigo(chave, usados) {
-    var total = Object.keys(usados).length, L = 5;
+    var total = typeof usados.__total === 'number' ? usados.__total : Object.keys(usados).length, L = 5;
     while (total > 0.25 * Math.pow(32, L) && L < 12) L++;
     for (; L <= 12; L++) {
       for (var t = 0; t < 6; t++) { var c = montarCodigo(chave, t, L); if (!usados[c] || usados[c] === chave) return c; }
@@ -2009,6 +2019,7 @@
       }
       if (!usoCod) usoCod = mapaCodigos();
       var chave = (tipo === 'rota' ? 'R' : 'S') + obj.id, c = novoCodigo(chave, usoCod);
+      if (!usoCod[c] && typeof usoCod.__total === 'number') usoCod.__total++;
       usoCod[c] = chave;
       return c;
     } catch (e) { return null; }

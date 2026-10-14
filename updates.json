@@ -5,6 +5,46 @@
     {
       "app": "rotas",
       "type": "corrigido",
+      "text": "5.3.8 (14/10/2026): ao concluir ou editar uma rota a tela fica parada — sem piscar nem pular, e toques acidentais logo após a fila se mexer são ignorados."
+    },
+    {
+      "app": "rotas",
+      "type": "corrigido",
+      "text": "5.3.8 (14/10/2026): a rota concluída vai para o último lugar das concluídas e a fila de pendentes sobe — no ROTAS, no FAST e no app do Motorista. A fila não embaralha mais depois da sincronização."
+    },
+    {
+      "app": "rotas",
+      "type": "melhorado",
+      "text": "5.3.8 (14/10/2026): o ROTAS abre mais rápido e mostra \"Carregando rotas…\" em vez de tudo zerado."
+    },
+    {
+      "app": "rotas",
+      "type": "corrigido",
+      "text": "5.3.8 (14/10/2026): no aplicativo, um único botão Galeria — o que funciona (o laranja \"Galeria (1 foto)\" saiu)."
+    },
+    {
+      "app": "cliente",
+      "type": "melhorado",
+      "text": "5.3.8 (14/10/2026): Cliente e Motorista mais leves ao digitar — a busca de lugares roda na pausa da digitação e a lista de sugestões some ao tocar numa delas."
+    },
+    {
+      "app": "rotas",
+      "type": "melhorado",
+      "text": "5.3.8 (14/10/2026): FAST e ROTAS mais leves — digitar no cliente ficou cerca de 15 vezes mais rápido e a troca de páginas ficou mais ágil."
+    },
+    {
+      "app": "fast",
+      "type": "melhorado",
+      "text": "5.3.8 (14/10/2026): a aba Rotas mostra as 150 rotas mais recentes; use os filtros ou o botão Mostrar todas para ver as antigas. Totais e relatórios continuam contando todas."
+    },
+    {
+      "app": "rotas",
+      "type": "corrigido",
+      "text": "5.3.8 (14/10/2026): o que é digitado em Cliente e Destino não fica mais gravado; ao tocar numa sugestão, a lista some na hora."
+    },
+    {
+      "app": "rotas",
+      "type": "corrigido",
       "text": "5.3.8 (14/10/2026): rotas concluídas não mudam mais de data sozinhas; se uma rota aparecer duplicada em duas datas, a cópia extra é removida e o cadastro fica com a data certa."
     },
     {

@@ -10752,6 +10752,7 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
             return ta - tb;
           });
           bd.sequencias[d] = pendOrdenada.concat(concl);
+          bd.sequencias[d].forEach(function(it, k){ if (it) it.ordem = k; }); // 5.3.8
         });
       } catch(e) { console.warn('fastReordenarFilasSeq:', e); }
     }
@@ -10907,35 +10908,42 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
     }
 
     async function fastCarregarBancoSeguro() {
-      const candidatos=[];
+      /* 5.3.8 (abertura mais rápida): antes as 4 cópias (localStorage, last-known-good,
+         IndexedDB e snapshot) eram TODAS lidas e conferidas a cada abertura — vários MB
+         processados 4 vezes antes de mostrar qualquer rota. Agora ordena pela data de
+         gravação e só abre a mais nova; se ela estiver com defeito, tenta a seguinte. */
+      const brutos=[];
       try {
         const local=localStorage.getItem(FAST_LOCAL_KEY);
         const localMeta=JSON.parse(localStorage.getItem(FAST_LOCAL_META_KEY)||'null');
-        if(local) {
-          const parsedLocal=fastParseValid({ data:local, savedAt:localMeta?.savedAt||0, checksum:localMeta?.checksum||null });
-          if(parsedLocal) candidatos.push({ ...parsedLocal, fonte:'localStorage' });
-        }
+        if(local) brutos.push({ c:{ data:local, savedAt:localMeta?.savedAt||0, checksum:localMeta?.checksum||null }, fonte:'localStorage' });
       } catch(_) {}
       try {
-        const lkg=fastParseValid(JSON.parse(localStorage.getItem(FAST_LKG_KEY)||'null'));
-        if(lkg) candidatos.push({ ...lkg, fonte:'last-known-good' });
+        const lkgRaw=JSON.parse(localStorage.getItem(FAST_LKG_KEY)||'null');
+        if(lkgRaw) brutos.push({ c:lkgRaw, fonte:'last-known-good' });
       } catch(_) {}
       try {
-        const current=fastParseValid(await fastIdbGet(FAST_STORE_STATE,'current'));
-        if(current) candidatos.push({ ...current, fonte:'IndexedDB' });
-        const snapshot=fastParseValid(await fastObterUltimoSnapshot());
-        if(snapshot) candidatos.push({ ...snapshot, fonte:'snapshot' });
+        const current=await fastIdbGet(FAST_STORE_STATE,'current');
+        if(current) brutos.push({ c:current, fonte:'IndexedDB' });
       } catch(e) { console.warn('FAST Data Vault: leitura IndexedDB indisponível:', e); }
-      const validos=candidatos.filter(x=>x && x.data);
-      if(!validos.length) return { data:fastNormalizarBanco({}), fonte:'novo', recuperado:false };
-      validos.sort((a,b)=>b.savedAt-a.savedAt);
-      const escolhido=validos[0];
-      // Repara automaticamente a cópia local se ela estiver ausente/corrompida.
-      try {
-        const repaired=JSON.stringify(escolhido.data);
-        localStorage.setItem(FAST_LOCAL_KEY, repaired);
-        localStorage.setItem(FAST_LOCAL_META_KEY, JSON.stringify({savedAt:Date.now(),checksum:fastChecksum(repaired)}));
-      } catch(_) {}
+      function abrir(lista){
+        lista.sort((a,b)=>Number((b.c&&b.c.savedAt)||0)-Number((a.c&&a.c.savedAt)||0));
+        for(const b of lista){ const v=fastParseValid(b.c); if(v&&v.data) return { ...v, fonte:b.fonte }; }
+        return null;
+      }
+      let escolhido=abrir(brutos);
+      if(!escolhido){
+        try { const snap=await fastObterUltimoSnapshot(); if(snap) escolhido=abrir([{ c:snap, fonte:'snapshot' }]); } catch(_) {}
+      }
+      if(!escolhido) return { data:fastNormalizarBanco({}), fonte:'novo', recuperado:false };
+      // Repara a cópia local só quando ela não era a escolhida (ausente/antiga/corrompida).
+      if(escolhido.fonte!=='localStorage'){
+        try {
+          const repaired=escolhido.serialized||JSON.stringify(escolhido.data);
+          localStorage.setItem(FAST_LOCAL_KEY, repaired);
+          localStorage.setItem(FAST_LOCAL_META_KEY, JSON.stringify({savedAt:Date.now(),checksum:fastChecksum(repaired)}));
+        } catch(_) {}
+      }
       return { data:escolhido.data, fonte:escolhido.fonte, recuperado:escolhido.fonte!=='localStorage' };
     }
 
@@ -14907,6 +14915,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
                 return ta - tb;
               });
               bancoDados.sequencias[dSeq] = pendOrdenada.concat(concl);
+              bancoDados.sequencias[dSeq].forEach(function(it, k){ if (it) it.ordem = k; }); // 5.3.8
             });
           }
         } catch(eOrd) { console.warn('r138 ordem pós-merge:', eOrd); }
@@ -16234,6 +16243,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
       // Carregamento resiliente: localStorage + Last-Known-Good + IndexedDB.
       try {
         const cargaSegura = await fastCarregarBancoSeguro();
+        window.__fastBootDados = true;
         const parsed = cargaSegura.data || {};
         bancoDados = fastNormalizarBanco(parsed);
         bancoDados.rotas = (parsed.rotas || parsed.rotasAgendadas || []).map((r, i) => ({
@@ -16272,6 +16282,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
         console.error('Falha no carregamento resiliente:', e);
         bancoDados = fastNormalizarBanco(bancoDados);
       }
+      window.__fastBootDados = true;
 
       document.addEventListener('click', (e) => {
         if (!e.target.closest('.autocomplete-container')) {
@@ -16291,8 +16302,12 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
       // Verifica rotas pendentes de dias anteriores e carrega para o dia seguinte
       verificarEVirarDia();
 
-      renderizar();
-      carregarSequenciaDia();
+      // 5.3.8: no ROTAS a lista do dia aparece primeiro (é a tela que está aberta)
+      if (/exclusive=rotas-dia/.test(location.search)) { carregarSequenciaDia(); renderizar(); }
+      else { renderizar(); carregarSequenciaDia(); }
+      // 5.3.8: deixa a tela desenhar as rotas ANTES do resto da inicialização
+      // (antes a lista ficava zerada até todas as tarefas de abertura terminarem)
+      try { await new Promise(function(ok){ requestAnimationFrame(function(){ setTimeout(ok, 0); }); }); } catch(_) {}
       atualizarPreviewAba1();
       atualizarStatusPastaFoto();
       // Migrar clientes existentes (das rotas) para o cadastro de clientes (uma vez)
@@ -16728,11 +16743,25 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
       return String(st || '').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
     }
 
+    // 5.3.8 (desempenho): busca de rota por id com índice de curta duração
+    // (antes cada consulta percorria TODAS as rotas — milhares de vezes por ciclo).
+    var __fastIdxRotas = { arr: null, len: -1, ts: 0, mapa: null };
+    function fastRotaPorId(rotas, id) {
+      if (!Array.isArray(rotas) || id == null) return null;
+      var agora = Date.now(), c = __fastIdxRotas;
+      if (c.arr !== rotas || c.len !== rotas.length || agora - c.ts > 150 || !c.mapa) {
+        var m = new Map();
+        for (var i = 0; i < rotas.length; i++) { var r = rotas[i]; if (r && r.id != null) { var k = String(r.id); if (!m.has(k)) m.set(k, r); } }
+        c.arr = rotas; c.len = rotas.length; c.ts = agora; c.mapa = m;
+      }
+      return c.mapa.get(String(id)) || null;
+    }
+    window.fastRotaPorId = fastRotaPorId;
     function fastEhConcluido(item, rotas) {
       if (!item) return false;
       if (fastNormalizarStatus(item.status).indexOf('CONCLU') !== -1) return true;
       if (item.rotaId && Array.isArray(rotas)) {
-        const rotaVinc = rotas.find(r => String(r.id) === String(item.rotaId));
+        const rotaVinc = fastRotaPorId(rotas, item.rotaId);
         if (rotaVinc && fastNormalizarStatus(rotaVinc.statusExecucao).indexOf('CONCLU') !== -1) return true;
       }
       return false;
@@ -17389,7 +17418,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
         const mantidos = [];
         (bancoDados.sequencias[dataSeq] || []).forEach(function(item){
           if (!item || item.agrupado || item.rotaId == null) { mantidos.push(item); return; }
-          const rotaVinc = rotasRef.find(function(r){ return String(r.id) === String(item.rotaId); });
+          const rotaVinc = fastRotaPorId(rotasRef, item.rotaId);
           const dataCorreta = rotaVinc && String(rotaVinc.data || '');
           if (!dataCorreta || dataCorreta === dataSeq || fastEhConcluido(item, rotasRef)) { mantidos.push(item); return; }
           mover.push({item:item,data:dataCorreta});
@@ -17433,7 +17462,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
             const fica = [];
             (bancoDados.sequencias[d] || []).forEach(function(item){
               if (!item || item.agrupado || fastEhConcluido(item, rotasRef)) { fica.push(item); return; }
-              const rv = item.rotaId != null ? rotasRef.find(function(r){ return String(r.id) === String(item.rotaId); }) : null;
+              const rv = item.rotaId != null ? fastRotaPorId(rotasRef, item.rotaId) : null;
               // rota que o ADM mandou para um dia futuro não é puxada
               if (rv && String(rv.data || '') > hoje) { fica.push(item); return; }
               if (!item.dataOriginal) item.dataOriginal = d;
@@ -17469,7 +17498,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
         let tirou = 0;
         listaHoje.forEach(function(item){
           if (!item || !fastEhConcluido(item, rotasRef)) { ficam.push(item); return; }
-          const rv = item.rotaId != null ? rotasRef.find(function(r){ return String(r.id) === String(item.rotaId); }) : null;
+          const rv = item.rotaId != null ? fastRotaPorId(rotasRef, item.rotaId) : null;
           const ts = (rv && rv.dataConclusao) || item.dataConclusao || '';
           let diaConcl = '';
           if (ts) { const dc = new Date(ts); if (!isNaN(dc.getTime())) diaConcl = fastDataLocalYYYYMMDD(dc); }
@@ -17510,7 +17539,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
         const agendadasFuturo = [];
         listaOrigem = listaOrigem.filter(item => {
           if (!item || item.agrupado || fastEhConcluido(item, rotasRef) || item.rotaId == null) return true;
-          const rotaVinc = rotasRef.find(r => String(r.id) === String(item.rotaId));
+          const rotaVinc = fastRotaPorId(rotasRef, item.rotaId);
           if (!rotaVinc || !rotaVinc.data || String(rotaVinc.data) <= hoje) return true;
           agendadasFuturo.push({ item, data: String(rotaVinc.data) });
           return false;
@@ -17541,7 +17570,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
           item.status = 'EM ROTA'; // recomeça como pendente no novo dia
           delete item.dataConclusao;
           if (item.rotaId) {
-            const rotaVinc = rotasRef.find(r => String(r.id) === String(item.rotaId));
+            const rotaVinc = fastRotaPorId(rotasRef, item.rotaId);
             if (rotaVinc) {
               rotaVinc.data = hoje; // (v2.3.36) pendente pertence a HOJE
               rotaVinc.statusExecucao = 'EM ROTA';
@@ -17568,7 +17597,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
         const novasLinhasHoje = listaHoje.filter(item => {
           if (!fastEhConcluido(item, rotasRef)) return true; // pendente de hoje fica
           if (!item.rotaId) return true; // concluído hoje sem rota vinculada fica
-          const rotaVinc = rotasRef.find(r => String(r.id) === String(item.rotaId));
+          const rotaVinc = fastRotaPorId(rotasRef, item.rotaId);
           if (!rotaVinc) return true; // rota vinculada não existe mais: fica
           // Data em que a rota foi concluída (ISO UTC): converte para o
           // fuso local antes de comparar (senão conclusão de 21:00+ de ontem
@@ -19419,6 +19448,12 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
         renderizarRelatorioSequencia(dataSel, lista);
         return;
       }
+      // 5.3.8: enquanto os dados do aparelho ainda estão sendo abertos, mostra "Carregando"
+      // em vez de uma lista vazia/zerada.
+      if (!window.__fastBootDados) {
+        container.innerHTML = '<div class="f538-carregando" style="text-align:center;padding:28px 12px;font-weight:700;color:var(--text-muted,#64748b);"><i class="fa-solid fa-spinner fa-spin"></i> Carregando rotas…</div>';
+        return;
+      }
       container.innerHTML = '';
 
       const filtroOrigem = (document.getElementById('filtroSeqOrigem').value || '').toLowerCase();
@@ -20882,6 +20917,9 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
 
       // Reconstruir lista: pendentes (na ordem da fila) + concluídas (por ordem de conclusão)
       bancoDados.sequencias[dataSel] = [...pendentes, ...concluidas];
+      // 5.3.8: grava a nova posição de cada rota (antes ficava a posição antiga e a
+      // sincronização embaralhava a fila por alguns segundos)
+      bancoDados.sequencias[dataSel].forEach(function(itm, k){ if (itm) itm.ordem = k; });
 
       // r59: atualiza e move apenas o cartão clicado no DOM. Isso libera a
       // próxima rota imediatamente, sem reconstruir fotos e todos os cartões.
@@ -28310,7 +28348,19 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
       const tbodyR = document.getElementById('tabelaRotasBody');
       tbodyR.innerHTML = '';
       const linhasRotas = [];
-      rotasFiltradas.forEach(r => {
+      // 5.3.8 (desempenho): sem nenhum filtro, a tabela desenha só as 150 rotas mais
+      // recentes (desenhar milhares de linhas deixava o app inteiro lento). Com qualquer
+      // filtro (cliente, datas, status, origem, destino) aparecem TODAS as encontradas.
+      // Totais e relatórios continuam usando todas as rotas.
+      const _f538SemFiltro = !nomeFiltro && !dtInicio && !dtFim && tipoVolFiltro === 'TODOS' && stFiltro === 'TODOS' && stRotaFiltro === 'TODOS' && !origemFiltro && !destinoFiltro;
+      const _f538Limite = 150;
+      let rotasVisiveis = rotasFiltradas;
+      if (_f538SemFiltro && !window.__fast538RotasTodas && rotasFiltradas.length > _f538Limite) {
+        const _rec = rotasFiltradas.slice().sort((a, b) => String(b.data || '').localeCompare(String(a.data || '')) || (Number(b.id) || 0) - (Number(a.id) || 0)).slice(0, _f538Limite);
+        const _ids = new Set(_rec.map(x => x));
+        rotasVisiveis = rotasFiltradas.filter(x => _ids.has(x));
+      }
+      rotasVisiveis.forEach(r => {
         let statusPagamentoClass = 'badge-pendente';
         if (r.status === 'Recebido') statusPagamentoClass = 'badge-recebido';
 
@@ -28343,6 +28393,11 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
           <td>${fmtMoedaBR(r.valor || 0)}</td>
         </tr>`);
       });
+      if (rotasVisiveis.length < rotasFiltradas.length) {
+        linhasRotas.push('<tr class="f538-mais-rotas no-print"><td colspan="13" style="text-align:center;padding:14px 8px;font-weight:700;">'
+          + 'Mostrando as ' + rotasVisiveis.length + ' rotas mais recentes de ' + rotasFiltradas.length + '. Use os filtros para buscar as antigas. '
+          + '<button type="button" class="btn-primary" style="margin-left:6px;padding:6px 12px;" onclick="window.__fast538RotasTodas=true;renderizar();">Mostrar todas</button></td></tr>');
+      }
       tbodyR.innerHTML = linhasRotas.join('');
 
       // Renderizar RH e Despesas da Empresa
@@ -43740,6 +43795,8 @@ label.hf-dia input{width:16px!important;height:16px!important;margin:0!important
     },400);
   }
   function salvarRascunho(){
+    /* 5.3.8: o que está sendo digitado NÃO é mais gravado (pedido do usuário) */
+    try{localStorage.removeItem(K_RASC)}catch(e){} return;
     try{
       var d={ts:Date.now()},tem=false;
       CAMPOS.forEach(function(id){var e=$(id);if(e&&e.value){d[id]=e.value;tem=true}});
@@ -43748,6 +43805,7 @@ label.hf-dia input{width:16px!important;height:16px!important;margin:0!important
   }
   function limparRascunho(){try{localStorage.removeItem(K_RASC)}catch(e){}}
   function restaurarRascunho(){
+    try{localStorage.removeItem(K_RASC)}catch(e){} return;
     try{
       var d=JSON.parse(localStorage.getItem(K_RASC)||'null');
       if(!d||Date.now()-d.ts>24*3600*1000)return;
@@ -43994,6 +44052,13 @@ label.hf-dia input{width:16px!important;height:16px!important;margin:0!important
     var dec=lista.map(function(it,i){return {it:it,i:i,k:(typeof it.ordem==='number')?it.ordem:i}});
     dec.sort(function(a,b){return a.k-b.k||a.i-b.i});
     dec.forEach(function(x,i){lista[i]=x.it});
+    // 5.3.8: concluídas sempre depois das pendentes, pela hora de conclusão; posições renumeradas
+    try{
+      var cc=function(it){return /CONCLU/i.test(String(it&&it.status||''))};
+      var pe=lista.filter(function(it){return !cc(it)}),co=lista.filter(cc);
+      co.sort(function(a,b){return (Date.parse(a.dataConclusao||'')||0)-(Date.parse(b.dataConclusao||'')||0)});
+      pe.concat(co).forEach(function(it,i){lista[i]=it;if(it)it.ordem=i});
+    }catch(e){}
   }
   function remover(id){
     var a=achar(id);if(!a)return false;
@@ -44263,15 +44328,43 @@ body.fx-apk .fx-gal-ajuda{display:flex}
     timerSem=setTimeout(function(){
       if(viuTroca||Date.now()-diag.ultimoToque<2400)return;
       diag.semResposta++;
-      if(ehApk&&diag.semResposta<=2)toast('A galeria não abriu neste aplicativo. Use o botão "Galeria (1 foto)" logo abaixo. Se também não abrir, o aplicativo precisa da atualização do seletor de arquivos.','warning');
+      if(ehApk&&diag.semResposta<=2)toast('A galeria não respondeu. Toque em Galeria de novo.','warning');
     },2500);
   }
   ['blur','pagehide'].forEach(function(ev){W.addEventListener(ev,function(){viuTroca=true})});
   document.addEventListener('visibilitychange',function(){if(document.hidden)viuTroca=true});
-  // toque no botão Galeria normal
+  /* 5.3.8 — UM SÓ BOTÃO DE GALERIA: no aplicativo, o botão "Galeria" passa a usar o mesmo
+     jeito do antigo botão laranja "Galeria (1 foto)" (o que funciona). O botão laranja sai. */
+  function escolherGenerico(orig){
+    var inp=document.createElement('input');
+    inp.type='file';inp.accept=orig.getAttribute('accept')||'image/*';
+    inp.style.cssText='position:fixed;left:-9999px;top:0;width:1px;height:1px;opacity:0';
+    document.body.appendChild(inp);
+    marcarToque(true);
+    inp.addEventListener('change',function(){
+      diag.escolhas++;
+      if(inp.files&&inp.files.length){
+        var ok=false;
+        try{orig.files=inp.files;ok=orig.files&&orig.files.length>0}catch(e){}
+        if(ok){try{orig.dispatchEvent(new Event('change',{bubbles:true}))}catch(e){toast('Não foi possível anexar a foto: '+(e&&e.message||e),'error')}}
+        else{
+          var oc=orig.getAttribute('onchange')||'';
+          try{(new Function('event',oc)).call(inp,{target:inp,currentTarget:inp,preventDefault:function(){}})}catch(e){toast('Não foi possível anexar a foto: '+(e&&e.message||e),'error')}
+        }
+      }
+      setTimeout(function(){try{inp.remove()}catch(e){}},60000);
+    });
+    inp.click();
+  }
   document.addEventListener('click',function(ev){
     var lab=ev.target&&ev.target.closest?ev.target.closest('label.btn-upload'):null;
-    if(lab&&lab.querySelector('input[type=file]'))marcarToque();
+    var orig=lab&&lab.querySelector('input[type=file]');
+    if(!orig)return;
+    if(!ehApk){marcarToque();return}
+    if(ev.target===orig)return;
+    ev.preventDefault();ev.stopPropagation();
+    var card=lab.closest('.seq-item');
+    if(card&&parseAlvo(card))escolherUma(card);else escolherGenerico(orig);
   },true);
   document.addEventListener('change',function(ev){
     var t=ev.target;
@@ -44281,12 +44374,8 @@ body.fx-apk .fx-gal-ajuda{display:flex}
   function decorar(){
     var cont=document.getElementById('containerSequencia');if(!cont)return;
     Array.prototype.forEach.call(cont.querySelectorAll('.seq-item'),function(card){
-      if(card.querySelector('.fx-gal-ajuda'))return;
-      var grp=card.querySelector('.seq-group-fotos');if(!grp)return;
-      var d=document.createElement('div');d.className='fx-gal-ajuda';
-      d.innerHTML='<span>Galeria não abre?</span><button type="button" class="fx-gal-1">Galeria (1 foto)</button>';
-      d.querySelector('button').addEventListener('click',function(e){e.preventDefault();e.stopPropagation();escolherUma(card)});
-      grp.appendChild(d);
+      /* 5.3.8: o botão laranja extra não é mais criado — o botão Galeria já usa o modo que funciona */
+      var velho=card.querySelector('.fx-gal-ajuda');if(velho)velho.remove();
     });
   }
   function ligar(){
@@ -44806,8 +44895,11 @@ body.fx-apk .fx-gal-ajuda{display:flex}
   function marcarCards(){
     var rotas={}; (bd().rotas||[]).forEach(function(r){if(r&&r.canalSolicitacao)rotas[String(r.id)]=r});
     var sq=(bd().sequencias||{}), dp=$('dpDataSequencia'), lista=sq[dp&&dp.value]||[];
+    /* 5.3.8 (desempenho): um único varrimento dos cards em vez de uma busca na página inteira por rota */
+    var cardsMap={}; var cont=$('containerSequencia'); if(!cont||document.hidden)return;
+    Array.prototype.forEach.call(cont.querySelectorAll('.seq-item[data-item-id]'),function(c){cardsMap[c.getAttribute('data-item-id')]=c});
     lista.forEach(function(it){
-      if(!it)return; var r=rotas[String(it.rotaId)]; var card=document.querySelector('.seq-item[data-item-id="'+it.id+'"]'); if(!card)return;
+      if(!it)return; var r=rotas[String(it.rotaId)]; var card=cardsMap[String(it.id)]; if(!card)return;
       var tag=card.querySelector('.fx-canal');
       if(!r){if(tag)tag.remove();return}
       var txt=(r.canalSolicitacao==='app'?'📱 App':'📲 WhatsApp')+(r.solicitadoEm?' '+p2(new Date(r.solicitadoEm).getHours())+':'+p2(new Date(r.solicitadoEm).getMinutes()):'');
@@ -45311,6 +45403,214 @@ body.fx-apk .fx-gal-ajuda{display:flex}
   setTimeout(rodar,6000);
   setInterval(function(){ if(!document.hidden) rodar(); },60000);
   document.addEventListener('visibilitychange',function(){ if(!document.hidden) setTimeout(rodar,3000); });
+})();
+</script>
+<script id="fast538-digitacao">
+/* 5.3.8 — DIGITAÇÃO MAIS LEVE E LISTA DE SUGESTÕES QUE FECHA AO TOCAR
+   - nomes de clientes e "Última rota" ficam em memória (refeitos só quando os dados mudam);
+   - a busca roda quando a pessoa dá uma pausa na digitação, não a cada letra;
+   - nada é preenchido no meio da digitação: só ao tocar na sugestão (ou ao sair do campo com o nome completo);
+   - ao tocar numa sugestão, a lista some na hora e não volta sozinha;
+   - o navegador/teclado não guarda mais o que foi digitado nos campos (autocomplete off). */
+(function(){
+  var W=window;
+  function N(v){try{return normalizarBuscaCliente(v)}catch(e){return String(v||'').toLowerCase().trim()}}
+  function bd(){return W.bancoDados||{}}
+  function assinatura(){var b=bd(),t=0,s=b.sequencias||{};for(var k in s){t+=(s[k]||[]).length}return (b.rotas||[]).length+'|'+(b.clientes||[]).length+'|'+t+'|'+(b.ultimaModificacao||'')}
+  var cache={sig:null,ts:0,nomes:null,norm:null,idx:null,tel:null};
+  function garantir(){
+    var sg=assinatura();
+    if(cache.sig===sg&&cache.nomes&&Date.now()-cache.ts<120000)return;
+    cache.sig=sg;cache.ts=Date.now();cache.idx=null;cache.tel=null;
+    cache.nomes=origNomes?origNomes():[];cache.norm=cache.nomes.map(N);
+  }
+  var origNomes=typeof W.obterNomesClientesAutocomplete==='function'?W.obterNomesClientesAutocomplete:null;
+  if(origNomes){W.obterNomesClientesAutocomplete=function(){garantir();return cache.nomes};}
+  function agrupado(it){var c=function(x){return Array.isArray(x)&&x.length>0};return !!(it&&(it.agrupado===true||c(it.itensOriginais)||c(it.rotasOriginais)||c(it.itensAgrupados)))}
+  function indice(){
+    garantir(); if(cache.idx)return cache.idx;
+    var m={},b=bd();
+    function por(o,d,id){if(!o||o.teste||agrupado(o))return;var k=N(o.cliente);if(!k)return;var a=m[k];if(!a||d>a.d||(d===a.d&&id>a.id))m[k]={d:d,id:id,o:o}}
+    (b.rotas||[]).forEach(function(r){por(r,String(r&&r.data||''),Number(r&&r.id)||0)});
+    var s=b.sequencias||{};Object.keys(s).forEach(function(d){(s[d]||[]).forEach(function(it){por(it,d,Number(String(it&&it.id||'').replace(/\D/g,'').slice(0,15))||0)})});
+    cache.idx=m;return m;
+  }
+  function telefones(){garantir();if(cache.tel)return cache.tel;var t={};(bd().clientes||[]).forEach(function(c){if(c&&c.nome)t[N(c.nome)]=c.whatsapp||c.telefone||''});cache.tel=t;return t}
+  function esc(v){try{return escapeHtml(v)}catch(e){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}}
+  function moeda(v){try{return fmtMoedaBR(v)}catch(e){return 'R$ '+(Number(v)||0).toFixed(2).replace('.',',')}}
+  var fechadaAte=0;
+  function esconder(l){if(!l)return;l.style.display='none';l.classList.remove('fast-sug-show')}
+
+  /* ---- Rotas do Dia: cliente ---- */
+  var tSeq=null;
+  function montarSeq(input){
+    var lista=document.getElementById('listaSugestoesSeq');if(!lista)return;
+    if(Date.now()<fechadaAte){esconder(lista);return}
+    var termo=N(input.value);
+    if(!termo){lista.innerHTML='';esconder(lista);return}
+    garantir();
+    var achados=[];for(var i=0;i<cache.nomes.length&&achados.length<30;i++){if(cache.norm[i].indexOf(termo)>=0)achados.push(cache.nomes[i])}
+    lista.innerHTML='';
+    if(!achados.length){esconder(lista);return}
+    var editando=String((document.getElementById('seqItemId')||{}).value||'').trim();
+    var idx=indice(),tel=telefones(),frag=document.createDocumentFragment();
+    achados.forEach(function(nome){
+      var item=document.createElement('div');item.className='suggestion-item';item.setAttribute('role','option');
+      var u=idx[N(nome)],o=u&&u.o,fone=tel[N(nome)]||'';
+      var resumo=o?[o.origem||'',o.destino||'',(o.qtdMercadorias||1)+'x',moeda(Number(o.valor)||0)].filter(Boolean).join(' · '):'';
+      item.innerHTML='<strong>'+esc(nome)+'</strong>'+(fone?'<small>📞 '+esc(fone)+'</small>':'')+(resumo?'<small><i class="fa-solid fa-clock-rotate-left"></i> Última rota: '+esc(resumo)+'</small>':'');
+      item.addEventListener('mousedown',function(e){e.preventDefault()});
+      item.addEventListener('click',function(){
+        input.value=nome;fechar(lista,input);
+        if(editando){try{atualizarPreviewAba2()}catch(e){}}else{try{preencherDadosClienteSeq(nome)}catch(e){}}
+      });
+      frag.appendChild(item);
+    });
+    lista.appendChild(frag);lista.style.display='block';lista.classList.add('fast-sug-show');
+  }
+  W.aoDigitarClienteSeq=function(input){
+    try{capitalizar(input)}catch(e){}
+    var ev=W.event, imediato=ev&&ev.type==='focus';
+    clearTimeout(tSeq);
+    if(imediato){montarSeq(input);return}
+    if(!String(input.value||'').trim()){montarSeq(input);return}
+    tSeq=setTimeout(function(){montarSeq(input)},180);
+  };
+  /* nome completo digitado e saiu do campo (ou Enter): aí sim preenche com a última rota */
+  function completarSeq(input){
+    var termo=N(input.value);if(!termo)return;
+    if(String((document.getElementById('seqItemId')||{}).value||'').trim())return;
+    garantir();var i=cache.norm.indexOf(termo);if(i<0)return;
+    if(input.__fxPreenchido===termo)return;input.__fxPreenchido=termo;
+    try{preencherDadosClienteSeq(cache.nomes[i])}catch(e){}
+  }
+  document.addEventListener('focusout',function(e){if(e.target&&e.target.id==='seqCliente'){var inp=e.target;setTimeout(function(){completarSeq(inp);esconder(document.getElementById('listaSugestoesSeq'))},220)}},true);
+  document.addEventListener('keydown',function(e){if(e.key==='Enter'&&e.target&&e.target.id==='seqCliente')completarSeq(e.target)},true);
+  document.addEventListener('input',function(e){if(e.target&&e.target.id==='seqCliente')e.target.__fxPreenchido=null},true);
+
+  /* ---- Aba Rotas (FAST): mesma busca, só que espera a pausa na digitação ---- */
+  var origCli=W.aoDigitarCliente,tCli=null;
+  if(typeof origCli==='function'){
+    W.aoDigitarCliente=function(input){
+      var ev=W.event;clearTimeout(tCli);
+      if((ev&&ev.type==='focus')||!String(input.value||'').trim())return origCli(input);
+      if(Date.now()<fechadaAte)return;
+      tCli=setTimeout(function(){origCli(input)},180);
+    };
+  }
+
+  /* ---- Toque numa sugestão: some na hora e não reabre ---- */
+  function fechar(lista,input){
+    esconder(lista);fechadaAte=Date.now()+900;
+    try{if(input&&input.blur)input.blur()}catch(e){}
+    [60,250,600].forEach(function(ms){setTimeout(function(){esconder(lista)},ms)});
+  }
+  document.addEventListener('click',function(e){
+    var it=e.target&&e.target.closest&&e.target.closest('.suggestion-item');if(!it)return;
+    var lista=it.closest('.suggestions-list');if(!lista)return;
+    var cont=lista.closest('.autocomplete-container')||lista.parentNode;
+    var inp=cont&&cont.querySelector('input');
+    setTimeout(function(){fechar(lista,inp)},0);
+  },false);
+
+  /* ---- Teclado/navegador não guarda o que foi digitado ---- */
+  function semHistorico(el){if(!el||el.__fxAc)return;var t=(el.type||'').toLowerCase();if(el.tagName==='TEXTAREA'||/^(text|search|tel|email|number|)$/.test(t)){el.setAttribute('autocomplete','off');el.__fxAc=1}}
+  document.addEventListener('focusin',function(e){var el=e.target;if(el&&(el.tagName==='INPUT'||el.tagName==='TEXTAREA'))semHistorico(el)},true);
+  function marcarTodos(){try{document.querySelectorAll('input,textarea').forEach(semHistorico);document.querySelectorAll('form').forEach(function(f){f.setAttribute('autocomplete','off')})}catch(e){}}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',marcarTodos);else marcarTodos();
+  try{localStorage.removeItem('fast_rd_rascunho_v1')}catch(e){}
+})();
+</script>
+<script id="fast538-tela-parada">
+/* 5.3.8 — TELA PARADA AO CONCLUIR / EDITAR (Rotas do Dia)
+   - ao redesenhar a lista, o card que estava sob o dedo (ou o primeiro visível) fica
+     exatamente no mesmo lugar da tela, mesmo que as fotos/cards mudem de altura depois;
+   - logo após concluir/desfazer (ou após um redesenho), toques nos cards ficam ignorados
+     por um instante, para não acertar sem querer o botão da rota que "subiu" para o lugar. */
+(function(){
+  var W=window,D=document;
+  var toque={x:0,y:0,t:0}, trava=0, segurando=null, usuarioRolou=0;
+  function rolador(){
+    var m=D.querySelector('main');
+    if(m){var st=getComputedStyle(m);if(/(auto|scroll)/.test(st.overflowY)&&m.scrollHeight>m.clientHeight+2)return m}
+    return D.scrollingElement||D.documentElement;
+  }
+  function topoVisivel(r){return r===D.scrollingElement||r===D.documentElement?0:r.getBoundingClientRect().top}
+  function cont(){return D.getElementById('containerSequencia')}
+  function cardPorId(id){var c=cont();if(!c||!id)return null;return c.querySelector('.seq-item[data-item-id="'+String(id).replace(/"/g,'')+'"]')}
+  function escolherAncora(){
+    var c=cont();if(!c||!c.children.length)return null;
+    var r=rolador(),topo=topoVisivel(r);
+    // 1) o card que está sob o dedo (toque recente)
+    if(Date.now()-toque.t<2500){
+      var e=D.elementFromPoint(toque.x,toque.y),card=e&&e.closest&&e.closest('#containerSequencia .seq-item');
+      if(card&&card.dataset.itemId)return {id:card.dataset.itemId,y:card.getBoundingClientRect().top};
+    }
+    // 2) senão, o primeiro card visível
+    var cards=c.querySelectorAll('.seq-item[data-item-id]');
+    for(var i=0;i<cards.length;i++){var b=cards[i].getBoundingClientRect();if(b.bottom>topo+40)return {id:cards[i].dataset.itemId,y:b.top}}
+    return null;
+  }
+  function segurar(anc,ms){
+    if(!anc)return;
+    var ate=Date.now()+ms, r=rolador(), inicio=Date.now();
+    segurando={anc:anc,ate:ate};
+    function passo(){
+      if(!segurando||segurando.anc!==anc)return;
+      if(usuarioRolou>inicio||Date.now()>ate){segurando=null;return}
+      var card=cardPorId(anc.id);
+      if(card){var d=card.getBoundingClientRect().top-anc.y;if(Math.abs(d)>1){r.scrollTop+=d;}}
+      requestAnimationFrame(passo);
+    }
+    passo();
+  }
+  // o usuário rolando a tela de propósito cancela a "fixação"
+  ['wheel','touchmove'].forEach(function(ev){D.addEventListener(ev,function(){usuarioRolou=Date.now()},{passive:true,capture:true})});
+  D.addEventListener('pointerdown',function(e){toque={x:e.clientX,y:e.clientY,t:Date.now()}},true);
+
+  // trava de toques acidentais nos cards
+  D.addEventListener('click',function(e){
+    if(Date.now()>=trava)return;
+    var t=e.target;if(!t||!t.closest||!t.closest('#containerSequencia'))return;
+    e.preventDefault();e.stopPropagation();if(e.stopImmediatePropagation)e.stopImmediatePropagation();
+  },true);
+  D.addEventListener('click',function(e){
+    var b=e.target&&e.target.closest&&e.target.closest('#containerSequencia button');
+    if(b&&/alternarConcluidoSeq/.test(b.getAttribute('onclick')||'')){
+      trava=Date.now()+800;
+      var anc=escolherAncora();segurar(anc,1600);
+    }
+  },false);
+
+  // embrulha o redesenho da lista
+  function instalar(){
+    var f=W.renderizarSequencia;
+    if(typeof f!=='function'||f.__f538Parada)return;
+    var g=function(){
+      var c=cont(),antes=c?c.children.length:0;
+      var anc=(segurando&&segurando.anc)||escolherAncora();
+      var r=f.apply(this,arguments);
+      var c2=cont();
+      if(anc&&c2&&antes&&c2.children.length){
+        var card=cardPorId(anc.id);
+        if(card){
+          var rol=rolador(),d=card.getBoundingClientRect().top-anc.y;
+          if(Math.abs(d)>1)rol.scrollTop+=d;
+          segurar(anc,1200);
+          if(Date.now()-toque.t<2500)trava=Math.max(trava,Date.now()+450);
+        }
+      }
+      return r;
+    };
+    Object.keys(f).forEach(function(k){try{g[k]=f[k]}catch(e){}});
+    g.__f538Parada=true;g.__frxEst=true;
+    W.renderizarSequencia=g;
+  }
+  instalar();
+  W.addEventListener('load',function(){setTimeout(instalar,200);setTimeout(instalar,2000);setTimeout(instalar,5000)});
+  setInterval(instalar,5000);
+  // fecha a janela de edição: a lista se redesenha sem pular
+  W.fast538Ancorar=function(ms){segurar(escolherAncora(),ms||1200)};
 })();
 </script>
 </body></html>
