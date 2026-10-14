@@ -3,6 +3,26 @@
   "releasedAt": "2026-10-14T10:00:00-03:00",
   "updates": [
     {
+      "app": "fast",
+      "type": "corrigido",
+      "text": "5.3.8 (14/10/2026): Lugares sincronizados na hora entre celular, aplicativo e navegador — cada lugar criado, editado ou excluído sobe em poucos segundos e os outros aparelhos recebem ao abrir, ao voltar para o app e a cada 30 s. Uma cópia antiga em outro aparelho não passa mais por cima da edição mais nova."
+    },
+    {
+      "app": "fast",
+      "type": "novo",
+      "text": "5.3.8 (14/10/2026): Área Protegida → Dispositivos: lista onde o FAST está conectado (Android com modelo e versão, aplicativo, Windows, Linux…), conta, local aproximado e último acesso. Dá para renomear, desconectar à distância ou tirar da lista."
+    },
+    {
+      "app": "fast",
+      "type": "corrigido",
+      "text": "5.3.8 (14/10/2026): Lugares — o Salvar volta a funcionar mesmo para um nome que já tinha sido excluído (antes a janela fechava e o lugar não aparecia). Agora sempre aparece uma confirmação ou o motivo de não salvar."
+    },
+    {
+      "app": "geral",
+      "type": "melhorado",
+      "text": "5.3.8 (14/10/2026): toque mais fácil — deslizar em cima de tabela move a tabela para os lados e a tela para cima/baixo; segurar um pouco e arrastar sobe/desce a tela em qualquer lugar (FAST, ROTAS, Cliente e Motorista)."
+    },
+    {
       "app": "rotas",
       "type": "corrigido",
       "text": "5.3.8 (14/10/2026): ao concluir ou editar uma rota a tela fica parada — sem piscar nem pular, e toques acidentais logo após a fila se mexer são ignorados."

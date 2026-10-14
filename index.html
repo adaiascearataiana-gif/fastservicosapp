@@ -13858,7 +13858,10 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
 
     // --- Mapear destino do app para formato da tabela Supabase ---
     function destinoToSupabase(d) {
-      const carimbo = d.updatedAt || d.updated_at || new Date().toISOString();
+      // 5.3.8: lugar nunca editado NÃO ganha a hora de agora ao subir (antes, um aparelho com a
+      // cópia antiga "carimbava agora" e passava por cima da edição feita em outro aparelho).
+      const _idMs = Number(d.id);
+      const carimbo = d.updatedAt || d.updated_at || ((_idMs > 1e12 && _idMs < 4e12) ? new Date(_idMs).toISOString() : '2020-01-01T00:00:00.000Z');
       return {
         id: Number(d.id),
         nome: d.nome || '',
@@ -14614,7 +14617,9 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
       const destinosUnificados = destMesclarDuplicados([
         ...(nuvem.destinos || []),
         ...(local.destinos || [])
-      ]).filter(d => /[a-z]/i.test(destNormalizarNome(d.nome)) && !/^\s*\d/.test(String(d.nome || '')) && !destinosExcluidosSet.has(destNormalizarNome(d.nome)));
+      ]);
+      const destinosBloqueados = fastLapideEfetiva(Array.from(destinosExcluidosSet)); // 5.3.8
+      const destinosUnificadosOk = destinosUnificados.filter(d => /[a-z]/i.test(destNormalizarNome(d.nome)) && !/^\s*\d/.test(String(d.nome || '')) && !destinosBloqueados.has(destNormalizarNome(d.nome)));
       return {
         rotas: Array.from(rotasMap.values()),
         despesas: Array.from(despMap.values()),
@@ -14635,7 +14640,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
         rhExcluidos: Array.from(rhExcluidosSet),
         despesasEmpresaExcluidas: Array.from(despesasEmpresaExcluidasSet),
         despesasExcluidas: Array.from(despesasExcluidasSet),
-        destinos: destinosUnificados
+        destinos: destinosUnificadosOk
       };
     }
 
@@ -17783,6 +17788,35 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
         .trim(); // 5.1.6: sem espaço nas pontas. Nomes com * no início ou . no final geravam chave com espaço, que nunca batia com a lápide — por isso voltavam.
     }
 
+    /* 5.3.8 — LÁPIDES COM "LIBERAÇÃO": um lugar excluído podia nunca mais ser
+       cadastrado de novo — o Salvar fechava a janela e nada aparecia, porque a lista de
+       excluídos da nuvem (que só cresce) trazia o nome de volta e apagava o cadastro.
+       Agora, ao cadastrar de propósito um nome que estava excluído, entra uma marca
+       "zz liberado <hora> <nome>" (que viaja junto com a lista para todos os aparelhos);
+       uma nova exclusão grava "zz excluido <hora> <nome>". Vale o evento mais recente. */
+    function fastLapideEfetiva(lista) {
+      const del = Object.create(null), lib = Object.create(null), out = new Set();
+      (lista || []).forEach(function (v) {
+        const n = destNormalizarNome(v); if (!n) return;
+        const m = /^zz (liberado|excluido) (\d+) (.+)$/.exec(n);
+        if (m) {
+          const ts = Number(m[2]) || 0, nome = m[3];
+          if (m[1] === 'liberado') { if (!(lib[nome] >= ts)) lib[nome] = ts; }
+          else { if (!(del[nome] >= ts)) del[nome] = ts; }
+          return;
+        }
+        if (!(n in del)) del[n] = 0;
+      });
+      Object.keys(del).forEach(function (n) { if (!(n in lib) || del[n] > lib[n]) out.add(n); });
+      return out;
+    }
+    function fastLapideMarcar(lista, tipo, nome) {
+      const chave = destNormalizarNome(nome); if (!chave || !Array.isArray(lista)) return;
+      lista.push('zz ' + (tipo === 'liberado' ? 'liberado' : 'excluido') + ' ' + Date.now() + ' ' + chave);
+    }
+    window.fastLapideEfetiva = fastLapideEfetiva;
+    window.fastLapideMarcar = fastLapideMarcar;
+
     // Consolida lugares repetidos sem descartar os dados úteis de nenhuma cópia.
     // O maior contador é preservado (somar inflaria o histórico de uso).
     function destMesclarDuplicados(lista) {
@@ -17796,8 +17830,10 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
         if (!porNome.has(chave)) { porNome.set(chave, atual); return; }
 
         const base = porNome.get(chave);
-        const tsBase = Date.parse(base.updatedAt || base.updated_at || '') || Number(base.ultimaUso || 0) || 0;
-        const tsAtual = Date.parse(atual.updatedAt || atual.updated_at || '') || Number(atual.ultimaUso || 0) || 0;
+        // 5.3.8: só a hora da EDIÇÃO decide (o "último uso" muda toda vez que o app abre e
+        // fazia a cópia antiga de um aparelho vencer a edição feita em outro).
+        const tsBase = Date.parse(base.updatedAt || base.updated_at || '') || 0;
+        const tsAtual = Date.parse(atual.updatedAt || atual.updated_at || '') || 0;
         // A edição mais recente é autoritativa. O código antigo escolhia o texto
         // mais longo e podia restaurar endereço/bairro antigos logo após salvar.
         if (tsAtual > tsBase) {
@@ -17879,7 +17915,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
       const chave = destNormalizarNome(nomeDestino);
       // 2.4.13: não recriar Lugares/Destinos cujo nome é apenas número/código.
       if (!/[a-z]/i.test(chave) || /^\s*\d/.test(String(nomeDestino))) return null;
-      if ((bancoDados.destinosExcluidos || []).some(n => destNormalizarNome(n) === chave)) return null;
+      if (fastLapideEfetiva(bancoDados.destinosExcluidos).has(chave)) return null; // 5.3.8
       const destinos = destGarantir();
       const existente = destBuscar(nomeDestino);
       if (existente) {
@@ -17902,7 +17938,8 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
         telefone: (infoExtra && infoExtra.telefone) || '',
         enderecoObj: (infoExtra && infoExtra.enderecoObj) || null,
         usadoEm: 1,
-        ultimaUso: Date.now()
+        ultimaUso: Date.now(),
+        updatedAt: new Date().toISOString() // 5.3.8: lugar novo também viaja para os outros aparelhos
       };
       destinos.push(novo);
       return novo;
@@ -18211,11 +18248,19 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
         if (chaveAnterior && chaveAnterior !== chaveNova) {
           if (!Array.isArray(bancoDados.destinosExcluidos)) bancoDados.destinosExcluidos = [];
           if (!bancoDados.destinosExcluidos.some(n => destNormalizarNome(n) === chaveAnterior)) bancoDados.destinosExcluidos.push(chaveAnterior);
+          fastLapideMarcar(bancoDados.destinosExcluidos, 'excluido', chaveAnterior); // 5.3.8
         }
       }
       /* Cadastro explícito do usuário pode reutilizar um nome antigo; somente
          essa ação consciente remove a lápide, nunca um merge/snapshot. */
+      // 5.3.8: se o nome estava excluído, grava a liberação (vale para todos os aparelhos)
+      const estavaExcluido = fastLapideEfetiva(bancoDados.destinosExcluidos).has(chaveNova);
       fastLiberarExclusaoPermanente('destinosExcluidos', nome, true);
+      if (estavaExcluido) { if (!Array.isArray(bancoDados.destinosExcluidos)) bancoDados.destinosExcluidos = []; fastLapideMarcar(bancoDados.destinosExcluidos, 'liberado', nome); }
+      if (!/[a-z]/i.test(chaveNova) || /^\s*\d/.test(nome)) {
+        mostrarToast('O nome do lugar precisa começar com uma letra (ex.: "Loja 2 Irmãos" em vez de "2 Irmãos").', 'warning');
+        return;
+      }
       if (id) {
         // Edicao
         const d = destGarantir().find(x => String(x.id) === String(id));
@@ -18247,8 +18292,10 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
         }
       } else {
         // Novo
-        if (destBuscar(nome)) { mostrarToast('Este destino ja existe na lista.', 'info'); return; }
-        destAdicionarOuAtualizar(nome, { bairro: bairro, endereco: endereco, telefone: telefone });
+        if (destBuscar(nome)) { mostrarToast('Este lugar já existe na lista: ' + nome + '. Use a busca para editá-lo.', 'warning'); return; }
+        const criado = destAdicionarOuAtualizar(nome, { bairro: bairro, endereco: endereco, telefone: telefone });
+        if (!criado) { mostrarToast('Não foi possível salvar este lugar. Confira o nome e tente de novo.', 'error'); return; }
+        try { mostrarToast('✅ Lugar salvo: ' + nome, 'success'); } catch (_) {}
       }
       // Permitir que o modal feche e o botão responda antes da serialização da
       // base completa (que pode ser grande em aparelhos com muitas fotos).
@@ -18275,6 +18322,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
         // (r119) Grava a chave canônica (sem acentos) para bater com destAdicionarOuAtualizar e mergeDados.
         const chaveExcluida = destNormalizarNome(d.nome || '');
         if (chaveExcluida && !bancoDados.destinosExcluidos.some(n => destNormalizarNome(n) === chaveExcluida)) bancoDados.destinosExcluidos.push(chaveExcluida);
+        fastLapideMarcar(bancoDados.destinosExcluidos, 'excluido', chaveExcluida); // 5.3.8
         // Excluir todas as cópias equivalentes, inclusive duplicatas antigas
         // com outro ID, para o nome desaparecer imediatamente da lista.
         bancoDados.destinos = destGarantir().filter(x => String(x.id) !== String(id) && destNormalizarNome(x.nome) !== chaveExcluida);
@@ -24116,6 +24164,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
             if (chave && !bancoDados.destinosExcluidos.some(n => destNormalizarNome(n) === chave)) {
               bancoDados.destinosExcluidos.push(chave);
             }
+            fastLapideMarcar(bancoDados.destinosExcluidos, 'excluido', chave); // 5.3.8
           });
           const nomesExcluidos = new Set(destinosSel.map(d => destNormalizarNome(d.nome)));
           bancoDados.destinos = destGarantir().filter(d => !idsSel.includes(String(d.id)) && !nomesExcluidos.has(destNormalizarNome(d.nome)));
@@ -32122,7 +32171,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
       <!-- Abas internas -->
       <div class="emp-tabs" role="tablist" aria-label="Seções da Área Protegida">
         <button type="button" class="emp-tab ripple" data-emptab="empresa" onclick="empTrocarTab('empresa')" style="user-select: none;" aria-selected="false" role="tab"><i class="fa-solid fa-building"></i> Empresa</button>
-        <button type="button" class="emp-tab ripple" data-emptab="acessos" onclick="empTrocarTab('acessos')" style="user-select: none;" aria-selected="false" role="tab"><i class="fa-solid fa-users-gear"></i> Usuários e Acessos</button><button type="button" class="emp-tab ripple active" data-emptab="backups" onclick="empTrocarTab('backups')" style="user-select: none;" aria-selected="true" role="tab"><i class="fa-solid fa-images"></i> Fotos e Backups</button><button type="button" class="emp-tab ripple" data-emptab="banco" onclick="empTrocarTab('banco')" style="user-select: none;" aria-selected="false" role="tab"><i class="fa-solid fa-database"></i> Banco de Dados</button>
+        <button type="button" class="emp-tab ripple" data-emptab="acessos" onclick="empTrocarTab('acessos')" style="user-select: none;" aria-selected="false" role="tab"><i class="fa-solid fa-users-gear"></i> Usuários e Acessos</button><button type="button" class="emp-tab ripple" data-emptab="dispositivos" role="tab" aria-selected="false" style="user-select: none;"><i class="fa-solid fa-mobile-screen-button"></i> Dispositivos</button><button type="button" class="emp-tab ripple active" data-emptab="backups" onclick="empTrocarTab('backups')" style="user-select: none;" aria-selected="true" role="tab"><i class="fa-solid fa-images"></i> Fotos e Backups</button><button type="button" class="emp-tab ripple" data-emptab="banco" onclick="empTrocarTab('banco')" style="user-select: none;" aria-selected="false" role="tab"><i class="fa-solid fa-database"></i> Banco de Dados</button>
         <button type="button" class="emp-tab ripple" data-emptab="datavalid" role="tab" aria-selected="false" style="user-select: none;"><i class="fa-solid fa-id-card-clip"></i> Datavalid</button><button type="button" class="emp-tab ripple" data-emptab="brevo" onclick="empTrocarTab('brevo')" style="user-select: none;" aria-selected="false" role="tab"><i class="fa-solid fa-envelope-circle-check"></i> E-mail Brevo</button><button type="button" class="emp-tab ripple" data-emptab="publicacao" onclick="empTrocarTab('publicacao')" style="user-select: none;" aria-selected="false" role="tab"><i class="fa-brands fa-github"></i> Publicação</button><button type="button" class="emp-tab ripple" data-emptab="sql" onclick="empTrocarTab('sql')" style="user-select: none;" aria-selected="false" role="tab"><i class="fa-solid fa-circle-question"></i> Ajuda SQL</button>
       </div>
 
@@ -32466,6 +32515,11 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
             <div class="gh-sync-progress-bar" id="ghSyncProgressBar"></div>
           </div>
           <div class="gh-sync-log" id="ghSyncLog"></div>
+        </div></div><div class="emp-tab-content" id="emptabDispositivos" role="tabpanel" hidden=""><div class="emp-section">
+          <div class="emp-section-title"><i class="fa-solid fa-mobile-screen-button"></i> Dispositivos conectados</div>
+          <p class="emp-sql-info">Onde o FAST (PAINEL, FAST, ROTAS e Despesas) está aberto com a sua conta — celulares, aplicativo Android e navegadores no Windows, Linux etc. O local é aproximado pela internet, ou pelo GPS quando o aparelho já deu essa permissão. Se não reconhecer algum, use <b>Desconectar</b> e troque a senha.</p>
+          <div class="f538-disp-topo"><span id="f538DispResumo"></span><button type="button" id="f538DispAtualizar" class="ripple"><i class="fa-solid fa-rotate"></i> Atualizar</button></div>
+          <div id="f538DispLista"><div class="f538-disp-vazio">Toque em Atualizar.</div></div>
         </div></div><div class="emp-tab-content" id="emptabSql" hidden="" role="tabpanel">
         <div class="emp-section">
           <div class="emp-section-title"><i class="fa-solid fa-list-ol"></i> Passo a Passo: Criar o Banco de Dados no SQL (Supabase)</div>
@@ -36589,7 +36643,7 @@ body.fast-touch-ui #scrollNavBox { bottom: 130px !important; top: auto !importan
 <script id="r107-protected-tabs-fix">
 (function(){
   'use strict';
-  var valid = {empresa:'emptabEmpresa',acessos:'emptabAcessos',backups:'emptabBackups',banco:'emptabBanco',datavalid:'emptabDatavalid',brevo:'emptabBrevo',publicacao:'emptabPublicacao',sql:'emptabSql'};
+  var valid = {empresa:'emptabEmpresa',acessos:'emptabAcessos',dispositivos:'emptabDispositivos',backups:'emptabBackups',banco:'emptabBanco',datavalid:'emptabDatavalid',brevo:'emptabBrevo',publicacao:'emptabPublicacao',sql:'emptabSql'};
   function activate(tabId, focusTab){
     if(!valid[tabId] || !document.getElementById(valid[tabId])) tabId='empresa';
     var box=document.getElementById('empDataBox'); if(!box) return false;
@@ -40734,7 +40788,8 @@ body.fast-home-reveal .tab-content.active{
       var lap=Array.isArray(bancoDados.destinosExcluidos)?bancoDados.destinosExcluidos:[];
       if(!lap.length||!Array.isArray(bancoDados.destinos)) return;
       var bloq={};
-      for(var i=0;i<lap.length;i++){ var k=chaveNorm(lap[i]); if(k) bloq[k]=1; }
+      if(typeof window.fastLapideEfetiva==='function'){ window.fastLapideEfetiva(lap).forEach(function(k){ bloq[k]=1; }); } // 5.3.8
+      else for(var i=0;i<lap.length;i++){ var k=chaveNorm(lap[i]); if(k) bloq[k]=1; }
       var antes=bancoDados.destinos.length;
       bancoDados.destinos=bancoDados.destinos.filter(function(d){ return !bloq[chaveNorm(d&&d.nome)]; });
       if(bancoDados.destinos.length!==antes){
@@ -41647,8 +41702,13 @@ html body .seq-number-wrap>.f47-cb{margin:0 6px 0 0!important}
   }
   function tumulos(chave,antigos,fc){
     if(!Array.isArray(bancoDados[chave]))bancoDados[chave]=[];
+    var eraBloq=(chave==='destinosExcluidos'&&typeof W.fastLapideEfetiva==='function')?W.fastLapideEfetiva(bancoDados[chave]).has(fc):false;
     bancoDados[chave]=bancoDados[chave].filter(function(n){return canon(n)!==fc});
     antigos.forEach(function(k){if(k&&k!==fc&&!bancoDados[chave].some(function(n){return canon(n)===k}))bancoDados[chave].push(k)});
+    if(chave==='destinosExcluidos'&&typeof W.fastLapideMarcar==='function'){ /* 5.3.8 */
+      if(eraBloq)W.fastLapideMarcar(bancoDados[chave],'liberado',fc);
+      antigos.forEach(function(k){if(k&&k!==fc)W.fastLapideMarcar(bancoDados[chave],'excluido',k)});
+    }
   }
   W.fast47AbrirUnificar=function(k){var L=LISTAS.filter(function(x){return x.k===k})[0];if(L)abrirUnificar(L)};
 
@@ -42017,7 +42077,7 @@ html body .destino-extra-row-rota.f49-dest-row{padding-top:8px;border-top:1px da
         var v=new Set(),novo=[];bancoDados[k].forEach(function(n){var c=N(n);if(c&&!v.has(c)){v.add(c);novo.push(c)}});
         if(novo.join('\n')!==bancoDados[k].join('\n'))bancoDados[k]=novo;
       });
-      var bd=setNomes('destinosExcluidos'),bc=setNomes('clientesExcluidos');
+      var bd=(typeof W.fastLapideEfetiva==='function')?W.fastLapideEfetiva(bancoDados.destinosExcluidos):setNomes('destinosExcluidos'),bc=setNomes('clientesExcluidos'); // 5.3.8
       var rx=setIds('rotasExcluidas'),sx=setIds('seqItensExcluidos'),srx=setIds('seqRotasExcluidas');
       var mx=setIds('motoristasExcluidos'),hx=setIds('rhExcluidos'),dex=setIds('despesasEmpresaExcluidas'),dx=setIds('despesasExcluidas');
       var r;
@@ -44716,70 +44776,88 @@ body.fx-apk .fx-gal-ajuda{display:flex}
 })();
 </script>
 <script id="fast524-toque">
-/* 5.3.3 — SENSIBILIDADE DO TOQUE (celular)
-   • Toque RÁPIDO e arrastar: rola o que estiver embaixo do dedo — a tabela dentro
-     do card (para cima/baixo) ou para os lados (rolagem horizontal), como sempre.
-   • Toque LONGO (segure ~0,35 s) e arraste: rola a TELA INTEIRA para cima e para
-     baixo, mesmo começando em cima de uma tabela ou card que tenha rolagem. */
+/* 5.3.8 — TOQUE E ROLAGEM (celular)
+   • Toque SIMPLES e arrastar em cima de uma tabela: desliza a tabela para os lados;
+     para cima/baixo quem rola é a tela (a tabela não "prende" mais o dedo).
+   • Toque LONGO (segure ~0,3 s, o ↕ aparece) e arraste — em QUALQUER lugar, dentro
+     ou fora de tabela/card — sobe e desce a tela inteira, com embalo ao soltar. */
 (function(){
+  if(window.__f538Toque)return; window.__f538Toque=1;
   if(!('ontouchstart' in window) && !(navigator.maxTouchPoints>0)) return;
-  var ESPERA=350, FOLGA=9, timer=0, ini=null, modo='', ultY=0, ultT=0, vel=0, raf=0;
+  var ESPERA=300, FOLGA=10, timer=0, ini=null, modo='', ultY=0, ultT=0, vel=0, raf=0, alvo=null;
+  // tabelas: sem rolagem vertical própria no celular (a tela rola), só para os lados
+  var css=document.createElement('style');
+  css.textContent='@media (pointer:coarse){html body .table-container,html body .f538-tab-wrap,html body main .tab-content .table-container{max-height:none!important;overscroll-behavior-y:auto!important;overscroll-behavior-x:contain!important}'+
+    'html.f538-rolando,html.f538-rolando *{user-select:none!important;-webkit-user-select:none!important;-webkit-touch-callout:none!important}}';
+  (document.head||document.documentElement).appendChild(css);
+  function marcarTabelas(){
+    try{Array.prototype.forEach.call(document.querySelectorAll('table'),function(tb){
+      for(var e=tb.parentElement,n=0;e&&n<4&&e!==document.body&&e.tagName!=='MAIN';e=e.parentElement,n++){
+        if(e.classList.contains('f538-tab-wrap'))return;
+        var s=getComputedStyle(e);if(/auto|scroll/.test(s.overflowX)){e.classList.add('f538-tab-wrap');return}
+      }
+    })}catch(er){}
+  }
+  setTimeout(marcarTabelas,1500);setInterval(marcarTabelas,4000);
   var aviso=document.createElement('div');
-  aviso.id='fastToqueLongo';
   aviso.style.cssText='position:fixed;right:10px;top:50%;transform:translateY(-50%);z-index:2147483000;background:rgba(15,23,42,.82);color:#fff;border-radius:999px;padding:8px 10px;font:700 18px/1 system-ui,sans-serif;display:none;pointer-events:none';
   aviso.textContent='↕';
-  function montar(){ if(document.body) document.body.appendChild(aviso); else setTimeout(montar,200); } montar();
-  function rolavelInterno(el){
-    // existe uma caixa (tabela, card, lista) com rolagem própria embaixo do dedo?
-    for(var n=el; n && n!==document.body && n!==document.documentElement; n=n.parentElement){
-      var cs=getComputedStyle(n), oy=cs.overflowY, ox=cs.overflowX;
-      if((/auto|scroll/.test(oy) && n.scrollHeight>n.clientHeight+2) || (/auto|scroll/.test(ox) && n.scrollWidth>n.clientWidth+2)) return n;
-    }
-    return null;
-  }
+  (function montar(){ if(document.body) document.body.appendChild(aviso); else setTimeout(montar,200); })();
   function ignorar(el){
-    return !!(el && el.closest && el.closest('input,textarea,select,[contenteditable="true"],.leaflet-container,canvas,video,[draggable="true"],.sortable-ghost,#fnavMapa'));
+    return !!(el && el.closest && el.closest('input,textarea,select,[contenteditable="true"],.leaflet-container,canvas,video,[draggable="true"],.sortable-ghost,#fnavMapa,#scrollNavBox,.fsb-drag-handle,[id$="DragHandle"]'));
+  }
+  // a "tela": o rolador vertical mais de fora sob o dedo (a página, ou a janela aberta)
+  function rolador(el){
+    var achado=null;
+    for(var n=el;n&&n!==document.documentElement;n=n.parentElement){
+      if(n===document.body)break;
+      var s=getComputedStyle(n);
+      if(/auto|scroll/.test(s.overflowY)&&n.scrollHeight>n.clientHeight+2&&!n.classList.contains('f538-tab-wrap'))achado=n;
+    }
+    return achado||document.scrollingElement||document.documentElement;
   }
   function parar(){ clearTimeout(timer); timer=0; }
   document.addEventListener('touchstart',function(e){
     parar(); cancelAnimationFrame(raf); modo=''; aviso.style.display='none';
-    if(e.touches.length!==1 || ignorar(e.target) || !rolavelInterno(e.target)) return;
-    var t=e.touches[0]; ini={x:t.clientX,y:t.clientY};
+    if(e.touches.length!==1 || ignorar(e.target)) { ini=null; return; }
+    var t=e.touches[0]; ini={x:t.clientX,y:t.clientY}; alvo=e.target;
     timer=setTimeout(function(){
-      timer=0; modo='tela'; ultY=ini.y; ultT=Date.now(); vel=0;
-      document.addEventListener('touchmove',moverTela,{passive:false});
+      timer=0; modo='tela'; ultY=ini.y; ultT=Date.now(); vel=0; alvo=rolador(alvo);
+      document.documentElement.classList.add('f538-rolando');
       aviso.style.display='block';
       try{ if(navigator.vibrate) navigator.vibrate(12); }catch(er){}
     },ESPERA);
   },{passive:true});
-  // 5.2.7: o "segurar" da rolagem só entra no toque longo. No toque normal o
-  // navegador rola sozinho, sem esperar o app (antes isso causava pequenos atrasos).
+  // ouvinte permanente (precisa existir desde o início do toque para poder segurar a rolagem)
   document.addEventListener('touchmove',function(e){
-    if(!ini||modo==='tela') return;
-    var t=e.touches[0];
-    if(timer && (Math.abs(t.clientX-ini.x)>FOLGA || Math.abs(t.clientY-ini.y)>FOLGA)){ parar(); ini=null; }
-  },{passive:true});
-  function moverTela(e){
-    if(modo!=='tela') return;
-    e.preventDefault();            // a caixa de baixo não rola: quem rola é a tela
-    var t=e.touches[0], agora=Date.now(), dy=t.clientY-ultY;
-    window.scrollBy(0,-dy*1.6);
-    vel=(-dy*1.6)/Math.max(1,agora-ultT); ultY=t.clientY; ultT=agora;
-  }
-  function fim(){
-    parar(); document.removeEventListener('touchmove',moverTela,{passive:false});
     if(modo==='tela'){
-      aviso.style.display='none';
-      // continua deslizando um pouco ao soltar, como a rolagem normal
-      var v=vel*16;
-      (function deslizar(){ if(Math.abs(v)<0.6) return; window.scrollBy(0,v); v*=0.93; raf=requestAnimationFrame(deslizar); })();
+      if(e.cancelable)e.preventDefault();
+      var t=e.touches[0], agora=Date.now(), dy=t.clientY-ultY;
+      alvo.scrollTop+=-dy*1.6;
+      vel=(-dy*1.6)/Math.max(1,agora-ultT); ultY=t.clientY; ultT=agora;
+      return;
+    }
+    if(!ini||!timer)return;
+    var t2=e.touches[0];
+    if(Math.abs(t2.clientX-ini.x)>FOLGA || Math.abs(t2.clientY-ini.y)>FOLGA){ parar(); ini=null; }
+  },{passive:false});
+  function fim(){
+    parar();
+    if(modo==='tela'){
+      aviso.style.display='none'; document.documentElement.classList.remove('f538-rolando');
+      var v=vel*16, a=alvo;
+      (function deslizar(){ if(Math.abs(v)<0.6) return; a.scrollTop+=v; v*=0.93; raf=requestAnimationFrame(deslizar); })();
     }
     modo=''; ini=null;
   }
   document.addEventListener('touchend',fim,{passive:true});
   document.addEventListener('touchcancel',fim,{passive:true});
-  // no toque longo não abre o menu de "copiar/salvar imagem" do navegador
+  // no toque longo não abre o menu de "copiar/salvar imagem" nem seleciona texto
   document.addEventListener('contextmenu',function(e){ if(modo==='tela'||timer){ e.preventDefault(); } },true);
+  document.addEventListener('selectstart',function(e){ if(modo==='tela'||timer){ e.preventDefault(); } },true);
+  // toque longo que virou rolagem não "clica" no que estava embaixo
+  document.addEventListener('click',function(e){ if(window.__f538RolouAte&&Date.now()<window.__f538RolouAte){e.preventDefault();e.stopPropagation();} },true);
+  document.addEventListener('touchend',function(){ if(modo==='tela')window.__f538RolouAte=Date.now()+350; },true);
   window.fastToqueModo=function(){ return modo; };
 })();
 </script>
@@ -45611,6 +45689,393 @@ body.fx-apk .fx-gal-ajuda{display:flex}
   setInterval(instalar,5000);
   // fecha a janela de edição: a lista se redesenha sem pular
   W.fast538Ancorar=function(ms){segurar(escolherAncora(),ms||1200)};
+})();
+</script>
+<style id="fast538-dispositivos-css">
+#f538DispLista{display:flex;flex-direction:column;gap:10px;margin-top:10px}
+.f538-disp-topo{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:13px;font-weight:700;color:var(--text-muted,#64748b)}
+.f538-disp-topo button,.f538-disp-ac button{border:1px solid var(--border,#e2e8f0);background:var(--card-bg,#fff);color:var(--text,#0f172a);border-radius:10px;padding:7px 11px;font-size:12.5px;font-weight:700;cursor:pointer}
+.f538-disp{display:flex;gap:12px;border:1px solid var(--border,#e2e8f0);border-radius:14px;padding:12px;background:var(--card-bg,#fff)}
+.f538-disp.rev{opacity:.6}
+.f538-disp-ic{flex:0 0 42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:rgba(79,70,229,.1);color:var(--primary,#4f46e5);font-size:20px}
+.f538-disp-bd{flex:1;min-width:0}
+.f538-disp-t{font-weight:800;font-size:15px;margin-bottom:4px;word-break:break-word}
+.f538-disp-l{font-size:12.5px;line-height:1.55;color:var(--text-muted,#475569);word-break:break-word}
+.f538-disp-l a{color:var(--accent,#4f46e5);font-weight:700}
+.f538-disp-ac{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.f538-disp-ac button.pe{color:#b91c1c;border-color:rgba(185,28,28,.35)}
+.f538-tag{display:inline-block;font-size:10.5px;font-weight:800;border-radius:999px;padding:2px 8px;vertical-align:middle}
+.f538-tag.eu{background:#dbeafe;color:#1d4ed8}.f538-tag.on{background:#dcfce7;color:#15803d}.f538-tag.rev{background:#fee2e2;color:#b91c1c}
+.f538-disp-vazio{padding:14px;text-align:center;font-size:13px;color:var(--text-muted,#64748b)}
+</style>
+<script id="fast538-lugares-sync">
+/* 5.3.8 — LUGARES SINCRONIZADOS NA HORA ENTRE TODOS OS APARELHOS
+   Antes: cadastro/edição/exclusão de lugares só subia na "sincronização completa"
+   (no máximo a cada 10 min, e nunca se o app fosse fechado logo depois) — por isso,
+   ao abrir o PAINEL no navegador, muitas edições feitas no celular não apareciam.
+   Agora:
+   • cada lugar criado/editado aqui sobe sozinho em poucos segundos (e ao sair do app);
+   • lugar excluído aqui é apagado da nuvem na hora;
+   • os outros aparelhos buscam só o que mudou, ao abrir, ao voltar para o app e a cada 30 s;
+   • em conflito, vale a edição mais recente (hora da edição, não do último uso). */
+(function(){
+  var W=window, K_CUR='f538_lug_cursor', K_SNAP='f538_lug_snap';
+  function bd(){return (typeof bancoDados!=='undefined'&&bancoDados)||W.bancoDados||null}
+  function N(v){try{return destNormalizarNome(v)}catch(e){return String(v||'').trim().toLowerCase()}}
+  function url(){try{return SUPABASE_URL}catch(e){return 'https://yhxuplhohhetzloxvgku.supabase.co/rest/v1'}}
+  function cab(x){try{return supabaseHeaders(x)}catch(e){return Object.assign({'Content-Type':'application/json'},x||{})}}
+  function logado(){try{return typeof W.fastObterTokenSupabase==='function'&&!!W.fastObterTokenSupabase()}catch(e){return false}}
+  function ts(x){return Date.parse((x&&(x.updatedAt||x.updated_at))||'')||0}
+  function campos(d){return [d.nome||'',d.endereco||'',d.bairro||'',d.telefone||'',JSON.stringify(d.enderecoObj||null)].join('\u0001')}
+  function lerSnap(){try{return JSON.parse(localStorage.getItem(K_SNAP)||'null')}catch(e){return null}}
+  function gravarSnap(m){try{localStorage.setItem(K_SNAP,JSON.stringify(m))}catch(e){}}
+  function retrato(){var m={};((bd()||{}).destinos||[]).forEach(function(d){if(d&&d.id!=null)m[String(d.id)]={h:campos(d),t:ts(d),n:N(d.nome)}});return m}
+  var snap=null, enviando=false, puxando=false, ultimaPuxada=0, vindosDaNuvem={};
+
+  /* ---------- SOBE o que mudou aqui ---------- */
+  async function subir(){
+    var b=bd(); if(!b||enviando||!logado()||!navigator.onLine)return;
+    if(!snap){snap=lerSnap()||retrato();gravarSnap(snap);return}
+    var atual=retrato(), envio=[], apagar=[];
+    var lapides=(typeof W.fastLapideEfetiva==='function')?W.fastLapideEfetiva(b.destinosExcluidos):new Set((b.destinosExcluidos||[]).map(N));
+    Object.keys(atual).forEach(function(id){
+      var a=atual[id], s=snap[id];
+      if(s&&s.h===a.h)return;                              // nada mudou
+      if(vindosDaNuvem[id]===a.h)return;                   // acabou de chegar da nuvem: não devolve
+      if(s&&a.t<=s.t)return;                               // mudou sem edição (merge/varredura): fica com a sincronização normal
+      var d=(b.destinos||[]).filter(function(x){return String(x.id)===id})[0]; if(d)envio.push(d);
+    });
+    Object.keys(snap).forEach(function(id){ if(!atual[id]&&lapides.has(snap[id].n))apagar.push(id); });
+    if(!envio.length&&!apagar.length){snap=atual;gravarSnap(snap);return}
+    enviando=true;
+    try{
+      if(envio.length){
+        var r=await fetch(url()+'/destinos',{method:'POST',headers:cab({'Prefer':'resolution=merge-duplicates,return=minimal'}),body:JSON.stringify(envio.map(function(d){return destinoToSupabase(d)}))});
+        if(!r.ok)throw new Error('HTTP '+r.status);
+      }
+      for(var i=0;i<apagar.length;i+=50){
+        await fetch(url()+'/destinos?id=in.('+apagar.slice(i,i+50).join(',')+')',{method:'DELETE',headers:cab({'Prefer':'return=minimal'})});
+      }
+      snap=atual;gravarSnap(snap);
+      W.__f538LugEnviados=(W.__f538LugEnviados||0)+envio.length+apagar.length;
+    }catch(e){ /* sem sinal/erro: tenta de novo na próxima volta */ }
+    enviando=false;
+  }
+
+  /* ---------- BUSCA o que mudou nos outros aparelhos ---------- */
+  async function puxar(forcar){
+    var b=bd(); if(!b||puxando||!logado()||!navigator.onLine||document.hidden)return;
+    if(!forcar&&Date.now()-ultimaPuxada<25000)return;
+    puxando=true; ultimaPuxada=Date.now();
+    try{
+      await subir();                                       // o que é daqui sobe antes
+      var cur=localStorage.getItem(K_CUR)||'';
+      var q=url()+'/destinos?select=*&order=updated_at.asc&limit=500'+(cur?'&updated_at=gt.'+encodeURIComponent(cur):'');
+      var r=await fetch(q,{headers:cab(),cache:'no-store'}); if(!r.ok)throw new Error('HTTP '+r.status);
+      var rows=await r.json(); if(!Array.isArray(rows))rows=[];
+      var lapides=(typeof W.fastLapideEfetiva==='function')?W.fastLapideEfetiva(b.destinosExcluidos):new Set((b.destinosExcluidos||[]).map(N));
+      var lista=(typeof destGarantir==='function')?destGarantir():(b.destinos=b.destinos||[]);
+      var porId={},porNome={};lista.forEach(function(d){if(!d)return;porId[String(d.id)]=d;porNome[N(d.nome)]=d});
+      var mudou=0,maior=cur;
+      rows.forEach(function(row){
+        if(row.updated_at&&(!maior||row.updated_at>maior))maior=row.updated_at;
+        var nv=supabaseToDestino(row), k=N(nv.nome); if(!k||lapides.has(k))return;
+        var loc=porId[String(nv.id)]||porNome[k];
+        if(!loc){lista.push(nv);porId[String(nv.id)]=nv;porNome[k]=nv;vindosDaNuvem[String(nv.id)]=campos(nv);mudou++;return}
+        if(ts(nv)>ts(loc)&&campos(nv)!==campos(loc)){
+          ['nome','endereco','bairro','telefone','enderecoObj'].forEach(function(c){loc[c]=nv[c]});
+          loc.updatedAt=nv.updatedAt; vindosDaNuvem[String(loc.id)]=campos(loc); mudou++;
+        }
+      });
+      if(maior)localStorage.setItem(K_CUR,maior);
+      if(mudou){
+        try{salvarStorage()}catch(e){}
+        try{if(typeof destRenderizarLista==='function')destRenderizarLista()}catch(e){}
+        try{atualizarContadoresHeader()}catch(e){}
+      }
+      if(rows.length>=500)setTimeout(function(){puxar(true)},500);   // ainda tem mais
+      else await conferirApagados(forcar);
+    }catch(e){}
+    puxando=false;
+  }
+  /* lugar apagado em outro aparelho: some daqui também (a cada 5 min, ao abrir e ao voltar) */
+  var K_IDS='f538_lug_ids', ultConf=0;
+  async function conferirApagados(forcar){
+    if(!forcar&&Date.now()-ultConf<5*60*1000)return; ultConf=Date.now();
+    var r=await fetch(url()+'/destinos?select=id,nome',{headers:cab(),cache:'no-store'}); if(!r.ok)return;
+    var rows=await r.json(); if(!Array.isArray(rows))return;
+    var agora={},nomesNuvem={}; rows.forEach(function(x){agora[String(x.id)]=1;nomesNuvem[N(x.nome)]=1});
+    var antes=null;try{antes=JSON.parse(localStorage.getItem(K_IDS)||'null')}catch(e){}
+    try{localStorage.setItem(K_IDS,JSON.stringify(agora))}catch(e){}
+    if(!antes||!rows.length)return;                         // 1ª vez neste aparelho: só registra
+    var b=bd(),lista=(b&&b.destinos)||[],sumiram=[];
+    lista.forEach(function(d){var k=String(d&&d.id);if(d&&antes[k]&&!agora[k]&&!(snap&&snap[k]&&snap[k].h!==campos(d)))sumiram.push(d)});
+    if(!sumiram.length||sumiram.length>Math.max(20,lista.length*0.3))return;   // nunca apaga em massa por engano
+    var ids={};sumiram.forEach(function(d){ids[String(d.id)]=1});
+    b.destinos=lista.filter(function(d){return !ids[String(d&&d.id)]});
+    sumiram.forEach(function(d){
+      var k=N(d.nome);
+      if(k&&!nomesNuvem[k]&&!b.destinos.some(function(x){return N(x.nome)===k})){
+        if(!Array.isArray(b.destinosExcluidos))b.destinosExcluidos=[];
+        if(b.destinosExcluidos.indexOf(k)<0)b.destinosExcluidos.push(k);
+        if(typeof W.fastLapideMarcar==='function')W.fastLapideMarcar(b.destinosExcluidos,'excluido',k);
+      }
+    });
+    snap=retrato();gravarSnap(snap);
+    try{salvarStorage()}catch(e){}
+    try{if(typeof destRenderizarLista==='function')destRenderizarLista()}catch(e){}
+  }
+
+  W.fast538LugaresAgora=function(){return puxar(true)};
+  // depois de salvar/excluir um lugar: sobe em 1,5 s
+  var tSub=0;
+  function agendarSubida(){clearTimeout(tSub);tSub=setTimeout(subir,1500)}
+  ['salvarDestinoModal','destExcluir','destExcluirSelecionados'].forEach(function(nome){
+    (function ligar(){
+      var f=W[nome]; if(typeof f!=='function'){setTimeout(ligar,1500);return}
+      if(f.__f538Lug)return;
+      var g=function(){var r=f.apply(this,arguments);agendarSubida();setTimeout(agendarSubida,4000);return r};
+      Object.keys(f).forEach(function(k){try{g[k]=f[k]}catch(e){}});g.__f538Lug=true;W[nome]=g;
+    })();
+  });
+  setInterval(function(){subir()},8000);
+  setInterval(function(){puxar(false)},30000);
+  document.addEventListener('visibilitychange',function(){
+    if(document.hidden)subir();                            // saindo do app: sobe o que falta
+    else puxar(true);                                      // voltando: busca o que mudou
+  });
+  W.addEventListener('focus',function(){puxar(false)});
+  W.addEventListener('online',function(){subir().then(function(){puxar(true)})});
+  setTimeout(function(){puxar(true)},7000);
+})();
+</script>
+<script id="fast538-dispositivos">
+/* 5.3.8 — DISPOSITIVOS CONECTADOS (Área Protegida → Dispositivos)
+   Cada aparelho/navegador onde o FAST está aberto e logado se registra sozinho:
+   sistema (Android/Windows/Linux…), versão, modelo, navegador ou aplicativo, conta,
+   local (pelo GPS se já permitido; senão aproximado pela internet) e último acesso.
+   Na Área Protegida dá para renomear, desconectar (sair à distância) ou tirar da lista. */
+(function(){
+  var W=window, K_ID='f538_disp_id', K_LOC='f538_disp_loc', K_USR='f538_disp_usr', K_NOME='f538_disp_nome', K_REV='f538_disp_rev';
+  var CADA=10*60*1000;
+  function url(){try{return SUPABASE_URL}catch(e){return 'https://yhxuplhohhetzloxvgku.supabase.co/rest/v1'}}
+  function cab(x){try{return supabaseHeaders(x)}catch(e){return Object.assign({'Content-Type':'application/json'},x||{})}}
+  function token(){try{return typeof W.fastObterTokenSupabase==='function'?W.fastObterTokenSupabase():null}catch(e){return null}}
+  function jget(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}}
+  function jset(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+  function meuId(){
+    var id=null;try{id=localStorage.getItem(K_ID)}catch(e){}
+    if(!id){id='d'+Date.now().toString(36)+Math.random().toString(36).slice(2,10);try{localStorage.setItem(K_ID,id)}catch(e){}}
+    return id;
+  }
+  function app(){
+    var q=location.search||'';
+    if(/exclusive=rotas-dia/.test(q))return 'ROTAS';
+    if(/exclusive=despesas/.test(q))return 'Despesas';
+    return 'FAST';
+  }
+  function versao(){var m=document.querySelector('meta[name="fast-app-version"]');return m?m.getAttribute('content'):''}
+  var FAB=[[/^SM-|^GT-|samsung/i,'Samsung'],[/moto|^XT\d/i,'Motorola'],[/redmi|^M2\d|^2\d{3}|xiaomi|poco/i,'Xiaomi'],[/pixel/i,'Google'],[/^CPH|oppo/i,'OPPO'],[/^RMX|realme/i,'realme'],[/^V\d{4}|vivo/i,'vivo'],[/^LM-|^LG/i,'LG'],[/asus|^ASUS/i,'ASUS'],[/nokia|^TA-/i,'Nokia'],[/huawei|^[A-Z]{3}-L/i,'Huawei'],[/infinix/i,'Infinix'],[/tecno/i,'TECNO'],[/positivo/i,'Positivo'],[/multilaser/i,'Multilaser']];
+  function fabricante(modelo){for(var i=0;i<FAB.length;i++)if(FAB[i][0].test(modelo||''))return FAB[i][1];return ''}
+  async function coletar(){
+    var ua=navigator.userAgent||'', o={plataforma:'',versao_sistema:'',modelo:'',fabricante:'',navegador:'',versao_navegador:'',apk:false};
+    o.apk=/FASTAndroid/i.test(ua)||/;\s*wv\)/.test(ua);
+    var m;
+    if((m=/Android\s+([\d.]+)(?:;\s*([^;)]+?))?(?:\s+Build\/[^;)]*)?[;)]/.exec(ua))){o.plataforma='Android';o.versao_sistema=m[1];if(m[2]&&!/^(K|wv|Linux|U)$/i.test(m[2].trim()))o.modelo=m[2].trim()}
+    else if((m=/Windows NT ([\d.]+)/.exec(ua))){o.plataforma='Windows';o.versao_sistema=({'10.0':'10','6.3':'8.1','6.2':'8','6.1':'7'})[m[1]]||m[1]}
+    else if(/CrOS/.test(ua)){o.plataforma='ChromeOS'}
+    else if(/iPhone|iPad/.test(ua)){o.plataforma=/iPad/.test(ua)?'iPad':'iPhone';m=/OS (\d+[_\d]*)/.exec(ua);if(m)o.versao_sistema=m[1].replace(/_/g,'.')}
+    else if(/Mac OS X/.test(ua)){o.plataforma='Mac';m=/Mac OS X (\d+[_\d]*)/.exec(ua);if(m)o.versao_sistema=m[1].replace(/_/g,'.')}
+    else if(/Linux/.test(ua)){o.plataforma='Linux'}
+    if((m=/Edg\/([\d.]+)/.exec(ua)))o.navegador='Edge',o.versao_navegador=m[1];
+    else if((m=/OPR\/([\d.]+)/.exec(ua)))o.navegador='Opera',o.versao_navegador=m[1];
+    else if((m=/SamsungBrowser\/([\d.]+)/.exec(ua)))o.navegador='Samsung Internet',o.versao_navegador=m[1];
+    else if((m=/Firefox\/([\d.]+)/.exec(ua)))o.navegador='Firefox',o.versao_navegador=m[1];
+    else if((m=/Chrome\/([\d.]+)/.exec(ua)))o.navegador=o.apk?'Aplicativo Android (WebView)':'Chrome',o.versao_navegador=m[1];
+    else if((m=/Version\/([\d.]+).*Safari/.exec(ua)))o.navegador='Safari',o.versao_navegador=m[1];
+    // dados mais precisos do Chrome/Edge (modelo do celular, Windows 11, versão do Android)
+    try{
+      if(navigator.userAgentData&&navigator.userAgentData.getHighEntropyValues){
+        var h=await navigator.userAgentData.getHighEntropyValues(['platformVersion','model','fullVersionList']);
+        if(h.model)o.modelo=h.model;
+        if(h.platform==='Windows'||o.plataforma==='Windows'){var maj=parseInt(String(h.platformVersion||'').split('.')[0],10);if(maj>=13)o.versao_sistema='11';else if(maj>0)o.versao_sistema='10'}
+        else if((h.platform==='Android'||o.plataforma==='Android')&&h.platformVersion)o.versao_sistema=String(h.platformVersion).replace(/\.0(\.0)?$/,'');
+        else if(h.platform==='Linux'&&!o.plataforma)o.plataforma='Linux';
+        var fv=(h.fullVersionList||[]).filter(function(b){return !/Not.?A.?Brand|Chromium/i.test(b.brand)})[0];
+        if(fv&&!o.apk){o.navegador=fv.brand.replace('Google ','').replace('Microsoft ','');o.versao_navegador=fv.version}
+      }
+    }catch(e){}
+    o.versao_navegador=String(o.versao_navegador||'').split('.')[0];
+    o.fabricante=fabricante(o.modelo);
+    o.tela=(screen.width||0)+'×'+(screen.height||0);
+    o.idioma=navigator.language||'';
+    try{o.fuso=Intl.DateTimeFormat().resolvedOptions().timeZone||''}catch(e){}
+    return o;
+  }
+  // local: GPS só se a permissão JÁ foi dada (não pergunta nada); senão, aproximado pela internet
+  async function local(){
+    var c=jget(K_LOC,null);
+    if(c&&Date.now()-c.em<6*3600*1000)return c;
+    var r=null;
+    try{
+      var perm=navigator.permissions&&await navigator.permissions.query({name:'geolocation'});
+      if(perm&&perm.state==='granted'&&navigator.geolocation){
+        var pos=await new Promise(function(ok,no){navigator.geolocation.getCurrentPosition(ok,no,{enableHighAccuracy:false,timeout:8000,maximumAge:30*60*1000})});
+        r={lat:pos.coords.latitude,lon:pos.coords.longitude,origem:'gps'};
+        try{
+          var g=await fetch('https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=10&accept-language=pt-BR&lat='+r.lat+'&lon='+r.lon);
+          if(g.ok){var a=(await g.json()).address||{};r.cidade=a.city||a.town||a.village||a.municipality||'';r.regiao=a.state||'';r.pais=a.country||''}
+        }catch(e){}
+      }
+    }catch(e){}
+    if(!r){
+      var fontes=[
+        ['https://ipapi.co/json/',function(j){return {cidade:j.city,regiao:j.region,pais:j.country_name,lat:j.latitude,lon:j.longitude,ip:j.ip}}],
+        ['https://ipwho.is/?lang=pt-BR',function(j){return j.success===false?null:{cidade:j.city,regiao:j.region,pais:j.country,lat:j.latitude,lon:j.longitude,ip:j.ip}}]
+      ];
+      for(var i=0;i<fontes.length&&!r;i++){
+        try{var x=await fetch(fontes[i][0],{cache:'no-store'});if(x.ok){var v=fontes[i][1](await x.json());if(v&&(v.cidade||v.pais)){r=v;r.origem='internet'}}}catch(e){}
+      }
+    }
+    if(r){r.em=Date.now();jset(K_LOC,r)}
+    return r||c||{};
+  }
+  async function usuario(){
+    var c=jget(K_USR,null);if(c&&Date.now()-c.em<24*3600*1000)return c;
+    var t=token();if(!t)return c||{};
+    try{
+      var key='';try{key=supabaseHeaders().apikey}catch(e){}
+      var r=await fetch(url().replace('/rest/v1','/auth/v1/user'),{headers:{apikey:key,Authorization:'Bearer '+t}});
+      if(r.ok){var u=await r.json(),md=u.user_metadata||{};c={email:u.email||'',nome:md.nome||md.full_name||md.name||md.usuario||'',em:Date.now()};jset(K_USR,c)}
+    }catch(e){}
+    return c||{};
+  }
+  var semTabela=false, rodando=false, ultimo=0;
+  async function registrar(forcar){
+    if(rodando||!token()||!navigator.onLine)return;
+    if(!forcar&&Date.now()-ultimo<CADA)return;
+    rodando=true;ultimo=Date.now();
+    try{
+      var id=meuId();
+      // foi desconectado à distância?
+      var g=await fetch(url()+'/dispositivos?select=revogado,revogado_em&id=eq.'+encodeURIComponent(id),{headers:cab(),cache:'no-store'});
+      if(g.status===404){semTabela=true;rodando=false;return}
+      var linha=g.ok?((await g.json())[0]||null):null;
+      var jaSaiu=null;try{jaSaiu=localStorage.getItem(K_REV)}catch(e){}
+      if(linha&&linha.revogado){
+        if(jaSaiu&&jaSaiu===String(linha.revogado_em||'')){ /* entrou de novo depois de desconectado: libera */ }
+        else{ desconectarEste(String(linha.revogado_em||'1')); rodando=false; return; }
+      }
+      var info=await coletar(), loc=await local(), u=await usuario();
+      var dados=Object.assign({
+        id:id, usuario:u.nome||'', email:u.email||'', app:app(), versao_app:versao(),
+        cidade:loc.cidade||'', regiao:loc.regiao||'', pais:loc.pais||'', lat:(loc.lat!=null?Number(loc.lat):null), lon:(loc.lon!=null?Number(loc.lon):null),
+        origem_local:loc.origem||'', ip:loc.ip||'', ultimo_acesso:new Date().toISOString(), updated_at:new Date().toISOString(),
+        revogado:false
+      },info);
+      var nome='';try{nome=localStorage.getItem(K_NOME)||''}catch(e){}
+      if(nome)dados.nome_aparelho=nome;
+      var p=await fetch(url()+'/dispositivos',{method:'POST',headers:cab({'Prefer':'resolution=merge-duplicates,return=minimal'}),body:JSON.stringify([dados])});
+      if(p.status===404)semTabela=true;
+      if(p.ok){try{localStorage.removeItem(K_REV)}catch(e){}}
+    }catch(e){}
+    rodando=false;
+  }
+  function desconectarEste(marca){
+    try{localStorage.setItem(K_REV,marca)}catch(e){}
+    try{localStorage.removeItem('fast_auth_bio');localStorage.removeItem('fast_supa_session')}catch(e){}
+    try{if(typeof W.fastSecLogout==='function')W.fastSecLogout()}catch(e){}
+    setTimeout(function(){var er=document.getElementById('fastGateErr');if(er)er.textContent='Este aparelho foi desconectado pela Área Protegida. Entre de novo para continuar.'},400);
+  }
+  setTimeout(function(){registrar(true)},9000);
+  setInterval(function(){if(!document.hidden)registrar(false)},60*1000);
+  document.addEventListener('visibilitychange',function(){if(!document.hidden)registrar(false)});
+  W.addEventListener('online',function(){registrar(false)});
+
+  /* ---------------- tela: Área Protegida → Dispositivos ---------------- */
+  function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+  function quando(iso){
+    var t=Date.parse(iso||'');if(!t)return '—';var s=(Date.now()-t)/1000;
+    if(s<120)return 'agora mesmo';if(s<3600)return 'há '+Math.round(s/60)+' min';if(s<86400)return 'há '+Math.round(s/3600)+' h';
+    var d=new Date(t);return d.toLocaleDateString('pt-BR')+' às '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  }
+  function icone(d){var p=d.plataforma||'';return /Android|iPhone/.test(p)?'fa-mobile-screen-button':(/iPad/.test(p)?'fa-tablet-screen-button':(/Windows|Mac|ChromeOS/.test(p)?'fa-laptop':'fa-desktop'))}
+  function titulo(d){
+    if(d.nome_aparelho)return d.nome_aparelho;
+    if(d.plataforma==='Android'||d.plataforma==='iPhone')return [d.fabricante,d.modelo].filter(Boolean).join(' ')||('Celular '+d.plataforma);
+    return [d.plataforma,d.versao_sistema].filter(Boolean).join(' ')||'Computador';
+  }
+  async function listar(){
+    var box=document.getElementById('f538DispLista');if(!box)return;
+    box.innerHTML='<div class="f538-disp-vazio"><i class="fa-solid fa-spinner fa-spin"></i> Carregando…</div>';
+    if(!token()){box.innerHTML='<div class="f538-disp-vazio">Entre com a sua conta para ver os dispositivos.</div>';return}
+    await registrar(true);
+    try{
+      var r=await fetch(url()+'/dispositivos?select=*&order=ultimo_acesso.desc',{headers:cab(),cache:'no-store'});
+      if(r.status===404||semTabela){box.innerHTML='<div class="f538-disp-vazio">⚠️ Falta rodar o arquivo <b>SUPABASE-5.3.8.sql</b> no Supabase (SQL Editor) para ativar esta seção.</div>';return}
+      if(!r.ok)throw new Error('HTTP '+r.status);
+      var l=await r.json(),eu=meuId();
+      l.sort(function(a,b){return (b.id===eu)-(a.id===eu)||(Date.parse(b.ultimo_acesso||'')||0)-(Date.parse(a.ultimo_acesso||'')||0)});
+      var ativos=l.filter(function(d){return !d.revogado&&Date.now()-(Date.parse(d.ultimo_acesso||'')||0)<15*60*1000}).length;
+      document.getElementById('f538DispResumo').textContent=l.length+' dispositivo'+(l.length===1?'':'s')+' · '+ativos+' ativo'+(ativos===1?'':'s')+' agora';
+      if(!l.length){box.innerHTML='<div class="f538-disp-vazio">Nenhum dispositivo registrado ainda.</div>';return}
+      box.innerHTML=l.map(function(d){
+        var esteAqui=d.id===eu, ativo=!d.revogado&&Date.now()-(Date.parse(d.ultimo_acesso||'')||0)<15*60*1000;
+        var sistema=[d.plataforma,d.versao_sistema].filter(Boolean).join(' ');
+        var acesso=d.apk?('Aplicativo '+(d.app||'FAST')+' para Android'):((d.navegador||'Navegador')+(d.versao_navegador?' '+d.versao_navegador:'')+' · '+(d.app||'FAST'));
+        var lugar=[d.cidade,d.regiao,d.pais].filter(Boolean).join(', ');
+        var mapa=(d.lat!=null&&d.lon!=null)?' <a href="https://www.google.com/maps?q='+d.lat+','+d.lon+'" target="_blank" rel="noopener">ver no mapa</a>':'';
+        return '<div class="f538-disp'+(d.revogado?' rev':'')+'">'+
+          '<div class="f538-disp-ic"><i class="fa-solid '+icone(d)+'"></i></div>'+
+          '<div class="f538-disp-bd">'+
+            '<div class="f538-disp-t">'+esc(titulo(d))+(esteAqui?' <span class="f538-tag eu">Este aparelho</span>':'')+(ativo&&!esteAqui?' <span class="f538-tag on">Ativo agora</span>':'')+(d.revogado?' <span class="f538-tag rev">Desconectado</span>':'')+'</div>'+
+            '<div class="f538-disp-l"><b>Sistema:</b> '+esc(sistema||'—')+(d.modelo&&d.nome_aparelho?' · '+esc([d.fabricante,d.modelo].filter(Boolean).join(' ')):'')+'</div>'+
+            '<div class="f538-disp-l"><b>Acesso:</b> '+esc(acesso)+(d.versao_app?' · versão '+esc(d.versao_app):'')+'</div>'+
+            '<div class="f538-disp-l"><b>Conta:</b> '+esc([d.usuario,d.email].filter(Boolean).join(' · ')||'—')+'</div>'+
+            '<div class="f538-disp-l"><b>Local:</b> '+esc(lugar||'desconhecido')+(lugar?' <small>('+(d.origem_local==='gps'?'pelo GPS':'aproximado pela internet')+')</small>':'')+mapa+'</div>'+
+            '<div class="f538-disp-l"><b>Último acesso:</b> '+(esteAqui?'agora (este aparelho)':esc(quando(d.ultimo_acesso)))+' · <b>1º acesso:</b> '+esc(quando(d.primeiro_acesso))+'</div>'+
+            '<div class="f538-disp-ac">'+
+              '<button type="button" data-ren="'+esc(d.id)+'"><i class="fa-solid fa-pen"></i> Renomear</button>'+
+              (esteAqui?'':(d.revogado?'':'<button type="button" class="pe" data-rev="'+esc(d.id)+'"><i class="fa-solid fa-right-from-bracket"></i> Desconectar</button>'))+
+              (esteAqui?'':'<button type="button" class="pe" data-del="'+esc(d.id)+'"><i class="fa-solid fa-trash"></i> Tirar da lista</button>')+
+            '</div>'+
+          '</div></div>';
+      }).join('');
+    }catch(e){box.innerHTML='<div class="f538-disp-vazio">Não foi possível carregar agora ('+esc(e.message||e)+'). Tente de novo.</div>'}
+  }
+  function aviso(m,t){try{mostrarToast(m,t||'info')}catch(e){alert(m)}}
+  async function alterar(id,dados){
+    var r=await fetch(url()+'/dispositivos?id=eq.'+encodeURIComponent(id),{method:'PATCH',headers:cab({'Prefer':'return=minimal'}),body:JSON.stringify(dados)});
+    if(!r.ok)throw new Error('HTTP '+r.status);
+  }
+  document.addEventListener('click',async function(e){
+    var b=e.target&&e.target.closest&&e.target.closest('#f538DispLista button, #f538DispAtualizar');if(!b)return;
+    e.preventDefault();
+    try{
+      if(b.id==='f538DispAtualizar'){listar();return}
+      var id=b.getAttribute('data-ren')||b.getAttribute('data-rev')||b.getAttribute('data-del');
+      if(b.hasAttribute('data-ren')){
+        var atual=(b.closest('.f538-disp').querySelector('.f538-disp-t').firstChild||{}).textContent||'';
+        var n=prompt('Nome para este dispositivo (ex.: Celular do Adaías, Notebook do escritório):',atual.trim());
+        if(n==null)return; n=n.trim().slice(0,60);
+        await alterar(id,{nome_aparelho:n});
+        if(id===meuId()){try{localStorage.setItem(K_NOME,n)}catch(er){}}
+        aviso('Nome salvo.','success');listar();
+      }else if(b.hasAttribute('data-rev')){
+        if(!confirm('Desconectar este dispositivo?\n\nNa próxima vez que ele abrir (ou em até 10 minutos, se estiver aberto), a conta sai dele e será preciso entrar de novo com a senha.'))return;
+        await alterar(id,{revogado:true,revogado_em:new Date().toISOString()});
+        aviso('Dispositivo será desconectado.','success');listar();
+      }else if(b.hasAttribute('data-del')){
+        if(!confirm('Tirar este dispositivo da lista?\n\nSe ele continuar logado e abrir o FAST de novo, volta a aparecer. Para tirar o acesso, use "Desconectar".'))return;
+        var r=await fetch(url()+'/dispositivos?id=eq.'+encodeURIComponent(id),{method:'DELETE',headers:cab({'Prefer':'return=minimal'})});
+        if(!r.ok)throw new Error('HTTP '+r.status);
+        aviso('Retirado da lista.','success');listar();
+      }
+    }catch(er){aviso('Não foi possível concluir: '+(er.message||er),'error')}
+  });
+  // abre a aba → carrega a lista
+  document.addEventListener('click',function(e){var t=e.target&&e.target.closest&&e.target.closest('.emp-tab[data-emptab="dispositivos"]');if(t)setTimeout(listar,50)},true);
+  W.fast538Dispositivos={listar:listar,registrar:function(){return registrar(true)},id:meuId,coletar:coletar};
 })();
 </script>
 </body></html>
