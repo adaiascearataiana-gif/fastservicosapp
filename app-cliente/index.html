@@ -362,11 +362,14 @@ window.fastBioLockAtivo=function(){return !!cfg()};window.fastBioSuportado=funct
       box=document.createElement('div');box.className='pdSug';
       box.innerHTML=l.map(function(x,i){var nome=x.nome||x;return '<div data-i="'+i+'"><b>'+h(nome)+'</b>'+(x.endereco?'<small>'+h([x.endereco,x.bairro].filter(Boolean).join(' - '))+'</small>':'')+'</div>'}).join('');
       box.addEventListener('mousedown',function(e){e.preventDefault()});
-      box.addEventListener('click',function(e){var d=e.target.closest('[data-i]');if(!d)return;var x=l[+d.getAttribute('data-i')];inp.value=x.nome||x;fechar();aoEscolher&&aoEscolher(x)});
+      box.addEventListener('click',function(e){var d=e.target.closest('[data-i]');if(!d)return;var x=l[+d.getAttribute('data-i')];inp.value=x.nome||x;fechar();fechadaAte=Date.now()+900;try{inp.blur()}catch(er){}aoEscolher&&aoEscolher(x)});
       inp.parentNode.appendChild(box);
     }
+    /* 5.3.8: a busca roda na pausa da digitação (não a cada letra) e não reabre logo após escolher */
+    var tSug=null,fechadaAte=0;
     inp.addEventListener('input',function(){
-      mostrarSug();
+      clearTimeout(tSug); if(!String(inp.value||'').trim()){fechar();return}
+      tSug=setTimeout(function(){if(Date.now()<fechadaAte||document.activeElement!==inp)return;mostrarSug()},150);
       // lista ainda chegando: tenta de novo assim que carregar
       if(!box&&!LUG.length&&Date.now()-lugTempo>15000){carregarLugares().then(function(){if(document.activeElement===inp)mostrarSug()})}
     });
@@ -1715,4 +1718,14 @@ html.cli-escuro{filter:invert(.92) hue-rotate(180deg);background:#111}html.cli-e
 })();
 </script>
 
+<script id="fast538-leve-cliente">
+/* 5.3.8 — o teclado/navegador não guarda o que é digitado nos campos do pedido.
+   Campos de login/cadastro (e-mail, senha, nome, telefone) continuam com o preenchimento do celular. */
+(function(){
+  function semHistorico(el){if(!el||el.__fxAc||el.hasAttribute('autocomplete'))return;var t=(el.type||'').toLowerCase();if(el.tagName==='TEXTAREA'||/^(text|search|number|)$/.test(t)){el.setAttribute('autocomplete','off');el.__fxAc=1}}
+  document.addEventListener('focusin',function(e){var el=e.target;if(el&&(el.tagName==='INPUT'||el.tagName==='TEXTAREA'))semHistorico(el)},true);
+  function todos(){try{document.querySelectorAll('input,textarea').forEach(semHistorico)}catch(e){}}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',todos);else todos();
+})();
+</script>
 </body></html>
