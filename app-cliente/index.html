@@ -1728,4 +1728,90 @@ html.cli-escuro{filter:invert(.92) hue-rotate(180deg);background:#111}html.cli-e
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',todos);else todos();
 })();
 </script>
+<script id="fast538-toque">
+/* 5.3.8 — TOQUE E ROLAGEM (celular)
+   • Toque SIMPLES e arrastar em cima de uma tabela: desliza a tabela para os lados;
+     para cima/baixo quem rola é a tela (a tabela não "prende" mais o dedo).
+   • Toque LONGO (segure ~0,3 s, o ↕ aparece) e arraste — em QUALQUER lugar, dentro
+     ou fora de tabela/card — sobe e desce a tela inteira, com embalo ao soltar. */
+(function(){
+  if(window.__f538Toque)return; window.__f538Toque=1;
+  if(!('ontouchstart' in window) && !(navigator.maxTouchPoints>0)) return;
+  var ESPERA=300, FOLGA=10, timer=0, ini=null, modo='', ultY=0, ultT=0, vel=0, raf=0, alvo=null;
+  // tabelas: sem rolagem vertical própria no celular (a tela rola), só para os lados
+  var css=document.createElement('style');
+  css.textContent='@media (pointer:coarse){html body .table-container,html body .f538-tab-wrap,html body main .tab-content .table-container{max-height:none!important;overscroll-behavior-y:auto!important;overscroll-behavior-x:contain!important}'+
+    'html.f538-rolando,html.f538-rolando *{user-select:none!important;-webkit-user-select:none!important;-webkit-touch-callout:none!important}}';
+  (document.head||document.documentElement).appendChild(css);
+  function marcarTabelas(){
+    try{Array.prototype.forEach.call(document.querySelectorAll('table'),function(tb){
+      for(var e=tb.parentElement,n=0;e&&n<4&&e!==document.body&&e.tagName!=='MAIN';e=e.parentElement,n++){
+        if(e.classList.contains('f538-tab-wrap'))return;
+        var s=getComputedStyle(e);if(/auto|scroll/.test(s.overflowX)){e.classList.add('f538-tab-wrap');return}
+      }
+    })}catch(er){}
+  }
+  setTimeout(marcarTabelas,1500);setInterval(marcarTabelas,4000);
+  var aviso=document.createElement('div');
+  aviso.style.cssText='position:fixed;right:10px;top:50%;transform:translateY(-50%);z-index:2147483000;background:rgba(15,23,42,.82);color:#fff;border-radius:999px;padding:8px 10px;font:700 18px/1 system-ui,sans-serif;display:none;pointer-events:none';
+  aviso.textContent='↕';
+  (function montar(){ if(document.body) document.body.appendChild(aviso); else setTimeout(montar,200); })();
+  function ignorar(el){
+    return !!(el && el.closest && el.closest('input,textarea,select,[contenteditable="true"],.leaflet-container,canvas,video,[draggable="true"],.sortable-ghost,#fnavMapa,#scrollNavBox,.fsb-drag-handle,[id$="DragHandle"]'));
+  }
+  // a "tela": o rolador vertical mais de fora sob o dedo (a página, ou a janela aberta)
+  function rolador(el){
+    var achado=null;
+    for(var n=el;n&&n!==document.documentElement;n=n.parentElement){
+      if(n===document.body)break;
+      var s=getComputedStyle(n);
+      if(/auto|scroll/.test(s.overflowY)&&n.scrollHeight>n.clientHeight+2&&!n.classList.contains('f538-tab-wrap'))achado=n;
+    }
+    return achado||document.scrollingElement||document.documentElement;
+  }
+  function parar(){ clearTimeout(timer); timer=0; }
+  document.addEventListener('touchstart',function(e){
+    parar(); cancelAnimationFrame(raf); modo=''; aviso.style.display='none';
+    if(e.touches.length!==1 || ignorar(e.target)) { ini=null; return; }
+    var t=e.touches[0]; ini={x:t.clientX,y:t.clientY}; alvo=e.target;
+    timer=setTimeout(function(){
+      timer=0; modo='tela'; ultY=ini.y; ultT=Date.now(); vel=0; alvo=rolador(alvo);
+      document.documentElement.classList.add('f538-rolando');
+      aviso.style.display='block';
+      try{ if(navigator.vibrate) navigator.vibrate(12); }catch(er){}
+    },ESPERA);
+  },{passive:true});
+  // ouvinte permanente (precisa existir desde o início do toque para poder segurar a rolagem)
+  document.addEventListener('touchmove',function(e){
+    if(modo==='tela'){
+      if(e.cancelable)e.preventDefault();
+      var t=e.touches[0], agora=Date.now(), dy=t.clientY-ultY;
+      alvo.scrollTop+=-dy*1.6;
+      vel=(-dy*1.6)/Math.max(1,agora-ultT); ultY=t.clientY; ultT=agora;
+      return;
+    }
+    if(!ini||!timer)return;
+    var t2=e.touches[0];
+    if(Math.abs(t2.clientX-ini.x)>FOLGA || Math.abs(t2.clientY-ini.y)>FOLGA){ parar(); ini=null; }
+  },{passive:false});
+  function fim(){
+    parar();
+    if(modo==='tela'){
+      aviso.style.display='none'; document.documentElement.classList.remove('f538-rolando');
+      var v=vel*16, a=alvo;
+      (function deslizar(){ if(Math.abs(v)<0.6) return; a.scrollTop+=v; v*=0.93; raf=requestAnimationFrame(deslizar); })();
+    }
+    modo=''; ini=null;
+  }
+  document.addEventListener('touchend',fim,{passive:true});
+  document.addEventListener('touchcancel',fim,{passive:true});
+  // no toque longo não abre o menu de "copiar/salvar imagem" nem seleciona texto
+  document.addEventListener('contextmenu',function(e){ if(modo==='tela'||timer){ e.preventDefault(); } },true);
+  document.addEventListener('selectstart',function(e){ if(modo==='tela'||timer){ e.preventDefault(); } },true);
+  // toque longo que virou rolagem não "clica" no que estava embaixo
+  document.addEventListener('click',function(e){ if(window.__f538RolouAte&&Date.now()<window.__f538RolouAte){e.preventDefault();e.stopPropagation();} },true);
+  document.addEventListener('touchend',function(){ if(modo==='tela')window.__f538RolouAte=Date.now()+350; },true);
+  window.fastToqueModo=function(){ return modo; };
+})();
+</script>
 </body></html>
