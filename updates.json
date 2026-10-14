@@ -1,7 +1,17 @@
 {
   "version": "5.3.8",
-  "releasedAt": "2026-10-13T15:00:00-03:00",
+  "releasedAt": "2026-10-14T10:00:00-03:00",
   "updates": [
+    {
+      "app": "rotas",
+      "type": "corrigido",
+      "text": "5.3.8 (14/10/2026): rotas concluídas não mudam mais de data sozinhas; se uma rota aparecer duplicada em duas datas, a cópia extra é removida e o cadastro fica com a data certa."
+    },
+    {
+      "app": "rotas",
+      "type": "corrigido",
+      "text": "5.3.8 (14/10/2026): ao abrir no dia seguinte, a tela de Rotas do Dia não fica mais presa na data de ontem."
+    },
     {
       "app": "rotas",
       "type": "melhorado",

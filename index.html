@@ -44560,6 +44560,8 @@ body.fx-apk .fx-gal-ajuda{display:flex}
    a data das Rotas do Dia e a posição da tela — e volta exatamente para lá. */
 (function(){
   var K='fast523_tela', LIMITE=12*3600*1000;
+  /* 5.3.8 — a data salva só volta se foi salva HOJE; de um dia para o outro a tela abre no dia atual */
+  function hojeLocal(){ var d=new Date(); return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2); }
   function abaAtual(){
     var a=document.querySelector('.tab-content.active')||Array.prototype.filter.call(document.querySelectorAll('.tab-content'),function(t){return t.offsetParent!==null})[0];
     return a?a.id:'';
@@ -44575,7 +44577,7 @@ body.fx-apk .fx-gal-ajuda{display:flex}
         var f6=document.getElementById('f66SeqEdit');
         if(!jan && f6 && getComputedStyle(f6).display!=='none' && window.__fast524UltSeq) jan={tipo:'seq',id:window.__fast524UltSeq};
       }catch(e){}
-      localStorage.setItem(K,JSON.stringify({aba:aba,y:Math.round(window.scrollY||0),data:dp?dp.value:'',jan:jan,em:Date.now()}));
+      localStorage.setItem(K,JSON.stringify({aba:aba,y:Math.round(window.scrollY||0),data:dp?dp.value:'',dia:hojeLocal(),jan:jan,em:Date.now()}));
     }catch(e){}
   }
   document.addEventListener('visibilitychange',function(){ if(document.hidden) guardar(); });
@@ -44585,6 +44587,7 @@ body.fx-apk .fx-gal-ajuda{display:flex}
   function restaurar(){
     var st=null; try{ st=JSON.parse(localStorage.getItem(K)||'null'); }catch(e){}
     if(!st||!st.aba||Date.now()-st.em>LIMITE) return;
+    if(st.dia!==hojeLocal()){ st.data=''; st.y=0; st.jan=null; }
     var tentativas=0;
     (function vai(){
       tentativas++;
@@ -45247,4 +45250,67 @@ body.fx-apk .fx-gal-ajuda{display:flex}
 })();
 </script>
 <style id="fast538-veio-de">.rd-veio-de{display:inline-flex;align-items:center;margin-left:6px;padding:2px 7px;border-radius:999px;font-size:11px;font-weight:800;background:#fef3c7;color:#92400e;border:1px solid #f59e0b;white-space:nowrap;vertical-align:middle}body.dark-mode .rd-veio-de,[data-theme="dark"] .rd-veio-de{background:#422006;color:#fcd34d;border-color:#b45309}</style>
+<script id="fast538-protege-data">
+/* 5.3.8 — PROTEÇÃO DA DATA DAS ROTAS
+   Se a mesma rota do dia aparecer em duas datas (cópia duplicada), o reparo de
+   vínculos acabava gravando no cadastro a data mais nova — rotas concluídas
+   ontem passavam para hoje. Agora a cópia duplicada é removida antes do reparo:
+   concluída fica na data mais antiga; pendente fica na mais nova. */
+(function(){
+  function concl(it){
+    try{ if(typeof fastEhConcluido==='function') return !!fastEhConcluido(it,(window.bancoDados||{}).rotas||[]); }catch(e){}
+    return /conclu/i.test(String((it&&it.status)||''));
+  }
+  function deduplicar(){
+    var bd=window.bancoDados, sq=bd&&bd.sequencias; if(!sq) return 0;
+    var mapa={};
+    Object.keys(sq).sort().forEach(function(d){
+      (sq[d]||[]).forEach(function(it){
+        if(!it||it.agrupado) return;
+        var reg={d:d,it:it};
+        (mapa['i'+it.id]=mapa['i'+it.id]||[]).push(reg);
+        if(it.rotaId!=null&&it.rotaId!==''){
+          var ch='r'+it.rotaId+'|'+String(it.cliente||'').trim().toLowerCase()+'|'+String(it.destino||'').trim().toLowerCase();
+          (mapa[ch]=mapa[ch]||[]).push(reg);
+        }
+      });
+    });
+    var remover=[];
+    Object.keys(mapa).forEach(function(ch){
+      var l=mapa[ch].filter(function(x){return remover.indexOf(x)<0}); if(l.length<2) return;
+      if(!l.some(function(x){return x.d!==l[0].d})) return;
+      var algumaConcl=l.some(function(x){return concl(x.it)});
+      var fica=algumaConcl ? l.filter(function(x){return concl(x.it)})[0] : l[l.length-1];
+      /* só remove cópias em OUTRA data — na mesma data nada é apagado */
+      l.forEach(function(x){ if(x!==fica && x.d!==fica.d && remover.indexOf(x)<0) remover.push(x); });
+      if(fica.it.rotaId!=null){
+        var r=(bd.rotas||[]).find(function(z){return String(z.id)===String(fica.it.rotaId)});
+        if(r && r.data!==fica.d){ r.data=fica.d; r.updatedAt=new Date().toISOString(); }
+      }
+    });
+    remover.forEach(function(x){ sq[x.d]=(sq[x.d]||[]).filter(function(i){return i!==x.it}); });
+    return remover.length;
+  }
+  function rodar(){
+    try{
+      var n=deduplicar();
+      if(n){
+        if(typeof salvarStorage==='function') salvarStorage();
+        if(typeof renderizarSequencia==='function') try{renderizarSequencia()}catch(e){}
+        if(typeof renderizar==='function') try{renderizar()}catch(e){}
+      }
+      return n;
+    }catch(e){ return 0; }
+  }
+  window.fast538Deduplicar=rodar;
+  var orig=window.fast75RepararVinculos;
+  if(typeof orig==='function' && !orig.__f538){
+    var w=function(){ try{deduplicar()}catch(e){} return orig.apply(this,arguments); };
+    w.__f538=true; window.fast75RepararVinculos=w;
+  }
+  setTimeout(rodar,6000);
+  setInterval(function(){ if(!document.hidden) rodar(); },60000);
+  document.addEventListener('visibilitychange',function(){ if(!document.hidden) setTimeout(rodar,3000); });
+})();
+</script>
 </body></html>
