@@ -34300,7 +34300,25 @@ window.fastMobileNav = function(ev, abaId, botao) {
         reg.driveFolderLink='https://drive.google.com/drive/folders/'+encodeURIComponent(pastaDestino);
         return pastaDestino;
       }
+      // 5.3.8: consulta em lote quais fotos ("idb:...") já têm arquivo no Drive (registro compartilhado)
+      async function fotosJaNoDrive(refs,mapa){
+        var achou=new Set(); refs=Array.from(new Set((refs||[]).filter(Boolean)));
+        try{
+          if(!refs.length||typeof SUPABASE_URL==='undefined'||typeof supabaseHeaders!=='function')return achou;
+          for(var i=0;i<refs.length;i+=60){
+            var lista=refs.slice(i,i+60).map(function(r){return '"'+String(r).replace(/"/g,'')+'"'}).join(',');
+            var r=await fetch(SUPABASE_URL+'/fotos_drive?select=ref,drive_id,nome&ref=in.('+encodeURIComponent(lista)+')',{headers:supabaseHeaders(),cache:'no-store'});
+            if(!r.ok)break;
+            (await r.json()).forEach(function(x){if(x&&x.ref&&x.drive_id){achou.add(x.ref);if(mapa)mapa[x.ref]=x}});
+          }
+        }catch(e){}
+        return achou;
+      }
       async function enviar(reg){
+        // 5.3.8: se esta foto já tem arquivo no Drive (enviado por este ou outro aparelho), não cria cópia
+        var refReg=String(reg.fotoRef||'');
+        if(!refReg){try{var mpr=JSON.parse(localStorage.getItem('fast68_fila_ref')||'{}');refReg=String(mpr[reg.id]||'')}catch(e){}}
+        if(/^idb:/.test(refReg)){var mpx={};await fotosJaNoDrive([refReg],mpx);var ja=mpx[refReg];if(ja&&ja.drive_id)return {id:ja.drive_id,name:ja.nome||reg.nome,webViewLink:'https://drive.google.com/file/d/'+ja.drive_id+'/view',jaExistia:true};}
         var cfg=config(), boundary='fast_'+Date.now()+'_'+Math.random().toString(36).slice(2);
         var destinoId=await pastaFinal(reg);
         var fastKey=reg.fotoKey||chaveFoto(reg.itemId,reg.fotoRef,reg.fotoIndex);
@@ -34343,6 +34361,10 @@ window.fastMobileNav = function(ev, abaId, botao) {
         const putStore=(name,value)=>new Promise((resolve,reject)=>{const tx=db.transaction(name,'readwrite');tx.objectStore(name).put(value);tx.oncomplete=()=>resolve(true);tx.onerror=()=>reject(tx.error)});
         const [queue,ledger]=await Promise.all([allStore('driveQueue'),allStore('driveLedger')]);
         const known=new Set(queue.concat(ledger).map(x=>String(x.id||'')));
+        // 5.3.8: a mesma foto já enviada (por qualquer caminho ou outro aparelho) não sobe de novo
+        const refsConhecidas=new Set(queue.concat(ledger).map(x=>String(x.fotoRef||'')).filter(Boolean));
+        try{const mp=JSON.parse(localStorage.getItem('fast68_fila_ref')||'{}');Object.keys(mp).forEach(k=>{if(mp[k])refsConhecidas.add(String(mp[k]))})}catch(e){}
+        const naNuvem=await fotosJaNoDrive((bancoDados.rotas||[]).reduce((a,r)=>a.concat(Array.isArray(r.fotos)?r.fotos:(r.foto?[r.foto]:[])),[]).map(String).filter(x=>/^idb:/.test(x)&&!refsConhecidas.has(x)));
         let added=0;
         for(const rota of (bancoDados.rotas||[])){
           const refs=Array.isArray(rota.fotos)?rota.fotos:(rota.foto?[rota.foto]:[]);
@@ -34351,6 +34373,9 @@ window.fastMobileNav = function(ev, abaId, botao) {
             const id='drive_rota_'+String(rota.id)+'_'+String(i);
             const jaExiste=queue.concat(ledger).some(x=>String(x.itemId||'')===String(rota.id)&&Number(x.fotoIndex)===i);
             if(known.has(id)||jaExiste)continue;
+            if(refsConhecidas.has(ref)||naNuvem.has(ref))continue;
+            // foto que veio do Drive (tirada em outro aparelho) NÃO é reenviada daqui
+            if(/^idb:/.test(ref)&&typeof window.__f68ObterLocal==='function'){let loc=null;try{loc=await window.__f68ObterLocal(ref.replace(/^idb:/,''))}catch(e){loc=null}if(!loc)continue;}
             let file=null;
             try{if(typeof window.resolverFotoParaFile==='function')file=await window.resolverFotoParaFile(ref,'rota_'+String(rota.id)+'_'+String(i+1)+'.jpg');}catch(e){file=null}
             if(!file)continue;
@@ -34409,6 +34434,16 @@ window.fastMobileNav = function(ev, abaId, botao) {
           return r.ok;
         }
         var FOLDER='application/vnd.google-apps.folder';
+        // 5.3.8: arquivos que o app usa para mostrar as fotos (nunca vão para a lixeira)
+        var usados=null;
+        try{
+          if(typeof SUPABASE_URL!=='undefined'&&typeof supabaseHeaders==='function'){
+            var tmp=new Set(),off=0,okU=true;
+            while(true){var ru=await fetch(SUPABASE_URL+'/fotos_drive?select=drive_id&order=ref&limit=1000&offset='+off,{headers:supabaseHeaders(),cache:'no-store'});if(!ru.ok){okU=false;break}var lu=await ru.json();lu.forEach(function(x){if(x&&x.drive_id)tmp.add(String(x.drive_id))});if(lu.length<1000)break;off+=1000;}
+            if(okU)usados=tmp;
+          }
+        }catch(eU){usados=null}
+        var globalMd5={};
         var pilha=[raiz], removidos=0, pastasVistas=0, visitadas=new Set();
         while(pilha.length){
           var atual=pilha.pop(); if(visitadas.has(atual))continue; visitadas.add(atual);
@@ -34420,6 +34455,8 @@ window.fastMobileNav = function(ev, abaId, botao) {
             if(f.mimeType===FOLDER){pilha.push(f.id);continue;}
             // agrupa por CONTEÚDO (md5) quando disponível — pega cópias idênticas
             // mesmo com nomes diferentes; senão, cai no nome do arquivo.
+            // com a lista de fotos em uso, junta cópias idênticas de TODAS as pastas
+            if(usados&&f.md5Checksum){(globalMd5[f.md5Checksum]=globalMd5[f.md5Checksum]||[]).push(f);continue;}
             var chave=f.md5Checksum?('md5:'+f.md5Checksum):('nome:'+f.name);
             (porChave[chave]=porChave[chave]||[]).push(f);
           }
@@ -34430,6 +34467,24 @@ window.fastMobileNav = function(ev, abaId, botao) {
             for(var g=1;g<grupo.length;g++){ // mantém grupo[0] (mais antigo)
               try{ if(await paraLixeira(grupo[g].id)){removidos++; prog('Limpando duplicatas… '+removidos+' cópia(s) removida(s).'); } }catch(e2){}
             }
+          }
+        }
+        var md5s=Object.keys(globalMd5);
+        for(var q=0;q<md5s.length;q++){
+          var gr=globalMd5[md5s[q]]; if(gr.length<2)continue;
+          // fica a cópia que o app usa; se nenhuma estiver em uso, a mais antiga
+          gr.sort(function(a,b){var ua=usados.has(String(a.id))?0:1,ub=usados.has(String(b.id))?0:1;if(ua!==ub)return ua-ub;return String(a.createdTime||'').localeCompare(String(b.createdTime||''));});
+          for(var g2=1;g2<gr.length;g2++){
+            var idDup=String(gr[g2].id);
+            if(usados.has(idDup)){
+              // a cópia está ligada a uma foto do app: antes, aponta essa foto para a cópia que fica
+              try{
+                var rp=await fetch(SUPABASE_URL+'/fotos_drive?drive_id=eq.'+encodeURIComponent(idDup),{method:'PATCH',headers:supabaseHeaders({'Content-Type':'application/json','Prefer':'return=minimal'}),body:JSON.stringify({drive_id:String(gr[0].id)})});
+                if(!rp.ok)continue;
+                usados.delete(idDup); usados.add(String(gr[0].id));
+              }catch(eP){continue}
+            }
+            try{ if(await paraLixeira(idDup)){removidos++; prog('Limpando duplicatas… '+removidos+' cópia(s) removida(s).'); } }catch(e3){}
           }
         }
         status(removidos?('✅ Limpeza concluída: '+removidos+' cópia(s) duplicada(s) enviada(s) à lixeira do Drive.'):'✅ Nenhuma duplicata encontrada no Drive.','ok');
@@ -46353,6 +46408,45 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
   setTimeout(ciclo,12000);
   D.addEventListener('visibilitychange',function(){if(!D.hidden)ciclo()});
   W.fast538Avisos={abrir:abrir,buscar:buscar,lista:function(){return LISTA}};
+})();
+</script>
+<script id="fast538-vigia-cadastros">
+/* 5.3.8 — VIGIA DOS CADASTROS: clientes e motoristas cadastrados/alterados em outro
+   aparelho chegavam só na sincronização completa (até 10 min) quando o aviso em tempo
+   real falhava. Agora, a cada 45 s (com a tela aberta), uma consulta mínima (1 linha)
+   confere se mudou algo na nuvem; se mudou, puxa a sincronização completa na hora. */
+(function(){
+  var W=window,D=document,TABS=['clientes','motoristas'],ult={},fora={},t=0,rodando=false;
+  function url(){try{return SUPABASE_URL}catch(e){return ''}}
+  function hdr(){try{return supabaseHeaders({'Prefer':'count=exact'})}catch(e){return null}}
+  async function conferir(){
+    if(rodando||D.hidden||navigator.onLine===false)return;var u=url(),h=hdr();if(!u||!h)return;
+    rodando=true;var mudou=false;
+    try{
+      for(var i=0;i<TABS.length;i++){
+        var tb=TABS[i];if(fora[tb])continue;
+        try{
+          var r=await fetch(u+'/'+tb+'?select=updated_at&order=updated_at.desc.nullslast&limit=1',{headers:h,cache:'no-store'});
+          if(r.status===400||r.status===404){fora[tb]=1;continue}
+          if(!r.ok)continue;
+          var j=await r.json(),sig=(r.headers.get('content-range')||'').split('/')[1]+'|'+((j[0]&&j[0].updated_at)||'');
+          if(ult[tb]!==undefined&&ult[tb]!==sig)mudou=true;
+          ult[tb]=sig;
+        }catch(e){}
+      }
+      if(mudou&&typeof W.sincronizarAgora==='function'){
+        W.__f68Pesada=0;   // pede a sincronização completa (traz os cadastros)
+        try{await W.sincronizarAgora()}catch(e){}
+        // a própria sincronização pode ter mexido na nuvem: guarda o estado novo sem disparar de novo
+        for(var k=0;k<TABS.length;k++)delete ult[TABS[k]];
+        setTimeout(conferir,1500);
+      }
+    }finally{rodando=false}
+  }
+  function ciclo(){clearTimeout(t);conferir();t=setTimeout(ciclo,45000)}
+  setTimeout(ciclo,20000);
+  D.addEventListener('visibilitychange',function(){if(!D.hidden){clearTimeout(t);t=setTimeout(ciclo,2000)}});
+  W.fast538VigiaCadastros={conferir:conferir};
 })();
 </script>
 </body></html>

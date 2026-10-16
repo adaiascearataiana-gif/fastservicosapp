@@ -3,6 +3,16 @@
   "releasedAt": "2026-10-14T10:00:00-03:00",
   "updates": [
     {
+      "app": "fast",
+      "type": "correcao",
+      "text": "5.3.8 (16/10/2026): fotos duplicadas no Google Drive. A mesma foto subia de novo pela aba ROTAS (numa subpasta ROTA) depois de já ter subido pelas Rotas do Dia. Agora cada foto sobe uma vez só, e a limpeza automática também remove as cópias idênticas em pastas diferentes (vão para a lixeira do Drive). A limpeza também junta as cópias numeradas da mesma foto (ex.: Foto 309 a 462 iguais) e mantém as fotos do app funcionando."
+    },
+    {
+      "app": "fast",
+      "type": "melhoria",
+      "text": "5.3.8 (16/10/2026): teste geral de sincronização (PAINEL, ROTAS, Despesas, Motorista e Cliente). Clientes e motoristas cadastrados em outro aparelho agora chegam em até 1 minuto, mesmo quando o aviso em tempo real falha."
+    },
+    {
       "app": "cliente",
       "type": "novo",
       "text": "5.3.8 (16/10/2026): PIX Mercado Pago com confirmação automática — o cliente paga pelo QR Code e as rotas viram Recebido sozinhas, sem comprovante. O PAINEL avisa \"💰 PIX recebido\"."
