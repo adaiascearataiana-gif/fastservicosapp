@@ -3,6 +3,46 @@
   "releasedAt": "2026-10-14T10:00:00-03:00",
   "updates": [
     {
+      "app": "cliente",
+      "type": "novo",
+      "text": "5.3.8 (16/10/2026): PIX Mercado Pago com confirmação automática — o cliente paga pelo QR Code e as rotas viram Recebido sozinhas, sem comprovante. O PAINEL avisa \"💰 PIX recebido\"."
+    },
+    {
+      "app": "motorista",
+      "type": "novo",
+      "text": "5.3.8 (16/10/2026): Motorista — confirmar entrega com nome de quem recebeu, código de entrega e assinatura; ocorrência com foto; meus números; rota inteira no mapa; botões grandes; checklist do veículo e SOS. Corrigidos os botões CHEGUEI e CONCLUIR."
+    },
+    {
+      "app": "cliente",
+      "type": "novo",
+      "text": "5.3.8 (16/10/2026): Cliente — repetir último pedido, destinos frequentes, valor estimado, código de entrega, quem recebeu com assinatura, ocorrências, avaliação da entrega e extrato do mês para imprimir ou salvar em PDF."
+    },
+    {
+      "app": "fast",
+      "type": "novo",
+      "text": "5.3.8 (16/10/2026): PAINEL — botão de avisos com SOS, ocorrências, checklist, entregas confirmadas e avaliações dos clientes."
+    },
+    {
+      "app": "fast",
+      "type": "corrigido",
+      "text": "5.3.8 (16/10/2026): pagamento protegido — rota marcada como Recebido não volta mais para Pendente. Cada troca de pagamento sobe na hora com carimbo, e um aparelho com a cópia antiga não desfaz mais o que foi marcado em outro."
+    },
+    {
+      "app": "rotas",
+      "type": "corrigido",
+      "text": "5.3.8 (14/10/2026): filtros de Cliente, Origem e Destino voltam a funcionar nas Rotas do Dia, sem diferença de acento (Kaua acha Kauã). Ao digitar aparecem os nomes que combinam — também no filtro de cliente da aba Rotas."
+    },
+    {
+      "app": "fast",
+      "type": "melhorado",
+      "text": "5.3.8 (14/10/2026): PAINEL no navegador bem mais leve — as bolinhas piscando no topo faziam a tela ser redesenhada sem parar (cerca de 30% do processador com o app parado; agora 2 a 5%). Rolagem mais lisa, lista de clientes mais rápida e a sincronização completa não trava mais a tela por meio segundo."
+    },
+    {
+      "app": "fast",
+      "type": "melhorado",
+      "text": "5.3.8 (14/10/2026): Dispositivos — local pelo GPS/Wi‑Fi do aparelho (bairro e precisão em metros); no aplicativo Android é automático e no navegador basta tocar em \"Usar localização precisa\" uma vez. O IP e a operadora aparecem à parte."
+    },
+    {
       "app": "fast",
       "type": "corrigido",
       "text": "5.3.8 (14/10/2026): Lugares sincronizados na hora entre celular, aplicativo e navegador — cada lugar criado, editado ou excluído sobe em poucos segundos e os outros aparelhos recebem ao abrir, ao voltar para o app e a cada 30 s. Uma cópia antiga em outro aparelho não passa mais por cima da edição mais nova."

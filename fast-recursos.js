@@ -1340,7 +1340,9 @@
   function assinaturaLista() {
     try {
       var d = ($('dpDataSequencia') || {}).value || '';
-      var filtros = Array.prototype.map.call(document.querySelectorAll('#rotasDia .rd-filter-driver select, #rotasDia #fastFiltroSeqStatus, #rotasDia input[type=search]'), function (x) { return x.value; }).join('|');
+      // 5.3.8: TODOS os filtros das Rotas do Dia entram na assinatura (cliente, origem e
+      // destino digitados também) — senão a lista não se redesenhava ao filtrar.
+      var filtros = Array.prototype.map.call(document.querySelectorAll('#rotasDia .rd-filter-driver select, #rotasDia #fastFiltroSeqStatus, #rotasDia input[type=search], #rotasDia [id^="filtroSeq"], #rotasDia [id^="filtro"]:not([type=date])'), function (x) { return (x.id || '') + '=' + (x.type === 'checkbox' ? x.checked : x.value); }).join('|');
       // 5.3.8: assinatura "canônica" — ignora a ordem das chaves, campos vazios e carimbos
       // de sincronização. Antes, cada sincronização trazia o MESMO item com as chaves em outra
       // ordem (ou com campos vazios a mais) e a lista inteira era redesenhada à toa (tela piscando).
@@ -1443,6 +1445,7 @@
   /* ---------------- SUGESTÕES nos filtros (só o nome já cadastrado) ---------------- */
   var CAMPOS_SUG = {
     filtroSeqCliente: 'cliente', filtroSeqOrigem: 'origem', filtroSeqDestino: 'destino',
+    filtroNome: 'cliente', /* 5.3.8: filtro de cliente da aba Rotas também sugere os nomes */
     filtroRotaOrigem: 'origem', filtroRotaDestino: 'destino',
     fastRelFiltroCliente: 'cliente', fastRelFiltroOrigem: 'origem', fastRelFiltroDestino: 'destino',
     // edição de rota (aba Rotas), editor rápido das Rotas do Dia e destino do Adicionar rota

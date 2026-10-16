@@ -1,3 +1,18 @@
+=====================================================================
+ ATUALIZAÇÃO FINAL DA 5.3.8 (para quem JÁ instalou a 5.3.8 anterior)
+=====================================================================
+ A) SUPABASE → SQL Editor → New query: cole e rode
+    SQL-rodar-no-Supabase/SUPABASE-5.3.8.sql
+    (no final devem aparecer CINCO colunas com "true")
+ B) GITHUB → pasta principal: envie index.html, fast-recursos.js e updates.json
+ C) GITHUB → pasta app-cliente: envie o index.html de dentro de app-cliente
+ D) GITHUB → pasta app-motorista: envie o index.html de dentro de app-motorista
+ E) Espere o ✓ verde no GitHub, feche e abra de novo FAST, ROTAS, Cliente e
+    Motorista em todos os aparelhos.
+ F) PIX MERCADO PAGO (baixa automática): siga
+    supabase-funcao-mp-pix/COMO-ATIVAR.txt (a função NÃO vai para o GitHub).
+=====================================================================
+
 FAST 5.3.8 — PACOTE COMPLETO (inclui tudo das versões 5.3.4, 5.3.5, 5.3.6, 5.3.7 e 5.3.8)
 
 NOVO NA 5.3.8 (ROTAS DO DIA):
@@ -20,6 +35,29 @@ NOVO NA 5.3.8 (ROTAS DO DIA):
   (ROTAS, FAST e Motorista). A fila não embaralha mais depois de sincronizar.
 - ROTAS abre mais rápido e mostra "Carregando rotas…" em vez de tudo zerado.
 - GALERIA: no aplicativo fica só um botão Galeria — o que funciona.
+- TOQUE: deslizar em cima de tabela move a tabela para os lados e a tela para
+  cima/baixo; segurar um pouco e arrastar sobe/desce a tela em qualquer lugar.
+- LUGARES: o Salvar funciona mesmo para um nome que já tinha sido excluído; sempre
+  aparece a confirmação ou o motivo de não salvar.
+- LUGARES SINCRONIZADOS NA HORA entre todos os aparelhos (criar, editar, excluir).
+- NOVO: Área Protegida → Dispositivos (onde o FAST está conectado, modelo, versão,
+  conta, local aproximado, último acesso; renomear e desconectar à distância).
+  >>> PRECISA rodar SQL-rodar-no-Supabase/SUPABASE-5.3.8.sql no Supabase. <<<
+- PAINEL no navegador mais leve (sem animações piscando, rolagem lisa, clientes e
+  sincronização sem travar a tela).
+- FILTROS de Cliente/Origem/Destino funcionando (sem diferença de acento) e com
+  sugestão de nomes ao digitar.
+- PAGAMENTO PROTEGIDO: rota marcada como Recebido não volta mais para Pendente
+  (precisa do SQL 5.3.8 rodado de novo).
+- MOTORISTA: concluir com nome de quem recebeu, código de entrega e assinatura;
+  OCORRÊNCIA com foto; Meus números; Rota no mapa; Botões grandes; Checklist do
+  veículo; SOS (localização + WhatsApp da empresa). Botões CHEGUEI/CONCLUIR
+  corrigidos (estavam sem ação no app web).
+- CLIENTE: Repetir último pedido; destinos frequentes; valor estimado pela tabela;
+  código de entrega; quem recebeu + assinatura; ocorrências; avaliação com
+  estrelas; Extrato do mês (imprimir/PDF).
+- PIX MERCADO PAGO: o cliente paga pelo QR Code e as rotas viram Recebido sozinhas.
+- PAINEL: botão "🚨 Avisos" com SOS, ocorrências, checklist, entregas e avaliações.
 
 JÁ FEITO (pode pular): passos 1, 2 e 3 — SQLs rodados, build.gradle 5.3.7 enviado
 e APKs já gerados em downloads/. COMECE PELO PASSO 4.
