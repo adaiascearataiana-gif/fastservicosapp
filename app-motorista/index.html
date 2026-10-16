@@ -1052,9 +1052,12 @@ document.addEventListener('click',function(e){
 },true);
 function itemArg(item){
   // objeto seguro p/ onclick inline (id como string; campos essenciais)
-  return '{id:'+JSON.stringify(String(item.id))+',data_seq:'+JSON.stringify(item.data_seq||ESTADO.dataSel)+
+  return ('{id:'+JSON.stringify(String(item.id))+',data_seq:'+JSON.stringify(item.data_seq||ESTADO.dataSel)+
     ',cliente:'+JSON.stringify(item.cliente||'')+',destino:'+JSON.stringify(item.destino||'')+
-    ',chegada_em:'+JSON.stringify(item.chegada_em||'')+',status:'+JSON.stringify(item.status||'')+'}';
+    ',chegada_em:'+JSON.stringify(item.chegada_em||'')+',status:'+JSON.stringify(item.status||'')+'}')
+    // 5.3.8: as aspas viravam o fim do atributo onclick="…" e os botões CHEGUEI/CONCLUIR
+    // ficavam sem ação; codificadas, o navegador devolve as aspas antes de rodar o código
+    .replace(/&/g,'&amp;').replace(/"/g,'&quot;');
 }
 function cardHTML(item,done){
   var chegou=item.chegada_em;
@@ -1601,6 +1604,212 @@ window.motInstalar=motInstalar;
   document.addEventListener('click',function(e){ if(window.__f538RolouAte&&Date.now()<window.__f538RolouAte){e.preventDefault();e.stopPropagation();} },true);
   document.addEventListener('touchend',function(){ if(modo==='tela')window.__f538RolouAte=Date.now()+350; },true);
   window.fastToqueModo=function(){ return modo; };
+})();
+</script>
+<script id="fast538-motorista-extras">
+/* 5.3.8 — EXTRAS DO MOTORISTA: confirmação de entrega (quem recebeu, código e assinatura),
+   ocorrências com foto, meus números, rota inteira no mapa, botões grandes, checklist e SOS. */
+(function(){
+  var W=window,D=document,FILA='x538_mot_eventos',FONE='5585996553791';
+  function $i(id){return D.getElementById(id)}
+  function H(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+  function pinDe(id){var s='fast-pin:'+String(id),h=2166136261;for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)>>>0}return String(1000+(h%9000))}
+  function est(){try{return ESTADO}catch(e){return W.ESTADO||{}}}
+  function ses(){return est().sessao||{}}
+  function item(id){return (est().rotas||[]).filter(function(x){return String(x.id)===String(id)})[0]||null}
+  function msg(t,tp){try{toast(t,tp||'ok')}catch(e){alert(t)}}
+  function hoje(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+  function brl(v){return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(v)||0)}
+
+  var css=D.createElement('style');css.textContent=
+    '.x5Ov{position:fixed;inset:0;z-index:99990;background:rgba(2,6,23,.7);display:flex;align-items:flex-end;justify-content:center}.x5Bx{background:#0f172a;color:#e2e8f0;width:100%;max-width:560px;max-height:92vh;overflow:auto;border-radius:20px 20px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px))}'+
+    '.x5Bx h3{margin:0 0 6px;font-size:19px}.x5Bx label{display:block;font-size:13px;color:#94a3b8;margin:12px 0 5px;font-weight:700}.x5Bx input,.x5Bx textarea,.x5Bx select{width:100%;box-sizing:border-box;background:#1e293b;color:#fff;border:1px solid #334155;border-radius:12px;padding:12px;font-size:16px}'+
+    '.x5Bx canvas{width:100%;height:150px;background:#fff;border-radius:12px;touch-action:none;display:block}.x5Rw{display:flex;gap:8px;margin-top:14px}.x5Rw button{flex:1;border:0;border-radius:14px;padding:14px;font-weight:900;font-size:15px}'+
+    '.x5Ok{background:#16a34a;color:#fff}.x5No{background:#334155;color:#e2e8f0}.x5Rd{background:#dc2626;color:#fff}.x5Pin{font-weight:800;margin-top:6px;font-size:14px}'+
+    '.x5Bar{display:flex;gap:8px;overflow-x:auto;padding:4px 0 10px;-webkit-overflow-scrolling:touch}.x5Bar button{flex:0 0 auto;border:0;border-radius:999px;padding:10px 14px;font-weight:900;font-size:14px;background:#1e293b;color:#e2e8f0}.x5Bar .sos{background:#dc2626;color:#fff}'+
+    '.x5Ch{display:flex;align-items:center;gap:10px;background:#1e293b;border-radius:12px;padding:12px;margin-top:8px;font-size:15px}.x5Ch input{width:22px;height:22px;flex:0 0 auto}'+
+    '.x5Num{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.x5Num div{background:#1e293b;border-radius:12px;padding:10px;text-align:center}.x5Num b{display:block;font-size:22px}'+
+    '.mc-rec538{margin-top:6px;font-size:13px;color:#86efac}.mbtn.b-oc538{background:#7c2d12;color:#fff}'+
+    'body.x5Grande .mbtn{min-height:62px!important;font-size:17px!important}body.x5Grande .mot-card{font-size:17px}body.x5Grande .mc-linha{font-size:18px}';
+  D.head.appendChild(css);
+
+  /* ---------------- fila de envio (funciona sem internet) ---------------- */
+  function fila(){try{return JSON.parse(localStorage.getItem(FILA)||'[]')}catch(e){return []}}
+  function gravar(f){try{localStorage.setItem(FILA,JSON.stringify(f))}catch(e){try{f.forEach(function(x){if(x.dados){delete x.dados.foto;delete x.dados.assinatura}});localStorage.setItem(FILA,JSON.stringify(f))}catch(er){}}}
+  function evento(tipo,it,dados){
+    var s=ses(),e={id:tipo.slice(0,3)+'_'+Date.now()+'_'+Math.floor(Math.random()*1e5),tipo:tipo,rota_id:it?(Number(it.rota_id)||null):null,item_id:it?(Number(it.id)||null):null,data_seq:(it&&it.data_seq)||hoje(),
+      cliente:(it&&it.cliente)||'',destino:(it&&it.destino)||'',motorista:s.employee_name||s.username||'',motorista_id:Number(s.motorista_id)||null,dados:dados||{}};
+    var f=fila();f.push(e);gravar(f);enviar();return e;
+  }
+  var enviando=false;
+  async function enviar(){
+    if(enviando||navigator.onLine===false)return;var f=fila();if(!f.length)return;enviando=true;
+    try{
+      var r=await fetch(SB_URL+'/fast_eventos',{method:'POST',headers:hdrs({'Prefer':'resolution=ignore-duplicates,return=minimal'}),body:JSON.stringify(f)});
+      if(r.ok||r.status===409){var ids={};f.forEach(function(x){ids[x.id]=1});gravar(fila().filter(function(x){return !ids[x.id]}))}
+      else if(r.status===404){if(!W.__x5Avisou){W.__x5Avisou=1;console.warn('fast_eventos: rode o SQL 5.3.8 no Supabase')}}
+    }catch(e){}
+    enviando=false;
+  }
+  setInterval(enviar,30000);W.addEventListener('online',function(){setTimeout(enviar,1500)});
+
+  function abrir(html){var ov=D.createElement('div');ov.className='x5Ov';ov.innerHTML='<div class="x5Bx">'+html+'</div>';D.body.appendChild(ov);ov.addEventListener('click',function(e){if(e.target===ov)ov.remove()});return ov}
+  function assinatura(cv){
+    var ctx=cv.getContext('2d'),r=cv.getBoundingClientRect(),dpr=W.devicePixelRatio||1,des=false,ult=null,usou=false;
+    cv.width=r.width*dpr;cv.height=r.height*dpr;ctx.scale(dpr,dpr);ctx.lineWidth=2.4;ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle='#0f172a';
+    function p(e){var b=cv.getBoundingClientRect();return {x:e.clientX-b.left,y:e.clientY-b.top}}
+    cv.addEventListener('pointerdown',function(e){des=true;usou=true;ult=p(e);try{cv.setPointerCapture(e.pointerId)}catch(er){}e.preventDefault()});
+    cv.addEventListener('pointermove',function(e){if(!des)return;var q=p(e);ctx.beginPath();ctx.moveTo(ult.x,ult.y);ctx.lineTo(q.x,q.y);ctx.stroke();ult=q;e.preventDefault()});
+    ['pointerup','pointercancel','pointerleave'].forEach(function(t){cv.addEventListener(t,function(){des=false})});
+    return {usou:function(){return usou},limpar:function(){ctx.clearRect(0,0,cv.width,cv.height);usou=false},
+      png:function(){if(!usou)return '';var c=D.createElement('canvas'),w=360,h=Math.round(w*cv.height/cv.width);c.width=w;c.height=h;var x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,w,h);x.drawImage(cv,0,0,w,h);return c.toDataURL('image/jpeg',0.6)}};
+  }
+
+  /* ---------------- 1) confirmar entrega ---------------- */
+  function concluirCom(arg){
+    var it=Object.assign({},item(arg.id)||{},arg),k=String(it.rota_id||it.id),pin=pinDe(k);
+    var ov=abrir('<h3>✅ Concluir entrega</h3><div style="color:#94a3b8;font-size:14px">'+H(it.cliente||'')+(it.destino?' → '+H(it.destino):'')+'</div>'+
+      '<label>Quem recebeu</label><input id="x5Rec" placeholder="Nome de quem recebeu" autocomplete="off">'+
+      '<label>Código de entrega (o cliente vê no app dele) — opcional</label><input id="x5Pin" inputmode="numeric" maxlength="4" placeholder="4 números"><div id="x5PinSt" class="x5Pin"></div>'+
+      '<label>Assinatura (opcional)</label><canvas id="x5Cv"></canvas><div style="text-align:right;margin-top:4px"><button type="button" id="x5Limpa" style="background:none;border:0;color:#94a3b8;font-weight:700">Limpar assinatura</button></div>'+
+      '<div class="x5Rw"><button type="button" class="x5No" id="x5Cancel">Cancelar</button><button type="button" class="x5Ok" id="x5Conf">CONCLUIR</button></div>');
+    var sig=assinatura(ov.querySelector('#x5Cv'));
+    ov.querySelector('#x5Limpa').onclick=sig.limpar;
+    var pi=ov.querySelector('#x5Pin'),st=ov.querySelector('#x5PinSt');
+    pi.addEventListener('input',function(){pi.value=pi.value.replace(/\D/g,'').slice(0,4);if(pi.value.length<4){st.textContent='';return}st.textContent=pi.value===pin?'🔐 Código correto':'❌ Código não confere — confira com quem recebe';st.style.color=pi.value===pin?'#86efac':'#fca5a5'});
+    ov.querySelector('#x5Cancel').onclick=function(){ov.remove()};
+    ov.querySelector('#x5Conf').onclick=function(){
+      var rec=ov.querySelector('#x5Rec').value.trim(),ok=pi.value===pin;
+      if(pi.value&&!ok&&!confirm('O código não confere. Concluir mesmo assim?'))return;
+      var dados={recebedor:rec,pin_ok:ok,assinatura:sig.png()};
+      ov.remove();
+      try{motConcluirExec(arg)}catch(e){try{W.__x5Orig(arg)}catch(er){}}
+      if(rec||dados.assinatura||ok){evento('entrega',it,dados);marcarLocal(arg.id,rec)}
+    };
+  }
+  var REC={};try{REC=JSON.parse(localStorage.getItem('x538_rec')||'{}')}catch(e){}
+  function marcarLocal(id,rec){REC[String(id)]=rec||'✓';try{localStorage.setItem('x538_rec',JSON.stringify(REC))}catch(e){}}
+
+  /* ---------------- 2) ocorrência com foto ---------------- */
+  var MOTIVOS=['Cliente ausente','Endereço não encontrado','Recusou a mercadoria','Mercadoria avariada','Local fechado','Outro'];
+  function comprimir(file){return new Promise(function(ok){var r=new FileReader();r.onload=function(){var im=new Image();im.onload=function(){var m=900,s=Math.min(1,m/Math.max(im.width,im.height)),c=D.createElement('canvas');c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);c.getContext('2d').drawImage(im,0,0,c.width,c.height);ok(c.toDataURL('image/jpeg',0.6))};im.onerror=function(){ok('')};im.src=r.result};r.onerror=function(){ok('')};r.readAsDataURL(file)})}
+  function ocorrencia(id){
+    var it=item(id)||{id:id},foto='';
+    var ov=abrir('<h3>⚠️ Registrar ocorrência</h3><div style="color:#94a3b8;font-size:14px">'+H(it.cliente||'')+(it.destino?' → '+H(it.destino):'')+'</div>'+
+      '<label>O que aconteceu?</label><select id="x5Mot">'+MOTIVOS.map(function(m){return '<option>'+m+'</option>'}).join('')+'</select>'+
+      '<label>Detalhes (opcional)</label><textarea id="x5Txt" rows="2" placeholder="Ex.: ninguém atendeu, liguei 2 vezes"></textarea>'+
+      '<label>Foto (opcional)</label><input type="file" id="x5Foto" accept="image/*" capture="environment"><img id="x5Prev" style="display:none;max-width:100%;border-radius:12px;margin-top:8px">'+
+      '<div class="x5Rw"><button type="button" class="x5No" id="x5Cancel">Cancelar</button><button type="button" class="x5Rd" id="x5Env">ENVIAR</button></div>');
+    ov.querySelector('#x5Foto').onchange=async function(){var f=this.files&&this.files[0];if(!f)return;foto=await comprimir(f);var p=ov.querySelector('#x5Prev');if(foto){p.src=foto;p.style.display='block'}};
+    ov.querySelector('#x5Cancel').onclick=function(){ov.remove()};
+    ov.querySelector('#x5Env').onclick=function(){var d={motivo:ov.querySelector('#x5Mot').value,texto:ov.querySelector('#x5Txt').value.trim(),foto:foto};ov.remove();evento('ocorrencia',it,d);msg('⚠️ Ocorrência enviada ao patrão'+(navigator.onLine===false?' (sobe quando houver sinal)':''),'ok')};
+  }
+
+  /* ---------------- 3) meus números ---------------- */
+  async function numeros(){
+    var ov=abrir('<h3>📊 Meus números</h3><div id="x5NumC">Carregando…</div><div class="x5Rw"><button type="button" class="x5No" id="x5F">Fechar</button></div>');
+    ov.querySelector('#x5F').onclick=function(){ov.remove()};
+    var s=ses(),d=new Date(),ini=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-01',rows=[];
+    try{
+      var f=s.motorista_id?'motorista_id=eq.'+encodeURIComponent(s.motorista_id):'motorista=eq.'+encodeURIComponent(s.employee_name||'');
+      var r=await fetch(SB_URL+'/sequencias_itens?select=id,status,data_seq,valor&'+f+'&data_seq=gte.'+ini+'&limit=3000',{headers:hdrs()});
+      if(r.ok)rows=await r.json();else rows=(est().rotas||[]).slice();
+    }catch(e){rows=(est().rotas||[]).slice()}
+    var hj=hoje(),seg=new Date(d);seg.setDate(d.getDate()-((d.getDay()+6)%7));var sem=seg.getFullYear()+'-'+String(seg.getMonth()+1).padStart(2,'0')+'-'+String(seg.getDate()).padStart(2,'0');
+    function bloco(filtro){var l=rows.filter(filtro),c=l.filter(function(x){return /CONCLU/i.test(x.status||'')});return {t:l.length,c:c.length,v:c.reduce(function(a,x){return a+(Number(x.valor)||0)},0)}}
+    var a=bloco(function(x){return x.data_seq===hj}),b=bloco(function(x){return x.data_seq>=sem}),c=bloco(function(){return true});
+    function cx(t,o){return '<div><small>'+t+'</small><b>'+o.c+'</b><small>de '+o.t+' entregas</small>'+(o.v?'<br><small>'+brl(o.v)+'</small>':'')+'</div>'}
+    var box=ov.querySelector('#x5NumC');if(box)box.innerHTML='<div class="x5Num">'+cx('Hoje',a)+cx('Semana',b)+cx('Mês',c)+'</div><div style="color:#94a3b8;font-size:12px;margin-top:8px">Entregas concluídas e valor das rotas concluídas.</div>';
+  }
+
+  /* ---------------- 4) rota inteira no mapa ---------------- */
+  function rotaMapa(){
+    var pend=(est().rotas||[]).filter(function(x){return !/CONCLU/i.test(x.status||'')&&x.destino});
+    if(!pend.length){msg('Nenhuma entrega pendente.','info');return}
+    var ps=pend.slice(0,10).map(function(x){return encodeURIComponent(x.destino+', Fortaleza - CE')});
+    var dest=ps.pop(),u='https://www.google.com/maps/dir/?api=1&travelmode=driving&destination='+dest+(ps.length?'&waypoints='+ps.join('%7C'):'');
+    if(pend.length>10)msg('O mapa aceita 10 paradas — abrindo as 10 primeiras.','info');
+    try{W.open(u,'_blank')}catch(e){location.href=u}
+  }
+
+  /* ---------------- 5) botões grandes ---------------- */
+  function grande(liga){if(liga===undefined)liga=!D.body.classList.contains('x5Grande');D.body.classList.toggle('x5Grande',liga);try{localStorage.setItem('x538_grande',liga?'1':'0')}catch(e){}var b=$i('x5BtG');if(b)b.textContent=liga?'🔠 Botões normais':'🔠 Botões grandes'}
+
+  /* ---------------- 6) checklist do veículo ---------------- */
+  var ITENS=['Pneus calibrados e sem danos','Freios funcionando','Faróis, setas e luz de freio','Óleo e água conferidos','Documentos do veículo e CNH','Combustível suficiente'];
+  function checklist(){
+    var feito=localStorage.getItem('x538_chk')===hoje();
+    var ov=abrir('<h3>✅ Checklist do veículo</h3><div style="color:#94a3b8;font-size:14px">'+(feito?'Já feito hoje — pode refazer.':'Faça antes de sair.')+'</div>'+
+      ITENS.map(function(t,i){return '<label class="x5Ch"><input type="checkbox" data-i="'+i+'"> '+t+'</label>'}).join('')+
+      '<label>KM do painel (opcional)</label><input id="x5Km" inputmode="numeric" placeholder="Ex.: 85320"><label>Observação (opcional)</label><input id="x5Obs" placeholder="Ex.: pneu traseiro baixo">'+
+      '<div class="x5Rw"><button type="button" class="x5No" id="x5Cancel">Cancelar</button><button type="button" class="x5Ok" id="x5Env">ENVIAR</button></div>');
+    ov.querySelector('#x5Cancel').onclick=function(){ov.remove()};
+    ov.querySelector('#x5Env').onclick=function(){
+      var ok=[],falta=[];ov.querySelectorAll('input[data-i]').forEach(function(c){(c.checked?ok:falta).push(ITENS[+c.getAttribute('data-i')])});
+      evento('checklist',null,{ok:ok,falta:falta,km:ov.querySelector('#x5Km').value.replace(/\D/g,''),obs:ov.querySelector('#x5Obs').value.trim()});
+      try{localStorage.setItem('x538_chk',hoje())}catch(e){}ov.remove();
+      msg(falta.length?'Checklist enviado — '+falta.length+' item(ns) com problema avisados ao patrão':'✅ Checklist enviado. Boa viagem!',falta.length?'info':'ok');
+    };
+  }
+
+  /* ---------------- 7) SOS ---------------- */
+  function sos(){
+    var ov=abrir('<h3 style="color:#fca5a5">🆘 Pedir ajuda</h3><div style="font-size:15px">Envia sua localização para a FAST e abre o WhatsApp da empresa.</div>'+
+      '<label>O que houve? (opcional)</label><select id="x5Sos"><option>Emergência</option><option>Acidente</option><option>Assalto / ameaça</option><option>Veículo quebrou</option><option>Problema de saúde</option></select>'+
+      '<div class="x5Rw"><button type="button" class="x5No" id="x5Cancel">Cancelar</button><button type="button" class="x5Rd" id="x5Env">🆘 ENVIAR AGORA</button></div>');
+    ov.querySelector('#x5Cancel').onclick=function(){ov.remove()};
+    ov.querySelector('#x5Env').onclick=function(){
+      var mot=ov.querySelector('#x5Sos').value;ov.remove();
+      function mandar(pos){
+        var c=pos&&pos.coords,link=c?'https://www.google.com/maps?q='+c.latitude.toFixed(6)+','+c.longitude.toFixed(6):'';
+        evento('sos',null,{motivo:mot,lat:c?c.latitude:null,lng:c?c.longitude:null,precisao:c?Math.round(c.accuracy):null,link:link});
+        var s=ses(),t='🆘 SOS — '+mot+'\nMotorista: '+(s.employee_name||s.username||'')+(link?'\nLocalização: '+link:'\n(localização indisponível)');
+        try{W.open('https://wa.me/'+FONE+'?text='+encodeURIComponent(t),'_blank')}catch(e){}
+        msg('🆘 Pedido de ajuda enviado.','ok');
+      }
+      if(navigator.geolocation)navigator.geolocation.getCurrentPosition(mandar,function(){mandar(null)},{enableHighAccuracy:true,timeout:8000,maximumAge:60000});else mandar(null);
+    };
+  }
+
+  /* ---------------- ligação com o app ---------------- */
+  function barra(){
+    var lista=$i('motLista');if(!lista||$i('x5Bar'))return;
+    var b=D.createElement('div');b.id='x5Bar';b.className='x5Bar';
+    b.innerHTML='<button type="button" data-x5="mapa">🗺️ Rota no mapa</button><button type="button" data-x5="num">📊 Meus números</button><button type="button" data-x5="chk">✅ Checklist</button><button type="button" id="x5BtG" data-x5="grande">🔠 Botões grandes</button><button type="button" class="sos" data-x5="sos">🆘 SOS</button>';
+    lista.parentNode.insertBefore(b,lista);
+    grande(localStorage.getItem('x538_grande')==='1');
+  }
+  D.addEventListener('click',function(e){
+    var b=e.target.closest&&e.target.closest('[data-x5],[data-x5oc]');if(!b)return;
+    var o=b.getAttribute('data-x5oc');if(o){ocorrencia(o);return}
+    var a=b.getAttribute('data-x5');
+    if(a==='mapa')rotaMapa();else if(a==='num')numeros();else if(a==='chk')checklist();else if(a==='grande')grande();else if(a==='sos')sos();
+  });
+  function ligar(){
+    if(typeof W.motConcluir==='function'&&!W.motConcluir.__x5){W.__x5Orig=W.motConcluir;var c=function(arg){concluirCom(arg)};c.__x5=1;W.motConcluir=c}
+    if(typeof W.cardHTML==='function'&&!W.cardHTML.__x5){
+      var o=W.cardHTML,g=function(it,done){
+        var h=o.apply(this,arguments);
+        try{
+          var id=String(it.id);
+          if(!done&&!/CONCLU/i.test(it.status||'')){
+            var bt='<button class="mbtn b-oc538" data-x5oc="'+H(id)+'"><i class="fa-solid fa-triangle-exclamation"></i> OCORRÊNCIA</button>';
+            var j=h.lastIndexOf('</div></div>');if(j>0)h=h.slice(0,j)+bt+h.slice(j);
+          }else if(REC[id]){
+            var r='<div class="mc-rec538">✍️ Recebido por '+H(REC[id]==='✓'?'—':REC[id])+'</div>';
+            var k=h.lastIndexOf('</div>');if(k>0)h=h.slice(0,k)+r+h.slice(k);
+          }
+        }catch(e){}
+        return h;
+      };g.__x5=1;W.cardHTML=g;
+      try{var bx=$i('motLista');if(bx)bx.__f538Html='';renderizar()}catch(e){}
+    }
+    barra();
+  }
+  setInterval(ligar,3000);
+  if(D.readyState==='complete')setTimeout(ligar,500);else W.addEventListener('load',function(){setTimeout(ligar,500)});
+  setTimeout(enviar,4000);
+  W.fast538Motorista={pinDe:pinDe,concluir:concluirCom,ocorrencia:ocorrencia,numeros:numeros,rotaMapa:rotaMapa,checklist:checklist,sos:sos,fila:fila,enviar:enviar};
 })();
 </script>
 </body>
