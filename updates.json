@@ -3,6 +3,11 @@
   "releasedAt": "2026-10-14T10:00:00-03:00",
   "updates": [
     {
+      "app": "fast",
+      "type": "melhoria",
+      "text": "5.3.8 (17/10/2026): sincronismo rápido com o Supabase. Lugares e clientes editados, criados ou apagados direto no Supabase aparecem no FAST/PAINEL em segundos (antes: até 10 min, e edições do Table Editor nem chegavam). Toda mudança feita no FAST (inclusive editar na tabela e unificar) sobe em 1 a 2 s."
+    },
+    {
       "app": "geral",
       "type": "correcao",
       "text": "5.3.8 (17/10/2026): a tabela lugares_publicos foi apagada do Supabase. Ela guardava cópias dos lugares e nunca apagava nada (excluídos e renomeados ficavam lá). O app do Cliente agora lê os lugares direto da tabela destinos (sem o telefone do lugar)."

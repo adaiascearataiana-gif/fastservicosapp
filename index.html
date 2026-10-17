@@ -45889,7 +45889,7 @@ body.fx-apk .fx-gal-ajuda{display:flex}
   function lerSnap(){try{return JSON.parse(localStorage.getItem(K_SNAP)||'null')}catch(e){return null}}
   function gravarSnap(m){try{localStorage.setItem(K_SNAP,JSON.stringify(m))}catch(e){}}
   function retrato(){var m={};((bd()||{}).destinos||[]).forEach(function(d){if(d&&d.id!=null)m[String(d.id)]={h:campos(d),t:ts(d),n:N(d.nome)}});return m}
-  var snap=null, enviando=false, puxando=false, ultimaPuxada=0, vindosDaNuvem={};
+  var snap=null, enviando=false, puxando=false, ultimaPuxada=0, vindosDaNuvem={}, nuvemH={};
 
   /* ---------- SOBE o que mudou aqui ---------- */
   async function subir(){
@@ -45901,8 +45901,11 @@ body.fx-apk .fx-gal-ajuda{display:flex}
       var a=atual[id], s=snap[id];
       if(s&&s.h===a.h)return;                              // nada mudou
       if(vindosDaNuvem[id]===a.h)return;                   // acabou de chegar da nuvem: não devolve
-      if(s&&a.t<=s.t)return;                               // mudou sem edição (merge/varredura): fica com a sincronização normal
-      var d=(b.destinos||[]).filter(function(x){return String(x.id)===id})[0]; if(d)envio.push(d);
+      if(nuvemH[id]===a.h)return;                          // já está igual na nuvem
+      var d=(b.destinos||[]).filter(function(x){return String(x.id)===id})[0]; if(!d)return;
+      // 5.3.8: mudança feita aqui sem hora de edição (unificar, editar na tabela...) também sobe
+      if(s&&a.t<=s.t){d.updatedAt=new Date().toISOString();}
+      envio.push(d);
     });
     Object.keys(snap).forEach(function(id){ if(!atual[id]&&lapides.has(snap[id].n))apagar.push(id); });
     if(!envio.length&&!apagar.length){snap=atual;gravarSnap(snap);return}
@@ -45915,7 +45918,8 @@ body.fx-apk .fx-gal-ajuda{display:flex}
       for(var i=0;i<apagar.length;i+=50){
         await fetch(url()+'/destinos?id=in.('+apagar.slice(i,i+50).join(',')+')',{method:'DELETE',headers:cab({'Prefer':'return=minimal'})});
       }
-      snap=atual;gravarSnap(snap);
+      snap=retrato();gravarSnap(snap);
+      envio.forEach(function(d){nuvemH[String(d.id)]=campos(d)});
       W.__f538LugEnviados=(W.__f538LugEnviados||0)+envio.length+apagar.length;
     }catch(e){ /* sem sinal/erro: tenta de novo na próxima volta */ }
     enviando=false;
@@ -45924,7 +45928,7 @@ body.fx-apk .fx-gal-ajuda{display:flex}
   /* ---------- BUSCA o que mudou nos outros aparelhos ---------- */
   async function puxar(forcar){
     var b=bd(); if(!b||puxando||!logado()||!navigator.onLine||document.hidden)return;
-    if(!forcar&&Date.now()-ultimaPuxada<25000)return;
+    if(!forcar&&Date.now()-ultimaPuxada<4000)return;
     puxando=true; ultimaPuxada=Date.now();
     try{
       await subir();                                       // o que é daqui sobe antes
@@ -45938,7 +45942,7 @@ body.fx-apk .fx-gal-ajuda{display:flex}
       var mudou=0,maior=cur;
       rows.forEach(function(row){
         if(row.updated_at&&(!maior||row.updated_at>maior))maior=row.updated_at;
-        var nv=supabaseToDestino(row), k=N(nv.nome); if(!k||lapides.has(k))return;
+        var nv=supabaseToDestino(row), k=N(nv.nome); nuvemH[String(nv.id)]=campos(nv); if(!k||lapides.has(k))return;
         var loc=porId[String(nv.id)]||porNome[k];
         if(!loc){lista.push(nv);porId[String(nv.id)]=nv;porNome[k]=nv;vindosDaNuvem[String(nv.id)]=campos(nv);mudou++;return}
         if(ts(nv)>ts(loc)&&campos(nv)!==campos(loc)){
@@ -45953,7 +45957,7 @@ body.fx-apk .fx-gal-ajuda{display:flex}
         try{atualizarContadoresHeader()}catch(e){}
       }
       if(rows.length>=500)setTimeout(function(){puxar(true)},500);   // ainda tem mais
-      else await conferirApagados(forcar);
+      else{ var temLog=await apagadosRapido(); if(temLog===false)await conferirApagados(forcar); }
     }catch(e){}
     puxando=false;
   }
@@ -45986,6 +45990,57 @@ body.fx-apk .fx-gal-ajuda{display:flex}
     try{if(typeof destRenderizarLista==='function')destRenderizarLista()}catch(e){}
   }
 
+  /* 5.3.8: APAGADO NO SUPABASE (por qualquer aparelho ou direto no Table Editor) some daqui
+     em segundos. O banco anota cada exclusão em fast_apagados (SQL 5.3.8, parte 10). */
+  var K_APC='f538_apag_cursor', semLog=false;
+  async function apagadosRapido(){
+    if(semLog)return false;
+    var cur=localStorage.getItem(K_APC);
+    if(!cur){ // 1ª vez neste aparelho: começa de agora (o histórico é coberto pela conferência completa)
+      try{var r0=await fetch(url()+'/fast_apagados?select=apagado_em&order=apagado_em.desc&limit=1',{headers:cab(),cache:'no-store'});
+        if(r0.status===404||r0.status===400){semLog=true;return false}
+        if(!r0.ok)return false; var l0=await r0.json();
+        localStorage.setItem(K_APC,(l0[0]&&l0[0].apagado_em)||new Date(Date.now()-60000).toISOString());}catch(e){return false}
+      await conferirApagados(true); return true;
+    }
+    var r=await fetch(url()+'/fast_apagados?select=tabela,registro_id,nome,apagado_em&order=apagado_em.asc&limit=500&apagado_em=gt.'+encodeURIComponent(cur),{headers:cab(),cache:'no-store'});
+    if(r.status===404||r.status===400){semLog=true;return false}
+    if(!r.ok)return true;
+    var l=await r.json(); if(!Array.isArray(l)||!l.length)return true;
+    var b=bd(); if(!b)return true;
+    var ids={destinos:{},clientes:{}},maior=cur;
+    l.forEach(function(x){if(x.apagado_em>maior)maior=x.apagado_em;if(ids[x.tabela])ids[x.tabela][String(x.registro_id)]=x.nome||''});
+    var mudouD=false,mudouC=false;
+    if(Object.keys(ids.destinos).length&&Array.isArray(b.destinos)){
+      var saiu=b.destinos.filter(function(d){return d&&ids.destinos[String(d.id)]!==undefined});
+      if(saiu.length){
+        b.destinos=b.destinos.filter(function(d){return !(d&&ids.destinos[String(d.id)]!==undefined)});
+        saiu.forEach(function(d){var k=N(d.nome);if(k&&!b.destinos.some(function(x){return N(x.nome)===k})){
+          if(!Array.isArray(b.destinosExcluidos))b.destinosExcluidos=[];
+          if(b.destinosExcluidos.indexOf(k)<0)b.destinosExcluidos.push(k);
+          if(typeof W.fastLapideMarcar==='function')W.fastLapideMarcar(b.destinosExcluidos,'excluido',k);}});
+        mudouD=true;
+      }
+    }
+    if(Object.keys(ids.clientes).length&&Array.isArray(b.clientes)){
+      var saiuC=b.clientes.filter(function(c){return c&&ids.clientes[String(c.id)]!==undefined});
+      if(saiuC.length){
+        b.clientes=b.clientes.filter(function(c){return !(c&&ids.clientes[String(c.id)]!==undefined)});
+        saiuC.forEach(function(c){var k=N(c.nome);if(k&&!b.clientes.some(function(x){return N(x.nome)===k})){
+          if(!Array.isArray(b.clientesExcluidos))b.clientesExcluidos=[];
+          if(b.clientesExcluidos.indexOf(k)<0)b.clientesExcluidos.push(k);}});
+        // a base da sincronização de cadastros também esquece esses códigos
+        try{var bc=JSON.parse(localStorage.getItem('fast512_base_colecoes')||'{}');if(bc.clientes){Object.keys(ids.clientes).forEach(function(k){delete bc.clientes[k]});localStorage.setItem('fast512_base_colecoes',JSON.stringify(bc))}}catch(e){}
+        mudouC=true;
+      }
+    }
+    localStorage.setItem(K_APC,maior);
+    if(mudouD){snap=retrato();gravarSnap(snap);try{if(typeof destRenderizarLista==='function')destRenderizarLista()}catch(e){}}
+    if(mudouD||mudouC){try{salvarStorage()}catch(e){}}
+    if(mudouC){try{if(typeof renderizarClientes==='function')renderizarClientes()}catch(e){}}
+    if(mudouD||mudouC){try{atualizarContadoresHeader()}catch(e){}}
+    return true;
+  }
   W.fast538LugaresAgora=function(){return puxar(true)};
   // depois de salvar/excluir um lugar: sobe em 1,5 s
   var tSub=0;
@@ -45999,7 +46054,7 @@ body.fx-apk .fx-gal-ajuda{display:flex}
     })();
   });
   setInterval(function(){subir()},8000);
-  setInterval(function(){puxar(false)},30000);
+  setInterval(function(){puxar(false)},5000);           // 5.3.8: a cada 5 s (consulta mínima quando nada mudou)
   document.addEventListener('visibilitychange',function(){
     if(document.hidden)subir();                            // saindo do app: sobe o que falta
     else puxar(true);                                      // voltando: busca o que mudou
@@ -46525,8 +46580,8 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
       }
     }finally{rodando=false}
   }
-  function ciclo(){clearTimeout(t);conferir();t=setTimeout(ciclo,45000)}
-  setTimeout(ciclo,20000);
+  function ciclo(){clearTimeout(t);conferir();t=setTimeout(ciclo,8000)}   // 5.3.8: a cada 8 s
+  setTimeout(ciclo,9000);
   D.addEventListener('visibilitychange',function(){if(!D.hidden){clearTimeout(t);t=setTimeout(ciclo,2000)}});
   W.fast538VigiaCadastros={conferir:conferir};
 })();
