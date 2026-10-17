@@ -5,6 +5,21 @@
     {
       "app": "fast",
       "type": "melhoria",
+      "text": "5.3.8 (17/10/2026): telas e câmera mais rápidas. Ao tocar numa aba a tela aparece na hora (as listas são montadas logo depois). A câmera em tempo real começa a abrir já no toque do botão e abre com um pedido só (antes alguns aparelhos recusavam o primeiro pedido e abriam a câmera duas vezes). No app ROTAS a página ficou mais leve."
+    },
+    {
+      "app": "fast",
+      "type": "correcao",
+      "text": "5.3.8 (17/10/2026): corrigido o erro \"POST rotas: HTTP 400 — All object keys must match\" que travava o envio das rotas. E o quadro de Sincronização não abre mais sozinho; só quando você abre em Ferramentas FAST → Sincronização."
+    },
+    {
+      "app": "fast",
+      "type": "melhoria",
+      "text": "5.3.8 (17/10/2026): excluir várias fotos de uma vez. No card da rota (Rotas do Dia) e em Editar Rota: toque em \"Selecionar fotos\", marque as fotos ou toque em \"Todas\" e depois em \"Excluir\"."
+    },
+    {
+      "app": "fast",
+      "type": "melhoria",
       "text": "5.3.8 (17/10/2026): sincronismo rápido com o Supabase. Lugares e clientes editados, criados ou apagados direto no Supabase aparecem no FAST/PAINEL em segundos (antes: até 10 min, e edições do Table Editor nem chegavam). Toda mudança feita no FAST (inclusive editar na tabela e unificar) sobe em 1 a 2 s."
     },
     {

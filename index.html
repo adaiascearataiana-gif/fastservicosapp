@@ -19955,29 +19955,35 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
           // Pede a maior resolução possível (câmera "boa" do aparelho) e foco
           // contínuo, em vez de aceitar o padrão baixo do navegador — é isso
           // que deixava a foto borrada/pequena.
-          var constraints = {
-            video: {
-              facingMode: { ideal: modo },
-              // 5.1.6: 1920x1080 abre mais rápido e bate a foto na hora (4K travava em vários aparelhos)
-              width: { ideal: 1920 },
-              height: { ideal: 1080 },
-              // resizeMode:'none' impede o navegador de reduzir o quadro da
-              // câmera (era uma das causas do preview/foto borrados).
-              resizeMode: 'none',
-              advanced: [{ focusMode: 'continuous' }, { exposureMode: 'continuous' }, { whiteBalanceMode: 'continuous' }]
-            },
-            audio: false
-          };
-          var stream;
-          try {
-            stream = await navigator.mediaDevices.getUserMedia(constraints);
-          } catch (e1) {
-            // Aparelho não aceitou a resolução/foco pedidos — tenta de novo
-            // só com a câmera certa, sem exigir resolução específica.
-            stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: modo } }, audio: false });
+          // 5.3.8: abre RÁPIDO — um pedido só, sem exigências que fazem o aparelho
+          // recusar e abrir de novo (resizeMode/foco eram pedidos na abertura).
+          // A câmera traseira usada da última vez é aberta direto pelo código dela.
+          // Se o botão já foi tocado, a câmera começou a abrir no toque (pré-abertura).
+          var stream = null;
+          if (modo === 'environment' && window.__f538CamPre) {
+            try { stream = await window.__f538CamPre; } catch (e0) { stream = null; }
+            window.__f538CamPre = null;
+            if (stream && !stream.active) stream = null;
           }
+          if (!stream) {
+            var camId = '';
+            try { camId = modo === 'environment' ? (localStorage.getItem('f538_cam_traseira') || '') : ''; } catch (e0) {}
+            var v1 = { width: { ideal: 1920 }, height: { ideal: 1080 } };
+            if (camId) v1.deviceId = { exact: camId }; else v1.facingMode = { ideal: modo };
+            try {
+              stream = await navigator.mediaDevices.getUserMedia({ video: v1, audio: false });
+            } catch (e1) {
+              try { localStorage.removeItem('f538_cam_traseira'); } catch (e0) {}
+              stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: modo } }, audio: false });
+            }
+          }
+          try {
+            var stt = stream.getVideoTracks()[0].getSettings ? stream.getVideoTracks()[0].getSettings() : {};
+            if (modo === 'environment' && stt.deviceId && (!stt.facingMode || stt.facingMode === 'environment')) localStorage.setItem('f538_cam_traseira', stt.deviceId);
+          } catch (e0) {}
           fastCameraAoVivoState = { stream: stream, dataSel: dataSel, index: index };
           video.srcObject = stream;
+          try { var pl = video.play(); if (pl && pl.catch) pl.catch(function () {}); } catch (e0) {}   // imagem na hora
           // Tenta forçar foco contínuo/automático na track já ativa (alguns
           // aparelhos só aceitam isso depois do stream aberto).
           try {
@@ -37270,7 +37276,9 @@ body.fast-exclusive-app main { padding-bottom: 12px !important; }
   else limpar();
   window.addEventListener('load', limpar);
   if (window.MutationObserver && document.documentElement) {
-    new MutationObserver(function(){ limpar(); }).observe(document.documentElement, {childList:true, subtree:true});
+    // 5.3.8: no máximo 1 vez por quadro (antes rodava a cada mudança e deixava a tela lenta)
+    var agendado = false;
+    new MutationObserver(function(){ if (agendado) return; agendado = true; requestAnimationFrame(function(){ agendado = false; limpar(); }); }).observe(document.documentElement, {childList:true, subtree:true});
   }
 })();
 </script>
@@ -47048,6 +47056,234 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
   function ciclo(){try{embrulharConversoes()}catch(e){}try{trocarSugestoes()}catch(e){}try{instalarSalvar()}catch(e){}try{vigiar()}catch(e){}}
   ciclo();setInterval(ciclo,400);setInterval(herdar,5000);
   detectar();setTimeout(detectar,15000);setInterval(detectar,30*60*1000);
+})();
+</script>
+<script id="fast538-fotos-lote">
+/* 5.3.8 — EXCLUIR VÁRIAS FOTOS DE UMA VEZ
+   Em cada galeria de fotos (card das Rotas do Dia e Editar Rota) aparece a barra:
+   [☑ Selecionar]  →  [Todas] [Nenhuma] [🗑 Excluir (n)] [Cancelar]
+   Toque nas fotos para marcar; "Todas" marca tudo; um toque em Excluir apaga as marcadas. */
+(function(){
+  var W=window,D=document,SEL={};   // SEL[idGaleria] = {ativo:bool, marcadas:{idx:1}}
+  var st=D.createElement('style');
+  st.textContent='.f538-fbar{display:flex;flex-wrap:wrap;gap:6px;width:100%;margin:2px 0 6px}'+
+    '.f538-fbar button{border:1px solid #cbd5e1;background:#fff;color:#0f172a;border-radius:10px;padding:6px 11px;font-weight:800;font-size:12px;cursor:pointer;min-height:34px}'+
+    '.f538-fbar .ex{background:#ef4444;border-color:#ef4444;color:#fff}.f538-fbar .ex:disabled{opacity:.45;cursor:default}'+
+    '.f538-fsel .galeria-fotos-item{cursor:pointer}.f538-fsel .btn-remover-foto{display:none!important}'+
+    '.f538-fsel .galeria-fotos-item img{outline:3px solid transparent;outline-offset:-3px}'+
+    '.galeria-fotos-item.f538-on img{outline-color:#ef4444!important;opacity:.75}'+
+    '.galeria-fotos-item .f538-chk{display:none;position:absolute;left:-6px;top:-6px;width:22px;height:22px;border-radius:50%;background:#fff;border:2px solid #94a3b8;z-index:4;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#fff}'+
+    '.f538-fsel .galeria-fotos-item .f538-chk{display:flex}.galeria-fotos-item.f538-on .f538-chk{background:#ef4444;border-color:#ef4444}';
+  D.head.appendChild(st);
+  function tipo(gal){return gal.id==='galeria-fotos-editRota'?'edit':(gal.id.indexOf('galeria-fotos-')===0?'item':'')}
+  function itens(gal){return [].slice.call(gal.querySelectorAll('.galeria-fotos-item'))}
+  function estado(gal){return SEL[gal.id]||(SEL[gal.id]={ativo:false,marcadas:{}})}
+  function pintar(gal){
+    var e=estado(gal),its=itens(gal),bar=gal.previousElementSibling;
+    if(!bar||!bar.classList||!bar.classList.contains('f538-fbar'))return;
+    gal.classList.toggle('f538-fsel',e.ativo);
+    its.forEach(function(it){
+      if(!it.querySelector('.f538-chk')){var c=D.createElement('span');c.className='f538-chk';c.textContent='✓';it.appendChild(c)}
+      it.classList.toggle('f538-on',!!(e.ativo&&e.marcadas[it.getAttribute('data-foto-idx')]));
+    });
+    var n=Object.keys(e.marcadas).length;
+    bar.innerHTML=e.ativo
+      ?'<button type="button" data-a="todas">☑ Todas ('+its.length+')</button><button type="button" data-a="nenhuma">Nenhuma</button>'+
+       '<button type="button" class="ex" data-a="excluir"'+(n?'':' disabled')+'>🗑 Excluir ('+n+')</button><button type="button" data-a="cancelar">Cancelar</button>'
+      :'<button type="button" data-a="selecionar">☑ Selecionar fotos</button>';
+  }
+  function preparar(){
+    D.querySelectorAll('[id^="galeria-fotos-"]').forEach(function(gal){
+      if(!tipo(gal))return;
+      var n=itens(gal).length,bar=gal.previousElementSibling,tem=bar&&bar.classList&&bar.classList.contains('f538-fbar');
+      if(n<2){if(tem)bar.remove();delete SEL[gal.id];gal.classList.remove('f538-fsel');return}
+      if(!tem){bar=D.createElement('div');bar.className='f538-fbar';bar.setAttribute('data-gal',gal.id);gal.parentNode.insertBefore(bar,gal)}
+      // marcadas que não existem mais (galeria redesenhada)
+      var e=estado(gal);Object.keys(e.marcadas).forEach(function(k){if(Number(k)>=n)delete e.marcadas[k]});
+      var assin=gal.id+'|'+n+'|'+e.ativo+'|'+Object.keys(e.marcadas).join(',')+'|'+gal.querySelectorAll('.f538-chk').length;
+      if(gal.__f538a!==assin){gal.__f538a=assin;pintar(gal);gal.__f538a=gal.id+'|'+n+'|'+e.ativo+'|'+Object.keys(e.marcadas).join(',')+'|'+gal.querySelectorAll('.f538-chk').length}
+    });
+  }
+  /* ---- excluir em lote ---- */
+  function excluirItem(itemId,idxs){
+    var b=W.bancoDados||{},item=null,rota=null;
+    Object.keys(b.sequencias||{}).forEach(function(d){var f=(b.sequencias[d]||[]).find(function(i){return String(i.id)===String(itemId)});if(f)item=f});
+    if(!item)return 0;
+    if(item.rotaId)rota=(b.rotas||[]).find(function(r){return String(r.id)===String(item.rotaId)});
+    try{normalizarFotosItem(item)}catch(e){}
+    if(!Array.isArray(b.fotosExcluidas))b.fotosExcluidas=[];
+    if(!Array.isArray(item.fotosExcluidas))item.fotosExcluidas=[];
+    var n=0;
+    idxs.sort(function(a,c){return c-a}).forEach(function(i){
+      if(i<0||i>=item.fotos.length)return;
+      var ref=String(item.fotos[i]||'');
+      if(ref){if(b.fotosExcluidas.indexOf(ref)<0)b.fotosExcluidas.push(ref);if(item.fotosExcluidas.indexOf(ref)<0)item.fotosExcluidas.push(ref)}
+      item.fotos.splice(i,1);n++;
+    });
+    item.foto=item.fotos.length?item.fotos[0]:'';
+    item.updatedAt=new Date().toISOString();
+    if(rota){rota.fotos=item.fotos.slice();rota.foto=item.foto;rota.updatedAt=item.updatedAt}
+    try{salvarStorage()}catch(e){}
+    try{W.__frxForcarLista=true;renderizarSequencia()}catch(e){}
+    try{fastSalvarSemBloquear(120)}catch(e){}
+    return n;
+  }
+  function excluirEdit(idxs){
+    var lista=null;try{lista=_editRotaFotos}catch(e){}
+    if(!Array.isArray(lista))return 0;
+    var n=0;idxs.sort(function(a,c){return c-a}).forEach(function(i){if(i>=0&&i<lista.length){lista.splice(i,1);n++}});
+    try{renderizarGaleriaEdicaoRota()}catch(e){}
+    return n;
+  }
+  /* ---- cliques ---- */
+  D.addEventListener('click',function(ev){
+    var bt=ev.target.closest&&ev.target.closest('.f538-fbar button');
+    if(bt){
+      ev.preventDefault();ev.stopPropagation();
+      var bar=bt.closest('.f538-fbar'),gal=D.getElementById(bar.getAttribute('data-gal'));if(!gal)return;
+      var e=estado(gal),a=bt.getAttribute('data-a'),its=itens(gal);
+      if(a==='selecionar'){e.ativo=true;e.marcadas={}}
+      else if(a==='todas'){its.forEach(function(it){e.marcadas[it.getAttribute('data-foto-idx')]=1})}
+      else if(a==='nenhuma'){e.marcadas={}}
+      else if(a==='cancelar'){e.ativo=false;e.marcadas={}}
+      else if(a==='excluir'){
+        var idxs=Object.keys(e.marcadas).map(Number).filter(function(x){return !isNaN(x)});
+        if(!idxs.length)return;
+        var todas=idxs.length===its.length;
+        if(!confirm(todas?'Excluir TODAS as '+idxs.length+' fotos desta rota?':'Excluir as '+idxs.length+' fotos selecionadas?'))return;
+        var n=tipo(gal)==='edit'?excluirEdit(idxs):excluirItem(gal.id.replace('galeria-fotos-',''),idxs);
+        e.ativo=false;e.marcadas={};
+        try{(W.mostrarToast||function(){})(n+' foto(s) excluída(s).','success')}catch(x){}
+        setTimeout(preparar,50);return;
+      }
+      gal.__f538a='';pintar(gal);return;
+    }
+    // modo seleção: tocar na foto marca/desmarca (não abre a foto grande)
+    var it=ev.target.closest&&ev.target.closest('.f538-fsel .galeria-fotos-item');
+    if(it){
+      ev.preventDefault();ev.stopPropagation();
+      var g=it.closest('[id^="galeria-fotos-"]'),es=estado(g),k=it.getAttribute('data-foto-idx');
+      if(es.marcadas[k])delete es.marcadas[k];else es.marcadas[k]=1;
+      g.__f538a='';pintar(g);
+    }
+  },true);
+  setInterval(preparar,1000);
+  W.fast538FotosLote={excluirItem:excluirItem,excluirEdit:excluirEdit};
+})();
+</script>
+<script id="fast538-sem-aviso">
+/* 5.3.8 — (1) ENVIO EM LOTE SEM ERRO 400 "All object keys must match"
+   O Supabase recusa um envio com várias linhas quando nem todas têm os mesmos campos
+   (ex.: rotas novas com "endereço da origem" junto com rotas antigas sem ele).
+   Agora o lote é dividido automaticamente em grupos com os mesmos campos.
+   (2) O PAINEL DE SINCRONIZAÇÃO NÃO APARECE MAIS SOZINHO
+   Só abre quando você pede (Ferramentas FAST → Sincronização) ou quando é preciso
+   entrar com e-mail e senha. */
+(function(){
+  var W=window,D=document;
+  /* ---------- (1) divide o lote ---------- */
+  var f0=W.fetch;
+  if(typeof f0==='function'&&!f0.__f538lote){
+    var fx=async function(input,init){
+      try{
+        var u=typeof input==='string'?input:(input&&input.url)||'';
+        var m=init&&String(init.method||'GET').toUpperCase();
+        var b=init&&init.body;
+        if(m==='POST'&&typeof b==='string'&&b.charAt(0)==='['&&/\/rest\/v1\/(?!rpc\/)[^/?]+/.test(u)){
+          var arr=JSON.parse(b);
+          if(Array.isArray(arr)&&arr.length>1){
+            var grupos={},ordem=[];
+            arr.forEach(function(o){var k=(o&&typeof o==='object')?Object.keys(o).sort().join('|'):'';if(!grupos[k]){grupos[k]=[];ordem.push(k)}grupos[k].push(o)});
+            if(ordem.length>1){
+              var h=init.headers||{},pref='';
+              try{pref=(h.get?h.get('Prefer'):(h.Prefer||h.prefer))||''}catch(e){}
+              var quer=/return=representation/.test(pref),todas=[],ult=null;
+              for(var i=0;i<ordem.length;i++){
+                var r=await f0.call(W,input,Object.assign({},init,{body:JSON.stringify(grupos[ordem[i]])}));
+                if(!r.ok)return r;
+                ult=r;
+                if(quer){try{var j=await r.clone().json();if(Array.isArray(j))todas=todas.concat(j)}catch(e){}}
+              }
+              if(quer)return new Response(JSON.stringify(todas),{status:ult.status,headers:{'Content-Type':'application/json'}});
+              return ult;
+            }
+          }
+        }
+      }catch(e){}
+      return f0.apply(this,arguments);
+    };
+    Object.keys(f0).forEach(function(k){try{fx[k]=f0[k]}catch(e){}});
+    fx.__f538lote=true; W.fetch=fx;
+  }
+  /* ---------- (2) painel só quando pedido ---------- */
+  var st=D.createElement('style');
+  st.textContent='#f68Diag:not(.f538-ver){display:none!important}';
+  D.head.appendChild(st);
+  var manualAte=0;
+  function ligar(){
+    var f=W.fastDiagnosticoSync;
+    if(typeof f==='function'&&!f.__f538){
+      var g=function(){manualAte=Date.now()+3*60*1000;var el=D.getElementById('f68Diag');if(el)el.classList.add('f538-ver');return f.apply(this,arguments)};
+      g.__f538=true;W.fastDiagnosticoSync=g;
+    }
+  }
+  setInterval(function(){
+    ligar();
+    var el=D.getElementById('f68Diag');if(!el)return;
+    var aberto=false;try{aberto=el.matches(':popover-open')}catch(e){aberto=el.style.display!=='none'}
+    var precisaLogin=!!D.getElementById('f68Email');          // mini-app sem login: precisa da tela para entrar
+    var ver=precisaLogin||Date.now()<manualAte;
+    el.classList.toggle('f538-ver',ver);
+    if(!aberto&&!precisaLogin)manualAte=0;                     // fechou: volta a ficar escondido
+  },300);
+  ligar();
+})();
+</script>
+<script id="fast538-rapido">
+/* 5.3.8 — TELAS E CÂMERA MAIS RÁPIDAS
+   • Troca de tela: a tela nova aparece NA HORA do toque; a montagem das listas
+     acontece logo depois (antes o aparelho só mostrava a tela quando terminava tudo).
+   • Câmera em tempo real: começa a abrir já no toque do botão (pré-abertura) e abre
+     com um pedido só (ver abrirCameraAoVivo). */
+(function(){
+  var W=window,D=document;
+  /* ---------- troca de tela instantânea ---------- */
+  function deUsuario(){var e=W.event;return !!(e&&e.isTrusted&&/^(click|touchend|pointerup|keydown|keyup)$/.test(e.type))}
+  function instalar(){
+    var f=W.trocarAba;
+    if(typeof f!=='function'||f.__f538rap)return;
+    var g=function(evt,aba){
+      var el=aba&&D.getElementById(aba);
+      if(!el||!deUsuario())return f.apply(this,arguments);
+      var ct=evt&&evt.currentTarget,self=this;
+      // 1) mostra a tela já
+      D.querySelectorAll('.tab-content.active').forEach(function(c){if(c!==el)c.classList.remove('active')});
+      el.classList.add('active');
+      if(ct&&ct.classList)ct.classList.add('active');
+      // 2) monta o conteúdo depois que a tela já foi desenhada
+      var ev2=ct?{currentTarget:ct,target:ct,preventDefault:function(){},stopPropagation:function(){}}:evt;
+      requestAnimationFrame(function(){setTimeout(function(){try{f.call(self,ev2,aba)}catch(e){console.warn(e)}},0)});
+    };
+    Object.keys(f).forEach(function(k){try{g[k]=f[k]}catch(e){}});
+    g.__f538rap=true;W.trocarAba=g;try{trocarAba=g}catch(e){}
+  }
+  instalar();W.addEventListener('load',function(){setTimeout(instalar,1500);setTimeout(instalar,5000)});setInterval(instalar,5000);
+
+  /* ---------- câmera: pré-abertura no toque ---------- */
+  function apkNativa(){var m=String(navigator.userAgent||'').match(/FASTAndroid\/(\d+)\.(\d+)\.(\d+)/);return m&&((+m[1])*10000+(+m[2])*100+(+m[3]))>=50001}
+  var tPre=0;
+  function soltar(){var p=W.__f538CamPre;W.__f538CamPre=null;if(p)p.then(function(s){try{s.getTracks().forEach(function(t){t.stop()})}catch(e){}},function(){})}
+  D.addEventListener('pointerdown',function(e){
+    var b=e.target&&e.target.closest&&e.target.closest('[onclick*="abrirCameraAoVivo"]');
+    if(!b||apkNativa()||W.__f538CamPre||!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)return;
+    if(D.getElementById('fastCameraAoVivoOverlay'))return;
+    var id='';try{id=localStorage.getItem('f538_cam_traseira')||''}catch(x){}
+    var v={width:{ideal:1920},height:{ideal:1080}};if(id)v.deviceId={exact:id};else v.facingMode={ideal:'environment'};
+    var p=navigator.mediaDevices.getUserMedia({video:v,audio:false}).catch(function(){return navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false})});
+    W.__f538CamPre=p;
+    clearTimeout(tPre);tPre=setTimeout(function(){if(W.__f538CamPre===p)soltar()},4000);   // não tocou de verdade: desliga
+  },true);
+  D.addEventListener('pointercancel',function(){if(W.__f538CamPre&&!D.getElementById('fastCameraAoVivoOverlay'))soltar()},true);   // era rolagem da tela
 })();
 </script>
 </body></html>
