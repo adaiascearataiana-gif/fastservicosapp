@@ -3,6 +3,31 @@
   "releasedAt": "2026-10-14T10:00:00-03:00",
   "updates": [
     {
+      "app": "geral",
+      "type": "correcao",
+      "text": "5.3.8 (17/10/2026): a tabela lugares_publicos foi apagada do Supabase. Ela guardava cópias dos lugares e nunca apagava nada (excluídos e renomeados ficavam lá). O app do Cliente agora lê os lugares direto da tabela destinos (sem o telefone do lugar)."
+    },
+    {
+      "app": "fast",
+      "type": "melhoria",
+      "text": "5.3.8 (17/10/2026): origem da rota vem do cliente. Ao digitar a origem, a busca mostra primeiro os clientes, depois os lugares, com o endereço. Campo novo \"Endereço da origem\" em Rotas, Rotas do Dia e Editar Rota. Origem que não existe em clientes nem em lugares entra como lugar novo. No Supabase: coluna origem_endereco em rotas e sequencias_itens."
+    },
+    {
+      "app": "fast",
+      "type": "melhoria",
+      "text": "5.3.8 (17/10/2026): no Supabase a coluna \"nome\" dos lugares passa a se chamar \"destino\". Ao lançar rota (FAST ou ROTAS), o cliente e o destino novos entram sozinhos em CLIENTES e LUGARES; os que já existem não são alterados. Criar, editar, renomear e excluir chegam ao Supabase."
+    },
+    {
+      "app": "fast",
+      "type": "correcao",
+      "text": "5.3.8 (17/10/2026): clientes e lugares repetidos ou excluídos que continuavam no Supabase agora são apagados de lá automaticamente (os cadastros em uso e os novos de outro aparelho ficam)."
+    },
+    {
+      "app": "fast",
+      "type": "correcao",
+      "text": "5.3.8 (17/10/2026): fotos — o FAST no celular reenviava fotos que o PAINEL já tinha enviado. Agora confere o conteúdo da foto na pasta do Drive antes de enviar."
+    },
+    {
       "app": "fast",
       "type": "melhoria",
       "text": "5.3.8 (16/10/2026): Google Drive sem a subpasta \"ROTA\". As fotos ficam direto em Cliente / Data / Destino. A limpeza de duplicatas tira as fotos das pastas ROTA antigas, coloca no destino e apaga essas pastas. Duas rotas para o mesmo destino no mesmo dia agora recebem números diferentes (Foto 01, Foto 02...) em vez de uma foto deixar de subir."

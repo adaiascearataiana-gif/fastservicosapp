@@ -13864,7 +13864,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
       const carimbo = d.updatedAt || d.updated_at || ((_idMs > 1e12 && _idMs < 4e12) ? new Date(_idMs).toISOString() : '2020-01-01T00:00:00.000Z');
       return {
         id: Number(d.id),
-        nome: d.nome || '',
+        [(window.__f538ColDestino === 'destino') ? 'destino' : 'nome']: d.nome || '', // 5.3.8: coluna "destino" no Supabase
         endereco: d.endereco || '',
         bairro: d.bairro || '',
         telefone: d.telefone || '',
@@ -13879,7 +13879,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
     function supabaseToDestino(row) {
       return {
         id: row.id,
-        nome: row.nome || '',
+        nome: row.destino || row.nome || '', // 5.3.8: coluna renomeada para "destino"
         endereco: row.endereco || '',
         bairro: row.bairro || '',
         telefone: row.telefone || '',
@@ -34309,6 +34309,40 @@ window.fastMobileNav = function(ev, abaId, botao) {
         }catch(e){}
         return achou;
       }
+      // 5.3.8: MD5 do arquivo (o mesmo código que o Google Drive mostra), para reconhecer foto igual
+      function fastMd5Buf(buf){
+        var b=new Uint8Array(buf),n=b.length,nb=((n+8)>>6)+1,x=new Int32Array(nb*16),i;
+        for(i=0;i<n;i++)x[i>>2]|=b[i]<<((i%4)*8);
+        x[n>>2]|=0x80<<((n%4)*8);x[nb*16-2]=(n*8)|0;x[nb*16-1]=Math.floor(n/536870912);
+        function ad(a,b){var l=(a&0xffff)+(b&0xffff);return(((a>>16)+(b>>16)+(l>>16))<<16)|(l&0xffff)}
+        function rl(v,c){return(v<<c)|(v>>>(32-c))}
+        function cm(q,a,b,x,s,t){return ad(rl(ad(ad(a,q),ad(x,t)),s),b)}
+        function ff(a,b,c,d,x,s,t){return cm((b&c)|(~b&d),a,b,x,s,t)}
+        function gg(a,b,c,d,x,s,t){return cm((b&d)|(c&~d),a,b,x,s,t)}
+        function hh(a,b,c,d,x,s,t){return cm(b^c^d,a,b,x,s,t)}
+        function ii(a,b,c,d,x,s,t){return cm(c^(b|~d),a,b,x,s,t)}
+        var a=1732584193,bb=-271733879,c=-1732584194,d=271733878;
+        for(i=0;i<x.length;i+=16){var oa=a,ob=bb,oc=c,od=d;
+          a=ff(a,bb,c,d,x[i],7,-680876936);d=ff(d,a,bb,c,x[i+1],12,-389564586);c=ff(c,d,a,bb,x[i+2],17,606105819);bb=ff(bb,c,d,a,x[i+3],22,-1044525330);
+          a=ff(a,bb,c,d,x[i+4],7,-176418897);d=ff(d,a,bb,c,x[i+5],12,1200080426);c=ff(c,d,a,bb,x[i+6],17,-1473231341);bb=ff(bb,c,d,a,x[i+7],22,-45705983);
+          a=ff(a,bb,c,d,x[i+8],7,1770035416);d=ff(d,a,bb,c,x[i+9],12,-1958414417);c=ff(c,d,a,bb,x[i+10],17,-42063);bb=ff(bb,c,d,a,x[i+11],22,-1990404162);
+          a=ff(a,bb,c,d,x[i+12],7,1804603682);d=ff(d,a,bb,c,x[i+13],12,-40341101);c=ff(c,d,a,bb,x[i+14],17,-1502002290);bb=ff(bb,c,d,a,x[i+15],22,1236535329);
+          a=gg(a,bb,c,d,x[i+1],5,-165796510);d=gg(d,a,bb,c,x[i+6],9,-1069501632);c=gg(c,d,a,bb,x[i+11],14,643717713);bb=gg(bb,c,d,a,x[i],20,-373897302);
+          a=gg(a,bb,c,d,x[i+5],5,-701558691);d=gg(d,a,bb,c,x[i+10],9,38016083);c=gg(c,d,a,bb,x[i+15],14,-660478335);bb=gg(bb,c,d,a,x[i+4],20,-405537848);
+          a=gg(a,bb,c,d,x[i+9],5,568446438);d=gg(d,a,bb,c,x[i+14],9,-1019803690);c=gg(c,d,a,bb,x[i+3],14,-187363961);bb=gg(bb,c,d,a,x[i+8],20,1163531501);
+          a=gg(a,bb,c,d,x[i+13],5,-1444681467);d=gg(d,a,bb,c,x[i+2],9,-51403784);c=gg(c,d,a,bb,x[i+7],14,1735328473);bb=gg(bb,c,d,a,x[i+12],20,-1926607734);
+          a=hh(a,bb,c,d,x[i+5],4,-378558);d=hh(d,a,bb,c,x[i+8],11,-2022574463);c=hh(c,d,a,bb,x[i+11],16,1839030562);bb=hh(bb,c,d,a,x[i+14],23,-35309556);
+          a=hh(a,bb,c,d,x[i+1],4,-1530992060);d=hh(d,a,bb,c,x[i+4],11,1272893353);c=hh(c,d,a,bb,x[i+7],16,-155497632);bb=hh(bb,c,d,a,x[i+10],23,-1094730640);
+          a=hh(a,bb,c,d,x[i+13],4,681279174);d=hh(d,a,bb,c,x[i],11,-358537222);c=hh(c,d,a,bb,x[i+3],16,-722521979);bb=hh(bb,c,d,a,x[i+6],23,76029189);
+          a=hh(a,bb,c,d,x[i+9],4,-640364487);d=hh(d,a,bb,c,x[i+12],11,-421815835);c=hh(c,d,a,bb,x[i+15],16,530742520);bb=hh(bb,c,d,a,x[i+2],23,-995338651);
+          a=ii(a,bb,c,d,x[i],6,-198630844);d=ii(d,a,bb,c,x[i+7],10,1126891415);c=ii(c,d,a,bb,x[i+14],15,-1416354905);bb=ii(bb,c,d,a,x[i+5],21,-57434055);
+          a=ii(a,bb,c,d,x[i+12],6,1700485571);d=ii(d,a,bb,c,x[i+3],10,-1894986606);c=ii(c,d,a,bb,x[i+10],15,-1051523);bb=ii(bb,c,d,a,x[i+1],21,-2054922799);
+          a=ii(a,bb,c,d,x[i+8],6,1873313359);d=ii(d,a,bb,c,x[i+15],10,-30611744);c=ii(c,d,a,bb,x[i+6],15,-1560198380);bb=ii(bb,c,d,a,x[i+13],21,1309151649);
+          a=ii(a,bb,c,d,x[i+4],6,-145523070);d=ii(d,a,bb,c,x[i+11],10,-1120210379);c=ii(c,d,a,bb,x[i+2],15,718787259);bb=ii(bb,c,d,a,x[i+9],21,-343485551);
+          a=ad(a,oa);bb=ad(bb,ob);c=ad(c,oc);d=ad(d,od);}
+        return [a,bb,c,d].map(function(v){var s='';for(var j=0;j<4;j++)s+=('0'+((v>>(j*8))&255).toString(16)).slice(-2);return s}).join('');
+      }
+      
       async function enviar(reg){
         // 5.3.8: se esta foto já tem arquivo no Drive (enviado por este ou outro aparelho), não cria cópia
         var refReg=String(reg.fotoRef||'');
@@ -34317,6 +34351,26 @@ window.fastMobileNav = function(ev, abaId, botao) {
         var cfg=config(), boundary='fast_'+Date.now()+'_'+Math.random().toString(36).slice(2);
         var destinoId=await pastaFinal(reg);
         var fastKey=reg.fotoKey||chaveFoto(reg.itemId,reg.fotoRef,reg.fotoIndex);
+        // 5.3.8: a mesma foto já está nesta pasta (enviada por OUTRO aparelho, com outra marca)?
+        // Compara o tamanho exato do arquivo — foto igual tem o mesmo tamanho em bytes.
+        var conteudoConferido=false; // true = a pasta foi conferida e não tem foto igual
+        try{
+          var tamLocal=reg.blob&&reg.blob.size;
+          if(tamLocal){
+            var qT="'"+qDrive(destinoId)+"' in parents and trashed=false and mimeType contains 'image/'";
+            var rT=await fetch('https://www.googleapis.com/drive/v3/files?spaces=drive&pageSize=1000&fields=files(id,name,size,md5Checksum,webViewLink)&q='+encodeURIComponent(qT),{headers:{Authorization:'Bearer '+token()}});
+            if(rT.status===401){salvarToken('');if(window.fastDriveReconectarSilencioso)try{window.fastDriveReconectarSilencioso();}catch(e){}throw new Error('Autorização do Google expirada. Reconectando automaticamente…');}
+            if(rT.ok){var dT=await rT.json(),mesmos=(dT.files||[]).filter(function(f){return Number(f.size)===Number(tamLocal)});
+              if(mesmos.length){
+                // mesmo tamanho: confirma pelo conteúdo (MD5), que o Drive informa
+                var md5Local='';try{md5Local=fastMd5Buf(await reg.blob.arrayBuffer())}catch(eM){}
+                var fT=mesmos.find(function(f){return md5Local&&f.md5Checksum&&f.md5Checksum===md5Local});
+                if(fT)return {id:fT.id,name:fT.name,webViewLink:fT.webViewLink||'',jaExistia:true};
+                if(md5Local&&mesmos.every(function(f){return !!f.md5Checksum}))conteudoConferido=true;
+              }else conteudoConferido=true;
+            }
+          }
+        }catch(eT){ if(/expirada/i.test(String(eT&&eT.message)))throw eT; }
         // (dedup FORTE) procura pela MARCA da foto (appProperties) nesta pasta do Drive:
         // reenvios com nome/numero/destino diferentes NÃO geram cópia nova.
         if(fastKey){try{
@@ -34337,7 +34391,7 @@ window.fastMobileNav = function(ev, abaId, botao) {
             var dJa=await rJa.json(),fJa=dJa.files&&dJa.files[0];
             if(!fJa)break;                                   // nome livre: envia com este nome
             var kJa=fJa.appProperties&&fJa.appProperties.fastKey;
-            if(!kJa||!fastKey||kJa===fastKey)return {id:fJa.id,name:fJa.name,webViewLink:fJa.webViewLink||'',jaExistia:true};
+            if(!conteudoConferido&&(!kJa||!fastKey||kJa===fastKey))return {id:fJa.id,name:fJa.name,webViewLink:fJa.webViewLink||'',jaExistia:true};
             // 5.3.8: é outra foto (de outra rota no mesmo destino e dia) — passa para o próximo número
             var mN=String(reg.nome).match(/^(.*Foto )(\d+)(\.[a-z0-9]+)$/i);
             if(!mN)break;
@@ -45447,6 +45501,10 @@ body.fx-apk .fx-gal-ajuda{display:flex}
   // lugares/destinos do FAST para o app do Cliente completar o endereço (sem telefone)
   var sigLug='';
   async function publicarLugares(){
+    // 5.3.8: DESLIGADO. A tabela lugares_publicos foi apagada; ela só recebia cópias e nunca
+    // apagava nada (lugares excluídos e renomeados ficavam lá). O app do Cliente agora lê
+    // direto de "destinos" pela função cliente_lugares (sem telefone).
+    return;
     try{
       var l=(bd().destinos||[]).filter(function(d){return d&&d.nome}).map(function(d){var k=String(d.nome).trim().toLowerCase();
         return {chave:k,nome:String(d.nome).trim(),endereco:String(d.endereco||(d.enderecoObj&&[d.enderecoObj.logradouro,d.enderecoObj.numero].filter(Boolean).join(', '))||'').trim(),bairro:String(d.bairro||'').trim(),atualizado_em:new Date().toISOString()}});
@@ -45903,8 +45961,9 @@ body.fx-apk .fx-gal-ajuda{display:flex}
   var K_IDS='f538_lug_ids', ultConf=0;
   async function conferirApagados(forcar){
     if(!forcar&&Date.now()-ultConf<5*60*1000)return; ultConf=Date.now();
-    var r=await fetch(url()+'/destinos?select=id,nome',{headers:cab(),cache:'no-store'}); if(!r.ok)return;
+    var r=await fetch(url()+'/destinos?select='+(W.__f538ColDestino==='destino'?'id,destino':'id,nome'),{headers:cab(),cache:'no-store'}); if(!r.ok)return;
     var rows=await r.json(); if(!Array.isArray(rows))return;
+    rows.forEach(function(x){if(x&&x.nome==null&&x.destino!=null)x.nome=x.destino});
     var agora={},nomesNuvem={}; rows.forEach(function(x){agora[String(x.id)]=1;nomesNuvem[N(x.nome)]=1});
     var antes=null;try{antes=JSON.parse(localStorage.getItem(K_IDS)||'null')}catch(e){}
     try{localStorage.setItem(K_IDS,JSON.stringify(agora))}catch(e){}
@@ -46470,6 +46529,470 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
   setTimeout(ciclo,20000);
   D.addEventListener('visibilitychange',function(){if(!D.hidden){clearTimeout(t);t=setTimeout(ciclo,2000)}});
   W.fast538VigiaCadastros={conferir:conferir};
+})();
+</script>
+<script id="fast538-limpa-repetidos">
+/* 5.3.8 — LIMPEZA DE CADASTROS REPETIDOS E EXCLUÍDOS NA NUVEM (clientes e lugares)
+   Também apaga do Supabase o que foi EXCLUÍDO na plataforma (a exclusão só escondia
+   o nome nos aparelhos; a linha ficava no banco) e as sobras antigas que nenhum
+   aparelho usa mais (confirmadas depois de uma sincronização completa).
+   O FAST unifica os repetidos na tela, mas a nuvem só apagava o que ESTE aparelho
+   tinha enviado antes. O repetido criado por outro aparelho ficava para sempre no
+   Supabase, voltava a cada sincronização completa e fazia a lista inteira ser
+   reenviada. Agora: linha da nuvem que NÃO existe neste aparelho e cujo NOME já
+   existe aqui (com outro código) é um repetido já unificado — é apagada da nuvem.
+   Cadastro com nome novo (de outro aparelho) nunca é apagado. */
+(function(){
+  var W=window,D=document,rodando=false,ult=0;
+  function norm(t){try{return destNormalizarNome(t)}catch(e){return String(t||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim()}}
+  function chaveCli(n){return norm(n).replace(/[^a-z0-9]+/g,' ').trim()}
+  function chaveLug(n){return norm(n).replace(/\s+/g,' ').trim()}
+  async function pegar(caminho){
+    var out=[],off=0;
+    while(true){
+      var r=await fetch(SUPABASE_URL+caminho+'&limit=1000&offset='+off,{headers:supabaseHeaders(),cache:'no-store'});
+      if(!r.ok)return null;
+      var l=await r.json();out=out.concat(l);if(l.length<1000)break;off+=1000;
+      if(off>20000)break;
+    }
+    return out;
+  }
+  async function apagar(tabela,ids){
+    var feitos=0;
+    for(var i=0;i<ids.length;i+=50){
+      var lote=ids.slice(i,i+50);
+      var r=await fetch(SUPABASE_URL+'/'+tabela+'?id=in.('+lote.join(',')+')',{method:'DELETE',headers:supabaseHeaders({'Prefer':'return=minimal'})});
+      if(r.ok)feitos+=lote.length;
+    }
+    return feitos;
+  }
+  var ORF_KEY='f538_orfaos_nuvem';
+  function lerOrf(){try{return JSON.parse(localStorage.getItem(ORF_KEY)||'{}')||{}}catch(e){return {}}}
+  function gravarOrf(o){try{localStorage.setItem(ORF_KEY,JSON.stringify(o))}catch(e){}}
+  function excluidos(lista){
+    try{if(typeof fastLapideEfetiva==='function')return fastLapideEfetiva(lista||[])}catch(e){}
+    var o=new Set();(lista||[]).forEach(function(n){var k=norm(n);if(k&&!/^zz /.test(k))o.add(k)});return o;
+  }
+  // devolve os códigos da nuvem que devem sair: repetidos já unificados, excluídos e sobras antigas
+  function aApagar(tabela,nuvem,local,chave,nomeNuvem,lapides){
+    var idsLocal={},porNome={},lap=excluidos(lapides),orf=lerOrf(),ot=orf[tabela]||{},novoOt={};
+    (local||[]).forEach(function(x){if(!x||x.id==null)return;idsLocal[String(x.id)]=1;var k=chave(x.nome);if(k&&/[a-z]/.test(k))porNome[k]=1});
+    var lista=[],sobras=[],agora=Date.now(),pesada=Number(W.__f68Pesada)||0;
+    (nuvem||[]).forEach(function(r){
+      var id=String(r.id);if(!/^-?\d+$/.test(id)||idsLocal[id])return;
+      var nome=nomeNuvem(r),k=chave(nome),kn=norm(nome);
+      if(k&&porNome[k]){lista.push(id);return;}                 // repetido: o nome já existe aqui com outro código
+      if(kn&&lap.has(kn)){lista.push(id);return;}               // excluído aqui na plataforma
+      // sobra: não está aqui, nem com outro código. Só apaga se continuar fora DEPOIS de uma
+      // sincronização completa (um cadastro novo de outro aparelho já teria chegado)
+      var visto=Number(ot[id])||agora; novoOt[id]=visto;
+      if(agora-visto>15*60*1000&&pesada>visto+60000)sobras.push(id);
+    });
+    orf[tabela]=novoOt;gravarOrf(orf);
+    // segurança: se "sobras" forem muitas, algo está errado com este aparelho — não apaga sobras
+    if(sobras.length<=Math.max(5,(nuvem||[]).length*0.25))lista=lista.concat(sobras);
+    return lista;
+  }
+  async function rodar(forcar){
+    if(rodando||D.hidden||navigator.onLine===false)return null;
+    if(!forcar&&Date.now()-ult<9*60*1000)return null;
+    if(typeof SUPABASE_URL==='undefined'||typeof supabaseHeaders!=='function'||!W.bancoDados)return null;
+    rodando=true;ult=Date.now();var res={clientes:0,lugares:0};
+    try{
+      var cl=bancoDados.clientes||[];
+      if(cl.length>=5){
+        var nc=await pegar('/clientes?select=id,n:dados->>nome,rs:dados->>razaoSocial,c:dados->>cliente&order=id');
+        // segurança: a lista deste aparelho precisa estar carregada de verdade
+        if(nc&&nc.length&&cl.length>=nc.length*0.4){
+          var ids=aApagar('clientes',nc,cl,chaveCli,function(r){return r.n||r.rs||r.c||''},bancoDados.clientesExcluidos);
+          if(ids.length)res.clientes=await apagar('clientes',ids);
+        }
+      }
+      var lg=bancoDados.destinos||[];
+      if(lg.length>=5){
+        var nl=await pegar('/destinos?select='+(W.__f538ColDestino==='destino'?'id,nome:destino':'id,nome')+'&order=id');
+        if(nl&&nl.length&&lg.length>=nl.length*0.4){
+          var idl=aApagar('destinos',nl,lg,chaveLug,function(r){return r.nome||''},bancoDados.destinosExcluidos);
+          if(idl.length)res.lugares=await apagar('destinos',idl);
+        }
+      }
+      if(res.clientes||res.lugares)console.info('FAST 5.3.8: repetidos apagados da nuvem',res);
+      W.__f538DupNuvem=res;return res;
+    }catch(e){return null}finally{rodando=false}
+  }
+  setTimeout(function(){rodar(true)},40000);
+  setInterval(function(){rodar(false)},60000);
+  W.fast538LimparRepetidosNuvem=function(){return rodar(true)};
+})();
+</script>
+<script id="fast538-cadastro-auto">
+/* 5.3.8 — (1) Coluna "destino" no Supabase: descobre se o banco já tem a coluna nova
+   (depois do SQL 5.3.8) e passa a gravar nela; antes do SQL continua usando "nome".
+   (2) CADASTRO AUTOMÁTICO: ao lançar ou editar uma rota (FAST/ROTAS, Rotas do Dia,
+   WhatsApp, desmembrar), o CLIENTE e o DESTINO entram nas listas se ainda não existirem.
+   Se já existem, nada é alterado. Nomes que você EXCLUIU não voltam sozinhos. */
+(function(){
+  var W=window;
+  // ---------- (1) coluna destino ----------
+  try{var c0=localStorage.getItem('f538_col_destino');if(c0)W.__f538ColDestino=c0}catch(e){}
+  async function detectarColuna(){
+    try{
+      if(typeof SUPABASE_URL==='undefined'||typeof supabaseHeaders!=='function')return;
+      var r=await fetch(SUPABASE_URL+'/destinos?select=destino&limit=1',{headers:supabaseHeaders(),cache:'no-store'});
+      var col=r.ok?'destino':(r.status===400||r.status===404?'nome':null);
+      if(col){W.__f538ColDestino=col;try{localStorage.setItem('f538_col_destino',col)}catch(e){}}
+    }catch(e){}
+  }
+  detectarColuna();setTimeout(detectarColuna,15000);setInterval(detectarColuna,30*60*1000);
+
+  // ---------- (2) cadastro automático ----------
+  var snap=null,acao=0,ocupado=false,tm=0;
+  function N(t){try{return destNormalizarNome(t)}catch(e){return String(t||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim()}}
+  function K(t){return N(t).replace(/[^a-z0-9]+/g,' ').trim()}
+  function excluidos(l){try{return fastLapideEfetiva(l||[])}catch(e){return new Set((l||[]).map(N))}}
+  function garantirCliente(nome){
+    var k=K(nome);if(!k||!/[a-z]/.test(k))return false;
+    var b=W.bancoDados;if(!b)return false;if(!Array.isArray(b.clientes))b.clientes=[];
+    if(b.clientes.some(function(c){return c&&(K(c.nome)===k||(c.apelido&&K(c.apelido)===k))}))return false; // já tem: pula
+    if(excluidos(b.clientesExcluidos).has(N(nome)))return false;                                            // você excluiu: não volta
+    var agora=new Date().toISOString();
+    b.clientes.push({id:Date.now()+Math.floor(Math.random()*10000),tipoPessoa:'PF',doc:'',nome:String(nome).trim(),apelido:'',
+      telefone:'',whatsapp:'',email:'',pagamento:'PIX',endereco:'',responsavel:'',obs:'Cadastrado automaticamente ao lançar rota',
+      dataCadastro:agora,updatedAt:agora,codigoCliente:String(b.clientes.length+1).padStart(4,'0')});
+    return true;
+  }
+  function garantirDestino(dest,cli){
+    if(!dest||!String(dest).trim()||typeof destAdicionarOuAtualizar!=='function')return false;
+    var partes=[];try{partes=destDividirMultiplos(dest)||[]}catch(e){}
+    if(!partes.length)partes=[dest];
+    var criou=false;
+    partes.forEach(function(p){
+      var ja=null;try{ja=destBuscar(p)}catch(e){}
+      if(ja)return;                                                                                   // já tem: pula
+      var info=null;try{info=destInfoDeCliente(cli||p)}catch(e){}
+      if(destAdicionarOuAtualizar(p,info))criou=true;                                                 // respeita os excluídos
+    });
+    return criou;
+  }
+  function itens(){
+    var b=W.bancoDados||{},out=[];
+    (b.rotas||[]).forEach(function(r){if(r&&r.id!=null)out.push(['r'+r.id,r])});
+    var sq=b.sequencias||{};Object.keys(sq).forEach(function(d){(sq[d]||[]).forEach(function(i){if(i&&i.id!=null)out.push(['s'+d+'_'+i.id,i])})});
+    return out;
+  }
+  function assinatura(r){return String(r.cliente||'')+'\u0001'+String(r.destino||'')}
+  function verificar(){
+    var lista=itens(),novo={};
+    lista.forEach(function(x){novo[x[0]]=assinatura(x[1])});
+    if(snap&&Date.now()-acao<8000){
+      var cCli=0,cDes=0;
+      lista.forEach(function(x){
+        if(snap[x[0]]===novo[x[0]])return;           // rota que não mudou
+        var r=x[1];
+        try{if(garantirCliente(r.cliente))cCli++}catch(e){}
+        try{if(garantirDestino(r.destino,r.cliente))cDes++}catch(e){}
+      });
+      if(cCli||cDes){
+        ocupado=true;try{salvarStorage()}catch(e){}finally{ocupado=false}
+        try{if(cCli&&typeof renderizarClientes==='function')renderizarClientes()}catch(e){}
+        try{if(cDes&&typeof destRenderizarLista==='function')destRenderizarLista()}catch(e){}
+        W.__f538CadAuto={clientes:(W.__f538CadAuto&&W.__f538CadAuto.clientes||0)+cCli,destinos:(W.__f538CadAuto&&W.__f538CadAuto.destinos||0)+cDes};
+      }
+    }
+    snap=novo;
+  }
+  function agendar(){if(ocupado)return;clearTimeout(tm);tm=setTimeout(verificar,250)}
+  function embrulharSalvar(){
+    var f=W.salvarStorage;if(typeof f!=='function'||f.__f538cad)return;
+    var g=function(){var r=f.apply(this,arguments);agendar();return r};
+    Object.keys(f).forEach(function(k){try{g[k]=f[k]}catch(e){}});g.__f538cad=1;W.salvarStorage=g;
+    try{salvarStorage=g}catch(e){}
+  }
+  var ACOES=['salvarRota','salvarItemSeq','salvarEdicaoRotaModal','fastWaDistribuir','executarDesmembramento','executarDesmembramentoAbaRotas'];
+  function embrulharAcoes(){
+    ACOES.forEach(function(n){
+      var f=W[n];if(typeof f!=='function'||f.__f538cad)return;
+      var g=function(){
+        acao=Date.now();if(!snap)verificar();
+        var r=f.apply(this,arguments);
+        if(r&&typeof r.then==='function')r.then(function(){acao=Date.now();agendar()},function(){});
+        acao=Date.now();agendar();return r;
+      };
+      Object.keys(f).forEach(function(k){try{g[k]=f[k]}catch(e){}});g.__f538cad=1;W[n]=g;
+    });
+  }
+  function instalar(){embrulharSalvar();embrulharAcoes();if(!snap&&W.bancoDados)verificar()}
+  instalar();setTimeout(instalar,1500);setTimeout(instalar,6000);setInterval(instalar,4000);
+  W.fast538CadastroAuto={verificar:verificar,garantirCliente:garantirCliente,garantirDestino:garantirDestino};
+})();
+</script>
+<script id="fast538-origem">
+/* 5.3.8 — ORIGEM INTELIGENTE + ENDEREÇO DA ORIGEM
+   • Ao escolher o CLIENTE numa rota nova, a origem já vem do cliente (se estiver vazia).
+   • Ao digitar a ORIGEM, a busca é feita primeiro nos CLIENTES, depois nos LUGARES
+     (e por último nas origens já usadas). Achou? O endereço vem junto.
+   • Campo novo "Endereço da origem" nas telas Rotas (FAST), Rotas do Dia (ROTAS) e Editar Rota.
+   • Ao salvar: se a origem não existe em CLIENTES nem em LUGARES, entra como lugar novo
+     (com o endereço). Se já existe, pula e não muda o cadastro.
+   • Supabase: coluna origem_endereco em rotas e sequencias_itens (SQL 5.3.8, parte 8).
+     Antes do SQL o app funciona normalmente e só não envia esse campo. */
+(function(){
+  var W=window,D=document;
+  function $(id){return D.getElementById(id)}
+  function N(t){try{return destNormalizarNome(t)}catch(e){return String(t||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim()}}
+  function esc(t){return String(t==null?'':t).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+  function bd(){return W.bancoDados||{}}
+
+  /* ---------- endereço de cliente e de lugar ---------- */
+  function endCliente(c){
+    if(!c)return '';
+    var eo=c.enderecoObj||{},partes=[];
+    var rua=[eo.logradouro,eo.numero].filter(Boolean).join(', ');
+    if(rua)partes.push(rua);else if(c.endereco)partes.push(String(c.endereco).trim());
+    var b=c.bairro||eo.bairro;if(b&&partes.join(' ').toLowerCase().indexOf(String(b).toLowerCase())<0)partes.push(b);
+    return partes.filter(Boolean).join(' - ');
+  }
+  function endLugar(d){
+    if(!d)return '';
+    var e=String(d.endereco||'').trim(),b=String(d.bairro||'').trim();
+    if(b&&e.toLowerCase().indexOf(b.toLowerCase())<0)e=e?(e+' - '+b):b;
+    return e;
+  }
+  function acharCliente(nome){
+    var k=N(nome);if(!k)return null;
+    return (bd().clientes||[]).find(function(c){return c&&(N(c.nome)===k||(c.apelido&&N(c.apelido)===k))})||null;
+  }
+  function acharLugar(nome){
+    var k=N(nome);if(!k)return null;
+    try{var d=destBuscar(nome);if(d)return d}catch(e){}
+    return (bd().destinos||[]).find(function(d){return d&&N(d.nome)===k})||null;
+  }
+  // ordem pedida: 1º clientes, 2º lugares
+  function achar(origem){
+    var c=acharCliente(origem);if(c)return {fonte:'cliente',nome:c.nome,endereco:endCliente(c)};
+    var d=acharLugar(origem);if(d)return {fonte:'lugar',nome:d.nome,endereco:endLugar(d)};
+    return null;
+  }
+  W.fast538AcharOrigem=achar;
+
+  /* ---------- campo "Endereço da origem" ---------- */
+  var CAMPOS=[
+    {org:'txtOrigem',cli:'txtCliente',end:'txtOrigemEnd',prev:'atualizarPreviewAba1'},
+    {org:'seqOrigem',cli:'seqCliente',end:'seqOrigemEnd',prev:'atualizarPreviewAba2'},
+    {org:'editTxtOrigem',cli:'editTxtCliente',end:'editTxtOrigemEnd',prev:''}
+  ];
+  function criarCampo(cf){
+    var o=$(cf.org);if(!o||$(cf.end))return;
+    var host=o.closest('label')||o.parentNode;if(!host||!host.parentNode)return;
+    var box=D.createElement(host.tagName==='LABEL'?'label':'div');
+    if(host.className)box.className=host.className;
+    box.className=(box.className?box.className+' ':'')+'f538-orig-end';
+    box.innerHTML=(host.tagName==='LABEL'?'Endereço da origem:':'<label>Endereço da origem:</label>')+
+      ' <input type="text" id="'+cf.end+'" autocomplete="off" placeholder="Rua, número - bairro">'+
+      '<small class="f538-orig-fonte" id="'+cf.end+'Fonte"></small>';
+    host.parentNode.insertBefore(box,host.nextSibling);
+    var inp=$(cf.end);
+    inp.addEventListener('input',function(){inp.dataset.auto='0';fonte(cf,'')});
+  }
+  function fonte(cf,txt){var f=$(cf.end+'Fonte');if(f)f.textContent=txt||''}
+  function preencherEnd(cf,forcar){
+    var o=$(cf.org),e=$(cf.end);if(!o||!e)return;
+    var r=achar(o.value);
+    var pode=forcar||!e.value.trim()||e.dataset.auto==='1';
+    if(!pode)return;
+    if(r){
+      e.value=r.endereco||'';e.dataset.auto='1';
+      fonte(cf,r.fonte==='cliente'?'👤 endereço do cadastro do cliente':'📍 endereço do cadastro de lugares');
+    }else if(e.dataset.auto==='1'){
+      e.value='';e.dataset.auto='0';fonte(cf,o.value.trim()?'🆕 origem nova: digite o endereço (vai para LUGARES ao salvar)':'');
+    }else if(o.value.trim()&&!e.value.trim()){
+      fonte(cf,'🆕 origem nova: digite o endereço (vai para LUGARES ao salvar)');
+    }
+  }
+
+  /* ---------- sugestões da origem: clientes → lugares → já usadas ---------- */
+  function sugestoes(input,idLista,prev){
+    var termo=N(input.value);
+    var div=$(idLista);
+    if(!div){div=D.createElement('div');div.id=idLista;div.className='suggestions-list';input.parentNode.appendChild(div)}
+    function esconder(){div.style.display='none';div.classList.remove('fast-sug-show')}
+    if(!termo){esconder();return}
+    var vistos={},lista=[];
+    function add(nome,tipo,end){var k=N(nome);if(!k||vistos[k]||k.indexOf(termo)<0)return;vistos[k]=1;lista.push({nome:nome,tipo:tipo,end:end})}
+    (bd().clientes||[]).forEach(function(c){if(c&&c.nome){add(c.nome,'cliente',endCliente(c));if(c.apelido)add(c.apelido,'cliente',endCliente(c))}});
+    (bd().destinos||[]).forEach(function(d){if(d&&d.nome)add(d.nome,'lugar',endLugar(d))});
+    (bd().rotas||[]).forEach(function(r){if(r&&r.origem)add(r.origem,'usada','')});
+    // o que começa com o texto digitado vem antes, mantendo a ordem clientes → lugares
+    var ord={cliente:0,lugar:1,usada:2};
+    lista.sort(function(a,b){var pa=N(a.nome).indexOf(termo)===0?0:1,pb=N(b.nome).indexOf(termo)===0?0:1;return (ord[a.tipo]-ord[b.tipo])||(pa-pb)||a.nome.localeCompare(b.nome)});
+    lista=lista.slice(0,15);
+    if(!lista.length){esconder();return}
+    div.innerHTML='';
+    lista.forEach(function(it){
+      var el=D.createElement('div');el.className='suggestion-item';
+      el.innerHTML=(it.tipo==='cliente'?'👤 ':it.tipo==='lugar'?'📍 ':'🕘 ')+esc(it.nome)+(it.end?'<small style="display:block;opacity:.7">'+esc(it.end)+'</small>':'');
+      el.onclick=function(){
+        input.value=it.nome;esconder();
+        var cf=CAMPOS.filter(function(c){return c.org===input.id})[0];
+        if(cf){var e=$(cf.end);if(e&&e.dataset.auto!=='0'||(e&&!e.value.trim()))preencherEnd(cf,true)}
+        try{if(prev&&typeof W[prev]==='function')W[prev]()}catch(x){}
+      };
+      div.appendChild(el);
+    });
+    div.style.display='block';div.classList.add('fast-sug-show');
+  }
+  function trocarSugestoes(){
+    if(typeof W.aoDigitarOrigem==='function'&&!W.aoDigitarOrigem.__f538)
+      {var a=function(input){sugestoes(input,'listaSugestoesOrigem','atualizarPreviewAba1')};a.__f538=1;W.aoDigitarOrigem=a;try{aoDigitarOrigem=a}catch(e){}}
+    if(typeof W.aoDigitarOrigemSeq==='function'&&!W.aoDigitarOrigemSeq.__f538)
+      {var b=function(input){sugestoes(input,'listaSugestoesOrigemSeq','atualizarPreviewAba2')};b.__f538=1;W.aoDigitarOrigemSeq=b;try{aoDigitarOrigemSeq=b}catch(e){}}
+    // tela de edição: não tinha lista; ganha a mesma busca
+    var eo=$('editTxtOrigem');
+    if(eo&&!eo.__f538){eo.__f538=1;eo.setAttribute('autocomplete','off');eo.parentNode.style.position=eo.parentNode.style.position||'relative';
+      eo.addEventListener('input',function(){sugestoes(eo,'listaSugestoesOrigemEdit','')});}
+  }
+
+  /* ---------- vigia dos campos (cliente → origem → endereço) ---------- */
+  var ult={};
+  function vigiar(){
+    CAMPOS.forEach(function(cf){
+      criarCampo(cf);
+      var c=$(cf.cli),o=$(cf.org),e=$(cf.end);if(!o||!e)return;
+      var u=ult[cf.org]||(ult[cf.org]={});
+      var cv=c?c.value.trim():'',ov=o.value.trim();
+      // cliente escolhido e origem vazia (rota nova): a origem vem do cliente
+      if(c&&cv!==u.cli){
+        u.cli=cv;
+        var novo=!(cf.org==='seqOrigem'&&$('seqItemId')&&$('seqItemId').value)&&cf.org!=='editTxtOrigem';
+        if(novo&&cv&&!ov&&acharCliente(cv)){
+          setTimeout(function(){ if(!o.value.trim()){o.value=acharCliente(cv).nome;try{if(cf.prev&&W[cf.prev])W[cf.prev]()}catch(x){}} },350);
+        }
+      }
+      if(ov!==u.org){u.org=ov;preencherEnd(cf,false)}
+    });
+    // editar item do dia / editar rota: mostra o endereço já gravado
+    var sid=$('seqItemId')&&$('seqItemId').value;
+    if(sid!==ult.__sid){ult.__sid=sid;var it=sid?acharItem(sid):null,e2=$('seqOrigemEnd');
+      if(e2){if(it&&it.origemEndereco!=null){e2.value=it.origemEndereco;e2.dataset.auto='0'}else if(!sid){e2.value='';e2.dataset.auto='1'}}}
+    var rid=$('editRotaId')&&$('modalEditarRota')&&$('modalEditarRota').classList.contains('active')?$('editRotaId').value:'';
+    if(rid!==ult.__rid){ult.__rid=rid;var r=rid?(bd().rotas||[]).find(function(x){return String(x.id)===String(rid)}):null,e3=$('editTxtOrigemEnd');
+      if(e3&&rid){if(r&&r.origemEndereco!=null){e3.value=r.origemEndereco;e3.dataset.auto='0'}else{e3.value='';e3.dataset.auto='1';ult.editTxtOrigem={};}}}
+  }
+  function acharItem(id){var sq=bd().sequencias||{},a=null;Object.keys(sq).some(function(d){a=(sq[d]||[]).find(function(i){return i&&String(i.id)===String(id)});return !!a});return a}
+
+  /* ---------- ao salvar: grava o endereço e cadastra a origem nova ---------- */
+  function garantirOrigem(origem,endereco){
+    if(!origem||!String(origem).trim())return false;
+    if(acharCliente(origem)||acharLugar(origem))return false;          // já existe: pula
+    if(typeof destAdicionarOuAtualizar!=='function')return false;
+    var info={};if(endereco)info.endereco=endereco;
+    try{return !!destAdicionarOuAtualizar(String(origem).trim(),info)}catch(e){return false}  // respeita os excluídos
+  }
+  W.fast538GarantirOrigem=garantirOrigem;
+  function retrato(){
+    var b=bd(),m={};
+    (b.rotas||[]).forEach(function(r){if(r&&r.id!=null)m['r'+r.id]=r});
+    var sq=b.sequencias||{};Object.keys(sq).forEach(function(d){(sq[d]||[]).forEach(function(i){if(i&&i.id!=null)m['s'+i.id]=i})});
+    return m;
+  }
+  function depois(antes,cfOrg,cfEnd,alvoId){
+    var e=$(cfEnd),org=$(cfOrg);
+    var end=e?e.value.trim():'',ov=org?org.value.trim():'';
+    // salvou antes do preenchimento automático: busca agora (clientes → lugares)
+    if(ov&&(!end||(e&&e.dataset.auto==='1'))){var ac=achar(ov);if(ac&&ac.endereco)end=ac.endereco}
+    return function(){
+      var agora=retrato(),mud=[];
+      Object.keys(agora).forEach(function(k){
+        var x=agora[k];
+        if(!antes[k]||antes[k]!==x||(alvoId&&String(x.id)===String(alvoId)))mud.push(x);
+      });
+      if(!mud.length)return;
+      var tocou=false;
+      mud.forEach(function(x){
+        if(ov&&N(x.origem)!==N(ov))return;          // só as rotas desta origem
+        if(x.origemEndereco!==end){x.origemEndereco=end;tocou=true}
+      });
+      var criou=garantirOrigem(ov,end);
+      if(tocou||criou){try{salvarStorage()}catch(z){}}
+      if(criou){try{destRenderizarLista()}catch(z){}}
+    };
+  }
+  function embrulhar(nome,cfOrg,cfEnd,alvo){
+    var f=W[nome];if(typeof f!=='function'||f.__f538orig)return;
+    var g=function(){
+      var antes=retrato(),fim=depois(antes,cfOrg,cfEnd,alvo?alvo():'');
+      var r=f.apply(this,arguments);
+      if(r&&typeof r.then==='function')r.then(function(){setTimeout(fim,50)},function(){});
+      else setTimeout(fim,50);
+      return r;
+    };
+    Object.keys(f).forEach(function(k){try{g[k]=f[k]}catch(e){}});g.__f538orig=1;W[nome]=g;
+  }
+  function instalarSalvar(){
+    embrulhar('salvarRota','txtOrigem','txtOrigemEnd');
+    embrulhar('salvarItemSeq','seqOrigem','seqOrigemEnd',function(){return $('seqItemId')?$('seqItemId').value:''});
+    embrulhar('salvarEdicaoRotaModal','editTxtOrigem','editTxtOrigemEnd',function(){return $('editRotaId')?$('editRotaId').value:''});
+  }
+  // item das Rotas do Dia carregado de uma rota: herda o endereço da origem
+  function herdar(){
+    var b=bd(),mapa={},tocou=false;(b.rotas||[]).forEach(function(r){if(r&&r.origemEndereco)mapa[String(r.id)]=r});
+    var sq=b.sequencias||{};Object.keys(sq).forEach(function(d){(sq[d]||[]).forEach(function(i){
+      if(!i||i.origemEndereco!=null||i.rotaId==null)return;var r=mapa[String(i.rotaId)];
+      if(r&&N(r.origem)===N(i.origem)){i.origemEndereco=r.origemEndereco;tocou=true}
+    })});
+    if(tocou)try{salvarStorage()}catch(e){}
+  }
+
+  /* ---------- Supabase: coluna origem_endereco ---------- */
+  try{if(localStorage.getItem('f538_col_origem_end')==='1')W.__f538ColOrigEnd=true}catch(e){}
+  async function detectar(){
+    try{
+      if(typeof SUPABASE_URL==='undefined'||typeof supabaseHeaders!=='function')return;
+      var r1=await fetch(SUPABASE_URL+'/rotas?select=origem_endereco&limit=1',{headers:supabaseHeaders(),cache:'no-store'});
+      var r2=await fetch(SUPABASE_URL+'/sequencias_itens?select=origem_endereco&limit=1',{headers:supabaseHeaders(),cache:'no-store'});
+      if(r1.status===400||r2.status===400){W.__f538ColOrigEnd=false;try{localStorage.removeItem('f538_col_origem_end')}catch(e){}}
+      else if(r1.ok&&r2.ok){W.__f538ColOrigEnd=true;try{localStorage.setItem('f538_col_origem_end','1')}catch(e){}}
+    }catch(e){}
+  }
+  function embrulharConversoes(){
+    var a=W.rotaToSupabase;
+    if(typeof a==='function'&&!a.__f538oe){
+      var a2=function(r){var o=a.apply(this,arguments);
+        // só manda quando a rota tem o campo (rotas antigas não mudam e não são reenviadas)
+        if(o&&r&&W.__f538ColOrigEnd===true&&r.origemEndereco!==undefined)o.origem_endereco=r.origemEndereco||'';return o};
+      Object.keys(a).forEach(function(k){try{a2[k]=a[k]}catch(e){}});a2.__f538oe=1;W.rotaToSupabase=a2;try{rotaToSupabase=a2}catch(e){}
+    }
+    var b=W.supabaseToRota;
+    if(typeof b==='function'&&!b.__f538oe){
+      var b2=function(row){var o=b.apply(this,arguments);if(o&&row&&row.origem_endereco!=null&&row.origem_endereco!=='')o.origemEndereco=row.origem_endereco;return o};
+      Object.keys(b).forEach(function(k){try{b2[k]=b[k]}catch(e){}});b2.__f538oe=1;W.supabaseToRota=b2;try{supabaseToRota=b2}catch(e){}
+    }
+    var c=W.sequenciasToRows;
+    if(typeof c==='function'&&!c.__f538oe){
+      var c2=function(seq){var rows=c.apply(this,arguments);
+        if(W.__f538ColOrigEnd===true&&Array.isArray(rows)){
+          var m={};Object.keys(seq||{}).forEach(function(d){(seq[d]||[]).forEach(function(i){if(i&&i.id!=null&&i.origemEndereco!==undefined)m[String(Math.floor(Number(i.id)))]=i.origemEndereco||''})});
+          rows.forEach(function(l){if(l&&m.hasOwnProperty(String(l.id)))l.origem_endereco=m[String(l.id)]});
+        }
+        return rows};
+      Object.keys(c).forEach(function(k){try{c2[k]=c[k]}catch(e){}});c2.__f538oe=1;W.sequenciasToRows=c2;try{sequenciasToRows=c2}catch(e){}
+    }
+    var d=W.rowsToSequencias;
+    if(typeof d==='function'&&!d.__f538oe){
+      var d2=function(rows){var out=d.apply(this,arguments);
+        var m={};(rows||[]).forEach(function(l){if(l&&l.id!=null&&l.origem_endereco!=null&&l.origem_endereco!=='')m[String(l.id)]=l.origem_endereco});
+        if(out)Object.keys(out).forEach(function(k){(out[k]||[]).forEach(function(i){if(i&&m.hasOwnProperty(String(i.id)))i.origemEndereco=m[String(i.id)]})});
+        return out};
+      Object.keys(d).forEach(function(k){try{d2[k]=d[k]}catch(e){}});d2.__f538oe=1;W.rowsToSequencias=d2;try{rowsToSequencias=d2}catch(e){}
+    }
+  }
+
+  var st=D.createElement('style');
+  st.textContent='.f538-orig-fonte{display:block;font-size:11px;opacity:.75;margin-top:2px;min-height:0}';
+  D.head.appendChild(st);
+  function ciclo(){try{embrulharConversoes()}catch(e){}try{trocarSugestoes()}catch(e){}try{instalarSalvar()}catch(e){}try{vigiar()}catch(e){}}
+  ciclo();setInterval(ciclo,400);setInterval(herdar,5000);
+  detectar();setTimeout(detectar,15000);setInterval(detectar,30*60*1000);
 })();
 </script>
 </body></html>
