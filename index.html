@@ -34290,12 +34290,7 @@ window.fastMobileNav = function(ev, abaId, botao) {
         var pastaCliente=await pastaDrive(cliente,cfg.folderId);
         var pastaData=await pastaDrive(data,pastaCliente);
         var pastaDestino=await pastaDrive(destino,pastaData);
-        if(reg.origemRota==='cadastro'){
-          var pastaRota=await pastaDrive('ROTA '+String(reg.itemId||'rota'),pastaDestino);
-          reg.driveFolderId=pastaRota;
-          reg.driveFolderLink='https://drive.google.com/drive/folders/'+encodeURIComponent(pastaRota);
-          return pastaRota;
-        }
+        // 5.3.8: sem subpasta "ROTA <id>" — a foto fica direto na pasta do destino
         reg.driveFolderId=pastaDestino;
         reg.driveFolderLink='https://drive.google.com/drive/folders/'+encodeURIComponent(pastaDestino);
         return pastaDestino;
@@ -34334,10 +34329,20 @@ window.fastMobileNav = function(ev, abaId, botao) {
         // Garante que uma foto enviada uma vez nunca seja duplicada, mesmo que a fila
         // tenha entradas repetidas ou de sessões antigas sem registro no ledger.
         try{
-          var qJa="name='"+qDrive(reg.nome)+"' and '"+qDrive(destinoId)+"' in parents and trashed=false";
-          var rJa=await fetch('https://www.googleapis.com/drive/v3/files?spaces=drive&fields=files(id,name,webViewLink)&q='+encodeURIComponent(qJa),{headers:{Authorization:'Bearer '+token()}});
-          if(rJa.status===401){salvarToken('');if(window.fastDriveReconectarSilencioso)try{window.fastDriveReconectarSilencioso();}catch(e){}throw new Error('Autorização do Google expirada. Reconectando automaticamente…');}
-          if(rJa.ok){var dJa=await rJa.json();if(dJa.files&&dJa.files[0]){return {id:dJa.files[0].id,name:dJa.files[0].name,webViewLink:dJa.files[0].webViewLink||'',jaExistia:true};}}
+          for(var tentNome=0;tentNome<60;tentNome++){
+            var qJa="name='"+qDrive(reg.nome)+"' and '"+qDrive(destinoId)+"' in parents and trashed=false";
+            var rJa=await fetch('https://www.googleapis.com/drive/v3/files?spaces=drive&fields=files(id,name,webViewLink,appProperties)&q='+encodeURIComponent(qJa),{headers:{Authorization:'Bearer '+token()}});
+            if(rJa.status===401){salvarToken('');if(window.fastDriveReconectarSilencioso)try{window.fastDriveReconectarSilencioso();}catch(e){}throw new Error('Autorização do Google expirada. Reconectando automaticamente…');}
+            if(!rJa.ok)break;
+            var dJa=await rJa.json(),fJa=dJa.files&&dJa.files[0];
+            if(!fJa)break;                                   // nome livre: envia com este nome
+            var kJa=fJa.appProperties&&fJa.appProperties.fastKey;
+            if(!kJa||!fastKey||kJa===fastKey)return {id:fJa.id,name:fJa.name,webViewLink:fJa.webViewLink||'',jaExistia:true};
+            // 5.3.8: é outra foto (de outra rota no mesmo destino e dia) — passa para o próximo número
+            var mN=String(reg.nome).match(/^(.*Foto )(\d+)(\.[a-z0-9]+)$/i);
+            if(!mN)break;
+            reg.nome=mN[1]+String(Number(mN[2])+1).padStart(2,'0')+mN[3];
+          }
         }catch(eJa){ if(/expirada/i.test(String(eJa&&eJa.message)))throw eJa; /* consulta falhou: segue o fluxo normal */ }
         var meta={name:reg.nome,parents:[destinoId]};
         if(fastKey)meta.appProperties={fastKey:fastKey};
@@ -34444,11 +34449,28 @@ window.fastMobileNav = function(ev, abaId, botao) {
           }
         }catch(eU){usados=null}
         var globalMd5={};
-        var pilha=[raiz], removidos=0, pastasVistas=0, visitadas=new Set();
+        var pilha=[raiz], removidos=0, pastasVistas=0, pastasRota=0, visitadas=new Set();
         while(pilha.length){
           var atual=pilha.pop(); if(visitadas.has(atual))continue; visitadas.add(atual);
           var filhos; try{filhos=await listar(atual);}catch(e){ if(/expirada/i.test(String(e&&e.message))){status(String(e.message),'erro');return {erro:'token',removidos:removidos};} else {continue;} }
           pastasVistas++;
+          // 5.3.8: pasta "ROTA <id>" dentro do destino — move as fotos para o destino e apaga a pasta
+          for(var jr=0;jr<filhos.length;jr++){
+            var fr=filhos[jr];
+            if(fr.mimeType!==FOLDER||!/^ROTA\s+\S+$/i.test(String(fr.name||'')))continue;
+            try{
+              var dentro=await listar(fr.id),moveuTodas=true;
+              for(var jm=0;jm<dentro.length;jm++){
+                var fm=dentro[jm];
+                if(fm.mimeType===FOLDER){moveuTodas=false;continue;}
+                var rm=await fetch('https://www.googleapis.com/drive/v3/files/'+encodeURIComponent(fm.id)+'?addParents='+encodeURIComponent(atual)+'&removeParents='+encodeURIComponent(fr.id)+'&fields=id',{method:'PATCH',headers:{Authorization:'Bearer '+token(),'Content-Type':'application/json'},body:'{}'});
+                if(rm.ok){filhos.push(fm);prog('Organizando pastas… fotos tiradas da pasta '+fr.name+'.');}else moveuTodas=false;
+              }
+              if(moveuTodas&&await paraLixeira(fr.id))pastasRota++;
+            }catch(eR){ if(/expirada/i.test(String(eR&&eR.message)))throw eR; }
+            fr.__rota=true;
+          }
+          filhos=filhos.filter(function(x){return !x.__rota});
           var porChave={};
           for(var j=0;j<filhos.length;j++){
             var f=filhos[j];
@@ -34487,8 +34509,9 @@ window.fastMobileNav = function(ev, abaId, botao) {
             try{ if(await paraLixeira(idDup)){removidos++; prog('Limpando duplicatas… '+removidos+' cópia(s) removida(s).'); } }catch(e3){}
           }
         }
-        status(removidos?('✅ Limpeza concluída: '+removidos+' cópia(s) duplicada(s) enviada(s) à lixeira do Drive.'):'✅ Nenhuma duplicata encontrada no Drive.','ok');
-        return {removidos:removidos,pastas:pastasVistas};
+        if(pastasRota)prog('Pastas ROTA removidas: '+pastasRota+'.');
+        status((removidos?('✅ Limpeza concluída: '+removidos+' cópia(s) duplicada(s) enviada(s) à lixeira do Drive.'):'✅ Nenhuma duplicata encontrada no Drive.')+(pastasRota?(' '+pastasRota+' pasta(s) ROTA removida(s); as fotos ficaram direto na pasta do destino.'):''),'ok');
+        return {removidos:removidos,pastas:pastasVistas,pastasRota:pastasRota};
       };
       window.fastDriveConfirmarLimpeza=async function(){
         if(!token()){status('Conecte o Google Drive primeiro para limpar duplicatas.','erro');return;}
