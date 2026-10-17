@@ -340,7 +340,12 @@ window.fastBioLockAtivo=function(){return !!cfg()};window.fastBioSuportado=funct
   var lugTempo=0;
   async function carregarLugares(){
     lugTempo=Date.now();
-    try{var r=await fetch(PROJECT+'/rest/v1/lugares_publicos?select=nome,endereco,bairro&order=nome&limit=5000',{headers:cab()});if(r.ok){var novos=await r.json();if(Array.isArray(novos)&&novos.length)LUG=novos}}catch(e){}
+    // 5.3.8: lugares vêm direto da tabela "destinos" (função cliente_lugares, sem telefone).
+    // A tabela lugares_publicos foi apagada; ela só é lida se o SQL 5.3.8 ainda não rodou.
+    var leu=false;
+    try{var r=await fetch(PROJECT+'/rest/v1/rpc/cliente_lugares',{method:'POST',headers:Object.assign({},cab(),{'Content-Type':'application/json'}),body:'{}'});
+      if(r.ok){var novos=await r.json();if(Array.isArray(novos)){LUG=novos;leu=true}}}catch(e){}
+    if(!leu){try{var r2=await fetch(PROJECT+'/rest/v1/lugares_publicos?select=nome,endereco,bairro&order=nome&limit=5000',{headers:cab()});if(r2.ok){var nv=await r2.json();if(Array.isArray(nv)&&nv.length)LUG=nv}}catch(e){}}
     try{(typeof rotas!=='undefined'?rotas:[]).forEach(function(x){if(x.origem&&ORI.indexOf(x.origem)<0)ORI.push(x.origem);if(x.destino&&!LUG.some(function(l){return nn(l.nome)===nn(x.destino)}))LUG.push({nome:x.destino,endereco:''})})}catch(e){}
     var rp=retirada(); if(rp&&rp.nome&&ORI.indexOf(rp.nome)<0)ORI.unshift(rp.nome);
   }
