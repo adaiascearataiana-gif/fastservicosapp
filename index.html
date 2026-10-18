@@ -14752,8 +14752,8 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
         });
         // Envia cada notificação (limite de 5 por ciclo para não spammar)
         notifs.slice(0, 5).forEach(function(n) {
-          try { if (typeof notifEnviar === 'function') notifEnviar(n.tipo === 'cheguei' ? '\ud83d\udccd Chegada registrada' : '\u2705 Rota conclu\u00edda', n.texto); } catch(e) {}
-          try { if (typeof mostrarToast === 'function') mostrarToast(n.texto, 'success'); } catch(e) {}
+          // 5.3.8: sem avisos na tela nem notificação do celular (pedido do usuário).
+          // A novidade continua registrada no sino 🔔.
           try { if (typeof notificacoesAdicionar === 'function') notificacoesAdicionar({ titulo: n.tipo === 'cheguei' ? 'Chegada registrada' : 'Rota conclu\u00edda', mensagem: n.texto, tipo: 'sucesso' }); } catch(e) {}
         });
         if (notifs.length) console.log('r101: ' + notifs.length + ' novidade(s) do motorista notificada(s).');
@@ -15661,8 +15661,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
         if (notificacoesAtuais.length > 50) notificacoesAtuais.pop();
         atualizarNotificacoes();
       }
-      // Toast visual
-      mostrarToast(titulo + ' — ' + destino, tipo === 'chegada' ? 'success' : 'info');
+      // 5.3.8: sem aviso na tela (fica só no sino 🔔)
     }
 
     /* ================================================================
@@ -17946,8 +17945,12 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
           if (!existente.telefone && infoExtra.telefone) existente.telefone = infoExtra.telefone;
           if (!existente.enderecoObj && infoExtra.enderecoObj) existente.enderecoObj = infoExtra.enderecoObj;
         }
-        existente.usadoEm = (existente.usadoEm || 0) + 1;
-        existente.ultimaUso = Date.now();
+        // 5.3.8: a varredura automática NÃO mexe no lugar (antes cada abertura do app
+        // "mexia" em todos os lugares, e por isso os excluídos/editados no Supabase voltavam)
+        if (!window.__f538Varrendo) {
+          existente.usadoEm = (existente.usadoEm || 0) + 1;
+          existente.ultimaUso = Date.now();
+        }
         return existente;
       }
       const novo = {
@@ -31986,7 +31989,51 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
       inicializarV5();
     }
 
-  </script>
+  
+/* 5.3.8 — LUGARES EXCLUÍDOS/EDITADOS NO SUPABASE NÃO VOLTAM MAIS
+   Causa: toda vez que o FAST, o PAINEL, o ROTAS ou o Despesas abria, ele percorria TODAS as
+   rotas antigas e (1) recriava como lugar novo qualquer destino delas que não existisse
+   mais — inclusive os que você apagou direto no Supabase — e (2) aumentava o contador
+   de uso de todos os lugares. Com isso o aparelho achava que tinha "mexido" em todos os
+   lugares e mandava a cópia dele de volta: o excluído voltava e a edição era desfeita.
+   Agora: a varredura automática só olha rotas NOVAS (lançadas depois da última abertura)
+   e não mexe nos lugares que já existem. O botão "Reescanear" continua fazendo a
+   varredura completa quando você pedir. */
+(function(){
+  var W=window,K='f538_dest_scan';
+  var orig=W.destReescanearRotas;
+  if(typeof orig!=='function'||orig.__f538)return;
+  function deUsuario(){var e=W.event;return !!(e&&e.isTrusted&&/^(click|touchend|pointerup|keydown|keyup)$/.test(e.type))}
+  function quando(x){
+    var t=0,id=Number(x&&x.id);if(id>1e12&&id<4e12)t=id;
+    var u=Date.parse(x&&(x.createdAt||x.criadoEm)||'');if(u>t)t=u;
+    return t;
+  }
+  var g=function(){
+    if(deUsuario()){                                   // botão "Reescanear": varredura completa
+      W.__f538Varrendo=true;try{return orig.apply(this,arguments)}finally{W.__f538Varrendo=false;try{localStorage.setItem(K,String(Date.now()))}catch(e){}}
+    }
+    var marca=0;try{marca=Number(localStorage.getItem(K))||0}catch(e){}
+    var agora=Date.now(),n=0;
+    try{if(typeof destDividirCompostos==='function')destDividirCompostos()}catch(e){}
+    if(!marca){try{localStorage.setItem(K,String(agora))}catch(e){}return 0}   // 1ª vez: só marca o ponto de partida
+    var b=W.bancoDados||{};
+    function olhar(x){
+      if(!x||!x.destino||!String(x.destino).trim()||quando(x)<=marca-60000)return;
+      var partes=[];try{partes=destDividirMultiplos(x.destino)}catch(e){partes=[x.destino]}
+      partes.forEach(function(p){try{if(destAdicionarOuAtualizar(p,null))n++}catch(e){}});
+    }
+    W.__f538Varrendo=true;
+    try{
+      (b.rotas||[]).forEach(olhar);
+      var sq=b.sequencias||{};Object.keys(sq).forEach(function(d){(sq[d]||[]).forEach(olhar)});
+    }finally{W.__f538Varrendo=false}
+    try{localStorage.setItem(K,String(agora))}catch(e){}
+    return n;
+  };
+  g.__f538=true;W.destReescanearRotas=g;try{destReescanearRotas=g}catch(e){}
+})();
+</script>
 
   <!-- Box Flutuante ENVIAR RASTREAMENTO - aparece quando um cliente tem +1 rota no dia -->
   <div id="floatingRastBox" class="floating-rast-box" style="user-select: none;">
