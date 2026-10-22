@@ -34400,7 +34400,7 @@ window.fastMobileNav = function(ev, abaId, botao) {
         // 5.3.8: se esta foto já tem arquivo no Drive (enviado por este ou outro aparelho), não cria cópia
         var refReg=String(reg.fotoRef||'');
         if(!refReg){try{var mpr=JSON.parse(localStorage.getItem('fast68_fila_ref')||'{}');refReg=String(mpr[reg.id]||'')}catch(e){}}
-        if(/^idb:/.test(refReg)){var mpx={};await fotosJaNoDrive([refReg],mpx);var ja=mpx[refReg];if(ja&&ja.drive_id)return {id:ja.drive_id,name:ja.nome||reg.nome,webViewLink:'https://drive.google.com/file/d/'+ja.drive_id+'/view',jaExistia:true};}
+        if(/^(idb:|https?:)/.test(refReg)){var mpx={};await fotosJaNoDrive([refReg],mpx);var ja=mpx[refReg];if(ja&&ja.drive_id)return {id:ja.drive_id,name:ja.nome||reg.nome,webViewLink:'https://drive.google.com/file/d/'+ja.drive_id+'/view',jaExistia:true};}
         var cfg=config(), boundary='fast_'+Date.now()+'_'+Math.random().toString(36).slice(2);
         var destinoId=await pastaFinal(reg);
         var fastKey=reg.fotoKey||chaveFoto(reg.itemId,reg.fotoRef,reg.fotoIndex);
@@ -34476,8 +34476,12 @@ window.fastMobileNav = function(ev, abaId, botao) {
         // 5.3.8: a mesma foto já enviada (por qualquer caminho ou outro aparelho) não sobe de novo
         const refsConhecidas=new Set(queue.concat(ledger).map(x=>String(x.fotoRef||'')).filter(Boolean));
         try{const mp=JSON.parse(localStorage.getItem('fast68_fila_ref')||'{}');Object.keys(mp).forEach(k=>{if(mp[k])refsConhecidas.add(String(mp[k]))})}catch(e){}
-        const naNuvem=await fotosJaNoDrive((bancoDados.rotas||[]).reduce((a,r)=>a.concat(Array.isArray(r.fotos)?r.fotos:(r.foto?[r.foto]:[])),[]).map(String).filter(x=>/^idb:/.test(x)&&!refsConhecidas.has(x)));
+        const naNuvem=await fotosJaNoDrive((bancoDados.rotas||[]).reduce((a,r)=>a.concat(Array.isArray(r.fotos)?r.fotos:(r.foto?[r.foto]:[])),[]).map(String).filter(x=>/^(idb:|https?:)/.test(x)&&!refsConhecidas.has(x)));
         let added=0;
+        // 5.3.8: foto tirada em OUTRO aparelho (link da nuvem .../rota/<hora>_...) nas últimas 24 h:
+        // quem tirou já manda o ORIGINAL para o Drive. Este aparelho não manda a cópia
+        // reduzida (era ela a "Foto 02" repetida em cada pasta).
+        const fotoAlheiaRecente=(ref)=>{const m=/\/rotas-fotos\/rota\/(\d{12,14})_/.exec(ref);return !!(m&&Date.now()-Number(m[1])<24*3600*1000)};
         for(const rota of (bancoDados.rotas||[])){
           const refs=Array.isArray(rota.fotos)?rota.fotos:(rota.foto?[rota.foto]:[]);
           for(let i=0;i<refs.length;i++){
@@ -34486,6 +34490,7 @@ window.fastMobileNav = function(ev, abaId, botao) {
             const jaExiste=queue.concat(ledger).some(x=>String(x.itemId||'')===String(rota.id)&&Number(x.fotoIndex)===i);
             if(known.has(id)||jaExiste)continue;
             if(refsConhecidas.has(ref)||naNuvem.has(ref))continue;
+            if(/^https?:/.test(ref)&&fotoAlheiaRecente(ref))continue;
             // foto que veio do Drive (tirada em outro aparelho) NÃO é reenviada daqui
             if(/^idb:/.test(ref)&&typeof window.__f68ObterLocal==='function'){let loc=null;try{loc=await window.__f68ObterLocal(ref.replace(/^idb:/,''))}catch(e){loc=null}if(!loc)continue;}
             let file=null;
@@ -43107,10 +43112,10 @@ html body #modalEditarRota .modal-content{margin:0 auto!important;top:auto!impor
   html body #containerSequencia .seq-item .seq-body .seq-info-wa{align-self:flex-start!important;max-width:max-content!important}
 }
 </style>
-<script src="fast-4067.js?v=33"></script>
+<script src="fast-4067.js?v=35"></script>
 <script src="navegacao-fast.js?v=1"></script>
 <script src="recibo-fast.js?v=1"></script>
-<script src="fast-recursos.js?v=42"></script>
+<script src="fast-recursos.js?v=43"></script>
 <!-- (r108) Painel de diagnostico de fotos na nuvem -->
 <style id="fast108-diag-css">
 #fast108Btn{position:fixed;right:14px;bottom:84px;z-index:2147483000;background:#16a34a;color:#fff;border:0;border-radius:999px;padding:11px 14px;font:800 13px system-ui,-apple-system,Segoe UI,Roboto,sans-serif;box-shadow:0 6px 20px rgba(0,0,0,.28);cursor:pointer}
@@ -43931,6 +43936,7 @@ html body #rotasDia .rd-actions-grid>button[hidden],html body #rotasDia .rd-acti
       if(item0)vigiar(data,item0,id0,antes);
       return r;
     };
+    Object.keys(orig).forEach(function(k){try{novo[k]=orig[k]}catch(e){}});   // 5.3.8: mantém as marcas das outras camadas
     novo.__fx517=1;W.salvarFotoRota=novo;return true;
   }
   // garante que a foto entra no card vigente mesmo que a lista tenha sido trocada por uma sincronização no meio do caminho,
@@ -47331,6 +47337,104 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
     clearTimeout(tPre);tPre=setTimeout(function(){if(W.__f538CamPre===p)soltar()},4000);   // não tocou de verdade: desliga
   },true);
   D.addEventListener('pointercancel',function(){if(W.__f538CamPre&&!D.getElementById('fastCameraAoVivoOverlay'))soltar()},true);   // era rolagem da tela
+})();
+</script>
+<script id="fast538-fotos-ver">
+/* 5.3.8 — FOTO QUE NÃO ABRE PELO LINK DA NUVEM: MOSTRA PELO GOOGLE DRIVE
+   Se a imagem guardada no Supabase não carregar neste aparelho (limite de tráfego,
+   sem internet do Supabase etc.), o FAST procura o mesmo arquivo no Google Drive
+   (registro fotos_drive) e mostra por ele. */
+(function(){
+  var W=window,D=document,cache={},buscando={};
+  function ehNuvem(src){return /\/storage\/v1\/object\/public\//.test(src||'')}
+  async function driveDe(ref){
+    if(cache[ref]!==undefined)return cache[ref];
+    if(buscando[ref])return buscando[ref];
+    buscando[ref]=(async function(){
+      try{
+        if(typeof SUPABASE_URL==='undefined'||typeof supabaseHeaders!=='function')return null;
+        var r=await fetch(SUPABASE_URL+'/fotos_drive?select=drive_id&ref=eq.'+encodeURIComponent(ref)+'&limit=1',{headers:supabaseHeaders(),cache:'no-store'});
+        if(!r.ok)return null;var j=await r.json();
+        var id=j&&j[0]&&j[0].drive_id;cache[ref]=id?('https://lh3.googleusercontent.com/d/'+encodeURIComponent(id)+'=w1600'):null;
+        if(!id)setTimeout(function(){delete cache[ref]},60000);   // ainda não registrada: tenta de novo depois
+        return cache[ref];
+      }catch(e){return null}finally{delete buscando[ref]}
+    })();
+    return buscando[ref];
+  }
+  D.addEventListener('error',function(ev){
+    var img=ev.target;if(!img||img.tagName!=='IMG')return;
+    var src=img.getAttribute('src')||'';if(!ehNuvem(src)||img.__f538drive)return;
+    img.__f538drive=1;
+    driveDe(src.split('?')[0]).then(function(alt){if(alt)img.src=alt});
+  },true);
+  W.fast538FotoPeloDrive=driveDe;
+})();
+</script>
+<script id="fast538-foto-previa">
+/* 5.3.8 — FOTO APARECE NA HORA
+   Ao voltar da câmera ou da galeria, a foto já aparece no card enquanto é preparada
+   e enviada (antes o card só mostrava a foto depois do envio terminar). */
+(function(){
+  var W=window,D=document;
+  var st=D.createElement('style');
+  st.textContent='.f538-previa{position:relative;display:inline-block;width:64px;height:64px;margin:3px;border-radius:10px;overflow:hidden;background:#e2e8f0}'+
+    '.f538-previa img{width:100%;height:100%;object-fit:cover;opacity:.8}'+
+    '.f538-previa span{position:absolute;left:0;right:0;bottom:0;background:rgba(15,23,42,.7);color:#fff;font-size:9px;font-weight:800;text-align:center;padding:2px 0}';
+  D.head.appendChild(st);
+  function instalar(){
+    var f=W.salvarFotoRota;if(typeof f!=='function'||f.__f538prev)return;
+    var g=function(dataSel,index,event){
+      try{
+        var files=event&&event.target&&event.target.files;
+        var item=(((W.bancoDados||{}).sequencias||{})[dataSel]||[])[index];
+        if(files&&files.length&&item){
+          var gal=D.getElementById('galeria-fotos-'+item.id);
+          if(gal){
+            var vazio=gal.querySelector('.galeria-fotos-vazio');if(vazio)vazio.style.display='none';
+            Array.prototype.slice.call(files,0,10).forEach(function(fl){
+              var u=URL.createObjectURL(fl),b=D.createElement('div');b.className='f538-previa';
+              b.innerHTML='<img alt=""><span>salvando…</span>';b.querySelector('img').src=u;gal.appendChild(b);
+              setTimeout(function(){try{URL.revokeObjectURL(u)}catch(e){}},120000);
+            });
+          }
+        }
+      }catch(e){}
+      return f.apply(this,arguments);
+    };
+    Object.keys(f).forEach(function(k){try{g[k]=f[k]}catch(e){}});
+    g.__f538prev=true;W.salvarFotoRota=g;try{salvarFotoRota=g}catch(e){}
+  }
+  instalar();W.addEventListener('load',function(){setTimeout(instalar,2000);setTimeout(instalar,6000)});setInterval(instalar,5000);
+})();
+</script>
+<script id="fast538-camadas">
+/* 5.3.8 — FIM DAS "CAMADAS" QUE SE MULTIPLICAVAM (foto repetida 30-40 vezes)
+   Várias partes do app "embrulham" a mesma função (ex.: salvar foto da galeria) e
+   conferem uma marca para não embrulhar de novo. Duas delas apagavam a marca uma da
+   outra, então a cada 5 s a função ganhava mais camadas (16 em 1 minuto, dezenas
+   depois). Cada camada tinha uma "conferência de segurança" que, se a foto demorasse
+   mais de 12 s para salvar, salvava a foto DE NOVO — daí a mesma foto 30-40 vezes.
+   Agora as marcas de todas as camadas ficam sempre juntas na função atual, e nenhuma
+   parte embrulha duas vezes. */
+(function(){
+  var W=window,marcas={};
+  function juntar(){
+    try{
+      var ks=Object.keys(W);
+      for(var i=0;i<ks.length;i++){
+        var n=ks[i],f;
+        try{f=W[n]}catch(e){continue}
+        if(typeof f!=='function')continue;
+        var proprias=Object.keys(f),tem=false;
+        for(var j=0;j<proprias.length;j++){var k=proprias[j];if(k.charAt(0)==='_'&&k.charAt(1)==='_'){tem=true;(marcas[n]||(marcas[n]={}))[k]=f[k]}}
+        var m=marcas[n];if(!m)continue;
+        for(var k2 in m){if(!(k2 in f)){try{f[k2]=m[k2]}catch(e){}}}
+      }
+    }catch(e){}
+  }
+  juntar();setInterval(juntar,1000);
+  W.addEventListener('load',function(){juntar();setTimeout(juntar,300)});
 })();
 </script>
 </body></html>

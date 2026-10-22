@@ -33,7 +33,7 @@
   W.__fast4067 = true;
 
   var BASE_KEY = 'fast4067_base_v1';
-  var VERSAO = 'v32';
+  var VERSAO = 'v35';
   function versaoApp() { try { return (document.querySelector('meta[name="fast-app-version"]') || {}).content || VERSAO; } catch (e) { return VERSAO; } }
   var DIAG = W.__f68Diag = { erro: '', erroEm: 0, envio: 0, baixou: 0 };
   function falha(txt) { DIAG.erro = String(txt).slice(0, 160); DIAG.erroEm = Date.now(); try { painel(true); } catch (e) {} }
@@ -390,6 +390,13 @@
           linhas = linhas.map(function (l) { var c = Object.assign({}, l); delete c.codigo_rastreio; return c; });
           i -= LOTE_ENVIO; continue;
         }
+        // 5.2.0: banco ainda sem as colunas de COLETA → envia sem elas
+        if (/servico|coleta_ordem/i.test(t) && lote.some(function (l) { return l && ('servico' in l || 'coleta_ordem' in l); })) {
+          W.__f520SemServ = true;
+          var tira = function (l) { var c = Object.assign({}, l); delete c.servico; delete c.coleta_ordem; return c; };
+          linhas = linhas.map(tira);
+          i -= LOTE_ENVIO; continue;
+        }
         if (legado && !W[flag] && typeof ehErroDeColunaSupabase === 'function' && ehErroDeColunaSupabase(r.status, t)) {
           W[flag] = true; i -= LOTE_ENVIO; continue;
         }
@@ -616,6 +623,7 @@
           Object.keys(seq || {}).forEach(function (d) { (seq[d] || []).forEach(function (it) { if (it && it.id != null) mapa[String(Math.floor(Number(it.id)))] = it.codigoRastreio || (W.fastCodigoPara ? W.fastCodigoPara(it, 'seq') : null); }); });
           rows.forEach(function (r) { r.codigo_rastreio = mapa[String(r.id)] || null; });
           colocarColeta(seq, rows);
+          servicoNasLinhas(seq, rows);
           return rows;
         };
         s2r2.__f514 = true; W.sequenciasToRows = s2r2;
@@ -629,11 +637,29 @@
             Object.keys(seq || {}).forEach(function (d) { (seq[d] || []).forEach(function (it) { var c = it && cod[String(Math.floor(Number(it.id)))]; if (c) it.codigoRastreio = c; }); });
           } catch (e) {}
           lerColeta(rows, seq);
+          servicoDasLinhas(rows, seq);
           return seq;
         };
         r2s2.__f514 = true; W.rowsToSequencias = r2s2;
       }
       W.supabaseGetRotas = async function () { return (await getInc('rotas')).map(supabaseToRota); };
+      // 5.2.0: tipo do serviço (COLETA) e a ordem da coleta, nas rotas e nas Rotas do Dia
+      [['rotaToSupabase', function (o, r) { if (!W.__f520SemServ) { o.servico = (r && r.servico) || null; o.coleta_ordem = (r && r.coletaOrdem) || null; } }],
+       ['supabaseToRota', function (o, row) { if (row && row.servico) { o.servico = row.servico; o.coletaOrdem = row.coleta_ordem || null; } }]].forEach(function (par) {
+        var f0 = W[par[0]]; if (typeof f0 !== 'function' || f0.__f520) return;
+        var f1 = function (x) { var o = f0.apply(this, arguments); try { par[1](o, x); } catch (e) {} return o; };
+        f1.__f520 = true; W[par[0]] = f1;
+      });
+      function servicoNasLinhas(seq, rows) {
+        if (W.__f520SemServ) return;
+        var m = {};
+        Object.keys(seq || {}).forEach(function (d) { (seq[d] || []).forEach(function (it) { if (it && it.id != null) m[String(Math.floor(Number(it.id)))] = it; }); });
+        rows.forEach(function (r) { var it = m[String(r.id)]; r.servico = (it && it.servico) || null; r.coleta_ordem = (it && it.coletaOrdem) || null; });
+      }
+      function servicoDasLinhas(rows, seq) {
+        var m = {}; (rows || []).forEach(function (r) { if (r && r.servico) m[String(r.id)] = r; });
+        Object.keys(seq || {}).forEach(function (d) { (seq[d] || []).forEach(function (it) { var r = it && m[String(Math.floor(Number(it.id)))]; if (r) { it.servico = r.servico; it.coletaOrdem = r.coleta_ordem || null; } }); });
+      }
       function colocarColeta(seq, rows) {
         try {
           var col = {};
@@ -847,6 +873,15 @@
     else if (!remota && (W.__f68Enviados > 0 || novas)) avisarOutros(novas);
   }
   function sincronizar(remota) { pedir('sync', remota); }
+  // 5.2.0: "Carregar" baixa TUDO de novo da nuvem (rotas, Rotas do Dia, despesas e cadastros)
+  W.fastSincronizarCompleto = async function () {
+    ['rotas', 'despesas', 'sequencias_itens'].forEach(function (t) { CACHE[t] = { rows: {}, wm: 0, completaEm: 0 }; });
+    W.__f68Pesada = 0;
+    pedir('sync', true);
+    var ini = Date.now();
+    await new Promise(function (res) { var t = setInterval(function () { if ((!rodando && DIAG.baixou >= ini) || Date.now() - ini > 45000) { clearInterval(t); res(); } }, 400); });
+    return DIAG.baixou >= ini;
+  };
 
   /* ---------------- envio logo após salvar ---------------- */
   var pendenteDesde = 0, ultimaTentativa = 0, tPush = 0;
@@ -1019,7 +1054,7 @@
   async function checar(forcar) {
     if (checando || document.hidden || !navigator.onLine || !pronto()) return;
     // com tempo real ativo, a verificação vira só reserva (a cada 15 s)
-    if (!forcar && Date.now() - ultimaChecagem < (rtConectado() ? 60000 : 10000)) return;
+    if (!forcar && Date.now() - ultimaChecagem < (rtConectado() ? 15000 : 2500)) return;   // 5.3.8: sem tempo real confere a cada ~3 s (antes 10 s)
     if (!token()) { await renovarLogin(true); }
     if (!token()) {
       if (!avisouSemLogin) {
@@ -1219,7 +1254,8 @@
       var m = String(r.id).match(/^drive_\d+_(\d+)_/);
       var idx = m ? Number(m[1]) : i;
       var ref = refs[idx];
-      if (ref && /^idb:/.test(ref)) mapa[r.id] = ref;
+      // 5.3.8: liga também fotos guardadas na nuvem (link https), não só as locais (idb:)
+      if (ref && /^(idb:|https?:)/.test(ref)) mapa[r.id] = ref;
     });
     var ks = Object.keys(mapa); if (ks.length > 3000) ks.slice(0, ks.length - 3000).forEach(function (k) { delete mapa[k]; });
     gravarJSON(MAPA_KEY, mapa);
@@ -1235,7 +1271,9 @@
       led.forEach(function (e) {
         if (!e || !e.driveId || pub[e.id]) return;
         var ref = e.fotoRef || mapa[e.id];
-        if (!ref || !/^idb:/.test(ref)) return;
+        // 5.3.8: registra também as fotos com link da nuvem — assim os outros aparelhos
+        // sabem que ela JÁ está no Drive e não mandam uma 2ª cópia (a "Foto 02" menor)
+        if (!ref || !/^(idb:|https?:)/.test(ref)) return;
         linhas.push({ ref: ref, drive_id: e.driveId, item_id: String(e.itemId || ''), nome: String(e.nome || '').slice(0, 200), _id: e.id });
       });
       for (var i = 0; i < linhas.length; i += 100) {

@@ -2444,16 +2444,26 @@
       var antes = alvo ? [].concat(alvo.fotos || []).length : 0, idAlvo = alvo ? String(alvo.id) : '';
       var r = f.call(this, dataSel, index, ev);
       if (idAlvo && files.length) {
-        setTimeout(function () {
+        // 5.3.8: a conferência só salva pelo caminho alternativo se o envio normal
+        // NÃO terminou em 90 s (antes era 12 s: com internet lenta o envio normal ainda
+        // estava em andamento, e a mesma foto entrava duas vezes — ou dezenas de vezes).
+        var ini = Date.now(), assin = idAlvo + '|' + files.map(function (x) { return x.name + ':' + x.size; }).join(',');
+        W.__frxConf = W.__frxConf || {};
+        if (W.__frxConf[assin] && Date.now() - W.__frxConf[assin] < 120000) return r;   // já há uma conferência para esta foto
+        W.__frxConf[assin] = ini;
+        var conferir = function () {
           // a sincronização pode ter trocado os objetos: procura a rota de novo pelo código
           var sq = bd().sequencias || {}, atual = null;
           Object.keys(sq).some(function (d) { atual = (sq[d] || []).filter(function (x) { return x && String(x.id) === idAlvo; })[0]; return !!atual; });
           if (!atual || [].concat(atual.fotos || []).length > antes) return;   // entrou normalmente
+          if (Date.now() - ini < 90000) { setTimeout(conferir, 5000); return; }   // ainda salvando: espera
           salvarFotoAlternativo(atual, files, dataSel);
-        }, 12000);
+        };
+        setTimeout(conferir, 12000);
       }
       return r;
     };
+    Object.keys(f).forEach(function (k) { try { g[k] = f[k]; } catch (e) {} });   // 5.3.8: mantém as marcas das outras camadas
     g.__frx = true; W.salvarFotoRota = g;
   }
   instalarFotoGaleria();

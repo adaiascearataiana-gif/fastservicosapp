@@ -4,6 +4,21 @@
   "updates": [
     {
       "app": "fast",
+      "type": "melhoria",
+      "text": "5.3.8 (22/10/2026): sincronismo mais rápido entre FAST, ROTAS, Despesas e PAINEL. Rota lançada, foto, CONCLUIR e Pendente→Pago aparecem nos outros aparelhos em até ~3 s (antes até 10 s), e em ~1 s com o tempo real do Supabase ligado (parte 12 do SQL)."
+    },
+    {
+      "app": "fast",
+      "type": "correcao",
+      "text": "5.3.8 (22/10/2026): corrigida a foto da galeria que entrava várias vezes no card (30, 40 vezes). A função de salvar foto ganhava uma camada nova a cada 5 s com o app aberto, e cada camada salvava a foto de novo quando o envio demorava mais de 12 s. Agora é uma camada só, e o salvamento alternativo só entra se o envio normal não terminar em 90 s."
+    },
+    {
+      "app": "fast",
+      "type": "correcao",
+      "text": "5.3.8 (22/10/2026): fotos — cada foto agora vai UMA vez para o Google Drive (antes ia o original e, depois, uma cópia menor mandada por outro aparelho: a \"Foto 02\" repetida). Foto que não abre pelo link da nuvem aparece pelo Drive. A foto escolhida aparece no card na hora, enquanto é salva."
+    },
+    {
+      "app": "fast",
       "type": "correcao",
       "text": "5.3.8 (18/10/2026): lugares apagados ou editados direto no Supabase não voltam mais. Ao abrir, o FAST/PAINEL/ROTAS percorria todas as rotas antigas e recriava os lugares apagados (e reenviava a cópia antiga dos editados). Agora só olha rotas novas e não mexe nos lugares que já existem."
     },
