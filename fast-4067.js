@@ -1327,12 +1327,15 @@
       var led = await lerStore('driveLedger');
       var mapa = lerJSON(MAPA_KEY, {}), pub = lerJSON(PUB_KEY, {});
       var linhas = [];
+      var vistosRef = {};
       led.forEach(function (e) {
         if (!e || !e.driveId || pub[e.id]) return;
         var ref = e.fotoRef || mapa[e.id];
         // 5.3.8: registra também as fotos com link da nuvem — assim os outros aparelhos
         // sabem que ela JÁ está no Drive e não mandam uma 2ª cópia (a "Foto 02" menor)
         if (!ref || !/^(idb:|https?:)/.test(ref)) return;
+        if (vistosRef[ref]) { pub[e.id] = 1; return; }   // 5.3.8: a mesma foto 2x no mesmo envio fazia o banco recusar o lote inteiro (HTTP 500)
+        vistosRef[ref] = 1;
         linhas.push({ ref: ref, drive_id: e.driveId, item_id: String(e.itemId || ''), nome: String(e.nome || '').slice(0, 200), _id: e.id });
       });
       for (var i = 0; i < linhas.length; i += 100) {
@@ -1510,6 +1513,7 @@
         else ok[a.ref] = 1;
       });
       if (gravar.length) {
+        var vr = {}; gravar = gravar.filter(function (a) { if (vr[a.ref]) return false; vr[a.ref] = 1; return true; });   // 5.3.8: sem repetidos no mesmo envio
         var up = await fetch(SUPABASE_URL + '/fotos_drive', {
           method: 'POST', headers: supabaseHeaders({ 'Prefer': 'resolution=merge-duplicates,return=minimal' }),
           body: JSON.stringify(gravar)

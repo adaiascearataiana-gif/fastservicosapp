@@ -115,6 +115,8 @@
         var tipo=st===401?'login':(st===404||st===416)?'aviso':(alvo==='drive'?'drive':'sync');
         try{r.clone().text().then(function(t){
           if(st===404&&/PGRST202|PGRST205/.test(t)) return;
+          // coluna que falta numa tabela opcional: o app já tenta de novo sem ela — só aviso
+          if(st===400&&/PGRST204|42703/.test(t)) tipo='aviso';
           registrar(tipo,(alvo==='banco'?'Banco':'Drive')+' recusou '+met+' '+caminho+' (HTTP '+st+')',t);
         },function(){registrar(tipo,(alvo==='banco'?'Banco':'Drive')+' recusou '+met+' '+caminho+' (HTTP '+st+')')})}catch(e){}
       },function(err){
@@ -43424,7 +43426,7 @@ html body #modalEditarRota .modal-content{margin:0 auto!important;top:auto!impor
   html body #containerSequencia .seq-item .seq-body .seq-info-wa{align-self:flex-start!important;max-width:max-content!important}
 }
 </style>
-<script src="fast-4067.js?v=39"></script>
+<script src="fast-4067.js?v=40"></script>
 <script src="navegacao-fast.js?v=1"></script>
 <script src="recibo-fast.js?v=1"></script>
 <script src="fast-recursos.js?v=44"></script>

@@ -5,6 +5,11 @@
     {
       "app": "fast",
       "type": "correcao",
+      "text": "5.3.8 (25/10/2026): fotos no Drive não são mais recusadas pelo banco quando a mesma foto aparecia duas vezes no envio; avisos de colunas opcionais deixam de aparecer como erro grave."
+    },
+    {
+      "app": "fast",
+      "type": "correcao",
       "text": "5.3.8 (25/10/2026): economia de dados do Supabase — o app baixa ~10x menos (cópia completa só a cada 12 h; só desce o que mudou; não reenvia o que já mandou; conferências mais espaçadas). As mudanças entre aparelhos chegam pelo aviso instantâneo (tempo real), agora também para lugares e clientes."
     },
     {
