@@ -14248,15 +14248,23 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
             method: 'GET', headers: supabaseHeaders()
           });
           if (respT.ok) { r106Modo[cfg.chave] = 'tabela'; continue; }
-        } catch (e) {}
+          // 5.3.8: recusa passageira (login ainda não pronto ao abrir o app = 401/403,
+          // servidor ocupado = 5xx) NÃO decide nada — tenta de novo na próxima
+          // sincronização. Antes, o app concluía "tabela não existe" e passava a sessão
+          // inteira sem baixar nem enviar clientes/motoristas (ex.: FAST com 5 clientes
+          // enquanto a nuvem tinha 137).
+          if (respT.status !== 404 && respT.status !== 400) continue;
+        } catch (e) { if (!cfg.raw) continue; }   // listas de excluídos (raw) seguem para a tabela-ponte, como antes
         // Tabela real ausente → tentar bridge
         if (r106BridgeOk === null) {
           try {
             var respB = await fetch(SUPABASE_URL + '/' + encodeURIComponent(r106BridgeTabela()) + '?select=id&limit=1', {
               method: 'GET', headers: supabaseHeaders()
             });
-            r106BridgeOk = respB.ok;
-          } catch (e) { r106BridgeOk = false; }
+            if (respB.ok) r106BridgeOk = true;
+            else if (respB.status === 404 || respB.status === 400) r106BridgeOk = false;
+            else continue;   // recusa passageira: decide depois
+          } catch (e) { continue; }
         }
         r106Modo[cfg.chave] = r106BridgeOk ? 'bridge' : 'off';
         if (r106Modo[cfg.chave] === 'off') r106AvisarUmaVez(cfg.chave, 'off');
@@ -14408,6 +14416,16 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
     async function r106SyncColecoes() {
       var resultado = {};
       await r106DetectarModos();
+      // 5.3.8: alguma coleção ainda sem resposta do banco (login não pronto): a próxima
+      // sincronização volta a trazer as coleções, em vez de esperar 10 minutos
+      // (só nos 3 primeiros minutos do app aberto, para não pesar a internet se uma tabela recusar sempre)
+      try { window.__f538ColIni = window.__f538ColIni || Date.now(); window.__f538ColPendente = (Date.now() - window.__f538ColIni < 180000) && R106_COLECOES.some(function (c) { return !c.raw && !r106Modo[c.chave]; }); } catch (_) {}
+      try {
+        if (window.__f538ColPendente && !window.__f538ColAgendado) {
+          window.__f538ColAgendado = true;
+          setTimeout(function () { window.__f538ColAgendado = false; try { if (typeof window.sincronizarAgora === 'function') window.sincronizarAgora(); } catch (_) {} }, 8000);
+        }
+      } catch (_) {}
       for (var i = 0; i < R106_COLECOES.length; i++) {
         var cfg = R106_COLECOES[i];
         try {
@@ -14456,8 +14474,9 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
         // clientes: respeitar blacklist clientesExcluidos UNIFICADA (nome canônico)
         var listaEnvio = listaLocal;
         if (cfg.chave === 'clientes' && lapidesUnificadas.clientesExcluidos.length > 0) {
-          var bl = lapidesUnificadas.clientesExcluidos.map(function(n) { return destNormalizarNome(n); });
-          listaEnvio = listaLocal.filter(function(c) { return bl.indexOf(destNormalizarNome(c.nome)) === -1; });
+          var mapaEnv = fastLapideMapa(lapidesUnificadas.clientesExcluidos);
+          // 5.3.8: exclusão antiga (só nome) não impede mais o envio de um cliente que está na tela
+          listaEnvio = listaLocal.filter(function(c) { var n = destNormalizarNome(c.nome); if (!(n in mapaEnv)) return true; if (!(mapaEnv[n] > 0)) return true; return fastClienteEscondido(mapaEnv, c, null) === false; });
         }
         // (v2.4.14/F1) motoristas/RH/despesasEmpresa: respeitar as lápides por ID UNIFICADAS
         // — nunca re-enviar para a nuvem um registro excluído em QUALQUER aparelho.
@@ -14742,6 +14761,8 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
         ...((local.clientesExcluidos || []).map(n => destNormalizarNome(n))),
         ...((nuvem.clientesExcluidos || []).map(n => destNormalizarNome(n)))
       ]);
+      const _f538MapaCli = fastLapideMapa([...(local.clientesExcluidos || []), ...(nuvem.clientesExcluidos || [])]);
+      const _f538NomesBanco = new Set((nuvem.clientes || []).map(x => destNormalizarNome(x && x.nome)).filter(Boolean));
       [...(nuvem.clientes || []), ...(local.clientes || [])].forEach(c => {
         const nomeCli = destNormalizarNome(c.nome);
         // CORREÇÃO (clientes sumindo): a regra "sem nenhuma letra = inválido"
@@ -14755,7 +14776,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
         // e só é descartado de vez quando não tem nome válido NEM id.
         const chaveCli = nomeCli && /[a-z]/i.test(nomeCli) ? nomeCli : (c && c.id != null && c.id !== '' ? ('__id:' + String(c.id)) : null);
         if (!chaveCli) return; // sem nome válido e sem id: aí sim é lixo
-        if (nomeCli && blNomesCli.has(nomeCli)) return; // pular cliente excluído
+        if (nomeCli && blNomesCli.has(nomeCli) && fastClienteEscondido(_f538MapaCli, c, _f538NomesBanco)) return; // pular cliente excluído (5.3.8: com data, ou sem data e fora do banco)
         // O nome canônico é a identidade do cliente. Antes o merge era por ID,
         // portanto o mesmo nome com IDs diferentes voltava centenas de vezes.
         const anterior = clientesMap.get(chaveCli);
@@ -18083,6 +18104,36 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
     }
     window.fastLapideEfetiva = fastLapideEfetiva;
     window.fastLapideMarcar = fastLapideMarcar;
+    /* 5.3.8: CLIENTES QUE SUMIAM (FAST com 5, PAINEL com 143).
+       A lista de "clientes excluídos" guardava só o NOME, sem data. Um nome excluído
+       uma vez (ou o nome antigo de um cliente renomeado/unificado) escondia PARA SEMPRE
+       qualquer cliente com esse nome — inclusive os que existem de verdade no banco.
+       Agora: exclusão com data só vale para cadastro mais antigo que ela; exclusão antiga
+       (só nome, sem data) NÃO esconde cliente que está no banco (Supabase). */
+    function fastLapideMapa(lista) {
+      const del = Object.create(null), lib = Object.create(null), out = Object.create(null);
+      (lista || []).forEach(function (v) {
+        const n = destNormalizarNome(v); if (!n) return;
+        const m = /^zz (liberado|excluido) (\d+) (.+)$/.exec(n);
+        if (m) {
+          const ts = Number(m[2]) || 0, nome = m[3];
+          if (m[1] === 'liberado') { if (!(lib[nome] >= ts)) lib[nome] = ts; }
+          else { if (!(del[nome] >= ts)) del[nome] = ts; }
+          return;
+        }
+        if (!(n in del)) del[n] = 0;
+      });
+      Object.keys(del).forEach(function (n) { if (!(n in lib) || del[n] > lib[n]) out[n] = del[n]; });
+      return out;
+    }
+    function fastClienteEscondido(mapa, cli, nomesNoBanco) {
+      const n = destNormalizarNome(cli && cli.nome); if (!n || !(n in mapa)) return false;
+      const ts = mapa[n];
+      if (ts > 0) { const u = Date.parse((cli && (cli.updatedAt || cli.criadoEm || cli.createdAt)) || '') || 0; return !(u > ts); }
+      return !(nomesNoBanco && nomesNoBanco.has(n));   // exclusão antiga sem data: só vale se o cliente não está no banco
+    }
+    window.fastLapideMapa = fastLapideMapa;
+    window.fastClienteEscondido = fastClienteEscondido;
 
     // Consolida lugares repetidos sem descartar os dados úteis de nenhuma cópia.
     // O maior contador é preservado (somar inflaria o histórico de uso).
@@ -24306,6 +24357,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
         if (chaveAnterior && chaveAnterior !== chaveNova) {
           if (!Array.isArray(bancoDados.clientesExcluidos)) bancoDados.clientesExcluidos = [];
           if (!bancoDados.clientesExcluidos.some(n => destNormalizarNome(n) === chaveAnterior)) bancoDados.clientesExcluidos.push(chaveAnterior);
+          try { fastLapideMarcar(bancoDados.clientesExcluidos, 'excluido', chaveAnterior); } catch (eLm) {}
         }
         bancoDados.clientes = bancoDados.clientes.map(c =>
           String(c.id) === String(id) ? { ...c, ...dados } : c
@@ -24414,6 +24466,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
             if (chave && !bancoDados.clientesExcluidos.some(n => destNormalizarNome(n) === chave)) {
               bancoDados.clientesExcluidos.push(chave);
             }
+            try { if (chave) fastLapideMarcar(bancoDados.clientesExcluidos, 'excluido', chave); } catch (eLm) {}
           });
           const nomesExcluidos = new Set(clientesSel.map(c => destNormalizarNome(c.nome)));
           bancoDados.clientes = (bancoDados.clientes || []).filter(c => !idsSel.includes(String(c.id)) && !nomesExcluidos.has(destNormalizarNome(c.nome)));
@@ -24663,6 +24716,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
           if (!bancoDados.clientesExcluidos.some(n => destNormalizarNome(n) === chaveCliente)) {
             bancoDados.clientesExcluidos.push(chaveCliente);
           }
+          try { fastLapideMarcar(bancoDados.clientesExcluidos, 'excluido', chaveCliente); } catch (eLm) {}
         }
         bancoDados.clientes = (bancoDados.clientes || []).filter(x => String(x.id) !== String(id) && destNormalizarNome(x.nome) !== chaveCliente);
         renumerarClientesSequencial();
@@ -42613,7 +42667,12 @@ html body .destino-extra-row-rota.f49-dest-row{padding-top:8px;border-top:1px da
       var mx=setIds('motoristasExcluidos'),hx=setIds('rhExcluidos'),dex=setIds('despesasEmpresaExcluidas'),dx=setIds('despesasExcluidas');
       var r;
       if(bd.size){r=filtrar(bancoDados.destinos,function(d){return !bd.has(N(d&&d.nome))});bancoDados.destinos=r.a;total+=r.n}
-      if(bc.size){r=filtrar(bancoDados.clientes,function(c){return !bc.has(N(c&&c.nome))});bancoDados.clientes=r.a;total+=r.n}
+      // 5.3.8: cliente só sai da lista por exclusão COM DATA mais nova que o cadastro. A exclusão
+      // antiga (só o nome, sem data) escondia para sempre clientes de verdade — no FAST
+      // sobravam 5 de 143. Quem foi excluído de fato também é apagado do banco.
+      if(bc.size&&typeof W.fastLapideMapa==='function'){var mpc=W.fastLapideMapa(bancoDados.clientesExcluidos);
+        r=filtrar(bancoDados.clientes,function(c){var n=N(c&&c.nome),t=mpc[n];if(!(t>0))return true;var u=Date.parse((c&&(c.updatedAt||c.criadoEm||c.createdAt))||'')||0;return u>t});bancoDados.clientes=r.a;total+=r.n}
+      else if(bc.size){r=filtrar(bancoDados.clientes,function(c){return !bc.has(N(c&&c.nome))});bancoDados.clientes=r.a;total+=r.n}
       if(rx.size){r=filtrar(bancoDados.rotas,function(x){return !rx.has(String(x&&x.id))});bancoDados.rotas=r.a;total+=r.n}
       if(mx.size){r=filtrar(bancoDados.motoristas,function(x){return !mx.has(String(x&&x.id))});bancoDados.motoristas=r.a;total+=r.n}
       if(hx.size){r=filtrar(bancoDados.rh,function(x){return !hx.has(String(x&&x.id))});bancoDados.rh=r.a;total+=r.n}
@@ -43428,7 +43487,7 @@ html body #modalEditarRota .modal-content{margin:0 auto!important;top:auto!impor
   html body #containerSequencia .seq-item .seq-body .seq-info-wa{align-self:flex-start!important;max-width:max-content!important}
 }
 </style>
-<script src="fast-4067.js?v=41"></script>
+<script src="fast-4067.js?v=42"></script>
 <script src="navegacao-fast.js?v=1"></script>
 <script src="recibo-fast.js?v=1"></script>
 <script src="fast-recursos.js?v=44"></script>
@@ -47060,7 +47119,11 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
       var id=String(r.id);if(!/^-?\d+$/.test(id)||idsLocal[id])return;
       var nome=nomeNuvem(r),k=chave(nome),kn=norm(nome);
       if(k&&porNome[k]){lista.push(id);return;}                 // repetido: o nome já existe aqui com outro código
-      if(kn&&lap.has(kn)){lista.push(id);return;}               // excluído aqui na plataforma
+      if(kn&&lap.has(kn)){                                       // excluído aqui na plataforma
+        // 5.3.8: clientes — só com exclusão COM DATA mais nova que o cadastro (exclusão antiga só por nome não apaga mais)
+        if(tabela!=='clientes'){lista.push(id);return;}
+        try{var mp=W.fastLapideMapa(lapides),u=Date.parse(r.u||'')||0;if(mp[kn]>0&&mp[kn]>u){lista.push(id);return;}}catch(eM){}
+      }
       // sobra: não está aqui, nem com outro código. Só apaga se continuar fora DEPOIS de uma
       // sincronização completa (um cadastro novo de outro aparelho já teria chegado)
       var visto=Number(ot[id])||agora; novoOt[id]=visto;
@@ -47079,7 +47142,7 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
     try{
       var cl=bancoDados.clientes||[];
       if(cl.length>=5){
-        var nc=await pegar('/clientes?select=id,n:dados->>nome,rs:dados->>razaoSocial,c:dados->>cliente&order=id');
+        var nc=await pegar('/clientes?select=id,n:dados->>nome,rs:dados->>razaoSocial,c:dados->>cliente,u:dados->>updatedAt&order=id');
         // segurança: a lista deste aparelho precisa estar carregada de verdade
         if(nc&&nc.length&&cl.length>=nc.length*0.4){
           var ids=aApagar('clientes',nc,cl,chaveCli,function(r){return r.n||r.rs||r.c||''},bancoDados.clientesExcluidos);

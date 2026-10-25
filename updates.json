@@ -4,6 +4,16 @@
   "updates": [
     {
       "app": "fast",
+      "type": "correcao",
+      "text": "5.3.8 (25/10/2026): clientes, motoristas, RH e despesas da empresa voltam a sincronizar em todos os aparelhos. Ao abrir o app, o login ainda não estava pronto e o app concluía que essas tabelas não existiam, passando a sessão inteira sem baixar nem enviar (ex.: FAST com 5 clientes e PAINEL com 143)."
+    },
+    {
+      "app": "fast",
+      "type": "correcao",
+      "text": "5.3.8 (25/10/2026): clientes que sumiam no FAST (ficavam só 5) voltam a aparecer — uma exclusão antiga, guardada só pelo nome, escondia para sempre clientes que existem no banco. Exclusões novas passam a ter data."
+    },
+    {
+      "app": "fast",
       "type": "melhorado",
       "text": "5.3.8 (25/10/2026): telefone copiado do WhatsApp (+55 85 9655-3791) é convertido sozinho ao colar: (85) 99655-3791 — tira o +55 e põe o 9 do celular quando falta. Fixo fica (85) 3333-4444."
     },

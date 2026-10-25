@@ -912,7 +912,7 @@
     // Quem controla a fila agora é este arquivo, então liberamos antes de chamar.
     W.__fastSyncRodando = false;
     var pedirPesada = forcarPesada; forcarPesada = false;
-    W.__f68Leve = !pedirPesada && !!(W.__f68Chaves && W.__f68Pesada && Date.now() - W.__f68Pesada < PESADA_MS && !restaurando());
+    W.__f68Leve = !pedirPesada && !W.__f538ColPendente && !!(W.__f68Chaves && W.__f68Pesada && Date.now() - W.__f68Pesada < PESADA_MS && !restaurando());
     W.__f68Pesada_on = !W.__f68Leve;
     W.__f68LeveUltima = W.__f68Leve;
     var novas = W.__f68Leve ? lapNovas() : null;
