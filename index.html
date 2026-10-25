@@ -48009,4 +48009,39 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
   },true);
 })();
 </script>
+<script id="fast538-cli-tela">
+/* 5.3.8 — LISTAS DE CLIENTES E MOTORISTAS SEMPRE EM DIA NA TELA
+   Os clientes que chegavam da nuvem entravam nos dados (o contador mostrava 137),
+   mas a TABELA só era desenhada uma vez, ao abrir o app (com os 5 que existiam
+   naquele momento) e não era redesenhada depois. Agora a tabela é redesenhada
+   quando a lista muda e sempre que a tela é aberta. */
+(function(){
+  var W=window,ult={};
+  function sig(l){
+    l=l||[];var m=0;
+    for(var i=0;i<l.length;i++){var x=l[i]||{};var t=Date.parse(x.updatedAt||x.ultimaModificacao||'')||0;if(t>m)m=t}
+    return l.length+'|'+m;
+  }
+  var LISTAS=[['clientes','renderizarClientes'],['motoristas','renderizarMotoristas']];
+  function conferir(forcar){
+    try{
+      var bd=W.bancoDados;if(!bd)return;
+      LISTAS.forEach(function(p){
+        var fn=W[p[1]];if(typeof fn!=='function')return;
+        var s=sig(bd[p[0]]);
+        if(forcar===p[0]||ult[p[0]]!==s){ult[p[0]]=s;try{fn()}catch(e){}}
+      });
+    }catch(e){}
+  }
+  setInterval(function(){if(!document.hidden)conferir()},3000);
+  setTimeout(function(){conferir()},4000);
+  function instalar(){
+    var f=W.trocarAba;if(typeof f!=='function'||f.__f538cli)return;
+    var g=function(evt,aba){var r=f.apply(this,arguments);if(aba==='clientes'||aba==='motoristas')setTimeout(function(){conferir(aba)},120);return r};
+    Object.keys(f).forEach(function(k){try{g[k]=f[k]}catch(e){}});
+    g.__f538cli=true;W.trocarAba=g;
+  }
+  instalar();W.addEventListener('load',function(){setTimeout(instalar,2000);setTimeout(instalar,6000)});setInterval(instalar,5000);
+})();
+</script>
 </body></html>

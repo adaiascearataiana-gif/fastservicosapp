@@ -5,6 +5,11 @@
     {
       "app": "fast",
       "type": "correcao",
+      "text": "5.3.8 (25/10/2026): a tabela de Clientes (e de Motoristas) agora é redesenhada quando chegam cadastros novos da nuvem — antes o contador mostrava 137 mas a tabela continuava com os 5 do momento em que o app abriu."
+    },
+    {
+      "app": "fast",
+      "type": "correcao",
       "text": "5.3.8 (25/10/2026): clientes, motoristas, RH e despesas da empresa voltam a sincronizar em todos os aparelhos. Ao abrir o app, o login ainda não estava pronto e o app concluía que essas tabelas não existiam, passando a sessão inteira sem baixar nem enviar (ex.: FAST com 5 clientes e PAINEL com 143)."
     },
     {
