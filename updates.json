@@ -4,6 +4,11 @@
   "updates": [
     {
       "app": "fast",
+      "type": "melhorado",
+      "text": "5.3.8 (25/10/2026): telefone copiado do WhatsApp (+55 85 9655-3791) é convertido sozinho ao colar: (85) 99655-3791 — tira o +55 e põe o 9 do celular quando falta. Fixo fica (85) 3333-4444."
+    },
+    {
+      "app": "fast",
       "type": "correcao",
       "text": "5.3.8 (25/10/2026): fotos no Drive não são mais recusadas pelo banco quando a mesma foto aparecia duas vezes no envio; avisos de colunas opcionais deixam de aparecer como erro grave."
     },
