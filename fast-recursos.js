@@ -1362,6 +1362,15 @@
     var f = W.renderizarSequencia;
     if (typeof f !== 'function' || f.__frxEst) return;
     var g = function () {
+      // 5.3.8: se esta camada já está dentro de outra igual (aconteceu de haver duas),
+      // a de dentro só repassa — antes a de fora "gastava" o pedido de redesenho forçado
+      // e a de dentro, achando que nada mudou, não redesenhava (ex.: foto que chegou do
+      // Drive ficava com a miniatura em branco).
+      if (W.__frxEstDentro) return f.apply(this, arguments);
+      W.__frxEstDentro = true;
+      try { return gInterno.apply(this, arguments); } finally { W.__frxEstDentro = false; }
+    };
+    var gInterno = function () {
       var cont = $('containerSequencia');
       var forcado = W.__frxForcarLista === true;
       var porUsuario = Date.now() - ultimaAcao < 1200 || forcado;

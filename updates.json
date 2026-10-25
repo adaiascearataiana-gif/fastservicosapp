@@ -4,6 +4,21 @@
   "updates": [
     {
       "app": "fast",
+      "type": "correcao",
+      "text": "5.3.8 (25/10/2026): economia de dados do Supabase — o app baixa ~10x menos (cópia completa só a cada 12 h; só desce o que mudou; não reenvia o que já mandou; conferências mais espaçadas). As mudanças entre aparelhos chegam pelo aviso instantâneo (tempo real), agora também para lugares e clientes."
+    },
+    {
+      "app": "fast",
+      "type": "correcao",
+      "text": "5.3.8 (24/10/2026): agora dá para lançar de novo uma rota igual a uma já concluída (antes era tratada como cópia repetida e sumia); um aparelho não reenvia mais a cópia velha de uma rota e desfaz a conclusão/pagamento feito em outro; app mais leve: botões Concluir/Pago e salvar respondem na hora, Despesas mostra as 150 mais recentes (com 'Mostrar todas' e filtros), menos travadas ao trocar de tela."
+    },
+    {
+      "app": "fast",
+      "type": "correcao",
+      "text": "5.3.8 (23/10/2026): foto da câmera/galeria tirada no ROTAS agora aparece no FAST e no PAINEL mesmo com o espaço de fotos do Supabase cheio (vem pelo Google Drive, ~10-15 s). Envio mais rápido: depois de uma recusa por falta de espaço, vai direto para o Drive. Erros que antes ficavam escondidos aparecem em Ferramentas → Sincronização; aparelho sem espaço não perde mais dados."
+    },
+    {
+      "app": "fast",
       "type": "melhoria",
       "text": "5.3.8 (22/10/2026): sincronismo mais rápido entre FAST, ROTAS, Despesas e PAINEL. Rota lançada, foto, CONCLUIR e Pendente→Pago aparecem nos outros aparelhos em até ~3 s (antes até 10 s), e em ~1 s com o tempo real do Supabase ligado (parte 12 do SQL)."
     },

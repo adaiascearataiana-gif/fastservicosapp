@@ -83,7 +83,20 @@
   document.addEventListener('visibilitychange', function () {
     if (document.hidden) return;
     try {
-      if (!souDono()) {
+      // 5.3.8 (fase 1): com o espaço do aparelho cheio, a versão mais nova fica só no
+      // IndexedDB — então quem volta para a tela lê de lá (e não a cópia velha).
+      if (localStorage.getItem('fast538_banco_no_idb') && typeof W.fastCarregarBancoSeguro === 'function') {
+        W.fastCarregarBancoSeguro().then(function (res) {
+          try {
+            if (!res || !res.data || res.fonte === 'novo') return;
+            if (JSON.stringify(res.data) === JSON.stringify(W.bancoDados)) return;
+            W.bancoDados = res.data; try { bancoDados = res.data; } catch (e) {}
+            W.__frxForcarLista = true;
+            try { if (typeof renderizar === 'function') renderizar(); } catch (e) {}
+            try { if (typeof renderizarSequencia === 'function') renderizarSequencia(); } catch (e) {}
+          } catch (e) {}
+        }).catch(function () {});
+      } else if (!souDono()) {
         var raw = localStorage.getItem('banco_gestao_local');
         if (raw && raw !== JSON.stringify(W.bancoDados)) {
           var novo = JSON.parse(raw);
@@ -133,7 +146,11 @@
      Guarda uma cópia da tabela no aparelho (IndexedDB) e, a cada sincronização,
      baixa só as linhas alteradas desde a última vez (updated_at). Exclusões são
      detectadas pela contagem. Cópia completa no máximo a cada 30 min. */
-  var CACHE = {}, IDB = null, COMPLETA_MS = 30 * 60 * 1000, SOBREPOR_MS = 2 * 60 * 1000;
+  // 5.3.8 (economia de dados): a cópia completa das tabelas era baixada de novo a cada
+  // 30 min (e a cada abertura do app depois disso) — com vários aparelhos, era a maior
+  // parte dos 10 GB/mês. Agora: completa a cada 12 h (ou pelo botão "Carregar"); no resto
+  // só o que mudou. A margem de segurança da leitura incremental cai de 2 min para 20 s.
+  var CACHE = {}, IDB = null, COMPLETA_MS = 12 * 60 * 60 * 1000, SOBREPOR_MS = 20 * 1000;
   function idb() {
     if (IDB) return IDB;
     IDB = new Promise(function (res) {
@@ -178,7 +195,20 @@
     var completa = !c || !c.rows || agora - (c.full || 0) > COMPLETA_MS || restaurando();
     if (!completa) {
       var desde = new Date(Math.max(0, (c.wm || 0) - SOBREPOR_MS)).toISOString();
-      var novos = await getTudo(tabela, '*', 'updated_at=gte.' + encodeURIComponent(desde));
+      // 5.3.8 (economia de dados): primeiro só "id + hora" das linhas da janela (poucos
+      // bytes cada); a linha completa só desce se for nova ou mudou. Antes, cada leitura
+      // baixava de novo, inteiras, todas as linhas gravadas no mesmo instante da última.
+      var leves = await getTudo(tabela, 'id,updated_at', 'updated_at=gte.' + encodeURIComponent(desde));
+      var faltam = leves.filter(function (r) { var c0 = c.rows[String(r.id)]; return !c0 || String(c0.updated_at) !== String(r.updated_at); });
+      var novos = [];
+      if (faltam.length > 400) novos = await getTudo(tabela, '*', 'updated_at=gte.' + encodeURIComponent(desde));
+      else {
+        for (var fi = 0; fi < faltam.length; fi += 80) {
+          var ids80 = faltam.slice(fi, fi + 80).map(function (r) { return encodeURIComponent(String(r.id)); }).join(',');
+          novos = novos.concat(await getTudo(tabela, '*', 'id=in.(' + ids80 + ')'));
+        }
+      }
+      leves.forEach(function (r) { c.wm = Math.max(c.wm || 0, quando(r.updated_at)); });
       novos.forEach(function (r) { c.rows[String(r.id)] = r; c.wm = Math.max(c.wm || 0, quando(r.updated_at)); });
       var total = await contar(tabela), qtd = Object.keys(c.rows).length;
       if (total != null && total !== qtd) {
@@ -198,6 +228,11 @@
   }
 
   /* ---------------- base: o que este aparelho já sincronizou ---------------- */
+  var baseCache = null, baseCacheEm = 0;
+  function baseRapida() {
+    if (Date.now() - baseCacheEm < 400) return baseCache;
+    baseCache = lerBase(); baseCacheEm = Date.now(); return baseCache;
+  }
   function lerBase() {
     try { var b = JSON.parse(localStorage.getItem(BASE_KEY) || 'null'); return b && b.r ? b : null; } catch (e) { return null; }
   }
@@ -236,12 +271,23 @@
       (nuvem.despesas || []).forEach(function (x) { if (x && x.id != null) n.d[String(x.id)] = camposDesp(x); });
       sequenciasToRows(nuvem.sequencias || {}).forEach(function (l) { if (l && l.id != null) { n.s[String(l.id)] = hSeq(l); n.sr[String(l.id)] = l.rota_id; } });
       N = n;
+      // outro aparelho mudou a linha depois do nosso envio: esquece o "já enviado",
+      // para que uma nova mudança feita aqui (mesmo voltando ao valor antigo) suba
+      ['r', 'd', 's'].forEach(function (k) {
+        Object.keys(ENVIADO[k]).forEach(function (id) { if (n[k][id] !== undefined && n[k][id] !== ENVIADO[k][id]) delete ENVIADO[k][id]; });
+      });
     } catch (e) { N = null; }
   }
   // envia se difere do que a nuvem tem; sem foto da nuvem, compara com a base
+  // 5.3.8 (economia de dados): o que ESTE aparelho já enviou, por tabela. Linha igual à
+  // última que ele mesmo mandou não é reenviada (antes, ao concluir 1 rota, as 28 rotas
+  // do dia subiam de novo, duas vezes — e cada reenvio fazia os outros aparelhos baixarem).
+  var ENVIADO = { r: {}, d: {}, s: {} };
+  function marcarEnviado(k, id, h) { try { ENVIADO[k][String(id)] = h; } catch (e) {} }
   function precisa(id, h, k) {
     if (restaurando()) return true;
     id = String(id);
+    if (ENVIADO[k] && ENVIADO[k][id] === h && !W.__f68Pesada_on) return false;
     if (N) {
       // Fora da sincronização completa: linha que sumiu da nuvem e que este
       // aparelho já tinha enviado sem mudar = provavelmente excluída em outro
@@ -250,7 +296,14 @@
         var bb = lerBase();
         if (bb && bb[k] && bb[k][id] === h) return false;
       }
-      return N[k][id] !== h;
+      if (N[k][id] === h) return false;
+      // 5.3.8: só envia o que ESTE aparelho mudou. Se a linha está igual à última versão
+      // sincronizada aqui (base), a diferença para a nuvem é mudança de OUTRO aparelho que
+      // ainda não chegou neste — reenviar a cópia velha desfazia a mudança do outro
+      // (ex.: rota concluída no ROTAS voltava para EM ROTA; rota nova "sumia").
+      var bq = baseRapida();
+      if (bq && bq[k] && bq[k][id] === h) return false;
+      return true;
     }
     var b = lerBase();
     return !(b && b[k] && b[k][id] === h);
@@ -456,6 +509,7 @@
     var linhas = semRepetidos(mud.map(rotaToSupabase)).map(function (l) { l.updated_at = agoraIso; return l; });
     if (linhas.length) {
       await enviarLotes('rotas', linhas, legadoRotas, 'r101RotasColunasFaltando');
+      linhas.forEach(function (l) { marcarEnviado('r', l.id, hs[String(l.id)]); });
       if (N) linhas.forEach(function (l) { N.r[String(l.id)] = hs[String(l.id)]; });
     }
     var base = lerBase();
@@ -478,6 +532,7 @@
           await enviarLotes('despesas', grupos[gk].map(function (l) { var c = Object.assign({}, l); delete c.forma_pgto; delete c.nome_cartao; return c; }));
         }
       }
+      linhas.forEach(function (l) { marcarEnviado('d', l.id, hs[String(l.id)]); });
       if (N) linhas.forEach(function (l) { N.d[String(l.id)] = hs[String(l.id)]; });
     }
     var base = lerBase();
@@ -489,6 +544,7 @@
     var linhas = todas.filter(function (l) { var h = hSeq(l); hs[String(l.id)] = h; return precisa(l.id, h, 's'); });
     if (linhas.length) {
       await enviarLotes('sequencias_itens', linhas, legadoSeq, 'r101ColunasFaltando');
+      linhas.forEach(function (l) { marcarEnviado('s', l.id, hs[String(l.id)]); });
       if (N) linhas.forEach(function (l) { N.s[String(l.id)] = hs[String(l.id)]; N.sr[String(l.id)] = l.rota_id; });
     }
     var base = lerBase();
@@ -938,7 +994,7 @@
     RT.tok = tk;
     var p1 = { config: { broadcast: { self: false, ack: false }, presence: { key: '' }, postgres_changes: [], private: false } };
     var p2 = { config: { broadcast: { self: false }, presence: { key: '' }, private: false,
-      postgres_changes: TABS_RT.map(function (t) { return { event: '*', schema: 'public', table: t }; }) } };
+      postgres_changes: TABS_RT.concat(['destinos', 'clientes']).map(function (t) { return { event: '*', schema: 'public', table: t }; }) } };
     if (tk) { p1.access_token = tk; p2.access_token = tk; }
     rtMandar(TOP_AVISO, 'phx_join', p1);
     rtMandar(TOP_DB, 'phx_join', p2);
@@ -978,6 +1034,9 @@
       if (m.event === 'postgres_changes' && m.topic === TOP_DB) {
         var d = (m.payload && m.payload.data) || {};
         var rec = d.record || d.old_record || {};
+        // 5.3.8: lugares e clientes chegam pelo aviso instantâneo (as conferências por tempo ficaram espaçadas para economizar dados)
+        if (d.table === 'destinos') { try { if (typeof W.__f538LugPuxar === 'function') W.__f538LugPuxar(); } catch (e) {} return; }
+        if (d.table === 'clientes') { try { if (typeof W.__f538CliConferir === 'function') W.__f538CliConferir(); } catch (e) {} return; }
         if (rec.id != null && ehEco(d.table, rec.id)) return;   // eco do que este aparelho gravou
         remoto();
       }
@@ -1054,7 +1113,7 @@
   async function checar(forcar) {
     if (checando || document.hidden || !navigator.onLine || !pronto()) return;
     // com tempo real ativo, a verificação vira só reserva (a cada 15 s)
-    if (!forcar && Date.now() - ultimaChecagem < (rtConectado() ? 15000 : 2500)) return;   // 5.3.8: sem tempo real confere a cada ~3 s (antes 10 s)
+    if (!forcar && Date.now() - ultimaChecagem < (rtConectado() ? 45000 : 15000)) return;   // 5.3.8: economia de dados — sem tempo real confere a cada 15 s; com tempo real, 45 s (os avisos chegam na hora)
     if (!token()) { await renovarLogin(true); }
     if (!token()) {
       if (!avisouSemLogin) {
@@ -2089,8 +2148,8 @@
       // camada do topo (fica por cima até da tela de login)
       try { el.setAttribute('popover', 'manual'); } catch (e) {}
       ['visibility', 'opacity', 'pointer-events'].forEach(function (k, i) { el.style.setProperty(k, ['visible', '1', 'auto'][i], 'important'); });
-      el.innerHTML = '<div id="f68DiagTxt"></div><div id="f68DiagLogin"></div>';
-      el.addEventListener('click', function (ev) { if (ev.target.closest && ev.target.closest('#f68DiagLogin')) return; esconderPainel(el); });
+      el.innerHTML = '<div id="f68DiagTxt"></div><div id="f68DiagLogin"></div><div id="f538Erros"></div>';
+      el.addEventListener('click', function (ev) { if (ev.target.closest && ev.target.closest('#f68DiagLogin, #f538Erros')) return; esconderPainel(el); });
       document.body.appendChild(el);
     }
     var tk = !!token(), rt = rtConectado();
@@ -2099,7 +2158,7 @@
       (tk ? '✅' : '❌') + ' Login no banco: ' + (tk ? 'sim' :
         (DIAG.login === 'sem-sessao' ? 'NÃO — entre NESTE app com e-mail e senha' :
          DIAG.login === 'recusado' ? 'NÃO — login venceu; saia e entre de novo com e-mail e senha' : 'renovando…')),
-      (rt ? '✅' : '⚠️') + ' Tempo real: ' + (rt ? 'conectado' : 'desconectado (verificando a cada 10 s)'),
+      (rt ? '✅' : '⚠️') + ' Tempo real: ' + (rt ? 'conectado' : 'desconectado (conferindo a cada 15 s)'),
       '⬆️ Último envio: ' + hora(DIAG.envio) + ' · ⬇️ Última leitura: ' + hora(DIAG.baixou),
       (driveToken() ? '✅' : '📷') + ' Google Drive (fotos): ' + (driveToken() ? 'conectado' : (DRV.estado || 'verificando…')) +
         (DRV.pend >= 0 ? ' · ' + DRV.pend + ' foto(s) na fila' : '')
@@ -2120,6 +2179,8 @@
     linhas.push((mb > 4.2 ? '⚠️' : '💾') + ' Espaço do app no aparelho: ' + mb.toFixed(1).replace('.', ',') + ' MB de ~5 MB' + (DIAG.espacoLiberado ? ' (liberados ' + (DIAG.espacoLiberado / 1048576).toFixed(1).replace('.', ',') + ' MB)' : ''));
     if (DIAG.erro) linhas.push('<span style="color:#fca5a5">⛔ ' + DIAG.erro.replace(/[<>&]/g, '') + '</span>');
     document.getElementById('f68DiagTxt').innerHTML = linhas.join('<br>');
+    // 5.3.8 (fase 1): erros que antes ficavam escondidos
+    try { var be = document.getElementById('f538Erros'); if (!be) { be = document.createElement('div'); be.id = 'f538Erros'; el.appendChild(be); } if (typeof W.fastErrosRender === 'function') W.fastErrosRender(be); } catch (e) {}
     formLogin(!tk && DIAG.login === 'sem-sessao');
     el.style.background = DIAG.erro || !tk ? 'rgba(127,29,29,.95)' : 'rgba(17,24,39,.94)';
     if (mostrar) {

@@ -1,5 +1,201 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="fast-linux-desktop" data-fast-version="5.3.7" data-fast-enter-navigation="1"><head>
+<html lang="pt-BR" class="fast-linux-desktop" data-fast-version="5.3.8" data-fast-enter-navigation="1"><head>
+<script id="fast538-erros">
+/* 5.3.8 — FASE 1: ERROS QUE ANTES FICAVAM ESCONDIDOS
+   O app tem centenas de proteções que "engolem" o erro e seguem em frente. Isso
+   evita travar a tela, mas esconde problemas sérios (ex.: o envio para a nuvem
+   recusado com HTTP 400, que ninguém via). Este bloco é o primeiro a rodar e anota:
+   - respostas recusadas pelo Supabase e pelo Google Drive (HTTP 400, 403, 409, 5xx…);
+   - falhas de conexão com internet ligada;
+   - erros de programação (que antes só apareciam no console);
+   - falta de espaço para salvar no aparelho.
+   Tudo aparece em Ferramentas FAST → Sincronização ("Erros recentes"), com botão
+   para copiar e mandar ao suporte. Senhas e chaves de acesso são apagadas do texto. */
+(function(){
+  'use strict';
+  var W=window; if(W.fastErros) return;
+  var KEY='fast_erros_v1', MAX=80, SETORIG=Storage.prototype.setItem, GETORIG=Storage.prototype.getItem;
+  var APP=/exclusive=rotas-dia/.test(location.search)?'ROTAS':/exclusive=despesas/.test(location.search)?'Despesas':(matchMedia&&matchMedia('(pointer:coarse)').matches?'FAST':'PAINEL');
+  var lista=[];
+  function ler(){try{var v=JSON.parse(GETORIG.call(localStorage,KEY)||'[]');return Array.isArray(v)?v:[]}catch(e){return[]}}
+  lista=ler();
+  function limpo(t){
+    return String(t==null?'':t)
+      .replace(/eyJ[\w-]{8,}\.[\w-]{8,}\.[\w-]+/g,'[token]')
+      .replace(/(apikey|access_token|refresh_token|token|password|senha|key)(["']?\s*[:=]\s*["']?)[^&\s"',}]+/gi,'$1$2…')
+      .replace(/sb_publishable_[\w-]+/g,'[chave]')
+      .replace(/\s+/g,' ').trim().slice(0,260);
+  }
+  var tGravar=0;
+  function gravar(){
+    clearTimeout(tGravar);
+    tGravar=setTimeout(function(){
+      try{
+        // junta com o que os outros apps (FAST/ROTAS/Despesas) gravaram no mesmo aparelho
+        var outros=ler(),vistos={};
+        var todos=outros.concat(lista).filter(function(x){if(!x||vistos[x.id])return false;vistos[x.id]=1;return true});
+        todos.sort(function(a,b){return a.t-b.t});
+        lista=todos.slice(-MAX);
+        SETORIG.call(localStorage,KEY,JSON.stringify(lista));
+      }catch(e){}
+    },800);
+  }
+  var GRAVES={sync:1,quota:1,drive:1};
+  var ultAviso=0;
+  function registrar(tipo,msg,det){
+    try{
+      msg=limpo(msg); if(!msg) return;
+      var agora=Date.now(), ult=null;
+      for(var i=lista.length-1;i>=0&&i>=lista.length-15;i--){ if(lista[i].tipo===tipo&&lista[i].msg===msg&&lista[i].app===APP){ult=lista[i];break} }
+      if(ult&&agora-ult.t<10*60000){ult.n=(ult.n||1)+1;ult.t=agora;if(det)ult.det=limpo(det)}
+      else lista.push({id:agora.toString(36)+Math.random().toString(36).slice(2,6),t:agora,app:APP,tipo:tipo,msg:msg,det:det?limpo(det):'',n:1});
+      if(lista.length>MAX) lista=lista.slice(-MAX);
+      gravar();
+      if(GRAVES[tipo]) avisarSeRepetir();
+    }catch(e){}
+  }
+  // avisa na tela (no máximo 1 vez a cada 30 min) quando um erro grave se repete
+  function avisarSeRepetir(){
+    var agora=Date.now(); if(agora-ultAviso<30*60000) return;
+    var rec=lista.filter(function(x){return GRAVES[x.tipo]&&x.app===APP&&agora-x.t<3*60000}).reduce(function(s,x){return s+(x.n||1)},0);
+    var temQuota=lista.some(function(x){return x.tipo==='quota'&&x.app===APP&&agora-x.t<60000});
+    if(rec<3&&!temQuota) return;
+    ultAviso=agora;
+    setTimeout(function(){
+      try{
+        var d=document.createElement('div');
+        d.id='f538ErroAviso';
+        d.textContent=temQuota?'⚠️ O aparelho está sem espaço para salvar. Toque para ver.':'⚠️ A sincronização está dando erro. Toque para ver.';
+        d.style.cssText='position:fixed;left:12px;right:12px;bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:2147483001;max-width:440px;margin:0 auto;padding:12px 14px;border-radius:12px;background:#7f1d1d;color:#fff;font:600 14px/1.35 system-ui,sans-serif;box-shadow:0 6px 24px rgba(0,0,0,.35);cursor:pointer';
+        d.onclick=function(){d.remove();try{W.fastDiagnosticoSync&&W.fastDiagnosticoSync()}catch(e){}};
+        (document.body||document.documentElement).appendChild(d);
+        setTimeout(function(){try{d.remove()}catch(e){}},15000);
+      }catch(e){}
+    },50);
+  }
+  W.fastErroRegistrar=registrar;
+
+  /* ---- 1) erros de programação ---- */
+  W.addEventListener('error',function(e){
+    if(!e||e.target&&e.target!==W) return;   // imagem que não carregou etc.: não é erro do app
+    var src=String(e.filename||'').split('/').pop().split('?')[0];
+    registrar('js',e.message||'erro',src?src+':'+(e.lineno||''):'');
+  },true);
+  W.addEventListener('unhandledrejection',function(e){
+    var r=e&&e.reason; var m=(r&&(r.message||r.toString&&r.toString()))||String(r);
+    if(/AbortError|The user aborted|NotAllowedError/i.test(m)) return;
+    registrar('js',m,'promessa não tratada');
+  });
+  /* ---- 2) mensagens de erro que só iam para o console ---- */
+  ['error','warn'].forEach(function(nv){
+    var orig=console[nv]; if(!orig||orig.__f538) return;
+    var f=function(){
+      try{
+        var txt=Array.prototype.map.call(arguments,function(a){return a&&a.message?a.message:(typeof a==='object'?(function(){try{return JSON.stringify(a)}catch(e){return String(a)}})():String(a))}).join(' ');
+        if(nv==='error') registrar(/quota|cheio|QuotaExceeded/i.test(txt)?'quota':'js',txt);
+        else if(/falh|erro|error|recus|quota|denied|negad|HTTP\s*[45]\d\d/i.test(txt)) registrar(/quota|QuotaExceeded/i.test(txt)?'quota':'aviso',txt);
+      }catch(e){}
+      return orig.apply(this,arguments);
+    };
+    f.__f538=true; console[nv]=f;
+  });
+  /* ---- 3) recusas do banco de dados e do Drive ---- */
+  var FORIG=W.fetch;
+  if(typeof FORIG==='function'&&!FORIG.__f538err){
+    var fx=function(input,init){
+      var url=String((input&&input.url)||input||''), met=String((init&&init.method)||(input&&input.method)||'GET').toUpperCase();
+      var alvo=/supabase\.co/.test(url)?'banco':/googleapis\.com|googleusercontent/.test(url)?'drive':'';
+      var p=FORIG.apply(this,arguments);
+      if(!alvo) return p;
+      var caminho=url.replace(/^https?:\/\/[^/]+/,'').split('?')[0].replace(/\/rest\/v1\//,'').replace(/\/storage\/v1\/object\//,'storage/').slice(0,70);
+      p.then(function(r){
+        if(!r||r.ok||r.status===304) return;
+        var st=r.status;
+        // respostas esperadas: função nova ainda não criada (404 PGRST202), sem permissão de leitura do Drive alheio etc.
+        var tipo=st===401?'login':(st===404||st===416)?'aviso':(alvo==='drive'?'drive':'sync');
+        try{r.clone().text().then(function(t){
+          if(st===404&&/PGRST202|PGRST205/.test(t)) return;
+          registrar(tipo,(alvo==='banco'?'Banco':'Drive')+' recusou '+met+' '+caminho+' (HTTP '+st+')',t);
+        },function(){registrar(tipo,(alvo==='banco'?'Banco':'Drive')+' recusou '+met+' '+caminho+' (HTTP '+st+')')})}catch(e){}
+      },function(err){
+        if(!navigator.onLine) return;
+        var m=String(err&&err.message||err);
+        if(/AbortError|aborted/i.test(m)) return;
+        registrar('rede','Sem resposta do '+(alvo==='banco'?'banco':'Drive')+' em '+met+' '+caminho,m);
+      });
+      return p;
+    };
+    try{Object.keys(FORIG).forEach(function(k){fx[k]=FORIG[k]})}catch(e){}
+    fx.__f538err=true; W.fetch=fx;
+  }
+
+  /* ---- 4) o que ocupa o espaço do aparelho ---- */
+  var cacheEsp=null,cacheEm=0;
+  function espaco(){
+    if(cacheEsp&&Date.now()-cacheEm<30000) return cacheEsp;
+    var chaves=[],total=0;
+    try{for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i),v=GETORIG.call(localStorage,k)||'';var b=(k.length+v.length)*2;total+=b;chaves.push([k,b])}}catch(e){}
+    chaves.sort(function(a,b){return b[1]-a[1]});
+    var partes=[],fotos=0;
+    try{
+      var bd=W.bancoDados||{};
+      Object.keys(bd).forEach(function(k){var s=JSON.stringify(bd[k])||'';partes.push([k,s.length*2]);var m=s.match(/data:image\//g);if(m)fotos+=m.length});
+      partes.sort(function(a,b){return b[1]-a[1]});
+    }catch(e){}
+    cacheEsp={total:total,chaves:chaves.slice(0,5),partes:partes.slice(0,5),fotos:fotos};cacheEm=Date.now();
+    return cacheEsp;
+  }
+  W.fastEspacoDetalhe=espaco;
+
+  /* ---- 5) quadro "Erros recentes" no painel de Sincronização ---- */
+  function hora(t){var d=new Date(t);return ('0'+d.getDate()).slice(-2)+'/'+('0'+(d.getMonth()+1)).slice(-2)+' '+('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2)}
+  function esc(t){return String(t).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+  function mb(b){return (b/1048576).toFixed(2).replace('.',',')+' MB'}
+  var NOMES={sync:'Banco',drive:'Drive',quota:'Espaço',rede:'Internet',login:'Login',js:'Programa',aviso:'Aviso'};
+  function textoCopia(){
+    var e=espaco();
+    return 'FAST — erros recentes ('+new Date().toLocaleString('pt-BR')+')\n'+
+      lista.slice().reverse().map(function(x){return hora(x.t)+' · '+x.app+' · '+(NOMES[x.tipo]||x.tipo)+' · '+x.msg+(x.n>1?' (×'+x.n+')':'')+(x.det?'\n   '+x.det:'')}).join('\n')+
+      '\n\nEspaço usado: '+mb(e.total)+' de ~5 MB\n'+e.partes.map(function(p){return '  '+p[0]+': '+mb(p[1])}).join('\n')+(e.fotos?'\n  fotos guardadas dentro dos dados: '+e.fotos:'');
+  }
+  W.fastErrosRender=function(box){
+    if(!box) return;
+    try{var vistos={};lista=ler().concat(lista).sort(function(a,b){return b.t-a.t}).filter(function(x){if(!x||vistos[x.id])return false;vistos[x.id]=1;return true}).reverse().slice(-MAX)}catch(e){}
+    var dia=Date.now()-24*3600000;
+    var rec=lista.filter(function(x){return x.t>dia}).reverse();
+    var graves=rec.filter(function(x){return GRAVES[x.tipo]||x.tipo==='rede'||x.tipo==='login'});
+    var e=espaco();
+    var h='<div style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.18)">';
+    h+='<b>'+(graves.length?'⚠️ Erros recentes (24 h): '+graves.length:'✅ Nenhum erro grave nas últimas 24 h')+'</b>'+(rec.length>graves.length?' <span style="opacity:.75">· '+(rec.length-graves.length)+' aviso(s)</span>':'');
+    if(rec.length){
+      h+='<div style="max-height:150px;overflow:auto;margin-top:4px;font-size:12px">'+rec.slice(0,20).map(function(x){
+        var cor=GRAVES[x.tipo]?'#fca5a5':(x.tipo==='rede'||x.tipo==='login')?'#fde68a':'#cbd5e1';
+        return '<div style="color:'+cor+';margin:2px 0">'+hora(x.t)+' · '+x.app+' · '+(NOMES[x.tipo]||x.tipo)+' — '+esc(x.msg)+(x.n>1?' <b>×'+x.n+'</b>':'')+'</div>';
+      }).join('')+'</div>';
+    }
+    h+='<div style="margin-top:6px;font-size:12px;opacity:.9">💾 Maiores partes dos dados: '+e.partes.slice(0,3).map(function(p){return esc(p[0])+' '+mb(p[1])}).join(' · ')+(e.fotos?' · '+e.fotos+' foto(s) dentro dos dados':'')+'</div>';
+    h+='<div style="display:flex;gap:8px;margin-top:8px"><button type="button" data-f538="copiar" style="flex:1;min-height:38px;border:0;border-radius:9px;font-weight:700;background:#e5e7eb;color:#111">📋 Copiar para o suporte</button>'+
+       '<button type="button" data-f538="limpar" style="min-height:38px;padding:0 12px;border:0;border-radius:9px;font-weight:700;background:#374151;color:#fff">Limpar</button></div></div>';
+    if(box.__f538h!==h){box.innerHTML=h;box.__f538h=h}
+    if(!box.__f538lig){
+      box.__f538lig=true;
+      box.addEventListener('click',function(ev){
+        var b=ev.target.closest&&ev.target.closest('[data-f538]'); if(!b) return;
+        ev.stopPropagation();
+        if(b.getAttribute('data-f538')==='copiar'){
+          var t=textoCopia();
+          var ok=function(){b.textContent='✅ Copiado'};
+          try{navigator.clipboard.writeText(t).then(ok,function(){W.prompt('Copie o texto:',t)})}catch(e){W.prompt('Copie o texto:',t)}
+        }else{
+          lista=[];try{SETORIG.call(localStorage,KEY,'[]')}catch(e){}
+          box.__f538h='';W.fastErrosRender(box);
+        }
+      });
+    }
+  };
+  W.fastErros=function(){return lista.slice()};
+})();
+</script>
 <script id="fast-4065-bio-nativa">
 /* 5.1.6: ponte para a biometria NATIVA do Android (APK). No WebView do APK o
    WebAuthn não existe; o APK expõe window.FASTBiometria e o app usa a digital/rosto
@@ -10947,6 +11143,8 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
       return { data:escolhido.data, fonte:escolhido.fonte, recuperado:escolhido.fonte!=='localStorage' };
     }
 
+    try { window.fastCarregarBancoSeguro = fastCarregarBancoSeguro; } catch(_) {}
+
     async function fastSolicitarPersistencia() {
       try {
         if (!navigator.storage) return;
@@ -14809,9 +15007,28 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
           const porChave = new Map();
           const remapIds = new Map();
           const carimbo = r => Date.parse(r.statusUpdatedAt || r.updatedAt || r.updated_at || '') || 0;
+          // 5.3.8: rotas ligadas a itens DIFERENTES das Rotas do Dia são rotas de verdade,
+          // mesmo com cliente/origem/destino/valor iguais (ex.: fazer de novo, no mesmo dia,
+          // uma rota já concluída). Antes elas eram tratadas como cópia repetida: uma era
+          // apagada e o item novo sumia do ROTAS ("não consigo gravar a mesma rota").
+          // Continua juntando só as cópias "soltas" (sem item próprio no ROTAS).
+          const rotaComItem = new Set();
+          try {
+            Object.keys(dadosMesclados.sequencias || {}).forEach(data => {
+              (dadosMesclados.sequencias[data] || []).forEach(item => {
+                if (!item) return;
+                if (item.rotaId != null) rotaComItem.add(String(item.rotaId));
+                if (Array.isArray(item.rotasOriginais)) item.rotasOriginais.forEach(id => rotaComItem.add(String(id)));
+                if (Array.isArray(item.itensOriginais)) item.itensOriginais.forEach(o => { if (o && o.rotaId != null) rotaComItem.add(String(o.rotaId)); });
+              });
+            });
+          } catch (eRci) {}
           dadosMesclados.rotas.forEach(r => {
-            const chave = [r.data, r.cliente, r.origem, r.destino, Number(r.qtdMercadorias || 1), Number(r.valor || 0)].map(normalizaChave).join('|');
-            const anterior = porChave.get(chave);
+            let chave = [r.data, r.cliente, r.origem, r.destino, Number(r.qtdMercadorias || 1), Number(r.valor || 0)].map(normalizaChave).join('|');
+            let anterior = porChave.get(chave);
+            if (anterior && rotaComItem.has(String(r.id)) && rotaComItem.has(String(anterior.id))) {
+              chave = chave + '|#' + String(r.id); anterior = porChave.get(chave);
+            }
             if (!anterior) { porChave.set(chave, r); return; }
             const manterNovo = carimbo(r) > carimbo(anterior);
             const mantida = manterNovo ? r : anterior;
@@ -16825,16 +17042,40 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
       }, 200);
     }
 
+    // 5.3.8 (fase 1): localStorage cheio não perde mais dados — a versão nova fica no
+    // IndexedDB, uma marca avisa os outros apps (FAST/ROTAS/Despesas) para lerem de lá,
+    // e o erro aparece em Ferramentas FAST → Sincronização em vez de um alerta a cada toque.
+    var fastEspacoAvisado = false;
+    function fastEspacoCheioSemPerder(err, tamanho) {
+      var quota = err && (err.name === 'QuotaExceededError' || err.code === 22 || err.code === 1014 || /quota/i.test(String(err.message || '')));
+      try { if (typeof window.fastErroRegistrar === 'function') window.fastErroRegistrar(quota ? 'quota' : 'js', quota ? 'Espaço do aparelho cheio: dados guardados só no IndexedDB (' + (tamanho / 524288).toFixed(1).replace('.', ',') + ' MB)' : 'Falha ao salvar no aparelho: ' + ((err && err.message) || err)); } catch(_) {}
+      try { localStorage.setItem('fast538_banco_no_idb', String(Date.now())); } catch(_) {
+        // nem a marca coube: tira a cópia velha do localStorage para os outros apps não lerem dados antigos
+        try { localStorage.removeItem(FAST_LOCAL_KEY); localStorage.setItem('fast538_banco_no_idb', String(Date.now())); } catch(__) {}
+      }
+      if (!fastEspacoAvisado && quota) {
+        fastEspacoAvisado = true;
+        try { mostrarToast('⚠️ Espaço do aparelho quase cheio. Seus dados continuam salvos (cópia interna). Veja Ferramentas → Sincronização.', 'warning'); } catch(_) {}
+      }
+    }
+
     function salvarStorage() {
       try {
         fastMutationRevision++;
         // Gravação imediata e síncrona para sobreviver a fechamento inesperado.
         const fastSerializedNow = JSON.stringify(fastNormalizarBanco(bancoDados));
-        localStorage.setItem(FAST_LOCAL_KEY, fastSerializedNow);
-        localStorage.setItem(FAST_LOCAL_META_KEY, JSON.stringify({savedAt:Date.now(), checksum:fastChecksum(fastSerializedNow)}));
-        // Espelho transacional durável no IndexedDB + snapshots rotativos.
+        // 5.3.8 (fase 1): a cópia durável no IndexedDB (sem o limite de ~5 MB) é feita
+        // SEMPRE e PRIMEIRO. Antes, se o localStorage estivesse cheio, o erro acontecia
+        // antes desta linha e a alteração não era guardada em lugar nenhum.
         fastEnfileirarPersistencia(bancoDados, 'save');
         mudancasPendentes = true;
+        try {
+          localStorage.setItem(FAST_LOCAL_KEY, fastSerializedNow);
+          localStorage.setItem(FAST_LOCAL_META_KEY, JSON.stringify({savedAt:Date.now(), checksum:fastChecksum(fastSerializedNow)}));
+          try { if (localStorage.getItem('fast538_banco_no_idb')) localStorage.removeItem('fast538_banco_no_idb'); } catch(_) {}
+        } catch (eLS) {
+          fastEspacoCheioSemPerder(eLS, fastSerializedNow.length);
+        }
         // TEMPO REAL: re-renderiza gráficos do dashboard sempre que os dados mudam
         // (mesmo que o usuário esteja em outra aba, os gráficos já estarão atualizados ao voltar)
         if (_fastDashRefreshTimer) clearTimeout(_fastDashRefreshTimer);
@@ -16876,6 +17117,11 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
     var _fastSaveUiTimer = null;
     var _fastRenderUiTimer = null;
     function fastSalvarSemBloquear(atraso) {
+      // 5.3.8: marca NA HORA que houve mudança. O salvamento em si continua adiado
+      // alguns milissegundos (para não travar o toque), mas a sincronização que estiver
+      // em andamento já fica sabendo e não substitui os dados por uma versão sem esta
+      // alteração (antes uma rota nova, uma conclusão ou um pagamento podia "sumir").
+      try { fastMutationRevision++; } catch(_) {}
       mudancasPendentes = true;
       atualizarStatusSync('pending', 'Salvando...');
       if (_fastSaveUiTimer) clearTimeout(_fastSaveUiTimer);
@@ -18197,6 +18443,11 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
         }
         return;
       }
+      // 5.3.8 (fluidez): sem busca, mostra os primeiros 120 lugares e um botão "Mostrar mais"
+      // (com centenas de lugares a tela demorava ~1 s para abrir). A busca procura em TODOS.
+      const _f538LimDest = window.__f538DestLimite || 120;
+      const _f538TotDest = filtrados.length;
+      if (!termo && filtrados.length > _f538LimDest) filtrados = filtrados.slice(0, _f538LimDest);
       tbody.innerHTML = filtrados.map(d => {
           const destNomeSeguro = escapeHtmlAttr(d.nome || '');
           return `
@@ -18214,7 +18465,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
           <td>${d.telefone ? '<span style="color:#10b981;font-weight:700;"><i class="fa-brands fa-whatsapp"></i> ' + escapeHtml(d.telefone) + '</span>' : '<span style="color:var(--text-faint);font-size:11px;">-</span>'}</td>
           <td style="text-align:center;">${d.usadoEm || 0}x</td>
         </tr>
-      `;}).join('');
+      `;}).join('') + (_f538TotDest > filtrados.length ? '<tr class="no-print"><td colspan="7" style="text-align:center;padding:14px 8px;font-weight:700;">Mostrando ' + filtrados.length + ' de ' + _f538TotDest + ' lugares. Use a busca para achar os outros. <button type="button" class="btn-primary" style="margin-left:6px;padding:6px 12px;" onclick="window.__f538DestLimite=(window.__f538DestLimite||120)+300;destRenderizarLista()">Mostrar mais</button></td></tr>' : '');
       // (r125) Sincroniza o balão de seleção em massa após re-render (esconde se a seleção zerou)
       if (typeof destAtualizarBoxSelecao === 'function') destAtualizarBoxSelecao();
     }
@@ -19401,7 +19652,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
       mostrarToast('Atualizando dados...', 'info');
       try {
         // 1. Recarregar dados do localStorage (5.1.6: grava antes a versão da memória)
-        try { salvarStorage(); } catch (eS) {}
+        try { window.__f538SalvarSync = true; salvarStorage(); } catch (eS) {} finally { window.__f538SalvarSync = false; }
         var raw = localStorage.getItem(FAST_LOCAL_KEY);
         if (raw) {
           try {
@@ -20025,6 +20276,14 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
         btnCap.disabled = true;
         var dsAtual = fastCameraAoVivoState ? fastCameraAoVivoState.dataSel : dataSel;
         var idxAtual = fastCameraAoVivoState ? fastCameraAoVivoState.index : index;
+        // 5.3.8: acha a rota pelo CÓDIGO dela (a posição na lista pode mudar enquanto a
+        // câmera está aberta, com a sincronização trazendo rotas novas ou reordenando).
+        try {
+          var idCam = String(fallbackId || '').replace(/^fastCamFallback-/, '');
+          var listaCam = (bancoDados.sequencias && bancoDados.sequencias[dsAtual]) || [];
+          var posCam = idCam ? listaCam.findIndex(function (x) { return x && String(x.id) === idCam; }) : -1;
+          if (posCam >= 0) idxAtual = posCam;
+        } catch (eCam) {}
         var ic = null; // 5.1.6: takePhoto() do sensor demorava vários segundos e travava — usa o quadro do vídeo (instantâneo)
         if (ic && ic.takePhoto) {
           try {
@@ -20092,6 +20351,13 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
     function fastFotoSubirNuvem(base64, prefixo) {
       return new Promise(function (resolve, reject) {
         if (!navigator.onLine) { reject(new Error('offline')); return; }
+        // 5.3.8: se o Supabase já recusou por falta de espaço há pouco, nem tenta de novo —
+        // a foto vai direto para o aparelho + Google Drive (antes cada foto subia inteira
+        // até 3 vezes só para ser recusada, e por isso demorava).
+        try {
+          var cheioEm = +localStorage.getItem('fast538_storage_cheio') || 0;
+          if (cheioEm && Date.now() - cheioEm < 2 * 3600000) { reject(new Error('storage cheio')); return; }
+        } catch (e0) {}
         var blob = fastBase64ParaBlob(base64);
         if (!blob) { reject(new Error('base64 inválido')); return; }
         var caminho = (prefixo || 'rota') + '/' + Date.now() + '_' + Math.random().toString(36).slice(2, 10) + '.jpg';
@@ -20100,7 +20366,11 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
           headers: fastStorageHeaders({ 'Content-Type': blob.type || 'image/jpeg', 'x-upsert': 'true' }),
           body: blob
         }).then(function (r) {
-          if (!r.ok) return r.text().then(function (t) { throw new Error('upload ' + r.status + ' ' + t); });
+          if (!r.ok) return r.text().then(function (t) {
+            if (r.status === 413 || /quota|exceed|payload too large|limit/i.test(t || '')) { try { localStorage.setItem('fast538_storage_cheio', String(Date.now())); } catch (e1) {} }
+            throw new Error('upload ' + r.status + ' ' + t);
+          });
+          try { localStorage.removeItem('fast538_storage_cheio'); } catch (e2) {}
           resolve(fastStorageBase() + '/object/public/' + FAST_FOTOS_BUCKET + '/' + caminho);
         }).catch(reject);
       });
@@ -20205,7 +20475,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
         bancoDados.sequencias[dataSel] = [];
       }
       const lista = bancoDados.sequencias[dataSel];
-      const item = lista[index];
+      let item = lista[index];
       if (!item) {
         console.error("Item de rota não encontrado para salvar foto:", dataSel, index);
         alert("⚠️ Não foi possível localizar esta rota para salvar a foto. Tente recarregar as rotas do dia.");
@@ -20215,7 +20485,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
 
       // Garantir que item.fotos seja array e normalizar
       normalizarFotosItem(item);
-      const rotaVinculada = item.rotaId ? (bancoDados.rotas || []).find(r => String(r.id) === String(item.rotaId)) : null;
+      let rotaVinculada = item.rotaId ? (bancoDados.rotas || []).find(r => String(r.id) === String(item.rotaId)) : null;
 
       const totalArquivos = fileList.length;
       mostrarFeedbackFoto(item.id, '⏳ Processando ' + totalArquivos + ' foto(s)...', 'sucesso');
@@ -20285,6 +20555,20 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
       }
 
       function finalizarSalvamento() {
+        // 5.3.8: enquanto a foto subia, a sincronização pode ter trocado o objeto da rota
+        // por uma cópia nova. Grava na cópia QUE ESTÁ NA LISTA AGORA (antes a foto ia para
+        // a cópia velha, que não existe mais, e se perdia — não chegava nos outros aparelhos).
+        try {
+          let vivo = null;
+          const seqAll = (bancoDados && bancoDados.sequencias) || {};
+          vivo = (seqAll[dataSel] || []).find(x => x && String(x.id) === String(item.id)) || null;
+          if (!vivo) Object.keys(seqAll).some(d => { vivo = (seqAll[d] || []).find(x => x && String(x.id) === String(item.id)) || null; return !!vivo; });
+          if (vivo && vivo !== item) { normalizarFotosItem(vivo); item = vivo; }
+          if (item.rotaId) {
+            const rv = (bancoDados.rotas || []).find(r => String(r.id) === String(item.rotaId));
+            if (rv) rotaVinculada = rv;
+          }
+        } catch (eVivo) {}
         // Adicionar as novas referências ao item.fotos
         if (!Array.isArray(item.fotos)) item.fotos = [];
         novasRefs.forEach(ref => { if (!item.fotos.includes(ref)) item.fotos.push(ref); });
@@ -20772,7 +21056,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
       if (ref.startsWith('idb:')) {
         const chave = ref.substring(4);
         if (_cacheBlobUrls[ref]) return _cacheBlobUrls[ref];
-        const b64 = await obterFotoIndexedDB(chave);
+        const b64 = await (typeof window.obterFotoIndexedDB === 'function' ? window.obterFotoIndexedDB : obterFotoIndexedDB)(chave);   // 5.3.8: versão completa (também busca no Drive a foto de outro aparelho)
         if (b64) {
           _cacheBlobUrls[ref] = b64;
           return b64;
@@ -20848,7 +21132,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
       if (ref.startsWith('idb:')) {
         try {
           const chave = ref.substring(4);
-          const b64 = await obterFotoIndexedDB(chave);
+          const b64 = await (typeof window.obterFotoIndexedDB === 'function' ? window.obterFotoIndexedDB : obterFotoIndexedDB)(chave);   // 5.3.8: versão completa (também busca no Drive a foto de outro aparelho)
           if (!b64) return null;
           const resp = await fetchComTimeout(b64, 25000);
           const blob = await resp.blob();
@@ -28489,7 +28773,26 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
       tbodyD.innerHTML = '';
       const linhasDespesas = [];
       // r96: Ordenacao por setinhas nos cabecalhos (igual Rotas). Renderiza e depois reaplica.
-      const _despesasLista = (bancoDados.despesas || []);
+      let _despesasLista = (bancoDados.despesas || []);
+      // 5.3.8 (fluidez): sem filtro, a tabela de Despesas desenha só as 150 mais recentes
+      // (com 1.500 despesas eram ~25 mil elementos escondidos deixando TODO o app lento).
+      // Ao usar qualquer filtro de Despesas, aparecem TODAS as encontradas.
+      const _f538FiltroDesp = ['fefDescription', 'fefLocation', 'fefCategory', 'fefPayment'].some(id => String((document.getElementById(id) || {}).value || '').trim());
+      const _f538TotalDesp = _despesasLista.length;
+      window.__f538DespLimitada = false;
+      if (!_f538FiltroDesp && !window.__fast538DespTodas && _despesasLista.length > 150) {
+        _despesasLista = _despesasLista.slice().sort((a, b) => String(b.data || '').localeCompare(String(a.data || '')) || (Number(b.id) || 0) - (Number(a.id) || 0)).slice(0, 150);
+        window.__f538DespLimitada = true;
+      }
+      try {
+        let aviso = document.getElementById('f538DespMais');
+        const tabD = tbodyD.closest('table');
+        if (window.__f538DespLimitada && tabD) {
+          if (!aviso) { aviso = document.createElement('div'); aviso.id = 'f538DespMais'; aviso.className = 'no-print'; aviso.style.cssText = 'text-align:center;padding:12px 8px;font-weight:700;'; (tabD.parentNode).insertBefore(aviso, tabD.nextSibling); }
+          aviso.innerHTML = 'Mostrando as 150 despesas mais recentes de ' + _f538TotalDesp + '. Use os filtros para buscar as antigas. <button type="button" class="btn-primary" style="margin-left:6px;padding:6px 12px;" onclick="window.__fast538DespTodas=true;window.__f538RenderSync=true;try{renderizar()}finally{window.__f538RenderSync=false}">Mostrar todas</button>';
+          aviso.style.display = '';
+        } else if (aviso) aviso.style.display = 'none';
+      } catch (eAv) {}
       _despesasLista.forEach(d => {
         const numDocs = (d.documentos && d.documentos.length) ? d.documentos.length : 0;
         const anexosCell = numDocs > 0
@@ -39543,6 +39846,15 @@ setInterval(function(){try{var tab=document.getElementById('rotasDia');if(tab&&t
   };
   window.fastFilterExpenses = function(){
     try{
+      // 5.3.8: tabela mostrando só as recentes + filtro em uso → desenha todas e filtra
+      if (window.__f538DespLimitada && !window.__f538DespRedesenhando) {
+        var algum = ['fefDescription','fefLocation','fefCategory','fefPayment'].some(function(id){var e=document.getElementById(id);return e&&String(e.value||'').trim();});
+        if (algum && typeof window.renderizar === 'function') {
+          window.__f538DespRedesenhando = true; window.__f538RenderSync = true;
+          try { window.renderizar(); } finally { window.__f538RenderSync = false; window.__f538DespRedesenhando = false; }
+          return;
+        }
+      }
       var desc = normalizar(document.getElementById('fefDescription') && document.getElementById('fefDescription').value);
       var loc  = normalizar(document.getElementById('fefLocation') && document.getElementById('fefLocation').value);
       var cat  = (document.getElementById('fefCategory') && document.getElementById('fefCategory').value) || '';
@@ -43112,10 +43424,10 @@ html body #modalEditarRota .modal-content{margin:0 auto!important;top:auto!impor
   html body #containerSequencia .seq-item .seq-body .seq-info-wa{align-self:flex-start!important;max-width:max-content!important}
 }
 </style>
-<script src="fast-4067.js?v=35"></script>
+<script src="fast-4067.js?v=39"></script>
 <script src="navegacao-fast.js?v=1"></script>
 <script src="recibo-fast.js?v=1"></script>
-<script src="fast-recursos.js?v=43"></script>
+<script src="fast-recursos.js?v=44"></script>
 <!-- (r108) Painel de diagnostico de fotos na nuvem -->
 <style id="fast108-diag-css">
 #fast108Btn{position:fixed;right:14px;bottom:84px;z-index:2147483000;background:#16a34a;color:#fff;border:0;border-radius:999px;padding:11px 14px;font:800 13px system-ui,-apple-system,Segoe UI,Roboto,sans-serif;box-shadow:0 6px 20px rgba(0,0,0,.28);cursor:pointer}
@@ -45583,7 +45895,7 @@ body.fx-apk .fx-gal-ajuda{display:flex}
   document.addEventListener('visibilitychange',function(){if(!document.hidden)setTimeout(publicarLugares,3000)});
   function iniciar(){ ligar(); marcarCards(); }
   setInterval(iniciar,2000); setTimeout(iniciar,800);
-  setInterval(buscarPedidos,15000); setTimeout(buscarPedidos,4000);
+  setInterval(buscarPedidos,45000); /* 5.3.8: economia de dados (antes 15 s) */ setTimeout(buscarPedidos,4000);
   document.addEventListener('visibilitychange',function(){if(!document.hidden)buscarPedidos()});
 })();
 </script>
@@ -45972,6 +46284,20 @@ body.fx-apk .fx-gal-ajuda{display:flex}
     if(!envio.length&&!apagar.length){snap=atual;gravarSnap(snap);return}
     enviando=true;
     try{
+      // 5.3.8: confere na nuvem antes de enviar. Lugar que chegou por OUTRO caminho
+      // (sincronização geral) já está lá com a mesma hora ou mais nova: não reenvia.
+      if(envio.length){
+        try{
+          var ids=envio.map(function(d){return String(d.id)}).filter(function(x){return /^\d+$/.test(x)});
+          if(ids.length){
+            var rc=await fetch(url()+'/destinos?select=id,updated_at&id=in.('+ids.join(',')+')',{headers:cab(),cache:'no-store'});
+            if(rc.ok){
+              var naNuvem={};(await rc.json()).forEach(function(x){naNuvem[String(x.id)]=Date.parse(x.updated_at||'')||0});
+              envio=envio.filter(function(d){var t=naNuvem[String(d.id)];return !(t&&t>=ts(d))});
+            }
+          }
+        }catch(eChk){}
+      }
       if(envio.length){
         var r=await fetch(url()+'/destinos',{method:'POST',headers:cab({'Prefer':'resolution=merge-duplicates,return=minimal'}),body:JSON.stringify(envio.map(function(d){return destinoToSupabase(d)}))});
         if(!r.ok)throw new Error('HTTP '+r.status);
@@ -46114,8 +46440,39 @@ body.fx-apk .fx-gal-ajuda{display:flex}
       Object.keys(f).forEach(function(k){try{g[k]=f[k]}catch(e){}});g.__f538Lug=true;W[nome]=g;
     })();
   });
+  /* 5.3.8: lugar alterado SEM hora de edição (unificar, varredura, edição direta) recebe
+     a hora JÁ NO MOMENTO EM QUE É SALVO. Antes ela só era posta na próxima volta do envio
+     (até 8 s depois); se a sincronização geral chegasse antes, a versão da nuvem — com a
+     mesma hora — vencia e a alteração era desfeita. */
+  function marcarEditados(){
+    try{
+      if(!snap)return;
+      // gravação feita PELA sincronização (dados que chegaram da nuvem) não é edição deste aparelho
+      if(W.__fastSyncRodando||W.__f538LugAplicando)return;
+      var b=bd(); if(!b||!Array.isArray(b.destinos))return;
+      var atual=retrato();
+      Object.keys(atual).forEach(function(id){
+        var a=atual[id],sn=snap[id];
+        if(!sn||sn.h===a.h)return;
+        if(vindosDaNuvem[id]===a.h||nuvemH[id]===a.h)return;
+        if(a.t>sn.t)return;                                   // já tem hora nova
+        var d=b.destinos.filter(function(x){return x&&String(x.id)===id})[0];
+        if(d)d.updatedAt=new Date().toISOString();
+      });
+    }catch(e){}
+  }
+  (function ligarMarca(){
+    var f=W.salvarStorage;
+    if(typeof f==='function'&&!f.__f538LugMarca){
+      var g=function(){marcarEditados();return f.apply(this,arguments)};
+      Object.keys(f).forEach(function(k){try{g[k]=f[k]}catch(e){}});
+      g.__f538LugMarca=true;W.salvarStorage=g;
+    }
+    setTimeout(ligarMarca,3000);
+  })();
   setInterval(function(){subir()},8000);
-  setInterval(function(){puxar(false)},5000);           // 5.3.8: a cada 5 s (consulta mínima quando nada mudou)
+  W.__f538LugPuxar=function(){setTimeout(function(){puxar(true)},400)};
+  setInterval(function(){puxar(false)},20000)   /* 5.3.8: economia de dados (antes 5 s) */;           // 5.3.8: a cada 5 s (consulta mínima quando nada mudou)
   document.addEventListener('visibilitychange',function(){
     if(document.hidden)subir();                            // saindo do app: sobe o que falta
     else puxar(true);                                      // voltando: busca o que mudou
@@ -46641,7 +46998,8 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
       }
     }finally{rodando=false}
   }
-  function ciclo(){clearTimeout(t);conferir();t=setTimeout(ciclo,8000)}   // 5.3.8: a cada 8 s
+  W.__f538CliConferir=function(){setTimeout(conferir,400)};
+  function ciclo(){clearTimeout(t);conferir();t=setTimeout(ciclo,30000)}   // 5.3.8: a cada 30 s (economia de dados; antes 8 s)
   setTimeout(ciclo,9000);
   D.addEventListener('visibilitychange',function(){if(!D.hidden){clearTimeout(t);t=setTimeout(ciclo,2000)}});
   W.fast538VigiaCadastros={conferir:conferir};
@@ -47435,6 +47793,101 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
   }
   juntar();setInterval(juntar,1000);
   W.addEventListener('load',function(){juntar();setTimeout(juntar,300)});
+})();
+</script>
+<script id="fast538-fluidez">
+/* 5.3.8 — FASE 2: TOQUES SEM ENGASGO
+   1) O redesenho geral (tabela de Rotas, Despesas, Painel, Motoristas...) levava até
+      0,7 s num celular comum e rodava NA HORA de cada toque (Pago, Concluir, salvar...).
+      Agora o toque é atendido primeiro (a tela responde) e o redesenho geral roda logo
+      depois do quadro seguinte. Vários pedidos seguidos viram UM redesenho só.
+   2) As Rotas do Dia eram redesenhadas 2-4 vezes seguidas pelo mesmo toque. O primeiro
+      pedido desenha na hora; os repetidos em menos de 60 ms viram um só, no fim. */
+(function(){
+  var W=window;
+  function instalarGeral(){
+    var f=W.renderizar;
+    if(typeof f!=='function'||f.__f538flu)return;
+    var pend=false,agendado=false;
+    var rodar=function(){agendado=false;if(!pend)return;pend=false;try{f.apply(W)}catch(e){try{console.warn('renderizar:',e)}catch(_){}}};
+    var g=function(){
+      if(W.__f538RenderSync)return f.apply(this,arguments);
+      pend=true;
+      if(!agendado){
+        agendado=true;
+        if(document.hidden||typeof requestAnimationFrame!=='function')setTimeout(rodar,0);
+        else requestAnimationFrame(function(){setTimeout(rodar,0)});
+      }
+    };
+    Object.keys(f).forEach(function(k){try{g[k]=f[k]}catch(e){}});
+    g.__f538flu=true;W.renderizar=g;
+    W.fastRenderizarAgora=function(){pend=true;rodar()};
+  }
+  function instalarDia(){
+    var f=W.renderizarSequencia;
+    if(typeof f!=='function'||f.__f538flu)return;
+    var ultimo=0,trailing=0,forcarDepois=false;
+    var g=function(){
+      var agora=performance.now();
+      if(agora-ultimo<60){
+        if(W.__frxForcarLista===true){forcarDepois=true;W.__frxForcarLista=false}
+        if(!trailing)trailing=setTimeout(function(){
+          trailing=0;ultimo=performance.now();
+          if(forcarDepois){W.__frxForcarLista=true;forcarDepois=false}
+          try{f.apply(W)}catch(e){try{console.warn('renderizarSequencia:',e)}catch(_){}}
+        },60);
+        return;
+      }
+      ultimo=agora;
+      return f.apply(this,arguments);
+    };
+    Object.keys(f).forEach(function(k){try{g[k]=f[k]}catch(e){}});
+    g.__f538flu=true;W.renderizarSequencia=g;
+  }
+  /* 3) SALVAR: gravar todos os dados no aparelho leva 0,3-0,6 s (passa por várias camadas
+        e regrava tudo). Agora o toque marca NA HORA que houve mudança (a sincronização já
+        respeita), a tela responde, e a gravação acontece logo depois do quadro seguinte.
+        Vários salvamentos seguidos viram UM só. Ao sair/minimizar o app, grava na hora. */
+  function instalarSalvar(){
+    var f=W.salvarStorage;
+    if(typeof f!=='function'||f.__f538flu)return;
+    var pend=false,agendado=false,deSync=false;
+    var gravar=function(){
+      agendado=false;if(!pend)return;pend=false;
+      // a mudança já foi contada no toque; a gravação adiada não é uma mudança NOVA
+      // (senão a sincronização em andamento descartaria a mescla e reenviaria dados velhos)
+      var rv;try{rv=fastMutationRevision}catch(_){}
+      // pedido feito PELA sincronização: continua sendo tratado como dado que veio da nuvem
+      var veioDaSync=deSync;deSync=false;
+      if(veioDaSync)W.__f538LugAplicando=true;
+      try{f.apply(W)}catch(e){try{console.warn('salvarStorage:',e)}catch(_){}}
+      finally{if(veioDaSync)W.__f538LugAplicando=false}
+      try{if(rv!==undefined)fastMutationRevision=rv}catch(_){}
+    };
+    var g=function(){
+      if(W.__f538SalvarSync)return f.apply(this,arguments);
+      if(W.__fastSyncRodando)deSync=true;
+      try{fastMutationRevision++}catch(_){}
+      try{mudancasPendentes=true}catch(_){}
+      pend=true;
+      if(!agendado){
+        agendado=true;
+        if(document.hidden||typeof requestAnimationFrame!=='function')setTimeout(gravar,0);
+        else requestAnimationFrame(function(){setTimeout(gravar,0)});
+      }
+      return true;
+    };
+    Object.keys(f).forEach(function(k){try{g[k]=f[k]}catch(e){}});
+    g.__f538flu=true;W.salvarStorage=g;
+    W.fastSalvarAgora=gravar;
+    var ja=function(){if(pend)gravar()};
+    W.addEventListener('pagehide',ja);W.addEventListener('beforeunload',ja);
+    document.addEventListener('visibilitychange',function(){if(document.hidden)ja()});
+  }
+  function instalar(){try{instalarGeral()}catch(e){}try{instalarDia()}catch(e){}try{instalarSalvar()}catch(e){}}
+  instalar();
+  W.addEventListener('load',function(){setTimeout(instalar,2500);setTimeout(instalar,6000)});
+  setInterval(instalar,5000);
 })();
 </script>
 </body></html>
