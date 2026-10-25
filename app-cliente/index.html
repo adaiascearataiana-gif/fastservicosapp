@@ -2073,4 +2073,56 @@ html.cli-escuro{filter:invert(.92) hue-rotate(180deg);background:#111}html.cli-e
   W.fast538MP={disponivel:disponivel,ativo:function(){return ativo}};
 })();
 </script>
+<script id="fast538-telefone">
+/* 5.3.8 — TELEFONE COLADO DO WHATSAPP
+   O WhatsApp copia o número como "+55 85 9655-3791" (com +55 e, em muitos celulares,
+   sem o 9 da frente). Ao COLAR num campo, o app reconhece e converte na hora para
+   "(85) 99655-3791":
+   - tira o +55 (e o 0 da operadora, se vier);
+   - celular sem o 9 (8 dígitos começando com 6, 7, 8 ou 9) ganha o 9;
+   - fixo (começa com 2, 3, 4 ou 5) fica "(85) 3333-4444".
+   Vale em qualquer campo de telefone/WhatsApp/contato e em qualquer campo de uma
+   linha quando o que foi colado é só um número começando com +55. Em textos maiores
+   (observações, mensagens) nada é mudado. */
+(function(){
+  var W=window;
+  function soNumero(t){return /^[\s+()\-.\d]{8,24}$/.test(String(t||'').trim())}
+  function normalizar(texto){
+    var d=String(texto||'').replace(/\D/g,'');
+    if((d.length===12||d.length===13)&&d.indexOf('55')===0)d=d.slice(2);
+    if((d.length===11||d.length===12)&&d.charAt(0)==='0')d=d.slice(1);
+    if(d.length===10&&/[6-9]/.test(d.charAt(2)))d=d.slice(0,2)+'9'+d.slice(2);   // celular sem o 9
+    if(d.length===11)return '('+d.slice(0,2)+') '+d.slice(2,7)+'-'+d.slice(7);
+    if(d.length===10)return '('+d.slice(0,2)+') '+d.slice(2,6)+'-'+d.slice(6);
+    return null;
+  }
+  W.fastTelefoneBr=normalizar;
+  function campoTelefone(el){
+    if(!el||el.tagName!=='INPUT')return false;
+    if(el.type==='tel')return true;
+    var s=[el.id,el.name,el.placeholder,el.getAttribute('aria-label'),el.className,el.getAttribute('oninput')].join(' ').toLowerCase();
+    return /tel|fone|whats|celular|contato|mascaratelefone/.test(s);
+  }
+  document.addEventListener('paste',function(ev){
+    try{
+      var el=ev.target;
+      if(!el||el.tagName!=='INPUT'||el.readOnly||el.disabled)return;
+      if(!/^(text|tel|search|)$/i.test(el.type||''))return;
+      var texto=(ev.clipboardData||W.clipboardData).getData('text');
+      if(!texto||!soNumero(texto))return;
+      var ehCampo=campoTelefone(el);
+      if(!ehCampo&&!/^\s*\+\s*55/.test(texto))return;
+      var f=normalizar(texto);if(!f)return;
+      ev.preventDefault();ev.stopPropagation();
+      if(ehCampo){el.value=f}
+      else{
+        var a=el.selectionStart,b=el.selectionEnd;
+        if(a==null||b==null){el.value=f}else{el.setRangeText(f,a,b,'end')}
+      }
+      el.dispatchEvent(new Event('input',{bubbles:true}));
+      el.dispatchEvent(new Event('change',{bubbles:true}));
+    }catch(e){}
+  },true);
+})();
+</script>
 </body></html>
