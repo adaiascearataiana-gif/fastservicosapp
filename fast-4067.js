@@ -1365,6 +1365,9 @@
           method: 'POST', headers: { Authorization: 'Bearer ' + tk, 'Content-Type': 'application/json' }, body: JSON.stringify({ role: 'reader', type: 'anyone' })
         });
         if (r.ok) feitos[id] = 1;
+        // 5.3.8: arquivo que não existe mais no Drive (apagado, por exemplo na limpeza de
+        // cópias repetidas): para de tentar — antes repetia a cada 30 s, para sempre
+        else if (r.status === 404) feitos[id] = 'sumiu';
       } catch (e) {}
     }
     gravarJSON(COMP_KEY, feitos);
