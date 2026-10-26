@@ -1,0 +1,1402 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>FAST OS · Modelo B — protótipo light executive</title>
+<meta name="description" content="Protótipo visual FAST OS — Modelo B, estilo executivo claro. Dados fictícios, sem backend.">
+<meta name="theme-color" content="#FAFAF8">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%231E3A8A'/%3E%3Cpath d='M9 9h14M9 16h10M9 23h14' stroke='%23fff' stroke-width='2.4' stroke-linecap='round'/%3E%3Ccircle cx='24.5' cy='23' r='2.2' fill='%23059669'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="styles.css">
+<script>
+  /* Evita piscar o tema errado: aplica a preferência salva antes da pintura. */
+  try {
+    var savedTheme = localStorage.getItem('proto_fast_b_theme');
+    if (savedTheme === 'dark' || savedTheme === 'light') {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    }
+  } catch (e) {}
+</script>
+</head>
+<body>
+
+<!-- ===================== ÍCONES (estilo Lucide, sprite inline) ===================== -->
+<svg class="sprite" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+  <symbol id="i-grid" viewBox="0 0 24 24">
+    <rect x="3" y="3" width="7" height="9" rx="1.4"/><rect x="14" y="3" width="7" height="5" rx="1.4"/>
+    <rect x="14" y="12" width="7" height="9" rx="1.4"/><rect x="3" y="16" width="7" height="5" rx="1.4"/>
+  </symbol>
+  <symbol id="i-package" viewBox="0 0 24 24">
+    <path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/>
+  </symbol>
+  <symbol id="i-route" viewBox="0 0 24 24">
+    <circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/>
+  </symbol>
+  <symbol id="i-users" viewBox="0 0 24 24">
+    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+  </symbol>
+  <symbol id="i-building" viewBox="0 0 24 24">
+    <path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/>
+  </symbol>
+  <symbol id="i-wallet" viewBox="0 0 24 24">
+    <path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/>
+  </symbol>
+  <symbol id="i-search" viewBox="0 0 24 24">
+    <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+  </symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5v14"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24">
+    <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+  </symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>
+  </symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24">
+    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/>
+  </symbol>
+  <symbol id="i-sliders" viewBox="0 0 24 24">
+    <path d="M4 21v-7"/><path d="M4 10V3"/><path d="M12 21v-9"/><path d="M12 8V3"/><path d="M20 21v-5"/><path d="M20 12V3"/><path d="M2 14h4"/><path d="M10 8h4"/><path d="M18 16h4"/>
+  </symbol>
+  <symbol id="i-chevron-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="i-chevron-up" viewBox="0 0 24 24"><path d="m18 15-6-6-6 6"/></symbol>
+  <symbol id="i-chevron-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+  <symbol id="i-arrow-up-right" viewBox="0 0 24 24"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></symbol>
+  <symbol id="i-arrow-left" viewBox="0 0 24 24"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></symbol>
+  <symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+  <symbol id="i-trending-up" viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></symbol>
+  <symbol id="i-trending-down" viewBox="0 0 24 24"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-check-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></symbol>
+  <symbol id="i-truck" viewBox="0 0 24 24"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></symbol>
+  <symbol id="i-sparkles" viewBox="0 0 24 24"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></symbol>
+  <symbol id="i-more" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></symbol>
+  <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></symbol>
+  <symbol id="i-receipt" viewBox="0 0 24 24"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 6v12"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
+  <symbol id="i-command" viewBox="0 0 24 24"><path d="M15 6v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3V6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3"/></symbol>
+  <symbol id="i-settings" viewBox="0 0 24 24"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-fuel" viewBox="0 0 24 24"><path d="M3 22h12"/><path d="M4 9h10"/><path d="M14 22V4a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v18"/><path d="M14 13h2a2 2 0 0 1 2 2v2a2 2 0 0 0 4 0V9.83a2 2 0 0 0-.59-1.42L18 5"/></symbol>
+  <symbol id="i-zap" viewBox="0 0 24 24"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></symbol>
+  <symbol id="i-filter" viewBox="0 0 24 24"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></symbol>
+  <symbol id="i-clipboard" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 12h6"/><path d="M9 16h4"/></symbol>
+  <symbol id="i-credit-card" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></symbol>
+  <symbol id="i-navigation" viewBox="0 0 24 24"><polygon points="3 11 22 2 13 21 11 13 3 11"/></symbol>
+  <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
+  <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></symbol>
+  <symbol id="i-arrow-down" viewBox="0 0 24 24"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></symbol>
+  <symbol id="i-trending-flat" viewBox="0 0 24 24"><path d="M3 12h18"/></symbol>
+</svg>
+
+<div class="app">
+
+  <!-- ===================== SIDEBAR ===================== -->
+  <aside class="sidebar" aria-label="Navegação principal">
+    <a class="brand" href="#painel" data-view="painel" aria-label="FAST OS — início">
+      <span class="brand-mark"><svg class="ico"><use href="#i-route"/></svg></span>
+      <span class="brand-copy">
+        <span class="brand-name">FAST<span>OS</span></span>
+        <span class="brand-sub">Logística inteligente</span>
+      </span>
+    </a>
+
+    <p class="nav-label">Operação</p>
+    <nav class="nav">
+      <button class="nav-item is-active" type="button" data-view="painel" aria-current="page">
+        <svg class="ico"><use href="#i-grid"/></svg><span>Painel</span>
+      </button>
+      <button class="nav-item" type="button" data-view="entregas">
+        <svg class="ico"><use href="#i-package"/></svg><span>Entregas</span><span class="nav-badge warn">3</span>
+      </button>
+      <button class="nav-item" type="button" data-view="rotas">
+        <svg class="ico"><use href="#i-route"/></svg><span>Rotas do dia</span>
+      </button>
+    </nav>
+
+    <p class="nav-label">Gestão</p>
+    <nav class="nav">
+      <button class="nav-item" type="button" data-view="motoristas">
+        <svg class="ico"><use href="#i-users"/></svg><span>Motoristas</span><span class="nav-badge">1</span>
+      </button>
+      <button class="nav-item" type="button" data-view="clientes">
+        <svg class="ico"><use href="#i-building"/></svg><span>Clientes</span>
+      </button>
+      <button class="nav-item" type="button" data-view="financeiro">
+        <svg class="ico"><use href="#i-wallet"/></svg><span>Financeiro</span>
+      </button>
+    </nav>
+
+    <p class="nav-label">Sistema</p>
+    <nav class="nav">
+      <button class="nav-item" type="button" data-demo="Configurações — tela não incluída neste protótipo.">
+        <svg class="ico"><use href="#i-settings"/></svg><span>Configurações</span>
+      </button>
+      <button class="nav-item" type="button" data-demo="Central de ajuda — demonstração.">
+        <svg class="ico"><use href="#i-help"/></svg><span>Ajuda</span>
+      </button>
+    </nav>
+
+    <div class="side-card" aria-label="Meta do mês">
+      <span class="side-card-label"><i class="dot"></i>Meta de outubro</span>
+      <strong class="side-card-title">47 de 52 entregas</strong>
+      <p class="side-card-meta">Faltam 5 para bater a meta.</p>
+      <div class="side-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="90" aria-label="90% da meta"><i></i></div>
+      <div class="side-card-foot"><span>90% da meta</span><b>+5 restantes</b></div>
+    </div>
+
+    <div class="sidebar-footer">
+      <button class="theme-switch" type="button" id="themeToggle" aria-pressed="false" aria-label="Alternar tema claro e escuro">
+        <span class="theme-switch-label">
+          <svg class="ico icon-moon"><use href="#i-moon"/></svg>
+          <svg class="ico icon-sun"><use href="#i-sun"/></svg>
+          <span class="theme-label">Tema escuro</span>
+        </span>
+        <span class="switch" aria-hidden="true"><i></i></span>
+      </button>
+      <button class="user-chip" type="button" data-demo="Perfil de Adaías Souza — demonstração.">
+        <span class="avatar">AS</span>
+        <span class="grow">
+          <strong>Adaías Souza</strong>
+          <span>Gestor · matriz CE</span>
+        </span>
+        <svg class="ico ico-sm"><use href="#i-chevron-down"/></svg>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ===================== CONTEÚDO ===================== -->
+  <div class="content">
+
+    <header class="topbar">
+      <div class="topbar-inner">
+        <a class="brand-mobile" href="#painel" data-view="painel" aria-label="FAST OS — início">
+          <span class="brand-mark"><svg class="ico"><use href="#i-route"/></svg></span>
+          <span class="brand-word">FAST<span>OS</span></span>
+        </a>
+
+        <button class="cmd-trigger" type="button" id="cmdTrigger" aria-label="Abrir paleta de comandos">
+          <svg class="ico"><use href="#i-search"/></svg>
+          <span class="cmd-text">Buscar entregas, clientes ou comandos…</span>
+          <kbd>Ctrl K</kbd>
+        </button>
+
+        <div class="topbar-right">
+          <span class="live-pill"><i class="live-dot"></i>Ao vivo</span>
+          <span class="clock" id="clock">--:--:--</span>
+          <span class="divider" aria-hidden="true"></span>
+          <button class="icon-btn" type="button" aria-label="Notificações" data-demo="3 notificações — todas revisadas (demonstração).">
+            <svg class="ico"><use href="#i-bell"/></svg><span class="notif-dot" aria-hidden="true"></span>
+          </button>
+          <button class="icon-btn theme-mobile" type="button" id="themeMobile" aria-label="Ativar tema escuro">
+            <svg class="ico icon-moon"><use href="#i-moon"/></svg>
+            <svg class="ico icon-sun"><use href="#i-sun"/></svg>
+          </button>
+          <button class="btn btn-primary" type="button" data-demo="Nova entrega — formulário de demonstração.">
+            <svg class="ico"><use href="#i-plus"/></svg>Nova entrega
+          </button>
+          <button class="icon-btn topbar-avatar" type="button" aria-label="Perfil de Adaías Souza" data-demo="Perfil de Adaías Souza — demonstração.">
+            <span class="avatar avatar-sm">AS</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="main">
+
+      <!-- ===================== 01 · PAINEL ===================== -->
+      <section class="view is-active" id="view-painel" aria-labelledby="title-painel">
+        <div class="page-head">
+          <div>
+            <p class="eyebrow"><span class="dot"></span>Operação · <span data-period-label="eyebrow">segunda-feira, 26 de outubro</span></p>
+            <h1 id="title-painel">Painel da frota</h1>
+            <p class="page-sub" data-period-sub><strong>47 entregas</strong> em 6 rotas · 3 veículos em movimento agora</p>
+          </div>
+          <div class="page-actions">
+            <div class="seg" role="group" aria-label="Período do painel">
+              <button class="is-on" type="button" data-period="hoje" aria-pressed="true">Hoje</button>
+              <button type="button" data-period="semana" aria-pressed="false">Semana</button>
+              <button type="button" data-period="mes" aria-pressed="false">Mês</button>
+            </div>
+            <button class="btn btn-secondary" type="button" data-demo="Relatório do dia exportado (simulação).">
+              <svg class="ico"><use href="#i-download"/></svg>Exportar
+            </button>
+          </div>
+        </div>
+
+        <div class="kpi-grid">
+          <article class="kpi">
+            <div class="kpi-top">
+              <span class="kpi-label" data-kpi-label="hoje|Entregas do dia|semana|Entregas na semana|mes|Entregas no mês">Entregas do dia</span>
+              <span class="kpi-icon"><svg class="ico"><use href="#i-package"/></svg></span>
+            </div>
+            <div class="kpi-value"><span class="num" data-count="47" data-count-period="47 329 1284">0</span></div>
+            <div class="kpi-foot">
+              <div class="kpi-foot-text">
+                <span class="delta"><svg class="ico"><use href="#i-trending-up"/></svg>12%</span>
+                <span class="kpi-note">vs. ontem · meta 52</span>
+              </div>
+              <svg class="spark emerald" viewBox="0 0 96 36" aria-hidden="true">
+                <path class="spark-area" d="M2 30 L14 25 L26 27 L38 18 L50 21 L62 12 L74 15 L86 7 L94 9 L94 36 L2 36 Z"/>
+                <path class="spark-line" d="M2 30 L14 25 L26 27 L38 18 L50 21 L62 12 L74 15 L86 7 L94 9"/>
+              </svg>
+            </div>
+          </article>
+
+          <article class="kpi">
+            <div class="kpi-top">
+              <span class="kpi-label" data-kpi-label="hoje|Taxa de sucesso|semana|Sucesso na semana|mes|Sucesso no mês">Taxa de sucesso</span>
+              <span class="kpi-icon emerald"><svg class="ico"><use href="#i-check-circle"/></svg></span>
+            </div>
+            <div class="kpi-value"><span class="num" data-count="96.2" data-count-period="96.2 94.8 95.1" data-decimals="1">0</span><span class="unit">%</span></div>
+            <div class="kpi-foot">
+              <div class="kpi-foot-text">
+                <span class="delta"><svg class="ico"><use href="#i-trending-up"/></svg>1,4 p.p.</span>
+                <span class="kpi-note">na última semana</span>
+              </div>
+              <svg class="spark emerald" viewBox="0 0 96 36" aria-hidden="true">
+                <path class="spark-area" d="M2 27 L14 24 L26 25 L38 19 L50 20 L62 14 L74 13 L86 8 L94 7 L94 36 L2 36 Z"/>
+                <path class="spark-line" d="M2 27 L14 24 L26 25 L38 19 L50 20 L62 14 L74 13 L86 8 L94 7"/>
+              </svg>
+            </div>
+          </article>
+
+          <article class="kpi">
+            <div class="kpi-top">
+              <span class="kpi-label" data-kpi-label="hoje|Tempo por parada|semana|Tempo por parada|mes|Tempo por parada">Tempo por parada</span>
+              <span class="kpi-icon violet"><svg class="ico"><use href="#i-clock"/></svg></span>
+            </div>
+            <div class="kpi-value"><span class="num" data-count="38" data-count-period="38 36 39">0</span> <span class="unit">min</span></div>
+            <div class="kpi-foot">
+              <div class="kpi-foot-text">
+                <span class="delta"><svg class="ico"><use href="#i-trending-down"/></svg>4 min</span>
+                <span class="kpi-note">abaixo da média</span>
+              </div>
+              <svg class="spark emerald" viewBox="0 0 96 36" aria-hidden="true">
+                <path class="spark-area" d="M2 9 L14 12 L26 10 L38 17 L50 16 L62 22 L74 20 L86 27 L94 26 L94 36 L2 36 Z"/>
+                <path class="spark-line" d="M2 9 L14 12 L26 10 L38 17 L50 16 L62 22 L74 20 L86 27 L94 26"/>
+              </svg>
+            </div>
+          </article>
+
+          <article class="kpi">
+            <div class="kpi-top">
+              <span class="kpi-label" data-kpi-label="hoje|Custo por quilômetro|semana|Custo por quilômetro|mes|Custo por quilômetro">Custo por quilômetro</span>
+              <span class="kpi-icon neutral"><svg class="ico"><use href="#i-fuel"/></svg></span>
+            </div>
+            <div class="kpi-value"><span class="num" data-count="1.84" data-count-period="1.84 1.79 1.88" data-decimals="2" data-prefix="R$ ">0</span></div>
+            <div class="kpi-foot">
+              <div class="kpi-foot-text">
+                <span class="delta flat"><svg class="ico"><use href="#i-trending-flat"/></svg>estável</span>
+                <span class="kpi-note">outubro · por km</span>
+              </div>
+              <svg class="spark slate" viewBox="0 0 96 36" aria-hidden="true">
+                <path class="spark-area" d="M2 20 L14 18 L26 21 L38 17 L50 20 L62 18 L74 20 L86 17 L94 19 L94 36 L2 36 Z"/>
+                <path class="spark-line" d="M2 20 L14 18 L26 21 L38 17 L50 20 L62 18 L74 20 L86 17 L94 19"/>
+              </svg>
+            </div>
+          </article>
+        </div>
+
+        <div class="grid">
+          <article class="card map-card col-8">
+            <div class="card-head">
+              <div>
+                <h2 class="card-title">Mapa operacional</h2>
+                <p class="card-desc">Rota 03 · 8 paradas · 64 km planejados</p>
+              </div>
+              <div class="legend">
+                <span><i class="dot-emerald"></i>em rota</span>
+                <span><i class="dot-navy"></i>parada</span>
+                <span><i class="dot-amber"></i>atraso</span>
+              </div>
+            </div>
+            <div class="map">
+              <svg viewBox="0 0 640 340" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                <path class="m-water" d="M604 0h36v340h-46c30-38-2-76 24-116 22-34-18-74 2-112 14-26-8-78 14-112z"/>
+                <rect class="m-park" x="42" y="196" width="92" height="76" rx="10"/>
+                <rect class="m-park" x="318" y="34" width="66" height="52" rx="9"/>
+                <path class="m-road" d="M0 74h640M0 160h640M0 250h640M0 318h640"/>
+                <path class="m-road" d="M126 0v340M304 0v340M462 0v340"/>
+                <path class="m-road thin" d="M0 112l182 0M0 206l304 0M304 34h158M462 250h178"/>
+                <rect class="m-block" x="150" y="86" width="126" height="56" rx="7"/>
+                <rect class="m-block" x="330" y="176" width="112" height="56" rx="7"/>
+                <rect class="m-block" x="478" y="270" width="108" height="60" rx="7"/>
+                <rect class="m-block" x="150" y="266" width="130" height="52" rx="7"/>
+                <text class="m-label" x="54" y="108">ALDEOTA</text>
+                <text class="m-label" x="330" y="112">MESSEJANA</text>
+                <text class="m-label" x="484" y="176">CENTRO</text>
+                <text class="m-label" x="60" y="300">CAUCAIA</text>
+                <circle class="geofence" cx="330" cy="228" r="38"/>
+                <path class="route-halo" d="M60 292 C 120 280, 150 235, 205 232 S 286 262, 330 228 S 390 150, 452 144 S 523 108, 588 72"/>
+                <path class="route-line" d="M60 292 C 120 280, 150 235, 205 232 S 286 262, 330 228 S 390 150, 452 144 S 523 108, 588 72"/>
+                <path class="route-flow" d="M60 292 C 120 280, 150 235, 205 232 S 286 262, 330 228 S 390 150, 452 144 S 523 108, 588 72"/>
+                <circle class="m-stop" cx="60" cy="292" r="6"/>
+                <circle class="m-stop" cx="205" cy="232" r="6"/>
+                <circle class="m-stop-ring" cx="330" cy="228" r="20"/>
+                <circle class="m-stop current" cx="330" cy="228" r="7"/>
+                <circle class="m-stop" cx="452" cy="144" r="6"/>
+                <circle class="m-stop destination" cx="588" cy="72" r="7"/>
+              </svg>
+              <span class="map-chip c1"><svg class="ico"><use href="#i-pin"/></svg>CD Matriz · 06:40</span>
+              <span class="map-chip c2"><svg class="ico"><use href="#i-package"/></svg>Parada 07 · 12:00</span>
+              <span class="map-chip c3 warn"><svg class="ico"><use href="#i-alert"/></svg>Atraso 22 min · Aldeota</span>
+              <span class="map-chip c4 ok"><svg class="ico"><use href="#i-navigation"/></svg>Destino · Caucaia</span>
+              <div class="map-zoom" aria-hidden="true"><span>+</span><span>−</span></div>
+            </div>
+          </article>
+
+          <article class="card col-4">
+            <div class="card-head">
+              <div>
+                <h2 class="card-title">Atividade em tempo real</h2>
+                <p class="card-desc">Últimos eventos da operação</p>
+              </div>
+              <span class="pill live">ao vivo</span>
+            </div>
+            <ul class="feed">
+              <li>
+                <span class="feed-ico"><svg class="ico"><use href="#i-check"/></svg></span>
+                <div class="grow"><strong>Entrega FT-4471 confirmada</strong><span class="sub">J. Bezerra · foto e assinatura</span></div>
+                <time>11:42</time>
+              </li>
+              <li>
+                <span class="feed-ico navy"><svg class="ico"><use href="#i-pin"/></svg></span>
+                <div class="grow"><strong>Motorista na geocerca</strong><span class="sub">Rota 03 · bairro Aldeota</span></div>
+                <time>11:36</time>
+              </li>
+              <li>
+                <span class="feed-ico amber"><svg class="ico"><use href="#i-receipt"/></svg></span>
+                <div class="grow"><strong>Despesa de combustível</strong><span class="sub">R$ 220,00 · M. Oliveira</span></div>
+                <time>11:21</time>
+              </li>
+              <li>
+                <span class="feed-ico violet"><svg class="ico"><use href="#i-building"/></svg></span>
+                <div class="grow"><strong>Novo cliente sincronizado</strong><span class="sub">Distribuidora Horizonte</span></div>
+                <time>10:58</time>
+              </li>
+              <li>
+                <span class="feed-ico"><svg class="ico"><use href="#i-shield"/></svg></span>
+                <div class="grow"><strong>Documento aprovado</strong><span class="sub">RNTRC · C. Andrade</span></div>
+                <time>10:44</time>
+              </li>
+            </ul>
+          </article>
+
+          <article class="card col-4">
+            <div class="card-head">
+              <div>
+                <h2 class="card-title">Desempenho semanal</h2>
+                <p class="card-desc">Entregas confirmadas por dia</p>
+              </div>
+              <span class="pill">meta 52</span>
+            </div>
+            <div class="bars" id="weeklyBars" aria-label="Entregas por dia: segunda 38, terça 44, quarta 41, quinta 49, sexta 46, sábado 18, hoje 47">
+              <div class="bar"><div class="bar-track"><i class="bar-fill" style="height:76%"></i></div><span>Seg</span><b>38</b></div>
+              <div class="bar"><div class="bar-track"><i class="bar-fill" style="height:88%"></i></div><span>Ter</span><b>44</b></div>
+              <div class="bar"><div class="bar-track"><i class="bar-fill" style="height:82%"></i></div><span>Qua</span><b>41</b></div>
+              <div class="bar"><div class="bar-track"><i class="bar-fill" style="height:98%"></i></div><span>Qui</span><b>49</b></div>
+              <div class="bar"><div class="bar-track"><i class="bar-fill" style="height:92%"></i></div><span>Sex</span><b>46</b></div>
+              <div class="bar"><div class="bar-track"><i class="bar-fill" style="height:36%"></i></div><span>Sáb</span><b>18</b></div>
+              <div class="bar today"><div class="bar-track"><i class="bar-fill" style="height:94%"></i></div><span>Hoje</span><b>47</b></div>
+            </div>
+          </article>
+
+          <article class="card flush col-8">
+            <div class="flush-head">
+              <div>
+                <h2 class="card-title">Próximas janelas de entrega</h2>
+                <p class="card-desc">Acompanhamento em tempo real das janelas do dia</p>
+              </div>
+              <button class="link-btn" type="button" data-goto="entregas">Ver todas<svg class="ico"><use href="#i-chevron-right"/></svg></button>
+            </div>
+            <div class="table-wrap">
+              <table class="table">
+                <thead>
+                  <tr><th>Código</th><th>Cliente</th><th>Janela</th><th>Motorista</th><th>Status</th></tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="code">FT-4472</td>
+                    <td class="strong">Mercadinho Pague Menos</td>
+                    <td class="num">12:00–13:00</td>
+                    <td>M. Oliveira</td>
+                    <td><span class="pill navy">em rota</span></td>
+                  </tr>
+                  <tr>
+                    <td class="code">FT-4473</td>
+                    <td class="strong">Frigorífico Norte</td>
+                    <td class="num">12:30–13:30</td>
+                    <td>C. Andrade</td>
+                    <td><span class="pill warn">parada</span></td>
+                  </tr>
+                  <tr>
+                    <td class="code">FT-4474</td>
+                    <td class="strong">Padaria Trigo Puro</td>
+                    <td class="num">13:00–14:00</td>
+                    <td>R. Nascimento</td>
+                    <td><span class="pill bad">atraso 22m</span></td>
+                  </tr>
+                  <tr>
+                    <td class="code">FT-4475</td>
+                    <td class="strong">Distribuidora Horizonte</td>
+                    <td class="num">14:00–15:30</td>
+                    <td>M. Oliveira</td>
+                    <td><span class="pill violet">programada</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- ===================== 02 · ENTREGAS ===================== -->
+      <section class="view" id="view-entregas" aria-labelledby="title-entregas">
+        <div class="page-head">
+          <div>
+            <p class="eyebrow"><span class="dot"></span>Operação · entregas</p>
+            <h1 id="title-entregas">Entregas</h1>
+            <p class="page-sub"><strong>52 programadas</strong> · 21 em rota · 19 concluídas hoje</p>
+          </div>
+          <div class="page-actions">
+            <button class="btn btn-secondary" type="button" data-demo="Filtro por rota — demonstração.">
+              Rota 03<svg class="ico"><use href="#i-chevron-down"/></svg>
+            </button>
+            <button class="btn btn-primary" type="button" data-demo="Nova entrega — formulário de demonstração.">
+              <svg class="ico"><use href="#i-plus"/></svg>Nova entrega
+            </button>
+          </div>
+        </div>
+
+        <article class="card flush">
+          <div class="flush-head">
+            <div>
+              <h2 class="card-title">Todas as entregas</h2>
+              <p class="card-desc">Atualizado há 2 minutos · operação de segunda-feira</p>
+            </div>
+            <span class="pill ok">sincronizado</span>
+          </div>
+          <div class="toolbar">
+            <div class="chips" role="group" aria-label="Filtrar por status">
+              <button class="chip is-on" type="button">Todas <span class="n">52</span></button>
+              <button class="chip" type="button">Em rota <span class="n">21</span></button>
+              <button class="chip" type="button">Paradas <span class="n">8</span></button>
+              <button class="chip" type="button">Atrasos <span class="n">3</span></button>
+              <button class="chip" type="button">Entregues <span class="n">19</span></button>
+            </div>
+            <span class="spacer"></span>
+            <label class="search-field">
+              <svg class="ico"><use href="#i-search"/></svg>
+              <input type="search" placeholder="Buscar código ou cliente" aria-label="Buscar entregas">
+            </label>
+            <button class="btn btn-secondary btn-sm" type="button" data-demo="Filtros avançados — demonstração.">
+              <svg class="ico"><use href="#i-sliders"/></svg>Filtros
+            </button>
+          </div>
+          <div class="table-wrap">
+            <table class="table">
+              <thead>
+                <tr><th>Código</th><th>Cliente</th><th>Destino</th><th>Motorista</th><th>Janela</th><th>Status</th><th></th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="code">FT-4471</td>
+                  <td class="strong">J. Bezerra Atacado</td>
+                  <td>Maracanaú, CE</td>
+                  <td><span class="person"><span class="avatar emerald">MO</span><span>M. Oliveira</span></span></td>
+                  <td class="num">06:40–07:30</td>
+                  <td><span class="pill ok">entregue 11:42</span></td>
+                  <td class="actions"><button class="icon-btn" type="button" aria-label="Abrir entrega FT-4471" data-demo="Detalhe da entrega FT-4471 (simulação)."><svg class="ico"><use href="#i-arrow-up-right"/></svg></button></td>
+                </tr>
+                <tr>
+                  <td class="code">FT-4472</td>
+                  <td class="strong">Mercadinho Pague Menos</td>
+                  <td>Fortaleza, CE</td>
+                  <td><span class="person"><span class="avatar emerald">MO</span><span>M. Oliveira</span></span></td>
+                  <td class="num">12:00–13:00</td>
+                  <td><span class="pill navy">em rota</span></td>
+                  <td class="actions"><button class="icon-btn" type="button" aria-label="Abrir entrega FT-4472" data-demo="Detalhe da entrega FT-4472 (simulação)."><svg class="ico"><use href="#i-arrow-up-right"/></svg></button></td>
+                </tr>
+                <tr>
+                  <td class="code">FT-4473</td>
+                  <td class="strong">Frigorífico Norte</td>
+                  <td>Caucaia, CE</td>
+                  <td><span class="person"><span class="avatar violet">CA</span><span>C. Andrade</span></span></td>
+                  <td class="num">12:30–13:30</td>
+                  <td><span class="pill warn">parada</span></td>
+                  <td class="actions"><button class="icon-btn" type="button" aria-label="Abrir entrega FT-4473" data-demo="Detalhe da entrega FT-4473 (simulação)."><svg class="ico"><use href="#i-arrow-up-right"/></svg></button></td>
+                </tr>
+                <tr>
+                  <td class="code">FT-4474</td>
+                  <td class="strong">Padaria Trigo Puro</td>
+                  <td>Fortaleza, CE</td>
+                  <td><span class="person"><span class="avatar amber">RN</span><span>R. Nascimento</span></span></td>
+                  <td class="num">13:00–14:00</td>
+                  <td><span class="pill bad">atraso 22m</span></td>
+                  <td class="actions"><button class="icon-btn" type="button" aria-label="Abrir entrega FT-4474" data-demo="Detalhe da entrega FT-4474 (simulação)."><svg class="ico"><use href="#i-arrow-up-right"/></svg></button></td>
+                </tr>
+                <tr>
+                  <td class="code">FT-4475</td>
+                  <td class="strong">Distribuidora Horizonte</td>
+                  <td>Horizonte, CE</td>
+                  <td><span class="person"><span class="avatar slate">JS</span><span>J. Silva</span></span></td>
+                  <td class="num">14:00–15:30</td>
+                  <td><span class="pill violet">programada</span></td>
+                  <td class="actions"><button class="icon-btn" type="button" aria-label="Abrir entrega FT-4475" data-demo="Detalhe da entrega FT-4475 (simulação)."><svg class="ico"><use href="#i-arrow-up-right"/></svg></button></td>
+                </tr>
+                <tr>
+                  <td class="code">FT-4476</td>
+                  <td class="strong">Restaurante Sabor &amp; Cia</td>
+                  <td>Maracanaú, CE</td>
+                  <td><span class="person"><span class="avatar violet">CA</span><span>C. Andrade</span></span></td>
+                  <td class="num">15:30–16:30</td>
+                  <td><span class="pill navy">em rota</span></td>
+                  <td class="actions"><button class="icon-btn" type="button" aria-label="Abrir entrega FT-4476" data-demo="Detalhe da entrega FT-4476 (simulação)."><svg class="ico"><use href="#i-arrow-up-right"/></svg></button></td>
+                </tr>
+                <tr>
+                  <td class="code">FT-4477</td>
+                  <td class="strong">Mercado Bom Preço</td>
+                  <td>Caucaia, CE</td>
+                  <td><span class="person"><span class="avatar slate">JS</span><span>J. Silva</span></span></td>
+                  <td class="num">16:00–17:00</td>
+                  <td><span class="pill">programada</span></td>
+                  <td class="actions"><button class="icon-btn" type="button" aria-label="Abrir entrega FT-4477" data-demo="Detalhe da entrega FT-4477 (simulação)."><svg class="ico"><use href="#i-arrow-up-right"/></svg></button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="pagination">
+            <span>Mostrando 7 de 52 entregas</span>
+            <div class="pager">
+              <button type="button" class="is-disabled" aria-label="Página anterior"><svg class="ico"><use href="#i-arrow-left"/></svg></button>
+              <button type="button" aria-label="Próxima página" data-demo="Próxima página (demonstração)."><svg class="ico"><use href="#i-arrow-right"/></svg></button>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <!-- ===================== 03 · ROTAS ===================== -->
+      <section class="view" id="view-rotas" aria-labelledby="title-rotas">
+        <div class="page-head">
+          <div>
+            <p class="eyebrow"><span class="dot"></span>Planejamento · rotas do dia</p>
+            <h1 id="title-rotas">Rotas do dia</h1>
+            <p class="page-sub"><strong>6 rotas</strong> · 64 km planejados · otimização ativa</p>
+          </div>
+          <div class="page-actions">
+            <button class="btn btn-secondary" type="button" data-demo="Exportação da rota em PDF (simulação).">
+              <svg class="ico"><use href="#i-download"/></svg>Exportar rota
+            </button>
+            <button class="btn btn-emerald" type="button" data-demo="Rota 03 otimizada — economia de 52 min (simulação).">
+              <svg class="ico"><use href="#i-sparkles"/></svg>Otimizar com IA
+            </button>
+          </div>
+        </div>
+
+        <div class="stat-strip">
+          <div class="stat-cell">
+            <span class="stat-label"><svg class="ico"><use href="#i-pin"/></svg>Paradas</span>
+            <div class="stat-value">8</div>
+            <div class="stat-foot neutral">6 concluídas · 2 restantes</div>
+          </div>
+          <div class="stat-cell">
+            <span class="stat-label"><svg class="ico"><use href="#i-route"/></svg>Distância</span>
+            <div class="stat-value">64 km</div>
+            <div class="stat-foot">−18 km com otimização</div>
+          </div>
+          <div class="stat-cell">
+            <span class="stat-label"><svg class="ico"><use href="#i-clock"/></svg>Duração</span>
+            <div class="stat-value">6h 20</div>
+            <div class="stat-foot neutral">saída 06:20 · retorno 15:40</div>
+          </div>
+          <div class="stat-cell">
+            <span class="stat-label"><svg class="ico"><use href="#i-target"/></svg>Pontualidade</span>
+            <div class="stat-value">92%</div>
+            <div class="stat-foot">acima da meta de 88%</div>
+          </div>
+        </div>
+
+        <div class="grid">
+          <article class="card col-7">
+            <div class="card-head">
+              <div>
+                <h2 class="card-title">Rota 03 · HJW-2E47</h2>
+                <p class="card-desc">Marcos Oliveira · VW Delivery · saída 06:20</p>
+              </div>
+              <span class="pill ok">8 paradas</span>
+            </div>
+
+            <ol class="timeline">
+              <li class="tl-item done">
+                <span class="tl-dot"><svg class="ico"><use href="#i-check"/></svg></span>
+                <div class="tl-body">
+                  <div class="tl-top"><strong class="tl-title">CD Matriz — carregamento</strong><span class="pill ok">concluído</span></div>
+                  <p class="tl-meta"><svg class="ico"><use href="#i-clock"/></svg>06:20 · 8 volumes carregados</p>
+                </div>
+              </li>
+              <li class="tl-item done">
+                <span class="tl-dot"><svg class="ico"><use href="#i-check"/></svg></span>
+                <div class="tl-body">
+                  <div class="tl-top"><strong class="tl-title">J. Bezerra Atacado</strong><span class="pill ok">entregue 07:35</span></div>
+                  <p class="tl-meta"><svg class="ico"><use href="#i-pin"/></svg>Maracanaú, CE · foto e assinatura</p>
+                </div>
+              </li>
+              <li class="tl-item current">
+                <span class="tl-dot"><svg class="ico"><use href="#i-navigation"/></svg></span>
+                <div class="tl-body">
+                  <div class="tl-top"><strong class="tl-title">Mercadinho Pague Menos</strong><span class="pill navy">agora</span></div>
+                  <p class="tl-meta"><svg class="ico"><use href="#i-clock"/></svg>previsto 12:00–13:00 · 2,4 km até o destino</p>
+                </div>
+              </li>
+              <li class="tl-item">
+                <span class="tl-dot"><svg class="ico"><use href="#i-pin"/></svg></span>
+                <div class="tl-body">
+                  <div class="tl-top"><strong class="tl-title">Frigorífico Norte</strong><span class="pill">no prazo</span></div>
+                  <p class="tl-meta"><svg class="ico"><use href="#i-clock"/></svg>13:20 · janela 12:30–13:30</p>
+                </div>
+              </li>
+              <li class="tl-item">
+                <span class="tl-dot"><svg class="ico"><use href="#i-pin"/></svg></span>
+                <div class="tl-body">
+                  <div class="tl-top"><strong class="tl-title">Padaria Trigo Puro</strong><span class="pill warn">risco de atraso</span></div>
+                  <p class="tl-meta"><svg class="ico"><use href="#i-clock"/></svg>14:10 · janela 13:00–14:00</p>
+                </div>
+              </li>
+              <li class="tl-item">
+                <span class="tl-dot"><svg class="ico"><use href="#i-pin"/></svg></span>
+                <div class="tl-body">
+                  <div class="tl-top"><strong class="tl-title">Distribuidora Horizonte</strong><span class="pill violet">programada</span></div>
+                  <p class="tl-meta"><svg class="ico"><use href="#i-clock"/></svg>15:30 · destino final · 64 km</p>
+                </div>
+              </li>
+            </ol>
+          </article>
+
+          <article class="card map-card col-5">
+            <div class="card-head">
+              <div>
+                <h2 class="card-title">Prévia da rota</h2>
+                <p class="card-desc">Traçado otimizado · atualizado agora</p>
+              </div>
+              <span class="pill live">ao vivo</span>
+            </div>
+            <div class="map" style="min-height:258px">
+              <svg viewBox="0 0 480 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                <path class="m-water" d="M452 0h28v300h-34c22-34-2-66 16-100 16-30-14-64 0-96 10-24-8-68 10-104z"/>
+                <rect class="m-park" x="34" y="176" width="72" height="62" rx="9"/>
+                <rect class="m-park" x="300" y="34" width="58" height="44" rx="8"/>
+                <path class="m-road" d="M0 70h480M0 152h480M0 232h480M0 284h480"/>
+                <path class="m-road" d="M96 0v300M240 0v300M364 0v300"/>
+                <path class="m-road thin" d="M0 108h240M0 194h364M240 34h124M364 232h116"/>
+                <rect class="m-block" x="114" y="82" width="100" height="50" rx="6"/>
+                <rect class="m-block" x="262" y="166" width="80" height="48" rx="6"/>
+                <rect class="m-block" x="382" y="248" width="72" height="52" rx="6"/>
+                <text class="m-label" x="44" y="100">ALDEOTA</text>
+                <text class="m-label" x="262" y="106">MESSEJANA</text>
+                <text class="m-label" x="378" y="166">CENTRO</text>
+                <circle class="geofence" cx="250" cy="204" r="32"/>
+                <path class="route-halo" d="M44 258 C 92 248, 114 208, 158 206 S 218 232, 250 204 S 292 132, 340 128 S 398 94, 448 62"/>
+                <path class="route-line" d="M44 258 C 92 248, 114 208, 158 206 S 218 232, 250 204 S 292 132, 340 128 S 398 94, 448 62"/>
+                <path class="route-flow" d="M44 258 C 92 248, 114 208, 158 206 S 218 232, 250 204 S 292 132, 340 128 S 398 94, 448 62"/>
+                <circle class="m-stop" cx="44" cy="258" r="5.5"/>
+                <circle class="m-stop" cx="158" cy="206" r="5.5"/>
+                <circle class="m-stop-ring" cx="250" cy="204" r="17"/>
+                <circle class="m-stop current" cx="250" cy="204" r="6.5"/>
+                <circle class="m-stop" cx="340" cy="128" r="5.5"/>
+                <circle class="m-stop destination" cx="448" cy="62" r="6.5"/>
+              </svg>
+              <span class="map-chip c1"><svg class="ico"><use href="#i-pin"/></svg>CD</span>
+              <span class="map-chip c3 warn"><svg class="ico"><use href="#i-alert"/></svg>Risco · 14:10</span>
+              <span class="map-chip c4 ok"><svg class="ico"><use href="#i-navigation"/></svg>Fim · 64 km</span>
+            </div>
+            <div class="route-stats">
+              <div class="route-stat"><small>Economia</small><strong class="good">−18 km</strong></div>
+              <div class="route-stat"><small>Combustível</small><strong class="good">−R$ 41,20</strong></div>
+              <div class="route-stat"><small>Tempo ganho</small><strong class="good">−52 min</strong></div>
+            </div>
+          </article>
+        </div>
+
+        <div class="insight">
+          <span class="insight-icon"><svg class="ico ico-lg"><use href="#i-sparkles"/></svg></span>
+          <div class="insight-body">
+            <div class="insight-title">Otimização sugerida pela IA</div>
+            <p class="insight-text">Visitar a Padaria Trigo Puro depois do Frigorífico Norte reduz 18 km de trajeto e devolve 52 minutos à rota — mantendo todas as janelas de entrega.</p>
+          </div>
+          <div class="insight-actions">
+            <span class="pill ok">−52 min</span>
+            <button class="btn btn-emerald" type="button" data-demo="Nova ordem aplicada à Rota 03 (simulação).">Aplicar nova ordem</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== 04 · MOTORISTAS ===================== -->
+      <section class="view" id="view-motoristas" aria-labelledby="title-motoristas">
+        <div class="page-head">
+          <div>
+            <p class="eyebrow"><span class="dot"></span>Equipe · motoristas</p>
+            <h1 id="title-motoristas">Motoristas</h1>
+            <p class="page-sub"><strong>6 na equipe</strong> · 3 em rota agora · 1 documento vencendo</p>
+          </div>
+          <div class="page-actions">
+            <button class="btn btn-secondary" type="button" data-demo="Filtros da equipe — demonstração.">
+              <svg class="ico"><use href="#i-filter"/></svg>Filtrar
+            </button>
+            <button class="btn btn-primary" type="button" data-demo="Cadastrar motorista — formulário de demonstração.">
+              <svg class="ico"><use href="#i-plus"/></svg>Cadastrar motorista
+            </button>
+          </div>
+        </div>
+
+        <div class="stat-strip">
+          <div class="stat-cell">
+            <span class="stat-label"><svg class="ico"><use href="#i-navigation"/></svg>Em rota</span>
+            <div class="stat-value">3</div>
+            <div class="stat-foot">3 veículos em movimento</div>
+          </div>
+          <div class="stat-cell">
+            <span class="stat-label"><svg class="ico"><use href="#i-pin"/></svg>Em pausa</span>
+            <div class="stat-value">1</div>
+            <div class="stat-foot neutral">aguardando janela</div>
+          </div>
+          <div class="stat-cell">
+            <span class="stat-label"><svg class="ico"><use href="#i-alert"/></svg>Em atraso</span>
+            <div class="stat-value">1</div>
+            <div class="stat-foot" style="color:var(--amber-ink)">22 min acima da janela</div>
+          </div>
+          <div class="stat-cell">
+            <span class="stat-label"><svg class="ico"><use href="#i-calendar"/></svg>De folga</span>
+            <div class="stat-value">1</div>
+            <div class="stat-foot neutral">escala de segunda-feira</div>
+          </div>
+        </div>
+
+        <div class="drivers-grid">
+          <article class="driver">
+            <div class="driver-top">
+              <div class="driver-id">
+                <span class="avatar avatar-lg">MO</span>
+                <div>
+                  <h2 class="driver-name">Marcos Oliveira</h2>
+                  <p class="driver-vehicle"><svg class="ico"><use href="#i-truck"/></svg>HJW-2E47 · VW Delivery</p>
+                </div>
+              </div>
+              <span class="pill ok">em rota</span>
+            </div>
+            <div class="driver-stats">
+              <div><small>Entregas</small><b>14</b></div>
+              <div><small>Avaliação</small><b><span class="rating"><svg class="ico"><use href="#i-star"/></svg>4,9</span></b></div>
+              <div><small>Pontual.</small><b>92%</b></div>
+            </div>
+            <div class="driver-meter">
+              <div class="driver-meter-row"><span>Jornada concluída</span><b>92%</b></div>
+              <div class="meter"><i style="width:92%"></i></div>
+            </div>
+            <div class="driver-actions">
+              <button class="btn btn-secondary btn-sm" type="button" data-demo="Jornada de Marcos Oliveira (demonstração).">Ver jornada</button>
+              <button class="icon-btn" type="button" aria-label="Mais opções de Marcos Oliveira" data-demo="Opções do motorista (demonstração)."><svg class="ico"><use href="#i-more"/></svg></button>
+            </div>
+          </article>
+
+          <article class="driver">
+            <div class="driver-top">
+              <div class="driver-id">
+                <span class="avatar avatar-lg emerald">CA</span>
+                <div>
+                  <h2 class="driver-name">Carlos Andrade</h2>
+                  <p class="driver-vehicle"><svg class="ico"><use href="#i-truck"/></svg>ORX-7B21 · Renault Duster</p>
+                </div>
+              </div>
+              <span class="pill warn">em pausa</span>
+            </div>
+            <div class="driver-stats">
+              <div><small>Entregas</small><b>9</b></div>
+              <div><small>Avaliação</small><b><span class="rating"><svg class="ico"><use href="#i-star"/></svg>4,7</span></b></div>
+              <div><small>Pontual.</small><b>78%</b></div>
+            </div>
+            <div class="driver-meter">
+              <div class="driver-meter-row"><span>Jornada concluída</span><b>78%</b></div>
+              <div class="meter amber"><i style="width:78%"></i></div>
+            </div>
+            <div class="driver-actions">
+              <button class="btn btn-secondary btn-sm" type="button" data-demo="Jornada de Carlos Andrade (demonstração).">Ver jornada</button>
+              <button class="icon-btn" type="button" aria-label="Mais opções de Carlos Andrade" data-demo="Opções do motorista (demonstração)."><svg class="ico"><use href="#i-more"/></svg></button>
+            </div>
+          </article>
+
+          <article class="driver">
+            <div class="driver-top">
+              <div class="driver-id">
+                <span class="avatar avatar-lg violet">RN</span>
+                <div>
+                  <h2 class="driver-name">Rita Nascimento</h2>
+                  <p class="driver-vehicle"><svg class="ico"><use href="#i-truck"/></svg>QMT-4K88 · Fiat Strada</p>
+                </div>
+              </div>
+              <span class="pill bad">atraso</span>
+            </div>
+            <div class="driver-stats">
+              <div><small>Entregas</small><b>11</b></div>
+              <div><small>Avaliação</small><b><span class="rating"><svg class="ico"><use href="#i-star"/></svg>4,5</span></b></div>
+              <div><small>Pontual.</small><b>61%</b></div>
+            </div>
+            <div class="driver-meter">
+              <div class="driver-meter-row"><span>Jornada concluída</span><b>61%</b></div>
+              <div class="meter red"><i style="width:61%"></i></div>
+            </div>
+            <div class="driver-actions">
+              <button class="btn btn-secondary btn-sm" type="button" data-demo="Jornada de Rita Nascimento (demonstração).">Ver jornada</button>
+              <button class="icon-btn" type="button" aria-label="Mais opções de Rita Nascimento" data-demo="Opções do motorista (demonstração)."><svg class="ico"><use href="#i-more"/></svg></button>
+            </div>
+          </article>
+
+          <article class="driver">
+            <div class="driver-top">
+              <div class="driver-id">
+                <span class="avatar avatar-lg slate">JS</span>
+                <div>
+                  <h2 class="driver-name">João Silva</h2>
+                  <p class="driver-vehicle"><svg class="ico"><use href="#i-truck"/></svg>FZB-1C93 · Hyundai HR</p>
+                </div>
+              </div>
+              <span class="pill">de folga</span>
+            </div>
+            <div class="driver-stats">
+              <div><small>Entregas</small><b>—</b></div>
+              <div><small>Avaliação</small><b><span class="rating"><svg class="ico"><use href="#i-star"/></svg>4,8</span></b></div>
+              <div><small>Pontual.</small><b>88%</b></div>
+            </div>
+            <div class="driver-meter">
+              <div class="driver-meter-row"><span>Média do mês</span><b>88%</b></div>
+              <div class="meter navy"><i style="width:88%"></i></div>
+            </div>
+            <div class="driver-actions">
+              <button class="btn btn-secondary btn-sm" type="button" data-demo="Jornada de João Silva (demonstração).">Ver jornada</button>
+              <button class="icon-btn" type="button" aria-label="Mais opções de João Silva" data-demo="Opções do motorista (demonstração)."><svg class="ico"><use href="#i-more"/></svg></button>
+            </div>
+          </article>
+
+          <article class="driver">
+            <div class="driver-top">
+              <div class="driver-id">
+                <span class="avatar avatar-lg emerald">PF</span>
+                <div>
+                  <h2 class="driver-name">Paula Ferreira</h2>
+                  <p class="driver-vehicle"><svg class="ico"><use href="#i-truck"/></svg>KLS-3D77 · Fiat Fiorino</p>
+                </div>
+              </div>
+              <span class="pill ok">em rota</span>
+            </div>
+            <div class="driver-stats">
+              <div><small>Entregas</small><b>12</b></div>
+              <div><small>Avaliação</small><b><span class="rating"><svg class="ico"><use href="#i-star"/></svg>4,9</span></b></div>
+              <div><small>Pontual.</small><b>96%</b></div>
+            </div>
+            <div class="driver-meter">
+              <div class="driver-meter-row"><span>Jornada concluída</span><b>96%</b></div>
+              <div class="meter"><i style="width:96%"></i></div>
+            </div>
+            <div class="driver-actions">
+              <button class="btn btn-secondary btn-sm" type="button" data-demo="Jornada de Paula Ferreira (demonstração).">Ver jornada</button>
+              <button class="icon-btn" type="button" aria-label="Mais opções de Paula Ferreira" data-demo="Opções do motorista (demonstração)."><svg class="ico"><use href="#i-more"/></svg></button>
+            </div>
+          </article>
+
+          <article class="driver">
+            <div class="driver-top">
+              <div class="driver-id">
+                <span class="avatar avatar-lg amber">DM</span>
+                <div>
+                  <h2 class="driver-name">Diego Martins</h2>
+                  <p class="driver-vehicle"><svg class="ico"><use href="#i-truck"/></svg>NTE-8A45 · VW Saveiro</p>
+                </div>
+              </div>
+              <span class="pill ok">em rota</span>
+            </div>
+            <div class="driver-stats">
+              <div><small>Entregas</small><b>8</b></div>
+              <div><small>Avaliação</small><b><span class="rating"><svg class="ico"><use href="#i-star"/></svg>4,6</span></b></div>
+              <div><small>Pontual.</small><b>84%</b></div>
+            </div>
+            <div class="driver-meter">
+              <div class="driver-meter-row"><span>Jornada concluída</span><b>84%</b></div>
+              <div class="meter navy"><i style="width:84%"></i></div>
+            </div>
+            <div class="driver-actions">
+              <button class="btn btn-secondary btn-sm" type="button" data-demo="Jornada de Diego Martins (demonstração).">Ver jornada</button>
+              <button class="icon-btn" type="button" aria-label="Mais opções de Diego Martins" data-demo="Opções do motorista (demonstração)."><svg class="ico"><use href="#i-more"/></svg></button>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- ===================== 05 · CLIENTES ===================== -->
+      <section class="view" id="view-clientes" aria-labelledby="title-clientes">
+        <div class="page-head">
+          <div>
+            <p class="eyebrow"><span class="dot"></span>Base comercial · clientes</p>
+            <h1 id="title-clientes">Clientes</h1>
+            <p class="page-sub"><strong>143 cadastros</strong> · 128 ativos · 8 novos em outubro</p>
+          </div>
+          <div class="page-actions">
+            <button class="btn btn-secondary" type="button" data-demo="Exportação da carteira (simulação).">
+              <svg class="ico"><use href="#i-download"/></svg>Exportar
+            </button>
+            <button class="btn btn-primary" type="button" data-demo="Novo cliente — formulário de demonstração.">
+              <svg class="ico"><use href="#i-plus"/></svg>Novo cliente
+            </button>
+          </div>
+        </div>
+
+        <div class="stat-strip">
+          <div class="stat-cell">
+            <span class="stat-label"><svg class="ico"><use href="#i-users"/></svg>Clientes ativos</span>
+            <div class="stat-value">128</div>
+            <div class="stat-foot">+6 nos últimos 30 dias</div>
+          </div>
+          <div class="stat-cell">
+            <span class="stat-label"><svg class="ico"><use href="#i-sparkles"/></svg>Novos em outubro</span>
+            <div class="stat-value">8</div>
+            <div class="stat-foot neutral">5 já fizeram 1ª entrega</div>
+          </div>
+          <div class="stat-cell">
+            <span class="stat-label"><svg class="ico"><use href="#i-wallet"/></svg>Receita recorrente</span>
+            <div class="stat-value">R$ 84,2 mil</div>
+            <div class="stat-foot">+8,3% vs. setembro</div>
+          </div>
+          <div class="stat-cell">
+            <span class="stat-label"><svg class="ico"><use href="#i-trending-down"/></svg>Churn</span>
+            <div class="stat-value">1,8%</div>
+            <div class="stat-foot">−0,4 p.p. no mês</div>
+          </div>
+        </div>
+
+        <div class="grid">
+          <article class="card flush col-8">
+            <div class="flush-head">
+              <div>
+                <h2 class="card-title">Carteira de clientes</h2>
+                <p class="card-desc">Ordenada por receita nos últimos 90 dias</p>
+              </div>
+              <span class="pill navy">143 cadastros</span>
+            </div>
+            <div class="toolbar">
+              <div class="chips" role="group" aria-label="Filtrar clientes">
+                <button class="chip is-on" type="button">Todos</button>
+                <button class="chip" type="button">Ativos</button>
+                <button class="chip" type="button">Novos</button>
+                <button class="chip" type="button">Atenção</button>
+              </div>
+              <span class="spacer"></span>
+              <label class="search-field">
+                <svg class="ico"><use href="#i-search"/></svg>
+                <input type="search" placeholder="Buscar cliente" aria-label="Buscar clientes">
+              </label>
+              <button class="btn btn-secondary btn-sm" type="button" data-demo="Filtros da carteira (demonstração).">
+                <svg class="ico"><use href="#i-filter"/></svg>Filtrar
+              </button>
+            </div>
+
+            <div class="client-list">
+              <div class="client-row">
+                <span class="avatar avatar-md">JB</span>
+                <div class="grow">
+                  <span class="client-name">J. Bezerra Atacado</span>
+                  <span class="client-meta"><svg class="ico"><use href="#i-pin"/></svg>Maracanaú, CE · 31 entregas em 90 dias</span>
+                </div>
+                <div class="client-rev"><b>R$ 12.480</b><small>há 2 dias</small></div>
+                <span class="pill ok">ativo</span>
+                <button class="icon-btn" type="button" aria-label="Abrir J. Bezerra Atacado" data-demo="Ficha de J. Bezerra Atacado (simulação)."><svg class="ico"><use href="#i-arrow-up-right"/></svg></button>
+              </div>
+              <div class="client-row">
+                <span class="avatar avatar-md emerald">DH</span>
+                <div class="grow">
+                  <span class="client-name">Distribuidora Horizonte</span>
+                  <span class="client-meta"><svg class="ico"><use href="#i-pin"/></svg>Horizonte, CE · novo em outubro</span>
+                </div>
+                <div class="client-rev"><b>R$ 9.860</b><small>há 5 dias</small></div>
+                <span class="pill violet">novo</span>
+                <button class="icon-btn" type="button" aria-label="Abrir Distribuidora Horizonte" data-demo="Ficha de Distribuidora Horizonte (simulação)."><svg class="ico"><use href="#i-arrow-up-right"/></svg></button>
+              </div>
+              <div class="client-row">
+                <span class="avatar avatar-md violet">FN</span>
+                <div class="grow">
+                  <span class="client-name">Frigorífico Norte</span>
+                  <span class="client-meta"><svg class="ico"><use href="#i-pin"/></svg>Caucaia, CE · 18 entregas em 90 dias</span>
+                </div>
+                <div class="client-rev"><b>R$ 8.140</b><small>ontem</small></div>
+                <span class="pill ok">ativo</span>
+                <button class="icon-btn" type="button" aria-label="Abrir Frigorífico Norte" data-demo="Ficha de Frigorífico Norte (simulação)."><svg class="ico"><use href="#i-arrow-up-right"/></svg></button>
+              </div>
+              <div class="client-row">
+                <span class="avatar avatar-md amber">MP</span>
+                <div class="grow">
+                  <span class="client-name">Mercadinho Pague Menos</span>
+                  <span class="client-meta"><svg class="ico"><use href="#i-pin"/></svg>Fortaleza, CE · 24 entregas em 90 dias</span>
+                </div>
+                <div class="client-rev"><b>R$ 7.390</b><small>hoje</small></div>
+                <span class="pill ok">ativo</span>
+                <button class="icon-btn" type="button" aria-label="Abrir Mercadinho Pague Menos" data-demo="Ficha de Mercadinho Pague Menos (simulação)."><svg class="ico"><use href="#i-arrow-up-right"/></svg></button>
+              </div>
+              <div class="client-row">
+                <span class="avatar avatar-md rose">RS</span>
+                <div class="grow">
+                  <span class="client-name">Restaurante Sabor &amp; Cia</span>
+                  <span class="client-meta"><svg class="ico"><use href="#i-pin"/></svg>Maracanaú, CE · 12 entregas em 90 dias</span>
+                </div>
+                <div class="client-rev"><b>R$ 5.620</b><small>há 3 dias</small></div>
+                <span class="pill ok">ativo</span>
+                <button class="icon-btn" type="button" aria-label="Abrir Restaurante Sabor e Cia" data-demo="Ficha de Restaurante Sabor e Cia (simulação)."><svg class="ico"><use href="#i-arrow-up-right"/></svg></button>
+              </div>
+              <div class="client-row">
+                <span class="avatar avatar-md slate">PT</span>
+                <div class="grow">
+                  <span class="client-name">Padaria Trigo Puro</span>
+                  <span class="client-meta"><svg class="ico"><use href="#i-pin"/></svg>Fortaleza, CE · 3 entregas em 90 dias</span>
+                </div>
+                <div class="client-rev"><b>R$ 1.240</b><small>há 12 dias</small></div>
+                <span class="pill warn">atenção</span>
+                <button class="icon-btn" type="button" aria-label="Abrir Padaria Trigo Puro" data-demo="Ficha de Padaria Trigo Puro (simulação)."><svg class="ico"><use href="#i-arrow-up-right"/></svg></button>
+              </div>
+            </div>
+          </article>
+
+          <article class="card col-4">
+            <div class="card-head">
+              <div>
+                <h2 class="card-title">Composição da base</h2>
+                <p class="card-desc">143 clientes cadastrados</p>
+              </div>
+              <svg class="ico" style="color:var(--faint)"><use href="#i-users"/></svg>
+            </div>
+            <div class="donut-wrap">
+              <div class="donut" role="img" aria-label="128 ativos, 8 novos e 7 em atenção">
+                <div class="donut-center"><b>128</b><small>ativos</small></div>
+              </div>
+              <ul class="donut-legend">
+                <li><i></i>Ativos <b>128</b></li>
+                <li><i></i>Novos <b>8</b></li>
+                <li><i></i>Atenção <b>7</b></li>
+              </ul>
+            </div>
+            <div class="donut-foot">
+              <div>Ticket médio<b>R$ 1.240</b></div>
+              <div style="text-align:right">Recompra 90 dias<b>68%</b></div>
+            </div>
+            <div class="mini-rank">
+              <p class="mini-rank-title">Top cidades</p>
+              <div class="mini-rank-row">
+                <span class="mini-rank-name">Fortaleza</span>
+                <div class="mini-rank-track"><i style="width:82%"></i></div>
+                <b>57</b>
+              </div>
+              <div class="mini-rank-row">
+                <span class="mini-rank-name">Maracanaú</span>
+                <div class="mini-rank-track"><i style="width:61%"></i></div>
+                <b>42</b>
+              </div>
+              <div class="mini-rank-row">
+                <span class="mini-rank-name">Caucaia</span>
+                <div class="mini-rank-track"><i style="width:44%"></i></div>
+                <b>31</b>
+              </div>
+              <div class="mini-rank-row">
+                <span class="mini-rank-name">Horizonte</span>
+                <div class="mini-rank-track"><i style="width:19%"></i></div>
+                <b>13</b>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- ===================== 06 · FINANCEIRO ===================== -->
+      <section class="view" id="view-financeiro" aria-labelledby="title-financeiro">
+        <div class="page-head">
+          <div>
+            <p class="eyebrow"><span class="dot"></span>Gestão · financeiro</p>
+            <h1 id="title-financeiro">Financeiro</h1>
+            <p class="page-sub">Outubro de 2026 · fechamento em 5 dias · conciliação ativa</p>
+          </div>
+          <div class="page-actions">
+            <button class="btn btn-secondary" type="button" data-demo="Seleção de mês — demonstração.">
+              <svg class="ico"><use href="#i-calendar"/></svg>Outubro 2026<svg class="ico"><use href="#i-chevron-down"/></svg>
+            </button>
+            <button class="btn btn-primary" type="button" data-demo="Lançar despesa — formulário de demonstração.">
+              <svg class="ico"><use href="#i-plus"/></svg>Lançar despesa
+            </button>
+          </div>
+        </div>
+
+        <div class="kpi-grid">
+          <article class="kpi">
+            <div class="kpi-top">
+              <span class="kpi-label">Receita do mês</span>
+              <span class="kpi-icon"><svg class="ico"><use href="#i-wallet"/></svg></span>
+            </div>
+            <div class="kpi-value"><span class="num" data-count="84210" data-group="1" data-prefix="R$ ">0</span></div>
+            <div class="kpi-foot">
+              <div class="kpi-foot-text">
+                <span class="delta"><svg class="ico"><use href="#i-trending-up"/></svg>8,3%</span>
+                <span class="kpi-note">vs. setembro</span>
+              </div>
+              <svg class="spark emerald" viewBox="0 0 96 36" aria-hidden="true">
+                <path class="spark-area" d="M2 29 L14 26 L26 27 L38 20 L50 22 L62 15 L74 13 L86 9 L94 7 L94 36 L2 36 Z"/>
+                <path class="spark-line" d="M2 29 L14 26 L26 27 L38 20 L50 22 L62 15 L74 13 L86 9 L94 7"/>
+              </svg>
+            </div>
+          </article>
+
+          <article class="kpi">
+            <div class="kpi-top">
+              <span class="kpi-label">Despesas do mês</span>
+              <span class="kpi-icon amber"><svg class="ico"><use href="#i-receipt"/></svg></span>
+            </div>
+            <div class="kpi-value"><span class="num" data-count="31874" data-group="1" data-prefix="R$ ">0</span></div>
+            <div class="kpi-foot">
+              <div class="kpi-foot-text">
+                <span class="delta flat"><svg class="ico"><use href="#i-trending-up"/></svg>2,1%</span>
+                <span class="kpi-note">vs. setembro</span>
+              </div>
+              <svg class="spark slate" viewBox="0 0 96 36" aria-hidden="true">
+                <path class="spark-area" d="M2 20 L14 22 L26 19 L38 23 L50 18 L62 21 L74 17 L86 19 L94 16 L94 36 L2 36 Z"/>
+                <path class="spark-line" d="M2 20 L14 22 L26 19 L38 23 L50 18 L62 21 L74 17 L86 19 L94 16"/>
+              </svg>
+            </div>
+          </article>
+
+          <article class="kpi">
+            <div class="kpi-top">
+              <span class="kpi-label">Margem operacional</span>
+              <span class="kpi-icon emerald"><svg class="ico"><use href="#i-trending-up"/></svg></span>
+            </div>
+            <div class="kpi-value"><span class="num" data-count="62.1" data-decimals="1">0</span><span class="unit">%</span></div>
+            <div class="kpi-foot">
+              <div class="kpi-foot-text">
+                <span class="delta"><svg class="ico"><use href="#i-trending-up"/></svg>3,4 p.p.</span>
+                <span class="kpi-note">no trimestre</span>
+              </div>
+              <svg class="spark emerald" viewBox="0 0 96 36" aria-hidden="true">
+                <path class="spark-area" d="M2 26 L14 24 L26 25 L38 19 L50 20 L62 14 L74 15 L86 9 L94 8 L94 36 L2 36 Z"/>
+                <path class="spark-line" d="M2 26 L14 24 L26 25 L38 19 L50 20 L62 14 L74 15 L86 9 L94 8"/>
+              </svg>
+            </div>
+          </article>
+
+          <article class="kpi">
+            <div class="kpi-top">
+              <span class="kpi-label">A receber</span>
+              <span class="kpi-icon sky"><svg class="ico"><use href="#i-clock"/></svg></span>
+            </div>
+            <div class="kpi-value"><span class="num" data-count="12480" data-group="1" data-prefix="R$ ">0</span></div>
+            <div class="kpi-foot">
+              <div class="kpi-foot-text">
+                <span class="delta flat"><svg class="ico"><use href="#i-trending-down"/></svg>4,2%</span>
+                <span class="kpi-note">3 boletos em aberto</span>
+              </div>
+              <svg class="spark slate" viewBox="0 0 96 36" aria-hidden="true">
+                <path class="spark-area" d="M2 12 L14 15 L26 13 L38 18 L50 16 L62 21 L74 19 L86 23 L94 22 L94 36 L2 36 Z"/>
+                <path class="spark-line" d="M2 12 L14 15 L26 13 L38 18 L50 16 L62 21 L74 19 L86 23 L94 22"/>
+              </svg>
+            </div>
+          </article>
+        </div>
+
+        <div class="grid">
+          <article class="card col-7">
+            <div class="card-head">
+              <div>
+                <h2 class="card-title">Receita x despesa</h2>
+                <p class="card-desc">Últimos 6 meses · valores em milhares de reais</p>
+              </div>
+              <div class="legend">
+                <span><i class="dot-navy"></i>receita</span>
+                <span><i class="dot-gray"></i>despesa</span>
+              </div>
+            </div>
+            <div class="grouped-chart" aria-label="Receita e despesa de maio a outubro">
+              <div class="group"><div class="group-bars"><i style="height:58%" title="Receita maio: R$ 61,4 mil"></i><i class="exp" style="height:24%" title="Despesa maio: R$ 25,2 mil"></i></div><span>Mai</span></div>
+              <div class="group"><div class="group-bars"><i style="height:64%" title="Receita junho: R$ 67,8 mil"></i><i class="exp" style="height:27%" title="Despesa junho: R$ 28,1 mil"></i></div><span>Jun</span></div>
+              <div class="group"><div class="group-bars"><i style="height:61%" title="Receita julho: R$ 64,6 mil"></i><i class="exp" style="height:26%" title="Despesa julho: R$ 27,4 mil"></i></div><span>Jul</span></div>
+              <div class="group"><div class="group-bars"><i style="height:72%" title="Receita agosto: R$ 76,3 mil"></i><i class="exp" style="height:30%" title="Despesa agosto: R$ 31,2 mil"></i></div><span>Ago</span></div>
+              <div class="group"><div class="group-bars"><i style="height:78%" title="Receita setembro: R$ 77,7 mil"></i><i class="exp" style="height:33%" title="Despesa setembro: R$ 31,2 mil"></i></div><span>Set</span></div>
+              <div class="group"><div class="group-bars"><i style="height:88%" title="Receita outubro: R$ 84,2 mil"></i><i class="exp" style="height:37%" title="Despesa outubro: R$ 31,9 mil"></i></div><span>Out</span></div>
+            </div>
+          </article>
+
+          <article class="card col-5">
+            <div class="card-head">
+              <div>
+                <h2 class="card-title">Despesas por categoria</h2>
+                <p class="card-desc">R$ 31.874 no mês · 84% do previsto</p>
+              </div>
+              <span class="pill ok">no orçamento</span>
+            </div>
+            <div class="hbars">
+              <div class="hbar">
+                <span class="hbar-label"><i></i>Combustível</span>
+                <div class="hbar-track"><i class="hbar-fill" style="width:82%"></i></div>
+                <b>R$ 14.820</b>
+              </div>
+              <div class="hbar">
+                <span class="hbar-label"><i></i>Manutenção</span>
+                <div class="hbar-track"><i class="hbar-fill" style="width:46%"></i></div>
+                <b>R$ 8.310</b>
+              </div>
+              <div class="hbar">
+                <span class="hbar-label"><i></i>Pedágios</span>
+                <div class="hbar-track"><i class="hbar-fill" style="width:28%"></i></div>
+                <b>R$ 5.044</b>
+              </div>
+              <div class="hbar">
+                <span class="hbar-label"><i></i>Pessoal</span>
+                <div class="hbar-track"><i class="hbar-fill" style="width:18%"></i></div>
+                <b>R$ 3.200</b>
+              </div>
+              <div class="hbar">
+                <span class="hbar-label"><i></i>Outros</span>
+                <div class="hbar-track"><i class="hbar-fill" style="width:9%"></i></div>
+                <b>R$ 1.500</b>
+              </div>
+            </div>
+          </article>
+
+          <article class="card col-7">
+            <div class="card-head">
+              <div>
+                <h2 class="card-title">Últimos lançamentos</h2>
+                <p class="card-desc">Entradas e saídas conciliadas automaticamente</p>
+              </div>
+              <button class="link-btn" type="button" data-demo="Extrato completo (demonstração).">Ver extrato<svg class="ico"><use href="#i-chevron-right"/></svg></button>
+            </div>
+            <div class="tx-list">
+              <div class="tx">
+                <span class="feed-ico amber"><svg class="ico"><use href="#i-fuel"/></svg></span>
+                <div class="grow"><strong>Combustível · M. Oliveira</strong><span class="sub">Posto Shell Maracanaú</span></div>
+                <div class="tx-amount">−R$ 220,00<small>11:21</small></div>
+              </div>
+              <div class="tx">
+                <span class="feed-ico navy"><svg class="ico"><use href="#i-receipt"/></svg></span>
+                <div class="grow"><strong>Pedágio · C. Andrade</strong><span class="sub">BR-020 · praça 04</span></div>
+                <div class="tx-amount">−R$ 14,50<small>09:02</small></div>
+              </div>
+              <div class="tx">
+                <span class="feed-ico slate"><svg class="ico"><use href="#i-settings"/></svg></span>
+                <div class="grow"><strong>Manutenção preventiva</strong><span class="sub">HJW-2E47 · oficina centro</span></div>
+                <div class="tx-amount">−R$ 680,00<small>ontem</small></div>
+              </div>
+              <div class="tx">
+                <span class="feed-ico"><svg class="ico"><use href="#i-zap"/></svg></span>
+                <div class="grow"><strong>Recebimento · PIX</strong><span class="sub">J. Bezerra Atacado</span></div>
+                <div class="tx-amount in">+R$ 4.200,00<small>ontem</small></div>
+              </div>
+              <div class="tx">
+                <span class="feed-ico"><svg class="ico"><use href="#i-wallet"/></svg></span>
+                <div class="grow"><strong>Recebimento · boleto</strong><span class="sub">Frigorífico Norte</span></div>
+                <div class="tx-amount in">+R$ 3.180,00<small>24 out</small></div>
+              </div>
+            </div>
+          </article>
+
+          <article class="card col-5">
+            <div class="card-head">
+              <div>
+                <h2 class="card-title">Fechamento de outubro</h2>
+                <p class="card-desc">Checklist do fechamento mensal</p>
+              </div>
+              <span class="pill warn">5 dias</span>
+            </div>
+            <div class="check-list">
+              <div class="check-item">
+                <span class="check-ico"><svg class="ico"><use href="#i-check"/></svg></span>
+                <div class="grow"><strong>NF-e emitidas</strong><small>12 de 12 notas</small></div>
+                <span class="pill ok">concluído</span>
+              </div>
+              <div class="check-item">
+                <span class="check-ico"><svg class="ico"><use href="#i-check"/></svg></span>
+                <div class="grow"><strong>Conciliação bancária</strong><small>100% dos lançamentos</small></div>
+                <span class="pill ok">concluído</span>
+              </div>
+              <div class="check-item pending">
+                <span class="check-ico"><svg class="ico"><use href="#i-clock"/></svg></span>
+                <div class="grow"><strong>Folha de pagamento</strong><small>prevista para 30/10</small></div>
+                <span class="pill warn">pendente</span>
+              </div>
+              <div class="check-item pending">
+                <span class="check-ico"><svg class="ico"><use href="#i-clock"/></svg></span>
+                <div class="grow"><strong>Impostos · DAS</strong><small>vencimento em 31/10</small></div>
+                <span class="pill warn">pendente</span>
+              </div>
+            </div>
+            <div class="close-progress">
+              <div class="close-progress-row"><span>Progresso do fechamento</span><b>78%</b></div>
+              <div class="meter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="78" aria-label="78% do fechamento"><i style="width:78%"></i></div>
+            </div>
+            <button class="btn btn-secondary btn-block" type="button" style="margin-top:14px" data-demo="Revisão do fechamento (demonstração).">
+              <svg class="ico"><use href="#i-clipboard"/></svg>Revisar fechamento
+            </button>
+          </article>
+        </div>
+      </section>
+
+      <footer class="app-foot">
+        <span>FAST<span style="color:var(--navy-ink);font-weight:700">OS</span> · Modelo B — protótipo visual com dados fictícios · outubro/2026</span>
+        <span class="tag-proto"><i></i>Sem backend · nada do app real foi alterado</span>
+      </footer>
+
+    </main>
+  </div>
+</div>
+
+<!-- ===================== PALETA DE COMANDOS ===================== -->
+<div class="palette" id="palette" role="dialog" aria-modal="true" aria-label="Paleta de comandos" aria-hidden="true">
+  <div class="palette-box">
+    <div class="palette-head">
+      <svg class="ico"><use href="#i-search"/></svg>
+      <input id="paletteInput" type="text" placeholder="Buscar comando ou tela…" autocomplete="off" spellcheck="false" aria-label="Buscar comandos" aria-controls="paletteList">
+      <kbd>ESC</kbd>
+    </div>
+    <div class="palette-list" id="paletteList" role="listbox" aria-label="Comandos"></div>
+    <div class="palette-foot">
+      <span><kbd><svg class="ico ico-xs" aria-hidden="true"><use href="#i-chevron-up"/></svg></kbd><kbd><svg class="ico ico-xs" aria-hidden="true"><use href="#i-chevron-down"/></svg></kbd> navegar</span>
+      <span><kbd>enter</kbd> abrir</span>
+      <span><kbd>esc</kbd> fechar</span>
+      <span class="pal-brand">FAST<span>OS</span></span>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== NAVEGAÇÃO INFERIOR (mobile) ===================== -->
+<nav class="bottom-nav" aria-label="Navegação mobile">
+  <button class="nav-item is-active" type="button" data-view="painel" aria-current="page">
+    <svg class="ico"><use href="#i-grid"/></svg><span>Painel</span>
+  </button>
+  <button class="nav-item" type="button" data-view="entregas">
+    <svg class="ico"><use href="#i-package"/></svg><span>Entregas</span>
+  </button>
+  <button class="nav-item" type="button" data-view="rotas">
+    <svg class="ico"><use href="#i-route"/></svg><span>Rotas</span>
+  </button>
+  <button class="nav-item" type="button" data-view="motoristas">
+    <svg class="ico"><use href="#i-users"/></svg><span>Motoristas</span>
+  </button>
+  <button class="nav-item" type="button" data-view="clientes">
+    <svg class="ico"><use href="#i-building"/></svg><span>Clientes</span>
+  </button>
+  <button class="nav-item" type="button" data-view="financeiro">
+    <svg class="ico"><use href="#i-wallet"/></svg><span>Finanças</span>
+  </button>
+</nav>
+
+<div class="toasts" id="toasts" aria-live="polite" aria-atomic="false"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
