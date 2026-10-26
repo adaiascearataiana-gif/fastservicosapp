@@ -1,0 +1,129 @@
+/* ==========================================================================
+   FAST — Modelo B · skin dos APPS (cliente, motorista, rotas, despesas, limpo)
+   Aplicada nas cópias geradas em modelo-b/<app>/index.html.
+   Os apps originais (na raiz) não carregam este arquivo.
+
+   Aqui a skin é DELIBERADAMENTE conservadora:
+   esses apps usam muitas cores fixas no próprio HTML e são escuros em partes,
+   então inverter fundo de fora para dentro poderia gerar texto claro sobre
+   fundo claro. Por isso esta folha mexe só no que é seguro:
+     · tipografia (Inter + Manrope);
+     · raio dos cantos (14–20px) e sombras suaves;
+     · cor de destaque onde o app já usa variável (--accent / --primary);
+     · anel de foco e detalhe de scrollbar.
+   O passe visual completo app por app (fase 3) é feito com teste tela a tela.
+   ========================================================================== */
+
+@font-face {
+  font-family: "Inter MB";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../fontes/inter-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter MB";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("../fontes/inter-600.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter MB";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("../fontes/inter-700.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Manrope MB";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("../fontes/manrope-700.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Manrope MB";
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url("../fontes/manrope-800.woff2") format("woff2");
+}
+
+:root {
+  --accent: #1E3A8A;
+  --accent-2: #059669;
+  --primary: #1E3A8A;
+  --mb-radius: 16px;
+  --mb-radius-sm: 11px;
+}
+
+body {
+  font-family: "Inter MB", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3,
+.titulo, .title,
+.card-title,
+.metric-value {
+  font-family: "Manrope MB", "Manrope", "Inter MB", sans-serif !important;
+  letter-spacing: -.02em;
+}
+
+/* cartões, blocos e modais: mesmo raio e mesma sombra do Modelo B */
+.card,
+.box,
+.panel,
+.metric-card,
+.modal,
+.modal-content,
+dialog,
+section.card,
+.form-card {
+  border-radius: var(--mb-radius) !important;
+}
+
+button,
+.btn,
+.btn-primary,
+.btn-secondary,
+.btn-danger,
+input,
+select,
+textarea {
+  border-radius: var(--mb-radius-sm) !important;
+  font-family: inherit;
+}
+
+button:not([class]):not([style*="background"]),
+.btn-primary {
+  transition: transform .15s ease, box-shadow .15s ease, background-color .15s ease;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none !important;
+  box-shadow: 0 0 0 4px rgba(30, 58, 138, .16) !important;
+}
+
+/* realce apenas onde o app já usa a variável de destaque */
+[style*="var(--accent)"] {
+  border-color: #1E3A8A;
+}
+
+::selection { background: rgba(30, 58, 138, .16); }
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb {
+  background: #DCDED4;
+  border: 3px solid transparent;
+  background-clip: padding-box;
+  border-radius: 999px;
+}
+
+@media print {
+  .mb-app-selo { display: none !important; }
+}

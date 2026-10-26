@@ -1,0 +1,784 @@
+/* ==========================================================================
+   FAST — Modelo B · "Light Executive"
+   SKIN do app real. NÃO substitui o app: ele continua sendo o mesmo
+   index.html + fast-4067.js + fast-recursos.js + service worker + Supabase.
+   Esta folha só troca a aparência (tokens + alguns componentes).
+
+   Como funciona: o app já é todo baseado em variáveis CSS
+   (--bg, --card-bg, --border, --text-main, --accent, --radius, --shadow…).
+   Remapeando essas variáveis sob `html.modelo-b`, a interface inteira muda
+   sem que uma linha de JavaScript de negócio seja alterada.
+
+   Nada aqui vale para o app atual em `/`: ele só carrega esta folha quando
+   aberto por `modelo-b/index.html`.
+   ========================================================================== */
+
+/* ---------- Tipografia (arquivos locais em modelo-b/fontes) ---------- */
+@font-face {
+  font-family: "Inter MB";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("fontes/inter-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter MB";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("fontes/inter-500.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter MB";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("fontes/inter-600.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter MB";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("fontes/inter-700.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Manrope MB";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("fontes/manrope-600.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Manrope MB";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("fontes/manrope-700.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Manrope MB";
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url("fontes/manrope-800.woff2") format("woff2");
+}
+
+/* ==========================================================================
+   1. TOKENS
+   O seletor cobre os três casos possíveis: o padrão do app (:root),
+   um tema aplicado no body (.theme-light/.theme-dark/.theme-ocean/.theme-contrast)
+   e um tema aplicado no próprio body por script.
+   ========================================================================== */
+html.modelo-b,
+html.modelo-b body,
+html.modelo-b body[class*="theme-"] {
+  /* superfícies */
+  --bg: #FAFAF8;
+  --bg-alt: #F3F4EF;
+  --bg-primary: #F3F4EF;
+  --bg-soft: #EDEFE8;
+  --card-bg: #FFFFFF;
+  --card-bg-2: #F7F8F4;
+  --card-alt: #F7F8F4;
+  --card: #FFFFFF;
+  --surface: #FFFFFF;
+  --surface-2: #F7F8F4;
+
+  /* texto */
+  --text: #0D1726;
+  --text-main: #0D1726;
+  --text-soft: #2B3A4F;
+  --text-muted: #5E6B7E;
+  --text-faint: #8B96A7;
+
+  /* linhas */
+  --border: #E9E9E2;
+  --border-soft: #F0F1EB;
+  --border-strong: #DCDED4;
+
+  /* cores da marca */
+  --accent: #1E3A8A;
+  --accent-2: #059669;
+  --accent-soft: rgba(30, 58, 138, .09);
+  --accent-glow: rgba(30, 58, 138, .22);
+  --primary: #1E3A8A;
+  --info: #1E3A8A;
+  --success: #059669;
+  --grad-accent: linear-gradient(135deg, #24479F 0%, #1E3A8A 60%, #17306F 100%);
+  --grad-sidebar: linear-gradient(180deg, #FFFFFF 0%, #FFFFFF 100%);
+
+  /* forma e profundidade */
+  --radius: 18px;
+  --v2-radius: 18px;
+  --v2-radius-sm: 12px;
+  --r47-radius: 18px;
+  --r47-radius-sm: 12px;
+  --r47-radius-xs: 10px;
+  --shadow: 0 1px 2px rgba(16, 24, 40, .04), 0 14px 34px -24px rgba(16, 24, 40, .24);
+  --shadow-sm: 0 1px 2px rgba(16, 24, 40, .05);
+  --shadow-md: 0 2px 4px rgba(16, 24, 40, .04), 0 18px 34px -22px rgba(16, 24, 40, .26);
+  --shadow-lg: 0 3px 6px rgba(16, 24, 40, .05), 0 28px 50px -26px rgba(30, 58, 138, .30);
+  --v2-shadow-card: 0 1px 2px rgba(16, 24, 40, .04), 0 14px 34px -24px rgba(16, 24, 40, .24);
+  --v2-shadow-hover: 0 2px 4px rgba(16, 24, 40, .05), 0 26px 46px -24px rgba(30, 58, 138, .28);
+  --r47-shadow-1: 0 1px 2px rgba(16, 24, 40, .05);
+  --r47-shadow-2: 0 1px 2px rgba(16, 24, 40, .04), 0 14px 34px -24px rgba(16, 24, 40, .24);
+  --r47-shadow-3: 0 2px 4px rgba(16, 24, 40, .05), 0 26px 46px -24px rgba(30, 58, 138, .28);
+
+  /* sidebar (o app usa gradiente escuro; aqui vira branco com item ativo azul) */
+  --sidebar-bg: #FFFFFF;
+  --sidebar-text: #5E6B7E;
+  --sidebar-active: #1E3A8A;
+  --pro-sidebar: 252px;
+
+  /* vidro / header */
+  --header-bg: rgba(250, 250, 248, .86);
+  --r47-glass: rgba(255, 255, 255, .86);
+  --r47-glass-2: rgba(255, 255, 255, .74);
+  --v2-glass: rgba(255, 255, 255, .86);
+  --v2-glass-border: #E9E9E2;
+
+  /* gradientes antigos (violeta → ciano) neutralizados */
+  --v2-gradient: linear-gradient(135deg, #24479F 0%, #1E3A8A 100%);
+  --v2-gradient-soft: linear-gradient(135deg, rgba(30, 58, 138, .06) 0%, rgba(5, 150, 105, .06) 100%);
+  --v2-primary: #1E3A8A;
+  --v2-primary-dark: #172F70;
+  --v2-primary-light: #2E4EA8;
+  --v2-accent: #059669;
+  --v2-accent-dark: #047857;
+  --v2-accent-light: #10B981;
+  --v2-glow: 0 0 18px rgba(30, 58, 138, .18);
+  --v2-glow-accent: 0 0 18px rgba(5, 150, 105, .18);
+
+  color-scheme: light;
+}
+
+/* exceções: o app tem variantes executiva/pro que fixam cores próprias */
+html.modelo-b body {
+  background: #FAFAF8 !important;
+  color: #0D1726;
+  font-family: "Inter MB", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+html.modelo-b body.fx-executive,
+html.modelo-b body.fast-pro {
+  background: #FAFAF8 !important;
+}
+
+/* ==========================================================================
+   2. TIPOGRAFIA
+   ========================================================================== */
+html.modelo-b h1,
+html.modelo-b h2,
+html.modelo-b h3,
+html.modelo-b .pro-page-title,
+html.modelo-b .metric-value,
+html.modelo-b .card-title,
+html.modelo-b .emp-section-title,
+html.modelo-b .pro-kpi-value {
+  font-family: "Manrope MB", "Manrope", "Inter MB", sans-serif;
+  letter-spacing: -.022em;
+}
+html.modelo-b .pro-page-title,
+html.modelo-b .card-title { color: var(--text-main); }
+html.modelo-b .metric-value,
+html.modelo-b .pro-kpi-value { font-variant-numeric: tabular-nums; }
+html.modelo-b .metric-title {
+  color: var(--text-muted);
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+/* ==========================================================================
+   3. SUPERFÍCIES
+   ========================================================================== */
+html.modelo-b .card,
+html.modelo-b .metric-card,
+html.modelo-b .pro-panel,
+html.modelo-b .pro-kpi,
+html.modelo-b .pro-health-card,
+html.modelo-b .quick-action-card,
+html.modelo-b .emp-section,
+html.modelo-b .modal-content,
+html.modelo-b .drawer {
+  background: #FFFFFF !important;
+  border: 1px solid #E9E9E2 !important;
+  border-radius: 18px !important;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, .04), 0 14px 34px -24px rgba(16, 24, 40, .22) !important;
+}
+html.modelo-b .metric-card:hover,
+html.modelo-b .quick-action-card:hover,
+html.modelo-b .card:hover {
+  border-color: #DCDED4 !important;
+  box-shadow: 0 2px 4px rgba(16, 24, 40, .05), 0 26px 46px -24px rgba(30, 58, 138, .26) !important;
+  transform: translateY(-2px);
+}
+html.modelo-b .card-title { font-size: 15px; font-weight: 700; }
+html.modelo-b .emp-section { padding: 20px !important; }
+
+/* ==========================================================================
+   4. SIDEBAR / CABEÇALHO / NAVEGAÇÃO
+   ========================================================================== */
+html.modelo-b .sidebar,
+html.modelo-b aside.sidebar,
+html.modelo-b .pro-sidebar,
+html.modelo-b #sidebar,
+html.modelo-b .nav-menu,
+html.modelo-b .nav-menu-container {
+  background: #FFFFFF !important;
+  border-right: 1px solid #E9E9E2 !important;
+  color: #5E6B7E !important;
+  box-shadow: none !important;
+}
+html.modelo-b .nav-menu * { color: inherit; }
+html.modelo-b .nav-item-text,
+html.modelo-b .nav-item,
+html.modelo-b .sidebar a,
+html.modelo-b .nav-menu a {
+  color: #5E6B7E !important;
+  border-radius: 11px !important;
+  font-weight: 500;
+}
+html.modelo-b .nav-item:hover,
+html.modelo-b .nav-menu a:hover,
+html.modelo-b .nav-item-text:hover {
+  background: #F3F4EF !important;
+  color: #0D1726 !important;
+}
+html.modelo-b .nav-item.active,
+html.modelo-b .nav-item.is-active,
+html.modelo-b .nav-item-text.active,
+html.modelo-b .nav-menu a.active,
+html.modelo-b .tab-btn.active {
+  background: rgba(30, 58, 138, .09) !important;
+  color: #1E3A8A !important;
+  font-weight: 600;
+  box-shadow: inset 3px 0 0 #1E3A8A;
+}
+html.modelo-b .nav-item-count {
+  background: #EDEFE8 !important;
+  color: #5E6B7E !important;
+  border-radius: 999px !important;
+}
+html.modelo-b .nav-section-bar,
+html.modelo-b .nav-current {
+  color: #8B96A7 !important;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+html.modelo-b header,
+html.modelo-b .topbar,
+html.modelo-b .app-header,
+html.modelo-b .header {
+  background: rgba(250, 250, 248, .9) !important;
+  border-bottom: 1px solid #E9E9E2 !important;
+  box-shadow: none !important;
+  backdrop-filter: blur(14px) saturate(1.4);
+}
+
+/* ==========================================================================
+   5. BOTÕES
+   ========================================================================== */
+html.modelo-b .btn-primary,
+html.modelo-b button.btn-primary,
+html.modelo-b .emp-btn-primary,
+html.modelo-b .btn-success,
+html.modelo-b .btn-accent,
+html.modelo-b .btn-save,
+html.modelo-b .btn-gradient {
+  background: #1E3A8A !important;
+  background-image: none !important;
+  color: #FFFFFF !important;
+  border: 1px solid #1E3A8A !important;
+  border-radius: 11px !important;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, .10), 0 10px 20px -12px rgba(30, 58, 138, .65) !important;
+  font-weight: 600;
+  letter-spacing: -.005em;
+}
+html.modelo-b .btn-primary:hover,
+html.modelo-b .emp-btn-primary:hover,
+html.modelo-b .btn-success:hover,
+html.modelo-b .btn-gradient:hover {
+  background: #172F70 !important;
+  border-color: #172F70 !important;
+  box-shadow: 0 2px 4px rgba(16, 24, 40, .10), 0 14px 24px -12px rgba(30, 58, 138, .6) !important;
+  transform: translateY(-1px) !important;
+}
+html.modelo-b .btn-secondary,
+html.modelo-b .emp-btn-secondary,
+html.modelo-b .btn-ghost {
+  background: #FFFFFF !important;
+  color: #2B3A4F !important;
+  border: 1px solid #DCDED4 !important;
+  border-radius: 11px !important;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, .05) !important;
+  font-weight: 600;
+}
+html.modelo-b .btn-secondary:hover,
+html.modelo-b .emp-btn-secondary:hover {
+  background: #F3F4EF !important;
+  color: #0D1726 !important;
+  border-color: #C9CCC2 !important;
+}
+html.modelo-b .btn-danger,
+html.modelo-b .emp-btn-danger {
+  background: #B42318 !important;
+  border-color: #B42318 !important;
+  color: #FFF !important;
+  border-radius: 11px !important;
+  box-shadow: 0 10px 20px -14px rgba(180, 35, 24, .6) !important;
+}
+html.modelo-b button,
+html.modelo-b .btn { border-radius: 10px; }
+html.modelo-b .ripple { border-radius: inherit; }
+
+/* ==========================================================================
+   6. FORMULÁRIOS
+   ========================================================================== */
+html.modelo-b input:not([type="checkbox"]):not([type="radio"]),
+html.modelo-b select,
+html.modelo-b textarea {
+  background: #FFFFFF !important;
+  color: #0D1726 !important;
+  border: 1px solid #DCDED4 !important;
+  border-radius: 11px !important;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, .04);
+  font-family: inherit;
+}
+html.modelo-b input:focus,
+html.modelo-b select:focus,
+html.modelo-b textarea:focus {
+  outline: none !important;
+  border-color: #1E3A8A !important;
+  box-shadow: 0 0 0 4px rgba(30, 58, 138, .12) !important;
+}
+html.modelo-b label,
+html.modelo-b .fd-lbl,
+html.modelo-b .emp-label {
+  color: #5E6B7E !important;
+  font-weight: 600;
+  font-size: 11.5px;
+}
+html.modelo-b .emp-value { color: #0D1726 !important; }
+
+/* ==========================================================================
+   7. TABELAS
+   ========================================================================== */
+html.modelo-b table { border-collapse: separate; border-spacing: 0; }
+html.modelo-b thead th,
+html.modelo-b .sortable-th {
+  background: #F7F8F4 !important;
+  color: #8B96A7 !important;
+  font-size: 10px !important;
+  font-weight: 600 !important;
+  letter-spacing: .08em !important;
+  text-transform: uppercase;
+  border-bottom: 1px solid #E9E9E2 !important;
+}
+html.modelo-b tbody td { border-bottom: 1px solid #F0F1EB !important; color: #2B3A4F; }
+html.modelo-b tbody tr:hover td { background: #F7F8F4 !important; }
+html.modelo-b .emp-data-row { border-bottom: 1px solid #F0F1EB !important; }
+
+/* ==========================================================================
+   8. STATUS / PILLS / DESTAQUES
+   ========================================================================== */
+html.modelo-b .badge-status {
+  border-radius: 999px !important;
+  font-weight: 600;
+  font-size: 10.5px;
+  padding: 3px 9px !important;
+}
+html.modelo-b .ia-link-aba {
+  background: rgba(30, 58, 138, .08) !important;
+  color: #1E3A8A !important;
+  border-radius: 9px !important;
+  font-weight: 600;
+}
+html.modelo-b .ia-link-aba:hover { background: #1E3A8A !important; color: #FFF !important; }
+html.modelo-b .dash-period-btn {
+  border-radius: 8px !important;
+  font-weight: 600;
+  color: #5E6B7E;
+}
+html.modelo-b .dash-period-btn.active,
+html.modelo-b .dash-period-btn.is-active {
+  background: #1E3A8A !important;
+  color: #FFF !important;
+}
+html.modelo-b .empty,
+html.modelo-b .fast71-note,
+html.modelo-b .emp-sql-info { color: #8B96A7 !important; }
+
+/* ==========================================================================
+   9. DETALHES DE ACABAMENTO
+   ========================================================================== */
+html.modelo-b ::selection { background: rgba(30, 58, 138, .16); color: #0D1726; }
+html.modelo-b ::-webkit-scrollbar { width: 10px; height: 10px; }
+html.modelo-b ::-webkit-scrollbar-thumb {
+  background: #DCDED4;
+  border: 3px solid transparent;
+  background-clip: padding-box;
+  border-radius: 999px;
+}
+html.modelo-b :focus-visible { outline: 2px solid #1E3A8A; outline-offset: 2px; }
+html.modelo-b .fa-solid,
+html.modelo-b .fa-regular,
+html.modelo-b .fa-brands { color: inherit; }
+
+/* ==========================================================================
+   10. SELO DO MODELO B (única peça que não existe no app atual)
+   ========================================================================== */
+.mb-badge {
+  position: fixed;
+  left: 14px;
+  bottom: 14px;
+  z-index: 2147483000;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px 6px 11px;
+  border: 1px solid #DCDED4;
+  border-radius: 12px;
+  background: #FFFFFF;
+  box-shadow: 0 18px 40px -20px rgba(13, 23, 38, .45);
+  font-family: "Inter MB", "Inter", system-ui, sans-serif;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #2B3A4F;
+  line-height: 1.2;
+}
+.mb-badge .mb-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #059669;
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, .14);
+  flex: none;
+}
+.mb-badge b {
+  font-family: "Manrope MB", "Manrope", sans-serif;
+  font-weight: 800;
+  letter-spacing: -.01em;
+  color: #1E3A8A;
+}
+.mb-badge a,
+.mb-badge button {
+  appearance: none;
+  border: 1px solid #E9E9E2;
+  background: #F7F8F4;
+  color: #5E6B7E;
+  border-radius: 8px;
+  padding: 4px 8px;
+  font: inherit;
+  font-size: 10.5px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+}
+.mb-badge a:hover,
+.mb-badge button:hover { background: #EDEFE8; color: #0D1726; }
+.mb-badge .mb-close {
+  border: 0;
+  background: transparent;
+  color: #8B96A7;
+  font-size: 14px;
+  line-height: 1;
+  padding: 2px 4px;
+}
+@media print { .mb-badge { display: none !important; } }
+@media (max-width: 900px) {
+  .mb-badge { bottom: 78px; font-size: 10.5px; padding: 5px 7px 5px 9px; }
+}
+
+/* ==========================================================================
+   11. TELA DE ACESSO (#fastLoginGate)
+   O login do app é um bloco escuro com botão em gradiente índigo. No Modelo B
+   ele fica claro, com o cartão branco e o botão azul-marinho, mantendo
+   exatamente os mesmos campos, validações e fluxo de autenticação.
+   ========================================================================== */
+html.modelo-b #fastLoginGate {
+  background:
+    radial-gradient(900px 500px at 85% -10%, rgba(30, 58, 138, .10), transparent 62%),
+    radial-gradient(700px 420px at 5% 0%, rgba(5, 150, 105, .08), transparent 66%),
+    #FAFAF8 !important;
+}
+html.modelo-b #fastLoginGate > div,
+html.modelo-b #fastLoginGate .fast-gate-card,
+html.modelo-b #fastLoginGate .fast-gate-box {
+  background: #FFFFFF !important;
+  border: 1px solid #E9E9E2 !important;
+  border-radius: 22px !important;
+  box-shadow: 0 2px 6px rgba(16, 24, 40, .05), 0 32px 60px -30px rgba(16, 24, 40, .35) !important;
+  color: #0D1726 !important;
+}
+html.modelo-b #fastLoginGate .fast-gate-btn,
+html.modelo-b #fastLoginGate button[class*="gate"],
+html.modelo-b #fastLoginGate .btn-primary {
+  background: #1E3A8A !important;
+  background-image: none !important;
+  color: #FFFFFF !important;
+  border-radius: 12px !important;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, .12), 0 12px 24px -14px rgba(30, 58, 138, .8) !important;
+  font-weight: 700;
+  letter-spacing: .01em;
+}
+html.modelo-b #fastLoginGate .fast-gate-btn:hover { filter: brightness(1.06) !important; }
+html.modelo-b #fastLoginGate input {
+  background: #FFFFFF !important;
+  color: #0D1726 !important;
+  border: 1px solid #DCDED4 !important;
+}
+html.modelo-b #fastLoginGate label,
+html.modelo-b #fastLoginGate p,
+html.modelo-b #fastLoginGate span:not([class*="badge"]) { color: #5E6B7E; }
+html.modelo-b #fastLoginGate input,
+html.modelo-b #fastLoginGate select { color: #0D1726 !important; }
+
+/* ==========================================================================
+   12. ESTRUTURA REAL DO APP (sidebar, header, hero)
+   Classes conferidas no DOM do app em 26/10: #proSidebar.pro-sidebar,
+   .pro-side-brand/.pro-side-section/.pro-side-btn, header.top-nav e
+   .pro-command-card. Aqui o visual escuro do app vira claro executivo.
+   ========================================================================== */
+
+/* ---------- Sidebar ---------- */
+html.modelo-b #proSidebar.pro-sidebar {
+  background: #FFFFFF !important;
+  background-image: none !important;
+  border-right: 1px solid #E9E9E2 !important;
+  color: #2B3A4F !important;
+  box-shadow: none !important;
+}
+html.modelo-b #proSidebar .pro-side-brand {
+  border-bottom: 1px solid #E9E9E2 !important;
+  background: transparent !important;
+}
+html.modelo-b #proSidebar .pro-side-logo {
+  border-radius: 11px !important;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, .08);
+}
+html.modelo-b #proSidebar .pro-side-ver { color: #6B7789 !important; }
+html.modelo-b #proSidebar .pro-side-section {
+  color: #6B7789 !important;
+  font-size: 9.5px !important;
+  font-weight: 700 !important;
+  letter-spacing: .12em !important;
+  text-transform: uppercase;
+}
+html.modelo-b #proSidebar .pro-side-btn {
+  color: #5E6B7E !important;
+  border-radius: 11px !important;
+  font-weight: 500;
+  transition: background-color .14s, color .14s;
+}
+html.modelo-b #proSidebar .pro-side-btn i { color: #8B96A7 !important; width: 18px; text-align: center; }
+html.modelo-b #proSidebar .pro-side-btn:hover {
+  background: #F3F4EF !important;
+  color: #0D1726 !important;
+}
+html.modelo-b #proSidebar .pro-side-btn:hover i { color: #2B3A4F !important; }
+html.modelo-b #proSidebar .pro-side-btn.active,
+html.modelo-b #proSidebar .pro-side-btn.is-active {
+  background: rgba(30, 58, 138, .09) !important;
+  color: #1E3A8A !important;
+  font-weight: 600;
+  box-shadow: inset 3px 0 0 #1E3A8A !important;
+}
+html.modelo-b #proSidebar .pro-side-btn.active i { color: #1E3A8A !important; }
+html.modelo-b #proSidebar .pro-side-footer {
+  border-top: 1px solid #E9E9E2 !important;
+  background: #F7F8F4 !important;
+}
+html.modelo-b #proSidebar .pro-side-status {
+  color: #5E6B7E !important;
+  background: #FFFFFF !important;
+  border: 1px solid #E9E9E2 !important;
+  border-radius: 11px !important;
+}
+
+/* ---------- Header ---------- */
+html.modelo-b header.top-nav {
+  background: rgba(250, 250, 248, .92) !important;
+  background-image: none !important;
+  border-bottom: 1px solid #E9E9E2 !important;
+  box-shadow: none !important;
+  backdrop-filter: blur(14px) saturate(1.4);
+  color: #0D1726 !important;
+}
+html.modelo-b header.top-nav .top-nav-brand,
+html.modelo-b header.top-nav .top-nav-brand * { color: #0D1726 !important; }
+html.modelo-b header.top-nav .top-nav-brand i { color: #1E3A8A !important; }
+html.modelo-b header.top-nav .global-search-input {
+  background: #FFFFFF !important;
+  color: #0D1726 !important;
+  border: 1px solid #DCDED4 !important;
+  border-radius: 11px !important;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, .04) !important;
+}
+html.modelo-b header.top-nav .global-search-input::placeholder { color: #8B96A7 !important; }
+html.modelo-b header.top-nav .fx-upd-pill,
+html.modelo-b header.top-nav .conn-status,
+html.modelo-b header.top-nav .sync-neon {
+  background: #FFFFFF !important;
+  color: #5E6B7E !important;
+  border: 1px solid #E9E9E2 !important;
+  border-radius: 999px !important;
+  box-shadow: none !important;
+}
+html.modelo-b header.top-nav .bell-btn {
+  background: #FFFFFF !important;
+  color: #5E6B7E !important;
+  border: 1px solid #E9E9E2 !important;
+  border-radius: 10px !important;
+}
+html.modelo-b header.top-nav .bell-btn:hover { background: #F3F4EF !important; color: #0D1726 !important; }
+html.modelo-b header.top-nav .fast-user-btn {
+  background: #FFFFFF !important;
+  border: 1px solid #E9E9E2 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, .04) !important;
+}
+html.modelo-b header.top-nav .fast-user-name,
+html.modelo-b header.top-nav .fast-user-meta { color: #2B3A4F !important; }
+html.modelo-b header.top-nav .fast-user-avatar {
+  background: linear-gradient(145deg, #24479F, #1E3A8A) !important;
+  color: #FFF !important;
+}
+html.modelo-b header.top-nav .bell-panel {
+  background: #FFFFFF !important;
+  border: 1px solid #E9E9E2 !important;
+  border-radius: 16px !important;
+  box-shadow: 0 24px 60px -28px rgba(13, 23, 38, .45) !important;
+}
+html.modelo-b header.top-nav .bell-panel-header,
+html.modelo-b header.top-nav .bell-panel-title { color: #0D1726 !important; }
+
+/* ---------- Hero / cartões de comando ---------- */
+html.modelo-b .pro-command-card {
+  background: linear-gradient(140deg, #24479F 0%, #1E3A8A 55%, #17306F 100%) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 2px 4px rgba(16, 24, 40, .06), 0 28px 54px -30px rgba(30, 58, 138, .75) !important;
+  color: #FFFFFF !important;
+}
+html.modelo-b .pro-command-card .pro-command-title { color: #FFFFFF !important; }
+html.modelo-b .pro-command-card .pro-command-sub { color: rgba(255, 255, 255, .78) !important; }
+html.modelo-b .pro-command-card .pro-live {
+  background: rgba(5, 150, 105, .22) !important;
+  color: #A7F3D0 !important;
+  border: 1px solid rgba(16, 185, 129, .38) !important;
+}
+html.modelo-b .pro-command-card .pro-ghost {
+  background: rgba(255, 255, 255, .10) !important;
+  border: 1px solid rgba(255, 255, 255, .28) !important;
+  color: #FFFFFF !important;
+}
+
+/* ==========================================================================
+   13. CONTRASTE E COMPONENTES QUE O APP PINTA POR CSS
+   Levantamento de 26/10 nas abas Clientes, Rotas e Despesas: cabeçalhos de
+   tabela em cinza claro sobre branco (2,8:1) e cartões ainda em violeta/ciano
+   do visual antigo. Aqui só cor e tipografia — nenhuma estrutura muda.
+   ========================================================================== */
+
+/* Cabeçalhos de tabela legíveis (eram #8B96A7 sobre #F7F8F4) */
+html.modelo-b .tab-content table thead th,
+html.modelo-b .emp-tab-content table thead th {
+  color: #4A586B !important;
+  letter-spacing: .05em !important;
+}
+html.modelo-b .tab-content table thead tr,
+html.modelo-b .emp-tab-content table thead tr {
+  background: #F3F4EF !important;
+  background-image: none !important;
+}
+
+/* Cartão "Total" de Despesas: era gradiente violeta → azul */
+html.modelo-b .fed-kpi.fed-total {
+  background: linear-gradient(135deg, #1E3A8A 0%, #2563EB 100%) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 18px 40px -26px rgba(30, 58, 138, .8) !important;
+}
+html.modelo-b .fed-kpi.fed-total * { color: #FFFFFF !important; }
+html.modelo-b .fed-kpi.fed-total .fed-kpi-label,
+html.modelo-b .fed-kpi.fed-total small { color: rgba(255, 255, 255, .78) !important; }
+
+/* Blocos de destaque e "comando de voz": eram violeta/ciano claros */
+html.modelo-b .fed-panel.fed-insight,
+html.modelo-b .fast-expense-voice-tools {
+  background: linear-gradient(135deg, #F7F8F4 0%, #EEF2FB 100%) !important;
+  border: 1px solid #E3E6DC !important;
+  border-radius: 16px !important;
+  color: #2B3A4F !important;
+}
+html.modelo-b .fast-expense-voice-tools .fast-expense-voice-hint,
+html.modelo-b .fast-expense-voice-tools p { color: #5E6B7E !important; }
+
+/* Selos/etiquetas em índigo claro (ex.: ícone de bloqueio nos campos) */
+html.modelo-b label.f47-lock,
+html.modelo-b .f47-lock {
+  background: rgba(30, 58, 138, .08) !important;
+  color: #1E3A8A !important;
+  border-color: rgba(30, 58, 138, .18) !important;
+}
+
+/* Selo "operação ativa" no cartão do hero: verde mais claro no fundo azul */
+html.modelo-b .pro-command-card .pro-live {
+  color: #D1FAE5 !important;
+  background: rgba(5, 150, 105, .26) !important;
+}
+
+/* ---------- Login: textos que eram brancos sobre o cartão claro ---------- */
+html.modelo-b #fastLoginGate .fast-gate-version {
+  color: #6B7789 !important;
+  opacity: 1 !important;
+}
+html.modelo-b #fastLoginGate .fast-gate-bio-btn {
+  background: #EEF2FB !important;
+  background-image: none !important;
+  color: #1E3A8A !important;
+  border: 1px solid #D6DEEC !important;
+}
+html.modelo-b #fastLoginGate a,
+html.modelo-b #fastLoginGate a:visited {
+  color: #1E3A8A !important;
+}
+
+/* ---------- Etiqueta "VISÃO FINANCEIRA" e ícones dos KPIs ---------- */
+html.modelo-b .fed-eyebrow {
+  color: #1E3A8A !important;
+  background: rgba(30, 58, 138, .08) !important;
+}
+html.modelo-b .pro-kpi-grid > .pro-kpi:nth-child(4n+1) .pro-kpi-icon {
+  color: #1E3A8A !important;
+  background: rgba(30, 58, 138, .10) !important;
+  border-color: rgba(30, 58, 138, .20) !important;
+}
+html.modelo-b .pro-kpi-grid > .pro-kpi:nth-child(4n+2) .pro-kpi-icon {
+  color: #059669 !important;
+  background: rgba(5, 150, 105, .10) !important;
+  border-color: rgba(5, 150, 105, .22) !important;
+}
+html.modelo-b .pro-kpi-grid > .pro-kpi:nth-child(4n+3) .pro-kpi-icon {
+  color: #B45309 !important;
+  background: rgba(180, 83, 9, .10) !important;
+  border-color: rgba(180, 83, 9, .22) !important;
+}
+html.modelo-b .pro-kpi-grid > .pro-kpi:nth-child(4n+4) .pro-kpi-icon {
+  color: #475569 !important;
+  background: rgba(71, 85, 105, .10) !important;
+  border-color: rgba(71, 85, 105, .22) !important;
+}
+
+/* Botão flutuante "raio" (atalhos): no visual atual o ícone é branco sobre
+   fundo cinza-claro e quase some. No Modelo B ele fica azul-marinho. */
+html.modelo-b .fast-v2-launcher {
+  background: linear-gradient(140deg, #24479F, #1E3A8A) !important;
+  color: #FFFFFF !important;
+  border: 1px solid rgba(23, 48, 111, .35) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 12px 30px -14px rgba(13, 23, 38, .6) !important;
+}
+html.modelo-b .fast-v2-launcher i { color: #FFFFFF !important; }

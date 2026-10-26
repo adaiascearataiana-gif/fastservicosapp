@@ -1,0 +1,92 @@
+{
+  "gerado_em": "2026-10-26T15:54:42+00:00",
+  "aviso": "Arquivos gerados por modelo-b/build.py. Não edite à mão.",
+  "arquivos": [
+    {
+      "origem": "index.html",
+      "destino": "modelo-b/index.html",
+      "origem_sha": "e1b07a334b60",
+      "destino_bytes": 3096074,
+      "scripts": [
+        "https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js",
+        "https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js",
+        "https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js",
+        "https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js",
+        "https://cdn.jsdelivr.net/npm/tesseract.js@5.0.5/dist/tesseract.min.js",
+        "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js",
+        "https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js",
+        "https://adaiascearataiana-gif.github.io/fastservicosapp/v2-ui.js?v=5.1.6",
+        "fast-logistics-2.4.js?v=4.0.27",
+        "motorista-admin.js?v=1",
+        "datavalid-panel.js",
+        "desktop-guides-keyboard.js",
+        "clear-money-on-tap.js?v=1",
+        "fast-4067.js?v=42",
+        "navegacao-fast.js?v=1",
+        "recibo-fast.js?v=1",
+        "fast-recursos.js?v=44"
+      ],
+      "service_worker": [
+        "fast-sw.js?v="
+      ]
+    },
+    {
+      "origem": "app-cliente/index.html",
+      "destino": "modelo-b/app-cliente/index.html",
+      "origem_sha": "e36db916bfc6",
+      "destino_bytes": 225182,
+      "scripts": [
+        "../recibo-fast.js?v=1",
+        "../suporte-fast.js?v=5",
+        "../rastreio-fast.js?v=3"
+      ],
+      "service_worker": []
+    },
+    {
+      "origem": "app-motorista/index.html",
+      "destino": "modelo-b/app-motorista/index.html",
+      "origem_sha": "55a48e8481e7",
+      "destino_bytes": 169710,
+      "scripts": [
+        "../app-keyboard.js",
+        "../motorista-documentos.js",
+        "../suporte-fast.js?v=5",
+        "../motorista-midia.js?v=1",
+        "../navegacao-fast.js?v=1"
+      ],
+      "service_worker": [
+        "./sw.js?v=r4010"
+      ]
+    },
+    {
+      "origem": "app-rotas-dia/index.html",
+      "destino": "modelo-b/app-rotas-dia/index.html",
+      "origem_sha": "2449ca5aa143",
+      "destino_bytes": 5760,
+      "scripts": [],
+      "service_worker": [
+        "./sw.js?v=neon4034"
+      ]
+    },
+    {
+      "origem": "app-despesas/index.html",
+      "destino": "modelo-b/app-despesas/index.html",
+      "origem_sha": "11331196a655",
+      "destino_bytes": 9054,
+      "scripts": [],
+      "service_worker": [
+        "./sw.js?v=neon4034"
+      ]
+    },
+    {
+      "origem": "app-limpo/index.html",
+      "destino": "modelo-b/app-limpo/index.html",
+      "origem_sha": "a636297576d6",
+      "destino_bytes": 4282,
+      "scripts": [],
+      "service_worker": [
+        "./sw.js?v=r4010"
+      ]
+    }
+  ]
+}
