@@ -1,17 +1,15 @@
 /* ==========================================================================
-   FAST — Modelo B · skin dos APPS (cliente, motorista, rotas, despesas, limpo)
-   Aplicada nas cópias geradas em modelo-b/<app>/index.html.
-   Os apps originais (na raiz) não carregam este arquivo.
+   FAST — Modelo B · skin dos APPS
+   (cliente, motorista, rotas do dia, despesas, limpo)
 
-   Aqui a skin é DELIBERADAMENTE conservadora:
-   esses apps usam muitas cores fixas no próprio HTML e são escuros em partes,
-   então inverter fundo de fora para dentro poderia gerar texto claro sobre
-   fundo claro. Por isso esta folha mexe só no que é seguro:
-     · tipografia (Inter + Manrope);
-     · raio dos cantos (14–20px) e sombras suaves;
-     · cor de destaque onde o app já usa variável (--accent / --primary);
-     · anel de foco e detalhe de scrollbar.
-   O passe visual completo app por app (fase 3) é feito com teste tela a tela.
+   Aplicada só nas cópias geradas em modelo-b/<app>/. Os apps originais não
+   carregam este arquivo.
+
+   Fase 2: além de tipografia/raio/foco, os apps agora usam a paleta do
+   Modelo B. O app do motorista e o do cliente já eram claros e usam
+   variáveis CSS — trocamos os valores. As telas de acesso e as páginas de
+   instalação tinham cores fixas (escuras/violeta) e são ajustadas por classe.
+   Nenhuma função, script ou texto é alterado.
    ========================================================================== */
 
 @font-face {
@@ -19,49 +17,69 @@
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url("../fontes/inter-400.woff2") format("woff2");
+  src: url("fontes/inter-400.woff2") format("woff2");
 }
 @font-face {
   font-family: "Inter MB";
   font-style: normal;
   font-weight: 600;
   font-display: swap;
-  src: url("../fontes/inter-600.woff2") format("woff2");
+  src: url("fontes/inter-600.woff2") format("woff2");
 }
 @font-face {
   font-family: "Inter MB";
   font-style: normal;
   font-weight: 700;
   font-display: swap;
-  src: url("../fontes/inter-700.woff2") format("woff2");
+  src: url("fontes/inter-700.woff2") format("woff2");
 }
 @font-face {
   font-family: "Manrope MB";
   font-style: normal;
   font-weight: 700;
   font-display: swap;
-  src: url("../fontes/manrope-700.woff2") format("woff2");
+  src: url("fontes/manrope-700.woff2") format("woff2");
 }
 @font-face {
   font-family: "Manrope MB";
   font-style: normal;
   font-weight: 800;
   font-display: swap;
-  src: url("../fontes/manrope-800.woff2") format("woff2");
+  src: url("fontes/manrope-800.woff2") format("woff2");
 }
 
+/* ---------- Paleta (serve ao cliente e ao motorista) ---------- */
 :root {
   --accent: #1E3A8A;
-  --accent-2: #059669;
+  --accent2: #2563EB;
+  --accent-soft: #EEF2FB;
   --primary: #1E3A8A;
+  --bg: #FAFAF8;
+  --card: #FFFFFF;
+  --text: #0D1726;
+  --muted: #5E6B7E;
+  --faint: #8B96A7;
+  --border: #E9E9E2;
+  --radius: 16px;
+  --ok: #059669;
+  --ok-soft: #D1FAE5;
+  --warn: #B45309;
+  --warn-soft: #FEF3C7;
+  --danger: #DC2626;
+  --danger-soft: #FEE2E2;
+  --green: #059669;
+  --green2: #047857;
+  --yellow: #B45309;
+  --red: #DC2626;
   --mb-radius: 16px;
   --mb-radius-sm: 11px;
 }
 
-body {
+html.modelo-b, body {
   font-family: "Inter MB", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  accent-color: #1E3A8A;
 }
 
 h1, h2, h3,
@@ -72,7 +90,7 @@ h1, h2, h3,
   letter-spacing: -.02em;
 }
 
-/* cartões, blocos e modais: mesmo raio e mesma sombra do Modelo B */
+/* ---------- Componentes comuns ---------- */
 .card,
 .box,
 .panel,
@@ -97,11 +115,6 @@ textarea {
   font-family: inherit;
 }
 
-button:not([class]):not([style*="background"]),
-.btn-primary {
-  transition: transform .15s ease, box-shadow .15s ease, background-color .15s ease;
-}
-
 input:focus,
 select:focus,
 textarea:focus {
@@ -109,10 +122,7 @@ textarea:focus {
   box-shadow: 0 0 0 4px rgba(30, 58, 138, .16) !important;
 }
 
-/* realce apenas onde o app já usa a variável de destaque */
-[style*="var(--accent)"] {
-  border-color: #1E3A8A;
-}
+[style*="var(--accent)"] { border-color: #1E3A8A; }
 
 ::selection { background: rgba(30, 58, 138, .16); }
 
@@ -123,6 +133,283 @@ textarea:focus {
   background-clip: padding-box;
   border-radius: 999px;
 }
+
+/* ==========================================================================
+   MOTORISTA — splash, gate e cadastro (eram escuros com acento violeta)
+   ========================================================================== */
+
+#motSplash { background: #FAFAF8 !important; color: #0D1726 !important; }
+.ms-bg {
+  background:
+    radial-gradient(620px 520px at 80% 0%, rgba(30, 58, 138, .10), transparent 62%),
+    radial-gradient(520px 420px at 10% 100%, rgba(5, 150, 105, .10), transparent 66%),
+    #FAFAF8 !important;
+}
+.ms-bg::after { background: none !important; }
+.ms-logo {
+  background: #FFFFFF !important;
+  border: 1px solid #E9E9E2 !important;
+  box-shadow: 0 2px 6px rgba(16, 24, 40, .05), 0 28px 60px -32px rgba(16, 24, 40, .4) !important;
+  border-radius: 26px !important;
+}
+.ms-name { color: #0D1726 !important; letter-spacing: .02em !important; }
+.ms-tag { color: #5E6B7E !important; }
+.ms-ver { color: #8B96A7 !important; }
+.ms-ver span { color: #1E3A8A !important; }
+.ms-loader { background: #E9E9E2 !important; }
+.ms-loader span { background: linear-gradient(90deg, #1E3A8A, #059669) !important; }
+
+#motGate {
+  background:
+    radial-gradient(700px 560px at 85% -10%, rgba(30, 58, 138, .10), transparent 62%),
+    radial-gradient(560px 460px at 0% 100%, rgba(5, 150, 105, .08), transparent 66%),
+    #FAFAF8 !important;
+}
+#motGate .gate-card,
+#motCadastro .gate-card {
+  background: #FFFFFF !important;
+  border: 1px solid #E9E9E2 !important;
+  box-shadow: 0 2px 6px rgba(16, 24, 40, .05), 0 32px 70px -36px rgba(16, 24, 40, .45) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  color: #0D1726 !important;
+}
+#motGate .gate-brand h1,
+#motCadastro .gate-brand h1 { color: #0D1726 !important; }
+#motGate .gate-brand p,
+#motCadastro .gate-brand p { color: #5E6B7E !important; }
+#motGate .gate-version { color: #8B96A7 !important; }
+#motGate .gate-version span { color: #1E3A8A !important; }
+#motGate .gate-field label,
+#motCadastro .gate-field label { color: #5E6B7E !important; }
+#motGate .gate-check { color: #5E6B7E !important; }
+#motGate .gate-check input { accent-color: #1E3A8A !important; }
+#motGate .gate-err { color: #B91C1C !important; }
+#motGate .gate-foot { color: #8B96A7 !important; }
+
+/* logo do gate: borda suave e o arquivo certo é corrigido pelo skin-apps.js */
+#motGate .gate-logo.app-identity {
+  border: 1px solid #E9E9E2 !important;
+  background: #FFFFFF !important;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, .06), 0 20px 50px -30px rgba(16, 24, 40, .5) !important;
+  border-radius: 26px !important;
+}
+
+#motGate .fg-wrap input,
+#motCadastro .fg-wrap input {
+  background: #FFFFFF !important;
+  border: 1px solid #DCDED4 !important;
+  color: #0D1726 !important;
+}
+#motGate .fg-wrap input::placeholder,
+#motCadastro .fg-wrap input::placeholder { color: #8B96A7 !important; }
+#motGate .fg-wrap input:focus,
+#motCadastro .fg-wrap input:focus {
+  border-color: #1E3A8A !important;
+  box-shadow: 0 0 0 4px rgba(30, 58, 138, .14) !important;
+}
+#motGate .fg-ico,
+#motCadastro .fg-ico { color: #8B96A7 !important; }
+#motGate .fg-toggle,
+#motCadastro .fg-toggle { color: #8B96A7 !important; }
+
+#motGate .gate-btn {
+  background: #1E3A8A !important;
+  background-image: none !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 12px 26px -18px rgba(30, 58, 138, .9) !important;
+}
+#motGate .gate-btn:hover { background: #17306F !important; }
+/* os dois botões secundários usam style inline no app */
+#motGate .gate-btn[style*="0f766e"] {
+  background: #ECFDF5 !important;
+  color: #047857 !important;
+  border: 1px solid #A7F3D0 !important;
+  box-shadow: none !important;
+}
+#motGate .gate-btn[style*="334155"] {
+  background: #F3F4EF !important;
+  color: #2B3A4F !important;
+  border: 1px solid #E9E9E2 !important;
+  box-shadow: none !important;
+}
+#motGate .gate-loading { background: rgba(250, 250, 248, .82) !important; }
+#motGate .gate-spinner {
+  border-color: rgba(30, 58, 138, .18) !important;
+  border-top-color: #1E3A8A !important;
+}
+
+/* cadastro do motorista: overlay escuro vira claro */
+#motCadastro {
+  background: rgba(250, 250, 248, .98) !important;
+  color: #0D1726 !important;
+}
+#motCadastro .mot-cad-section {
+  border: 1px solid #E9E9E2 !important;
+  background: #FFFFFF !important;
+  border-radius: 16px !important;
+}
+#motCadastro .mot-cad-section legend { color: #1E3A8A !important; }
+#motCadastro input,
+#motCadastro select,
+#motCadastro textarea {
+  background: #FFFFFF !important;
+  border: 1px solid #DCDED4 !important;
+  color: #0D1726 !important;
+}
+#motCadastro input::placeholder,
+#motCadastro textarea::placeholder { color: #8B96A7 !important; }
+#motCadastro .gate-btn {
+  background: #1E3A8A !important;
+  color: #FFFFFF !important;
+}
+#motCadastro .mot-step-progress,
+#motCadastro .mot-step-progress span { color: #5E6B7E !important; }
+#motCadastro .mot-step-progress span.on,
+#motCadastro .mot-step-progress span.active { color: #1E3A8A !important; }
+
+/* ==========================================================================
+   CLIENTE — login e área logada
+   ========================================================================== */
+
+body {
+  background:
+    radial-gradient(720px 520px at 85% 0%, rgba(30, 58, 138, .07), transparent 62%),
+    radial-gradient(560px 460px at 5% 100%, rgba(5, 150, 105, .07), transparent 66%),
+    #FAFAF8 !important;
+  color: #0D1726 !important;
+}
+header {
+  background: linear-gradient(135deg, #0F1F47 0%, #1E3A8A 55%, #24479F 100%) !important;
+  box-shadow: 0 8px 24px rgba(30, 58, 138, .24) !important;
+}
+header .logo { background: rgba(255, 255, 255, .16) !important; }
+.logo img { border-radius: 12px !important; }
+
+#gate, .gate { background: transparent !important; }
+.login {
+  background: #FFFFFF !important;
+  border: 1px solid #E9E9E2 !important;
+  border-radius: 22px !important;
+  box-shadow: 0 2px 6px rgba(16, 24, 40, .05), 0 30px 60px -34px rgba(16, 24, 40, .4) !important;
+  color: #0D1726 !important;
+}
+.login h1, .login h2, .login .titulo { color: #0D1726 !important; }
+.login p { color: #5E6B7E !important; }
+.login .mb-logo-img {
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
+  display: block;
+  margin-bottom: 4px;
+  object-fit: contain;
+  background: #FAFAF8;
+  border: 1px solid #E9E9E2;
+}
+
+/* Botão principal e ações (eram teal #0F766E → #14B8A6) */
+.btn.primary,
+#loginBtn,
+.pdEnviar,
+.cliBtn {
+  background: linear-gradient(135deg, #1E3A8A 0%, #24479F 100%) !important;
+  background-image: linear-gradient(135deg, #1E3A8A 0%, #24479F 100%) !important;
+  color: #FFFFFF !important;
+  border: 0 !important;
+  box-shadow: 0 10px 22px -14px rgba(30, 58, 138, .9) !important;
+}
+.cliBtn.red { background: #FEF2F2 !important; color: #B91C1C !important; box-shadow: none !important; }
+.cliBtn.sec { background: #FFFFFF !important; color: #1E3A8A !important; border: 1px solid #DCDED4 !important; }
+
+.cards .card,
+.tablewrap,
+.filters,
+.stat,
+.login {
+  border-radius: 18px !important;
+}
+.stat strong { color: #0D1726 !important; }
+.stat::after { background: rgba(30, 58, 138, .06) !important; }
+.tablewrap { background: #FFFFFF !important; border-color: #E9E9E2 !important; }
+.tabletitle { color: #0D1726 !important; }
+.paid { background: #ECFDF5 !important; color: #047857 !important; }
+.field input:focus,
+.field select:focus,
+.pdIn:focus,
+.cliSheet input:focus {
+  border-color: #1E3A8A !important;
+  box-shadow: 0 0 0 4px rgba(30, 58, 138, .14) !important;
+}
+.pdTipo:has(input:checked) {
+  background: #EEF2FB !important;
+  border-color: #1E3A8A !important;
+  color: #1E3A8A !important;
+}
+
+/* ==========================================================================
+   MOTORISTA — área logada (cabeçalho e ações)
+   ========================================================================== */
+
+.mot-header {
+  background: linear-gradient(135deg, #0F1F47 0%, #1E3A8A 58%, #24479F 100%) !important;
+  box-shadow: 0 6px 24px rgba(30, 58, 138, .30) !important;
+}
+.gate-logo { background: linear-gradient(135deg, #24479F, #1E3A8A) !important; box-shadow: 0 10px 28px -18px rgba(30, 58, 138, .9) !important; }
+.b-concluir,
+.mm-ok {
+  background: linear-gradient(135deg, #1E3A8A, #24479F) !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 8px 20px -14px rgba(30, 58, 138, .9) !important;
+}
+.mtoast.info { border-left-color: #2563EB !important; }
+.mot-step-progress span.on,
+.mot-step-progress span.active { color: #1E3A8A !important; }
+
+/* ==========================================================================
+   PÁGINAS DE INSTALAÇÃO (Rotas do Dia, Despesas, FAST Limpo)
+   ========================================================================== */
+
+.install-page {
+  background:
+    radial-gradient(720px 520px at 85% 0%, rgba(30, 58, 138, .10), transparent 62%),
+    radial-gradient(560px 460px at 5% 100%, rgba(5, 150, 105, .08), transparent 66%),
+    #FAFAF8 !important;
+}
+body:has(.install-page) {
+  background: #FAFAF8 !important;
+  color: #0D1726 !important;
+}
+.install-page .card {
+  background: #FFFFFF !important;
+  border: 1px solid #E9E9E2 !important;
+  border-radius: 24px !important;
+  box-shadow: 0 2px 6px rgba(16, 24, 40, .05), 0 30px 70px -40px rgba(16, 24, 40, .45) !important;
+}
+.install-page .card img {
+  border-radius: 24px !important;
+  border: 1px solid #E9E9E2;
+  background: #FFFFFF;
+}
+.install-page h1 { color: #0D1726 !important; }
+.install-page p { color: #5E6B7E !important; }
+.install-page button {
+  background: #1E3A8A !important;
+  background-image: none !important;
+  color: #FFFFFF !important;
+  border-radius: 12px !important;
+  box-shadow: 0 12px 26px -18px rgba(30, 58, 138, .8) !important;
+}
+.install-page .open {
+  background: #EEF2FB !important;
+  color: #1E3A8A !important;
+  border-radius: 12px !important;
+}
+.install-page .status {
+  background: #F7F8F4 !important;
+  color: #5E6B7E !important;
+  border-radius: 12px !important;
+}
+.install-page .versao { color: #8B96A7 !important; }
 
 @media print {
   .mb-app-selo { display: none !important; }
