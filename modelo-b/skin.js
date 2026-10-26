@@ -298,12 +298,37 @@
   function soltarLancador() {
     var b = document.getElementById('fastV2Launcher');
     if (!b) return;
-    if (b.getAttribute('data-dragged') === '1') return;
+
+    /* O app grava a posição escolhida em fastV2LauncherPos quando o botão é
+       arrastado. O atributo data-dragged NÃO serve para isso: ele só existe
+       por 450 ms, para o clique depois do gesto não abrir a paleta. */
+    var salva = null;
+    try { salva = JSON.parse(localStorage.getItem('fastV2LauncherPos') || 'null'); } catch (e) {}
+
+    var temPosicao = salva && typeof salva.left === 'number' && typeof salva.top === 'number';
+
     try {
-      b.classList.remove('fast-drag-pinned');
-      ['inset', 'left', 'top', 'right', 'bottom'].forEach(function (p) {
-        b.style.removeProperty(p);
-      });
+      if (temPosicao) {
+        /* O app recalcula a posição no arranque a partir do HTML e acaba
+           voltando para o lugar antigo; aqui a escolha do usuário é mantida
+           (com a mesma margem de segurança que o app usa). */
+        var w = b.offsetWidth || 50;
+        var h = b.offsetHeight || 50;
+        var margem = 6;
+        var esq = Math.max(margem, Math.min(salva.left, window.innerWidth - w - margem));
+        var topo = Math.max(margem, Math.min(salva.top, window.innerHeight - h - margem));
+        b.classList.add('fast-drag-pinned');
+        b.style.setProperty('left', Math.round(esq) + 'px', 'important');
+        b.style.setProperty('top', Math.round(topo) + 'px', 'important');
+        b.style.setProperty('right', 'auto', 'important');
+        b.style.setProperty('bottom', 'auto', 'important');
+      } else {
+        /* Sem arrasto salvo: canto inferior direito, definido pelo CSS. */
+        b.classList.remove('fast-drag-pinned');
+        ['inset', 'left', 'top', 'right', 'bottom'].forEach(function (p) {
+          b.style.removeProperty(p);
+        });
+      }
     } catch (e) {}
   }
 

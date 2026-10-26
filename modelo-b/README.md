@@ -10,6 +10,7 @@ do app que já está no ar: nenhum arquivo do app atual foi alterado.
 | Modelo B | [`/modelo-b/`](index.html) |
 | Apps do Modelo B | [`app-motorista`](app-motorista/index.html) · [`app-cliente`](app-cliente/index.html) · [`app-rotas-dia`](app-rotas-dia/index.html) · [`app-despesas`](app-despesas/index.html) · [`app-limpo`](app-limpo/index.html) |
 | Paridade verificada | [`PARIDADE.md`](PARIDADE.md) |
+| Testes de sincronização, layout e transições | [`TESTES.md`](TESTES.md) |
 
 No navegador, o botão **“Modelo B · visual novo”** (canto inferior esquerdo)
 volta para o visual atual naquele aparelho; a escolha fica em
@@ -70,7 +71,8 @@ build de novo.
 - cartões de KPI, DRE, Despesas, Configurações e indicadores sem violeta/ciano;
 - painel de sincronização em marinho (o vermelho continua nos textos de erro);
 - paleta de comandos (Ctrl+K) como folha branca;
-- botão flutuante da Central Rápida no canto inferior direito e em marinho;
+- botão flutuante da Central Rápida no canto inferior direito e em marinho,
+  respeitando a posição quando a pessoa arrasta;
 - botões `.btn-danger` separados por texto: “Limpar/Parar” = contorno vermelho;
   “Salvar/Confirmar” = marinho.
 
@@ -102,6 +104,7 @@ Nenhuma função, texto, permissão ou chamada ao Supabase foi alterada.
 | `index.html`, `app-*/index.html` | **gerados** — não editar à mão |
 | `build-info.json` | **gerado** — SHA das origens e tamanho das cópias |
 | `prints/` | capturas de 26/10/2026: login, 9 abas, celular e os 5 apps |
+| `TESTES.md` | resultados dos testes de sincronização, estouro de tela e transições |
 
 ## Capturas
 
@@ -136,11 +139,18 @@ Dashboard, login no celular, App Cliente, Rotas do Dia, Despesas e FAST Limpo.
 - o formato de hora dos campos nativos (`08:00 AM`) segue o idioma do aparelho
   — em português mostra 24 h.
 
+## Testes (26/10/2026)
+
+Os 8 cenários de sincronização (criar online, criar offline e reconectar, duas
+abas, recusa do servidor, recuperação, edição offline, receber de outro
+aparelho) passaram sem duplicar nada — ver [`TESTES.md`](TESTES.md).
+Layout: 13 abas × 6 larguras sem estouro horizontal e sem erro; transições de
+aba em 8–32 ms, iguais ao app atual.
+
 ## Próxima fase (Fase 3)
 
-1. testar sincronização de verdade: criar offline → reconectar → conferir
-   duplicidade, duas abas abertas, edição simultânea e atualização do service
-   worker;
-2. revisar em aparelho real (Android e iPhone) os apps e o login;
+1. repetir os testes em dois aparelhos reais (tempo real por WebSocket, modo
+   avião de verdade, atualização do service worker após publicar);
+2. revisar no Android e no iPhone os apps e o login;
 3. decidir se o visual atual é aposentado, promovendo o `modelo-b/` para a
    raiz (o build já garante que é o mesmo app).

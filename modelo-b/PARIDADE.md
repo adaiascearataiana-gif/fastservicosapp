@@ -169,7 +169,14 @@ painel que a skin repinta.
 - a auditoria de contraste não avalia fundos em gradiente: esses casos foram
   conferidos a olho nas capturas.
 
-## 8. Como repetir a verificação
+## 8. Sincronização — testes executados
+
+Os 8 cenários (criar com e sem internet, reconectar, duas abas, recusa do
+servidor, recuperação, edição offline e receber de outro aparelho) estão em
+[`TESTES.md`](TESTES.md). Resumo: nenhum caso duplicou dados, nada se perdeu
+quando o servidor recusou, e o app não reenvia o que já estava sincronizado.
+
+## 9. Como repetir a verificação
 
 ```bash
 # 1. as cópias batem com o app real?
