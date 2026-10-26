@@ -1,116 +1,146 @@
-# Modelo B no app real
+# Modelo B — o FAST com o visual novo
 
-Esta pasta é o **app FAST inteiro** — as mesmas telas, as mesmas funções, a mesma
-sincronização e os mesmos apps — com o **visual Modelo B** (claro, executivo,
-azul-marinho + verde esmeralda).
+Esta pasta é o **app inteiro** (mesmas telas, mesmas funções, mesma
+sincronização, mesmos apps) com a pele do Modelo B. Ela é **gerada** a partir
+do app que já está no ar: nenhum arquivo do app atual foi alterado.
 
-O app atual continua intacto em `../`. Nada foi apagado, substituído ou movido.
-
-| | Endereço |
+| | |
 |---|---|
-| **Visual atual** (intacto) | `https://adaiascearataiana-gif.github.io/fastservicosapp/` |
-| **Modelo B** | `https://adaiascearataiana-gif.github.io/fastservicosapp/modelo-b/` |
-| Apps do Modelo B | `.../modelo-b/app-cliente/`, `app-motorista/`, `app-rotas-dia/`, `app-despesas/`, `app-limpo/` |
+| App atual (intocado) | [`/`](../index.html) |
+| Modelo B | [`/modelo-b/`](index.html) |
+| Apps do Modelo B | [`app-motorista`](app-motorista/index.html) · [`app-cliente`](app-cliente/index.html) · [`app-rotas-dia`](app-rotas-dia/index.html) · [`app-despesas`](app-despesas/index.html) · [`app-limpo`](app-limpo/index.html) |
+| Paridade verificada | [`PARIDADE.md`](PARIDADE.md) |
 
-> **Importante:** os arquivos `index.html` desta pasta são **gerados**. Não edite
-> à mão. Para mudar o visual, edite `skin-modelo-b.css` / `skin.js`; para trazer
-> qualquer alteração feita no app real, rode o build de novo (§ *Como atualizar*).
+No navegador, o botão **“Modelo B · visual novo”** (canto inferior esquerdo)
+volta para o visual atual naquele aparelho; a escolha fica em
+`localStorage.fast_modelo_b` e não toca em nenhum dado do app.
 
-## Como é possível “usar tudo” sem reescrever nada
+## Como funciona (não é uma cópia do app)
 
-`modelo-b/index.html` é uma **cópia byte a byte do `index.html` real**, com duas
-injeções:
+`build.py` copia cada `index.html` real e injeta, **antes de `</head>`**:
 
-1. `<base href="../">` — todos os 17 scripts, o `fast-sw.js`, o manifest, as
-   imagens e os apps continuam carregando **os arquivos reais da raiz**;
-2. a skin (`skin-modelo-b.css` + `skin.js`) logo antes de `</head>`.
-
-Por isso as funções, a sincronização em tempo real, a fila offline, o login no
-Supabase, os 13 menus e os 5 apps são **os mesmos arquivos** — não uma cópia que
-pode ficar diferente. Os apps recebem `../../<app>/` como base e uma skin leve.
-O `build.py` confere isso a cada geração (ver `PARIDADE.md`).
-
-## O que muda no visual
-
-- fundo `#FAFAF8`, cartões brancos, bordas `#E9E9E2`, cantos de 14–20 px;
-- azul-marinho `#1E3A8A` como cor principal e verde esmeralda `#059669` de apoio;
-- fontes **Inter** e **Manrope** (locais, em `fontes/`, com licença OFL);
-- login claro, cartão branco e botão **CONFIRMAR azul-marinho**;
-- menu lateral branco, item ativo em azul-marinho com barra à esquerda;
-- cabeçalho claro, busca e pílulas brancas, cartão do usuário claro;
-- cartão “Boa tarde…” em gradiente azul-marinho;
-- cabeçalhos de tabela legíveis (eram cinza-claro), cartão **Total** de Despesas
-  em azul-marinho, blocos “Destaque” e “Comando de voz” claros;
-- painel de sincronização/erros em azul-marinho (só aparece quando falta login ou
-  há erro — o vermelho continua nos textos e ícones de alerta);
-- botão flutuante de atalhos (raio) em azul-marinho, antes quase invisível.
-
-Capturas em [`prints/`](prints/): login, Centro de Operações, Rotas, Clientes,
-Despesas, Motoristas, Configurações, celular (390 px) e apps.
-
-## O que **não** muda
-
-- os 17 scripts do app e o service worker (`fast-sw.js`, versão 4.0.24);
-- sincronização `realtime:fast-sync-db` (`rotas`, `despesas`,
-  `sequencias_itens`, `destinos`, `clientes`), fila offline e resolução de
-  conflitos;
-- login/Supabase (`fast_supa_session`), Google Drive das fotos, backups;
-- dados, permissões, textos, validações e fluxos;
-- os 5 apps e seus service workers (quando o app registra um);
-- o app atual em `/` — nenhum arquivo dele foi alterado.
-
-A única chave nova no navegador é `fast_modelo_b` (o selo “visual atual” grava
-`off` nela; para voltar ao Modelo B, limpe a chave ou use a URL normal).
-
-## Como atualizar (depois de mexer no app real)
-
-```bash
-python3 modelo-b/build.py            # regenera as cópias
-python3 modelo-b/build.py --check    # só confere; sai com erro se estiver velho
+```html
+<base href="../">                            <!-- apps: ../../<app>/ -->
+<link rel="stylesheet" href="modelo-b/skin-modelo-b.css">
+<script src="modelo-b/lucide.js" defer></script>
+<script src="modelo-b/skin.js" defer></script>
+<!-- nos apps: skin-apps.css + skin-apps.js -->
 ```
 
-O build:
+O `<base>` mantém **todos** os caminhos originais (scripts, `assets`, fontes,
+`fast-sw.js`, manifest e pastas dos apps) apontando para os arquivos reais na
+raiz. Como o motor é o mesmo arquivo, a sincronização é a mesma.
 
-- lê `index.html` e os 5 `app-*/index.html` **sem alterá-los**;
-- injeta `<base>` e a skin;
-- **remove a injeção e compara** com o original (precisa bater byte a byte);
-- confere que nenhum script do app mudou de endereço e que o service worker é o
-  mesmo;
-- grava `build-info.json` com o SHA-256 de cada origem e a lista de scripts.
+O build confere, a cada execução:
+
+1. o HTML gerado, **removida a injeção**, é idêntico byte a byte ao original;
+2. a lista de scripts do app não muda (só entram `lucide.js`/`skin.js`, e
+   `skin-apps.js` nos apps);
+3. a URL do service worker não muda;
+4. os arquivos da skin existem.
+
+```bash
+python3 modelo-b/build.py           # gera/atualiza as 6 páginas
+python3 modelo-b/build.py --check   # só confere (sai com erro se estiver velho)
+```
+
+`build-info.json` guarda o SHA-256 (12 primeiros caracteres) da origem de cada
+página. As cópias são descartáveis: **edite o app real** (ou a skin) e rode o
+build de novo.
+
+## O que mudou nesta fase (Fase 2)
+
+### Identidade
+
+- off-white `#FAFAF8`, cartões brancos, azul-marinho `#1E3A8A` como cor
+  principal e esmeralda `#059669` como acento;
+- raio 14–20 px, sombras difusas, tipografia Manrope (títulos) + Inter (texto),
+  ambas servidas de `fontes/` (sem depender de CDN);
+- **205 classes Font Awesome trocadas por 177 ícones Lucide** (traço, 42 KB),
+  mantendo a classe original no `<i>`: se um ícone não tem equivalente, o Font
+  Awesome continua. Ícones de marca (WhatsApp, Google, GitHub) ficam como estão.
+
+### Telas do app principal
+
+- login: cartão branco, botão CONFIRMAR marinho, biometria em azul claro;
+- menu lateral branco com item ativo marinho e barra de 3 px;
+- cabeçalho claro translúcido, busca e pílulas de estado;
+- hero da Central em gradiente marinho, com KPIs e tarja de operação;
+- tabelas com cabeçalho legível (`#4A586B` sobre `#F3F4EF`);
+- cartões de KPI, DRE, Despesas, Configurações e indicadores sem violeta/ciano;
+- painel de sincronização em marinho (o vermelho continua nos textos de erro);
+- paleta de comandos (Ctrl+K) como folha branca;
+- botão flutuante da Central Rápida no canto inferior direito e em marinho;
+- botões `.btn-danger` separados por texto: “Limpar/Parar” = contorno vermelho;
+  “Salvar/Confirmar” = marinho.
+
+### Apps
+
+- `app-motorista`: acesso claro (era escuro), botões marinho, cabeçalho e ações
+  internas em marinho;
+- `app-cliente`: fundo off-white, botão Entrar marinho, ícone real no lugar do
+  quadrado emoji, cabeçalho marinho;
+- `app-rotas-dia`, `app-despesas`, `app-limpo`: páginas de instalação claras,
+  botões marinho;
+- nos apps, um script pequeno (`skin-apps.js`) aponta as imagens que não
+  existiam em `assets/` para os arquivos reais (logo do motorista, ícones dos
+  atalhos) e ajusta a cor da barra do navegador.
+
+Nenhuma função, texto, permissão ou chamada ao Supabase foi alterada.
 
 ## Arquivos
 
-| Arquivo | Papel |
+| Arquivo | Para que serve |
 |---|---|
-| `build.py` | gerador + conferência (não altera o app real) |
-| `skin-modelo-b.css` | visual do app principal (tokens, login, menu, cabeçalho, tabelas, contraste) |
-| `skin.js` | liga a skin, pinta o que o app define por JS e mostra o selo |
-| `skin-apps.css` | toque leve nos 5 apps: fontes, raio, foco, impressão |
-| `fontes/` | Inter e Manrope (woff2) + licenças OFL |
-| `prints/` | capturas usadas nesta documentação |
-| `index.html`, `app-*/index.html` | **gerados** — não editar |
-| `build-info.json` | **gerado** — origem, SHA, tamanho e scripts |
+| `build.py` | gera as cópias e verifica a paridade |
+| `skin-modelo-b.css` | a pele do app principal (tokens, componentes, seções 1–16) |
+| `skin.js` | liga a pele, troca os ícones e reconcilia a pintura a cada troca de tela |
+| `lucide.js` | 177 ícones Lucide (42 KB) + 205 mapeamentos `fa-*` → Lucide |
+| `lucide-LICENSE.txt` | licença ISC do Lucide |
+| `skin-apps.css` / `skin-apps.js` | pele e ajustes visuais dos 5 apps |
+| `fontes/` | Inter 400/500/600/700 e Manrope 600/700/800 (woff2) |
+| `index.html`, `app-*/index.html` | **gerados** — não editar à mão |
+| `build-info.json` | **gerado** — SHA das origens e tamanho das cópias |
+| `prints/` | capturas de 26/10/2026: login, 9 abas, celular e os 5 apps |
 
-## Limites desta fase (Fase 1)
+## Capturas
 
-- os ícones continuam sendo Font Awesome (208 ícones distintos, 806 usos). A
-  troca para ícones de traço (Lucide) é a Fase 2, para não quebrar nenhum botão;
-- os 5 apps mantêm o visual próprio; por enquanto recebem só fonte, raio, foco e
-  impressão. O visual novo dos apps é a Fase 2;
-- o visual foi revisado tela a tela em Centro de Operações, Rotas, Clientes,
-  Despesas, Motoristas e Configurações, além de modais e do celular. As demais
-  abas usam os mesmos componentes (cartões, tabelas, formulários) e a mesma skin,
-  mas ainda não tiveram revisão visual individual — checklist em `PARIDADE.md`;
-- problemas que **já existem no app atual** (não são da skin): ícones quebrados
-  em `assets/` de alguns apps e uma lista branca sobre branco na paleta do
-  celular em tema claro.
+| | |
+|---|---|
+| ![Login](prints/01-login.jpg) | ![Centro de Operações](prints/02-central.jpg) |
+| ![Clientes](prints/05-clientes.jpg) | ![DRE](prints/08-dre.jpg) |
+| ![Despesas](prints/09-despesas.jpg) | ![Configurações](prints/10-configuracoes.jpg) |
+| ![Celular](prints/12-mobile-central.jpg) | ![App Motorista](prints/13-app-motorista.jpg) |
 
-## Próximas fases
+As demais estão em [`prints/`](prints/): Rotas, Rotas do Dia, Motoristas,
+Dashboard, login no celular, App Cliente, Rotas do Dia, Despesas e FAST Limpo.
 
-- **Fase 2** — revisão tela a tela das 13 abas + 5 apps, ícones Lucide, ajustes
-  finos de tabelas, formulários e modais;
-- **Fase 3** — teste de sincronização: criar offline → reconectar → conferir
-  duplicidade, duas abas abertas, conflito de edição, atualização do service
-  worker.
+## O que **não** mudou
 
-A paridade atual está documentada em [`PARIDADE.md`](PARIDADE.md).
+- `index.html`, `app-*/`, `*.js`, `*.css`, `assets/`, `fast-sw.js` e
+  `updates.json` da raiz estão exatamente como estavam (`git status` só mostra
+  `modelo-b/`);
+- Supabase, tempo real, fila offline (IndexedDB), sessão, Google Drive e
+  backups: mesmas URLs e mesmo código;
+- versão do app (`5.3.8`), textos, permissões e fluxos.
+
+## Limites conhecidos
+
+- os ícones sem equivalente Lucide continuam em Font Awesome (nenhum some);
+- as telas internas de `app-motorista` que já eram escuras seguem escuras — só
+  cabeçalho, botões de ação e tipografia mudaram;
+- em `file://` (sem internet) o painel de sincronização aparece porque não há
+  sessão; ele fica marinho e limitado a 78% da altura;
+- a paleta do celular e alguns widgets flutuantes têm posição definida pelo
+  app (não pela skin); são os mesmos no visual atual;
+- o formato de hora dos campos nativos (`08:00 AM`) segue o idioma do aparelho
+  — em português mostra 24 h.
+
+## Próxima fase (Fase 3)
+
+1. testar sincronização de verdade: criar offline → reconectar → conferir
+   duplicidade, duas abas abertas, edição simultânea e atualização do service
+   worker;
+2. revisar em aparelho real (Android e iPhone) os apps e o login;
+3. decidir se o visual atual é aposentado, promovendo o `modelo-b/` para a
+   raiz (o build já garante que é o mesmo app).

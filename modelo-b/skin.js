@@ -8,8 +8,10 @@
         de sincronização) com estilo inline + important — porque o app aplica
         essas cores por seletores muito específicos, ou por JavaScript, e sem
         isso elas venceriam a skin;
-     3. mostra um selo discreto para voltar ao visual atual;
-     4. guarda a escolha em localStorage (chave própria: fast_modelo_b).
+     3. troca os ícones do Font Awesome pelos ícones de traço (Lucide) —
+        sem remover a classe original, para nenhum botão do app quebrar;
+     4. mostra um selo discreto para voltar ao visual atual;
+     5. guarda a escolha em localStorage (chave própria: fast_modelo_b).
 
    A pintura é reconciliada a cada mudança de tela: o que deixou de valer é
    removido na hora (sem "fantasmas" de aba ativa) e o que o app reescreveu
@@ -29,6 +31,75 @@
   } catch (e) {}
 
   raiz.classList.add('modelo-b');
+
+  /* ------------------------------------------------------------------------
+     ÍCONES — Lucide no lugar do Font Awesome
+     O elemento <i class="fa-solid fa-x"> NÃO é substituído: só ganha a classe
+     `mb-icone` e um <svg> por dentro. Assim qualquer código do app que leia a
+     classe, troque o ícone ou recrie o botão continua funcionando; se o ícone
+     não tiver equivalente, o Font Awesome permanece.
+     ---------------------------------------------------------------------- */
+  var ICONES = window.MB_ICONES || {};
+  var MAPA = window.MB_MAPA_ICONES || {};
+  var contagem = { lucide: 0, fontawesome: 0 };
+
+  function svgDoIcone(classe) {
+    var corpo = ICONES[classe];
+    if (!corpo) return '';
+    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
+      'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' +
+      corpo + '</svg>';
+  }
+
+  function pintarIcone(el) {
+    var classes = String(el.className || '').split(/\s+/);
+    var alvo = '';
+    for (var i = 0; i < classes.length; i++) {
+      if (MAPA[classes[i]]) { alvo = classes[i]; break; }
+    }
+    var atual = el.getAttribute('data-mb-icone') || '';
+
+    if (!alvo) {
+      if (atual) {
+        el.removeAttribute('data-mb-icone');
+        el.classList.remove('mb-icone');
+        el.innerHTML = '';
+        contagem.fontawesome++;
+      }
+      return;
+    }
+
+    var precisa = atual !== alvo || !el.classList.contains('mb-icone') || !el.querySelector('svg');
+    if (!precisa) { contagem.lucide++; return; }
+
+    el.innerHTML = svgDoIcone(MAPA[alvo]);
+    el.setAttribute('data-mb-icone', alvo);
+    el.classList.add('mb-icone');
+    contagem.lucide++;
+  }
+
+  /* Botões .btn-danger: separa ação destrutiva de ação principal pelo texto. */
+  function classificarBotoes() {
+    var lista;
+    try { lista = document.querySelectorAll('.btn-danger'); } catch (e) { return; }
+    Array.prototype.forEach.call(lista, function (el) {
+      var txt = String(el.textContent || '').trim().toLowerCase();
+      var perigo = /(limpar|parar|excluir|apagar|remover|zerar|resetar|desconectar)/.test(txt);
+      var primario = /(salvar|gravar|enviar|confirmar|publicar)/.test(txt);
+      el.classList.toggle('mb-perigo', perigo && !primario);
+      el.classList.toggle('mb-primario', primario && !perigo);
+    });
+  }
+
+  function pintarIcones() {
+    contagem = { lucide: 0, fontawesome: 0 };
+    var lista;
+    try {
+      lista = document.querySelectorAll('i.fa-solid, i.fa-regular');
+    } catch (e) { return; }
+    Array.prototype.forEach.call(lista, pintarIcone);
+    try { window.__mbIcones = { lucide: contagem.lucide, fontAwesome: contagem.fontawesome }; } catch (e) {}
+  }
 
   /* ------------------------------------------------------------------------
      Pintura dos elementos estruturais (só cor, borda, raio e sombra)
@@ -135,6 +206,22 @@
       'background': '#2B3A4F',
       'color': '#FFFFFF',
       'border-radius': '10px'
+    },
+    /* mesma classe .btn-danger usada pelo app para "Limpar/Parar" e "Salvar":
+       o skin.js marca o botão pelo texto e aqui a cor é garantida inline. */
+    '.btn-danger.mb-perigo': {
+      'background': '#FEF2F2',
+      'background-image': 'none',
+      'color': '#B91C1C',
+      'border': '1px solid #FECACA',
+      'box-shadow': 'none'
+    },
+    '.btn-danger.mb-primario': {
+      'background': '#1E3A8A',
+      'background-image': 'none',
+      'color': '#FFFFFF',
+      'border': '1px solid #17306F',
+      'box-shadow': '0 10px 24px -16px rgba(30, 58, 138, .9)'
     }
   };
 
@@ -146,6 +233,7 @@
   var estado = new Map();
 
   function pintar() {
+    classificarBotoes();
     var desejado = new Map();
 
     Object.keys(REGRAS).forEach(function (seletor) {
@@ -192,6 +280,31 @@
     });
 
     estado = desejado;
+
+    /* 3) ícones (Lucide) */
+    pintarIcones();
+
+    /* 4) lançador flutuante no canto padrão quando a posição veio do arquivo */
+    soltarLancador();
+  }
+
+  /* ------------------------------------------------------------------------
+     Lançador da Central Rápida (botão do raio)
+     O arquivo atual do app carrega uma posição arrastada antiga escrita no
+     próprio HTML (`inset: 411px auto auto 373px`, data-dragged="0"). No
+     Modelo B ele volta ao canto padrão — só quando NUNCA foi arrastado neste
+     navegador. Se o usuário arrastar (data-dragged="1"), a posição dele vale.
+     ---------------------------------------------------------------------- */
+  function soltarLancador() {
+    var b = document.getElementById('fastV2Launcher');
+    if (!b) return;
+    if (b.getAttribute('data-dragged') === '1') return;
+    try {
+      b.classList.remove('fast-drag-pinned');
+      ['inset', 'left', 'top', 'right', 'bottom'].forEach(function (p) {
+        b.style.removeProperty(p);
+      });
+    } catch (e) {}
   }
 
   /* ------------------------------------------------------------------------

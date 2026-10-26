@@ -90,7 +90,7 @@ html.modelo-b body[class*="theme-"] {
   --text-main: #0D1726;
   --text-soft: #2B3A4F;
   --text-muted: #5E6B7E;
-  --text-faint: #8B96A7;
+  --text-faint: #5E6B7E;
 
   /* linhas */
   --border: #E9E9E2;
@@ -104,7 +104,7 @@ html.modelo-b body[class*="theme-"] {
   --accent-glow: rgba(30, 58, 138, .22);
   --primary: #1E3A8A;
   --info: #1E3A8A;
-  --success: #059669;
+  --success: #047857;
   --grad-accent: linear-gradient(135deg, #24479F 0%, #1E3A8A 60%, #17306F 100%);
   --grad-sidebar: linear-gradient(180deg, #FFFFFF 0%, #FFFFFF 100%);
 
@@ -263,7 +263,7 @@ html.modelo-b .nav-item-count {
 }
 html.modelo-b .nav-section-bar,
 html.modelo-b .nav-current {
-  color: #8B96A7 !important;
+  color: #6B7789 !important;
   font-size: 10px;
   font-weight: 600;
   letter-spacing: .12em;
@@ -371,7 +371,7 @@ html.modelo-b table { border-collapse: separate; border-spacing: 0; }
 html.modelo-b thead th,
 html.modelo-b .sortable-th {
   background: #F7F8F4 !important;
-  color: #8B96A7 !important;
+  color: #4A586B !important;
   font-size: 10px !important;
   font-weight: 600 !important;
   letter-spacing: .08em !important;
@@ -410,7 +410,7 @@ html.modelo-b .dash-period-btn.is-active {
 }
 html.modelo-b .empty,
 html.modelo-b .fast71-note,
-html.modelo-b .emp-sql-info { color: #8B96A7 !important; }
+html.modelo-b .emp-sql-info { color: #5E6B7E !important; }
 
 /* ==========================================================================
    9. DETALHES DE ACABAMENTO
@@ -782,3 +782,252 @@ html.modelo-b .fast-v2-launcher {
   box-shadow: 0 12px 30px -14px rgba(13, 23, 38, .6) !important;
 }
 html.modelo-b .fast-v2-launcher i { color: #FFFFFF !important; }
+
+/* ==========================================================================
+   14. ÍCONES DE TRAÇO (LUCIDE)
+   O <i class="fa-solid fa-x"> continua no DOM (o app depende dele); a skin
+   desenha um <svg> por dentro e esconde o glifo do Font Awesome. Ícones de
+   marca (WhatsApp, Google, GitHub, Drive) continuam no Font Awesome.
+   ========================================================================== */
+html.modelo-b i.mb-icone {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 1em;
+  height: 1em;
+  line-height: 1;
+  font-family: inherit !important;
+  font-weight: inherit !important;
+  vertical-align: -.125em;
+}
+html.modelo-b i.mb-icone::before { content: none !important; }
+html.modelo-b i.mb-icone > svg {
+  width: 1em;
+  height: 1em;
+  display: block;
+  stroke-width: 1.9;
+}
+html.modelo-b i.mb-icone.fa-spin > svg { animation: mb-girar 1s linear infinite; }
+@keyframes mb-girar { to { transform: rotate(360deg); } }
+
+/* ==========================================================================
+   15. CARTÕES DE INDICADOR, ABAS FINANCEIRAS E AÇÕES
+   Revisão tela a tela (26/10): Dashboard e Rotas do Dia usavam cartões em
+   gradiente com texto branco de baixa opacidade; DRE e Configurações ainda
+   tinham barras/ícones violeta. Aqui os cartões ficam brancos com barra de
+   destaque e texto escuro — mesma informação, legível.
+   ========================================================================== */
+
+/* Cor nativa de checkbox/radio/range no azul do Modelo B */
+html.modelo-b { accent-color: #1E3A8A; }
+
+/* ---------- Cartões do painel do dia (Dashboard e Rotas do Dia) ---------- */
+html.modelo-b .fd-card {
+  background: #FFFFFF !important;
+  background-image: none !important;
+  color: #0D1726 !important;
+  border: 1px solid #E9E9E2 !important;
+  border-radius: 16px !important;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, .05) !important;
+  padding: 14px 16px 14px 18px !important;
+}
+html.modelo-b .fd-card::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 4px;
+  background: var(--mb-fd, #1E3A8A);
+}
+html.modelo-b .fd-card > i {
+  color: var(--mb-fd, #1E3A8A) !important;
+  opacity: .95 !important;
+  font-size: 22px !important;
+}
+html.modelo-b .fd-card .fd-num { color: #0D1726 !important; }
+html.modelo-b .fd-card .fd-lbl {
+  color: #5E6B7E !important;
+  opacity: 1 !important;
+  font-weight: 600 !important;
+}
+html.modelo-b .fd-card .fd-sub {
+  color: #5E6B7E !important;
+  opacity: 1 !important;
+}
+html.modelo-b .fd-c-total { --mb-fd: #1E3A8A; }
+html.modelo-b .fd-c-ok { --mb-fd: #059669; }
+html.modelo-b .fd-c-pend { --mb-fd: #B45309; }
+html.modelo-b .fd-c-cheg { --mb-fd: #0284C7; }
+html.modelo-b .fd-c-val { --mb-fd: #475569; }
+
+/* ---------- Barras superiores dos cartões de métrica (DRE) ---------- */
+html.modelo-b .metric-card.blue::before { background: linear-gradient(90deg, #24479F, #1E3A8A); }
+html.modelo-b .metric-card.cyan::before { background: linear-gradient(90deg, #38BDF8, #0284C7); }
+html.modelo-b .metric-card.purple::before { background: linear-gradient(90deg, #64748B, #475569); }
+
+/* Indicadores de saúde financeira: rótulos mais legíveis */
+html.modelo-b .ind-titulo { color: #5E6B7E !important; }
+html.modelo-b .ind-sub { color: #5E6B7E !important; }
+html.modelo-b .ind-icon {
+  background: #FFFFFF !important;
+  border: 1px solid #E9E9E2 !important;
+  border-radius: 12px !important;
+}
+
+/* ---------- Configurações: ícones, botão da área protegida e toggle ---------- */
+html.modelo-b .config-topic-icon {
+  background: linear-gradient(135deg, #EEF2FB, #E1E8F5) !important;
+  color: #1E3A8A !important;
+  border: 1px solid #DCE4F2 !important;
+  box-shadow: none !important;
+}
+html.modelo-b .config-topic-icon i { color: #1E3A8A !important; }
+html.modelo-b .emp-lock-btn {
+  background: linear-gradient(135deg, #24479F, #1E3A8A) !important;
+  background-image: linear-gradient(135deg, #24479F, #1E3A8A) !important;
+  color: #FFFFFF !important;
+  border: 0 !important;
+  box-shadow: 0 12px 26px -18px rgba(30, 58, 138, .9) !important;
+}
+html.modelo-b .fg-slider {
+  background: linear-gradient(135deg, #24479F, #1E3A8A) !important;
+}
+
+/* ---------- Ações destrutivas x ação principal ----------
+   O app usa a mesma classe .btn-danger para "Limpar/Parar" e para "Salvar
+   Despesa". O skin.js marca pelo texto: perigo vira contorno vermelho;
+   salvar/confirmar vira azul-marinho. */
+html.modelo-b .btn-danger.mb-perigo {
+  background: #FEF2F2 !important;
+  background-image: none !important;
+  color: #B91C1C !important;
+  border: 1px solid #FECACA !important;
+  box-shadow: none !important;
+}
+html.modelo-b .btn-danger.mb-perigo:hover {
+  background: #FEE2E2 !important;
+  color: #991B1B !important;
+}
+html.modelo-b .btn-danger.mb-primario {
+  background: #1E3A8A !important;
+  background-image: none !important;
+  color: #FFFFFF !important;
+  border: 1px solid #17306F !important;
+  box-shadow: 0 10px 24px -16px rgba(30, 58, 138, .9) !important;
+}
+html.modelo-b .btn-danger.mb-primario:hover { background: #17306F !important; }
+
+/* ==========================================================================
+   16. GIRO FINAL DE CORES (auditoria 26/10, 13 abas)
+   Sobras do visual antigo que não vinham de token: botão de WhatsApp, ação
+   verde do app, lançador flutuante, barras do gráfico de despesas e selos.
+   ========================================================================== */
+
+/* Botão de WhatsApp: era azul-céu; aqui usa o verde do Modelo B */
+html.modelo-b #btnEnviarFotosWhatsAppCliente,
+html.modelo-b .floating-select-box #btnEnviarFotosWhatsAppCliente {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+  background-image: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+  color: #FFFFFF !important;
+  border: 0 !important;
+  box-shadow: 0 12px 26px -16px rgba(5, 150, 105, .8) !important;
+}
+
+/* Ação verde genérica do app (mesma classe usada em várias abas) */
+html.modelo-b #fast108Btn {
+  background: #1E3A8A !important;
+  background-image: none !important;
+  color: #FFFFFF !important;
+  border: 1px solid #17306F;
+}
+
+/* Lançador flutuante de comandos: era branco com ícone branco (invisível) */
+html.modelo-b .fast-v2-launcher {
+  background: linear-gradient(145deg, #24479F, #1E3A8A) !important;
+  background-image: linear-gradient(145deg, #24479F, #1E3A8A) !important;
+  color: #FFFFFF !important;
+  border: 0 !important;
+  border-radius: 16px !important;
+  box-shadow: 0 16px 34px -18px rgba(30, 58, 138, .9) !important;
+}
+html.modelo-b .fast-v2-launcher i,
+html.modelo-b .fast-v2-launcher svg { color: #FFFFFF !important; }
+
+/* Barras do gráfico de Despesas: eram violeta → ciano */
+html.modelo-b #fedBars .fed-month i,
+html.modelo-b .fed-bars .fed-month i {
+  background: linear-gradient(180deg, #2563EB, #1E3A8A) !important;
+  background-image: linear-gradient(180deg, #2563EB, #1E3A8A) !important;
+}
+
+/* Selos de situação (Motoristas) e textos minúsculos de resultado */
+html.modelo-b .analise { color: #B45309 !important; }
+html.modelo-b .aprovado { color: #047857 !important; }
+html.modelo-b #fefResult { color: #5E6B7E !important; }
+
+/* Rótulos auxiliares: o app pinta o ID do usuário em amarelo (sobre o
+   cabeçalho branco ficava ilegível) e o selo Linux em branco. */
+html.modelo-b #fastUserId { color: #5E6B7E !important; }
+html.modelo-b .fast-user-btn .fast-user-meta { color: #5E6B7E !important; }
+html.modelo-b #fastLinuxBadge {
+  background: #F7F8F4 !important;
+  background-image: none !important;
+  color: #4A586B !important;
+  border: 1px solid #E9E9E2 !important;
+}
+
+/* Paleta de comandos (Ctrl+K): o app usa texto branco em botões claros.
+   Aqui ela vira uma folha branca — mesma função, legível. */
+html.modelo-b .fast-v2-palette-box {
+  background: #FFFFFF !important;
+  border: 1px solid #E9E9E2 !important;
+  border-radius: 18px !important;
+  box-shadow: 0 30px 70px -30px rgba(13, 23, 38, .55) !important;
+}
+html.modelo-b .fast-v2-command {
+  background: #F7F8F4 !important;
+  background-image: none !important;
+  color: #0D1726 !important;
+  border-radius: 12px !important;
+}
+html.modelo-b .fast-v2-command:hover { background: #EEF2FB !important; }
+html.modelo-b .fast-v2-command small { color: #5E6B7E !important; }
+html.modelo-b .fast-v2-command i,
+html.modelo-b .fast-v2-command svg { color: #1E3A8A !important; }
+
+/* Pílula de tempo de bloqueio em Configurações (texto branco sem fundo) */
+html.modelo-b .fast-lock-to-btn {
+  background: #FFFFFF !important;
+  background-image: none !important;
+  color: #1E3A8A !important;
+  border: 1px solid #DCDED4 !important;
+  border-radius: 999px !important;
+}
+
+html.modelo-b .dre-badge.negativo { color: #B91C1C !important; }
+html.modelo-b .dre-badge.positivo { color: #047857 !important; }
+
+/* Lançador da Central Rápida: canto inferior direito (o arquivo do app
+   carrega uma posição arrastada antiga). O skin.js só libera o pino quando
+   o botão nunca foi arrastado neste navegador. */
+html.modelo-b #fastV2Launcher:not(.fast-drag-pinned) {
+  left: auto !important;
+  top: auto !important;
+  right: 22px !important;
+  bottom: 118px !important;
+}
+@media (max-width: 900px) {
+  html.modelo-b #fastV2Launcher:not(.fast-drag-pinned) {
+    right: 14px !important;
+    bottom: 96px !important;
+  }
+}
+
+/* Últimos ajustes de contraste (auditoria das 13 abas, 26/10) */
+html.modelo-b .negativo,
+html.modelo-b .dre-linha-valor.negativo,
+html.modelo-b .dre-badge.negativo { color: #B91C1C !important; }
+html.modelo-b .fast-sec-status.on { color: #047857 !important; }
+html.modelo-b label.hf-dia { color: #475569 !important; }
+html.modelo-b #fastSecBioStatus { color: #5E6B7E !important; }
+html.modelo-b .sa-danger,
+html.modelo-b #fastSecBtnRemove { color: #B91C1C !important; }

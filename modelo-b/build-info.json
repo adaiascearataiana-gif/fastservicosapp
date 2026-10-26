@@ -1,12 +1,12 @@
 {
-  "gerado_em": "2026-10-26T15:54:42+00:00",
+  "gerado_em": "2026-10-26T16:33:00+00:00",
   "aviso": "Arquivos gerados por modelo-b/build.py. Não edite à mão.",
   "arquivos": [
     {
       "origem": "index.html",
       "destino": "modelo-b/index.html",
       "origem_sha": "e1b07a334b60",
-      "destino_bytes": 3096074,
+      "destino_bytes": 3096123,
       "scripts": [
         "https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js",
         "https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js",
@@ -34,7 +34,7 @@
       "origem": "app-cliente/index.html",
       "destino": "modelo-b/app-cliente/index.html",
       "origem_sha": "e36db916bfc6",
-      "destino_bytes": 225182,
+      "destino_bytes": 225237,
       "scripts": [
         "../recibo-fast.js?v=1",
         "../suporte-fast.js?v=5",
@@ -46,7 +46,7 @@
       "origem": "app-motorista/index.html",
       "destino": "modelo-b/app-motorista/index.html",
       "origem_sha": "55a48e8481e7",
-      "destino_bytes": 169710,
+      "destino_bytes": 169765,
       "scripts": [
         "../app-keyboard.js",
         "../motorista-documentos.js",
@@ -62,7 +62,7 @@
       "origem": "app-rotas-dia/index.html",
       "destino": "modelo-b/app-rotas-dia/index.html",
       "origem_sha": "2449ca5aa143",
-      "destino_bytes": 5760,
+      "destino_bytes": 5815,
       "scripts": [],
       "service_worker": [
         "./sw.js?v=neon4034"
@@ -72,7 +72,7 @@
       "origem": "app-despesas/index.html",
       "destino": "modelo-b/app-despesas/index.html",
       "origem_sha": "11331196a655",
-      "destino_bytes": 9054,
+      "destino_bytes": 9109,
       "scripts": [],
       "service_worker": [
         "./sw.js?v=neon4034"
@@ -82,7 +82,7 @@
       "origem": "app-limpo/index.html",
       "destino": "modelo-b/app-limpo/index.html",
       "origem_sha": "a636297576d6",
-      "destino_bytes": 4282,
+      "destino_bytes": 4337,
       "scripts": [],
       "service_worker": [
         "./sw.js?v=r4010"

@@ -60,7 +60,8 @@ def sw_urls(html: str) -> list[str]:
     return re.findall(r"serviceWorker\.register\(\s*['\"]([^'\"]+)", html)
 
 
-def injetar(origem: str, base_href: str, skin_href: str, skin_js: str | None) -> str:
+def injetar(origem: str, base_href: str, skin_href: str, skin_js: str | None,
+            outros_scripts: tuple[str, ...] = ()) -> str:
     """Devolve o HTML com <base> e a skin injetados, sem mexer no resto."""
     if re.search(r"<base\s", origem, re.I):
         raise SystemExit("O arquivo de origem já tem <base>; ajuste o script.")
@@ -72,6 +73,8 @@ def injetar(origem: str, base_href: str, skin_href: str, skin_js: str | None) ->
     bloco_base = f"\n{MARCA_BASE}\n<base href=\"{base_href}\">\n"
 
     extra = f'\n{MARCA_SKIN}\n<link rel="stylesheet" href="{skin_href}">\n'
+    for script in outros_scripts:
+        extra += f'<script src="{script}" defer></script>\n'
     if skin_js:
         extra += f'<script src="{skin_js}" defer></script>\n'
 
@@ -94,7 +97,7 @@ def remover_injecao(html: str) -> str:
     """Reconstrói o original (para conferir que nada além do previsto mudou)."""
     html = re.sub(r"\n" + re.escape(MARCA_BASE) + r"\n<base href=\"[^\"]+\">\n", "", html)
     html = re.sub(
-        r"\n" + re.escape(MARCA_SKIN) + r"\n<link rel=\"stylesheet\" href=\"[^\"]+\">\n(?:<script src=\"[^\"]+\"(?:\s+defer)?></script>\n)?",
+        r"\n" + re.escape(MARCA_SKIN) + r"\n<link rel=\"stylesheet\" href=\"[^\"]+\">\n(?:<script src=\"[^\"]+\"(?:\s+defer)?></script>\n)*",
         "",
         html,
     )
@@ -105,13 +108,14 @@ CONFERIR = False
 PENDENTES: list[str] = []
 
 
-def gerar_app(nome: str, destino_rel: str, base_href: str, skin_href: str, skin_js: str | None) -> dict:
+def gerar_app(nome: str, destino_rel: str, base_href: str, skin_href: str, skin_js: str | None,
+             outros_scripts: tuple[str, ...] = ()) -> dict:
     origem_path = RAIZ / nome / "index.html" if destino_rel != "index.html" else RAIZ / "index.html"
     if not origem_path.exists():
         raise SystemExit(f"Não encontrei {origem_path}")
 
     origem = origem_path.read_text(encoding="utf-8", errors="strict")
-    html = injetar(origem, base_href, skin_href, skin_js)
+    html = injetar(origem, base_href, skin_href, skin_js, outros_scripts)
 
     # conferência: tirando a injeção, o arquivo tem de ser idêntico ao original
     if remover_injecao(html) != origem:
@@ -120,8 +124,9 @@ def gerar_app(nome: str, destino_rel: str, base_href: str, skin_href: str, skin_
     # conferência: nenhum script do app trocado de endereço
     # (o único script extra permitido é o skin.js)
     extras = [u for u in script_urls(html) if u not in script_urls(origem)]
-    if extras not in ([], [skin_js or "__nenhum__"]):
-        raise SystemExit(f"Script inesperado em {origem_path}: {extras}")
+    permitidos = [u for u in (*outros_scripts, skin_js) if u]
+    if sorted(extras) != sorted(permitidos):
+        raise SystemExit(f"Script inesperado em {origem_path}: {extras} (esperado: {permitidos})")
     # conferência: a skin precisa existir no disco (caminho resolvido pela base)
     alvo_skin = (RAIZ / skin_href).resolve() if not skin_href.startswith("../") else None
     if alvo_skin is not None and not alvo_skin.exists():
@@ -170,8 +175,9 @@ def main() -> None:
     args = ap.parse_args()
     CONFERIR = args.check
 
-    if not (SAIDA / "skin-modelo-b.css").exists():
-        raise SystemExit("skin-modelo-b.css não encontrado — a pasta modelo-b está incompleta.")
+    for obrigatorio in ("skin-modelo-b.css", "skin-apps.css", "skin.js", "skin-apps.js", "lucide.js"):
+        if not (SAIDA / obrigatorio).exists():
+            raise SystemExit(f"{obrigatorio} não encontrado — a pasta modelo-b está incompleta.")
 
     info = {
         "gerado_em": datetime.now(timezone.utc).isoformat(timespec="seconds"),
@@ -181,11 +187,25 @@ def main() -> None:
 
     # As URLs abaixo são resolvidas a partir do <base href>, não do arquivo.
     info["arquivos"].append(
-        gerar_app("index.html", "index.html", "../", "modelo-b/skin-modelo-b.css", "modelo-b/skin.js")
+        gerar_app(
+            "index.html",
+            "index.html",
+            "../",
+            "modelo-b/skin-modelo-b.css",
+            "modelo-b/skin.js",
+            ("modelo-b/lucide.js",),
+        )
     )
     for app in APPS:
         info["arquivos"].append(
-            gerar_app(app, f"{app}/index.html", f"../../{app}/", "../modelo-b/skin-apps.css", None)
+            gerar_app(
+                app,
+                f"{app}/index.html",
+                f"../../{app}/",
+                "../modelo-b/skin-apps.css",
+                None,
+                ("../modelo-b/skin-apps.js",),
+            )
         )
 
     total_fontes = copiar_fontes()
