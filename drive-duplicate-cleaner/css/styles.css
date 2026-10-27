@@ -19,6 +19,11 @@
 
 * { box-sizing: border-box; }
 
+/* Garante que o atributo hidden nativo sempre vença regras de display
+   (ex.: .modal-backdrop { display:flex } mantinha o modal visível desde o
+   carregamento e travava o botão Confirmar). */
+[hidden] { display: none !important; }
+
 body {
   margin: 0;
   font-family: "Segoe UI", Roboto, system-ui, -apple-system, Arial, sans-serif;
