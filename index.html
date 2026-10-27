@@ -48044,4 +48044,155 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
   instalar();W.addEventListener('load',function(){setTimeout(instalar,2000);setTimeout(instalar,6000)});setInterval(instalar,5000);
 })();
 </script>
+<script id="fast538-origem-rotas">
+/* 5.3.8 — ROTAS: ORIGEM VEM DE LUGARES
+   No formulário das Rotas do Dia (ROTAS):
+   • O campo é só "ORIGEM" (o antigo "Endereço da origem" deixa de aparecer).
+   • Ao digitar, a lista mostra os LUGARES cadastrados com a prévia do endereço e
+     bairro. Tocou num deles: a origem e o endereço já ficam preenchidos.
+   • Se o que foi digitado não está em LUGARES, abrem dois campos: ENDEREÇO e BAIRRO.
+     Ao salvar a rota, essa origem entra em LUGARES com esse endereço e bairro. */
+(function(){
+  var W=window,D=document;
+  function $(id){return D.getElementById(id)}
+  function N(t){try{return destNormalizarNome(t)}catch(e){return String(t||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim()}}
+  function esc(t){return String(t==null?'':t).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+  function bd(){return W.bancoDados||{}}
+  function lugares(){return (bd().destinos||[]).filter(function(d){return d&&d.nome})}
+  function acharLugar(nome){
+    var k=N(nome);if(!k)return null;
+    try{var d=destBuscar(nome);if(d)return d}catch(e){}
+    return lugares().find(function(d){return N(d.nome)===k})||null;
+  }
+  function endLugar(d){
+    if(!d)return '';
+    var e=String(d.endereco||'').trim(),b=String(d.bairro||'').trim();
+    if(b&&e.toLowerCase().indexOf(b.toLowerCase())<0)e=e?(e+' - '+b):b;
+    return e;
+  }
+  function juntar(end,bai){end=String(end||'').trim();bai=String(bai||'').trim();if(bai&&end.toLowerCase().indexOf(bai.toLowerCase())<0)return end?end+' - '+bai:bai;return end}
+
+  /* ---------- montagem da área abaixo de ORIGEM ---------- */
+  function montar(){
+    var o=$('seqOrigem');if(!o)return false;
+    // some o campo antigo "Endereço da origem" (o valor continua guardado nele, escondido)
+    var e=$('seqOrigemEnd');if(e){var bx=e.closest('.f538-orig-end');if(bx&&bx.style.display!=='none')bx.style.display='none'}
+    var lab=o.parentNode&&o.parentNode.querySelector('label');if(lab&&/origem/i.test(lab.textContent)&&lab.textContent!=='ORIGEM:')lab.textContent='ORIGEM:';
+    o.setAttribute('autocomplete','off');o.setAttribute('placeholder','Digite e escolha um lugar');
+    if($('f538OrigLugar'))return true;
+    var area=D.createElement('div');area.id='f538OrigLugar';
+    area.innerHTML=
+      '<div id="f538OrigPrev" style="display:none;margin-top:6px;padding:8px 10px;border-radius:10px;background:rgba(16,185,129,.12);font-size:13px;font-weight:700;line-height:1.35"></div>'+
+      '<div id="f538OrigNovo" style="display:none;margin-top:8px;padding:10px;border-radius:10px;border:1px dashed rgba(99,102,241,.55);background:rgba(99,102,241,.06)">'+
+        '<div style="font-size:12px;font-weight:800;margin-bottom:6px">🆕 Lugar novo — preencha para salvar em LUGARES</div>'+
+        '<label style="display:block">ENDEREÇO:</label><input type="text" id="f538OrigNovoEnd" autocomplete="off" placeholder="Rua, número">'+
+        '<label style="display:block;margin-top:6px">BAIRRO:</label><input type="text" id="f538OrigNovoBai" autocomplete="off" placeholder="Bairro">'+
+      '</div>';
+    var lista=$('listaSugestoesOrigemSeq');
+    (lista||o).parentNode.insertBefore(area,(lista||o).nextSibling);
+    ['f538OrigNovoEnd','f538OrigNovoBai'].forEach(function(id){
+      var i=$(id);i.addEventListener('input',function(){try{capitalizar(i)}catch(x){}gravarNovoNoCampo()});
+    });
+    return true;
+  }
+  function gravarNovoNoCampo(){
+    var e=$('seqOrigemEnd');if(!e)return;
+    e.value=juntar(($('f538OrigNovoEnd')||{}).value,($('f538OrigNovoBai')||{}).value);
+    e.dataset.auto='0';
+  }
+
+  /* ---------- estado: lugar conhecido (prévia) ou novo (campos) ---------- */
+  var ultimoValor=null,ultimoItem=null;
+  function atualizar(forcar){
+    if(!montar())return;
+    var o=$('seqOrigem'),e=$('seqOrigemEnd'),prev=$('f538OrigPrev'),novo=$('f538OrigNovo');
+    var v=o.value.trim(),item=$('seqItemId')?$('seqItemId').value:'';
+    if(!forcar&&v===ultimoValor&&item===ultimoItem)return;
+    var trocouItem=item!==ultimoItem;
+    ultimoValor=v;ultimoItem=item;
+    if(!v){prev.style.display='none';novo.style.display='none';return}
+    var d=acharLugar(v);
+    if(d){
+      var end=endLugar(d);
+      prev.innerHTML='📍 <span>'+esc(d.nome)+'</span>'+(end?'<span style="display:block;font-weight:600;opacity:.85">'+esc(end)+'</span>':'<span style="display:block;font-weight:600;opacity:.7">(lugar sem endereço cadastrado)</span>');
+      prev.style.display='block';novo.style.display='none';
+      if(e&&(e.dataset.auto!=='0'||trocouItem||!e.value.trim())){e.value=end;e.dataset.auto='1'}
+    }else{
+      prev.style.display='none';
+      // enquanto há lugares parecidos na lista e o campo está em uso, espera a escolha
+      var t=N(v),parecidos=lugares().some(function(x){return N(x.nome).indexOf(t)>=0});
+      if(parecidos&&D.activeElement===o){novo.style.display='none';ultimoValor=null;return}
+      novo.style.display='block';
+      var ie=$('f538OrigNovoEnd'),ib=$('f538OrigNovoBai');
+      // editando um item que já tinha endereço gravado: mostra no campo
+      if(trocouItem&&e&&e.value.trim()&&!ie.value&&!ib.value){ie.value=e.value.trim()}
+      // se for nome de cliente com endereço, já sugere
+      if(!ie.value&&!ib.value){
+        try{var c=(bd().clientes||[]).find(function(x){return x&&N(x.nome)===N(v)});
+          if(c){var eo=c.enderecoObj||{};ie.value=[eo.logradouro,eo.numero].filter(Boolean).join(', ')||String(c.endereco||'');ib.value=c.bairro||eo.bairro||''}}catch(x){}
+      }
+      gravarNovoNoCampo();
+    }
+  }
+  W.fast538OrigemRotasAtualizar=function(){atualizar(true)};
+
+  /* ---------- sugestões: só LUGARES, com prévia ---------- */
+  function sugerir(input){
+    var div=$('listaSugestoesOrigemSeq');
+    if(!div){div=D.createElement('div');div.id='listaSugestoesOrigemSeq';div.className='suggestions-list';input.parentNode.appendChild(div)}
+    function esconder(){div.style.display='none';div.classList.remove('fast-sug-show')}
+    var termo=N(input.value);
+    if(!termo){esconder();atualizar(true);return}
+    var lista=lugares().filter(function(d){return N(d.nome).indexOf(termo)>=0});
+    lista.sort(function(a,b){var pa=N(a.nome).indexOf(termo)===0?0:1,pb=N(b.nome).indexOf(termo)===0?0:1;return (pa-pb)||((b.usadoEm||0)-(a.usadoEm||0))||String(a.nome).localeCompare(String(b.nome))});
+    lista=lista.slice(0,15);
+    div.innerHTML='';
+    lista.forEach(function(d){
+      var el=D.createElement('div');el.className='suggestion-item';
+      var end=endLugar(d);
+      el.innerHTML='📍 '+esc(d.nome)+'<small style="display:block;opacity:.75">'+(end?esc(end):'sem endereço cadastrado')+'</small>';
+      el.onclick=function(){
+        input.value=d.nome;esconder();
+        var e=$('seqOrigemEnd');if(e){e.value=end;e.dataset.auto='1'}
+        var ie=$('f538OrigNovoEnd'),ib=$('f538OrigNovoBai');if(ie)ie.value='';if(ib)ib.value='';
+        atualizar(true);
+        try{atualizarPreviewAba2()}catch(x){}
+      };
+      div.appendChild(el);
+    });
+    if(lista.length){div.style.display='block';div.classList.add('fast-sug-show')}else esconder();
+    atualizar(true);
+  }
+  function instalar(){
+    var f=W.aoDigitarOrigemSeq;
+    if(typeof f==='function'&&!f.__f538lug){var g=function(input){sugerir(input)};g.__f538lug=1;g.__f538=1;W.aoDigitarOrigemSeq=g;try{aoDigitarOrigemSeq=g}catch(e){}}
+    montar();
+  }
+
+  /* ---------- ao salvar: origem nova entra em LUGARES com endereço e bairro ---------- */
+  function instalarSalvar(){
+    var f=W.salvarItemSeq;if(typeof f!=='function'||f.__f538lugSalvar)return;
+    var g=function(){
+      try{
+        var o=$('seqOrigem'),v=o?o.value.trim():'';
+        if(v&&!acharLugar(v)&&typeof destAdicionarOuAtualizar==='function'){
+          var end=(($('f538OrigNovoEnd')||{}).value||'').trim(),bai=(($('f538OrigNovoBai')||{}).value||'').trim();
+          var criado=destAdicionarOuAtualizar(v,{endereco:end,bairro:bai});
+          if(criado){criado.updatedAt=new Date().toISOString();try{destRenderizarLista()}catch(x){}}
+        }
+      }catch(e){}
+      var r=f.apply(this,arguments);
+      setTimeout(function(){var ie=$('f538OrigNovoEnd'),ib=$('f538OrigNovoBai');if(ie&&!(($('seqOrigem')||{}).value||'').trim()){ie.value='';ib.value=''}ultimoValor=null;atualizar(true)},300);
+      return r;
+    };
+    Object.keys(f).forEach(function(k){try{g[k]=f[k]}catch(e){}});
+    g.__f538lugSalvar=1;W.salvarItemSeq=g;
+  }
+
+  instalar();instalarSalvar();
+  W.addEventListener('load',function(){setTimeout(function(){instalar();instalarSalvar()},1500);setTimeout(function(){instalar();instalarSalvar()},5000)});
+  setInterval(function(){instalar();instalarSalvar();atualizar(false)},500);
+  D.addEventListener('focusout',function(ev){if(ev.target&&ev.target.id==='seqOrigem')setTimeout(function(){atualizar(true)},250)},true);
+})();
+</script>
 </body></html>

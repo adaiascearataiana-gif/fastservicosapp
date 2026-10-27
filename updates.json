@@ -4,6 +4,11 @@
   "updates": [
     {
       "app": "fast",
+      "type": "melhorado",
+      "text": "5.3.8 (27/10/2026): no ROTAS o campo agora é só ORIGEM e vem de LUGARES — ao digitar aparece a lista de lugares com endereço e bairro; tocou, já preenche. Origem que não está em LUGARES abre ENDEREÇO e BAIRRO e entra em LUGARES ao salvar."
+    },
+    {
+      "app": "fast",
       "type": "correcao",
       "text": "5.3.8 (25/10/2026): a tabela de Clientes (e de Motoristas) agora é redesenhada quando chegam cadastros novos da nuvem — antes o contador mostrava 137 mas a tabela continuava com os 5 do momento em que o app abriu."
     },
