@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Limpa Duplicadas — Google Drive</title>
+  <meta name="description" content="Conecte seu Google Drive, encontre imagens duplicadas e mantenha apenas uma cópia." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%93%B7%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <span class="brand-icon">🗂️</span>
+        <div>
+          <h1>Limpa Duplicadas</h1>
+          <p class="brand-sub">Imagens duplicadas no Google Drive — detecte e mantenha só uma</p>
+        </div>
+      </div>
+      <div id="connectionBadge" class="badge badge-off">
+        <span class="dot"></span><span id="connectionText">Desconectado</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- ============ ETAPA 1: CONEXÃO ============ -->
+    <section class="card" id="cardConexao">
+      <h2><span class="step">1</span> Conectar ao Google Drive</h2>
+
+      <details class="help-box">
+        <summary>❓ Como obtenho o Client ID OAuth? (primeira vez, ~3 min)</summary>
+        <ol>
+          <li>Acesse o <a href="https://console.cloud.google.com/" target="_blank" rel="noopener">Google Cloud Console</a> e crie um projeto.</li>
+          <li>Em <strong>APIs e Serviços → Biblioteca</strong>, habilite a <strong>Google Drive API</strong>.</li>
+          <li>Em <strong>Tela de consentimento OAuth</strong>, escolha <em>External</em>, preencha nome/e-mail e adicione seu e-mail Google em <strong>Usuários de teste</strong>.</li>
+          <li>Em <strong>Credenciais → Criar credenciais → ID do cliente OAuth</strong>, tipo <em>Aplicativo da Web</em>.</li>
+          <li>Em <strong>Origens JavaScript autorizadas</strong>, adicione a origem deste app (ex.: <code>http://localhost:8000</code> e a URL de preview).</li>
+          <li>Copie o Client ID (formato <code>xxxxx.apps.googleusercontent.com</code>) e cole abaixo.</li>
+        </ol>
+        <p class="muted">O app roda 100% no seu navegador: suas credenciais e arquivos nunca passam por servidores de terceiros.</p>
+      </details>
+
+      <div class="form-row">
+        <label for="clientIdInput">Client ID OAuth (Google Cloud)</label>
+        <input type="text" id="clientIdInput" placeholder="xxxxx-xxxxx.apps.googleusercontent.com" autocomplete="off" spellcheck="false" />
+      </div>
+
+      <div class="form-row">
+        <label>Escopo da varredura</label>
+        <div class="radio-inline">
+          <label><input type="radio" name="escopo" value="all" checked /> Todo o Drive</label>
+          <label><input type="radio" name="escopo" value="folder" /> Pasta específica</label>
+        </div>
+        <input type="text" id="folderInput" placeholder="Cole o link ou ID da pasta (quanto escolher pasta específica)" hidden spellcheck="false" />
+      </div>
+
+      <div class="btn-row">
+        <button id="btnSaveClient" class="btn btn-ghost">💾 Salvar Client ID</button>
+        <button id="btnConnect" class="btn btn-primary">🔗 Conectar com o Google</button>
+        <button id="btnDisconnect" class="btn btn-ghost" hidden>Encerrar sessão</button>
+      </div>
+      <p id="authMsg" class="msg"></p>
+    </section>
+
+    <!-- ============ ETAPA 2: VARREDURA ============ -->
+    <section class="card" id="cardVarredura" disabled-section>
+      <h2><span class="step">2</span> Detectar duplicatas</h2>
+
+      <div class="form-row">
+        <label>Modo de detecção</label>
+        <div class="mode-grid">
+          <label class="mode-option">
+            <input type="radio" name="modo" value="exact" checked />
+            <div>
+              <strong>Exatas por hash MD5 <span class="tag tag-green">recomendado</span></strong>
+              <span class="muted">Compara o conteúdo real (checksum). 100% confiável, sem baixar arquivos.</span>
+            </div>
+          </label>
+          <label class="mode-option">
+            <input type="radio" name="modo" value="exact-plus" />
+            <div>
+              <strong>Exatas + nome e tamanho iguais</strong>
+              <span class="muted">Também agrupa arquivos com o mesmo nome e tamanho quando não há hash.</span>
+            </div>
+          </label>
+          <label class="mode-option">
+            <input type="radio" name="modo" value="visual" />
+            <div>
+              <strong>Visualmente parecidas (hash perceptivo)</strong>
+              <span class="muted">Baixa miniaturas e encontra fotos iguais ou quase iguais (ex.: redimensionadas).</span>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-row" id="thresholdRow" hidden>
+        <label for="thresholdSelect">Sensibilidade da similaridade visual</label>
+        <select id="thresholdSelect">
+          <option value="5">Rigorosa — apenas quase idênticas</option>
+          <option value="8" selected>Equilibrada (recomendado)</option>
+          <option value="12">Ampla — pode incluir fotos parecidas</option>
+        </select>
+      </div>
+
+      <div class="form-row">
+        <label for="keepRule">Qual cópia manter?</label>
+        <select id="keepRule">
+          <option value="oldest" selected>A mais antiga (data de criação)</option>
+          <option value="newest">A mais recente</option>
+          <option value="shortpath">A do caminho mais curto</option>
+        </select>
+      </div>
+
+      <div class="btn-row">
+        <button id="btnScan" class="btn btn-primary">🔎 Iniciar varredura</button>
+        <button id="btnStop" class="btn btn-warn" hidden>⏹ Parar</button>
+      </div>
+
+      <div id="progressWrap" class="progress-wrap" hidden>
+        <div class="progress-label">
+          <span id="progressText">Iniciando…</span>
+          <span id="progressPct">0%</span>
+        </div>
+        <div class="progress-bar"><div id="progressFill" class="progress-fill"></div></div>
+        <div class="stat-grid">
+          <div class="stat"><span id="statScanned">0</span><small>imagens analisadas</small></div>
+          <div class="stat"><span id="statGroups">0</span><small>grupos duplicados</small></div>
+          <div class="stat"><span id="statWaste">0 MB</span><small>espaço recuperável</small></div>
+        </div>
+      </div>
+      <p id="scanMsg" class="msg"></p>
+    </section>
+
+    <!-- ============ ETAPA 3: RESULTADOS ============ -->
+    <section class="card" id="cardResultados" disabled-section hidden>
+      <h2><span class="step">3</span> Revisar e limpar</h2>
+
+      <div id="summaryBox" class="summary-box"></div>
+
+      <div class="btn-row wrap">
+        <button id="btnTrash" class="btn btn-success">🗑️ Mover duplicatas para a lixeira <span class="btn-hint">(recuperável)</span></button>
+        <button id="btnDelete" class="btn btn-danger">⚠️ Excluir permanentemente</button>
+        <button id="btnExport" class="btn btn-ghost">⬇️ Exportar relatório CSV</button>
+      </div>
+
+      <div id="groupsContainer" class="groups"></div>
+      <p id="emptyState" class="empty-state" hidden>🎉 Nenhuma duplicata encontrada com os critérios atuais.</p>
+    </section>
+
+    <!-- ============ LOG ============ -->
+    <section class="card log-card">
+      <details>
+        <summary>📋 Log de atividade</summary>
+        <pre id="logArea" class="log-area"></pre>
+      </details>
+    </section>
+
+    <footer class="footer">
+      <p>Limpa Duplicadas • app local (sem backend) • Google Drive API v3. Por padrão os arquivos vão para a lixeira e podem ser restaurados no Google Drive.</p>
+    </footer>
+  </main>
+
+  <!-- Modal de confirmação -->
+  <div id="modal" class="modal-backdrop" hidden>
+    <div class="modal">
+      <h3 id="modalTitle">Confirmar</h3>
+      <p id="modalBody"></p>
+      <div class="btn-row end">
+        <button id="modalCancel" class="btn btn-ghost">Cancelar</button>
+        <button id="modalConfirm" class="btn btn-danger">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" hidden></div>
+
+  <script src="js/config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/drive-api.js"></script>
+  <script src="js/dedup.js"></script>
+  <script src="js/ui.js"></script>
+</body>
+</html>
