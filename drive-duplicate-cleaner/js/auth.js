@@ -17,6 +17,11 @@ const Auth = (() => {
     return (saved || window.APP_CONFIG.GOOGLE_CLIENT_ID || "").trim();
   }
 
+  /** Pré-carrega o script do Google para o popup não ser bloqueado no clique. */
+  function preload() {
+    loadGIS().catch(() => {});
+  }
+
   function saveClientId(id) {
     localStorage.setItem(STORAGE_KEY, id.trim());
   }
@@ -59,7 +64,11 @@ const Auth = (() => {
     }
   }
 
-  /** Solicita um access token. interactive=true abre o consentimento. */
+  /**
+   * Solicita um access token.
+   * interactive=true força o popup do Google com a tela de escolha de conta
+   * (prompt=select_account); interactive=false tenta renovação silenciosa.
+   */
   async function requestToken(interactive = true) {
     if (accessToken) return accessToken;
     if (tokenPromise) return tokenPromise;
@@ -84,9 +93,11 @@ const Auth = (() => {
       };
 
       try {
-        tokenClient.requestAccessToken({ prompt: interactive ? "consent" : "" });
+        // select_account: sempre abre o login para o usuário escolher a conta.
+        tokenClient.requestAccessToken({ prompt: interactive ? "select_account" : "" });
       } catch (e) {
         tokenPromise = null;
+        pendingReject = null;
         reject(e);
       }
     });
@@ -126,5 +137,5 @@ const Auth = (() => {
     if (expireTimer) clearTimeout(expireTimer);
   }
 
-  return { getClientId, saveClientId, requestToken, getToken, invalidate, isConnected, disconnect };
+  return { getClientId, saveClientId, preload, requestToken, getToken, invalidate, isConnected, disconnect };
 })();
