@@ -1463,6 +1463,7 @@
   };
   function tipoCampo(el) {
     if (!el || el.tagName !== 'INPUT') return '';
+    if (el.dataset && el.dataset.f538lug === '1') return '';   // 5.3.8: destino do ROTAS tem lista própria (LUGARES com endereço)
     if (CAMPOS_SUG[el.id]) return CAMPOS_SUG[el.id];
     // destinos extras (Adicionar rota e Rotas do Dia) e o destino principal das Rotas do Dia
     if (el.classList && (el.classList.contains('destino-extra-input') || el.classList.contains('destino-extra-rota-input') || el.classList.contains('seq-destino-input'))) return 'destino';

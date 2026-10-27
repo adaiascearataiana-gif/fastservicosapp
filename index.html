@@ -43490,7 +43490,7 @@ html body #modalEditarRota .modal-content{margin:0 auto!important;top:auto!impor
 <script src="fast-4067.js?v=42"></script>
 <script src="navegacao-fast.js?v=1"></script>
 <script src="recibo-fast.js?v=1"></script>
-<script src="fast-recursos.js?v=44"></script>
+<script src="fast-recursos.js?v=45"></script>
 <!-- (r108) Painel de diagnostico de fotos na nuvem -->
 <style id="fast108-diag-css">
 #fast108Btn{position:fixed;right:14px;bottom:84px;z-index:2147483000;background:#16a34a;color:#fff;border:0;border-radius:999px;padding:11px 14px;font:800 13px system-ui,-apple-system,Segoe UI,Roboto,sans-serif;box-shadow:0 6px 20px rgba(0,0,0,.28);cursor:pointer}
@@ -48193,6 +48193,133 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
   W.addEventListener('load',function(){setTimeout(function(){instalar();instalarSalvar()},1500);setTimeout(function(){instalar();instalarSalvar()},5000)});
   setInterval(function(){instalar();instalarSalvar();atualizar(false)},500);
   D.addEventListener('focusout',function(ev){if(ev.target&&ev.target.id==='seqOrigem')setTimeout(function(){atualizar(true)},250)},true);
+})();
+</script>
+<script id="fast538-destino-rotas">
+/* 5.3.8 — ROTAS: DESTINO VEM DE LUGARES (igual à ORIGEM)
+   Vale para o destino principal e para cada "Adicionar Destino" das Rotas do Dia:
+   • ao digitar, a lista mostra os LUGARES com a prévia do endereço e bairro;
+   • tocou num lugar: o destino fica preenchido e a prévia aparece embaixo;
+   • não está em LUGARES: abrem ENDEREÇO e BAIRRO; ao salvar, o destino entra em
+     LUGARES com esse endereço e bairro. */
+(function(){
+  var W=window,D=document;
+  function $(id){return D.getElementById(id)}
+  function N(t){try{return destNormalizarNome(t)}catch(e){return String(t||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim()}}
+  function esc(t){return String(t==null?'':t).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+  function bd(){return W.bancoDados||{}}
+  function lugares(){return (bd().destinos||[]).filter(function(d){return d&&d.nome})}
+  function acharLugar(nome){
+    var k=N(nome);if(!k)return null;
+    try{var d=destBuscar(nome);if(d)return d}catch(e){}
+    return lugares().find(function(d){return N(d.nome)===k})||null;
+  }
+  function endLugar(d){
+    if(!d)return '';
+    var e=String(d.endereco||'').trim(),b=String(d.bairro||'').trim();
+    if(b&&e.toLowerCase().indexOf(b.toLowerCase())<0)e=e?(e+' - '+b):b;
+    return e;
+  }
+  function campos(){
+    var f=$('formModalSeq');if(!f)return [];
+    var l=[];var p=$('seqDestino');if(p)l.push(p);
+    f.querySelectorAll('#containerDestinosExtras .destino-extra-input').forEach(function(i){l.push(i)});
+    return l;
+  }
+  function montar(inp){
+    if(inp.__f538area&&D.body.contains(inp.__f538area))return inp.__f538area;
+    var row=inp.closest('.seq-destino-row')||inp.parentNode;
+    var area=D.createElement('div');area.className='f538-dest-area';area.style.cssText='display:flex;flex-direction:column;gap:6px;';
+    area.innerHTML=
+      '<div class="f538-dest-sug" style="display:none;border-radius:12px;overflow:hidden;box-shadow:0 6px 18px rgba(0,0,0,.12);background:var(--bg-card,#fff)"></div>'+
+      '<div class="f538-dest-prev" style="display:none;padding:8px 10px;border-radius:10px;background:rgba(16,185,129,.12);font-size:13px;font-weight:700;line-height:1.35"></div>'+
+      '<div class="f538-dest-novo" style="display:none;padding:10px;border-radius:10px;border:1px dashed rgba(99,102,241,.55);background:rgba(99,102,241,.06)">'+
+        '<div style="font-size:12px;font-weight:800;margin-bottom:6px">🆕 Lugar novo — preencha para salvar em LUGARES</div>'+
+        '<label style="display:block">ENDEREÇO:</label><input type="text" class="f538-dest-end" autocomplete="off" placeholder="Rua, número">'+
+        '<label style="display:block;margin-top:6px">BAIRRO:</label><input type="text" class="f538-dest-bai" autocomplete="off" placeholder="Bairro">'+
+      '</div>';
+    row.parentNode.insertBefore(area,row.nextSibling);
+    area.querySelectorAll('input').forEach(function(i){i.addEventListener('input',function(){try{capitalizar(i)}catch(x){}})});
+    inp.__f538area=area;inp.setAttribute('autocomplete','off');inp.dataset.f538lug='1';
+    inp.addEventListener('input',function(){sugerir(inp)});
+    inp.addEventListener('focus',function(){if(inp.value.trim())sugerir(inp)});
+    inp.addEventListener('blur',function(){setTimeout(function(){esconderSug(inp);atualizar(inp,true)},250)});
+    return area;
+  }
+  function esconderSug(inp){var a=inp.__f538area;if(a){var s=a.querySelector('.f538-dest-sug');s.style.display='none'}}
+  function atualizar(inp,forcar){
+    var a=montar(inp),v=inp.value.trim();
+    if(!forcar&&inp.__f538ult===v)return;inp.__f538ult=v;
+    var prev=a.querySelector('.f538-dest-prev'),novo=a.querySelector('.f538-dest-novo');
+    if(!v){prev.style.display='none';novo.style.display='none';return}
+    var d=acharLugar(v);
+    if(d){
+      var end=endLugar(d);
+      prev.innerHTML='📍 <span>'+esc(d.nome)+'</span>'+(end?'<span style="display:block;font-weight:600;opacity:.85">'+esc(end)+'</span>':'<span style="display:block;font-weight:600;opacity:.7">(lugar sem endereço cadastrado)</span>');
+      prev.style.display='block';novo.style.display='none';
+    }else{
+      prev.style.display='none';
+      var t=N(v),parecidos=lugares().some(function(x){return N(x.nome).indexOf(t)>=0});
+      if(parecidos&&D.activeElement===inp){novo.style.display='none';inp.__f538ult=null;return}
+      novo.style.display='block';
+    }
+  }
+  function sugerir(inp){
+    var a=montar(inp),div=a.querySelector('.f538-dest-sug');
+    var termo=N(inp.value);
+    if(!termo){div.style.display='none';atualizar(inp,true);return}
+    var lista=lugares().filter(function(d){return N(d.nome).indexOf(termo)>=0});
+    lista.sort(function(x,y){var px=N(x.nome).indexOf(termo)===0?0:1,py=N(y.nome).indexOf(termo)===0?0:1;return (px-py)||((y.usadoEm||0)-(x.usadoEm||0))||String(x.nome).localeCompare(String(y.nome))});
+    lista=lista.slice(0,12);
+    div.innerHTML='';
+    lista.forEach(function(d){
+      var el=D.createElement('div');el.className='suggestion-item';el.style.cssText='padding:10px 12px;cursor:pointer;border-bottom:1px solid rgba(0,0,0,.06)';
+      var end=endLugar(d);
+      el.innerHTML='📍 <b>'+esc(d.nome)+'</b><small style="display:block;opacity:.75">'+(end?esc(end):'sem endereço cadastrado')+'</small>';
+      el.addEventListener('mousedown',function(ev){ev.preventDefault()});   // não tira o foco antes do toque
+      el.addEventListener('click',function(){
+        inp.value=d.nome;div.style.display='none';
+        var ie=a.querySelector('.f538-dest-end'),ib=a.querySelector('.f538-dest-bai');ie.value='';ib.value='';
+        atualizar(inp,true);
+        try{inp.dispatchEvent(new Event('change',{bubbles:true}))}catch(x){}
+        try{atualizarPreviewAba2()}catch(x){}
+      });
+      div.appendChild(el);
+    });
+    div.style.display=lista.length?'block':'none';
+    atualizar(inp,true);
+  }
+  /* ao salvar: destinos novos entram em LUGARES com endereço e bairro */
+  function instalarSalvar(){
+    var f=W.salvarItemSeq;if(typeof f!=='function'||f.__f538destSalvar)return;
+    var g=function(){
+      try{
+        var criou=false;
+        campos().forEach(function(inp){
+          var v=inp.value.trim();if(!v||acharLugar(v)||typeof destAdicionarOuAtualizar!=='function')return;
+          var a=inp.__f538area,end='',bai='';
+          if(a){end=(a.querySelector('.f538-dest-end').value||'').trim();bai=(a.querySelector('.f538-dest-bai').value||'').trim()}
+          var n=destAdicionarOuAtualizar(v,{endereco:end,bairro:bai});
+          if(n){n.updatedAt=new Date().toISOString();criou=true}
+        });
+        if(criou){try{destRenderizarLista()}catch(x){}}
+      }catch(e){}
+      var r=f.apply(this,arguments);
+      setTimeout(function(){campos().forEach(function(inp){var a=inp.__f538area;if(a&&!inp.value.trim()){a.querySelectorAll('input').forEach(function(i){i.value=''})}inp.__f538ult=null;atualizar(inp,true)})},300);
+      return r;
+    };
+    Object.keys(f).forEach(function(k){try{g[k]=f[k]}catch(e){}});
+    g.__f538destSalvar=1;W.salvarItemSeq=g;
+  }
+  function vigiar(){
+    campos().forEach(function(inp){montar(inp);atualizar(inp,false)});
+    // áreas de destinos extras que foram removidos
+    D.querySelectorAll('.f538-dest-area').forEach(function(a){var prev=a.previousElementSibling;if(!prev||!prev.querySelector||!prev.querySelector('.seq-destino-input'))a.remove()});
+  }
+  instalarSalvar();
+  W.addEventListener('load',function(){setTimeout(instalarSalvar,1500);setTimeout(instalarSalvar,5000)});
+  setInterval(function(){instalarSalvar();vigiar()},500);
+  W.fast538DestinoRotasCampos=campos;
 })();
 </script>
 </body></html>
