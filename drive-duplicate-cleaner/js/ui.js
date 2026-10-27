@@ -35,15 +35,21 @@
     return new Promise((resolve) => {
       $("modalTitle").textContent = title;
       $("modalBody").innerHTML = bodyHtml;
-      $("modal").hidden = false;
+      const modal = $("modal");
+      modal.hidden = false;
       const cleanup = (result) => {
-        $("modal").hidden = true;
+        modal.hidden = true;
         $("modalConfirm").onclick = null;
         $("modalCancel").onclick = null;
+        modal.onclick = null;
+        document.onkeydown = null;
         resolve(result);
       };
       $("modalConfirm").onclick = () => cleanup(true);
       $("modalCancel").onclick = () => cleanup(false);
+      // Clique no fundo escuro ou tecla ESC cancela.
+      modal.onclick = (e) => { if (e.target === modal) cleanup(false); };
+      document.onkeydown = (e) => { if (e.key === "Escape") cleanup(false); };
     });
   }
 
