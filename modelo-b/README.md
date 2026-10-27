@@ -49,6 +49,24 @@ python3 modelo-b/build.py --check   # só confere (sai com erro se estiver velho
 página. As cópias são descartáveis: **edite o app real** (ou a skin) e rode o
 build de novo.
 
+## Recuperar lugares (socorro)
+
+`recuperar-lugares.html` — página avulsa, na mesma origem do app, que lê **todas** as
+cópias locais do banco (localStorage, `fastapp_last_known_good`, IndexedDB `state` e os
+12 snapshots, `fast_destinos_backup_pre_dedup_v201`) e mostra o que existe em cada uma.
+
+- Diagnostica por que cada lugar sumiu (lista de exclusão, nome começando com número,
+  restou só em cópia antiga).
+- Restaura os lugares escolhidos gravando `zz liberado <hora> <nome>` no banco **e** no
+  cofre `fastapp_exclusoes_permanentes_v1` (senão o app reinsere a exclusão a cada save).
+- Grava as 4 cópias com carimbo 1 s à frente para vencer a corrida de abertura.
+- Baixa um JSON de segurança antes de qualquer gravação e aceita backup `.json` externo.
+
+Testes (Chromium headless, 2026-10-26): restauração de 3 lugares + liberação de 1 escondido
+→ app abriu com 5 lugares, 5 linhas na tabela, 0 erros; estado vazio → mensagem correta,
+0 erros; largura 390 px sem rolagem horizontal.
+
+
 ## O que mudou nesta fase (Fase 2)
 
 ### Identidade

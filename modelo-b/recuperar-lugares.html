@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Recuperar lugares — FAST Serviços</title>
+<meta name="theme-color" content="#1E3A8A">
+<style>
+  :root{
+    --fundo:#FAFAF8; --navy:#1E3A8A; --navy-900:#16296b; --esmeralda:#059669; --esmeralda-900:#047857;
+    --texto:#111827; --fraco:#6B7280; --borda:#E5E7EB; --card:#FFFFFF; --aviso:#B45309; --erro:#B91C1C;
+    --r:16px; --sombra:0 10px 30px rgba(30,58,138,.08), 0 2px 6px rgba(17,24,39,.04);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--fundo);color:var(--texto);
+    font-family:"Inter","Manrope",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;line-height:1.5}
+  a{color:var(--navy)}
+  .wrap{max-width:1040px;margin:0 auto;padding:clamp(16px,3vw,32px)}
+  header.topo{display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:18px}
+  .marca{display:flex;gap:12px;align-items:center;min-width:0}
+  .logo{width:44px;height:44px;border-radius:14px;background:linear-gradient(145deg,var(--navy),#2f56c4);
+    display:grid;place-items:center;color:#fff;flex:0 0 auto;box-shadow:0 6px 16px rgba(30,58,138,.28)}
+  .logo svg{width:24px;height:24px}
+  h1{font-size:clamp(18px,2.6vw,24px);margin:0;letter-spacing:-.02em}
+  .sub{color:var(--fraco);font-size:13px;margin:2px 0 0}
+  .pill{font-size:12px;font-weight:700;color:var(--esmeralda-900);background:#ECFDF5;border:1px solid #A7F3D0;
+    padding:6px 12px;border-radius:999px;white-space:nowrap}
+  .card{background:var(--card);border:1px solid var(--borda);border-radius:var(--r);box-shadow:var(--sombra);padding:18px;margin-bottom:16px}
+  .card h2{font-size:15px;margin:0 0 12px;letter-spacing:-.01em;display:flex;gap:8px;align-items:center}
+  .card h2 svg{width:18px;height:18px;color:var(--navy)}
+  .grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}
+  .kpi{border:1px solid var(--borda);border-radius:14px;padding:14px;background:#fff}
+  .kpi .n{font-size:26px;font-weight:800;letter-spacing:-.03em;line-height:1.1}
+  .kpi .l{font-size:12px;color:var(--fraco);margin-top:4px}
+  .kpi.alerta .n{color:var(--aviso)}
+  .kpi.ok .n{color:var(--esmeralda-900)}
+  .kpi.ruim .n{color:var(--erro)}
+  .btn{appearance:none;border:0;border-radius:14px;padding:11px 16px;font:inherit;font-weight:700;font-size:13.5px;
+    cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:transform .12s ease, box-shadow .12s ease}
+  .btn:active{transform:translateY(1px)}
+  .btn svg{width:17px;height:17px}
+  .btn-primario{background:var(--navy);color:#fff;box-shadow:0 8px 18px rgba(30,58,138,.22)}
+  .btn-primario:hover{background:var(--navy-900)}
+  .btn-ok{background:var(--esmeralda);color:#fff;box-shadow:0 8px 18px rgba(5,150,105,.22)}
+  .btn-ok:hover{background:var(--esmeralda-900)}
+  .btn-claro{background:#fff;color:var(--navy);border:1px solid var(--borda)}
+  .btn-claro:hover{border-color:#c7d2fe}
+  .btn[disabled]{opacity:.5;cursor:not-allowed}
+  .acoes{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--borda);vertical-align:top}
+  th{font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--fraco)}
+  tbody tr:hover{background:#FAFAFF}
+  .tag{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:#EEF2FF;color:#3730A3}
+  .tag.aviso{background:#FEF3C7;color:#92400E}
+  .tag.erro{background:#FEE2E2;color:#991B1B}
+  .tag.ok{background:#D1FAE5;color:#065F46}
+  .vazio{padding:18px;text-align:center;color:var(--fraco);font-size:13.5px}
+  .aviso-box{border-left:4px solid var(--aviso);background:#FFFBEB;border-radius:12px;padding:12px 14px;font-size:13.5px;color:#78350F}
+  .ok-box{border-left:4px solid var(--esmeralda);background:#ECFDF5;border-radius:12px;padding:12px 14px;font-size:13.5px;color:#065F46}
+  .erro-box{border-left:4px solid var(--erro);background:#FEF2F2;border-radius:12px;padding:12px 14px;font-size:13.5px;color:#7F1D1D}
+  code{background:#F3F4F6;padding:1px 6px;border-radius:6px;font-size:12.5px}
+  .log{margin-top:14px;background:#0B1220;color:#D1E7FF;border-radius:12px;padding:12px;font-size:12.5px;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;max-height:220px;overflow:auto;white-space:pre-wrap;display:none}
+  .log.on{display:block}
+  details summary{cursor:pointer;font-weight:700;font-size:13.5px;color:var(--navy);outline:none}
+  .mn{font-size:12.5px;color:var(--fraco)}
+  .linha{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  input[type=file]{font-size:13px}
+  .sel{width:34px}
+  .rodape{color:var(--fraco);font-size:12px;text-align:center;padding:10px 0 26px}
+  @media (max-width:560px){.kpi .n{font-size:22px}th:nth-child(4),td:nth-child(4){display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="topo">
+    <div class="marca">
+      <div class="logo" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+      </div>
+      <div>
+        <h1>Recuperar lugares</h1>
+        <p class="sub">Diagnóstico e restauração da aba Lugares — roda só neste navegador</p>
+      </div>
+    </div>
+    <span class="pill">somente leitura até você mandar gravar</span>
+  </header>
+
+  <div class="card">
+    <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg> O que existe neste navegador agora</h2>
+    <div class="grid" id="kpis"></div>
+    <div id="veredito" style="margin-top:14px"></div>
+    <div class="acoes">
+      <button class="btn btn-claro" id="btExportar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+        Baixar cópia de segurança (JSON)
+      </button>
+      <button class="btn btn-claro" id="btReanalisar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+        Analisar de novo
+      </button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/></svg> Cópias encontradas no aparelho</h2>
+    <table>
+      <thead><tr><th>Fonte</th><th>Quando</th><th>Lugares</th><th>Rotas</th><th>Situação</th></tr></thead>
+      <tbody id="tabelaFontes"><tr><td colspan="5" class="vazio">Lendo…</td></tr></tbody>
+    </table>
+    <p class="mn" style="margin:10px 0 0">O app guarda o banco em 4 lugares: o <code>localStorage</code>, a “última versão boa”, o banco interno do navegador (IndexedDB) e até 12 cópias automáticas (snapshots). Esta página lê todos.</p>
+  </div>
+
+  <div class="card">
+    <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.3 3.9 2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg> Lugares que estão fora da lista atual</h2>
+    <div id="avisoBloqueio"></div>
+    <div style="overflow:auto;margin-top:10px">
+      <table>
+        <thead><tr>
+          <th class="sel"><input type="checkbox" id="selTodos" aria-label="Selecionar todos"></th>
+          <th>Lugar</th><th>Bairro / endereço</th><th>Onde estava</th><th>Por que sumiu</th>
+        </tr></thead>
+        <tbody id="tabelaRecuperaveis"><tr><td colspan="5" class="vazio">Lendo…</td></tr></tbody>
+      </table>
+    </div>
+    <div class="acoes">
+      <button class="btn btn-ok" id="btRestaurar" disabled>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/><path d="m9 12 2 2 4-4"/></svg>
+        Restaurar selecionados
+      </button>
+      <button class="btn btn-claro" id="btRestaurarTudo">Restaurar todos</button>
+      <label class="btn btn-claro" for="arqBackup" style="cursor:pointer">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4"/><path d="m7 9 5-5 5 5"/><path d="M5 20h14"/></svg>
+        Trazer de um backup .json
+      </label>
+      <input id="arqBackup" type="file" accept=".json,application/json" hidden>
+    </div>
+    <div class="log" id="log" aria-live="polite"></div>
+  </div>
+
+  <div class="card">
+    <details>
+      <summary>Como o app fazia os lugares desaparecerem (explicação técnica)</summary>
+      <div class="mn" style="margin-top:10px">
+        <p><strong>1. Exclusão por nome, sem data, que nunca expira.</strong> Quando um lugar é apagado ou renomeado, o app grava o <em>nome</em> numa lista de exclusão. Na versão 5.3.8 essa lista ganhou data (“<code>zz excluido &lt;hora&gt; &lt;nome&gt;</code>”, com liberação por “<code>zz liberado</code>”), mas nomes antigos, sem data, continuam escondendo o lugar para sempre.</p>
+        <p><strong>2. Nomes que começam com número são descartados e gravados por cima.</strong> A lista só aceita nome com letra: <code>2 Irmãos</code>, <code>123</code> ou <code>Rua 7, 200</code> saem da base na próxima abertura — não ficam só escondidos.</p>
+        <p><strong>3. A sincronização apaga na nuvem o que não estiver no aparelho.</strong> <code>supabaseSyncDestinos()</code> faz <code>DELETE</code> de toda linha da tabela <code>destinos</code> cujo <code>id</code> não exista na lista local — até quando a lista local está vazia. Um aparelho novo, ou com a lista esvaziada, limpa a nuvem.</p>
+        <p><strong>4. Corrida na abertura (5.3.8).</strong> O <code>fast-4067.js</code> regrava <code>banco_gestao_local</code> com o que estiver na memória naquele instante. Se a leitura assíncrona do banco ainda não terminou, ele grava um banco vazio por cima do arquivo bom — e a cópia “mais nova” passa a ser a vazia.</p>
+        <p>Esta página desfaz 1, 2 e 4 no aparelho e libera a lista de exclusão; a nuvem volta a receber os lugares quando o app sincronizar.</p>
+      </div>
+    </details>
+  </div>
+
+  <p class="rodape">Nada é enviado para a internet. Tudo o que esta página faz é ler e gravar o armazenamento deste navegador, no mesmo endereço do app.</p>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  var LS_BANCO='banco_gestao_local', LS_META='fastapp_local_meta', LS_LKG='fastapp_last_known_good',
+      LS_COFRE='fastapp_exclusoes_permanentes_v1', LS_DEDUP='fast_destinos_backup_pre_dedup_v201',
+      DB='fastapp_enterprise_db';
+  var fontes=[], atual=null, cofre={}, recuperaveis=[], bloqueados=[], nomesDescartados=[];
+
+  /* ---------- utilidades iguais às do app ---------- */
+  function NORM(v){
+    return String(v==null?'':v).trim().toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+      .replace(/&/g,' e ')
+      .replace(/[^a-z0-9]+/g,' ')
+      .replace(/\s+/g,' ').trim();
+  }
+  function fnv(str){var h=2166136261;for(var i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619);}return (h>>>0).toString(16).padStart(8,'0');}
+  var RE_LAPIDE=/^zz (liberado|excluido) (\d+) (.+)$/;
+  function lapideEfetiva(lista){
+    var del=Object.create(null),lib=Object.create(null),out=new Set();
+    (lista||[]).forEach(function(v){
+      var n=NORM(v); if(!n) return;
+      var m=RE_LAPIDE.exec(n);
+      if(m){var ts=Number(m[2])||0,nome=m[3];
+        if(m[1]==='liberado'){ if(!(lib[nome]>=ts)) lib[nome]=ts; }
+        else { if(!(del[nome]>=ts)) del[nome]=ts; }
+        return;}
+      if(!(n in del)) del[n]=0;
+    });
+    Object.keys(del).forEach(function(n){ if(!(n in lib)||del[n]>lib[n]) out.add(n); });
+    return out;
+  }
+  function nomeValido(nome){ var n=NORM(nome); return /[a-z]/i.test(n) && !/^\s*\d/.test(String(nome||'')); }
+  function ehLapide(v){ var n=NORM(v); var m=RE_LAPIDE.exec(n); return m?{tipo:m[1],ts:Number(m[2])||0,nome:m[3]}:null; }
+  function dataTxt(ts){ if(!ts) return '—'; try{ return new Date(ts).toLocaleString('pt-BR'); }catch(e){ return '—'; } }
+  function qtdDestinos(b){ return b && Array.isArray(b.destinos) ? b.destinos.length : 0; }
+  function qtdRotas(b){ return b && Array.isArray(b.rotas) ? b.rotas.length : 0; }
+
+  function log(txt){
+    var el=document.getElementById('log');
+    el.classList.add('on');
+    el.textContent += (el.textContent?'\n':'') + txt;
+    el.scrollTop=el.scrollHeight;
+  }
+
+  /* ---------- leitura das fontes ---------- */
+  function lerLS(chave){ try{ var v=localStorage.getItem(chave); return v?JSON.parse(v):null; }catch(e){ return null; } }
+
+  function abrirIDB(){
+    return new Promise(function(resolve){
+      if(!('indexedDB' in window)) return resolve(null);
+      var pedido;
+      try{ pedido=indexedDB.open(DB); }catch(e){ return resolve(null); }
+      pedido.onupgradeneeded=function(){ try{ pedido.transaction.abort(); }catch(e){} };
+      pedido.onerror=function(){ resolve(null); };
+      pedido.onblocked=function(){ resolve(null); };
+      pedido.onsuccess=function(){ var db=pedido.result; resolve(db); };
+      setTimeout(function(){ resolve(null); },3500);
+    });
+  }
+  function idbReq(db,store,metodo,arg){
+    return new Promise(function(resolve){
+      if(!db || !db.objectStoreNames || !db.objectStoreNames.contains(store)) return resolve(null);
+      try{
+        var tx=db.transaction(store,'readonly');
+        var st=tx.objectStore(store);
+        var r=metodo==='getAll'?st.getAll():st.get(arg);
+        r.onsuccess=function(){ resolve(r.result); };
+        r.onerror=function(){ resolve(null); };
+      }catch(e){ resolve(null); }
+    });
+  }
+  function idbGravar(db,store,registro){
+    return new Promise(function(resolve){
+      if(!db || !db.objectStoreNames || !db.objectStoreNames.contains(store)) return resolve(false);
+      try{
+        var tx=db.transaction(store,'readwrite');
+        tx.objectStore(store).put(registro);
+        tx.oncomplete=function(){ resolve(true); };
+        tx.onerror=function(){ resolve(false); };
+        tx.onabort=function(){ resolve(false); };
+      }catch(e){ resolve(false); }
+    });
+  }
+
+  function empacotar(nome,quando,banco,obs){
+    fontes.push({nome:nome,quando:quando||0,banco:banco||null,obs:obs||'',
+      destinos:(banco&&Array.isArray(banco.destinos))?banco.destinos:[], rotas:qtdRotas(banco)});
+  }
+
+  async function lerTudo(){
+    fontes=[]; recuperaveis=[]; bloqueados=[]; nomesDescartados=[];
+
+    /* 1) banco principal do localStorage */
+    var bancoLS=lerLS(LS_BANCO);
+    var meta=lerLS(LS_META);
+    if(bancoLS) empacotar('Banco principal (localStorage)',(meta&&meta.savedAt)||0,bancoLS,'é o que o app abre primeiro');
+
+    /* 2) última versão boa */
+    var lkg=lerLS(LS_LKG);
+    if(lkg && lkg.data){
+      var b=null; try{ b=JSON.parse(lkg.data); }catch(e){}
+      if(b) empacotar('Última versão boa (last-known-good)',Number(lkg.savedAt)||0,b,'cópia de segurança imediata');
+    }
+
+    /* 3) IndexedDB: estado atual + snapshots */
+    var db=await abrirIDB();
+    if(db){
+      var est=await idbReq(db,'state','get','current');
+      if(est && est.data){
+        var be=null; try{ be=JSON.parse(est.data); }catch(e){}
+        if(be) empacotar('Banco interno do navegador (IndexedDB)',Number(est.savedAt)||0,be,'cópia durável');
+      }
+      var snaps=await idbReq(db,'snapshots','getAll');
+      if(Array.isArray(snaps)){
+        snaps.sort(function(a,b){ return (Number(b.savedAt)||0)-(Number(a.savedAt)||0); });
+        snaps.forEach(function(s,i){
+          if(!s||!s.data) return;
+          var bs=null; try{ bs=JSON.parse(s.data); }catch(e){ return; }
+          empacotar('Cópia automática #'+(i+1)+(s.motivo?' ('+s.motivo+')':''),Number(s.savedAt)||0,bs,'snapshot');
+        });
+      }
+    }
+
+    /* 4) backup feito antes da deduplicação de lugares */
+    var dedup=lerLS(LS_DEDUP);
+    if(dedup){
+      var bd={destinos:Array.isArray(dedup.destinos)?dedup.destinos:[],rotas:[]};
+      empacotar('Backup antes de juntar lugares repetidos',Date.parse(dedup.criadoEm||'')||0,bd,'backup do próprio app');
+    }
+
+    /* 5) cofre de exclusões (localStorage) — usado pelo app em toda gravação */
+    cofre=lerLS(LS_COFRE)||{};
+
+    /* banco "atual" = o que o app vai abrir: o de maior savedAt entre os válidos */
+    var ordenadas=fontes.slice().filter(function(f){return !!f.banco;}).sort(function(a,b){return (b.quando||0)-(a.quando||0);});
+    atual = ordenadas.length ? ordenadas[0].banco : ({rotas:[],despesas:[],sequencias:{},motoristas:[],clientes:[],rh:[],despesasEmpresa:[],dadosEmpresa:{},clientesExcluidos:[],destinosExcluidos:[],rotasExcluidas:[],fotosExcluidas:[],seqItensExcluidos:[],seqRotasExcluidas:[],motoristasExcluidos:[],rhExcluidos:[],despesasEmpresaExcluidas:[],despesasExcluidas:[],destinos:[]});
+    atual.destinos = Array.isArray(atual.destinos)?atual.destinos:[];
+    atual.destinosExcluidos = Array.isArray(atual.destinosExcluidos)?atual.destinosExcluidos.slice():[];
+
+    /* ---------- diagnóstico ---------- */
+    var lapidesAtuais=lapideEfetiva(atual.destinosExcluidos.concat(Array.isArray(cofre.destinosExcluidos)?cofre.destinosExcluidos:[]));
+    var nomesAtuais={};
+    atual.destinos.forEach(function(d){
+      var n=NORM(d&&d.nome); if(!n) return;
+      nomesAtuais[n]=true;
+      if(lapidesAtuais.has(n)) bloqueados.push({nome:d.nome,norm:n,motivo:'lista de exclusão'});
+      if(!nomeValido(d&&d.nome)) nomesDescartados.push({nome:d.nome,norm:n,motivo:(/^\s*\d/.test(String(d.nome||''))?'nome começa com número':'nome sem letra')});
+    });
+
+    /* união de tudo que já existiu, com a melhor versão de cada lugar */
+    var mapa={};
+    ordenadas.forEach(function(f){
+      (f.destinos||[]).forEach(function(d){
+        if(!d||typeof d!=='object') return;
+        var n=NORM(d.nome); if(!n) return;
+        var peso=function(x){ var p=0; ['nome','bairro','endereco','telefone','enderecoObj'].forEach(function(k){ if(x[k]&&String(x[k]).trim()) p++; }); return p; };
+        var atualReg=mapa[n];
+        if(!atualReg || peso(d)>peso(atualReg.registro) || (peso(d)===peso(atualReg.registro) && (f.quando||0)>(atualReg.quando||0))){
+          mapa[n]={registro:d,quando:f.quando||0,fonte:f.nome};
+        }
+      });
+    });
+
+    var usados={};
+    atual.destinos.forEach(function(d){ var n=NORM(d&&d.nome); if(n) usados[n]=true; });
+
+    Object.keys(mapa).forEach(function(n){
+      if(usados[n]) return;
+      var item=mapa[n];
+      var motivo = lapidesAtuais.has(n) ? 'lista de exclusão'
+                 : (!nomeValido(item.registro.nome) ? (/^\s*\d/.test(String(item.registro.nome||''))?'nome começa com número':'nome sem letra')
+                 : 'estava só nas cópias antigas');
+      recuperaveis.push({norm:n,nome:item.registro.nome,registro:item.registro,bairro:item.registro.bairro||'',endereco:item.registro.endereco||'',fonte:item.fonte,quando:item.quando,motivo:motivo,precisaRenomear:!nomeValido(item.registro.nome)});
+    });
+    recuperaveis.sort(function(a,b){ return String(a.nome||'').localeCompare(String(b.nome||''),'pt-BR'); });
+  }
+
+  /* ---------- desenho ---------- */
+  function el(tag,attrs,html){ var e=document.createElement(tag); if(attrs) Object.keys(attrs).forEach(function(k){ e.setAttribute(k,attrs[k]); }); if(html!=null) e.innerHTML=html; return e; }
+
+  function desenhar(){
+    var total=atual.destinos.length;
+    var kpis=[
+      {n:total,l:(total===1?'lugar na lista atual':'lugares na lista atual'),cls:total?'ok':'ruim'},
+      {n:recuperaveis.length,l:(recuperaveis.length===1?'lugar fora da lista':'lugares fora da lista'),cls:recuperaveis.length?'alerta':'ok'},
+      {n:bloqueados.length,l:(bloqueados.length===1?'escondido':'escondidos')+' pela lista de exclusão',cls:bloqueados.length?'alerta':''},
+      {n:nomesDescartados.length,l:(nomesDescartados.length===1?'nome que o app descarta':'nomes que o app descarta'),cls:nomesDescartados.length?'alerta':''},
+      {n:qtdRotas(atual),l:'rotas preservadas',cls:''}
+    ];
+    var box=document.getElementById('kpis'); box.innerHTML='';
+    kpis.forEach(function(k){
+      var d=document.createElement('div');
+      d.className='kpi '+(k.cls||'');
+      d.appendChild(el('div',{class:'n'},String(k.n)));
+      d.appendChild(el('div',{class:'l'},k.l));
+      box.appendChild(d);
+    });
+
+    var v=document.getElementById('veredito');
+    if(!total && !recuperaveis.length){
+      v.innerHTML='<div class="erro-box"><strong>Não encontrei nenhum lugar neste navegador.</strong> Isso costuma significar que o app foi aberto em outro aparelho, em outro navegador, ou que os dados foram limpos. Use “Trazer de um backup .json” se você tiver um arquivo <code>fast_backup_…json</code>.</div>';
+    } else if(!total && recuperaveis.length){
+      v.innerHTML='<div class="aviso-box"><strong>A lista atual está vazia, mas achei '+recuperaveis.length+' lugar(es) em cópias antigas deste aparelho.</strong> Clique em “Restaurar todos” — nada é enviado para a internet.</div>';
+    } else if(recuperaveis.length){
+      v.innerHTML='<div class="aviso-box"><strong>Achei '+recuperaveis.length+' lugar(es) que existem nas cópias antigas e não estão na lista atual.</strong> Marque os que quiser e restaure. Depois abra o app e use “Sincronizar Agora” para subir de volta para a nuvem.</div>';
+    } else {
+      v.innerHTML='<div class="ok-box"><strong>A lista atual tem '+total+' lugar(es) e não há outros perdidos nas cópias deste aparelho.</strong> Se a tela mostra “Nenhum destino”, o problema é de exibição — abra “Diagnóstico” no app ou recarregue com Ctrl+F5.</div>';
+    }
+
+    var tb=document.getElementById('tabelaFontes'); tb.innerHTML='';
+    if(!fontes.length){ tb.innerHTML='<tr><td colspan="5" class="vazio">Nenhuma cópia encontrada.</td></tr>'; }
+    fontes.forEach(function(f){
+      var tr=el('tr');
+      var principal = (f.banco===atual);
+      tr.innerHTML='<td>'+f.nome+'</td>'
+        +'<td>'+dataTxt(f.quando)+'</td>'
+        +'<td><strong>'+f.destinos.length+'</strong></td>'
+        +'<td>'+f.rotas+'</td>'
+        +'<td><span class="tag'+(principal?' ok':'')+'">'+(principal?'é a que o app abre':'alternativa')+'</span>'
+        +'<div class="mn">'+f.obs+'</div></td>';
+      tb.appendChild(tr);
+    });
+
+    var ab=document.getElementById('avisoBloqueio'); ab.innerHTML='';
+    if(bloqueados.length){
+      ab.innerHTML='<div class="aviso-box">'+bloqueados.length+' lugar(es) estão na base, mas escondidos pela lista de exclusão: <strong>'
+        +bloqueados.slice(0,8).map(function(x){return x.nome;}).join(', ')+(bloqueados.length>8?'…':'')+'</strong>. '
+        +'<button class="btn btn-claro" id="btLiberar" style="margin-top:8px">Liberar esses lugares</button></div>';
+      document.getElementById('btLiberar').addEventListener('click',liberarBloqueados);
+    }
+
+    var tr2=document.getElementById('tabelaRecuperaveis'); tr2.innerHTML='';
+    if(!recuperaveis.length){
+      tr2.innerHTML='<tr><td colspan="5" class="vazio">Nada perdido nas cópias deste aparelho.</td></tr>';
+    }
+    recuperaveis.forEach(function(r,i){
+      var tr=el('tr');
+      tr.innerHTML='<td class="sel"><input type="checkbox" class="ck" data-i="'+i+'" '+(r.precisaRenomear?'':'checked')+'></td>'
+        +'<td><strong>'+esc(r.nome)+'</strong>'+(r.precisaRenomear?' <span class="tag aviso">nome inválido</span>':'')+'</td>'
+        +'<td>'+esc(r.bairro||'—')+(r.endereco?'<div class="mn">'+esc(r.endereco)+'</div>':'')+'</td>'
+        +'<td>'+esc(r.fonte)+'<div class="mn">'+dataTxt(r.quando)+'</div></td>'
+        +'<td><span class="tag'+(r.motivo==='lista de exclusão'?' erro':' aviso')+'">'+esc(r.motivo)+'</span></td>';
+      tr2.appendChild(tr);
+    });
+
+    document.getElementById('btRestaurar').disabled = !recuperaveis.length;
+    document.getElementById('btRestaurarTudo').disabled = !recuperaveis.length;
+    document.getElementById('selTodos').checked=false;
+  }
+
+  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+  /* ---------- gravação ---------- */
+  async function gravarTudo(novoBanco,novasLapides,rotulo){
+    var agora=Date.now();
+    /* +1 s: a abertura do app regrava o localStorage com a memória (que pode estar
+       vazia) sem atualizar este carimbo; a cópia durável precisa ser estritamente
+       mais nova para ganhar a disputa na abertura. Normaliza sozinho no segundo seguinte. */
+    var carimbo=agora+1000;
+    novoBanco.destinosExcluidos=novasLapides.bancos;
+    var json=JSON.stringify(novoBanco);
+    var soma=fnv(json);
+    var cofreNovo=cofre||{};
+    cofreNovo.destinosExcluidos=novasLapides.cofre;
+
+    try{
+      localStorage.setItem(LS_BANCO,json);
+      localStorage.setItem(LS_META,JSON.stringify({savedAt:carimbo,checksum:soma}));
+      localStorage.setItem(LS_LKG,JSON.stringify({savedAt:carimbo,checksum:soma,data:json}));
+      localStorage.setItem(LS_COFRE,JSON.stringify(cofreNovo));
+      log('✔ localStorage atualizado ('+SIZE(json)+')');
+    }catch(e){ log('✖ localStorage: '+e.message); }
+
+    var db=await abrirIDB();
+    if(db){
+      var ok=await idbGravar(db,'state',{key:'current',savedAt:carimbo,checksum:soma,schema:9,data:json});
+      log(ok?'✔ banco interno (IndexedDB) atualizado':'✖ não consegui gravar no IndexedDB');
+      var ok2=await idbGravar(db,'snapshots',{id:carimbo+'-'+soma,savedAt:carimbo,checksum:soma,motivo:'restauracao_lugares',data:json});
+      if(ok2) log('✔ cópia automática criada antes/depois da restauração');
+      try{ db.close(); }catch(e){}
+    }
+    log('✔ restauração gravada: '+rotulo);
+    log('➜ Abra o app, confira a aba Lugares e só depois clique em “Sincronizar Agora” para a nuvem receber de volta esses lugares.');
+  }
+  function SIZE(s){ return (s.length/1024).toFixed(0)+' KB'; }
+
+  function lapidesParaLiberar(nomesNorm,listas,agora){
+    // remove qualquer marca (com ou sem data) desses nomes e grava "zz liberado <agora> <nome>"
+    var filtro=function(arr){
+      return (arr||[]).filter(function(v){
+        var m=ehLapide(v); var alvo=m?m.nome:NORM(v);
+        return nomesNorm.indexOf(alvo)<0;
+      });
+    };
+    var bancos=filtro(listas.bancos), cofreL=filtro(listas.cofre);
+    nomesNorm.forEach(function(n){ bancos.push('zz liberado '+agora+' '+n); cofreL.push('zz liberado '+agora+' '+n); });
+    return {bancos:dedupe(bancos),cofre:dedupe(cofreL)};
+  }
+  function dedupe(arr){ var v={},out=[]; (arr||[]).forEach(function(x){ var s=String(x); if(v[s])return; v[s]=1; out.push(s); }); return out; }
+
+  async function restaurar(indices){
+    if(!indices.length) return;
+    var agora=Date.now();
+    var banco=JSON.parse(JSON.stringify(atual));
+    banco.destinos=Array.isArray(banco.destinos)?banco.destinos:[];
+    var ids=banco.destinos.map(function(d){return Number(d&&d.id);}).filter(function(n){return isFinite(n);});
+    var proximo=(ids.length?Math.max.apply(Math,ids):0)+1;
+    var nomes=[],renomeados=0,inseridos=0;
+    var usados={}; banco.destinos.forEach(function(d){ var n=NORM(d&&d.nome); if(n) usados[n]=true; });
+
+    /* lugares que estão na base, porém escondidos pela lista de exclusão, entram junto */
+    bloqueados.forEach(function(b){ nomes.push(b.norm); });
+
+    indices.forEach(function(i){
+      var r=recuperaveis[i]; if(!r) return;
+      var reg=JSON.parse(JSON.stringify(r.registro));
+      if(!nomeValido(reg.nome)){ reg.nome='Lugar '+String(reg.nome||'').trim(); reg.nomeOriginal=r.nome; renomeados++; }
+      var n=NORM(reg.nome);
+      if(!n || usados[n]) return;
+      var id=Number(reg.id);
+      var idEmUso=banco.destinos.some(function(d){ return String(d&&d.id)===String(id); });
+      if(!isFinite(id) || idEmUso) reg.id=proximo++;
+      reg.updatedAt=new Date().toISOString();
+      banco.destinos.push(reg); usados[n]=true; inseridos++;
+      nomes.push(n); nomes.push(r.norm);
+    });
+
+    if(!inseridos){ log('Nada novo para inserir.'); return; }
+    var lap=lapidesParaLiberar(Array.from(new Set(nomes)),{bancos:banco.destinosExcluidos,cofre:(cofre.destinosExcluidos||[])},agora);
+    var extra=bloqueados.length?(' e '+bloqueados.length+' liberado(s) da lista de exclusão'):'';
+    await gravarTudo(banco,lap,inseridos+' lugar(es) restaurado(s)'+extra+(renomeados?', '+renomeados+' com nome corrigido ('+'"Lugar "+nome original)':''));
+    await lerTudo(); desenhar();
+  }
+
+  async function liberarBloqueados(){
+    var agora=Date.now();
+    var banco=JSON.parse(JSON.stringify(atual));
+    var nomes=bloqueados.map(function(b){return b.norm;});
+    var lap=lapidesParaLiberar(nomes,{bancos:banco.destinosExcluidos,cofre:(cofre.destinosExcluidos||[])},agora);
+    await gravarTudo(banco,lap,nomes.length+' lugar(es) liberado(s) da lista de exclusão');
+    await lerTudo(); desenhar();
+  }
+
+  /* ---------- backup / importação ---------- */
+  function baixar(){
+    var pacote={
+      geradoEm:new Date().toISOString(),
+      aviso:'Cópia de segurança feita pela página “Recuperar lugares”. Contém todas as cópias locais encontradas.',
+      atual:atual, cofre:cofre,
+      fontes:fontes.map(function(f){ return {nome:f.nome,quando:f.quando,destinos:f.destinos,banco:f.banco}; }),
+      recuperaveis:recuperaveis
+    };
+    var blob=new Blob([JSON.stringify(pacote,null,2)],{type:'application/json'});
+    var a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download='fast_lugares_backup_'+new Date().toISOString().slice(0,10)+'.json';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); },4000);
+    log('✔ backup baixado com '+qtdDestinos(atual)+' lugar(es) atuais e '+fontes.length+' fonte(s).');
+  }
+
+  function importar(arquivo){
+    var fr=new FileReader();
+    fr.onload=function(){
+      var dados=null;
+      try{ dados=JSON.parse(fr.result); }catch(e){ log('✖ arquivo não é um JSON válido.'); return; }
+      var lista=[];
+      if(Array.isArray(dados)) lista=dados;
+      else if(Array.isArray(dados.destinos)) lista=dados.destinos;
+      else if(dados.banco && Array.isArray(dados.banco.destinos)) lista=dados.banco.destinos;
+      else if(Array.isArray(dados.fontes)){
+        dados.fontes.forEach(function(f){ if(Array.isArray(f.destinos)) lista=lista.concat(f.destinos); });
+      }
+      lista=lista.filter(function(d){ return d && typeof d==='object' && d.nome; });
+      if(!lista.length){ log('✖ não achei lugares nesse arquivo.'); return; }
+      empacotar('Arquivo enviado: '+arquivo.name,Date.now(),{destinos:lista,rotas:[]},'backup do usuário');
+      var usados={}; (atual.destinos||[]).forEach(function(d){ var n=NORM(d&&d.nome); if(n) usados[n]=true; });
+      var novos=0;
+      lista.forEach(function(d){
+        var n=NORM(d.nome); if(!n||usados[n]) return;
+        usados[n]=true; novos++;
+        recuperaveis.push({norm:n,nome:d.nome,registro:d,bairro:d.bairro||'',endereco:d.endereco||'',fonte:'Arquivo enviado',quando:Date.now(),motivo:'estava no backup',precisaRenomear:!nomeValido(d.nome)});
+      });
+      recuperaveis.sort(function(a,b){ return String(a.nome||'').localeCompare(String(b.nome||''),'pt-BR'); });
+      desenhar();
+      log('✔ '+novos+' lugar(es) lidos de '+arquivo.name+' e prontos para restaurar.');
+    };
+    fr.readAsText(arquivo);
+  }
+
+  /* ---------- eventos ---------- */
+  document.getElementById('btExportar').addEventListener('click',baixar);
+  document.getElementById('btReanalisar').addEventListener('click',async function(){ await lerTudo(); desenhar(); log('↻ análise refeita.'); });
+  document.getElementById('selTodos').addEventListener('change',function(e){
+    document.querySelectorAll('.ck').forEach(function(ck){ ck.checked=e.target.checked; });
+  });
+  document.getElementById('btRestaurar').addEventListener('click',function(){
+    var idx=Array.prototype.map.call(document.querySelectorAll('.ck:checked'),function(ck){ return Number(ck.dataset.i); });
+    if(!idx.length){ log('Marque pelo menos um lugar.'); return; }
+    if(!confirm('Restaurar '+idx.length+' lugar(es) neste navegador?\n\nO app será atualizado e a lista de exclusão será liberada para esses nomes.')) return;
+    restaurar(idx);
+  });
+  document.getElementById('btRestaurarTudo').addEventListener('click',function(){
+    if(!recuperaveis.length) return;
+    if(!confirm('Restaurar TODOS os '+recuperaveis.length+' lugares encontrados?\n\nUma cópia de segurança é gravada antes.')) return;
+    restaurar(recuperaveis.map(function(_,i){ return i; }));
+  });
+  document.getElementById('arqBackup').addEventListener('change',function(e){ if(e.target.files&&e.target.files[0]) importar(e.target.files[0]); });
+
+  /* ---------- início ---------- */
+  (async function(){
+    try{
+      await lerTudo(); desenhar();
+      log('Análise concluída: '+fontes.length+' fonte(s), '+qtdDestinos(atual)+' lugar(es) na lista atual, '+recuperaveis.length+' recuperável(is).');
+    }catch(e){
+      document.getElementById('veredito').innerHTML='<div class="erro-box">Erro ao ler os dados: '+esc(e.message)+'</div>';
+    }
+  })();
+})();
+</script>
+</body>
+</html>
