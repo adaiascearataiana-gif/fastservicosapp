@@ -103,19 +103,55 @@
 
   /* ---------- Conexão ---------- */
 
+  function flagClientIdError(input, message) {
+    input.classList.add("input-error", "shake");
+    input.addEventListener("animationend", () => input.classList.remove("shake"), { once: true });
+    input.focus();
+    $("helpDetails").open = true; // revela o passo a passo automaticamente
+    setMsg("authMsg", message, "error");
+  }
+
   $("btnSaveClient").addEventListener("click", () => {
     const id = $("clientIdInput").value.trim();
     if (!id.endsWith(".apps.googleusercontent.com")) {
-      setMsg("authMsg", "O Client ID não parece válido (deve terminar em .apps.googleusercontent.com).", "error");
+      flagClientIdError($("clientIdInput"), "O Client ID não parece válido (deve terminar em .apps.googleusercontent.com). Veja o passo a passo acima.");
       return;
     }
     Auth.saveClientId(id);
+    $("clientIdInput").classList.remove("input-error");
     setMsg("authMsg", "Client ID salvo neste navegador. Agora clique em “Conectar com o Google”.", "ok");
     log("Client ID OAuth salvo localmente.");
   });
 
+  // Enter no campo já dispara a conexão.
+  $("clientIdInput").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") $("btnConnect").click();
+  });
+
   $("btnConnect").addEventListener("click", async () => {
     setMsg("authMsg", "");
+    const input = $("clientIdInput");
+    const typed = input.value.trim();
+
+    // Salvamento automático: dispensa o botão "Salvar Client ID".
+    if (typed) {
+      if (!typed.endsWith(".apps.googleusercontent.com")) {
+        flagClientIdError(input, "Esse valor não é um Client ID válido — ele deve terminar em “.apps.googleusercontent.com”. Abra o passo a passo acima para ver como criar o seu.");
+        return;
+      }
+      Auth.saveClientId(typed);
+    }
+
+    if (!Auth.getClientId()) {
+      flagClientIdError(
+        input,
+        "Falta o Client ID OAuth: cole-o no campo acima e clique em Conectar de novo. Ainda não tem? O passo a passo que acabei de abrir mostra como criar o seu no Google Cloud Console em cerca de 3 minutos."
+      );
+      log("Tentativa de conexão sem Client ID configurado.");
+      return;
+    }
+
+    input.classList.remove("input-error");
     try {
       await Auth.requestToken(true);
       state.connected = true;
@@ -465,8 +501,17 @@
 
   /* ---------- Init ---------- */
 
+  // Permite pré-preencher via URL: .../index.html?client_id=xxxxx.apps.googleusercontent.com
+  const urlClientId = new URLSearchParams(window.location.search).get("client_id");
+  if (urlClientId && urlClientId.trim().endsWith(".apps.googleusercontent.com")) {
+    $("clientIdInput").value = urlClientId.trim();
+    Auth.saveClientId(urlClientId.trim());
+    log("Client ID pré-preenchido pela URL e salvo.");
+  }
+
   const savedId = Auth.getClientId();
   if (savedId) $("clientIdInput").value = savedId;
   refreshSections();
+  Auth.preload(); // aquece o Google Identity Services antes do clique
   log("App pronto. Conecte sua conta Google para começar.");
 })();

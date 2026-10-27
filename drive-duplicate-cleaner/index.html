@@ -30,15 +30,20 @@
     <section class="card" id="cardConexao">
       <h2><span class="step">1</span> Conectar ao Google Drive</h2>
 
-      <details class="help-box">
+      <details class="help-box" id="helpDetails">
         <summary>❓ Como obtenho o Client ID OAuth? (primeira vez, ~3 min)</summary>
         <ol>
           <li>Acesse o <a href="https://console.cloud.google.com/" target="_blank" rel="noopener">Google Cloud Console</a> e crie um projeto.</li>
           <li>Em <strong>APIs e Serviços → Biblioteca</strong>, habilite a <strong>Google Drive API</strong>.</li>
           <li>Em <strong>Tela de consentimento OAuth</strong>, escolha <em>External</em>, preencha nome/e-mail e adicione seu e-mail Google em <strong>Usuários de teste</strong>.</li>
           <li>Em <strong>Credenciais → Criar credenciais → ID do cliente OAuth</strong>, tipo <em>Aplicativo da Web</em>.</li>
-          <li>Em <strong>Origens JavaScript autorizadas</strong>, adicione a origem deste app (ex.: <code>http://localhost:8000</code> e a URL de preview).</li>
-          <li>Copie o Client ID (formato <code>xxxxx.apps.googleusercontent.com</code>) e cole abaixo.</li>
+          <li>Em <strong>Origens JavaScript autorizadas</strong>, adicione as origens abaixo <strong>sem barra no final</strong>:
+            <ul>
+              <li><code>https://adaiascearataiana-gif.github.io</code> (link publicado)</li>
+              <li><code>http://localhost:8000</code> (se testar no seu computador)</li>
+            </ul>
+          </li>
+          <li>Copie o Client ID (formato <code>xxxxx.apps.googleusercontent.com</code>), cole no campo e clique direto em <strong>Conectar com o Google</strong> (o salvamento é automático).</li>
         </ol>
         <p class="muted">O app roda 100% no seu navegador: suas credenciais e arquivos nunca passam por servidores de terceiros.</p>
       </details>
