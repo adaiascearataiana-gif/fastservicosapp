@@ -66,6 +66,15 @@ Testes (Chromium headless, 2026-10-26): restauração de 3 lugares + liberação
 → app abriu com 5 lugares, 5 linhas na tabela, 0 erros; estado vazio → mensagem correta,
 0 erros; largura 390 px sem rolagem horizontal.
 
+Evidências levantadas no código real do app (5.3.8), reproduzidas em teste:
+
+| mecanismo | prova |
+|---|---|
+| nome começando com número é **apagado** da base, não só escondido | 15 lugares semeados (2 com nome numérico) → 13 depois de abrir a aba Lugares, e 13 no `localStorage` |
+| lápide só com nome esconde para sempre | 14 lugares + lápide `cliente exemplo 03` → `mergeDados` devolve 12 |
+| envio apaga na nuvem o que o aparelho já enviou e não tem mais | base `fast512_base_colecoes` com 101,102,103 + lista vazia → `DELETE /rest/v1/destinos?id=in.(101,102,103)` |
+| corrida na abertura | `fast-4067.js:2140` regrava `banco_gestao_local` com a memória; com só essa cópia no aparelho, o banco foi sobrescrito vazio |
+
 
 ## O que mudou nesta fase (Fase 2)
 
