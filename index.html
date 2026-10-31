@@ -43288,8 +43288,9 @@ html body #modalEditarRota .modal-content{margin:0 auto!important;top:auto!impor
       // registro para o suporte (Ferramentas → Sincronização → Copiar): mostra o que a edição tocou
       try{if(typeof W.fastErroRegistrar==='function')W.fastErroRegistrar('aviso','Edição de rota: item '+item.id+' (data '+ds+', cópias '+copias.length+', rotas ligadas '+rotasLig.length+(item.agrupado?', agrupado com '+((item.itensOriginais||[]).length)+' itens':'')+')','qtd '+item.qtdMercadorias+' valor '+item.valor)}catch(e){}
       try{salvarStorage()}catch(e){}
-      try{if(typeof carregarSequenciaDia==='function')carregarSequenciaDia();else renderizarSequencia()}catch(e){try{renderizarSequencia()}catch(_){}}
+      // 5.3.8 (fluidez): fecha a janela NA HORA; a lista é redesenhada no quadro seguinte
       fechar();toast('Rota do dia alterada.','success');
+      setTimeout(function(){try{W.__frxForcarLista=true;if(typeof carregarSequenciaDia==='function')carregarSequenciaDia();else renderizarSequencia()}catch(e){try{renderizarSequencia()}catch(_){}}},0);
     };
     setTimeout(function(){try{$('f66eCli').focus()}catch(e){}},80);
   }
@@ -46277,8 +46278,8 @@ body.fx-apk .fx-gal-ajuda{display:flex}
   D.addEventListener('click',function(e){
     var b=e.target&&e.target.closest&&e.target.closest('#containerSequencia button');
     if(b&&/alternarConcluidoSeq/.test(b.getAttribute('onclick')||'')){
-      trava=Date.now()+800;
-      var anc=escolherAncora();segurar(anc,1600);
+      trava=Date.now()+350;
+      var anc=escolherAncora();segurar(anc,700);
     }
   },false);
 
@@ -46296,8 +46297,10 @@ body.fx-apk .fx-gal-ajuda{display:flex}
         if(card){
           var rol=rolador(),d=card.getBoundingClientRect().top-anc.y;
           if(Math.abs(d)>1)rol.scrollTop+=d;
-          segurar(anc,1200);
-          if(Date.now()-toque.t<2500)trava=Math.max(trava,Date.now()+450);
+          // 5.3.8 (fluidez): só "segura" a tela por mais tempo logo após uma ação sua
+          // (concluir/editar). Redesenho vindo da sincronização ajusta uma vez e pronto,
+          // e NÃO bloqueia mais os toques (antes os botões pareciam não responder).
+          if(Date.now()-toque.t<1500)segurar(anc,500);
         }
       }
       return r;
@@ -47923,6 +47926,12 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
     var ultimo=0,trailing=0,forcarDepois=false;
     var g=function(){
       var agora=performance.now();
+      if(W.__f538DiaAdiar){
+        // ação de toque: a tela responde primeiro, a lista redesenha no quadro seguinte
+        if(W.__frxForcarLista===true){forcarDepois=true;W.__frxForcarLista=false}
+        if(!trailing)trailing=setTimeout(function(){trailing=0;ultimo=performance.now();if(forcarDepois){W.__frxForcarLista=true;forcarDepois=false}try{f.apply(W)}catch(e){}},0);
+        return;
+      }
       if(agora-ultimo<60){
         if(W.__frxForcarLista===true){forcarDepois=true;W.__frxForcarLista=false}
         if(!trailing)trailing=setTimeout(function(){
@@ -47978,7 +47987,13 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
     W.addEventListener('pagehide',ja);W.addEventListener('beforeunload',ja);
     document.addEventListener('visibilitychange',function(){if(document.hidden)ja()});
   }
-  function instalar(){try{instalarGeral()}catch(e){}try{instalarDia()}catch(e){}try{instalarSalvar()}catch(e){}}
+  function adiarEm(nome){
+    var f=W[nome];if(typeof f!=='function'||f.__f538adiar)return;
+    var g=function(){W.__f538DiaAdiar=true;try{return f.apply(this,arguments)}finally{W.__f538DiaAdiar=false}};
+    Object.keys(f).forEach(function(k){try{g[k]=f[k]}catch(e){}});g.__f538adiar=true;W[nome]=g;
+  }
+  function instalar(){try{instalarGeral()}catch(e){}try{instalarDia()}catch(e){}try{instalarSalvar()}catch(e){}
+    ['alternarStatusPagamentoDirecto','alternarStatusExecucaoDirecto'].forEach(function(n){try{adiarEm(n)}catch(e){}});}
   instalar();
   W.addEventListener('load',function(){setTimeout(instalar,2500);setTimeout(instalar,6000)});
   setInterval(instalar,5000);

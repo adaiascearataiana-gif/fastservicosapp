@@ -5,6 +5,11 @@
     {
       "app": "fast",
       "type": "melhorado",
+      "text": "5.3.8 (31/10/2026): toques mais rápidos — botão Pago responde em menos de 0,1 s (antes até 1,3 s), a janela de edição fecha na hora, e os cards não ignoram mais toques depois de cada sincronização."
+    },
+    {
+      "app": "fast",
+      "type": "melhorado",
       "text": "5.3.8 (31/10/2026): mudanças feitas no ROTAS chegam mais rápido no FAST quando o aviso instantâneo (tempo real) não está ligado — conferência a cada 8 s. App Android 5.3.8: a Galeria permite escolher várias fotos de uma vez."
     },
     {
