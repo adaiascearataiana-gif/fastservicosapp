@@ -4,6 +4,11 @@
   "updates": [
     {
       "app": "fast",
+      "type": "melhorado",
+      "text": "5.3.8 (31/10/2026): mudanças feitas no ROTAS chegam mais rápido no FAST quando o aviso instantâneo (tempo real) não está ligado — conferência a cada 8 s. App Android 5.3.8: a Galeria permite escolher várias fotos de uma vez."
+    },
+    {
+      "app": "fast",
       "type": "correcao",
       "text": "5.3.8 (31/10/2026): editar pelo lápis no ROTAS agora grava também na rota ligada (de onde o card e o PAINEL tiram valor e quantidade), nas cópias do mesmo item e no item agrupado de um só destino; cada edição fica anotada em Ferramentas → Sincronização para o suporte."
     },

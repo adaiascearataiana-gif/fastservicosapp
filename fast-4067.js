@@ -1113,7 +1113,7 @@
   async function checar(forcar) {
     if (checando || document.hidden || !navigator.onLine || !pronto()) return;
     // com tempo real ativo, a verificação vira só reserva (a cada 15 s)
-    if (!forcar && Date.now() - ultimaChecagem < (rtConectado() ? 45000 : 15000)) return;   // 5.3.8: economia de dados — sem tempo real confere a cada 15 s; com tempo real, 45 s (os avisos chegam na hora)
+    if (!forcar && Date.now() - ultimaChecagem < (rtConectado() ? 30000 : 8000)) return;   // 5.3.8: sem tempo real confere a cada 8 s (pedido curto, poucos bytes); com tempo real, 30 s (os avisos chegam na hora)
     if (!token()) { await renovarLogin(true); }
     if (!token()) {
       if (!avisouSemLogin) {
@@ -2165,7 +2165,7 @@
       (tk ? '✅' : '❌') + ' Login no banco: ' + (tk ? 'sim' :
         (DIAG.login === 'sem-sessao' ? 'NÃO — entre NESTE app com e-mail e senha' :
          DIAG.login === 'recusado' ? 'NÃO — login venceu; saia e entre de novo com e-mail e senha' : 'renovando…')),
-      (rt ? '✅' : '⚠️') + ' Tempo real: ' + (rt ? 'conectado' : 'desconectado (conferindo a cada 15 s)'),
+      (rt ? '✅' : '⚠️') + ' Tempo real: ' + (rt ? 'conectado' : 'desconectado (conferindo a cada 8 s)'),
       '⬆️ Último envio: ' + hora(DIAG.envio) + ' · ⬇️ Última leitura: ' + hora(DIAG.baixou),
       (driveToken() ? '✅' : '📷') + ' Google Drive (fotos): ' + (driveToken() ? 'conectado' : (DRV.estado || 'verificando…')) +
         (DRV.pend >= 0 ? ' · ' + DRV.pend + ' foto(s) na fila' : '')
