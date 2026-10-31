@@ -271,6 +271,9 @@ public class MainActivity extends Activity {
         else {
             Intent galeria = params != null ? params.createIntent() : new Intent(Intent.ACTION_GET_CONTENT).setType("image/*");
             galeria.addCategory(Intent.CATEGORY_OPENABLE);
+            // 5.3.8: campo da galeria com "multiple" → deixa escolher VÁRIAS fotos de uma vez
+            if (params != null && params.getMode() == WebChromeClient.FileChooserParams.MODE_OPEN_MULTIPLE)
+                galeria.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
             destino = Intent.createChooser(galeria, "Escolher foto");
             if (camera != null) destino.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[]{camera});
         }
@@ -607,7 +610,17 @@ public class MainActivity extends Activity {
             Uri[] res = null;
             boolean temDados = data != null && (data.getData() != null || data.getClipData() != null);
             if (resultCode == RESULT_OK) {
-                if (temDados) res = WebChromeClient.FileChooserParams.parseResult(resultCode, data);
+                if (temDados) {
+                    // 5.3.8: o parseResult do Android devolve só UMA foto; quando a galeria manda
+                    // várias (ClipData), entrega todas para a página
+                    ClipData cd = data.getClipData();
+                    if (cd != null && cd.getItemCount() > 0) {
+                        ArrayList<Uri> lista = new ArrayList<>();
+                        for (int i = 0; i < cd.getItemCount(); i++) { Uri u = cd.getItemAt(i).getUri(); if (u != null) lista.add(u); }
+                        if (lista.isEmpty() && data.getData() != null) lista.add(data.getData());
+                        res = lista.toArray(new Uri[0]);
+                    } else res = WebChromeClient.FileChooserParams.parseResult(resultCode, data);
+                }
                 else if (cameraUri != null) res = new Uri[]{cameraUri};
             }
             // foto da câmera não usada (cancelou ou escolheu da galeria): apaga o arquivo vazio
