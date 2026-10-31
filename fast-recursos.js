@@ -1196,7 +1196,7 @@
       try { fastSetMoeda('seqValorDestino', valor); } catch (e) {}
       try { fastSetMoeda('seqValor', valor); } catch (e) {}
       set('seqQtdVolumes', qtd);
-      set('seqObs', u.descricao || u.obs || u.observacao || '');
+      set('seqObs', '');   // 5.3.8: observação não é puxada da rota anterior
       var mot = $('seqMotorista');
       if (mot && u.motorista) { var alvo = nomeChave(u.motorista), ok = false; Array.prototype.forEach.call(mot.options, function (op) { if (!ok && (nomeChave(op.value) === alvo || nomeChave(op.text) === alvo)) { mot.value = op.value; ok = true; } }); }
       try { atualizarPreviewAba2(); } catch (e) {}

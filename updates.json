@@ -4,6 +4,16 @@
   "updates": [
     {
       "app": "fast",
+      "type": "correcao",
+      "text": "5.3.8 (31/10/2026): edição de rota pelo lápis no ROTAS não volta mais ao valor antigo — a sincronização às vezes trazia de volta uma cópia velha (valor, quantidade, destino); agora a edição fica protegida e é reenviada."
+    },
+    {
+      "app": "fast",
+      "type": "melhorado",
+      "text": "5.3.8 (31/10/2026): LUGARES ganhou o campo LOCAL (NOME, LOCAL, ENDEREÇO, BAIRRO, TELEFONE). No ROTAS, ao digitar o destino (ex.: Sirley) a prévia mostra o local, endereço e bairro; lugar novo pede LOCAL, ENDEREÇO, BAIRRO e TELEFONE. Ao puxar uma rota já feita, a observação vem vazia."
+    },
+    {
+      "app": "fast",
       "type": "melhorado",
       "text": "5.3.8 (27/10/2026): no ROTAS o DESTINO (principal e Adicionar Destino) também vem de LUGARES — lista com endereço e bairro; tocou, já preenche; destino que não está em LUGARES abre ENDEREÇO e BAIRRO e entra em LUGARES ao salvar."
     },

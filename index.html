@@ -10679,16 +10679,20 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
         <input type="hidden" id="editDestinoId" value="">
         <div class="grid-form">
           <div class="span-2">
-            <label>Nome do Destino: *</label>
+            <label>Nome: *</label>
             <input type="text" id="editDestinoNome" required="" placeholder="Ex: PRÍNCIPE, WM, Yvone...">
           </div>
           <div class="span-2">
-            <label>Bairro (usado no cálculo de previsão de chegada):</label>
-            <input type="text" id="editDestinoBairro" placeholder="Ex: Centro, Messejana, Aldeota...">
+            <label>Local:</label>
+            <input type="text" id="editDestinoLocal" placeholder="Ex: Shopping Benfica, Mercado São Sebastião...">
           </div>
           <div class="span-2">
             <label>Endereço completo:</label>
             <input type="text" id="editDestinoEndereco" placeholder="Rua, número, complemento...">
+          </div>
+          <div class="span-2">
+            <label>Bairro (usado no cálculo de previsão de chegada):</label>
+            <input type="text" id="editDestinoBairro" placeholder="Ex: Centro, Messejana, Aldeota...">
           </div>
           <div>
             <label>Telefone / WhatsApp:</label>
@@ -14069,6 +14073,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
         bairro: d.bairro || '',
         telefone: d.telefone || '',
         endereco_obj: d.enderecoObj || null,
+        ...(window.__f538TemLocal === true ? { local: d.local || '' } : {}),   // 5.3.8: campo LOCAL (depois do SQL)
         usado_em: Number(d.usadoEm) || 0,
         ultima_uso: Number(d.ultimaUso) || null,
         updated_at: carimbo
@@ -14084,6 +14089,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
         bairro: row.bairro || '',
         telefone: row.telefone || '',
         enderecoObj: row.endereco_obj || null,
+        local: row.local || '',
         usadoEm: row.usado_em || 0,
         ultimaUso: row.ultima_uso || null,
         updatedAt: row.updated_at || ''
@@ -17477,7 +17483,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
       setVal('seqDestino', ultimaRota.destino || '');
       setVal('seqQtdDestino', ultimaRota.qtdMercadorias != null ? ultimaRota.qtdMercadorias : (ultimaRota.qtdVolumes || 1));
       fastSetMoeda('seqValorDestino', ultimaRota.valor != null ? ultimaRota.valor : 0);
-      setVal('seqObs', ultimaRota.descricao || ultimaRota.observacao || '');
+      setVal('seqObs', '');   // 5.3.8: ao puxar uma rota já feita, a observação fica vazia
       fastSetMoeda('seqValor', ultimaRota.valor != null ? ultimaRota.valor : 0);
       setVal('seqQtdVolumes', ultimaRota.qtdMercadorias != null ? ultimaRota.qtdMercadorias : (ultimaRota.qtdVolumes || 0));
       setVal('seqMotorista', ultimaRota.motorista || '');
@@ -17603,7 +17609,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
       setVal('cbStatusRota', ultimaRota.status || 'Pendente');
       setVal('cbStatusExecucao', ultimaRota.statusExecucao || 'EM ROTA');
       fastSetMoeda('txtValorRota', ultimaRota.valor != null ? ultimaRota.valor : '');
-      setVal('txtDescricaoRota', ultimaRota.descricao || ultimaRota.observacao || '');
+      setVal('txtDescricaoRota', '');   // 5.3.8: ao puxar uma rota já feita, a observação fica vazia
 
       const alerta = document.getElementById('alertPreviewRota');
       if (alerta) alerta.style.display = 'flex';
@@ -18458,7 +18464,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
           const bairro = (d.bairro||'').toLowerCase();
           const endereco = (d.endereco||'').toLowerCase();
           const telefone = (d.telefone||'').toLowerCase();
-          return nome.includes(termo) || bairro.includes(termo) || endereco.includes(termo) || telefone.includes(termo);
+          return nome.includes(termo) || bairro.includes(termo) || endereco.includes(termo) || telefone.includes(termo) || String(d.local||'').toLowerCase().includes(termo);
         });
       }
       // Aplicar ordenacao
@@ -18512,7 +18518,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
               <button class="btn-danger" onclick="destExcluir(${d.id})" title="Excluir"><span class="lbl">EXCLUIR</span></button>
             </div>
           </td>
-          <td style="font-weight:800;">${escapeHtml(d.nome || '')}</td>
+          <td style="font-weight:800;">${escapeHtml(d.nome || '')}${d.local ? '<div style="font-weight:700;font-size:12px;opacity:.8;margin-top:2px;">🏢 ' + escapeHtml(d.local) + '</div>' : ''}</td>
           <td>${d.bairro ? '<span class="badge-status badge-recebido">' + escapeHtml(d.bairro) + '</span>' : '<span style="color:var(--text-faint);font-size:11px;">Não definido</span>'}</td>
           <td>${d.endereco ? escapeHtml(d.endereco) : '<span style="color:var(--text-faint);font-size:11px;">-</span>'}</td>
           <td>${d.telefone ? '<span style="color:#10b981;font-weight:700;"><i class="fa-brands fa-whatsapp"></i> ' + escapeHtml(d.telefone) + '</span>' : '<span style="color:var(--text-faint);font-size:11px;">-</span>'}</td>
@@ -18533,6 +18539,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
       document.getElementById('editDestinoBairro').value = d.bairro || '';
       document.getElementById('editDestinoEndereco').value = d.endereco || '';
       document.getElementById('editDestinoTelefone').value = d.telefone || '';
+      try { document.getElementById('editDestinoLocal').value = d.local || ''; } catch (_) {}
       document.getElementById('modalEditarDestino').classList.add('active');
     }
 
@@ -18544,6 +18551,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
       document.getElementById('editDestinoBairro').value = '';
       document.getElementById('editDestinoEndereco').value = '';
       document.getElementById('editDestinoTelefone').value = '';
+      try { document.getElementById('editDestinoLocal').value = ''; } catch (_) {}
       document.getElementById('modalEditarDestino').classList.add('active');
     }
 
@@ -42516,7 +42524,7 @@ html body .destino-extra-row-rota.f49-dest-row{padding-top:8px;border-top:1px da
     setSelect('cbPagamento',info.pagRef||'PIX');
     setSelect('cbStatusRota',u.status||'Pendente');
     setSelect('cbStatusExecucao',u.statusExecucao||'EM ROTA');
-    set('txtDescricaoRota',u.descricao||u.observacao||'');
+    set('txtDescricaoRota','');   // 5.3.8: observação não é puxada da rota anterior
     try{limparDestinosExtrasRota()}catch(e){}
     modoMulti=false;var mw=garantirValorPrincipal();if(mw)mw.hidden=true;var tv=$('txtValorRota');if(tv)tv.readOnly=false;
     var v0=Number((info.lote[0]||u).valor)>0?Number((info.lote[0]||u).valor):info.valorRef;
@@ -42883,7 +42891,7 @@ html.f56-travado,html.f56-travado body{overflow:hidden!important;overscroll-beha
     try{fastSetMoeda('seqValorDestino',valor)}catch(e){}
     try{fastSetMoeda('seqValor',valor)}catch(e){}
     set('seqQtdVolumes',qtd);
-    set('seqObs',u.descricao||u.obs||u.observacao||'');
+    set('seqObs','');   // 5.3.8: observação não é puxada da rota anterior
     var mot=$('seqMotorista');
     if(mot&&u.motorista){var alvo=N(u.motorista),ok=false;Array.prototype.forEach.call(mot.options,function(o){if(!ok&&(N(o.value)===alvo||N(o.text)===alvo)){mot.value=o.value;ok=true}})}
     try{atualizarPreviewAba2()}catch(e){}
@@ -46321,7 +46329,7 @@ body.fx-apk .fx-gal-ajuda{display:flex}
   function cab(x){try{return supabaseHeaders(x)}catch(e){return Object.assign({'Content-Type':'application/json'},x||{})}}
   function logado(){try{return typeof W.fastObterTokenSupabase==='function'&&!!W.fastObterTokenSupabase()}catch(e){return false}}
   function ts(x){return Date.parse((x&&(x.updatedAt||x.updated_at))||'')||0}
-  function campos(d){return [d.nome||'',d.endereco||'',d.bairro||'',d.telefone||'',JSON.stringify(d.enderecoObj||null)].join('\u0001')}
+  function campos(d){var c=[d.nome||'',d.endereco||'',d.bairro||'',d.telefone||'',JSON.stringify(d.enderecoObj||null)].join('\u0001');return d.local?c+'\u0001'+d.local:c}   /* LOCAL só entra quando existe: os lugares antigos mantêm a mesma assinatura e não são reenviados */
   function lerSnap(){try{return JSON.parse(localStorage.getItem(K_SNAP)||'null')}catch(e){return null}}
   function gravarSnap(m){try{localStorage.setItem(K_SNAP,JSON.stringify(m))}catch(e){}}
   function retrato(){var m={};((bd()||{}).destinos||[]).forEach(function(d){if(d&&d.id!=null)m[String(d.id)]={h:campos(d),t:ts(d),n:N(d.nome)}});return m}
@@ -48085,12 +48093,14 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
       '<div id="f538OrigPrev" style="display:none;margin-top:6px;padding:8px 10px;border-radius:10px;background:rgba(16,185,129,.12);font-size:13px;font-weight:700;line-height:1.35"></div>'+
       '<div id="f538OrigNovo" style="display:none;margin-top:8px;padding:10px;border-radius:10px;border:1px dashed rgba(99,102,241,.55);background:rgba(99,102,241,.06)">'+
         '<div style="font-size:12px;font-weight:800;margin-bottom:6px">🆕 Lugar novo — preencha para salvar em LUGARES</div>'+
-        '<label style="display:block">ENDEREÇO:</label><input type="text" id="f538OrigNovoEnd" autocomplete="off" placeholder="Rua, número">'+
+        '<label style="display:block">LOCAL:</label><input type="text" id="f538OrigNovoLoc" autocomplete="off" placeholder="Ex: Shopping Benfica">'+
+        '<label style="display:block;margin-top:6px">ENDEREÇO:</label><input type="text" id="f538OrigNovoEnd" autocomplete="off" placeholder="Rua, número">'+
         '<label style="display:block;margin-top:6px">BAIRRO:</label><input type="text" id="f538OrigNovoBai" autocomplete="off" placeholder="Bairro">'+
+        '<label style="display:block;margin-top:6px">TELEFONE:</label><input type="tel" id="f538OrigNovoTel" autocomplete="off" placeholder="(85) 9XXXX-XXXX">'+
       '</div>';
     var lista=$('listaSugestoesOrigemSeq');
     (lista||o).parentNode.insertBefore(area,(lista||o).nextSibling);
-    ['f538OrigNovoEnd','f538OrigNovoBai'].forEach(function(id){
+    ['f538OrigNovoLoc','f538OrigNovoEnd','f538OrigNovoBai'].forEach(function(id){
       var i=$(id);i.addEventListener('input',function(){try{capitalizar(i)}catch(x){}gravarNovoNoCampo()});
     });
     return true;
@@ -48114,7 +48124,7 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
     var d=acharLugar(v);
     if(d){
       var end=endLugar(d);
-      prev.innerHTML='📍 <span>'+esc(d.nome)+'</span>'+(end?'<span style="display:block;font-weight:600;opacity:.85">'+esc(end)+'</span>':'<span style="display:block;font-weight:600;opacity:.7">(lugar sem endereço cadastrado)</span>');
+      prev.innerHTML='📍 <span>'+esc(d.nome)+'</span>'+(d.local?'<span style="display:block">🏢 '+esc(d.local)+'</span>':'')+(end?'<span style="display:block;font-weight:600;opacity:.85">'+esc(end)+'</span>':'<span style="display:block;font-weight:600;opacity:.7">(lugar sem endereço cadastrado)</span>');
       prev.style.display='block';novo.style.display='none';
       if(e&&(e.dataset.auto!=='0'||trocouItem||!e.value.trim())){e.value=end;e.dataset.auto='1'}
     }else{
@@ -48143,18 +48153,18 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
     function esconder(){div.style.display='none';div.classList.remove('fast-sug-show')}
     var termo=N(input.value);
     if(!termo){esconder();atualizar(true);return}
-    var lista=lugares().filter(function(d){return N(d.nome).indexOf(termo)>=0});
+    var lista=lugares().filter(function(d){return N(d.nome).indexOf(termo)>=0||(d.local&&N(d.local).indexOf(termo)>=0)});
     lista.sort(function(a,b){var pa=N(a.nome).indexOf(termo)===0?0:1,pb=N(b.nome).indexOf(termo)===0?0:1;return (pa-pb)||((b.usadoEm||0)-(a.usadoEm||0))||String(a.nome).localeCompare(String(b.nome))});
     lista=lista.slice(0,15);
     div.innerHTML='';
     lista.forEach(function(d){
       var el=D.createElement('div');el.className='suggestion-item';
       var end=endLugar(d);
-      el.innerHTML='📍 '+esc(d.nome)+'<small style="display:block;opacity:.75">'+(end?esc(end):'sem endereço cadastrado')+'</small>';
+      el.innerHTML='📍 '+esc(d.nome)+(d.local?'<small style="display:block;font-weight:700">🏢 '+esc(d.local)+'</small>':'')+'<small style="display:block;opacity:.75">'+(end?esc(end):'sem endereço cadastrado')+'</small>';
       el.onclick=function(){
         input.value=d.nome;esconder();
         var e=$('seqOrigemEnd');if(e){e.value=end;e.dataset.auto='1'}
-        var ie=$('f538OrigNovoEnd'),ib=$('f538OrigNovoBai');if(ie)ie.value='';if(ib)ib.value='';
+        ['f538OrigNovoLoc','f538OrigNovoEnd','f538OrigNovoBai','f538OrigNovoTel'].forEach(function(id){var x=$(id);if(x)x.value=''});
         atualizar(true);
         try{atualizarPreviewAba2()}catch(x){}
       };
@@ -48177,12 +48187,13 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
         var o=$('seqOrigem'),v=o?o.value.trim():'';
         if(v&&!acharLugar(v)&&typeof destAdicionarOuAtualizar==='function'){
           var end=(($('f538OrigNovoEnd')||{}).value||'').trim(),bai=(($('f538OrigNovoBai')||{}).value||'').trim();
-          var criado=destAdicionarOuAtualizar(v,{endereco:end,bairro:bai});
-          if(criado){criado.updatedAt=new Date().toISOString();try{destRenderizarLista()}catch(x){}}
+          var loc=(($('f538OrigNovoLoc')||{}).value||'').trim(),tel=(($('f538OrigNovoTel')||{}).value||'').trim();
+          var criado=destAdicionarOuAtualizar(v,{endereco:end,bairro:bai,telefone:tel});
+          if(criado){if(loc&&!criado.local)criado.local=loc;if(tel&&!criado.telefone)criado.telefone=tel;criado.updatedAt=new Date().toISOString();try{destRenderizarLista()}catch(x){}}
         }
       }catch(e){}
       var r=f.apply(this,arguments);
-      setTimeout(function(){var ie=$('f538OrigNovoEnd'),ib=$('f538OrigNovoBai');if(ie&&!(($('seqOrigem')||{}).value||'').trim()){ie.value='';ib.value=''}ultimoValor=null;atualizar(true)},300);
+      setTimeout(function(){if(!(($('seqOrigem')||{}).value||'').trim()){['f538OrigNovoLoc','f538OrigNovoEnd','f538OrigNovoBai','f538OrigNovoTel'].forEach(function(id){var x=$(id);if(x)x.value=''})}ultimoValor=null;atualizar(true)},300);
       return r;
     };
     Object.keys(f).forEach(function(k){try{g[k]=f[k]}catch(e){}});
@@ -48235,11 +48246,13 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
       '<div class="f538-dest-prev" style="display:none;padding:8px 10px;border-radius:10px;background:rgba(16,185,129,.12);font-size:13px;font-weight:700;line-height:1.35"></div>'+
       '<div class="f538-dest-novo" style="display:none;padding:10px;border-radius:10px;border:1px dashed rgba(99,102,241,.55);background:rgba(99,102,241,.06)">'+
         '<div style="font-size:12px;font-weight:800;margin-bottom:6px">🆕 Lugar novo — preencha para salvar em LUGARES</div>'+
-        '<label style="display:block">ENDEREÇO:</label><input type="text" class="f538-dest-end" autocomplete="off" placeholder="Rua, número">'+
+        '<label style="display:block">LOCAL:</label><input type="text" class="f538-dest-loc" autocomplete="off" placeholder="Ex: Shopping Benfica">'+
+        '<label style="display:block;margin-top:6px">ENDEREÇO:</label><input type="text" class="f538-dest-end" autocomplete="off" placeholder="Rua, número">'+
         '<label style="display:block;margin-top:6px">BAIRRO:</label><input type="text" class="f538-dest-bai" autocomplete="off" placeholder="Bairro">'+
+        '<label style="display:block;margin-top:6px">TELEFONE:</label><input type="tel" class="f538-dest-tel" autocomplete="off" placeholder="(85) 9XXXX-XXXX">'+
       '</div>';
     row.parentNode.insertBefore(area,row.nextSibling);
-    area.querySelectorAll('input').forEach(function(i){i.addEventListener('input',function(){try{capitalizar(i)}catch(x){}})});
+    area.querySelectorAll('input:not([type=tel])').forEach(function(i){i.addEventListener('input',function(){try{capitalizar(i)}catch(x){}})});
     inp.__f538area=area;inp.setAttribute('autocomplete','off');inp.dataset.f538lug='1';
     inp.addEventListener('input',function(){sugerir(inp)});
     inp.addEventListener('focus',function(){if(inp.value.trim())sugerir(inp)});
@@ -48255,7 +48268,7 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
     var d=acharLugar(v);
     if(d){
       var end=endLugar(d);
-      prev.innerHTML='📍 <span>'+esc(d.nome)+'</span>'+(end?'<span style="display:block;font-weight:600;opacity:.85">'+esc(end)+'</span>':'<span style="display:block;font-weight:600;opacity:.7">(lugar sem endereço cadastrado)</span>');
+      prev.innerHTML='📍 <span>'+esc(d.nome)+'</span>'+(d.local?'<span style="display:block">🏢 '+esc(d.local)+'</span>':'')+(end?'<span style="display:block;font-weight:600;opacity:.85">'+esc(end)+'</span>':'<span style="display:block;font-weight:600;opacity:.7">(lugar sem endereço cadastrado)</span>');
       prev.style.display='block';novo.style.display='none';
     }else{
       prev.style.display='none';
@@ -48268,18 +48281,18 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
     var a=montar(inp),div=a.querySelector('.f538-dest-sug');
     var termo=N(inp.value);
     if(!termo){div.style.display='none';atualizar(inp,true);return}
-    var lista=lugares().filter(function(d){return N(d.nome).indexOf(termo)>=0});
+    var lista=lugares().filter(function(d){return N(d.nome).indexOf(termo)>=0||(d.local&&N(d.local).indexOf(termo)>=0)});
     lista.sort(function(x,y){var px=N(x.nome).indexOf(termo)===0?0:1,py=N(y.nome).indexOf(termo)===0?0:1;return (px-py)||((y.usadoEm||0)-(x.usadoEm||0))||String(x.nome).localeCompare(String(y.nome))});
     lista=lista.slice(0,12);
     div.innerHTML='';
     lista.forEach(function(d){
       var el=D.createElement('div');el.className='suggestion-item';el.style.cssText='padding:10px 12px;cursor:pointer;border-bottom:1px solid rgba(0,0,0,.06)';
       var end=endLugar(d);
-      el.innerHTML='📍 <b>'+esc(d.nome)+'</b><small style="display:block;opacity:.75">'+(end?esc(end):'sem endereço cadastrado')+'</small>';
+      el.innerHTML='📍 <b>'+esc(d.nome)+'</b>'+(d.local?'<small style="display:block;font-weight:700">🏢 '+esc(d.local)+'</small>':'')+'<small style="display:block;opacity:.75">'+(end?esc(end):'sem endereço cadastrado')+'</small>';
       el.addEventListener('mousedown',function(ev){ev.preventDefault()});   // não tira o foco antes do toque
       el.addEventListener('click',function(){
         inp.value=d.nome;div.style.display='none';
-        var ie=a.querySelector('.f538-dest-end'),ib=a.querySelector('.f538-dest-bai');ie.value='';ib.value='';
+        a.querySelectorAll('.f538-dest-novo input').forEach(function(x){x.value=''});
         atualizar(inp,true);
         try{inp.dispatchEvent(new Event('change',{bubbles:true}))}catch(x){}
         try{atualizarPreviewAba2()}catch(x){}
@@ -48297,10 +48310,10 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
         var criou=false;
         campos().forEach(function(inp){
           var v=inp.value.trim();if(!v||acharLugar(v)||typeof destAdicionarOuAtualizar!=='function')return;
-          var a=inp.__f538area,end='',bai='';
-          if(a){end=(a.querySelector('.f538-dest-end').value||'').trim();bai=(a.querySelector('.f538-dest-bai').value||'').trim()}
-          var n=destAdicionarOuAtualizar(v,{endereco:end,bairro:bai});
-          if(n){n.updatedAt=new Date().toISOString();criou=true}
+          var a=inp.__f538area,end='',bai='',loc='',tel='';
+          if(a){end=(a.querySelector('.f538-dest-end').value||'').trim();bai=(a.querySelector('.f538-dest-bai').value||'').trim();loc=(a.querySelector('.f538-dest-loc').value||'').trim();tel=(a.querySelector('.f538-dest-tel').value||'').trim()}
+          var n=destAdicionarOuAtualizar(v,{endereco:end,bairro:bai,telefone:tel});
+          if(n){if(loc&&!n.local)n.local=loc;if(tel&&!n.telefone)n.telefone=tel;n.updatedAt=new Date().toISOString();criou=true}
         });
         if(criou){try{destRenderizarLista()}catch(x){}}
       }catch(e){}
@@ -48320,6 +48333,94 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
   W.addEventListener('load',function(){setTimeout(instalarSalvar,1500);setTimeout(instalarSalvar,5000)});
   setInterval(function(){instalarSalvar();vigiar()},500);
   W.fast538DestinoRotasCampos=campos;
+})();
+</script>
+<script id="fast538-local">
+/* 5.3.8 — LUGARES: campo LOCAL
+   Cadastro de lugar: NOME, LOCAL, ENDEREÇO, BAIRRO, TELEFONE. O LOCAL é onde a
+   pessoa/empresa fica (ex.: "Sirley" → "Shopping Benfica"). Vai para o Supabase
+   depois do SQL (coluna "local" em destinos); antes disso fica só nos aparelhos. */
+(function(){
+  var W=window,D=document;
+  function $(id){return D.getElementById(id)}
+  /* o banco já tem a coluna "local"? (pergunta até ter uma resposta definitiva) */
+  var tent=0;
+  async function sondar(){
+    if(W.__f538TemLocal===true||W.__f538TemLocal===false)return;
+    try{
+      var r=await fetch(SUPABASE_URL+'/destinos?select=local&limit=1',{headers:supabaseHeaders(),cache:'no-store'});
+      if(r.ok)W.__f538TemLocal=true;
+      else if(r.status===400||r.status===404)W.__f538TemLocal=false;
+    }catch(e){}
+    if(W.__f538TemLocal!==true&&W.__f538TemLocal!==false&&++tent<20)setTimeout(sondar,6000);
+  }
+  setTimeout(sondar,3000);
+  /* salvar o LOCAL no formulário do lugar */
+  function instalar(){
+    var f=W.salvarDestinoModal;if(typeof f!=='function'||f.__f538local)return;
+    var g=function(){
+      var id=(($('editDestinoId')||{}).value||'').trim(),nome=(($('editDestinoNome')||{}).value||'').trim(),loc=(($('editDestinoLocal')||{}).value||'').trim();
+      var r=f.apply(this,arguments);
+      try{
+        var lista=(W.bancoDados&&W.bancoDados.destinos)||[],d=null;
+        if(id)d=lista.find(function(x){return String(x.id)===String(id)});
+        if(!d&&nome){var k=destNormalizarNome(nome);d=lista.find(function(x){return destNormalizarNome(x.nome)===k})}
+        if(d&&String(d.local||'')!==loc){d.local=loc;d.updatedAt=new Date().toISOString();try{salvarStorage()}catch(e){}try{destRenderizarLista()}catch(e){}}
+      }catch(e){}
+      return r;
+    };
+    Object.keys(f).forEach(function(k){try{g[k]=f[k]}catch(e){}});g.__f538local=1;W.salvarDestinoModal=g;
+  }
+  instalar();W.addEventListener('load',function(){setTimeout(instalar,1500);setTimeout(instalar,5000)});setInterval(instalar,5000);
+})();
+</script>
+<script id="fast538-protege-edicao">
+/* 5.3.8 — EDIÇÃO DE ROTA NO ROTAS NÃO VOLTA MAIS AO VALOR ANTIGO
+   Depois de "Confirmar edição", a sincronização às vezes trazia de volta uma cópia
+   antiga da rota (valor, quantidade, destino…) que ainda estava a caminho. Agora a
+   edição feita aqui fica PROTEGIDA por 3 minutos: se uma cópia antiga aparecer, o
+   app recoloca o que você editou e envia de novo. */
+(function(){
+  var W=window,D=document,PRAZO=180000,prot={};
+  var CI=['cliente','origem','destino','qtdMercadorias','valor','motorista','obs'];
+  var CR={cliente:'cliente',origem:'origem',destino:'destino',qtdMercadorias:'qtdMercadorias',valor:'valor',motorista:'motorista',obs:'descricao'};
+  function bd(){return W.bancoDados||{}}
+  function acharItem(id){var sq=bd().sequencias||{},a=null;Object.keys(sq).some(function(d){a=(sq[d]||[]).find(function(i){return i&&String(i.id)===String(id)});return !!a});return a}
+  function acharRota(id){return (bd().rotas||[]).find(function(r){return r&&String(r.id)===String(id)})||null}
+  function instalar(){
+    var f=W.abrirModalEditarSeq;if(typeof f!=='function'||f.__f538prot)return;
+    var g=function(itemId){W.__f538EditId=String(itemId);return f.apply(this,arguments)};
+    Object.keys(f).forEach(function(k){try{g[k]=f[k]}catch(e){}});g.__f538prot=1;W.abrirModalEditarSeq=g;try{abrirModalEditarSeq=g}catch(e){}
+  }
+  // depois do "Confirmar edição", guarda o que foi editado
+  D.addEventListener('click',function(ev){
+    var b=ev.target&&ev.target.closest&&ev.target.closest('#f66eOk');if(!b)return;
+    var id=W.__f538EditId;if(!id)return;
+    setTimeout(function(){
+      var it=acharItem(id);if(!it)return;
+      var v={};CI.forEach(function(k){v[k]=it[k]});
+      prot[id]={t:Date.now(),v:v,rota:it.rotaId!=null?String(it.rotaId):null};
+    },0);
+  },true);
+  function igual(a,b){return String(a==null?'':a)===String(b==null?'':b)}
+  function vigiar(){
+    var agora=Date.now(),mexeu=false;
+    Object.keys(prot).forEach(function(id){
+      var p=prot[id];if(agora-p.t>PRAZO){delete prot[id];return}
+      var it=acharItem(id);
+      if(it){CI.forEach(function(k){if(!igual(it[k],p.v[k])){it[k]=p.v[k];mexeu=true}});if(mexeu)it.updatedAt=new Date().toISOString()}
+      var r=p.rota?acharRota(p.rota):null;
+      if(r){var mr=false;CI.forEach(function(k){var kr=CR[k];if(!igual(r[kr],p.v[k])){r[kr]=p.v[k];mr=true}});if(mr){r.updatedAt=new Date().toISOString();mexeu=true}}
+    });
+    if(mexeu){
+      try{salvarStorage()}catch(e){}
+      try{W.__frxForcarLista=true;renderizarSequencia()}catch(e){}
+      try{if(typeof W.sincronizarAgora==='function')setTimeout(W.sincronizarAgora,300)}catch(e){}
+    }
+  }
+  instalar();W.addEventListener('load',function(){setTimeout(instalar,1500);setTimeout(instalar,5000)});
+  setInterval(function(){instalar();vigiar()},400);
+  W.fast538EdicoesProtegidas=function(){return JSON.parse(JSON.stringify(prot))};
 })();
 </script>
 </body></html>
