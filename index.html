@@ -43267,7 +43267,26 @@ html body #modalEditarRota .modal-content{margin:0 auto!important;top:auto!impor
       item.valor=parse($('f66eVal').value);
       item.motorista=$('f66eMot').value;
       item.obs=$('f66eObs').value.trim();
-      item.updatedAt=new Date().toISOString();
+      // 5.3.8: a edição vale também para a ROTA ligada (o card e o PAINEL mostram os dados
+      // dela) e para cópias do mesmo item em outras datas. A hora gravada é sempre MAIOR que
+      // a que já existia — se outro aparelho gravou com o relógio adiantado, a cópia antiga
+      // não passa mais por cima desta edição.
+      var horaNova=function(){return new Date().toISOString()};
+      var rotasLig=[];try{
+        var ids={};if(item.rotaId!=null)ids[String(item.rotaId)]=1;(item.rotasOriginais||[]).forEach(function(x){ids[String(x)]=1});
+        rotasLig=(bancoDados.rotas||[]).filter(function(r){return r&&ids[String(r.id)]});
+      }catch(e){}
+      var copias=[];try{Object.keys(bancoDados.sequencias||{}).forEach(function(dd){(bancoDados.sequencias[dd]||[]).forEach(function(i){if(i&&i!==item&&String(i.id)===String(item.id))copias.push(i)})})}catch(e){}
+      var hn=horaNova.apply(null,[item].concat(rotasLig,copias));
+      item.updatedAt=hn;
+      copias.forEach(function(c){['cliente','origem','destino','qtdMercadorias','valor','motorista','obs'].forEach(function(k){c[k]=item[k]});c.updatedAt=hn});
+      if(rotasLig.length===1){var r=rotasLig[0];r.cliente=item.cliente;r.origem=item.origem;r.destino=item.destino;r.qtdMercadorias=item.qtdMercadorias;r.valor=item.valor;r.motorista=item.motorista;r.descricao=item.obs;r.updatedAt=hn}
+      else rotasLig.forEach(function(r){r.cliente=item.cliente;r.motorista=item.motorista;r.updatedAt=hn});
+      try{W.__f538EditId=String(item.id)}catch(e){}
+      // item agrupado com um só original: a quantidade/valor exibidos vêm do original
+      try{if(item.agrupado&&Array.isArray(item.itensOriginais)&&item.itensOriginais.length===1){var o=item.itensOriginais[0];o.qtdMercadorias=item.qtdMercadorias;o.valor=item.valor;o.destino=item.destino}}catch(e){}
+      // registro para o suporte (Ferramentas → Sincronização → Copiar): mostra o que a edição tocou
+      try{if(typeof W.fastErroRegistrar==='function')W.fastErroRegistrar('aviso','Edição de rota: item '+item.id+' (data '+ds+', cópias '+copias.length+', rotas ligadas '+rotasLig.length+(item.agrupado?', agrupado com '+((item.itensOriginais||[]).length)+' itens':'')+')','qtd '+item.qtdMercadorias+' valor '+item.valor)}catch(e){}
       try{salvarStorage()}catch(e){}
       try{if(typeof carregarSequenciaDia==='function')carregarSequenciaDia();else renderizarSequencia()}catch(e){try{renderizarSequencia()}catch(_){}}
       fechar();toast('Rota do dia alterada.','success');
@@ -48385,7 +48404,7 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
   var CI=['cliente','origem','destino','qtdMercadorias','valor','motorista','obs'];
   var CR={cliente:'cliente',origem:'origem',destino:'destino',qtdMercadorias:'qtdMercadorias',valor:'valor',motorista:'motorista',obs:'descricao'};
   function bd(){return W.bancoDados||{}}
-  function acharItem(id){var sq=bd().sequencias||{},a=null;Object.keys(sq).some(function(d){a=(sq[d]||[]).find(function(i){return i&&String(i.id)===String(id)});return !!a});return a}
+  function acharItem(id){var sq=bd().sequencias||{},ds=((D.getElementById('dpDataSequencia')||{}).value)||'',a=(sq[ds]||[]).find(function(i){return i&&String(i.id)===String(id)})||null;if(a)return a;Object.keys(sq).some(function(d){a=(sq[d]||[]).find(function(i){return i&&String(i.id)===String(id)});return !!a});return a}
   function acharRota(id){return (bd().rotas||[]).find(function(r){return r&&String(r.id)===String(id)})||null}
   function instalar(){
     var f=W.abrirModalEditarSeq;if(typeof f!=='function'||f.__f538prot)return;
@@ -48408,9 +48427,10 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
     Object.keys(prot).forEach(function(id){
       var p=prot[id];if(agora-p.t>PRAZO){delete prot[id];return}
       var it=acharItem(id);
-      if(it){CI.forEach(function(k){if(!igual(it[k],p.v[k])){it[k]=p.v[k];mexeu=true}});if(mexeu)it.updatedAt=new Date().toISOString()}
+      var hora=function(o){var m=Date.now(),t=o?Date.parse(o.updatedAt||o.updated_at||'')||0:0;return new Date(t>=m?t+1000:m).toISOString()};
+      if(it){var mi=false;CI.forEach(function(k){if(!igual(it[k],p.v[k])){it[k]=p.v[k];mi=true}});if(mi){it.updatedAt=hora(it);mexeu=true}}
       var r=p.rota?acharRota(p.rota):null;
-      if(r){var mr=false;CI.forEach(function(k){var kr=CR[k];if(!igual(r[kr],p.v[k])){r[kr]=p.v[k];mr=true}});if(mr){r.updatedAt=new Date().toISOString();mexeu=true}}
+      if(r){var mr=false;CI.forEach(function(k){var kr=CR[k];if(!igual(r[kr],p.v[k])){r[kr]=p.v[k];mr=true}});if(mr){r.updatedAt=hora(r);mexeu=true}}
     });
     if(mexeu){
       try{salvarStorage()}catch(e){}

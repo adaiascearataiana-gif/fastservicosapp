@@ -5,6 +5,11 @@
     {
       "app": "fast",
       "type": "correcao",
+      "text": "5.3.8 (31/10/2026): editar pelo lápis no ROTAS agora grava também na rota ligada (de onde o card e o PAINEL tiram valor e quantidade), nas cópias do mesmo item e no item agrupado de um só destino; cada edição fica anotada em Ferramentas → Sincronização para o suporte."
+    },
+    {
+      "app": "fast",
+      "type": "correcao",
       "text": "5.3.8 (31/10/2026): edição de rota pelo lápis no ROTAS não volta mais ao valor antigo — a sincronização às vezes trazia de volta uma cópia velha (valor, quantidade, destino); agora a edição fica protegida e é reenviada."
     },
     {
