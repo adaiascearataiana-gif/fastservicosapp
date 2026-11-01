@@ -1474,10 +1474,10 @@
     if (cacheSug.d && Date.now() - cacheSug.em < 15000) return cacheSug.d;
     var m = { cliente: {}, origem: {}, destino: {} };
     function add(t, v) { v = String(v == null ? '' : v).trim(); if (!v || v === '-' || /[,;|]/.test(v)) return; var k = norm(v); if (!k) return; var e = m[t][k] || (m[t][k] = { n: 0, nomes: {} }); e.n++; e.nomes[v] = (e.nomes[v] || 0) + 1; }
-    (bd().rotas || []).forEach(function (r) { if (!r || r.teste) return; add('cliente', r.cliente); add('origem', r.origem); add('destino', r.destino); });
-    var sq = bd().sequencias || {}; Object.keys(sq).forEach(function (d) { (sq[d] || []).forEach(function (it) { if (!it || ehAgrupado(it)) return; add('cliente', it.cliente); add('origem', it.origem); add('destino', it.destino); }); });
+    // 5.3.8: sugestões só do que está CADASTRADO (Clientes e Lugares). Antes entravam também
+    // nomes digitados em rotas antigas (ex.: "Jaci" aparecia sem existir em lugar nenhum).
     (bd().clientes || []).forEach(function (c) { if (c) add('cliente', c.nome); });
-    (bd().destinos || []).forEach(function (x) { if (x) add('destino', x.nome); });
+    (bd().destinos || []).forEach(function (x) { if (x) { add('destino', x.nome); add('origem', x.nome); } });
     var out = {};
     Object.keys(m).forEach(function (t) {
       out[t] = Object.keys(m[t]).map(function (k) { var e = m[t][k], melhor = Object.keys(e.nomes).sort(function (a2, b2) { return e.nomes[b2] - e.nomes[a2]; })[0]; return { k: k, nome: melhor, n: e.n }; });

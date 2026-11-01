@@ -10484,7 +10484,7 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
           </div>
           <div class="span-4">
             <label>Cidade / UF</label>
-            <input type="text" id="clienteCidadeUf" placeholder="Cidade - UF" readonly="">
+            <input type="text" id="clienteCidadeUf" data-f538="editavel" placeholder="Cidade - UF" readonly="">
           </div>
           <div class="span-2">
             <label>Responsável / Contato secundário</label>
@@ -17334,13 +17334,9 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
         if (nome) nomes.push(nome);
       };
 
+      // 5.3.8: só clientes CADASTRADOS. Nomes digitados em rotas antigas (ex.: "Jaci")
+      // apareciam como se existissem, sem estar em Clientes nem em Lugares.
       (bancoDados.clientes || []).forEach(c => adicionar(c && (c.nome || c.cliente)));
-      (bancoDados.rotas || []).forEach(r => adicionar(r && r.cliente));
-
-      // Também considera nomes que só existam nas Rotas do Dia/sequências.
-      Object.values(bancoDados.sequencias || {}).forEach(lista => {
-        (Array.isArray(lista) ? lista : []).forEach(item => adicionar(item && item.cliente));
-      });
 
       const mapa = new Map();
       nomes.forEach(nome => {
@@ -24346,8 +24342,11 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
         cidadeUf: (coletarEnderecoCliente().cidadeUf || '').trim(),
         responsavel: document.getElementById('clienteResponsavel').value.trim(),
         obs: document.getElementById('clienteObs').value.trim(),
-        ultimaModificacao: new Date().toISOString()
+        ultimaModificacao: new Date().toISOString(),
+        updatedAt: new Date().toISOString()   // 5.3.8: sem esta hora, a cópia antiga da nuvem voltava por cima da edição
       };
+      // 5.3.8: telefone sempre no formato (85) 99999-9999 (tira +55, põe o 9 do celular)
+      try { if (typeof window.fastTelefoneBr === 'function') { ['telefone', 'whatsapp'].forEach(function (k) { var f = window.fastTelefoneBr(dados[k]); if (f) dados[k] = f; }); } } catch (eTel) {}
       if (!dados.nome) {
         marcarCampoInvalido(document.getElementById('clienteNome'), 'Informe o nome do cliente');
         mostrarToast('Informe o nome do cliente antes de salvar.', 'error');
@@ -43518,7 +43517,7 @@ html body #modalEditarRota .modal-content{margin:0 auto!important;top:auto!impor
 <script src="fast-4067.js?v=43"></script>
 <script src="navegacao-fast.js?v=1"></script>
 <script src="recibo-fast.js?v=1"></script>
-<script src="fast-recursos.js?v=45"></script>
+<script src="fast-recursos.js?v=46"></script>
 <!-- (r108) Painel de diagnostico de fotos na nuvem -->
 <style id="fast108-diag-css">
 #fast108Btn{position:fixed;right:14px;bottom:84px;z-index:2147483000;background:#16a34a;color:#fff;border:0;border-radius:999px;padding:11px 14px;font:800 13px system-ui,-apple-system,Segoe UI,Roboto,sans-serif;box-shadow:0 6px 20px rgba(0,0,0,.28);cursor:pointer}
@@ -48456,6 +48455,75 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
   instalar();W.addEventListener('load',function(){setTimeout(instalar,1500);setTimeout(instalar,5000)});
   setInterval(function(){instalar();vigiar()},400);
   W.fast538EdicoesProtegidas=function(){return JSON.parse(JSON.stringify(prot))};
+})();
+</script>
+<script id="fast538-cadastros">
+/* 5.3.8 — CLIENTES E LUGARES: EDIÇÃO QUE FICA
+   • Rua, bairro e cidade continuam editáveis mesmo depois da busca pelo CEP
+     (antes ficavam "travados" e não deixavam corrigir).
+   • Ao abrir um cliente, os telefones já aparecem como (85) 99999-9999.
+   • Telefone de LUGAR também é gravado nesse formato.
+   • Depois de salvar um cliente ou lugar, a edição fica protegida por 3 minutos:
+     se uma cópia antiga chegar da sincronização, o app recoloca o que você salvou. */
+(function(){
+  var W=window,D=document,PRAZO=180000,prot={cli:{},dest:{}};
+  var IDS=/(Logradouro|Bairro|CidadeUf|Cidade)$/;
+  function liberar(){
+    D.querySelectorAll('input[readonly]').forEach(function(i){if(IDS.test(i.id||'')&&!/^f538/.test(i.id||'')){i.readOnly=false;i.removeAttribute('readonly')}});
+  }
+  function fmt(v){try{var f=W.fastTelefoneBr&&W.fastTelefoneBr(v);return f||v}catch(e){return v}}
+  function arrumarTelsAbertos(){
+    ['clienteTelefone','clienteWhatsApp','editDestinoTelefone','motoristaTelefone'].forEach(function(id){
+      var i=D.getElementById(id);if(!i||D.activeElement===i||!i.value)return;
+      var f=fmt(i.value);if(f&&f!==i.value)i.value=f;
+    });
+  }
+  function bd(){return W.bancoDados||{}}
+  // clientes só sobem na sincronização "completa": pede uma logo (antes podia levar até 10 min)
+  var tEnv=0;function enviarJa(){clearTimeout(tEnv);tEnv=setTimeout(function(){try{W.__f538ColPendente=true;if(typeof W.sincronizarAgora==='function')W.sincronizarAgora()}catch(e){}},600)}
+  function guardar(tipo,obj,campos){if(!obj||obj.id==null)return;var v={};campos.forEach(function(k){v[k]=obj[k]});prot[tipo][String(obj.id)]={t:Date.now(),v:v}}
+  var CC=['nome','telefone','whatsapp','email','endereco','enderecoObj','cep','logradouro','numero','bairro','cidadeUf','apelido','responsavel','obs','doc','pagamento'];
+  var CD=['nome','local','endereco','bairro','telefone','enderecoObj'];
+  function embrulhar(nome,tipo,lista,campos,idCampo){
+    var f=W[nome];if(typeof f!=='function'||f.__f538cli)return;
+    var g=function(){
+      var idAntes=((D.getElementById(idCampo)||{}).value||'').trim(),nomeAntes=(((D.getElementById(tipo==='cli'?'clienteNome':'editDestinoNome')||{}).value)||'').trim();
+      var r=f.apply(this,arguments);
+      try{
+        var l=bd()[lista]||[],o=null;
+        if(idAntes)o=l.find(function(x){return String(x.id)===String(idAntes)});
+        if(!o&&nomeAntes){var k=destNormalizarNome(nomeAntes);o=l.find(function(x){return destNormalizarNome(x.nome)===k})}
+        if(o){
+          if(tipo==='dest'&&o.telefone){var ft=fmt(o.telefone);if(ft!==o.telefone)o.telefone=ft}
+          o.updatedAt=new Date().toISOString();guardar(tipo,o,campos);try{salvarStorage()}catch(e){}
+          if(tipo==='cli')enviarJa();
+        }
+      }catch(e){}
+      return r;
+    };
+    Object.keys(f).forEach(function(k){try{g[k]=f[k]}catch(e){}});g.__f538cli=1;W[nome]=g;
+  }
+  function igual(a,b){return JSON.stringify(a==null?'':a)===JSON.stringify(b==null?'':b)}
+  function vigiar(){
+    var agora=Date.now(),mexeu=false;
+    [['cli','clientes'],['dest','destinos']].forEach(function(p){
+      var mapa=prot[p[0]],l=bd()[p[1]]||[];
+      Object.keys(mapa).forEach(function(id){
+        var e=mapa[id];if(agora-e.t>PRAZO){delete mapa[id];return}
+        var o=l.find(function(x){return String(x.id)===String(id)});if(!o)return;
+        var m=false;Object.keys(e.v).forEach(function(k){if(!igual(o[k],e.v[k])){o[k]=e.v[k];m=true}});
+        if(m){o.updatedAt=new Date().toISOString();mexeu=true}
+      });
+    });
+    if(mexeu){try{salvarStorage()}catch(e){}try{renderizarClientes()}catch(e){}try{destRenderizarLista()}catch(e){}enviarJa()}
+  }
+  function instalar(){
+    embrulhar('salvarCliente','cli','clientes',CC,'clienteId');
+    embrulhar('salvarDestinoModal','dest','destinos',CD,'editDestinoId');
+  }
+  instalar();W.addEventListener('load',function(){setTimeout(instalar,1500);setTimeout(instalar,6000)});
+  setInterval(function(){instalar();liberar();arrumarTelsAbertos();vigiar()},500);
+  W.fast538ProtCadastros=function(){return JSON.parse(JSON.stringify(prot))};
 })();
 </script>
 </body></html>

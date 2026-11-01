@@ -4,6 +4,11 @@
   "updates": [
     {
       "app": "fast",
+      "type": "correcao",
+      "text": "5.3.8 (31/10/2026): Clientes — rua, bairro e cidade continuam editáveis depois do CEP; telefone sempre (85) 99999-9999; edição de cliente/lugar não volta mais ao valor antigo e sobe para a nuvem na hora; a busca mostra só clientes e lugares cadastrados (nomes digitados em rotas antigas não aparecem mais)."
+    },
+    {
+      "app": "fast",
       "type": "melhorado",
       "text": "5.3.8 (31/10/2026): toques mais rápidos — botão Pago responde em menos de 0,1 s (antes até 1,3 s), a janela de edição fecha na hora, e os cards não ignoram mais toques depois de cada sincronização."
     },
