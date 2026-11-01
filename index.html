@@ -8888,7 +8888,7 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
         <div class="grid-form no-print" style="margin-bottom: 12px; align-items: end;">
           <div class="span-3" style="position: relative;">
             <label>Buscar destino:</label>
-            <input type="text" id="filtroDestino" placeholder="Nome, bairro, endereço, telefone..." oninput="destRenderizarLista()" autocomplete="off">
+            <input type="text" id="filtroDestino" placeholder="Nome, local, endereço, bairro, telefone..." oninput="destRenderizarLista()" autocomplete="off">
           </div>
           <div class="span-1" style="display: flex; align-items: flex-end;">
             <button class="btn-danger ripple" style="width: 100%; padding: 9px 10px; font-size: 13px; font-weight: 700; white-space: nowrap;" onclick="limparFiltroDestino()" title="Limpar busca">
@@ -8908,11 +8908,12 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
             <tr>
               <th class="dest-sel-th" title="Marcar/desmarcar todos os lugares desta lista"><input type="checkbox" id="destSelTodos" class="cli-sel-checkbox" onchange="destAlternarTodos(this.checked)"></th>
               <th>Ações</th>
-              <th class="sortable-th" onclick="destOrdenarTabela(1)">Nome</th>
-              <th class="sortable-th" onclick="destOrdenarTabela(2)">Bairro</th>
+              <th class="sortable-th" onclick="destOrdenarTabela(1)">Nome do destino</th>
+              <th class="sortable-th" onclick="destOrdenarTabela(2)">Local</th>
               <th class="sortable-th" onclick="destOrdenarTabela(3)">Endereço</th>
-              <th class="sortable-th" onclick="destOrdenarTabela(4)">Telefone</th>
-              <th class="sortable-th" onclick="destOrdenarTabela(5)">Usado em</th>
+              <th class="sortable-th" onclick="destOrdenarTabela(4)">Bairro</th>
+              <th class="sortable-th" onclick="destOrdenarTabela(5)">Telefone</th>
+              <th class="sortable-th" onclick="destOrdenarTabela(6)">Usado em</th>
             </tr>
           </thead>
           <tbody id="tabelaDestinosBody"></tbody>
@@ -10679,24 +10680,24 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
         <input type="hidden" id="editDestinoId" value="">
         <div class="grid-form">
           <div class="span-2">
-            <label>Nome: *</label>
-            <input type="text" id="editDestinoNome" required="" placeholder="Ex: PRÍNCIPE, WM, Yvone...">
+            <label>Nome do destino: *</label>
+            <input type="text" id="editDestinoNome" required="" placeholder="Ex: Sirley, PRÍNCIPE, WM...">
           </div>
           <div class="span-2">
             <label>Local:</label>
             <input type="text" id="editDestinoLocal" placeholder="Ex: Shopping Benfica, Mercado São Sebastião...">
           </div>
           <div class="span-2">
-            <label>Endereço completo:</label>
+            <label>Endereço:</label>
             <input type="text" id="editDestinoEndereco" placeholder="Rua, número, complemento...">
           </div>
-          <div class="span-2">
-            <label>Bairro (usado no cálculo de previsão de chegada):</label>
-            <input type="text" id="editDestinoBairro" placeholder="Ex: Centro, Messejana, Aldeota...">
+          <div>
+            <label>Bairro:</label>
+            <input type="text" id="editDestinoBairro" placeholder="Ex: Centro, Aldeota..." title="Usado no cálculo da previsão de chegada">
           </div>
           <div>
-            <label>Telefone / WhatsApp:</label>
-            <input type="text" id="editDestinoTelefone" placeholder="(85) 9XXXX-XXXX">
+            <label>Telefone:</label>
+            <input type="tel" id="editDestinoTelefone" placeholder="(85) 9XXXX-XXXX" style="padding-left:10px;padding-right:6px;">
           </div>
           <div class="span-4 modal-actions">
             <button type="button" class="btn-secondary ripple" style="padding: 12px 20px;" onclick="fecharModalDestino()"><i class="fa-solid fa-xmark"></i> Cancelar</button>
@@ -18454,6 +18455,9 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
       const filtroEl = document.getElementById('filtroDestino');
       const termo = filtroEl ? filtroEl.value.toLowerCase().trim() : '';
       let filtrados = destinos;
+      // 5.3.8: botão "Lugares incompletos" — só os que estão sem endereço, sem bairro
+      // ou com telefone fora do formato (85) 99999-9999 / (85) 3333-4444
+      if (window.__f538DestIncompletos) filtrados = filtrados.filter(d => window.fast538LugarFaltando(d).length > 0);
       if (termo) {
         filtrados = destinos.filter(d => {
           const nome = (d.nome||'').toLowerCase();
@@ -18465,8 +18469,8 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
       }
       // Aplicar ordenacao
       if (destOrdenarCol >= 0) {
-        const cols = ['nome','bairro','endereco','telefone','usadoEm'];
-        const key = cols[destOrdenarCol];
+        const cols = ['nome','local','endereco','bairro','telefone','usadoEm'];
+        const key = cols[Math.max(0, destOrdenarCol - 1)];   // 5.3.8: cabeçalhos são 1..6 (antes "Nome" ordenava pelo bairro)
         if (key) {
           filtrados = filtrados.slice().sort((a,b) => {
             let va = String(a[key] || '').toLowerCase();
@@ -18492,9 +18496,9 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
       // Renderizar tabela
       if (filtrados.length === 0) {
         if (destinos.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:30px;font-weight:700;">Nenhum destino cadastrado ainda.<br>Insira uma rota ou clique em <strong>Novo Destino</strong>.</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text-muted);padding:30px;font-weight:700;">Nenhum destino cadastrado ainda.<br>Insira uma rota ou clique em <strong>Novo Destino</strong>.</td></tr>';
         } else {
-          tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:20px;font-weight:700;">Nenhum destino encontrado para "' + escapeHtml(termo) + '".</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text-muted);padding:20px;font-weight:700;">Nenhum destino encontrado para "' + escapeHtml(termo) + '".</td></tr>';
         }
         return;
       }
@@ -18502,7 +18506,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
       // (com centenas de lugares a tela demorava ~1 s para abrir). A busca procura em TODOS.
       const _f538LimDest = window.__f538DestLimite || 120;
       const _f538TotDest = filtrados.length;
-      if (!termo && filtrados.length > _f538LimDest) filtrados = filtrados.slice(0, _f538LimDest);
+      if (!termo && !window.__f538DestIncompletos && filtrados.length > _f538LimDest) filtrados = filtrados.slice(0, _f538LimDest);
       tbody.innerHTML = filtrados.map(d => {
           const destNomeSeguro = escapeHtmlAttr(d.nome || '');
           return `
@@ -18514,13 +18518,14 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
               <button class="btn-danger" onclick="destExcluir(${d.id})" title="Excluir"><span class="lbl">EXCLUIR</span></button>
             </div>
           </td>
-          <td style="font-weight:800;">${escapeHtml(d.nome || '')}${d.local ? '<div style="font-weight:700;font-size:12px;opacity:.8;margin-top:2px;">🏢 ' + escapeHtml(d.local) + '</div>' : ''}</td>
-          <td>${d.bairro ? '<span class="badge-status badge-recebido">' + escapeHtml(d.bairro) + '</span>' : '<span style="color:var(--text-faint);font-size:11px;">Não definido</span>'}</td>
+          <td style="font-weight:800;">${escapeHtml(d.nome || '')}${window.__f538DestIncompletos ? '<div style="font-size:11px;font-weight:800;color:#dc2626;margin-top:2px;">⚠ falta: ' + window.fast538LugarFaltando(d).join(', ') + '</div>' : ''}</td>
+          <td>${d.local ? '<span style="font-weight:700;">🏢 ' + escapeHtml(d.local) + '</span>' : '<span style="color:var(--text-faint);font-size:11px;">-</span>'}</td>
           <td>${d.endereco ? escapeHtml(d.endereco) : '<span style="color:var(--text-faint);font-size:11px;">-</span>'}</td>
+          <td>${d.bairro ? '<span class="badge-status badge-recebido">' + escapeHtml(d.bairro) + '</span>' : '<span style="color:var(--text-faint);font-size:11px;">Não definido</span>'}</td>
           <td>${d.telefone ? '<span style="color:#10b981;font-weight:700;"><i class="fa-brands fa-whatsapp"></i> ' + escapeHtml(d.telefone) + '</span>' : '<span style="color:var(--text-faint);font-size:11px;">-</span>'}</td>
           <td style="text-align:center;">${d.usadoEm || 0}x</td>
         </tr>
-      `;}).join('') + (_f538TotDest > filtrados.length ? '<tr class="no-print"><td colspan="7" style="text-align:center;padding:14px 8px;font-weight:700;">Mostrando ' + filtrados.length + ' de ' + _f538TotDest + ' lugares. Use a busca para achar os outros. <button type="button" class="btn-primary" style="margin-left:6px;padding:6px 12px;" onclick="window.__f538DestLimite=(window.__f538DestLimite||120)+300;destRenderizarLista()">Mostrar mais</button></td></tr>' : '');
+      `;}).join('') + (_f538TotDest > filtrados.length ? '<tr class="no-print"><td colspan="8" style="text-align:center;padding:14px 8px;font-weight:700;">Mostrando ' + filtrados.length + ' de ' + _f538TotDest + ' lugares. Use a busca para achar os outros. <button type="button" class="btn-primary" style="margin-left:6px;padding:6px 12px;" onclick="window.__f538DestLimite=(window.__f538DestLimite||120)+300;destRenderizarLista()">Mostrar mais</button></td></tr>' : '');
       // (r125) Sincroniza o balão de seleção em massa após re-render (esconde se a seleção zerou)
       if (typeof destAtualizarBoxSelecao === 'function') destAtualizarBoxSelecao();
     }
@@ -48524,6 +48529,37 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
   instalar();W.addEventListener('load',function(){setTimeout(instalar,1500);setTimeout(instalar,6000)});
   setInterval(function(){instalar();liberar();arrumarTelsAbertos();vigiar()},500);
   W.fast538ProtCadastros=function(){return JSON.parse(JSON.stringify(prot))};
+})();
+</script>
+<script id="fast538-lugares-incompletos">
+/* 5.3.8 — LUGARES INCOMPLETOS
+   Botão na tela de Lugares que mostra só os lugares sem endereço, sem bairro ou com
+   telefone fora do formato — com o que falta escrito embaixo do nome. */
+(function(){
+  var W=window,D=document;
+  W.fast538LugarFaltando=function(d){
+    var f=[];if(!d)return f;
+    if(!String(d.endereco||'').trim())f.push('endereço');
+    if(!String(d.bairro||'').trim())f.push('bairro');
+    var t=String(d.telefone||'').trim();
+    if(t&&!/^\(\d{2}\) (9\d{4}|\d{4})-\d{4}$/.test(t))f.push('telefone no formato');
+    return f;
+  };
+  function contar(){try{return (W.bancoDados.destinos||[]).filter(function(d){return d&&d.nome&&W.fast538LugarFaltando(d).length}).length}catch(e){return 0}}
+  function montar(){
+    var busca=D.getElementById('filtroDestino');if(!busca)return;
+    var b=D.getElementById('f538BtnIncompletos');
+    if(!b){
+      b=D.createElement('button');b.type='button';b.id='f538BtnIncompletos';
+      b.style.cssText='margin-top:10px;width:100%;min-height:44px;border-radius:12px;border:2px solid #f59e0b;background:#fffbeb;color:#92400e;font-weight:800;font-size:14px;cursor:pointer;';
+      b.onclick=function(){W.__f538DestIncompletos=!W.__f538DestIncompletos;try{destRenderizarLista()}catch(e){}montar()};
+      var alvo=busca.closest('div')||busca.parentNode;alvo.parentNode.insertBefore(b,alvo.nextSibling);
+    }
+    var n=contar(),txt=W.__f538DestIncompletos?'✖ Mostrar todos os lugares':'⚠ Lugares incompletos ('+n+')';
+    if(b.textContent!==txt)b.textContent=txt;
+    b.style.background=W.__f538DestIncompletos?'#f59e0b':'#fffbeb';b.style.color=W.__f538DestIncompletos?'#fff':'#92400e';
+  }
+  setInterval(montar,1500);W.addEventListener('load',function(){setTimeout(montar,1500)});
 })();
 </script>
 </body></html>

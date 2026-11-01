@@ -4,6 +4,21 @@
   "updates": [
     {
       "app": "fast",
+      "type": "melhorado",
+      "text": "5.3.8 (01/11/2026): botão \"Lugares incompletos\" na tela de Lugares — mostra só os lugares sem endereço, sem bairro ou com telefone fora do formato, com o que falta escrito embaixo do nome."
+    },
+    {
+      "app": "fast",
+      "type": "melhorado",
+      "text": "5.3.8 (01/11/2026): tabela de Lugares com as colunas NOME DO DESTINO, LOCAL, ENDEREÇO, BAIRRO, TELEFONE; ordenar pelo cabeçalho agora ordena pela coluna certa."
+    },
+    {
+      "app": "fast",
+      "type": "melhorado",
+      "text": "5.3.8 (01/11/2026): janela de Lugar/Destino reorganizada — NOME DO DESTINO e LOCAL na primeira linha; ENDEREÇO, BAIRRO e TELEFONE na segunda."
+    },
+    {
+      "app": "fast",
       "type": "correcao",
       "text": "5.3.8 (31/10/2026): Clientes — rua, bairro e cidade continuam editáveis depois do CEP; telefone sempre (85) 99999-9999; edição de cliente/lugar não volta mais ao valor antigo e sobe para a nuvem na hora; a busca mostra só clientes e lugares cadastrados (nomes digitados em rotas antigas não aparecem mais)."
     },
