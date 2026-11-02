@@ -1388,8 +1388,14 @@
   function blobParaDataURL(b) {
     return new Promise(function (res, rej) { var fr = new FileReader(); fr.onload = function () { res(fr.result); }; fr.onerror = rej; fr.readAsDataURL(b); });
   }
+  // 5.3.8: fotos que não existem mais no Drive (apagadas) — lembradas por 7 dias,
+  // para não tentar baixar de novo a cada abertura do app
+  var SUMIDAS_K = 'fast538_fotos_sumidas';
+  function sumidas() { try { var o = JSON.parse(localStorage.getItem(SUMIDAS_K) || '{}'); var a = Date.now(), m = false; Object.keys(o).forEach(function (k) { if (a - o[k] > 7 * 864e5) { delete o[k]; m = true; } }); if (m) localStorage.setItem(SUMIDAS_K, JSON.stringify(o)); return o; } catch (e) { return {}; } }
+  function marcarSumida(ref) { try { var o = sumidas(); o[ref] = Date.now(); localStorage.setItem(SUMIDAS_K, JSON.stringify(o)); } catch (e) {} }
   async function fotoDoDrive(chave) {
     var ref = 'idb:' + chave;
+    if (sumidas()[ref]) return null;
     if (faltas[ref] && Date.now() - faltas[ref] < 8000) return null;
     if (buscando[ref]) return buscando[ref];
     buscando[ref] = (async function () {
@@ -1402,6 +1408,7 @@
         var tk = driveToken();
         if (!tk) { await garantirDrive(true); tk = driveToken(); }
         var d = tk ? await fetch('https://www.googleapis.com/drive/v3/files/' + encodeURIComponent(j[0].drive_id) + '?alt=media', { headers: { Authorization: 'Bearer ' + tk } }).catch(function () { return null; }) : null;
+        if (d && d.status === 404) { marcarSumida(ref); faltas[ref] = Date.now(); return null; }   // apagada do Drive
         if (!d || !d.ok) {
           // sem Drive neste aparelho (ou a foto é de outra conta): usa o link de visualização
           var pub = 'https://lh3.googleusercontent.com/d/' + encodeURIComponent(j[0].drive_id) + '=w1600';
@@ -1428,7 +1435,7 @@
   var buscandoFaltas = false;
   setInterval(async function () {
     if (buscandoFaltas || !token() || !navigator.onLine || document.hidden) return;
-    var agora = Date.now(), refs = Object.keys(faltas).filter(function (r) { return agora - faltas[r] < 30 * 60000; }).slice(0, 40);
+    var sm = sumidas(), agora = Date.now(), refs = Object.keys(faltas).filter(function (r) { return agora - faltas[r] < 30 * 60000 && !sm[r]; }).slice(0, 40);
     if (!refs.length) return;
     buscandoFaltas = true;
     try {
