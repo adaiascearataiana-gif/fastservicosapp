@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#102b25">
+  <title>Importador de setlists · MM IBNM</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="parser.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header class="top"><div class="brand"><span class="mark">♫</span><span>MM IBNM <small>FERRAMENTAS</small></span></div><span class="top-tag">IMPORTADOR DE SETLISTS <span class="top-dot"></span> LOCAL</span></header>
+  <main>
+    <div class="intro"><div class="eyebrow"><span class="line"></span> HISTÓRICO MUSICAL <span class="line"></span></div><h1>Da conversa para<br><em>o repertório.</em></h1><p>Encontre as listas de músicas no histórico do grupo e prepare os registros para <strong>“Músicas que já cantamos”</strong>.</p><div class="privacy"><span>✳</span> A conversa fica somente neste navegador. Nada é enviado ao servidor.</div></div>
+    <div class="layout">
+      <section class="card form-card" aria-labelledby="source-heading">
+        <div class="card-head"><span class="step">01</span><div><h2 id="source-heading">Carregue a conversa</h2><p>Arquivo de texto exportado do WhatsApp, sem mídia.</p></div></div>
+        <label class="drop" for="file" id="drop"><span class="drop-icon">⇧</span><strong>Selecione ou arraste o arquivo .txt</strong><small>Exportar conversa → Sem mídia → salvar arquivo .txt</small><span class="file-name" id="fileName"></span></label>
+        <input id="file" type="file" accept=".txt,text/plain" hidden>
+        <div class="or"><span>OU COLE UM TRECHO DA CONVERSA</span></div>
+        <label class="sr-only" for="conversation">Texto da conversa</label><textarea id="conversation" spellcheck="false" placeholder="[28/10/2026, 19:30] Maria: *SETLIST DA SEMANA 04/10 - 08/11*&#10;&#10;*CULTO DA QUARTA 28/10*&#10;- Hino CC 05 - Presença Divina&#10;- Bem mais que tudo"></textarea>
+        <div class="period"><div class="period-head"><span class="step">02</span><div><h2>Escolha o período</h2><p>Filtra pela <strong>data em que a mensagem foi enviada</strong>, não pela data do culto.</p></div></div><div class="date-fields"><label>DATA INICIAL<input id="start" type="date" required></label><span class="arrow">→</span><label>DATA FINAL<input id="end" type="date" required></label></div></div>
+        <button id="analyze" class="primary" type="button">Analisar conversa <span>↗</span></button><div id="error" class="error" role="alert" hidden></div>
+      </section>
+      <aside class="side"><div class="side-title">COMO FUNCIONA <span>↗</span></div><div class="how"><span class="how-num">01 /</span><div><strong>Exporte o grupo</strong><p>No WhatsApp, abra o grupo → Mais → Exportar conversa → Sem mídia.</p></div></div><div class="how"><span class="how-num">02 /</span><div><strong>Escolha as datas</strong><p>Buscamos mensagens enviadas dentro do intervalo, incluindo as duas datas.</p></div></div><div class="how"><span class="how-num">03 /</span><div><strong>Confira e baixe</strong><p>Revise as datas e cada música e baixe JSON ou CSV com as colunas da tabela <code>musicas_cantadas</code>.</p></div></div><div class="note"><span>ⓘ</span><p>O app procura <strong>MÚSICAS DA SEMANA</strong>, <strong>MÚSICAS DA PRÓXIMA SEMANA</strong> ou <strong>SETLIST</strong> e inclui <strong>todas as seções com músicas</strong>: quarta, EBD, culto da noite, sexta, sábado e outros eventos. Confira as datas na prévia; se alguma não puder ser inferida, preencha-a antes de exportar.</p></div></aside>
+    </div>
+    <section id="results" class="results" aria-live="polite" hidden><div class="result-head"><div><div class="eyebrow left"><span class="line"></span> PRÉVIA DA EXTRAÇÃO</div><h2>Revise antes de exportar.</h2><p id="summary"></p></div><div class="actions"><button id="json" class="primary" type="button">↓ Baixar JSON</button><button id="csv" class="secondary" type="button">↓ Baixar CSV</button></div></div><div id="warnings" class="warnings" hidden></div><div id="groups" class="groups"></div><p class="result-foot">A exportação <strong>não grava no banco</strong>. Importar requer acesso de administrador no projeto MM IBNM. Mensagens repetidas permanecem na lista para você decidir se deve removê-las.</p></section>
+  </main>
+  <footer>MM IBNM <span>·</span> FERRAMENTA LOCAL PARA ORGANIZAR O REPERTÓRIO</footer>
+</body>
+</html>
