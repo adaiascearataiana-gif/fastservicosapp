@@ -1,9 +1,11 @@
 'use strict';
 const fileInput = document.getElementById('pdf');
 const save = document.getElementById('save');
+const removeFirst = document.getElementById('remove-first');
 const status = document.getElementById('status');
 const filename = document.getElementById('filename');
 const targetName = 'Cantor_Cristao_Tom_Original_Violao_Teclado_001-581.pdf';
+const trimmedName = 'Cantor_Cristao_Tom_Original_Violao_Teclado_sem_paginas_01-02.pdf';
 let chosen = null;
 function report(message, error = false) {
   status.textContent = message;
@@ -11,7 +13,7 @@ function report(message, error = false) {
   status.classList.toggle('error', error);
 }
 async function selectFile(file) {
-  chosen = null; save.disabled = true;
+  chosen = null; save.disabled = removeFirst.disabled = true;
   if (!file) return;
   filename.textContent = file.name;
   if (!/\.pdf$/i.test(file.name)) { report('Selecione um arquivo .pdf.', true); return; }
@@ -20,7 +22,7 @@ async function selectFile(file) {
     if (prefix !== '%PDF-') { report('O arquivo não tem assinatura de PDF. Confirme o download no Google Drive.', true); return; }
     chosen = file;
     report(`PDF reconhecido · ${(file.size / (1024 * 1024)).toFixed(1)} MB. Confirme no índice se o conteúdo está completo antes de usar.`);
-    save.disabled = false;
+    save.disabled = removeFirst.disabled = false;
   } catch (_) { report('Não foi possível ler o arquivo selecionado.', true); }
 }
 fileInput.addEventListener('change', () => selectFile(fileInput.files[0]));
@@ -35,4 +37,24 @@ save.addEventListener('click', () => {
   const a = document.createElement('a'); a.href = url; a.download = targetName;
   document.body.append(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 60000);
+});
+
+removeFirst.addEventListener('click', async () => {
+  if (!chosen) return;
+  const current = chosen;
+  save.disabled = removeFirst.disabled = true;
+  report('Removendo as páginas 1 e 2... Isso pode levar alguns segundos em PDFs grandes.');
+  try {
+    const { bytes, originalPages, remainingPages } = await CantorPdfOps.removeFirstTwo(await current.arrayBuffer(), PDFLib);
+    if (chosen !== current) return; // Another file was selected during processing.
+    const url = URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' }));
+    const a = document.createElement('a'); a.href = url; a.download = trimmedName;
+    document.body.append(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+    report(`Pronto: ${originalPages} páginas no original, ${remainingPages} na cópia. As duas primeiras foram removidas; o original permanece intacto.`);
+  } catch (e) {
+    if (chosen === current) report(e.message || 'Não foi possível editar este PDF.', true);
+  } finally {
+    if (chosen === current) save.disabled = removeFirst.disabled = false;
+  }
 });
