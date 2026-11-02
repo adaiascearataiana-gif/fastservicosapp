@@ -5,6 +5,11 @@
     {
       "app": "fast",
       "type": "melhorado",
+      "text": "5.3.8 (01/11/2026): telas mais leves no celular — sem o efeito de vidro embaçado (muito pesado), sem animação ao trocar de tela, cards das Rotas do Dia fora da tela só são desenhados quando chegam perto; a tela de Clientes não é mais redesenhada à toa ao abrir."
+    },
+    {
+      "app": "fast",
+      "type": "melhorado",
       "text": "5.3.8 (01/11/2026): botão \"Lugares incompletos\" na tela de Lugares — mostra só os lugares sem endereço, sem bairro ou com telefone fora do formato, com o que falta escrito embaixo do nome."
     },
     {

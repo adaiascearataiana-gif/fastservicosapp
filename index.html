@@ -2352,7 +2352,19 @@ body.fast-edition-mobile .sync-neon, body.fast-touch-ui .sync-neon { display:non
 body.fast-edition-mobile .pro-sidebar, body.fast-touch-ui .pro-sidebar { display:none !important; }
 body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher { right:14px !important; bottom:88px !important; width:50px !important; height:50px !important; }
 
-</style><style>@media (max-width:900px){main .tab-content.active .table-container{overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch;overflow-y:auto!important;min-height:0}main .tab-content.active .table-container thead th{position:sticky!important;top:0!important;z-index:2}}</style></head>
+</style><style>@media (max-width:900px){main .tab-content.active .table-container{overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch;overflow-y:auto!important;min-height:0}main .tab-content.active .table-container thead th{position:sticky!important;top:0!important;z-index:2}}</style><style id="fast538-fluidez-css">
+/* 5.3.8 — FLUIDEZ (celular): menos trabalho de pintura na rolagem e na troca de telas */
+/* 1) cards das Rotas do Dia fora da tela não são desenhados até chegar perto */
+.seq-item{content-visibility:auto;contain-intrinsic-size:auto 430px}
+/* 2) efeito de vidro embaçado (muito pesado no celular) desligado em telas de toque */
+@media (pointer:coarse){
+  *,*::before,*::after{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+  /* troca de tela sem animação de entrada (evita a tela "tremida") */
+  .tab-content,.tab-content.active{animation:none!important;transition:none!important}
+}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
+</head>
 <body class="fast-pro fast-v2 fast-v2-compact fast-edition-mobile fast-touch-ui fx-executive fx-layout-command theme-light" style="" data-fast-layout="operacional">
 <script id="r99-ime-guard">
 /* r99: Guarda IME (teclado de voz do Google / Gboard e teclados CJK).
@@ -48083,7 +48095,7 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
   setTimeout(function(){conferir()},4000);
   function instalar(){
     var f=W.trocarAba;if(typeof f!=='function'||f.__f538cli)return;
-    var g=function(evt,aba){var r=f.apply(this,arguments);if(aba==='clientes'||aba==='motoristas')setTimeout(function(){conferir(aba)},120);return r};
+    var g=function(evt,aba){var r=f.apply(this,arguments);if(aba==='clientes'||aba==='motoristas')setTimeout(function(){conferir(false)},120);return r};
     Object.keys(f).forEach(function(k){try{g[k]=f[k]}catch(e){}});
     g.__f538cli=true;W.trocarAba=g;
   }
