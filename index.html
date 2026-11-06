@@ -17347,9 +17347,17 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
         if (nome) nomes.push(nome);
       };
 
-      // 5.3.8: só clientes CADASTRADOS. Nomes digitados em rotas antigas (ex.: "Jaci")
-      // apareciam como se existissem, sem estar em Clientes nem em Lugares.
+      // Pré-visualização ao digitar (RESTAURADO): clientes CADASTRADOS primeiro
+      // e, em seguida, os nomes já usados no histórico — Rotas e Rotas do Dia.
+      // Na 5.3.8 a busca passou a olhar só o cadastro e a pré-visualização
+      // "sumiu do nada" para quem lança pelo histórico. Cadastrado tem
+      // prioridade: é o primeiro inserido e a dedup abaixo mantém esse nome.
       (bancoDados.clientes || []).forEach(c => adicionar(c && (c.nome || c.cliente)));
+      (bancoDados.rotas || []).forEach(r => adicionar(r && r.cliente));
+      // Também considera nomes que só existam nas Rotas do Dia/sequências.
+      Object.values(bancoDados.sequencias || {}).forEach(lista => {
+        (Array.isArray(lista) ? lista : []).forEach(item => adicionar(item && item.cliente));
+      });
 
       const mapa = new Map();
       nomes.forEach(nome => {
@@ -17595,6 +17603,10 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
       const divLista = document.getElementById('listaSugestoes');
       if (divLista) { divLista.style.display = 'none'; divLista.classList.remove('fast-sug-show'); }
       preencherPreviewRota(nomeCliente);
+      // Ao puxar os dados do cliente, a Observação/Descrição NUNCA vem junto:
+      // nem a da última rota, nem a do cadastro do cliente. Campo limpo.
+      const obsAba1 = document.getElementById('txtDescricaoRota');
+      if (obsAba1) obsAba1.value = '';
       atualizarPreviewAba1();
     }
 
@@ -23406,6 +23418,9 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
       // 2.3.43: ao tocar em Adicionar Destino, reaproveita quantidade e valor
       // da linha imediatamente anterior (ou da linha principal, no primeiro extra).
       if (arguments.length === 0) {
+        // NOVO destino pelo botão: repete SÓ quantidade e valor da linha
+        // anterior. O NOME do destino nunca é copiado — vem sempre zerado.
+        valor = '';
         const anterior = container.lastElementChild;
         const qtdAnterior = anterior
           ? anterior.querySelector('.extra-qtd-input')
@@ -23432,8 +23447,15 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
         <button type="button" class="btn-danger" style="padding:10px 12px;flex-shrink:0;" onclick="this.parentElement.remove()"><i class="fa-solid fa-xmark"></i></button>
       `;
       container.appendChild(div);
+      // Garante pelo valor (e não pelo HTML) que destino/qtd/valor são os
+      // pretendidos: nome zerado ao adicionar, qtd/valor repetidos.
+      const input = div.querySelector('.destino-extra-input');
+      if (input) input.value = valor == null ? '' : String(valor);
+      const inpQ = div.querySelector('.extra-qtd-input');
+      if (inpQ && qtd !== '') inpQ.value = qtd;
+      const inpV = div.querySelector('.extra-valor-input');
+      if (inpV && valr !== '') inpV.value = valr;
       // Foca no novo campo para digitar rapido
-      const input = div.querySelector('input[type="text"]');
       if (input) setTimeout(() => input.focus(), 50);
     }
 
@@ -25478,6 +25500,9 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
     function adicionarDestinoExtraRota(valor = '') {
       const container = document.getElementById('containerDestinosExtrasRota');
       if (!container) return;
+      // Pelo botão (sem argumentos): o nome do novo destino vem ZERADO.
+      // Valor/quantidade da rota são campos globais desta aba e não mudam.
+      if (arguments.length === 0) valor = '';
       const div = document.createElement('div');
       div.style.display = 'flex';
       div.style.gap = '8px';
@@ -42494,6 +42519,10 @@ html body .destino-extra-row-rota.f49-dest-row{padding-top:8px;border-top:1px da
   W.adicionarDestinoExtraRota=function(valor,valr){
     var container=$('containerDestinosExtrasRota');if(!container)return;
     garantirValorPrincipal();
+    // Pelo botão (sem argumentos): NOME do novo destino vem ZERADO;
+    // repete só o VALOR da rota anterior (ou da principal). A quantidade
+    // desta aba é o campo global da rota e permanece como está.
+    if(arguments.length===0)valor='';
     // ao adicionar, repete o valor da rota anterior (ou da principal)
     if(valr==null||valr===''){
       var ex=extras(),ant=ex.length?ex[ex.length-1].querySelector('.f49-valor-extra'):null;
@@ -43538,7 +43567,7 @@ html body #modalEditarRota .modal-content{margin:0 auto!important;top:auto!impor
 <script src="fast-4067.js?v=44"></script>
 <script src="navegacao-fast.js?v=1"></script>
 <script src="recibo-fast.js?v=1"></script>
-<script src="fast-recursos.js?v=46"></script>
+<script src="fast-recursos.js?v=47"></script>
 <!-- (r108) Painel de diagnostico de fotos na nuvem -->
 <style id="fast108-diag-css">
 #fast108Btn{position:fixed;right:14px;bottom:84px;z-index:2147483000;background:#16a34a;color:#fff;border:0;border-radius:999px;padding:11px 14px;font:800 13px system-ui,-apple-system,Segoe UI,Roboto,sans-serif;box-shadow:0 6px 20px rgba(0,0,0,.28);cursor:pointer}
@@ -46184,6 +46213,8 @@ body.fx-apk .fx-gal-ajuda{display:flex}
       item.addEventListener('click',function(){
         input.value=nome;fechar(lista,input);
         if(editando){try{atualizarPreviewAba2()}catch(e){}}else{try{preencherDadosClienteSeq(nome)}catch(e){}}
+        // Puxou o cliente? A observação fica LIMPA (não vem da rota/cliente).
+        var o=document.getElementById('seqObs');if(o)o.value='';
       });
       frag.appendChild(item);
     });
@@ -48285,6 +48316,16 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
     if(b&&e.toLowerCase().indexOf(b.toLowerCase())<0)e=e?(e+' - '+b):b;
     return e;
   }
+  /* Pré-visualização RESTAURADA: além dos LUGARES cadastrados, os destinos já
+     usados em Rotas/Rotas do Dia também aparecem ao digitar (como era antes
+     da 5.3.8, quando a lista passou a olhar só o cadastro e "sumiu"). */
+  function historicoDestinos(){
+    var vistos={},out=[];
+    function add(v){String(v||'').split(',').forEach(function(parte){var nome=String(parte||'').trim();var k=N(nome);if(!nome||!k||vistos[k])return;vistos[k]=1;out.push(nome)})}
+    (bd().rotas||[]).forEach(function(r){if(r)add(r.destino)});
+    var sq=bd().sequencias||{};Object.keys(sq).forEach(function(d){(sq[d]||[]).forEach(function(it){if(it)add(it.destino)})});
+    return out;
+  }
   function campos(){
     var f=$('formModalSeq');if(!f)return [];
     var l=[];var p=$('seqDestino');if(p)l.push(p);
@@ -48337,12 +48378,17 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
     if(!termo){div.style.display='none';atualizar(inp,true);return}
     var lista=lugares().filter(function(d){return N(d.nome).indexOf(termo)>=0||(d.local&&N(d.local).indexOf(termo)>=0)});
     lista.sort(function(x,y){var px=N(x.nome).indexOf(termo)===0?0:1,py=N(y.nome).indexOf(termo)===0?0:1;return (px-py)||((y.usadoEm||0)-(x.usadoEm||0))||String(x.nome).localeCompare(String(y.nome))});
+    // lugares cadastrados primeiro; depois, nomes do histórico que casam
+    var jaNaLista={};lista.forEach(function(d){jaNaLista[N(d.nome)]=1});
+    historicoDestinos().forEach(function(nome){var k=N(nome);if(k.indexOf(termo)>=0&&!jaNaLista[k]){jaNaLista[k]=1;lista.push({nome:nome,__hist:1})}});
     lista=lista.slice(0,12);
     div.innerHTML='';
     lista.forEach(function(d){
       var el=D.createElement('div');el.className='suggestion-item';el.style.cssText='padding:10px 12px;cursor:pointer;border-bottom:1px solid rgba(0,0,0,.06)';
       var end=endLugar(d);
-      el.innerHTML='📍 <b>'+esc(d.nome)+'</b>'+(d.local?'<small style="display:block;font-weight:700">🏢 '+esc(d.local)+'</small>':'')+'<small style="display:block;opacity:.75">'+(end?esc(end):'sem endereço cadastrado')+'</small>';
+      el.innerHTML=d.__hist
+        ? '🕘 <b>'+esc(d.nome)+'</b><small style="display:block;opacity:.75">já usado em outra rota</small>'
+        : '📍 <b>'+esc(d.nome)+'</b>'+(d.local?'<small style="display:block;font-weight:700">🏢 '+esc(d.local)+'</small>':'')+'<small style="display:block;opacity:.75">'+(end?esc(end):'sem endereço cadastrado')+'</small>';
       el.addEventListener('mousedown',function(ev){ev.preventDefault()});   // não tira o foco antes do toque
       el.addEventListener('click',function(){
         inp.value=d.nome;div.style.display='none';
