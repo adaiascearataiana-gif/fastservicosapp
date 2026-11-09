@@ -5,6 +5,16 @@
     {
       "app": "fast",
       "type": "correcao",
+      "text": "5.3.8 (10/11/2026): ROTAS DO DIA mostra só as rotas de hoje e as pendentes reais de dias anteriores — as pendências só são puxadas depois de conversar com a nuvem (antes, rota já concluída em outro aparelho era puxada para hoje); rota de outro dia que já estava concluída volta para o dia dela."
+    },
+    {
+      "app": "fast",
+      "type": "novo",
+      "text": "5.3.8 (08/11/2026): Clientes ganhou o botão \"📍 Enviar clientes para Lugares\" — leva nome, endereço, bairro e telefone dos clientes (marcados ou todos) para Lugares/Destinos; lugares que já existem não são trocados, só os campos vazios podem ser completados."
+    },
+    {
+      "app": "fast",
+      "type": "correcao",
       "text": "5.3.8 (02/11/2026): fotos apagadas do Google Drive deixam de ser procuradas a cada abertura; tabelas extras (biometria, funcionários) que não aceitam o formato param de ser tentadas a cada 15 s; conferência do rastreamento sem erro."
     },
     {

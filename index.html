@@ -15193,7 +15193,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
         // volta pendentes antigos em datas passadas. Com a nova regra, eles migram
         // para hoje (ou ficam na origem, se já concluídos), mantendo ROTAS DO DIA
         // sempre com: pendentes do dia anterior + rotas do próprio dia.
-        try { if (typeof verificarEVirarDia === 'function') verificarEVirarDia(); } catch(eVD) { console.warn('virarDia pós-sync:', eVD); }
+        try { window.__f538JaSincronizou = true; if (typeof verificarEVirarDia === 'function') verificarEVirarDia(); } catch(eVD) { console.warn('virarDia pós-sync:', eVD); }
         // 3. Salvar merge no localStorage (cache local)
         localStorage.setItem('banco_gestao_local', JSON.stringify(bancoDados));
         // 3a. Dividir destinos compostos apos merge (r11)
@@ -17347,17 +17347,9 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
         if (nome) nomes.push(nome);
       };
 
-      // Pré-visualização ao digitar (RESTAURADO): clientes CADASTRADOS primeiro
-      // e, em seguida, os nomes já usados no histórico — Rotas e Rotas do Dia.
-      // Na 5.3.8 a busca passou a olhar só o cadastro e a pré-visualização
-      // "sumiu do nada" para quem lança pelo histórico. Cadastrado tem
-      // prioridade: é o primeiro inserido e a dedup abaixo mantém esse nome.
+      // 5.3.8: só clientes CADASTRADOS. Nomes digitados em rotas antigas (ex.: "Jaci")
+      // apareciam como se existissem, sem estar em Clientes nem em Lugares.
       (bancoDados.clientes || []).forEach(c => adicionar(c && (c.nome || c.cliente)));
-      (bancoDados.rotas || []).forEach(r => adicionar(r && r.cliente));
-      // Também considera nomes que só existam nas Rotas do Dia/sequências.
-      Object.values(bancoDados.sequencias || {}).forEach(lista => {
-        (Array.isArray(lista) ? lista : []).forEach(item => adicionar(item && item.cliente));
-      });
 
       const mapa = new Map();
       nomes.forEach(nome => {
@@ -17603,10 +17595,6 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
       const divLista = document.getElementById('listaSugestoes');
       if (divLista) { divLista.style.display = 'none'; divLista.classList.remove('fast-sug-show'); }
       preencherPreviewRota(nomeCliente);
-      // Ao puxar os dados do cliente, a Observação/Descrição NUNCA vem junto:
-      // nem a da última rota, nem a do cadastro do cliente. Campo limpo.
-      const obsAba1 = document.getElementById('txtDescricaoRota');
-      if (obsAba1) obsAba1.value = '';
       atualizarPreviewAba1();
     }
 
@@ -17775,6 +17763,10 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
         }
         const agoraIso = new Date().toISOString();
         const topo = [];
+        // 5.3.8: só puxa pendências DEPOIS de conversar com a nuvem nesta abertura. Antes,
+        // ao abrir o ROTAS, uma rota concluída em outro aparelho ainda parecia pendente
+        // (a conclusão não tinha chegado) e era puxada para hoje.
+        if (window.__f538JaSincronizou)
         Object.keys(bancoDados.sequencias)
           .filter(function(d){ return /^\d{4}-\d{2}-\d{2}$/.test(d) && d < hoje && d >= desde; })
           .sort()
@@ -23418,9 +23410,6 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
       // 2.3.43: ao tocar em Adicionar Destino, reaproveita quantidade e valor
       // da linha imediatamente anterior (ou da linha principal, no primeiro extra).
       if (arguments.length === 0) {
-        // NOVO destino pelo botão: repete SÓ quantidade e valor da linha
-        // anterior. O NOME do destino nunca é copiado — vem sempre zerado.
-        valor = '';
         const anterior = container.lastElementChild;
         const qtdAnterior = anterior
           ? anterior.querySelector('.extra-qtd-input')
@@ -23447,15 +23436,8 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
         <button type="button" class="btn-danger" style="padding:10px 12px;flex-shrink:0;" onclick="this.parentElement.remove()"><i class="fa-solid fa-xmark"></i></button>
       `;
       container.appendChild(div);
-      // Garante pelo valor (e não pelo HTML) que destino/qtd/valor são os
-      // pretendidos: nome zerado ao adicionar, qtd/valor repetidos.
-      const input = div.querySelector('.destino-extra-input');
-      if (input) input.value = valor == null ? '' : String(valor);
-      const inpQ = div.querySelector('.extra-qtd-input');
-      if (inpQ && qtd !== '') inpQ.value = qtd;
-      const inpV = div.querySelector('.extra-valor-input');
-      if (inpV && valr !== '') inpV.value = valr;
       // Foca no novo campo para digitar rapido
+      const input = div.querySelector('input[type="text"]');
       if (input) setTimeout(() => input.focus(), 50);
     }
 
@@ -25500,9 +25482,6 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
     function adicionarDestinoExtraRota(valor = '') {
       const container = document.getElementById('containerDestinosExtrasRota');
       if (!container) return;
-      // Pelo botão (sem argumentos): o nome do novo destino vem ZERADO.
-      // Valor/quantidade da rota são campos globais desta aba e não mudam.
-      if (arguments.length === 0) valor = '';
       const div = document.createElement('div');
       div.style.display = 'flex';
       div.style.gap = '8px';
@@ -42519,10 +42498,6 @@ html body .destino-extra-row-rota.f49-dest-row{padding-top:8px;border-top:1px da
   W.adicionarDestinoExtraRota=function(valor,valr){
     var container=$('containerDestinosExtrasRota');if(!container)return;
     garantirValorPrincipal();
-    // Pelo botão (sem argumentos): NOME do novo destino vem ZERADO;
-    // repete só o VALOR da rota anterior (ou da principal). A quantidade
-    // desta aba é o campo global da rota e permanece como está.
-    if(arguments.length===0)valor='';
     // ao adicionar, repete o valor da rota anterior (ou da principal)
     if(valr==null||valr===''){
       var ex=extras(),ant=ex.length?ex[ex.length-1].querySelector('.f49-valor-extra'):null;
@@ -43567,7 +43542,7 @@ html body #modalEditarRota .modal-content{margin:0 auto!important;top:auto!impor
 <script src="fast-4067.js?v=44"></script>
 <script src="navegacao-fast.js?v=1"></script>
 <script src="recibo-fast.js?v=1"></script>
-<script src="fast-recursos.js?v=47"></script>
+<script src="fast-recursos.js?v=46"></script>
 <!-- (r108) Painel de diagnostico de fotos na nuvem -->
 <style id="fast108-diag-css">
 #fast108Btn{position:fixed;right:14px;bottom:84px;z-index:2147483000;background:#16a34a;color:#fff;border:0;border-radius:999px;padding:11px 14px;font:800 13px system-ui,-apple-system,Segoe UI,Roboto,sans-serif;box-shadow:0 6px 20px rgba(0,0,0,.28);cursor:pointer}
@@ -46213,8 +46188,6 @@ body.fx-apk .fx-gal-ajuda{display:flex}
       item.addEventListener('click',function(){
         input.value=nome;fechar(lista,input);
         if(editando){try{atualizarPreviewAba2()}catch(e){}}else{try{preencherDadosClienteSeq(nome)}catch(e){}}
-        // Puxou o cliente? A observação fica LIMPA (não vem da rota/cliente).
-        var o=document.getElementById('seqObs');if(o)o.value='';
       });
       frag.appendChild(item);
     });
@@ -48316,16 +48289,6 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
     if(b&&e.toLowerCase().indexOf(b.toLowerCase())<0)e=e?(e+' - '+b):b;
     return e;
   }
-  /* Pré-visualização RESTAURADA: além dos LUGARES cadastrados, os destinos já
-     usados em Rotas/Rotas do Dia também aparecem ao digitar (como era antes
-     da 5.3.8, quando a lista passou a olhar só o cadastro e "sumiu"). */
-  function historicoDestinos(){
-    var vistos={},out=[];
-    function add(v){String(v||'').split(',').forEach(function(parte){var nome=String(parte||'').trim();var k=N(nome);if(!nome||!k||vistos[k])return;vistos[k]=1;out.push(nome)})}
-    (bd().rotas||[]).forEach(function(r){if(r)add(r.destino)});
-    var sq=bd().sequencias||{};Object.keys(sq).forEach(function(d){(sq[d]||[]).forEach(function(it){if(it)add(it.destino)})});
-    return out;
-  }
   function campos(){
     var f=$('formModalSeq');if(!f)return [];
     var l=[];var p=$('seqDestino');if(p)l.push(p);
@@ -48378,17 +48341,12 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
     if(!termo){div.style.display='none';atualizar(inp,true);return}
     var lista=lugares().filter(function(d){return N(d.nome).indexOf(termo)>=0||(d.local&&N(d.local).indexOf(termo)>=0)});
     lista.sort(function(x,y){var px=N(x.nome).indexOf(termo)===0?0:1,py=N(y.nome).indexOf(termo)===0?0:1;return (px-py)||((y.usadoEm||0)-(x.usadoEm||0))||String(x.nome).localeCompare(String(y.nome))});
-    // lugares cadastrados primeiro; depois, nomes do histórico que casam
-    var jaNaLista={};lista.forEach(function(d){jaNaLista[N(d.nome)]=1});
-    historicoDestinos().forEach(function(nome){var k=N(nome);if(k.indexOf(termo)>=0&&!jaNaLista[k]){jaNaLista[k]=1;lista.push({nome:nome,__hist:1})}});
     lista=lista.slice(0,12);
     div.innerHTML='';
     lista.forEach(function(d){
       var el=D.createElement('div');el.className='suggestion-item';el.style.cssText='padding:10px 12px;cursor:pointer;border-bottom:1px solid rgba(0,0,0,.06)';
       var end=endLugar(d);
-      el.innerHTML=d.__hist
-        ? '🕘 <b>'+esc(d.nome)+'</b><small style="display:block;opacity:.75">já usado em outra rota</small>'
-        : '📍 <b>'+esc(d.nome)+'</b>'+(d.local?'<small style="display:block;font-weight:700">🏢 '+esc(d.local)+'</small>':'')+'<small style="display:block;opacity:.75">'+(end?esc(end):'sem endereço cadastrado')+'</small>';
+      el.innerHTML='📍 <b>'+esc(d.nome)+'</b>'+(d.local?'<small style="display:block;font-weight:700">🏢 '+esc(d.local)+'</small>':'')+'<small style="display:block;opacity:.75">'+(end?esc(end):'sem endereço cadastrado')+'</small>';
       el.addEventListener('mousedown',function(ev){ev.preventDefault()});   // não tira o foco antes do toque
       el.addEventListener('click',function(){
         inp.value=d.nome;div.style.display='none';
@@ -48622,6 +48580,150 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
     b.style.background=W.__f538DestIncompletos?'#f59e0b':'#fffbeb';b.style.color=W.__f538DestIncompletos?'#fff':'#92400e';
   }
   setInterval(montar,1500);W.addEventListener('load',function(){setTimeout(montar,1500)});
+})();
+</script>
+<script id="fast538-clientes-lugares">
+/* 5.3.8 — CLIENTES → LUGARES (ferramenta do ADM)
+   Botão "📍 Enviar para Lugares" na tela de Clientes. Leva nome, endereço, bairro e
+   telefone dos clientes para LUGARES/DESTINOS:
+   • só os clientes marcados (se houver) ou todos;
+   • lugar que ainda não existe: é criado;
+   • lugar que já existe com o mesmo nome: NÃO é sobrescrito — só preenche o que
+     estiver vazio (endereço, bairro, telefone), se a opção estiver marcada.
+   Mostra antes quantos vão ser criados/completados e pede confirmação. */
+(function(){
+  var W=window,D=document;
+  function $(id){return D.getElementById(id)}
+  function N(t){try{return destNormalizarNome(t)}catch(e){return String(t||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim()}}
+  function esc(t){return String(t==null?'':t).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+  function tel(v){try{return (W.fastTelefoneBr&&W.fastTelefoneBr(v))||String(v||'').trim()}catch(e){return String(v||'').trim()}}
+  function dadosDoCliente(c){
+    var eo=c.enderecoObj||{};
+    var rua=[c.logradouro||eo.logradouro,c.numero||eo.numero].filter(Boolean).join(', ');
+    var end=rua||String(c.endereco||'').trim();
+    var bai=String(c.bairro||eo.bairro||'').trim();
+    // endereço guardado como "Rua X, 10 - Bairro": separa o bairro se ele não veio à parte
+    if(!bai&&/ - [^-]+$/.test(end)){var p=end.split(' - ');bai=p.pop().trim();end=p.join(' - ').trim()}
+    return {nome:String(c.nome||'').trim(),endereco:end,bairro:bai,telefone:tel(c.whatsapp||c.telefone||'')};
+  }
+  function marcados(){return [].slice.call(D.querySelectorAll('#tabelaClientesBody .cli-sel-linha:checked')).map(function(i){return String(i.getAttribute('data-cli-id'))})}
+  function planejar(soMarcados,completar){
+    var bd=W.bancoDados||{},cl=(bd.clientes||[]).filter(function(c){return c&&String(c.nome||'').trim()});
+    if(soMarcados){var ids={};marcados().forEach(function(i){ids[i]=1});cl=cl.filter(function(c){return ids[String(c.id)]})}
+    var lug={};(bd.destinos||[]).forEach(function(d){if(d&&d.nome)lug[N(d.nome)]=d});
+    var novos=[],completar_=[],iguais=0,vistos={};
+    cl.forEach(function(c){
+      var x=dadosDoCliente(c),k=N(x.nome);if(!k||vistos[k])return;vistos[k]=1;
+      var d=lug[k];
+      if(!d){novos.push(x);return}
+      var falta={};['endereco','bairro','telefone'].forEach(function(f){if(!String(d[f]||'').trim()&&x[f])falta[f]=x[f]});
+      if(completar&&Object.keys(falta).length)completar_.push({d:d,falta:falta});else iguais++;
+    });
+    return {total:cl.length,novos:novos,completar:completar_,iguais:iguais};
+  }
+  function aplicar(pl){
+    var bd=W.bancoDados;if(!bd)return;
+    if(!Array.isArray(bd.destinos))bd.destinos=[];
+    var agora=new Date().toISOString(),base=Date.now();
+    // nomes que estavam na lista de "excluídos" voltam, porque foi o ADM que pediu
+    var exc=bd.destinosExcluidos;
+    pl.novos.forEach(function(x,i){
+      bd.destinos.push({id:base+i,nome:x.nome,local:'',endereco:x.endereco,bairro:x.bairro,telefone:x.telefone,enderecoObj:null,usadoEm:0,ultimaUso:null,updatedAt:agora});
+      if(Array.isArray(exc)){var k=N(x.nome);bd.destinosExcluidos=exc=exc.filter(function(e){return N(typeof e==='string'?e:(e&&e.nome))!==k})}
+    });
+    pl.completar.forEach(function(o){Object.keys(o.falta).forEach(function(f){o.d[f]=o.falta[f]});o.d.updatedAt=agora});
+    try{salvarStorage()}catch(e){}
+    try{destRenderizarLista()}catch(e){}
+    try{if(typeof W.__f538LugPuxar==='function'){} if(typeof W.sincronizarAgora==='function')setTimeout(W.sincronizarAgora,400)}catch(e){}
+  }
+  function abrir(){
+    var temMarc=marcados().length;
+    var f=D.getElementById('f538CliLugModal');if(f)f.remove();
+    f=D.createElement('div');f.id='f538CliLugModal';
+    f.style.cssText='position:fixed;inset:0;z-index:2147483000;background:rgba(15,23,42,.55);display:flex;align-items:center;justify-content:center;padding:16px';
+    f.innerHTML='<div style="background:#fff;color:#0f172a;max-width:520px;width:100%;border-radius:16px;padding:18px;box-shadow:0 20px 50px rgba(0,0,0,.35);font-size:14px">'+
+      '<div style="font-size:17px;font-weight:900;margin-bottom:6px">📍 Enviar clientes para Lugares</div>'+
+      '<div style="opacity:.8;margin-bottom:12px">Leva nome, endereço, bairro e telefone dos clientes para LUGARES/DESTINOS. Lugares que já existem não são apagados nem trocados.</div>'+
+      '<label class="f538op"><input type="radio" name="f538cl" value="m"'+(temMarc?' checked':' disabled')+'> Só os clientes marcados ('+temMarc+')</label>'+
+      '<label class="f538op"><input type="radio" name="f538cl" value="t"'+(temMarc?'':' checked')+'> Todos os clientes</label>'+
+      '<label class="f538op"><input type="checkbox" id="f538ClCompletar" checked> Completar lugares que já existem (só os campos vazios)</label>'+
+      '<div id="f538ClResumo" style="margin:12px 0;padding:10px;border-radius:10px;background:rgba(99,102,241,.08);font-weight:700;line-height:1.5"></div>'+
+      '<div style="display:flex;gap:8px;justify-content:flex-end"><button type="button" id="f538ClCancelar" style="min-height:42px;padding:0 16px;border-radius:10px;border:1px solid #cbd5e1;background:transparent;font-weight:800;cursor:pointer">Cancelar</button>'+
+      '<button type="button" id="f538ClOk" style="min-height:42px;padding:0 16px;border-radius:10px;border:0;background:linear-gradient(135deg,#7c3aed,#0ea5e9);color:#fff;font-weight:900;cursor:pointer">Enviar para Lugares</button></div></div>';
+    D.body.appendChild(f);
+    function opc(){return {so:(f.querySelector('input[name=f538cl]:checked')||{}).value==='m',comp:$('f538ClCompletar').checked}}
+    function resumo(){
+      var o=opc(),pl=planejar(o.so,o.comp);
+      $('f538ClResumo').innerHTML=pl.total+' cliente(s) analisados<br>🆕 '+pl.novos.length+' lugar(es) novo(s)'+(o.comp?'<br>✏️ '+pl.completar.length+' lugar(es) existente(s) completado(s)':'')+'<br>✔️ '+pl.iguais+' já estão em Lugares (sem mudança)'+
+        (pl.novos.length?'<div style="font-weight:600;opacity:.75;margin-top:6px;font-size:12px">Ex.: '+pl.novos.slice(0,4).map(function(x){return esc(x.nome)}).join(', ')+(pl.novos.length>4?'…':'')+'</div>':'');
+      $('f538ClOk').disabled=!(pl.novos.length||pl.completar.length);$('f538ClOk').style.opacity=$('f538ClOk').disabled?'.5':'1';
+      return pl;
+    }
+    f.querySelectorAll('input').forEach(function(i){i.addEventListener('change',resumo)});
+    resumo();
+    $('f538ClCancelar').onclick=function(){f.remove()};
+    f.addEventListener('click',function(e){if(e.target===f)f.remove()});
+    $('f538ClOk').onclick=function(){
+      var o=opc(),pl=planejar(o.so,o.comp);aplicar(pl);f.remove();
+      try{mostrarToast('📍 Lugares: '+pl.novos.length+' novo(s), '+pl.completar.length+' completado(s).','success')}catch(e){}
+    };
+  }
+  W.fast538ClientesParaLugares=abrir;
+  // estilos próprios (o app tem regras gerais para rótulos e botões que bagunçavam esta janela)
+  if(!D.getElementById('f538CliLugCss')){var st=D.createElement('style');st.id='f538CliLugCss';st.textContent=
+    '#f538BtnCliLug{display:block!important;width:100%!important;min-height:44px!important;margin:0 0 12px!important;border-radius:12px!important;border:2px solid #7c3aed!important;background:#f5f3ff!important;color:#5b21b6!important;font-weight:800!important;font-size:14px!important;text-transform:none!important;opacity:1!important;visibility:visible!important}'+
+    '#f538CliLugModal .f538op{display:flex!important;gap:10px!important;align-items:center!important;margin:8px 0!important;text-transform:none!important;font-size:14px!important;font-weight:700!important;color:#0f172a!important;letter-spacing:0!important;width:auto!important}'+
+    '#f538CliLugModal .f538op input{width:20px!important;height:20px!important;min-height:0!important;margin:0!important;flex:0 0 auto!important;opacity:1!important}'+
+    '#f538CliLugModal button{text-transform:none!important;font-size:14px!important;opacity:1!important}'+
+    '#f538ClCancelar{color:#0f172a!important;background:#f1f5f9!important;border:1px solid #cbd5e1!important}'+
+    '#f538ClOk{color:#fff!important}';
+    D.head.appendChild(st)}
+  function montar(){
+    var h=$('contagemClientesHeader');if(!h||$('f538BtnCliLug'))return;
+    var b=D.createElement('button');b.type='button';b.id='f538BtnCliLug';b.className='no-print';
+    b.innerHTML='📍 Enviar clientes para Lugares';
+    b.style.cssText='display:block;width:100%;min-height:42px;margin:0 0 12px;border-radius:12px;border:2px solid #7c3aed;background:rgba(124,58,237,.08);color:#5b21b6;font-weight:800;font-size:14px;cursor:pointer';
+    b.onclick=abrir;h.parentNode.insertBefore(b,h.nextSibling);
+  }
+  setInterval(montar,1500);W.addEventListener('load',function(){setTimeout(montar,1500)});
+})();
+</script>
+<script id="fast538-dia-limpo">
+/* 5.3.8 — ROTAS DO DIA SÓ COM O QUE É DE HOJE
+   Hoje mostra: rotas cadastradas para hoje + pendentes que ficaram de dias anteriores.
+   Rota de outro dia que foi puxada para hoje mas JÁ ESTAVA CONCLUÍDA antes de hoje
+   (a conclusão chegou depois) volta para o dia dela — sai da lista de hoje. */
+(function(){
+  var W=window;
+  function hoje(){try{return fastDataLocalYYYYMMDD()}catch(e){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}}
+  function inicioHoje(){var d=new Date();d.setHours(0,0,0,0);return d.getTime()}
+  function limpar(){
+    try{
+      var bd=W.bancoDados;if(!bd||!bd.sequencias)return;
+      var h=hoje(),lista=bd.sequencias[h]||[],rotas=bd.rotas||[],h0=inicioHoje(),agora=new Date().toISOString(),mexeu=0,fica=[];
+      lista.forEach(function(it){
+        var orig=it&&it.dataOriginal;
+        if(!it||!orig||!/^\d{4}-\d{2}-\d{2}$/.test(orig)||orig>=h||!fastEhConcluido(it,rotas)){fica.push(it);return}
+        var rv=it.rotaId!=null?fastRotaPorId(rotas,it.rotaId):null;
+        var tc=Date.parse(it.dataConclusao||it.statusUpdatedAt||(rv&&rv.updatedAt)||'')||0;
+        if(tc>=h0&&it.dataConclusao){fica.push(it);return}            // concluída HOJE: foi trabalho de hoje, fica
+        var dest=bd.sequencias[orig]||(bd.sequencias[orig]=[]);
+        var ja=dest.some(function(x){return x&&(String(x.id)===String(it.id)||(x.rotaId!=null&&it.rotaId!=null&&String(x.rotaId)===String(it.rotaId)))});
+        delete it.passouEm;it.updatedAt=agora;
+        if(!ja)dest.push(it);
+        if(rv&&String(rv.data||'')===h){rv.data=orig;rv.updatedAt=agora}
+        mexeu++;
+      });
+      if(mexeu){
+        bd.sequencias[h]=fica;
+        try{salvarStorage()}catch(e){}
+        try{W.__frxForcarLista=true;renderizarSequencia()}catch(e){}
+      }
+    }catch(e){}
+  }
+  W.fast538LimparDiaConcluidas=limpar;
+  setInterval(limpar,4000);
+  W.addEventListener('load',function(){setTimeout(limpar,3000)});
 })();
 </script>
 </body></html>
