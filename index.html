@@ -48289,15 +48289,21 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
     if(b&&e.toLowerCase().indexOf(b.toLowerCase())<0)e=e?(e+' - '+b):b;
     return e;
   }
-  function campos(){
-    var f=$('formModalSeq');if(!f)return [];
-    var l=[];var p=$('seqDestino');if(p)l.push(p);
-    f.querySelectorAll('#containerDestinosExtras .destino-extra-input').forEach(function(i){l.push(i)});
+  // 5.3.8: vale também em ROTAS E SERVIÇOS (origem, destino, destinos extras) e na
+  // janela Editar Rota — todo campo de lugar puxa de LUGARES com prévia
+  var END_DE={txtOrigem:'txtOrigemEnd',editTxtOrigem:'editTxtOrigemEnd'};
+  function camposDe(grupo){
+    var l=[];function add(i){if(i)l.push(i)}
+    if(grupo==='seq'||!grupo){add($('seqDestino'));D.querySelectorAll('#formModalSeq #containerDestinosExtras .destino-extra-input').forEach(add)}
+    if(grupo==='rota'||!grupo){add($('txtOrigem'));add($('txtDestino'));D.querySelectorAll('#containerDestinosExtrasRota .destino-extra-rota-input').forEach(add)}
+    if(grupo==='edit'||!grupo){add($('editTxtOrigem'));add($('editTxtDestino'))}
     return l;
   }
+  function campos(){return camposDe('seq')}
+  function todos(){return camposDe('')}
   function montar(inp){
     if(inp.__f538area&&D.body.contains(inp.__f538area))return inp.__f538area;
-    var row=inp.closest('.seq-destino-row')||inp.parentNode;
+    var row=inp.closest('.seq-destino-row');
     var area=D.createElement('div');area.className='f538-dest-area';area.style.cssText='display:flex;flex-direction:column;gap:6px;';
     area.innerHTML=
       '<div class="f538-dest-sug" style="display:none;border-radius:12px;overflow:hidden;box-shadow:0 6px 18px rgba(0,0,0,.12);background:var(--bg-card,#fff)"></div>'+
@@ -48309,13 +48315,23 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
         '<label style="display:block;margin-top:6px">BAIRRO:</label><input type="text" class="f538-dest-bai" autocomplete="off" placeholder="Bairro">'+
         '<label style="display:block;margin-top:6px">TELEFONE:</label><input type="tel" class="f538-dest-tel" autocomplete="off" placeholder="(85) 9XXXX-XXXX">'+
       '</div>';
-    row.parentNode.insertBefore(area,row.nextSibling);
+    if(row)row.parentNode.insertBefore(area,row.nextSibling);
+    else if(inp.classList.contains('destino-extra-rota-input')){var lin=inp.parentNode;lin.parentNode.insertBefore(area,lin.nextSibling)}
+    else inp.parentNode.insertBefore(area,inp.nextSibling);
+    // origem do FAST: o campo antigo "Endereço da origem" some (o valor continua guardado nele)
+    if(END_DE[inp.id]){var ee=$(END_DE[inp.id]);var bx=ee&&ee.closest('.f538-orig-end');if(bx)bx.style.display='none'}
+    area.querySelectorAll('.f538-dest-end,.f538-dest-bai').forEach(function(x){x.addEventListener('input',function(){gravarEnd(inp)})});
     area.querySelectorAll('input:not([type=tel])').forEach(function(i){i.addEventListener('input',function(){try{capitalizar(i)}catch(x){}})});
-    inp.__f538area=area;inp.setAttribute('autocomplete','off');inp.dataset.f538lug='1';
+    inp.__f538area=area;area.__inp=inp;inp.setAttribute('autocomplete','off');inp.dataset.f538lug='1';
     inp.addEventListener('input',function(){sugerir(inp)});
     inp.addEventListener('focus',function(){if(inp.value.trim())sugerir(inp)});
     inp.addEventListener('blur',function(){setTimeout(function(){esconderSug(inp);atualizar(inp,true)},250)});
     return area;
+  }
+  function gravarEnd(inp){
+    var ee=END_DE[inp.id]&&$(END_DE[inp.id]),a=inp.__f538area;if(!ee||!a)return;
+    var e=(a.querySelector('.f538-dest-end').value||'').trim(),bb=(a.querySelector('.f538-dest-bai').value||'').trim();
+    ee.value=(bb&&e.toLowerCase().indexOf(bb.toLowerCase())<0)?(e?e+' - '+bb:bb):e;ee.dataset.auto='0';
   }
   function esconderSug(inp){var a=inp.__f538area;if(a){var s=a.querySelector('.f538-dest-sug');s.style.display='none'}}
   function atualizar(inp,forcar){
@@ -48328,6 +48344,7 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
       var end=endLugar(d);
       prev.innerHTML='📍 <span>'+esc(d.nome)+'</span>'+(d.local?'<span style="display:block">🏢 '+esc(d.local)+'</span>':'')+(end?'<span style="display:block;font-weight:600;opacity:.85">'+esc(end)+'</span>':'<span style="display:block;font-weight:600;opacity:.7">(lugar sem endereço cadastrado)</span>');
       prev.style.display='block';novo.style.display='none';
+      if(END_DE[inp.id]){var ee=$(END_DE[inp.id]);if(ee){ee.value=end;ee.dataset.auto='1'}}
     }else{
       prev.style.display='none';
       var t=N(v),parecidos=lugares().some(function(x){return N(x.nome).indexOf(t)>=0});
@@ -48362,11 +48379,15 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
   }
   /* ao salvar: destinos novos entram em LUGARES com endereço e bairro */
   function instalarSalvar(){
-    var f=W.salvarItemSeq;if(typeof f!=='function'||f.__f538destSalvar)return;
+    [['salvarItemSeq','seq'],['salvarRota','rota'],['salvarEdicaoRotaModal','edit']].forEach(function(p){embrulharSalvar(p[0],p[1])});
+  }
+  function embrulharSalvar(nome,grupo){
+    var f=W[nome];if(typeof f!=='function'||f.__f538destSalvar)return;
     var g=function(){
       try{
         var criou=false;
-        campos().forEach(function(inp){
+        camposDe(grupo).forEach(function(inp){if(END_DE[inp.id]&&!acharLugar(inp.value.trim()))gravarEnd(inp)});
+        camposDe(grupo).forEach(function(inp){
           var v=inp.value.trim();if(!v||acharLugar(v)||typeof destAdicionarOuAtualizar!=='function')return;
           var a=inp.__f538area,end='',bai='',loc='',tel='';
           if(a){end=(a.querySelector('.f538-dest-end').value||'').trim();bai=(a.querySelector('.f538-dest-bai').value||'').trim();loc=(a.querySelector('.f538-dest-loc').value||'').trim();tel=(a.querySelector('.f538-dest-tel').value||'').trim()}
@@ -48376,16 +48397,19 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
         if(criou){try{destRenderizarLista()}catch(x){}}
       }catch(e){}
       var r=f.apply(this,arguments);
-      setTimeout(function(){campos().forEach(function(inp){var a=inp.__f538area;if(a&&!inp.value.trim()){a.querySelectorAll('input').forEach(function(i){i.value=''})}inp.__f538ult=null;atualizar(inp,true)})},300);
+      setTimeout(function(){camposDe(grupo).forEach(function(inp){var a=inp.__f538area;if(a&&!inp.value.trim()){a.querySelectorAll('input').forEach(function(i){i.value=''})}inp.__f538ult=null;atualizar(inp,true)})},300);
       return r;
     };
     Object.keys(f).forEach(function(k){try{g[k]=f[k]}catch(e){}});
-    g.__f538destSalvar=1;W.salvarItemSeq=g;
+    g.__f538destSalvar=1;W[nome]=g;
   }
   function vigiar(){
-    campos().forEach(function(inp){montar(inp);atualizar(inp,false)});
+    // a lista antiga da origem do FAST sai de cena (a nova mostra LUGARES com prévia)
+    if(typeof W.aoDigitarOrigem!=='function'||!W.aoDigitarOrigem.__f538lugar){var nada=function(){};nada.__f538=1;nada.__f538lugar=1;W.aoDigitarOrigem=nada;try{aoDigitarOrigem=nada}catch(e){}}
+    ['listaSugestoesOrigem','listaSugestoesOrigemEdit'].forEach(function(id){var l=$(id);if(l&&l.style.display!=='none')l.style.display='none'});
+    todos().forEach(function(inp){if(inp.offsetParent||inp.__f538area){montar(inp);atualizar(inp,false)}});
     // áreas de destinos extras que foram removidos
-    D.querySelectorAll('.f538-dest-area').forEach(function(a){var prev=a.previousElementSibling;if(!prev||!prev.querySelector||!prev.querySelector('.seq-destino-input'))a.remove()});
+    D.querySelectorAll('.f538-dest-area').forEach(function(a){if(!a.__inp||!D.body.contains(a.__inp))a.remove()});   // só some a área cujo campo foi removido
   }
   instalarSalvar();
   W.addEventListener('load',function(){setTimeout(instalarSalvar,1500);setTimeout(instalarSalvar,5000)});
