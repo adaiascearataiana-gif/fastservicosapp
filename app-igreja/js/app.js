@@ -229,7 +229,7 @@
       atualizarTopo();
       aplicarRedes();
       aplicarRadio();
-      estadoOffline(!!Views.Estado.offline);
+      estadoOffline(navigator.onLine === false);
     }).catch(function () {
       estadoOffline(true);
     });
