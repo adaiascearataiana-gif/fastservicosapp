@@ -16226,7 +16226,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
       window.rastMapa = rastMapaMotorista;
       // Adiciona os destinos das rotas ativas como marcadores
       rastAdicionarDestinosNoMapa();
-      setTimeout(() => { if (rastMapaMotorista) rastMapaMotorista.invalidateSize(); }, 200);
+      setTimeout(() => { if (rastMapaMotorista) rastMapaMotorista.invalidateSize(); }, 150);
     }
 
     // Adiciona marcadores dos destinos das rotas ativas no mapa (modo motorista)
@@ -17091,7 +17091,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
           console.warn('fastDebounceSincronizar catch:', e);
           mudancasPendentes = true;
         }
-      }, 200);
+      }, 150);
     }
 
     // 5.3.8 (fase 1): localStorage cheio não perde mais dados — a versão nova fica no
@@ -17180,7 +17180,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
       _fastSaveUiTimer = setTimeout(function(){
         _fastSaveUiTimer = null;
         salvarStorage();
-      }, Number.isFinite(Number(atraso)) ? Number(atraso) : 35);
+      }, Number.isFinite(Number(atraso)) ? Math.min(Number(atraso), 25) : 25);
       return true;
     }
     function fastAgendarRenderizacaoCompleta(incluirSequencia, atraso) {
@@ -17191,7 +17191,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
         if (incluirSequencia) {
           try { renderizarSequencia(); } catch(e) { console.warn('renderizarSequencia em segundo plano:', e); }
         }
-      }, Number.isFinite(Number(atraso)) ? Number(atraso) : 0);
+      }, 0);
     }
 
     function trocarAba(evt, abaId) {
@@ -17247,7 +17247,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
             try { rastMapa.invalidateSize(); } catch(e) {}
             rastBuscarLocalizacoes();
           }
-        }, 200);
+        }, 150);
         // Reforço: invalidar novamente após o layout mobile estabilizar
         setTimeout(function() {
           if (rastMapa) { try { rastMapa.invalidateSize(); } catch(e) {} }
@@ -17503,6 +17503,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
       // (ou clica no campo para limpar, como nos outros campos).
       setVal('seqQtdDestino', ultimaRota.qtdMercadorias != null ? ultimaRota.qtdMercadorias : (ultimaRota.qtdVolumes || 1));
       fastSetMoeda('seqValorDestino', ultimaRota.valor != null ? ultimaRota.valor : 0);
+      setVal('seqDestino', '');   // 5.4.x: destino VAZIO ao puxar última rota — motorista digita o novo
       setVal('seqObs', '');   // 5.3.8: ao puxar uma rota já feita, a observação fica vazia
       fastSetMoeda('seqValor', ultimaRota.valor != null ? ultimaRota.valor : 0);
       setVal('seqQtdVolumes', ultimaRota.qtdMercadorias != null ? ultimaRota.qtdMercadorias : (ultimaRota.qtdVolumes || 0));
@@ -17622,7 +17623,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
         if (el) el.value = valor == null ? '' : valor;
       };
       setVal('txtOrigem', ultimaRota.origem || '');
-      setVal('txtDestino', ultimaRota.destino || '');
+      setVal('txtDestino', '');   // 5.4.x: destino VAZIO ao puxar última rota — motorista digita o novo
       setVal('cbTipoVolume', ultimaRota.tipoVolume || 'MERCADORIA');
       setVal('txtQtdMercadorias', ultimaRota.qtdMercadorias != null ? ultimaRota.qtdMercadorias : 0);
       setVal('cbPagamento', ultimaRota.pagamento || 'PIX');
@@ -20524,7 +20525,7 @@ function renderizarSequencia() {
           var nome = 'FAST_' + agora.getFullYear() + dd(agora.getMonth()+1) + dd(agora.getDate()) + '_' + dd(agora.getHours()) + dd(agora.getMinutes()) + dd(agora.getSeconds()) + '.jpg';
           var arquivo = new File([blob], nome, { type: 'image/jpeg' });
           salvarFotoRota(dsAtual, idxAtual, { target: { files: [arquivo], value: '' } });
-        }, 'image/jpeg', 0.85);
+        }, 'image/jpeg', 0.75);
       };
       iniciarStream(facing);
     }
@@ -20738,7 +20739,7 @@ function renderizarSequencia() {
           }).catch(() => { errosCount++; processarProximo(i + 1); });
         }
 
-        comprimirImagem(file, 1280, 0.8).then(base64Compact => {
+        comprimirImagem(file, 1280, 0.75).then(base64Compact => {
           // Salva localmente primeiro (rápido) e mostra o feedback imediato.
           // O upload para a nuvem roda em segundo plano e substitui a referência
           // quando terminar — a foto já aparece na hora no aparelho.
@@ -25746,7 +25747,7 @@ function renderizarSequencia() {
           return;
         }
         const file = fileList[i];
-        comprimirImagem(file, 1280, 0.8).then(base64Compact => {
+        comprimirImagem(file, 1280, 0.75).then(base64Compact => {
           // (r108) NUVEM-FIRST: sobe para o Storage e guarda a URL pública.
           fastFotoSubirNuvem(base64Compact, 'editrota').then(urlNuvem => {
             _editRotaFotos.push(urlNuvem);
@@ -30378,7 +30379,7 @@ function renderizarSequencia() {
         maxZoom: 19
       }).addTo(rastMapa);
       // Força recálculo de tamanho (corrige renderização em aba oculta)
-      setTimeout(() => { if (rastMapa) rastMapa.invalidateSize(); }, 200);
+      setTimeout(() => { if (rastMapa) rastMapa.invalidateSize(); }, 150);
     }
 
     // Inicia o compartilhamento de posição (modo motorista)
@@ -42831,7 +42832,7 @@ html body .destino-extra-row-rota.f49-dest-row{padding-top:8px;border-top:1px da
     var ok=0;
     for(var i=0;i<arquivos.length;i++){
       try{
-        var b64=await comprimirImagem(arquivos[i],1280,0.8);
+        var b64=await comprimirImagem(arquivos[i],1280,0.75);
         var chave='rota_'+rota.id+'_'+Date.now()+'_'+i+'_'+Math.random().toString(36).slice(2,7);
         var salvo=false;try{salvo=await guardarFotoIndexedDB(chave,b64)}catch(e){}
         var refF=salvo?'idb:'+chave:b64;rota.fotos.push(refF);ok++;
@@ -48167,7 +48168,7 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
     var v={width:{ideal:1280},height:{ideal:720}};if(id)v.deviceId={exact:id};else v.facingMode={ideal:'environment'};
     var p=navigator.mediaDevices.getUserMedia({video:v,audio:false}).catch(function(){return navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false})});
     W.__f538CamPre=p;
-    clearTimeout(tPre);tPre=setTimeout(function(){if(W.__f538CamPre===p)soltar()},4000);   // não tocou de verdade: desliga
+      clearTimeout(tPre);tPre=setTimeout(function(){if(W.__f538CamPre===p)soltar()},4000);   // não tocou de verdade: desliga
   },true);
   D.addEventListener('pointercancel',function(){if(W.__f538CamPre&&!D.getElementById('fastCameraAoVivoOverlay'))soltar()},true);   // era rolagem da tela
 })();
