@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b4a3a">
+<title>App da Igreja Batista em Nova Metrópole</title>
+<link rel="icon" href="app-igreja/icons/favicon-32.png">
+<meta http-equiv="refresh" content="0;url=app-igreja/">
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;min-height:100dvh;display:grid;place-items:center;padding:22px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+       background:radial-gradient(120% 90% at 50% -10%,#0f6b50,#0b4a3a 60%,#083a2e);color:#fff}
+  .cx{width:min(100%,420px);text-align:center}
+  .cx img{width:112px;height:112px;border-radius:30px;margin:0 auto 16px;box-shadow:0 20px 50px rgba(0,0,0,.35)}
+  h1{font-size:1.3rem;margin:0 0 6px;line-height:1.3}
+  p{color:rgba(255,255,255,.82);font-size:.9rem;line-height:1.5;margin:0 0 20px}
+  a{display:flex;align-items:center;justify-content:center;min-height:54px;border-radius:15px;text-decoration:none;
+    background:linear-gradient(135deg,#f0c75e,#c9a227);color:#3d2c00;font-weight:850;font-size:1rem}
+  small{display:block;margin-top:14px;color:rgba(255,255,255,.6);font-size:.74rem}
+</style>
+</head>
+<body>
+  <main class="cx">
+    <img src="app-igreja/icons/icon-192.png" alt="IBNM">
+    <h1>Igreja Batista em<br>Nova Metrópole</h1>
+    <p>Abrindo o app da igreja: devocional do dia, agenda, programações, palavra pastoral e ofertas por PIX.</p>
+    <a href="app-igreja/">Abrir o app agora</a>
+    <small>Se não abrir sozinho, toque no botão acima.</small>
+  </main>
+  <script>location.replace('app-igreja/' + location.hash);</script>
+</body>
+</html>
