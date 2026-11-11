@@ -8497,15 +8497,15 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
         </div>
         <div class="fast-route-report-note"><i class="fa-solid fa-circle-info"></i> Este relatório reúne <b>todas as rotas cadastradas</b>, inclusive as lançadas fora de ROTAS DO DIA. As fotos vinculadas são encaminhadas para a mesma fila do Google Drive e, quando já estiverem lá, aparece um link direto para a pasta da rota.</div>
         <div class="fast-route-report-filters f63-rel-filtros">
-          <div class="rf-cliente"><label>Buscar por Cliente:</label><input id="fastRelFiltroCliente" type="text" placeholder="Digite o cliente..." oninput="fastRelatorioRotasRender()" autocomplete="off"></div>
-          <div class="rf-exec"><label>Status da Rota:</label><select id="fastRelFiltroExec" onchange="fastRelatorioRotasRender()"><option value="TODOS">Todos</option><option value="EM ROTA">PENDENTE</option><option value="CONCLUÍDA">CONCLUÍDA</option></select></div>
-          <div class="rf-origem"><label>Buscar por Origem:</label><input id="fastRelFiltroOrigem" type="text" placeholder="Digite a origem..." oninput="fastRelatorioRotasRender()" autocomplete="off"></div>
-          <div class="rf-destino"><label>Buscar por Destino:</label><input id="fastRelFiltroDestino" type="text" placeholder="Digite o destino..." oninput="fastRelatorioRotasRender()" autocomplete="off"></div>
-          <div class="rf-ini"><label>Data Inicial:</label><input id="fastRelFiltroInicio" type="date" onchange="fastRelatorioRotasRender()"></div>
-          <div class="rf-fim"><label>Data Final:</label><input id="fastRelFiltroFim" type="date" onchange="fastRelatorioRotasRender()"></div>
-          <div class="rf-tipo"><label>Tipo de Volume:</label><select id="fastRelFiltroTipo" onchange="fastRelatorioRotasRender()"><option value="TODOS">Todos</option><option value="MERCADORIA">MERCADORIA</option><option value="DOCUMENTO">DOCUMENTO</option></select></div>
-          <div class="rf-modo"><label>Modo:</label><select id="fastRelFiltroModo" onchange="fastRelatorioRotasRender()"><option value="TODOS">Todos</option><option value="coleta">COLETA</option><option value="entrega">ENTREGA</option></select></div>
-          <div class="rf-status"><label>Status de Pagamento:</label><select id="fastRelFiltroStatus" onchange="fastRelatorioRotasRender()"><option value="TODOS">Todos</option><option value="Recebido">Recebido</option><option value="Pendente">Pendente</option></select></div>
+          <div class="rf-cliente"><label>Buscar por Cliente:</label><input id="fastRelFiltroCliente" type="text" placeholder="Digite o cliente..." oninput="fastRelatorioRotasRenderDebounced()" autocomplete="off"></div>
+          <div class="rf-exec"><label>Status da Rota:</label><select id="fastRelFiltroExec" onchange="fastRelatorioRotasRenderDebounced()"><option value="TODOS">Todos</option><option value="EM ROTA">PENDENTE</option><option value="CONCLUÍDA">CONCLUÍDA</option></select></div>
+          <div class="rf-origem"><label>Buscar por Origem:</label><input id="fastRelFiltroOrigem" type="text" placeholder="Digite a origem..." oninput="fastRelatorioRotasRenderDebounced()" autocomplete="off"></div>
+          <div class="rf-destino"><label>Buscar por Destino:</label><input id="fastRelFiltroDestino" type="text" placeholder="Digite o destino..." oninput="fastRelatorioRotasRenderDebounced()" autocomplete="off"></div>
+          <div class="rf-ini"><label>Data Inicial:</label><input id="fastRelFiltroInicio" type="date" onchange="fastRelatorioRotasRenderDebounced()"></div>
+          <div class="rf-fim"><label>Data Final:</label><input id="fastRelFiltroFim" type="date" onchange="fastRelatorioRotasRenderDebounced()"></div>
+          <div class="rf-tipo"><label>Tipo de Volume:</label><select id="fastRelFiltroTipo" onchange="fastRelatorioRotasRenderDebounced()"><option value="TODOS">Todos</option><option value="MERCADORIA">MERCADORIA</option><option value="DOCUMENTO">DOCUMENTO</option></select></div>
+          <div class="rf-modo"><label>Modo:</label><select id="fastRelFiltroModo" onchange="fastRelatorioRotasRenderDebounced()"><option value="TODOS">Todos</option><option value="coleta">COLETA</option><option value="entrega">ENTREGA</option></select></div>
+          <div class="rf-status"><label>Status de Pagamento:</label><select id="fastRelFiltroStatus" onchange="fastRelatorioRotasRenderDebounced()"><option value="TODOS">Todos</option><option value="Recebido">Recebido</option><option value="Pendente">Pendente</option></select></div>
           <button type="button" class="btn-secondary ripple fast-rel-clear" onclick="fastRelatorioRotasLimpar()"><i class="fa-solid fa-broom"></i> Limpar Filtros</button>
         </div>
         <div class="fast-route-report-kpis" id="fastRelKpis"></div>
@@ -8547,22 +8547,22 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
           </div>
           <div class="rd-filter-client">
             <label>Filtrar por Cliente:</label>
-            <input type="text" id="filtroSeqCliente" placeholder="Digite o cliente..." oninput="renderizarSequencia()">
+            <input type="text" id="filtroSeqCliente" placeholder="Digite o cliente..." oninput="renderizarSequenciaDebounced()">
           </div>
           <div class="rd-filter-origin">
             <label>Filtrar por Origem:</label>
-            <input type="text" id="filtroSeqOrigem" placeholder="Digite a origem..." oninput="renderizarSequencia()">
+            <input type="text" id="filtroSeqOrigem" placeholder="Digite a origem..." oninput="renderizarSequenciaDebounced()">
           </div>
           <div class="rd-filter-destination">
             <label>Filtrar por Destino:</label>
-            <input type="text" id="filtroSeqDestino" placeholder="Digite o destino..." oninput="renderizarSequencia()">
+            <input type="text" id="filtroSeqDestino" placeholder="Digite o destino..." oninput="renderizarSequenciaDebounced()">
           </div>
           <div class="rd-filter-driver">
             <label>Filtrar por Motorista:</label>
-            <select id="filtroSeqMotorista" onchange="renderizarSequencia()"><option value="">Todos</option></select>
+            <select id="filtroSeqMotorista" onchange="renderizarSequenciaDebounced()"><option value="">Todos</option></select>
           </div>
         <div class="rd-filter-status" id="fastFiltroSeqStatusWrap"><label>Filtrar por Status:</label><select id="fastFiltroSeqStatus"><option value="">Todos</option><option value="pendentes">Pendentes</option><option value="concluidas">Concluidas</option></select></div>
-        <div class="rd-filter-modo"><label>Modo:</label><select id="filtroSeqModo" onchange="renderizarSequencia()"><option value="">Todos</option><option value="coleta">Coletas</option><option value="entrega">Entregas</option></select></div></div>
+        <div class="rd-filter-modo"><label>Modo:</label><select id="filtroSeqModo" onchange="renderizarSequenciaDebounced()"><option value="">Todos</option><option value="coleta">Coletas</option><option value="entrega">Entregas</option></select></div></div>
       </div>
 
       <!-- (2.3.35) LANÇAMENTO DE ROTA DO DIA — embutido (antes era o modal ADICIONAR ROTAS) -->
@@ -17499,7 +17499,8 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
       };
       setVal('seqOrigem', ultimaRota.origem || '');
       // 2.4.13: reaproveitar a última rota do cliente para acelerar o lançamento.
-      setVal('seqDestino', ultimaRota.destino || '');
+      // 5.4.x: o campo DESTINO vem VAZIO — o motorista digita o novo destino
+      // (ou clica no campo para limpar, como nos outros campos).
       setVal('seqQtdDestino', ultimaRota.qtdMercadorias != null ? ultimaRota.qtdMercadorias : (ultimaRota.qtdVolumes || 1));
       fastSetMoeda('seqValorDestino', ultimaRota.valor != null ? ultimaRota.valor : 0);
       setVal('seqObs', '');   // 5.3.8: ao puxar uma rota já feita, a observação fica vazia
@@ -19946,7 +19947,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
       return txt||'Coleta';
     }
 
-    function renderizarSequencia() {
+function renderizarSequencia() {
       const dataSel = document.getElementById('dpDataSequencia').value;
       const container = document.getElementById('containerSequencia');
       if (!container) {
@@ -20434,7 +20435,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
           if (!stream) {
             var camId = '';
             try { camId = modo === 'environment' ? (localStorage.getItem('f538_cam_traseira') || '') : ''; } catch (e0) {}
-            var v1 = { width: { ideal: 1920 }, height: { ideal: 1080 } };
+            var v1 = { width: { ideal: 1280 }, height: { ideal: 720 } };
             if (camId) v1.deviceId = { exact: camId }; else v1.facingMode = { ideal: modo };
             try {
               stream = await navigator.mediaDevices.getUserMedia({ video: v1, audio: false });
@@ -20510,7 +20511,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
         // real da câmera (videoWidth/videoHeight), não na resolução da tela.
         if (!video.videoWidth) { btnCap.disabled = false; return; }
         var canvas = document.createElement('canvas');
-        var escala = Math.min(1, 1920 / Math.max(video.videoWidth, video.videoHeight));
+        var escala = Math.min(1, 1280 / Math.max(video.videoWidth, video.videoHeight));
         canvas.width = Math.round(video.videoWidth * escala);
         canvas.height = Math.round(video.videoHeight * escala);
         canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
@@ -20737,13 +20738,39 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
           }).catch(() => { errosCount++; processarProximo(i + 1); });
         }
 
-        comprimirImagem(file, 1920, 0.92).then(base64Compact => {
-          fastFotoSubirNuvem(base64Compact, 'rota').then(urlNuvem => {
-            novasRefs.push(urlNuvem);
-            processadas++;
-            mostrarFeedbackFoto(item.id, '⏳ ' + processadas + '/' + totalArquivos + ' foto(s) enviadas à nuvem...', 'sucesso');
+        comprimirImagem(file, 1280, 0.8).then(base64Compact => {
+          // Salva localmente primeiro (rápido) e mostra o feedback imediato.
+          // O upload para a nuvem roda em segundo plano e substitui a referência
+          // quando terminar — a foto já aparece na hora no aparelho.
+          var chaveLocal = item.id + '_' + Date.now() + '_' + i;
+          var refLocal = 'idb:' + chaveLocal;
+          guardarFotoIndexedDB(chaveLocal, base64Compact).then(okLocal => {
+            if (okLocal) {
+              novasRefs.push(refLocal);
+              fastFotoEnfileirarPendente(refLocal);
+              processadas++;
+              mostrarFeedbackFoto(item.id, '⏳ ' + processadas + '/' + totalArquivos + ' foto(s) salvas...', 'sucesso');
+            } else {
+              const tempItem = { fotos: item.fotos.slice(), foto: item.foto };
+              tempItem.fotos.push(base64Compact);
+              const testeSalvo = tentarSalvarStorageCom(tempItem);
+              if (testeSalvo) { novasRefs.push(base64Compact); processadas++; } else { errosCount++; }
+            }
             processarProximo(i + 1);
-          }).catch(() => { fast108FallbackLocal(base64Compact); });
+            // Em segundo plano: tenta subir à nuvem e trocar a ref local pela URL.
+            fastFotoSubirNuvem(base64Compact, 'rota').then(urlNuvem => {
+              try { if (typeof fastFotoSubstituirRef === 'function') fastFotoSubstituirRef(refLocal, urlNuvem); } catch (eUp2) {}
+              try {
+                var vivo = (bancoDados.sequencias[dataSel] || []).find(x => x && String(x.id) === String(item.id));
+                if (vivo && Array.isArray(vivo.fotos)) {
+                  var idx = vivo.fotos.indexOf(refLocal);
+                  if (idx >= 0) vivo.fotos[idx] = urlNuvem;
+                  else vivo.fotos.push(urlNuvem);
+                  if (vivo.foto === refLocal) vivo.foto = urlNuvem;
+                }
+              } catch (eUp) {}
+            }).catch(() => { /* offline: a foto já está local */ });
+          }).catch(() => { errosCount++; processarProximo(i + 1); });
         }).catch(() => { errosCount++; processarProximo(i + 1); });
       }
 
@@ -25616,6 +25643,15 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
     function adicionarDestinoExtraRota(valor = '') {
       const container = document.getElementById('containerDestinosExtrasRota');
       if (!container) return;
+      // 5.4.x: ao adicionar destino extra, somente o valor e a Quantidade repita do anterior.
+      // O nome do novo destino vem zerado.
+      var qtd = '';
+      if (arguments.length === 0) {
+        var anterior = container.lastElementChild;
+        var qtdAnterior = anterior ? anterior.querySelector('.extra-qtd-rota-input') : document.getElementById('seqQtdDestino');
+        qtd = qtdAnterior ? qtdAnterior.value : '';
+      }
+      var qtdParam = arguments.length >= 2 ? arguments[1] : qtd;
       const div = document.createElement('div');
       div.style.display = 'flex';
       div.style.gap = '8px';
@@ -25623,10 +25659,11 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
       div.className = 'destino-extra-row-rota';
       div.innerHTML = `
         <input type="text" placeholder="Destino extra..." value="${valor}" class="destino-extra-rota-input" style="flex:1;" oninput="capitalizar(this); atualizarPreviewAba1();">
+        <input type="number" placeholder="Qtd" value="${qtdParam}" class="extra-qtd-rota-input" step="1" min="0" inputmode="numeric" title="Quantidade" style="width:70px;flex-shrink:0;" onfocus="limparZero(this);" oninput="atualizarPreviewAba1();">
         <button type="button" class="btn-danger" style="padding:10px 12px;flex-shrink:0;" onclick="this.parentElement.remove(); atualizarPreviewAba1();"><i class="fa-solid fa-xmark"></i></button>
       `;
       container.appendChild(div);
-      const input = div.querySelector('input');
+      const input = div.querySelector('input[type="text"]');
       if (input) setTimeout(() => input.focus(), 50);
     }
 
@@ -25709,7 +25746,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
           return;
         }
         const file = fileList[i];
-        comprimirImagem(file, 1920, 0.92).then(base64Compact => {
+        comprimirImagem(file, 1280, 0.8).then(base64Compact => {
           // (r108) NUVEM-FIRST: sobe para o Storage e guarda a URL pública.
           fastFotoSubirNuvem(base64Compact, 'editrota').then(urlNuvem => {
             _editRotaFotos.push(urlNuvem);
@@ -29509,6 +29546,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
     window.renderizarClientesDebounced = debounce(renderizarClientes, 250);
     window.renderizarDebounced = debounce(renderizar, 250);
     window.renderizarSequenciaDebounced = debounce(renderizarSequencia, 250);
+    window.fastRelatorioRotasRenderDebounced = debounce(fastRelatorioRotasRender, 150);
 
     // --- Prevenção de duplicidade de CPF/CNPJ ---
     function docJaCadastrado(doc, tipo, ignorarId, colecao) {
@@ -42024,6 +42062,13 @@ body.fast-home-reveal .tab-content.active{
   .fast-route-report-filters>div:nth-child(4){order:5}
   .fast-route-report-filters>.fast-rel-clear{order:6;width:100%;height:37px}
 }
+/* Fix: botão "Limpar Filtros" — elimina tremor/inversão ao clicar */
+.fast-rel-clear{transform:none!important;-webkit-transform:none!important;transition:none!important;touch-action:manipulation}
+.fast-rel-clear:active{transform:none!important;-webkit-transform:none!important;scale:none!important}
+.fast-rel-clear .ripple-effect{display:none!important}
+.fast-rel-clear.ripple{position:static;overflow:visible}
+html body .f63-rel-filtros>.fast-rel-clear{grid-column:auto!important;order:6!important;width:auto!important;min-width:140px;flex:0 0 auto}
+
 </style>
 <style id="fast-4047-style">
 .f47-bar{display:flex;align-items:center;gap:6px;margin:0 0 10px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding:2px 0 6px;scrollbar-width:thin}
@@ -42786,7 +42831,7 @@ html body .destino-extra-row-rota.f49-dest-row{padding-top:8px;border-top:1px da
     var ok=0;
     for(var i=0;i<arquivos.length;i++){
       try{
-        var b64=await comprimirImagem(arquivos[i],1920,0.92);
+        var b64=await comprimirImagem(arquivos[i],1280,0.8);
         var chave='rota_'+rota.id+'_'+Date.now()+'_'+i+'_'+Math.random().toString(36).slice(2,7);
         var salvo=false;try{salvo=await guardarFotoIndexedDB(chave,b64)}catch(e){}
         var refF=salvo?'idb:'+chave:b64;rota.fotos.push(refF);ok++;
@@ -43053,7 +43098,7 @@ html.f56-travado,html.f56-travado body{overflow:hidden!important;overscroll-beha
     cands.sort(function(a,b){return a.data!==b.data?b.data.localeCompare(a.data):b.id-a.id});
     // completa campos vazios com a rota anterior mais recente que tenha o dado
     var base=Object.assign({},cands[0].o);
-    ['origem','destino','qtdMercadorias','descricao','obs','motorista','pagamento'].forEach(function(f){
+    ['origem','destino','qtdMercadorias','motorista','pagamento'].forEach(function(f){
       if(base[f]==null||base[f]===''){for(var i=1;i<cands.length;i++){var v=cands[i].o[f];if(v!=null&&v!==''){base[f]=v;break}}}
     });
     if(!(Number(base.valor)>0)){for(var j=1;j<cands.length;j++){if(Number(cands[j].o.valor)>0){base.valor=Number(cands[j].o.valor);break}}}
@@ -48119,7 +48164,7 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
     if(!b||apkNativa()||W.__f538CamPre||!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)return;
     if(D.getElementById('fastCameraAoVivoOverlay'))return;
     var id='';try{id=localStorage.getItem('f538_cam_traseira')||''}catch(x){}
-    var v={width:{ideal:1920},height:{ideal:1080}};if(id)v.deviceId={exact:id};else v.facingMode={ideal:'environment'};
+    var v={width:{ideal:1280},height:{ideal:720}};if(id)v.deviceId={exact:id};else v.facingMode={ideal:'environment'};
     var p=navigator.mediaDevices.getUserMedia({video:v,audio:false}).catch(function(){return navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false})});
     W.__f538CamPre=p;
     clearTimeout(tPre);tPre=setTimeout(function(){if(W.__f538CamPre===p)soltar()},4000);   // não tocou de verdade: desliga
