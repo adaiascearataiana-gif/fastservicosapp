@@ -3,7 +3,11 @@
 Aplicativo (site instalável no celular) da **Igreja Batista em Nova Metrópole**.
 Funciona no Android, iPhone e computador, sem precisar baixar na loja.
 
-**Endereço do app (depois de publicado):**
+**Endereço do app já no ar:**
+`https://adaiascearataiana-gif.github.io/fastservicosapp/app-igreja/`
+(atalho: `https://adaiascearataiana-gif.github.io/fastservicosapp/igreja.html`)
+
+Endereço próprio (depois de criar o repositório `igrejaibnm`):
 `https://adaiascearataiana-gif.github.io/igrejaibnm/`
 
 > Já vem com: login por e-mail e Google, cadastro com data de nascimento e endereço,
@@ -123,6 +127,22 @@ Projeto usado: **mmibnm** — `https://whtbzermbyuxicswyvsy.supabase.co`
    - (deixe também a URL antiga `.../fastservicosapp/app-igreja/**` se quiser)
 
 > No projeto atual isso **já está feito**. O login por e-mail funciona sempre, mesmo sem Google.
+
+---
+
+## 7.1 Criar o repositório próprio (opcional, um comando)
+
+O app já está publicado dentro do repositório `fastservicosapp`. Se quiser um
+repositório só dele (`igrejaibnm`), rode **uma vez**:
+
+```bash
+cd ~/fastservicosapp/app-igreja
+bash publicar-novo-repo.sh igrejaibnm
+```
+
+O script copia o app para uma pasta nova, cria o repositório no GitHub,
+envia o código e liga o GitHub Pages. No fim ele mostra o endereço.
+Depois disso, os comandos de atualização passam a ser no repositório novo.
 
 ---
 
