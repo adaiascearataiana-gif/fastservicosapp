@@ -1,6 +1,13 @@
 // Gera o logotipo e os ícones do app da Igreja Batista em Nova Metrópole.
 // Uso: node scripts/icones-igreja.js
-const sharp = require('/tmp/sharpcheck/node_modules/sharp');
+function carregarSharp() {
+  for (const caminho of ['sharp', '/tmp/sharpcheck/node_modules/sharp']) {
+    try { return require(caminho); } catch (e) {}
+  }
+  console.log('Instale o sharp para gerar os ícones:  npm install sharp');
+  process.exit(1);
+}
+const sharp = carregarSharp();
 const fs = require('fs');
 const path = require('path');
 

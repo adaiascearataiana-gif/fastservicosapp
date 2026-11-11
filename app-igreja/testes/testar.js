@@ -2,7 +2,15 @@
    Uso:  node testes/testar.js       (precisa do jsdom instalado) */
 const fs = require('fs');
 const path = require('path');
-const { JSDOM } = require(process.env.JSDOM || '/tmp/jsdomtest/node_modules/jsdom');
+function carregarJsdom() {
+  const tentativas = [process.env.JSDOM, 'jsdom', '/tmp/jsdomtest/node_modules/jsdom'].filter(Boolean);
+  for (const caminho of tentativas) {
+    try { return require(caminho); } catch (e) {}
+  }
+  console.log('Instale o jsdom para rodar os testes:  npm install jsdom');
+  process.exit(1);
+}
+const { JSDOM } = carregarJsdom();
 
 const RAIZ = path.join(__dirname, '..');
 const pasta = (f) => path.join(RAIZ, f);
