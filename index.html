@@ -8414,6 +8414,14 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
               <option value="Pendente">Pendente</option>
             </select>
           </div>
+          <div class="ff-modo">
+            <label>Modo:</label>
+            <select id="filtroModo" onchange="renderizar()">
+              <option value="TODOS">Todos</option>
+              <option value="coleta">COLETA</option>
+              <option value="entrega">ENTREGA</option>
+            </select>
+          </div>
           <div class="ff-status-rota">
             <label>Status da Rota:</label>
             <select id="filtroStatusRota" onchange="renderizar()">
@@ -8496,6 +8504,7 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
           <div class="rf-ini"><label>Data Inicial:</label><input id="fastRelFiltroInicio" type="date" onchange="fastRelatorioRotasRender()"></div>
           <div class="rf-fim"><label>Data Final:</label><input id="fastRelFiltroFim" type="date" onchange="fastRelatorioRotasRender()"></div>
           <div class="rf-tipo"><label>Tipo de Volume:</label><select id="fastRelFiltroTipo" onchange="fastRelatorioRotasRender()"><option value="TODOS">Todos</option><option value="MERCADORIA">MERCADORIA</option><option value="DOCUMENTO">DOCUMENTO</option></select></div>
+          <div class="rf-modo"><label>Modo:</label><select id="fastRelFiltroModo" onchange="fastRelatorioRotasRender()"><option value="TODOS">Todos</option><option value="coleta">COLETA</option><option value="entrega">ENTREGA</option></select></div>
           <div class="rf-status"><label>Status de Pagamento:</label><select id="fastRelFiltroStatus" onchange="fastRelatorioRotasRender()"><option value="TODOS">Todos</option><option value="Recebido">Recebido</option><option value="Pendente">Pendente</option></select></div>
           <button type="button" class="btn-secondary ripple fast-rel-clear" onclick="fastRelatorioRotasLimpar()"><i class="fa-solid fa-broom"></i> Limpar Filtros</button>
         </div>
@@ -8552,7 +8561,8 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
             <label>Filtrar por Motorista:</label>
             <select id="filtroSeqMotorista" onchange="renderizarSequencia()"><option value="">Todos</option></select>
           </div>
-        <div class="rd-filter-status" id="fastFiltroSeqStatusWrap"><label>Filtrar por Status:</label><select id="fastFiltroSeqStatus"><option value="">Todos</option><option value="pendentes">Pendentes</option><option value="concluidas">Concluidas</option></select></div></div>
+        <div class="rd-filter-status" id="fastFiltroSeqStatusWrap"><label>Filtrar por Status:</label><select id="fastFiltroSeqStatus"><option value="">Todos</option><option value="pendentes">Pendentes</option><option value="concluidas">Concluidas</option></select></div>
+        <div class="rd-filter-modo"><label>Modo:</label><select id="filtroSeqModo" onchange="renderizarSequencia()"><option value="">Todos</option><option value="coleta">Coletas</option><option value="entrega">Entregas</option></select></div></div>
       </div>
 
       <!-- (2.3.35) LANÇAMENTO DE ROTA DO DIA — embutido (antes era o modal ADICIONAR ROTAS) -->
@@ -18029,7 +18039,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
     }
 
     function limparFiltrosSeq() {
-      const campos = ['filtroSeqCliente', 'filtroSeqOrigem', 'filtroSeqDestino', 'filtroSeqMotorista', 'filtroSeqVoz'];
+      const campos = ['filtroSeqCliente', 'filtroSeqOrigem', 'filtroSeqDestino', 'filtroSeqMotorista', 'filtroSeqVoz', 'filtroSeqModo'];
       campos.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
       renderizarSequencia();
     }
@@ -18144,7 +18154,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
     function fastClienteEscondido(mapa, cli, nomesNoBanco) {
       const n = destNormalizarNome(cli && cli.nome); if (!n || !(n in mapa)) return false;
       const ts = mapa[n];
-      if (ts > 0) { const u = Date.parse((cli && (cli.updatedAt || cli.criadoEm || cli.createdAt)) || '') || 0; return !(u > ts); }
+      if (ts > 0) { const u = Date.parse((cli && (cli.updatedAt || cli.criadoEm || cli.createdAt || cli.ultimaModificacao)) || '') || 0; return !(u > ts); }
       return !(nomesNoBanco && nomesNoBanco.has(n));   // exclusão antiga sem data: só vale se o cliente não está no banco
     }
     window.fastLapideMapa = fastLapideMapa;
@@ -19835,6 +19845,107 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
       return fastSeqSelecaoPersistente.get(chave);
     }
 
+    /* ============================================================
+       5.4.x — COLETAS AGRUPADAS (rotas do dia, relatório, filtros)
+       Cada lançamento de coleta cria um item/rota por ponto de coleta
+       (tipo='coleta', valor 0) e uma rota do DESTINO FINAL com o valor
+       da coleta (coletaFinal=1). No relatório, as coletas não entram como
+       rotas individuais: entram agrupadas por cliente, com o destino final
+       e os pontos de coleta descritos numa única linha.
+       ============================================================ */
+    function fcNormColeta(v){return String(v||'').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim()}
+    function fcChaveGrupoColetaRota(r){
+      if(r.coletaId||r.coletaid)return 'CID:'+String(r.coletaId||r.coletaid);
+      return 'coleta|'+fcNormColeta(r.cliente)+'|'+String(r.data||'')+'|'+fcNormColeta(r.destinoFinal||r.destinofinal||'');
+    }
+    function fcGruposColetaRotas(lista){
+      var mapa=new Map(),ordenados=[];
+      lista.forEach(function(r){
+        if(!r||String(r.tipo||'').toLowerCase()!=='coleta')return;
+        var k=fcChaveGrupoColetaRota(r);
+        var g=mapa.get(k);
+        if(!g){g={key:k,rotas:[],final:null,pos:lista.indexOf(r)};mapa.set(k,g);ordenados.push(g)}
+        g.rotas.push(r);
+        if(r.coletaFinal===1||r.coletafinal===1)g.final=r;
+      });
+      return {grupos:ordenados,mapa:mapa};
+    }
+    function fcDescGrupoColetaRota(g){
+      var finalRota=g.final;
+      var df=finalRota?String(finalRota.destino||'').trim():String((g.rotas[0].destinoFinal||g.rotas[0].destinofinal)||'').trim();
+      var pontos=g.rotas.filter(function(r){return !(r.coletaFinal===1||r.coletafinal===1)}).map(function(r){return String(r.destino||'').trim()}).filter(Boolean);
+      var txt='';
+      if(df)txt+='Destino final: '+df;
+      if(pontos.length){
+        var pt=pontos.join(', ').replace(/, ([^,]+)$/,' e $1');
+        txt+=(txt?' · ':'')+'Pontos de coleta: '+pt;
+      }
+      return txt||'Coleta';
+    }
+    function fcGrupoLineRota(g){
+      var finalRota=g.final||g.rotas[0];
+      var line=Object.assign({},finalRota);
+      line.destino=fcDescGrupoColetaRota(g);
+      line._grupo=true;
+      // valor: na coleta nova só o destino final tem valor; em dados antigos
+      // cada ponto tinha seu valor — soma para não perder nada no relatório.
+      line.valor=g.rotas.reduce(function(a,r){return a+(Number(r.valor)||0)},0);
+      return line;
+    }
+    function fcTipoItemColeta(item,rotaVinculada){
+      var t=String(item.tipo||'').toLowerCase();
+      if(t)return t;
+      return rotaVinculada?String(rotaVinculada.tipo||'').toLowerCase():'';
+    }
+    function fcColetaFinalItem(item,rotaVinculada){
+      return item&&(item.coletaFinal===1||item.coletafinal===1)||(rotaVinculada&&(rotaVinculada.coletaFinal===1||rotaVinculada.coletafinal===1));
+    }
+    function fcCardColetaHtml(item,rotaVinculada){
+      var tipo=fcTipoItemColeta(item,rotaVinculada);
+      if(tipo!=='coleta')return '';
+      var df=String(item.destinoFinal||item.destinofinal||(rotaVinculada?rotaVinculada.destinoFinal||rotaVinculada.destinofinal:'')||'').trim();
+      if(fcColetaFinalItem(item,rotaVinculada))return '<div class="seq-field fc-coleta-final"><i class="fa-solid fa-flag-checkered"></i> DESTINO FINAL DA COLETA</div>';
+      if(df)return '<div class="seq-field" style="color:var(--text-muted)"><i class="fa-solid fa-bullseye"></i> Destino final: '+escapeHtml(df)+'</div>';
+      return '';
+    }
+    function fcMostraValorLinha(item,rotaVinculada){
+      var tipo=fcTipoItemColeta(item,rotaVinculada);
+      if(tipo==='coleta')return !!fcColetaFinalItem(item,rotaVinculada);
+      return true;
+    }
+    /* agrupamento de ITENS de sequência (relatório consolidado do dia) */
+    function fcGruposColetaItens(lista,dataSel){
+      var mapa=new Map(),ordenados=[],ehGrupo=new Set(),grupoDeItem=new Map();
+      var rotasPorId=new Map((bancoDados.rotas||[]).map(function(r){return [String(r.id),r]}));
+      lista.forEach(function(item){
+        if(!item)return;
+        var tipo=fcTipoItemColeta(item,item.rotaId!=null?rotasPorId.get(String(item.rotaId)):null);
+        if(tipo!=='coleta')return;
+        var rv=item.rotaId!=null?rotasPorId.get(String(item.rotaId)):null;
+        var cid=item.coletaId||item.coletaid||(rv&&(rv.coletaId||rv.coletaid));
+        var k=cid?('CID:'+String(cid)):('coleta|'+fcNormColeta(item.cliente)+'|'+fcNormColeta(item.destinoFinal||item.destinofinal||(rv?rv.destinoFinal||rv.destinofinal:'')||''));
+        var g=mapa.get(k);
+        if(!g){g={key:k,itens:[],final:null,pos:lista.indexOf(item)};mapa.set(k,g);ordenados.push(g)}
+        g.itens.push(item);
+        if(item.coletaFinal===1||item.coletafinal===1||(rv&&(rv.coletaFinal===1||rv.coletafinal===1)))g.final=item;
+        grupoDeItem.set(String(item.id),g);
+        ehGrupo.add(String(item.id));
+      });
+      return {grupos:ordenados,mapa:mapa,ehGrupo:ehGrupo,grupoDeItem:grupoDeItem};
+    }
+    function fcDescGrupoColetaItens(g){
+      var finalItem=g.final;
+      var df=finalItem?String(finalItem.destino||'').trim():String((g.itens[0].destinoFinal||g.itens[0].destinofinal)||'').trim();
+      var pontos=g.itens.filter(function(it){return !(it.coletaFinal===1||it.coletafinal===1)}).map(function(it){return String(it.destino||'').trim()}).filter(Boolean);
+      var txt='';
+      if(df)txt+='Destino final: '+df;
+      if(pontos.length){
+        var pt=pontos.join(', ').replace(/, ([^,]+)$/,' e $1');
+        txt+=(txt?' · ':'')+'Pontos de coleta: '+pt;
+      }
+      return txt||'Coleta';
+    }
+
     function renderizarSequencia() {
       const dataSel = document.getElementById('dpDataSequencia').value;
       const container = document.getElementById('containerSequencia');
@@ -19859,6 +19970,8 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
       const filtroMotorista = (document.getElementById('filtroSeqMotorista') || {}).value || '';
       const filtroCliente = _f538n(document.getElementById('filtroSeqCliente').value);
       const filtroVoz = ((document.getElementById('filtroSeqVoz') || {}).value || '').toLowerCase().trim();
+      // 5.4.x: filtro de modo (coletas / entregas)
+      const filtroModo = (document.getElementById('filtroSeqModo') || {}).value || '';
 
       const listaBruta = (bancoDados.sequencias && bancoDados.sequencias[dataSel]) ? bancoDados.sequencias[dataSel] : [];
       // (3.0.0) A data do cadastro em ROTAS sempre prevalece para itens
@@ -19901,7 +20014,10 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
         const matchCliente = !filtroCliente || (item.cliente && _f538n(item.cliente).includes(filtroCliente));
         const textoRota = [item.cliente,item.origem,item.destino,item.motorista,item.obs,item.descricao].filter(Boolean).join(' ').toLowerCase();
         const matchVoz = !filtroVoz || filtroVoz.split(/\s+/).every(palavra => textoRota.includes(palavra));
-        return matchOrigem && matchDestino && matchMotorista && matchCliente && matchVoz;
+        // 5.4.x: separar coletas de entregas na lista do dia
+        const tipoItem = String(item.tipo || '').toLowerCase();
+        const matchModo = !filtroModo || (filtroModo === 'coleta' ? tipoItem === 'coleta' : tipoItem !== 'coleta');
+        return matchOrigem && matchDestino && matchMotorista && matchCliente && matchVoz && matchModo;
       });
 
       if (listaFiltrada.length === 0) {
@@ -19952,7 +20068,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
               })()}
             </div>
             <div class="seq-body">
-              <div class="seq-valor-linha" title="Quantidade de volumes: ${item.qtdMercadorias != null ? item.qtdMercadorias : 1}x"><i class="fa-solid fa-sack-dollar"></i> <span class="seq-valor-linha-label">Valor</span> <strong class="seq-valor-badge seq-valor-destino">${fmtMoedaBR(item.valor != null ? item.valor : 0)}</strong></div>
+              ${fcMostraValorLinha(item, rotaVinculada) ? `<div class="seq-valor-linha" title="Quantidade de volumes: ${item.qtdMercadorias != null ? item.qtdMercadorias : 1}x"><i class="fa-solid fa-sack-dollar"></i> <span class="seq-valor-linha-label">Valor</span> <strong class="seq-valor-badge seq-valor-destino">${fmtMoedaBR(item.valor != null ? item.valor : 0)}</strong></div>` : ''}
               ${(item.confirmadoQR || item.chegadaEm || item.agrupado || item.grupoFotosId) ? `<div class="seq-header-top">
                 ${item.confirmadoQR ? '<span class="badge-status" style="background:rgba(99,102,241,0.15);color:#6366f1;border:1px solid rgba(99,102,241,0.4);font-weight:800;"><i class="fa-solid fa-qrcode"></i> QR Confirmado</span>' : ''}
                 ${item.chegadaEm ? `<span class="badge-status" style="background:rgba(5,150,105,0.15);color:#059669;border:1px solid rgba(5,150,105,0.4);font-weight:800;"><i class="fa-solid fa-location-dot"></i> CHEGOU ${String(item.chegadaEm).slice(11,16)}</span>` : ''}
@@ -19969,6 +20085,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
                   <span class="seq-info-value">${item.origem || 'N/A'}</span>
                 </div>
               </div>
+              ${fcCardColetaHtml(item, rotaVinculada)}
               ${item.motorista ? `<div class="seq-field">🧑‍✈️ MOTORISTA: ${item.motorista}</div>` : ''}
               ${item.chegadaEm ? `<div class="seq-field" style="color:#059669;"><i class="fa-solid fa-flag-checkered"></i> Chegada registrada em ${formatarDataHoraBR(item.chegadaEm)}</div>` : ''}
               <div class="seq-field" style="font-size: 13px; color: var(--text-muted);">📅 DATA: ${formatarDataBR(dataSel)}</div>
@@ -20051,7 +20168,20 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
       // Defensivo: garantir que listaExibida é um array válido
       if (!Array.isArray(listaExibida)) listaExibida = [];
 
-      const total = listaExibida.length;
+      // 5.4.x: coletas entram agrupadas (uma linha por cliente)
+      var resGrupos = fcGruposColetaItens(listaExibida, dataSel);
+      var descriptors = [];
+      listaExibida.forEach(function(item, idx){
+        if (resGrupos.ehGrupo.has(String(item.id))) {
+          var g = resGrupos.grupoDeItem.get(String(item.id));
+          if (!descriptors.some(function(d){ return d.g === g; })) descriptors.push({ g: g, pos: idx });
+        } else {
+          descriptors.push({ it: item, pos: idx });
+        }
+      });
+      descriptors.sort(function(a, b){ return a.pos - b.pos; });
+
+      const total = descriptors.length;
       let concluidas = 0;
       let pendentes = 0;
       // r138: somas de valor por status
@@ -20063,11 +20193,17 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
       if (tbody) tbody.innerHTML = '';
       const linhasRelatorio = [];
 
-      listaExibida.forEach((item, idx) => {
+      descriptors.forEach((desc, idx) => {
+        // linha agrupada: representa a coleta pelo item do destino final (ou o primeiro)
+        var item = desc.g ? (desc.g.final || desc.g.itens[0]) : desc.it;
+        var agrupado = !!desc.g;
         const rotaVinculada = item.rotaId ? (bancoDados.rotas || []).find(r => String(r.id) === String(item.rotaId)) : null;
         const estaConcluido = (rotaVinculada && rotaVinculada.statusExecucao === 'CONCLUÍDA') || item.status === 'CONCLUÍDA' || item.status === 'Concluído';
 
-        const valItem = parseFloat(item.valor) || 0;
+        // soma de valor da linha: na coleta, soma os itens (coletas 0 + destino final)
+        var valItem = 0;
+        if (agrupado) { desc.g.itens.forEach(function(it2){ valItem += parseFloat(it2.valor) || 0; }); }
+        else valItem = parseFloat(item.valor) || 0;
         valorTotal += valItem;
         if (estaConcluido) { concluidas++; valorConcluidas += valItem; }
         else { pendentes++; valorPendentes += valItem; }
@@ -20076,16 +20212,18 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
           // (r139/2.3.24) Mapear o índice REAL na fila completa (a listaExibida pode estar filtrada).
           const listaCompleta = (bancoDados.sequencias && bancoDados.sequencias[dataSel]) || [];
           const idxOriginal = listaCompleta.findIndex(i => String(i.id) === String(item.id));
-          const podeSubir = idxOriginal > 0;
-          const podeDescer = idxOriginal >= 0 && idxOriginal < listaCompleta.length - 1;
+          // linha agrupada não tem botões de ordem (movimentar só um item separaria a coleta)
+          const podeSubir = !agrupado && idxOriginal > 0;
+          const podeDescer = !agrupado && idxOriginal >= 0 && idxOriginal < listaCompleta.length - 1;
+          const destinoTxt = agrupado ? fcDescGrupoColetaItens(desc.g) : (item.destino || '-');
           linhasRelatorio.push(`
             <tr>
-              <td class="rd-ord-cell no-print"><strong>${idx + 1}º</strong><div class="rd-ord-btns">
+              <td class="rd-ord-cell no-print"><strong>${idx + 1}º</strong>${agrupado ? ' <span class="fc-badge">COLETA</span>' : ''}<div class="rd-ord-btns">
                 <button class="rd-ord-btn rd-btn-up" ${podeSubir ? '' : 'disabled'} title="Subir na fila (trocar com ${idx}º${idx > 0 ? ' de cima' : ''})" onclick="moverSeq('${dataSel}', ${idxOriginal}, -1)"><i class="fa-solid fa-arrow-up"></i></button>
                 <button class="rd-ord-btn rd-btn-down" ${podeDescer ? '' : 'disabled'} title="Descer na fila (trocar com o de baixo)" onclick="moverSeq('${dataSel}', ${idxOriginal}, 1)"><i class="fa-solid fa-arrow-down"></i></button>
                 ${fastSinalizadorRotaHtml(item, rotaVinculada, dataSel)}
               </div></td>
-              <td>${formatarDestinoCelula((item.destino || '-').toUpperCase())}</td>
+              <td>${formatarDestinoCelula(String(destinoTxt).toUpperCase())}</td>
               <td>${item.cliente || '-'}</td>
               <td>${item.origem || '-'}</td>
               <td>${formatarDataBR(dataSel)}</td>
@@ -25840,6 +25978,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
       document.getElementById('filtroTipoVolume').value = 'TODOS';
       document.getElementById('filtroStatus').value = 'TODOS';
       document.getElementById('filtroStatusRota').value = 'TODOS';
+      const elModo = document.getElementById('filtroModo'); if (elModo) elModo.value = 'TODOS';
       ['filtroRotaOrigem','filtroRotaDestino'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
       renderizar();
     }
@@ -28723,40 +28862,68 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
       const orig=_rn((document.getElementById('fastRelFiltroOrigem')||{}).value);
       const dest=_rn((document.getElementById('fastRelFiltroDestino')||{}).value);
       const tipo=(document.getElementById('fastRelFiltroTipo')||{}).value||'TODOS';
+      // 5.4.x: filtro de modo (coletas / entregas)
+      const modo=(document.getElementById('fastRelFiltroModo')||{}).value||'TODOS';
       const rotas=(bancoDados.rotas||[]).filter(r=>{
         const nome=String(r.cliente||'').toLocaleLowerCase('pt-BR');
         const exec=String(r.statusExecucao||'EM ROTA');
-        return (!cliente||nome.includes(cliente))&&(!ini||String(r.data||'')>=ini)&&(!fim||String(r.data||'')<=fim)&&(st==='TODOS'||String(r.status||'Pendente')===st)&&(ex==='TODOS'||exec===ex)&&(!orig||_rn(r.origem).includes(orig))&&(!dest||_rn(r.destino).includes(dest))&&(tipo==='TODOS'||String(r.tipoVolume||'MERCADORIA')===tipo)&&(typeof fast47LetraOk!=='function'||fast47LetraOk(r.cliente));
+        const éColeta=String(r.tipo||'').toLowerCase()==='coleta';
+        const matchModo=modo==='TODOS'||(modo==='coleta'?éColeta:!éColeta);
+        return (!cliente||nome.includes(cliente))&&(!ini||String(r.data||'')>=ini)&&(!fim||String(r.data||'')<=fim)&&(st==='TODOS'||String(r.status||'Pendente')===st)&&(ex==='TODOS'||exec===ex)&&(!orig||_rn(r.origem).includes(orig))&&(!dest||_rn(r.destino).includes(dest))&&(tipo==='TODOS'||String(r.tipoVolume||'MERCADORIA')===tipo)&&(typeof fast47LetraOk!=='function'||fast47LetraOk(r.cliente))&&matchModo;
       }).slice().sort((a,b)=>String(b.data||'').localeCompare(String(a.data||''))||Number(b.id||0)-Number(a.id||0));
+      // 5.4.x: coletas entram agrupadas (uma linha por cliente) — não como rotas individuais
+      var gruposRes=fcGruposColetaRotas(rotas);
+      var linhas=[];
+      rotas.forEach(function(r,idx){
+        var k=fcChaveGrupoColetaRota(r);
+        if(gruposRes.mapa.has(k)){
+          if(!linhas.some(function(l){return l._k===k}))linhas.push({_k:k,_pos:idx,_r:fcGrupoLineRota(gruposRes.mapa.get(k))});
+        }else{
+          linhas.push({_k:null,_pos:idx,_r:r});
+        }
+      });
+      linhas.sort(function(a,b){return a._pos-b._pos});
+      var linhasRota=linhas.map(function(l){return l._r});
       const mapa=await fastRelatorioDriveMapa();
       let total=0,recebido=0,pendente=0,fotos=0,enviadas=0,aguardando=0;
-      // KPIs continuam somando TODAS as rotas filtradas (não só a página atual)
-      rotas.forEach(r=>{ total++; const v=Number(r.valor)||0; if(r.status==='Recebido')recebido+=v; else pendente+=v; const info=fastRelatorioDriveInfo(r,mapa); fotos+=info.total; enviadas+=info.enviados; aguardando+=info.pendentes; });
-      const totalPaginas = Math.max(1, Math.ceil(rotas.length / fastRelPorPagina));
+      // KPIs continuam somando TODAS as linhas filtradas (não só a página atual)
+      linhasRota.forEach(r=>{ total++; const v=Number(r.valor)||0; if(r.status==='Recebido')recebido+=v; else pendente+=v; const info=fastRelatorioDriveInfo(r,mapa); fotos+=info.total; enviadas+=info.enviados; aguardando+=info.pendentes; });
+      const totalPaginas = Math.max(1, Math.ceil(linhasRota.length / fastRelPorPagina));
       if (fastRelPagAtual > totalPaginas) fastRelPagAtual = totalPaginas;
       const inicioPag = (fastRelPagAtual-1)*fastRelPorPagina;
-      const rotasPagina = rotas.slice(inicioPag, inicioPag+fastRelPorPagina);
+      const rotasPagina = linhasRota.slice(inicioPag, inicioPag+fastRelPorPagina);
       const rows=rotasPagina.map(r=>{
         const v=Number(r.valor)||0;
         const info=fastRelatorioDriveInfo(r,mapa);
         const link=info.link ? '<a class="fast-drive-route-link" href="'+fastRelatorioEscape(info.link)+'" target="_blank" rel="noopener"><i class="fa-brands fa-google-drive"></i> Abrir fotos</a>' : (info.pendentes?'<span class="fast-drive-pending"><i class="fa-solid fa-cloud-arrow-up"></i> '+info.pendentes+' pendente(s)</span>':'<span class="fast-drive-none">—</span>');
         const fs=info.total?('<b>'+info.total+'</b>'):'0';
         const exec=String(r.statusExecucao||'EM ROTA');
-        return '<tr data-rota-id="'+fastIdSeguro(r.id)+'"><td>'+fastRelatorioEscape(formatarDataBR(r.data))+'</td><td><b>'+fastRelatorioEscape(r.cliente||'-')+'</b></td><td>'+fastRelatorioEscape(r.origem||'-')+'</td><td>'+fastRelatorioEscape(r.destino||'-')+'</td><td>'+(window.fastFormaPgtoHtml?window.fastFormaPgtoHtml(r.pagamento):fastRelatorioEscape(r.pagamento||'-'))+'<div class="fast-rel-status">'+fastRelatorioEscape(r.status||'Pendente')+'</div></td><td class="f63-img">'+fast63CelulaImagem(r)+'</td><td><b>'+fastRelatorioEscape(fmtMoedaBR(v))+'</b></td><td><span class="fast-rel-exec '+(exec==='CONCLUÍDA'?'done':'route')+'">'+fastRelatorioEscape(exec)+'</span></td><td>'+fs+'</td><td>'+link+'</td></tr>';
+        return '<tr class="'+(r._grupo?'fc-rel-grupo':'')+'" data-rota-id="'+fastIdSeguro(r.id)+'"><td>'+fastRelatorioEscape(formatarDataBR(r.data))+'</td><td><b>'+fastRelatorioEscape(r.cliente||'-')+'</b></td><td>'+fastRelatorioEscape(r.origem||'-')+'</td><td>'+fastRelatorioEscape(r.destino||'-')+'</td><td>'+(window.fastFormaPgtoHtml?window.fastFormaPgtoHtml(r.pagamento):fastRelatorioEscape(r.pagamento||'-'))+'<div class="fast-rel-status">'+fastRelatorioEscape(r.status||'Pendente')+'</div></td><td class="f63-img">'+fast63CelulaImagem(r)+'</td><td><b>'+fastRelatorioEscape(fmtMoedaBR(v))+'</b></td><td><span class="fast-rel-exec '+(exec==='CONCLUÍDA'?'done':'route')+'">'+fastRelatorioEscape(exec)+'</span></td><td>'+fs+'</td><td>'+link+'</td></tr>';
       }).join('');
       body.innerHTML=rows||'<tr><td colspan="10" class="fast-rel-empty">Nenhuma rota encontrada com os filtros atuais.</td></tr>';
       if(kpis)kpis.innerHTML='<div><span>Rotas</span><b>'+total+'</b></div><div><span>Recebido</span><b>'+fmtMoedaBR(recebido)+'</b></div><div><span>Pendente</span><b>'+fmtMoedaBR(pendente)+'</b></div><div><span>Fotos</span><b>'+fotos+'</b></div><div><span>No Drive</span><b>'+enviadas+'</b></div><div><span>Aguardando</span><b>'+aguardando+'</b></div>';
       const pagInfo=document.getElementById('fastRelPagInfo');
-      if(pagInfo) pagInfo.textContent = 'Página '+fastRelPagAtual+' de '+totalPaginas+' ('+rotas.length+' rota(s))';
+      if(pagInfo) pagInfo.textContent = 'Página '+fastRelPagAtual+' de '+totalPaginas+' ('+linhasRota.length+' rota(s))';
       const btnAnt=document.getElementById('fastRelBtnAnterior'), btnProx=document.getElementById('fastRelBtnProxima');
       if(btnAnt) btnAnt.disabled = fastRelPagAtual<=1;
       if(btnProx){ btnProx.disabled = fastRelPagAtual>=totalPaginas; btnProx.setAttribute('onclick','fastRelPaginaProxima('+totalPaginas+')'); }
     };
-    window.fastRelatorioRotasLimpar=function(){['fastRelFiltroTipo'].forEach(id=>{const x=document.getElementById(id);if(x)x.value='TODOS'});['fastRelFiltroCliente','fastRelFiltroInicio','fastRelFiltroFim','fastRelFiltroOrigem','fastRelFiltroDestino'].forEach(id=>{const x=document.getElementById(id);if(x)x.value=''});const s=document.getElementById('fastRelFiltroStatus');if(s)s.value='TODOS';const e=document.getElementById('fastRelFiltroExec');if(e)e.value='TODOS';fastRelatorioRotasRender()};
+    window.fastRelatorioRotasLimpar=function(){['fastRelFiltroTipo','fastRelFiltroModo'].forEach(id=>{const x=document.getElementById(id);if(x)x.value='TODOS'});['fastRelFiltroCliente','fastRelFiltroInicio','fastRelFiltroFim','fastRelFiltroOrigem','fastRelFiltroDestino'].forEach(id=>{const x=document.getElementById(id);if(x)x.value=''});const s=document.getElementById('fastRelFiltroStatus');if(s)s.value='TODOS';const e=document.getElementById('fastRelFiltroExec');if(e)e.value='TODOS';fastRelatorioRotasRender()};
     window.fastRelatorioRotasCSV=async function(){
       const cliente=((document.getElementById('fastRelFiltroCliente')||{}).value||'').trim().toLocaleLowerCase('pt-BR'),ini=(document.getElementById('fastRelFiltroInicio')||{}).value||'',fim=(document.getElementById('fastRelFiltroFim')||{}).value||'';
       const mapa=await fastRelatorioDriveMapa(),linhas=[['Data','Cliente','Origem','Destino','Pagamento','Status pagamento','Valor','Execução','Fotos','Google Drive']];
-      (bancoDados.rotas||[]).filter(r=>{const n=String(r.cliente||'').toLocaleLowerCase('pt-BR');return(!cliente||n.includes(cliente))&&(!ini||String(r.data||'')>=ini)&&(!fim||String(r.data||'')<=fim)}).forEach(r=>{const i=fastRelatorioDriveInfo(r,mapa);linhas.push([formatarDataBR(r.data),r.cliente||'',r.origem||'',r.destino||'',r.pagamento||'',r.status||'',String(Number(r.valor)||0).replace('.',','),r.statusExecucao||'EM ROTA',String(i.total),i.link||''])});
+      // 5.4.x: coletas exportadas agrupadas (uma linha por cliente)
+      var listaCSV=(bancoDados.rotas||[]).filter(r=>{const n=String(r.cliente||'').toLocaleLowerCase('pt-BR');return(!cliente||n.includes(cliente))&&(!ini||String(r.data||'')>=ini)&&(!fim||String(r.data||'')<=fim)}).slice().sort((a,b)=>String(b.data||'').localeCompare(String(a.data||''))||Number(b.id||0)-Number(a.id||0));
+      var gruposCSV=fcGruposColetaRotas(listaCSV);
+      var linhasCSV=[];
+      listaCSV.forEach(function(r,idx){
+        var k=fcChaveGrupoColetaRota(r);
+        if(gruposCSV.mapa.has(k)){
+          if(!linhasCSV.some(function(l){return l._k===k}))linhasCSV.push({_k:k,_pos:idx,_r:fcGrupoLineRota(gruposCSV.mapa.get(k))});
+        }else linhasCSV.push({_k:null,_pos:idx,_r:r});
+      });
+      linhasCSV.sort(function(a,b){return a._pos-b._pos});
+      linhasCSV.forEach(function(l){var r=l._r;const i=fastRelatorioDriveInfo(r,mapa);linhas.push([formatarDataBR(r.data),r.cliente||'',r.origem||'',r.destino||'',r.pagamento||'',r.status||'',String(Number(r.valor)||0).replace('.',','),r.statusExecucao||'EM ROTA',String(i.total),i.link||''])});
       const csv='\ufeff'+linhas.map(row=>row.map(v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"').join(';')).join('\n'); const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download='relatorio-geral-rotas.csv';document.body.appendChild(a);a.click();a.remove();
     };
     window.fastRelatorioRotasSincronizarFotos=async function(){
@@ -28772,6 +28939,8 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
       const tipoVolFiltro = document.getElementById('filtroTipoVolume').value;
       const stFiltro = document.getElementById('filtroStatus').value;
       const stRotaFiltro = document.getElementById('filtroStatusRota').value;
+      // 5.4.x: filtro de modo (coletas / entregas)
+      const modoFiltro = (document.getElementById('filtroModo') || {}).value || 'TODOS';
       // 5.1.6: busca por origem e destino (sem diferença de maiúsculas, acentos e pontuação)
       const _f63n = v => String(v || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
       const origemFiltro = _f63n((document.getElementById('filtroRotaOrigem') || {}).value);
@@ -28789,7 +28958,10 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
           (stRotaFiltro === 'CONCLUÍDA' && statusExec === 'CONCLUÍDA');
         const matchOrigem = !origemFiltro || _f63n(r.origem).includes(origemFiltro);
         const matchDestino = !destinoFiltro || _f63n(r.destino).includes(destinoFiltro);
-        return matchNome && matchDtInicio && matchDtFim && matchTipoVol && matchStatus && matchStatusRota && matchOrigem && matchDestino;
+        // 5.4.x: separar coletas de entregas
+        const éColetaRota = String(r.tipo || '').toLowerCase() === 'coleta';
+        const matchModo = modoFiltro === 'TODOS' || (modoFiltro === 'coleta' ? éColetaRota : !éColetaRota);
+        return matchNome && matchDtInicio && matchDtFim && matchTipoVol && matchStatus && matchStatusRota && matchOrigem && matchDestino && matchModo;
       });
 
       const tbodyR = document.getElementById('tabelaRotasBody');
@@ -42943,8 +43115,10 @@ html body .card.fast-filtros-rotas .grid-form{display:grid}
 html body .card.fast-filtros-rotas .ff-cliente{order:1}html body .card.fast-filtros-rotas .ff-status-rota{order:2}
 html body .card.fast-filtros-rotas .ff-origem{order:3}html body .card.fast-filtros-rotas .ff-destino{order:4}
 html body .card.fast-filtros-rotas .ff-data-ini{order:5}html body .card.fast-filtros-rotas .ff-data-fim{order:6}
-html body .card.fast-filtros-rotas .ff-tipo{order:7}html body .card.fast-filtros-rotas .ff-status-pag{order:8}
-html body .card.fast-filtros-rotas .grid-form>.ff-acoes{order:9}
+html body .card.fast-filtros-rotas .ff-tipo{order:7}html body .card.fast-filtros-rotas .ff-status-pag{order:8}html body .card.fast-filtros-rotas .ff-modo{order:9}
+html body .card.fast-filtros-rotas .ff-modo label,html body .rd-filter-modo label{display:block;font-weight:800;font-size:12px;color:var(--text-muted,#64748b);margin-bottom:3px}
+html body .rd-filter-modo{margin-top:2px}
+html body .card.fast-filtros-rotas .grid-form>.ff-acoes{order:10}
 .f47-pp{cursor:pointer}.f47-pp .f47-pp-sel{border:0!important;background:transparent!important;color:inherit!important;font:inherit!important;font-weight:800!important;padding:0 2px!important;margin:0!important;min-height:0!important;height:auto!important;width:auto!important;box-shadow:none!important;-webkit-appearance:menulist!important;appearance:auto!important}
 td.f63-img{text-align:center;white-space:nowrap!important;overflow:hidden;max-width:132px}
 td.f63-img .f63-ok,td.f63-img .f63-sem{display:block;font-size:14px;line-height:1.1}
@@ -43651,6 +43825,8 @@ html body #modalEditarRota .modal-content{margin:0 auto!important;top:auto!impor
   '.fc-switch.on .fc-track{background:#f59e0b}.fc-switch.on .fc-knob{left:23px}'+
   '.fc-badge{display:inline-block;background:#f59e0b;color:#fff;font-weight:800;font-size:10px;padding:1px 7px;border-radius:999px;margin-left:4px;vertical-align:middle}'+
   'tr.fc-row-coleta td{background:rgba(245,158,11,.08)!important}'+
+  'tr.fc-rel-grupo td{background:rgba(245,158,11,.06)!important}'+
+  '.fc-coleta-final{color:#b45309!important;font-weight:800}'+
   'th.fc-col,td.fc-col{text-align:center;white-space:normal;word-break:break-word;min-width:90px}';
   (document.head||document.documentElement).appendChild(css);
 
@@ -43665,7 +43841,18 @@ html body #modalEditarRota .modal-content{margin:0 auto!important;top:auto!impor
 
   /* ====== 1) FORMULARIO DE LANCAMENTO (Rotas do Dia) ====== */
   function destinoBlocoLanc(){var rows=$all('#formModalSeq .span-4');for(var i=0;i<rows.length;i++){if(rows[i].querySelector('.seq-destino-row'))return rows[i]}return null}
-  function campoDestinoFinalLanc(){var id='coletaDFLancWrap';var ex=document.getElementById(id);if(ex)return ex;var div=document.createElement('div');div.className='span-4';div.id=id;div.style.display='none';div.innerHTML='<label>Destino final da coleta:</label><input type="text" id="coletaDestinoFinalLanc" placeholder="Para onde a coleta vai" oninput="if(window.capitalizar)capitalizar(this);">';return div}
+  function campoDestinoFinalLanc(){
+    var id='coletaDFLancWrap';var ex=document.getElementById(id);
+    if(ex){ /* já existe: garante o campo de valor ao lado do destino final */
+      var vw=ex.querySelector('.fc-df-valor-wrap');
+      if(!vw){var dfi=ex.querySelector('#coletaDestinoFinalLanc');
+        if(dfi){var wrap=document.createElement('div');wrap.className='seq-valor-wrap fc-df-valor-wrap';wrap.style.cssText='flex:0 0 auto;margin-left:6px';
+          wrap.innerHTML='<input type="text" id="coletaDestinoFinalValor" class="seq-valor-input" inputmode="numeric" placeholder="R$ 0,00" title="Valor da coleta (vai só para o destino final)" onfocus="fastMoedaFocus(this)" oninput="fastMascaraMoeda(this); atualizarPreviewAba2();" onblur="fastMoedaBlurVazio(this)"><button type="button" class="fast-step-btn ripple" title="Diminuir R$ 5,00" onclick="fastValorStep(\'coletaDestinoFinalValor\',-5)"><i class="fa-solid fa-minus"></i></button><button type="button" class="fast-step-btn ripple" title="Aumentar R$ 5,00" onclick="fastValorStep(\'coletaDestinoFinalValor\',5)"><i class="fa-solid fa-plus"></i></button>';
+          dfi.parentNode.insertBefore(wrap,dfi.nextSibling)}}
+      return ex}
+    var div=document.createElement('div');div.className='span-4';div.id=id;div.style.display='none';
+    div.innerHTML='<label>Destino final da coleta:</label><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><input type="text" id="coletaDestinoFinalLanc" placeholder="Para onde a coleta vai" oninput="if(window.capitalizar)capitalizar(this); atualizarPreviewAba2();"><div class="seq-valor-wrap fc-df-valor-wrap" style="flex:0 0 auto"><input type="text" id="coletaDestinoFinalValor" class="seq-valor-input" inputmode="numeric" placeholder="R$ 0,00" title="Valor da coleta (vai só para o destino final)" onfocus="fastMoedaFocus(this)" oninput="fastMascaraMoeda(this); atualizarPreviewAba2();" onblur="fastMoedaBlurVazio(this)"><button type="button" class="fast-step-btn ripple" title="Diminuir R$ 5,00" onclick="fastValorStep(\'coletaDestinoFinalValor\',-5)"><i class="fa-solid fa-minus"></i></button><button type="button" class="fast-step-btn ripple" title="Aumentar R$ 5,00" onclick="fastValorStep(\'coletaDestinoFinalValor\',5)"><i class="fa-solid fa-plus"></i></button></div></div>';
+    return div}
   var _snap=null;
   function snapshot(){if(_snap)return;var bloco=destinoBlocoLanc();var extras=document.getElementById('destinosExtrasSection');if(!bloco)return;_snap={bp:bloco.parentNode,bn:bloco.nextSibling,ep:extras?extras.parentNode:null,en:extras?extras.nextSibling:null}}
   function restaurarOrdem(){if(!_snap)return;var bloco=destinoBlocoLanc();var extras=document.getElementById('destinosExtrasSection');try{if(bloco&&_snap.bp)_snap.bp.insertBefore(bloco,_snap.bn);if(extras&&_snap.ep)_snap.ep.insertBefore(extras,_snap.en)}catch(e){}}
@@ -43683,12 +43870,15 @@ html body #modalEditarRota .modal-content{margin:0 auto!important;top:auto!impor
       try{if(extras)bloco.parentNode.insertBefore(extras,bloco.nextSibling);}catch(e){}
       try{if(!dfWrap.parentNode)(extras||bloco).parentNode.insertBefore(dfWrap,(extras||bloco).nextSibling);}catch(e){}
       dfWrap.style.display='';
-      if(destLabel)destLabel.textContent='Coleta / Qtd / Valor:';
+      // 5.4.x: o valor sai das linhas de coleta — entra só no destino final
+      $all('#formModalSeq .seq-destino-row .seq-valor-wrap').forEach(function(w){w.style.display='none'});
+      if(destLabel)destLabel.textContent='Coleta / Qtd:';
       if(destInput)destInput.placeholder='Coleta 1';
       if(addBtn)addBtn.innerHTML='<i class="fa-solid fa-plus"></i> Adicionar Coleta';
       renumerarColetas();
     } else {
       dfWrap.style.display='none';
+      $all('#formModalSeq .seq-destino-row .seq-valor-wrap').forEach(function(w){w.style.display=''});
       if(destLabel)destLabel.textContent='Destino / Qtd / Valor:';
       if(destInput)destInput.placeholder='Destino';
       if(addBtn)addBtn.innerHTML='<i class="fa-solid fa-plus"></i> Adicionar Destino';
@@ -43705,20 +43895,123 @@ html body #modalEditarRota .modal-content{margin:0 auto!important;top:auto!impor
     if(cont){try{new MutationObserver(function(){renumerarColetas()}).observe(cont,{childList:true})}catch(e){}}
   }
 
+  /* 5.4.x — linhas de coleta não levam valor: cada nova linha esconde o campo
+     de valor (o valor entra só no destino final). Fora do modo coleta, tudo
+     volta como estava. */
+  var _origAddDestino=window.adicionarDestinoExtra;
+  window.adicionarDestinoExtra=function(){
+    var row=null;
+    if(typeof _origAddDestino==='function'){try{row=_origAddDestino.apply(this,arguments)}catch(e){row=null}}
+    try{
+      if(ligado()&&row){
+        var w=row.querySelector('.seq-valor-wrap');
+        if(w)w.style.display='none';
+      }
+    }catch(e){}
+    return row;
+  };
+
+  /* 5.4.x — pré-visualização no modo coleta mostra o destino final e o valor
+     que está no campo do destino final (não o valor das linhas de coleta). */
+  var _origPrev2=window.atualizarPreviewAba2;
+  window.atualizarPreviewAba2=function(){
+    if(typeof _origPrev2==='function'){try{_origPrev2.apply(this,arguments)}catch(e){}}
+    try{
+      if(ligado()){
+        var df=(document.getElementById('coletaDestinoFinalLanc')||{}).value||'';
+        var vf=(document.getElementById('coletaDestinoFinalValor')||{}).value||'';
+        var tr=document.getElementById('prev2-trajeto');
+        if(tr&&df)tr.textContent='Destino final: '+df;
+        var pv=document.getElementById('prev2-valor');
+        if(pv)pv.textContent=fmtMoedaBR(fastParseMoeda(vf)||0);
+      }
+    }catch(e){}
+  };
+
+  /* 5.4.x — ao puxar a última rota do cliente no modo coleta, o valor não
+     vai para as linhas de coleta (campo escondido): vai para o campo do
+     destino final. */
+  var _origPreencher=window.preencherDadosClienteSeq;
+  window.preencherDadosClienteSeq=function(nomeCliente){
+    var r;
+    if(typeof _origPreencher==='function'){try{r=_origPreencher.apply(this,arguments)}catch(e){}}
+    try{
+      if(ligado()){
+        var u=(typeof window.fastUltimaRotaCompleta==='function')?window.fastUltimaRotaCompleta(nomeCliente):null;
+        var v=u?(Number(u.valor)||0):0;
+        try{fastSetMoeda('coletaDestinoFinalValor',v)}catch(e){}
+        var sv=document.getElementById('seqValorDestino');if(sv)sv.value='';
+        var sv2=document.getElementById('seqValor');if(sv2)sv2.value='';
+        try{atualizarPreviewAba2()}catch(e){}
+      }
+    }catch(e){}
+    return r;
+  };
+
   /* tag ao salvar: marca os itens novos como coleta (campos extras, sincronizam normal) */
   function hookSalvar(){
     var orig=window.salvarItemSeq;if(typeof orig!=='function'||orig.__fcHook)return;
     var novo=function(e){
       var coleta=ligado();
       var data=(document.getElementById('dpDataSequencia')||{}).value;
+      // lê ANTES do orig: o reset do formulário limpa os campos
       var df=(document.getElementById('coletaDestinoFinalLanc')||{}).value||'';
+      var vf=fastParseMoeda((document.getElementById('coletaDestinoFinalValor')||{}).value);
       var l0=(window.bancoDados&&bancoDados.sequencias&&bancoDados.sequencias[data])||null;
       var antes=l0?l0.length:0;
       var r=orig.apply(this,arguments);
       if(coleta){setTimeout(function(){try{
+        var coletaId='C'+Date.now().toString(36)+Math.floor(Math.random()*1000).toString(36);
         var l=(window.bancoDados&&bancoDados.sequencias&&bancoDados.sequencias[data])||[];
-        for(var i=antes;i<l.length;i++){if(l[i]){l[i].tipo='coleta';if(df)l[i].destinoFinal=df;var rv=l[i].rotaId?(bancoDados.rotas||[]).find(function(x){return String(x.id)===String(l[i].rotaId)}):null;if(rv){rv.tipo='coleta';if(df)rv.destinoFinal=df}}}
+        var ref=null,qtdTotal=0;
+        for(var i=antes;i<l.length;i++){
+          var it=l[i];if(!it)continue;
+          it.tipo='coleta';
+          if(df)it.destinoFinal=df;
+          it.coletaId=coletaId;
+          it.coletaFinal=0;
+          // 5.4.x: o valor sai das linhas de coleta — vai só para o destino final
+          it.valor=0;
+          if(!ref)ref=it;
+          qtdTotal+=Number(it.qtdMercadorias)||0;
+          var rv=it.rotaId?(bancoDados.rotas||[]).find(function(x){return String(x.id)===String(it.rotaId)}):null;
+          if(rv){rv.tipo='coleta';if(df)rv.destinoFinal=df;rv.coletaId=coletaId;rv.coletaFinal=0;rv.valor=0;}
+        }
+        // 5.4.x: o destino final também vira rota (e item de Rotas do Dia),
+        // com o valor da coleta — o motorista pode finalizar essa rota.
+        if(ref&&df&&df.trim()&&typeof window.sincronizarComCadastroRotas==='function'){
+          var dfT=df.trim();
+          var finalId=window.sincronizarComCadastroRotas(ref.cliente||'',ref.origem||'',dfT,ref.obs||'',data,null,vf||0,qtdTotal||1);
+          var fr=(bancoDados.rotas||[]).find(function(x){return String(x.id)===String(finalId)});
+          if(fr){
+            fr.tipo='coleta';fr.destinoFinal=dfT;fr.coletaId=coletaId;fr.coletaFinal=1;
+            fr.valor=vf||0;fr.descricao=ref.obs||'';
+            if(ref.motorista)fr.motorista=ref.motorista;
+            if(ref.motoristaId!=null)fr.motoristaId=ref.motoristaId;
+          }
+          if(bancoDados.sequencias&&bancoDados.sequencias[data]){
+            bancoDados.sequencias[data].push({
+              id:Date.now()+7000+Math.floor(Math.random()*1000),
+              rotaId:finalId,
+              cliente:ref.cliente||'',
+              origem:ref.origem||'',
+              destino:dfT,
+              obs:ref.obs||'',
+              motorista:ref.motorista||'',
+              motoristaId:ref.motoristaId!=null?ref.motoristaId:null,
+              extras:Array.isArray(ref.extras)?ref.extras.slice():[],
+              valor:vf||0,
+              qtdMercadorias:qtdTotal||1,
+              status:'EM ROTA',
+              tipo:'coleta',
+              destinoFinal:dfT,
+              coletaId:coletaId,
+              coletaFinal:1
+            });
+          }
+        }
         if(window.fastSalvarSemBloquear)window.fastSalvarSemBloquear(60);
+        if(window.fastAgendarRenderizacaoCompleta)window.fastAgendarRenderizacaoCompleta(true);
         setTimeout(fcSyncColunas,1500);
       }catch(err){console.warn('coleta tag',err)}},150)}
       return r;
@@ -43749,7 +44042,9 @@ html body #modalEditarRota .modal-content{margin:0 auto!important;top:auto!impor
       tr.appendChild(c1);tr.appendChild(c2);
     });
   }
-  function applyTables(){try{augment(document.getElementById('rotasTable'))}catch(e){}try{augment(document.querySelector('#fastRouteReportCard table'))}catch(e){}}
+  /* 5.4.x: o relatório agrupa as coletas (a descrição vem na coluna Destino),
+     então as colunas extras de coleta só fazem sentido na tabela de rotas. */
+  function applyTables(){try{augment(document.getElementById('rotasTable'))}catch(e){}}
   function montarSwitchRotas(){
     var cont=document.querySelector('.table-rotas-container');
     if(cont&&!document.getElementById('fcBarRotas')){
@@ -43770,17 +44065,35 @@ html body #modalEditarRota .modal-content{margin:0 auto!important;top:auto!impor
   var fcColsOff=false;
   function fcHeaders(){return {apikey:FC_KEY,Authorization:'Bearer '+FC_KEY,'Content-Type':'application/json','Prefer':'return=minimal'}}
   function fcPatch(tabela,id,corpo){return fetch(FC_URL+'/'+tabela+'?id=eq.'+encodeURIComponent(id),{method:'PATCH',headers:fcHeaders(),body:JSON.stringify(corpo)}).then(function(r){if(r.status===400){fcColsOff=true;}return r;}).catch(function(){})}
+  /* 5.4.x: coletaid/coletafinal são colunas novas — se ainda não existirem na
+     nuvem, o PATCH falha mas não bloqueia o sync do tipo/destinofinal. */
+  var fcColsNovasOff=false;
+  function fcPatchNovas(tabela,id,corpo){return fetch(FC_URL+'/'+tabela+'?id=eq.'+encodeURIComponent(id),{method:'PATCH',headers:fcHeaders(),body:JSON.stringify(corpo)}).then(function(r){if(r.status===400){fcColsNovasOff=true;}return r;}).catch(function(){})}
   function fcSyncColunas(){
     if(fcColsOff)return;
     try{
-      ((window.bancoDados&&bancoDados.rotas)||[]).forEach(function(r){if(r&&String(r.tipo).toLowerCase()==='coleta'&&r.id!=null){fcPatch('rotas',r.id,{tipo:'coleta',destinofinal:r.destinoFinal||r.destinofinal||''});}});
+      ((window.bancoDados&&bancoDados.rotas)||[]).forEach(function(r){
+        if(r&&String(r.tipo).toLowerCase()==='coleta'&&r.id!=null){
+          fcPatch('rotas',r.id,{tipo:'coleta',destinofinal:r.destinoFinal||r.destinofinal||''});
+          if(!fcColsNovasOff&&(r.coletaId||r.coletaFinal===1)){
+            fcPatchNovas('rotas',r.id,{coletaid:r.coletaId||'',coletafinal:r.coletaFinal===1?1:0});
+          }
+        }
+      });
       var seq=(window.bancoDados&&bancoDados.sequencias)||{};
-      Object.keys(seq).forEach(function(d){(seq[d]||[]).forEach(function(it){if(it&&String(it.tipo).toLowerCase()==='coleta'&&it.id!=null){fcPatch('sequencias_itens',it.id,{tipo:'coleta',destinofinal:it.destinoFinal||it.destinofinal||''});}});});
+      Object.keys(seq).forEach(function(d){(seq[d]||[]).forEach(function(it){
+        if(it&&String(it.tipo).toLowerCase()==='coleta'&&it.id!=null){
+          fcPatch('sequencias_itens',it.id,{tipo:'coleta',destinofinal:it.destinoFinal||it.destinofinal||''});
+          if(!fcColsNovasOff&&(it.coletaId||it.coletaFinal===1)){
+            fcPatchNovas('sequencias_itens',it.id,{coletaid:it.coletaId||'',coletafinal:it.coletaFinal===1?1:0});
+          }
+        }
+      })});
     }catch(e){}
   }
-  function boot(){try{montarSwitchLanc()}catch(e){}try{montarSwitchRotas()}catch(e){}try{hookSalvar()}catch(e){}applyTables();observeBody('#rotasTable');observeBody('#fastRouteReportCard table');syncSwitches();setTimeout(fcSyncColunas,3000);}
+  function boot(){try{montarSwitchLanc()}catch(e){}try{montarSwitchRotas()}catch(e){}try{hookSalvar()}catch(e){}applyTables();observeBody('#rotasTable');syncSwitches();setTimeout(fcSyncColunas,3000);}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){setTimeout(boot,400)},{once:true});else setTimeout(boot,400);
-  setInterval(function(){try{montarSwitchLanc()}catch(e){}try{montarSwitchRotas()}catch(e){}try{hookSalvar()}catch(e){}observeBody('#rotasTable');observeBody('#fastRouteReportCard table');},2500);
+  setInterval(function(){try{montarSwitchLanc()}catch(e){}try{montarSwitchRotas()}catch(e){}try{hookSalvar()}catch(e){}observeBody('#rotasTable');},2500);
 })();
 </script>
 <!-- 5.1.9: módulo de tempo real duplicado removido (o canal essencial está em fast-519-sync-rapido) -->
