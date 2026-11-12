@@ -10855,7 +10855,7 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
     let syncEmAndamento = false;
     let syncTimer = null;
     let ultimoSyncTimestamp = 0;
-    const SYNC_INTERVALO_MS = 5 * 60 * 1000; // 5.1.6: era 10s — baixava o banco inteiro 6x por minuto e estourou o limite de tráfego do Supabase
+    const SYNC_INTERVALO_MS = 30 * 1000; // 30s — rotas do navegador aparecem no app em poucos segundos
     let mudancasPendentes = false;
     let fastMutationRevision = 0;
     // Flag para suprimir sincronização (download da nuvem) durante restauração de backup.
@@ -14591,7 +14591,14 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
           if (tsEdicaoRem > tsEdicaoLoc && jaExistente.data !== r.data) {
             r = { ...r, data: jaExistente.data, updatedAt: jaExistente.updatedAt || '' };
           }
-          if (tsRem > tsLoc && jaExistente.statusExecucao !== r.statusExecucao) {
+          // (FIX 2026-11-12) BUG: rotas concluídas voltavam para EM ROTA.
+          // Causa: nuvem tinha cópia EM ROTA com statusUpdatedAt mais recente e vencia
+          // a cópia CONCLUÍDA local no merge. Solução: CONCLUÍDA nunca perde para EM ROTA.
+          const locConcl = /CONCLU/i.test(String(r.statusExecucao || ''));
+          const remConcl = /CONCLU/i.test(String(jaExistente.statusExecucao || ''));
+          if (locConcl && !remConcl) {
+            rotasMap.set(idStr, r); // local CONCLUÍDA vence nuvem EM ROTA
+          } else if (tsRem > tsLoc && jaExistente.statusExecucao !== r.statusExecucao) {
             // Nuvem mais recente E status diferente -> adotar status da nuvem no objeto local
             const mantido = { ...r, statusExecucao: jaExistente.statusExecucao, statusUpdatedAt: jaExistente.statusUpdatedAt || '' };
             if (jaExistente.chegadaEm) mantido.chegadaEm = jaExistente.chegadaEm;
@@ -15139,8 +15146,22 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
               // descartado se a nuvem tivesse cópia CONCLUÍDA antiga. Agora: a cópia com o
               // comando MAIS RECENTE vence; empate (ambos sem carimbo) mantém a local
               // (a nuvem entra primeiro no arrNorm, a local entra depois e vence em >=).
-              const melhor = ts >= curTs;
-              if (melhor) melhorPorRotaId.set(key, item);
+              // (FIX 2026-11-12) BUG: rotas concluídas voltavam para EM ROTA.
+              // Causa: nuvem tinha cópia EM ROTA com statusUpdatedAt mais recente
+              // (criado pelo app no navegador) e vencia a cópia CONCLUÍDA local.
+              // Solução: CONCLUÍDA com dataConclusao SEMPRE vence EM ROTA independente do carimbo.
+              const curConcl = /CONCLU/i.test(String(cur.status || '')) || /CONCLU/i.test(String(cur.dataConclusao || ''));
+              const itemConcl = /CONCLU/i.test(String(item.status || '')) || /CONCLU/i.test(String(item.dataConclusao || ''));
+              if (itemConcl && !curConcl) {
+                // item é CONCLUÍDA, cur é EM ROTA -> item vence sem importar carimbo
+                melhorPorRotaId.set(key, item);
+              } else if (curConcl && !itemConcl) {
+                // cur é CONCLUÍDA, item é EM ROTA -> cur vence (não troca)
+              } else {
+                // ambos CONCLUÍDA ou ambos EM ROTA -> usa carimbo
+                const melhor = ts >= curTs;
+                if (melhor) melhorPorRotaId.set(key, item);
+              }
             });
             const arrFinal = [];
             const vistosFinal = new Set();
