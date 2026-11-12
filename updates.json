@@ -4,6 +4,11 @@
   "updates": [
     {
       "app": "fast",
+      "type": "correcao",
+      "text": "5.3.8 (12/11/2026): rotas concluídas não voltam mais para EM ROTA — um aparelho que ainda tinha a cópia antiga não a reenvia mais, e a mescla adota a versão mais nova da nuvem; Limpar filtros sem a tela pular; campo Destino/Origem seleciona o texto ao tocar; lista de Lugares mais leve ao digitar/apagar."
+    },
+    {
+      "app": "fast",
       "type": "melhorado",
       "text": "5.3.8 (10/11/2026): em ROTAS E SERVIÇOS e na janela Editar Rota, ORIGEM e DESTINO (e os destinos extras) puxam de LUGARES com prévia de local, endereço e bairro; lugar novo pede LOCAL, ENDEREÇO, BAIRRO e TELEFONE e entra em LUGARES ao salvar — igual ao ROTAS."
     },

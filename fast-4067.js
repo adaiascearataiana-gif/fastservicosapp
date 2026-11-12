@@ -303,6 +303,9 @@
       // (ex.: rota concluída no ROTAS voltava para EM ROTA; rota nova "sumia").
       var bq = baseRapida();
       if (bq && bq[k] && bq[k][id] === h) return false;
+      // 5.3.8: linha que veio da nuvem (existe lá), que este aparelho nunca enviou e que
+      // ainda não entrou na base daqui: a diferença é cópia velha, não edição — não reenvia
+      if (bq && bq[k] && bq[k][id] === undefined && N[k][id] !== undefined && !(ENVIADO[k] && ENVIADO[k][id])) return false;
       return true;
     }
     var b = lerBase();
@@ -568,6 +571,8 @@
       });
       return y;
     }
+    // 5.3.8: hora mais recente de alteração de um registro (o maior entre os carimbos)
+    function tsReg(o) { if (!o) return 0; var m = 0; ['updatedAt', 'statusUpdatedAt', 'dataConclusao', 'updated_at'].forEach(function (f) { var t = quando(o[f]); if (t > m) m = t; }); return m; }
     function ajustar(lista, baseMap, locArr, nuvArr, hashFn, combinar, sigMap, campos) {
       if (!Array.isArray(lista)) return;
       var lm = mapaPorId(locArr), nm = mapaPorId(nuvArr);
@@ -578,6 +583,10 @@
         var k = String(x.id), bh = baseMap[k], l = lm[k], c = nm[k];
         // 5.1.5: apagado em outro aparelho (estava sincronizado, não mexi aqui e sumiu da nuvem) → apaga aqui também
         if (bh && l && !c && nuvemOk) { var hl0; try { hl0 = hashFn(l); } catch (e) { hl0 = null; } if (hl0 === bh) { lista.splice(i, 1); i--; } continue; }
+        // 5.3.8: registro que este aparelho ainda não tinha sincronizado (sem base): se a
+        // versão da nuvem é mais nova, ela vale (antes ficava a cópia velha daqui e ela
+        // ainda era reenviada, desfazendo a conclusão feita em outro aparelho)
+        if (!bh && l && c) { var hl1, hc1; try { hl1 = hashFn(l); hc1 = hashFn(c); } catch (e) { continue; } if (hl1 !== hc1 && tsReg(c) > tsReg(l)) lista[i] = combinar(x, c); continue; }
         if (!bh || !l || !c) continue;
         var hl, hc;
         try { hl = hashFn(l); hc = hashFn(c); } catch (e) { continue; }
@@ -619,7 +628,12 @@
             if (locIt) arr[i] = juntarCampos(x, locIt, nuvIt[k].it, base.sf[k], CAMPOS_S);
             continue;
           }
-          if (!bh || !hl[k] || !hc[k] || hl[k] !== bh || hc[k] === bh) continue;
+          var semBaseNuvemNova = false;
+          if (!bh && hl[k] && hc[k] && hl[k] !== hc[k] && nuvIt[k]) {
+            var locX = null; Object.keys(local.sequencias || {}).forEach(function (dd) { (local.sequencias[dd] || []).forEach(function (z) { if (z && String(Math.floor(Number(z.id))) === k) locX = z; }); });
+            semBaseNuvemNova = tsReg(nuvIt[k].it) > tsReg(locX || x);
+          }
+          if (!semBaseNuvemNova && (!bh || !hl[k] || !hc[k] || hl[k] !== bh || hc[k] === bh)) continue;
           var c = nuvIt[k]; if (!c) continue;
           // adota a nuvem, mas NUNCA troca um valor/motorista/horário preenchido por vazio
           // (a nuvem pode não ter essas colunas e devolvê-las zeradas)

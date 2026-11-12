@@ -8414,14 +8414,6 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
               <option value="Pendente">Pendente</option>
             </select>
           </div>
-          <div class="ff-modo">
-            <label>Modo:</label>
-            <select id="filtroModo" onchange="renderizar()">
-              <option value="TODOS">Todos</option>
-              <option value="coleta">COLETA</option>
-              <option value="entrega">ENTREGA</option>
-            </select>
-          </div>
           <div class="ff-status-rota">
             <label>Status da Rota:</label>
             <select id="filtroStatusRota" onchange="renderizar()">
@@ -8497,15 +8489,14 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
         </div>
         <div class="fast-route-report-note"><i class="fa-solid fa-circle-info"></i> Este relatório reúne <b>todas as rotas cadastradas</b>, inclusive as lançadas fora de ROTAS DO DIA. As fotos vinculadas são encaminhadas para a mesma fila do Google Drive e, quando já estiverem lá, aparece um link direto para a pasta da rota.</div>
         <div class="fast-route-report-filters f63-rel-filtros">
-          <div class="rf-cliente"><label>Buscar por Cliente:</label><input id="fastRelFiltroCliente" type="text" placeholder="Digite o cliente..." oninput="fastRelatorioRotasRenderDebounced()" autocomplete="off"></div>
-          <div class="rf-exec"><label>Status da Rota:</label><select id="fastRelFiltroExec" onchange="fastRelatorioRotasRenderDebounced()"><option value="TODOS">Todos</option><option value="EM ROTA">PENDENTE</option><option value="CONCLUÍDA">CONCLUÍDA</option></select></div>
-          <div class="rf-origem"><label>Buscar por Origem:</label><input id="fastRelFiltroOrigem" type="text" placeholder="Digite a origem..." oninput="fastRelatorioRotasRenderDebounced()" autocomplete="off"></div>
-          <div class="rf-destino"><label>Buscar por Destino:</label><input id="fastRelFiltroDestino" type="text" placeholder="Digite o destino..." oninput="fastRelatorioRotasRenderDebounced()" autocomplete="off"></div>
-          <div class="rf-ini"><label>Data Inicial:</label><input id="fastRelFiltroInicio" type="date" onchange="fastRelatorioRotasRenderDebounced()"></div>
-          <div class="rf-fim"><label>Data Final:</label><input id="fastRelFiltroFim" type="date" onchange="fastRelatorioRotasRenderDebounced()"></div>
-          <div class="rf-tipo"><label>Tipo de Volume:</label><select id="fastRelFiltroTipo" onchange="fastRelatorioRotasRenderDebounced()"><option value="TODOS">Todos</option><option value="MERCADORIA">MERCADORIA</option><option value="DOCUMENTO">DOCUMENTO</option></select></div>
-          <div class="rf-modo"><label>Modo:</label><select id="fastRelFiltroModo" onchange="fastRelatorioRotasRenderDebounced()"><option value="TODOS">Todos</option><option value="coleta">COLETA</option><option value="entrega">ENTREGA</option></select></div>
-          <div class="rf-status"><label>Status de Pagamento:</label><select id="fastRelFiltroStatus" onchange="fastRelatorioRotasRenderDebounced()"><option value="TODOS">Todos</option><option value="Recebido">Recebido</option><option value="Pendente">Pendente</option></select></div>
+          <div class="rf-cliente"><label>Buscar por Cliente:</label><input id="fastRelFiltroCliente" type="text" placeholder="Digite o cliente..." oninput="fastRelatorioRotasRender()" autocomplete="off"></div>
+          <div class="rf-exec"><label>Status da Rota:</label><select id="fastRelFiltroExec" onchange="fastRelatorioRotasRender()"><option value="TODOS">Todos</option><option value="EM ROTA">PENDENTE</option><option value="CONCLUÍDA">CONCLUÍDA</option></select></div>
+          <div class="rf-origem"><label>Buscar por Origem:</label><input id="fastRelFiltroOrigem" type="text" placeholder="Digite a origem..." oninput="fastRelatorioRotasRender()" autocomplete="off"></div>
+          <div class="rf-destino"><label>Buscar por Destino:</label><input id="fastRelFiltroDestino" type="text" placeholder="Digite o destino..." oninput="fastRelatorioRotasRender()" autocomplete="off"></div>
+          <div class="rf-ini"><label>Data Inicial:</label><input id="fastRelFiltroInicio" type="date" onchange="fastRelatorioRotasRender()"></div>
+          <div class="rf-fim"><label>Data Final:</label><input id="fastRelFiltroFim" type="date" onchange="fastRelatorioRotasRender()"></div>
+          <div class="rf-tipo"><label>Tipo de Volume:</label><select id="fastRelFiltroTipo" onchange="fastRelatorioRotasRender()"><option value="TODOS">Todos</option><option value="MERCADORIA">MERCADORIA</option><option value="DOCUMENTO">DOCUMENTO</option></select></div>
+          <div class="rf-status"><label>Status de Pagamento:</label><select id="fastRelFiltroStatus" onchange="fastRelatorioRotasRender()"><option value="TODOS">Todos</option><option value="Recebido">Recebido</option><option value="Pendente">Pendente</option></select></div>
           <button type="button" class="btn-secondary ripple fast-rel-clear" onclick="fastRelatorioRotasLimpar()"><i class="fa-solid fa-broom"></i> Limpar Filtros</button>
         </div>
         <div class="fast-route-report-kpis" id="fastRelKpis"></div>
@@ -8547,22 +8538,21 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
           </div>
           <div class="rd-filter-client">
             <label>Filtrar por Cliente:</label>
-            <input type="text" id="filtroSeqCliente" placeholder="Digite o cliente..." oninput="renderizarSequenciaDebounced()">
+            <input type="text" id="filtroSeqCliente" placeholder="Digite o cliente..." oninput="renderizarSequencia()">
           </div>
           <div class="rd-filter-origin">
             <label>Filtrar por Origem:</label>
-            <input type="text" id="filtroSeqOrigem" placeholder="Digite a origem..." oninput="renderizarSequenciaDebounced()">
+            <input type="text" id="filtroSeqOrigem" placeholder="Digite a origem..." oninput="renderizarSequencia()">
           </div>
           <div class="rd-filter-destination">
             <label>Filtrar por Destino:</label>
-            <input type="text" id="filtroSeqDestino" placeholder="Digite o destino..." oninput="renderizarSequenciaDebounced()">
+            <input type="text" id="filtroSeqDestino" placeholder="Digite o destino..." oninput="renderizarSequencia()">
           </div>
           <div class="rd-filter-driver">
             <label>Filtrar por Motorista:</label>
-            <select id="filtroSeqMotorista" onchange="renderizarSequenciaDebounced()"><option value="">Todos</option></select>
+            <select id="filtroSeqMotorista" onchange="renderizarSequencia()"><option value="">Todos</option></select>
           </div>
-        <div class="rd-filter-status" id="fastFiltroSeqStatusWrap"><label>Filtrar por Status:</label><select id="fastFiltroSeqStatus"><option value="">Todos</option><option value="pendentes">Pendentes</option><option value="concluidas">Concluidas</option></select></div>
-        <div class="rd-filter-modo"><label>Modo:</label><select id="filtroSeqModo" onchange="renderizarSequenciaDebounced()"><option value="">Todos</option><option value="coleta">Coletas</option><option value="entrega">Entregas</option></select></div></div>
+        <div class="rd-filter-status" id="fastFiltroSeqStatusWrap"><label>Filtrar por Status:</label><select id="fastFiltroSeqStatus"><option value="">Todos</option><option value="pendentes">Pendentes</option><option value="concluidas">Concluidas</option></select></div></div>
       </div>
 
       <!-- (2.3.35) LANÇAMENTO DE ROTA DO DIA — embutido (antes era o modal ADICIONAR ROTAS) -->
@@ -10855,7 +10845,7 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
     let syncEmAndamento = false;
     let syncTimer = null;
     let ultimoSyncTimestamp = 0;
-    const SYNC_INTERVALO_MS = 30 * 1000; // 30s — rotas do navegador aparecem no app em poucos segundos
+    const SYNC_INTERVALO_MS = 5 * 60 * 1000; // 5.1.6: era 10s — baixava o banco inteiro 6x por minuto e estourou o limite de tráfego do Supabase
     let mudancasPendentes = false;
     let fastMutationRevision = 0;
     // Flag para suprimir sincronização (download da nuvem) durante restauração de backup.
@@ -14591,14 +14581,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
           if (tsEdicaoRem > tsEdicaoLoc && jaExistente.data !== r.data) {
             r = { ...r, data: jaExistente.data, updatedAt: jaExistente.updatedAt || '' };
           }
-          // (FIX 2026-11-12) BUG: rotas concluídas voltavam para EM ROTA.
-          // Causa: nuvem tinha cópia EM ROTA com statusUpdatedAt mais recente e vencia
-          // a cópia CONCLUÍDA local no merge. Solução: CONCLUÍDA nunca perde para EM ROTA.
-          const locConcl = /CONCLU/i.test(String(r.statusExecucao || ''));
-          const remConcl = /CONCLU/i.test(String(jaExistente.statusExecucao || ''));
-          if (locConcl && !remConcl) {
-            rotasMap.set(idStr, r); // local CONCLUÍDA vence nuvem EM ROTA
-          } else if (tsRem > tsLoc && jaExistente.statusExecucao !== r.statusExecucao) {
+          if (tsRem > tsLoc && jaExistente.statusExecucao !== r.statusExecucao) {
             // Nuvem mais recente E status diferente -> adotar status da nuvem no objeto local
             const mantido = { ...r, statusExecucao: jaExistente.statusExecucao, statusUpdatedAt: jaExistente.statusUpdatedAt || '' };
             if (jaExistente.chegadaEm) mantido.chegadaEm = jaExistente.chegadaEm;
@@ -15146,22 +15129,8 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
               // descartado se a nuvem tivesse cópia CONCLUÍDA antiga. Agora: a cópia com o
               // comando MAIS RECENTE vence; empate (ambos sem carimbo) mantém a local
               // (a nuvem entra primeiro no arrNorm, a local entra depois e vence em >=).
-              // (FIX 2026-11-12) BUG: rotas concluídas voltavam para EM ROTA.
-              // Causa: nuvem tinha cópia EM ROTA com statusUpdatedAt mais recente
-              // (criado pelo app no navegador) e vencia a cópia CONCLUÍDA local.
-              // Solução: CONCLUÍDA com dataConclusao SEMPRE vence EM ROTA independente do carimbo.
-              const curConcl = /CONCLU/i.test(String(cur.status || '')) || /CONCLU/i.test(String(cur.dataConclusao || ''));
-              const itemConcl = /CONCLU/i.test(String(item.status || '')) || /CONCLU/i.test(String(item.dataConclusao || ''));
-              if (itemConcl && !curConcl) {
-                // item é CONCLUÍDA, cur é EM ROTA -> item vence sem importar carimbo
-                melhorPorRotaId.set(key, item);
-              } else if (curConcl && !itemConcl) {
-                // cur é CONCLUÍDA, item é EM ROTA -> cur vence (não troca)
-              } else {
-                // ambos CONCLUÍDA ou ambos EM ROTA -> usa carimbo
-                const melhor = ts >= curTs;
-                if (melhor) melhorPorRotaId.set(key, item);
-              }
+              const melhor = ts >= curTs;
+              if (melhor) melhorPorRotaId.set(key, item);
             });
             const arrFinal = [];
             const vistosFinal = new Set();
@@ -15224,7 +15193,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
         // volta pendentes antigos em datas passadas. Com a nova regra, eles migram
         // para hoje (ou ficam na origem, se já concluídos), mantendo ROTAS DO DIA
         // sempre com: pendentes do dia anterior + rotas do próprio dia.
-        try { if (typeof verificarEVirarDia === 'function') verificarEVirarDia(); } catch(eVD) { console.warn('virarDia pós-sync:', eVD); }
+        try { window.__f538JaSincronizou = true; if (typeof verificarEVirarDia === 'function') verificarEVirarDia(); } catch(eVD) { console.warn('virarDia pós-sync:', eVD); }
         // 3. Salvar merge no localStorage (cache local)
         localStorage.setItem('banco_gestao_local', JSON.stringify(bancoDados));
         // 3a. Dividir destinos compostos apos merge (r11)
@@ -16247,7 +16216,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
       window.rastMapa = rastMapaMotorista;
       // Adiciona os destinos das rotas ativas como marcadores
       rastAdicionarDestinosNoMapa();
-      setTimeout(() => { if (rastMapaMotorista) rastMapaMotorista.invalidateSize(); }, 150);
+      setTimeout(() => { if (rastMapaMotorista) rastMapaMotorista.invalidateSize(); }, 200);
     }
 
     // Adiciona marcadores dos destinos das rotas ativas no mapa (modo motorista)
@@ -17112,7 +17081,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
           console.warn('fastDebounceSincronizar catch:', e);
           mudancasPendentes = true;
         }
-      }, 150);
+      }, 200);
     }
 
     // 5.3.8 (fase 1): localStorage cheio não perde mais dados — a versão nova fica no
@@ -17201,7 +17170,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
       _fastSaveUiTimer = setTimeout(function(){
         _fastSaveUiTimer = null;
         salvarStorage();
-      }, Number.isFinite(Number(atraso)) ? Math.min(Number(atraso), 25) : 25);
+      }, Number.isFinite(Number(atraso)) ? Number(atraso) : 35);
       return true;
     }
     function fastAgendarRenderizacaoCompleta(incluirSequencia, atraso) {
@@ -17212,7 +17181,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
         if (incluirSequencia) {
           try { renderizarSequencia(); } catch(e) { console.warn('renderizarSequencia em segundo plano:', e); }
         }
-      }, 0);
+      }, Number.isFinite(Number(atraso)) ? Number(atraso) : 0);
     }
 
     function trocarAba(evt, abaId) {
@@ -17268,7 +17237,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
             try { rastMapa.invalidateSize(); } catch(e) {}
             rastBuscarLocalizacoes();
           }
-        }, 150);
+        }, 200);
         // Reforço: invalidar novamente após o layout mobile estabilizar
         setTimeout(function() {
           if (rastMapa) { try { rastMapa.invalidateSize(); } catch(e) {} }
@@ -17520,11 +17489,9 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
       };
       setVal('seqOrigem', ultimaRota.origem || '');
       // 2.4.13: reaproveitar a última rota do cliente para acelerar o lançamento.
-      // 5.4.x: o campo DESTINO vem VAZIO — o motorista digita o novo destino
-      // (ou clica no campo para limpar, como nos outros campos).
+      setVal('seqDestino', ultimaRota.destino || '');
       setVal('seqQtdDestino', ultimaRota.qtdMercadorias != null ? ultimaRota.qtdMercadorias : (ultimaRota.qtdVolumes || 1));
       fastSetMoeda('seqValorDestino', ultimaRota.valor != null ? ultimaRota.valor : 0);
-      setVal('seqDestino', '');   // 5.4.x: destino VAZIO ao puxar última rota — motorista digita o novo
       setVal('seqObs', '');   // 5.3.8: ao puxar uma rota já feita, a observação fica vazia
       fastSetMoeda('seqValor', ultimaRota.valor != null ? ultimaRota.valor : 0);
       setVal('seqQtdVolumes', ultimaRota.qtdMercadorias != null ? ultimaRota.qtdMercadorias : (ultimaRota.qtdVolumes || 0));
@@ -17644,7 +17611,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
         if (el) el.value = valor == null ? '' : valor;
       };
       setVal('txtOrigem', ultimaRota.origem || '');
-      setVal('txtDestino', '');   // 5.4.x: destino VAZIO ao puxar última rota — motorista digita o novo
+      setVal('txtDestino', ultimaRota.destino || '');
       setVal('cbTipoVolume', ultimaRota.tipoVolume || 'MERCADORIA');
       setVal('txtQtdMercadorias', ultimaRota.qtdMercadorias != null ? ultimaRota.qtdMercadorias : 0);
       setVal('cbPagamento', ultimaRota.pagamento || 'PIX');
@@ -17796,6 +17763,10 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
         }
         const agoraIso = new Date().toISOString();
         const topo = [];
+        // 5.3.8: só puxa pendências DEPOIS de conversar com a nuvem nesta abertura. Antes,
+        // ao abrir o ROTAS, uma rota concluída em outro aparelho ainda parecia pendente
+        // (a conclusão não tinha chegado) e era puxada para hoje.
+        if (window.__f538JaSincronizou)
         Object.keys(bancoDados.sequencias)
           .filter(function(d){ return /^\d{4}-\d{2}-\d{2}$/.test(d) && d < hoje && d >= desde; })
           .sort()
@@ -18062,7 +18033,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
     }
 
     function limparFiltrosSeq() {
-      const campos = ['filtroSeqCliente', 'filtroSeqOrigem', 'filtroSeqDestino', 'filtroSeqMotorista', 'filtroSeqVoz', 'filtroSeqModo'];
+      const campos = ['filtroSeqCliente', 'filtroSeqOrigem', 'filtroSeqDestino', 'filtroSeqMotorista', 'filtroSeqVoz'];
       campos.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
       renderizarSequencia();
     }
@@ -18177,7 +18148,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
     function fastClienteEscondido(mapa, cli, nomesNoBanco) {
       const n = destNormalizarNome(cli && cli.nome); if (!n || !(n in mapa)) return false;
       const ts = mapa[n];
-      if (ts > 0) { const u = Date.parse((cli && (cli.updatedAt || cli.criadoEm || cli.createdAt || cli.ultimaModificacao)) || '') || 0; return !(u > ts); }
+      if (ts > 0) { const u = Date.parse((cli && (cli.updatedAt || cli.criadoEm || cli.createdAt)) || '') || 0; return !(u > ts); }
       return !(nomesNoBanco && nomesNoBanco.has(n));   // exclusão antiga sem data: só vale se o cliente não está no banco
     }
     window.fastLapideMapa = fastLapideMapa;
@@ -19868,108 +19839,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
       return fastSeqSelecaoPersistente.get(chave);
     }
 
-    /* ============================================================
-       5.4.x — COLETAS AGRUPADAS (rotas do dia, relatório, filtros)
-       Cada lançamento de coleta cria um item/rota por ponto de coleta
-       (tipo='coleta', valor 0) e uma rota do DESTINO FINAL com o valor
-       da coleta (coletaFinal=1). No relatório, as coletas não entram como
-       rotas individuais: entram agrupadas por cliente, com o destino final
-       e os pontos de coleta descritos numa única linha.
-       ============================================================ */
-    function fcNormColeta(v){return String(v||'').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim()}
-    function fcChaveGrupoColetaRota(r){
-      if(r.coletaId||r.coletaid)return 'CID:'+String(r.coletaId||r.coletaid);
-      return 'coleta|'+fcNormColeta(r.cliente)+'|'+String(r.data||'')+'|'+fcNormColeta(r.destinoFinal||r.destinofinal||'');
-    }
-    function fcGruposColetaRotas(lista){
-      var mapa=new Map(),ordenados=[];
-      lista.forEach(function(r){
-        if(!r||String(r.tipo||'').toLowerCase()!=='coleta')return;
-        var k=fcChaveGrupoColetaRota(r);
-        var g=mapa.get(k);
-        if(!g){g={key:k,rotas:[],final:null,pos:lista.indexOf(r)};mapa.set(k,g);ordenados.push(g)}
-        g.rotas.push(r);
-        if(r.coletaFinal===1||r.coletafinal===1)g.final=r;
-      });
-      return {grupos:ordenados,mapa:mapa};
-    }
-    function fcDescGrupoColetaRota(g){
-      var finalRota=g.final;
-      var df=finalRota?String(finalRota.destino||'').trim():String((g.rotas[0].destinoFinal||g.rotas[0].destinofinal)||'').trim();
-      var pontos=g.rotas.filter(function(r){return !(r.coletaFinal===1||r.coletafinal===1)}).map(function(r){return String(r.destino||'').trim()}).filter(Boolean);
-      var txt='';
-      if(df)txt+='Destino final: '+df;
-      if(pontos.length){
-        var pt=pontos.join(', ').replace(/, ([^,]+)$/,' e $1');
-        txt+=(txt?' · ':'')+'Pontos de coleta: '+pt;
-      }
-      return txt||'Coleta';
-    }
-    function fcGrupoLineRota(g){
-      var finalRota=g.final||g.rotas[0];
-      var line=Object.assign({},finalRota);
-      line.destino=fcDescGrupoColetaRota(g);
-      line._grupo=true;
-      // valor: na coleta nova só o destino final tem valor; em dados antigos
-      // cada ponto tinha seu valor — soma para não perder nada no relatório.
-      line.valor=g.rotas.reduce(function(a,r){return a+(Number(r.valor)||0)},0);
-      return line;
-    }
-    function fcTipoItemColeta(item,rotaVinculada){
-      var t=String(item.tipo||'').toLowerCase();
-      if(t)return t;
-      return rotaVinculada?String(rotaVinculada.tipo||'').toLowerCase():'';
-    }
-    function fcColetaFinalItem(item,rotaVinculada){
-      return item&&(item.coletaFinal===1||item.coletafinal===1)||(rotaVinculada&&(rotaVinculada.coletaFinal===1||rotaVinculada.coletafinal===1));
-    }
-    function fcCardColetaHtml(item,rotaVinculada){
-      var tipo=fcTipoItemColeta(item,rotaVinculada);
-      if(tipo!=='coleta')return '';
-      var df=String(item.destinoFinal||item.destinofinal||(rotaVinculada?rotaVinculada.destinoFinal||rotaVinculada.destinofinal:'')||'').trim();
-      if(fcColetaFinalItem(item,rotaVinculada))return '<div class="seq-field fc-coleta-final"><i class="fa-solid fa-flag-checkered"></i> DESTINO FINAL DA COLETA</div>';
-      if(df)return '<div class="seq-field" style="color:var(--text-muted)"><i class="fa-solid fa-bullseye"></i> Destino final: '+escapeHtml(df)+'</div>';
-      return '';
-    }
-    function fcMostraValorLinha(item,rotaVinculada){
-      var tipo=fcTipoItemColeta(item,rotaVinculada);
-      if(tipo==='coleta')return !!fcColetaFinalItem(item,rotaVinculada);
-      return true;
-    }
-    /* agrupamento de ITENS de sequência (relatório consolidado do dia) */
-    function fcGruposColetaItens(lista,dataSel){
-      var mapa=new Map(),ordenados=[],ehGrupo=new Set(),grupoDeItem=new Map();
-      var rotasPorId=new Map((bancoDados.rotas||[]).map(function(r){return [String(r.id),r]}));
-      lista.forEach(function(item){
-        if(!item)return;
-        var tipo=fcTipoItemColeta(item,item.rotaId!=null?rotasPorId.get(String(item.rotaId)):null);
-        if(tipo!=='coleta')return;
-        var rv=item.rotaId!=null?rotasPorId.get(String(item.rotaId)):null;
-        var cid=item.coletaId||item.coletaid||(rv&&(rv.coletaId||rv.coletaid));
-        var k=cid?('CID:'+String(cid)):('coleta|'+fcNormColeta(item.cliente)+'|'+fcNormColeta(item.destinoFinal||item.destinofinal||(rv?rv.destinoFinal||rv.destinofinal:'')||''));
-        var g=mapa.get(k);
-        if(!g){g={key:k,itens:[],final:null,pos:lista.indexOf(item)};mapa.set(k,g);ordenados.push(g)}
-        g.itens.push(item);
-        if(item.coletaFinal===1||item.coletafinal===1||(rv&&(rv.coletaFinal===1||rv.coletafinal===1)))g.final=item;
-        grupoDeItem.set(String(item.id),g);
-        ehGrupo.add(String(item.id));
-      });
-      return {grupos:ordenados,mapa:mapa,ehGrupo:ehGrupo,grupoDeItem:grupoDeItem};
-    }
-    function fcDescGrupoColetaItens(g){
-      var finalItem=g.final;
-      var df=finalItem?String(finalItem.destino||'').trim():String((g.itens[0].destinoFinal||g.itens[0].destinofinal)||'').trim();
-      var pontos=g.itens.filter(function(it){return !(it.coletaFinal===1||it.coletafinal===1)}).map(function(it){return String(it.destino||'').trim()}).filter(Boolean);
-      var txt='';
-      if(df)txt+='Destino final: '+df;
-      if(pontos.length){
-        var pt=pontos.join(', ').replace(/, ([^,]+)$/,' e $1');
-        txt+=(txt?' · ':'')+'Pontos de coleta: '+pt;
-      }
-      return txt||'Coleta';
-    }
-
-function renderizarSequencia() {
+    function renderizarSequencia() {
       const dataSel = document.getElementById('dpDataSequencia').value;
       const container = document.getElementById('containerSequencia');
       if (!container) {
@@ -19993,8 +19863,6 @@ function renderizarSequencia() {
       const filtroMotorista = (document.getElementById('filtroSeqMotorista') || {}).value || '';
       const filtroCliente = _f538n(document.getElementById('filtroSeqCliente').value);
       const filtroVoz = ((document.getElementById('filtroSeqVoz') || {}).value || '').toLowerCase().trim();
-      // 5.4.x: filtro de modo (coletas / entregas)
-      const filtroModo = (document.getElementById('filtroSeqModo') || {}).value || '';
 
       const listaBruta = (bancoDados.sequencias && bancoDados.sequencias[dataSel]) ? bancoDados.sequencias[dataSel] : [];
       // (3.0.0) A data do cadastro em ROTAS sempre prevalece para itens
@@ -20037,10 +19905,7 @@ function renderizarSequencia() {
         const matchCliente = !filtroCliente || (item.cliente && _f538n(item.cliente).includes(filtroCliente));
         const textoRota = [item.cliente,item.origem,item.destino,item.motorista,item.obs,item.descricao].filter(Boolean).join(' ').toLowerCase();
         const matchVoz = !filtroVoz || filtroVoz.split(/\s+/).every(palavra => textoRota.includes(palavra));
-        // 5.4.x: separar coletas de entregas na lista do dia
-        const tipoItem = String(item.tipo || '').toLowerCase();
-        const matchModo = !filtroModo || (filtroModo === 'coleta' ? tipoItem === 'coleta' : tipoItem !== 'coleta');
-        return matchOrigem && matchDestino && matchMotorista && matchCliente && matchVoz && matchModo;
+        return matchOrigem && matchDestino && matchMotorista && matchCliente && matchVoz;
       });
 
       if (listaFiltrada.length === 0) {
@@ -20091,7 +19956,7 @@ function renderizarSequencia() {
               })()}
             </div>
             <div class="seq-body">
-              ${fcMostraValorLinha(item, rotaVinculada) ? `<div class="seq-valor-linha" title="Quantidade de volumes: ${item.qtdMercadorias != null ? item.qtdMercadorias : 1}x"><i class="fa-solid fa-sack-dollar"></i> <span class="seq-valor-linha-label">Valor</span> <strong class="seq-valor-badge seq-valor-destino">${fmtMoedaBR(item.valor != null ? item.valor : 0)}</strong></div>` : ''}
+              <div class="seq-valor-linha" title="Quantidade de volumes: ${item.qtdMercadorias != null ? item.qtdMercadorias : 1}x"><i class="fa-solid fa-sack-dollar"></i> <span class="seq-valor-linha-label">Valor</span> <strong class="seq-valor-badge seq-valor-destino">${fmtMoedaBR(item.valor != null ? item.valor : 0)}</strong></div>
               ${(item.confirmadoQR || item.chegadaEm || item.agrupado || item.grupoFotosId) ? `<div class="seq-header-top">
                 ${item.confirmadoQR ? '<span class="badge-status" style="background:rgba(99,102,241,0.15);color:#6366f1;border:1px solid rgba(99,102,241,0.4);font-weight:800;"><i class="fa-solid fa-qrcode"></i> QR Confirmado</span>' : ''}
                 ${item.chegadaEm ? `<span class="badge-status" style="background:rgba(5,150,105,0.15);color:#059669;border:1px solid rgba(5,150,105,0.4);font-weight:800;"><i class="fa-solid fa-location-dot"></i> CHEGOU ${String(item.chegadaEm).slice(11,16)}</span>` : ''}
@@ -20108,7 +19973,6 @@ function renderizarSequencia() {
                   <span class="seq-info-value">${item.origem || 'N/A'}</span>
                 </div>
               </div>
-              ${fcCardColetaHtml(item, rotaVinculada)}
               ${item.motorista ? `<div class="seq-field">🧑‍✈️ MOTORISTA: ${item.motorista}</div>` : ''}
               ${item.chegadaEm ? `<div class="seq-field" style="color:#059669;"><i class="fa-solid fa-flag-checkered"></i> Chegada registrada em ${formatarDataHoraBR(item.chegadaEm)}</div>` : ''}
               <div class="seq-field" style="font-size: 13px; color: var(--text-muted);">📅 DATA: ${formatarDataBR(dataSel)}</div>
@@ -20191,20 +20055,7 @@ function renderizarSequencia() {
       // Defensivo: garantir que listaExibida é um array válido
       if (!Array.isArray(listaExibida)) listaExibida = [];
 
-      // 5.4.x: coletas entram agrupadas (uma linha por cliente)
-      var resGrupos = fcGruposColetaItens(listaExibida, dataSel);
-      var descriptors = [];
-      listaExibida.forEach(function(item, idx){
-        if (resGrupos.ehGrupo.has(String(item.id))) {
-          var g = resGrupos.grupoDeItem.get(String(item.id));
-          if (!descriptors.some(function(d){ return d.g === g; })) descriptors.push({ g: g, pos: idx });
-        } else {
-          descriptors.push({ it: item, pos: idx });
-        }
-      });
-      descriptors.sort(function(a, b){ return a.pos - b.pos; });
-
-      const total = descriptors.length;
+      const total = listaExibida.length;
       let concluidas = 0;
       let pendentes = 0;
       // r138: somas de valor por status
@@ -20216,17 +20067,11 @@ function renderizarSequencia() {
       if (tbody) tbody.innerHTML = '';
       const linhasRelatorio = [];
 
-      descriptors.forEach((desc, idx) => {
-        // linha agrupada: representa a coleta pelo item do destino final (ou o primeiro)
-        var item = desc.g ? (desc.g.final || desc.g.itens[0]) : desc.it;
-        var agrupado = !!desc.g;
+      listaExibida.forEach((item, idx) => {
         const rotaVinculada = item.rotaId ? (bancoDados.rotas || []).find(r => String(r.id) === String(item.rotaId)) : null;
         const estaConcluido = (rotaVinculada && rotaVinculada.statusExecucao === 'CONCLUÍDA') || item.status === 'CONCLUÍDA' || item.status === 'Concluído';
 
-        // soma de valor da linha: na coleta, soma os itens (coletas 0 + destino final)
-        var valItem = 0;
-        if (agrupado) { desc.g.itens.forEach(function(it2){ valItem += parseFloat(it2.valor) || 0; }); }
-        else valItem = parseFloat(item.valor) || 0;
+        const valItem = parseFloat(item.valor) || 0;
         valorTotal += valItem;
         if (estaConcluido) { concluidas++; valorConcluidas += valItem; }
         else { pendentes++; valorPendentes += valItem; }
@@ -20235,18 +20080,16 @@ function renderizarSequencia() {
           // (r139/2.3.24) Mapear o índice REAL na fila completa (a listaExibida pode estar filtrada).
           const listaCompleta = (bancoDados.sequencias && bancoDados.sequencias[dataSel]) || [];
           const idxOriginal = listaCompleta.findIndex(i => String(i.id) === String(item.id));
-          // linha agrupada não tem botões de ordem (movimentar só um item separaria a coleta)
-          const podeSubir = !agrupado && idxOriginal > 0;
-          const podeDescer = !agrupado && idxOriginal >= 0 && idxOriginal < listaCompleta.length - 1;
-          const destinoTxt = agrupado ? fcDescGrupoColetaItens(desc.g) : (item.destino || '-');
+          const podeSubir = idxOriginal > 0;
+          const podeDescer = idxOriginal >= 0 && idxOriginal < listaCompleta.length - 1;
           linhasRelatorio.push(`
             <tr>
-              <td class="rd-ord-cell no-print"><strong>${idx + 1}º</strong>${agrupado ? ' <span class="fc-badge">COLETA</span>' : ''}<div class="rd-ord-btns">
+              <td class="rd-ord-cell no-print"><strong>${idx + 1}º</strong><div class="rd-ord-btns">
                 <button class="rd-ord-btn rd-btn-up" ${podeSubir ? '' : 'disabled'} title="Subir na fila (trocar com ${idx}º${idx > 0 ? ' de cima' : ''})" onclick="moverSeq('${dataSel}', ${idxOriginal}, -1)"><i class="fa-solid fa-arrow-up"></i></button>
                 <button class="rd-ord-btn rd-btn-down" ${podeDescer ? '' : 'disabled'} title="Descer na fila (trocar com o de baixo)" onclick="moverSeq('${dataSel}', ${idxOriginal}, 1)"><i class="fa-solid fa-arrow-down"></i></button>
                 ${fastSinalizadorRotaHtml(item, rotaVinculada, dataSel)}
               </div></td>
-              <td>${formatarDestinoCelula(String(destinoTxt).toUpperCase())}</td>
+              <td>${formatarDestinoCelula((item.destino || '-').toUpperCase())}</td>
               <td>${item.cliente || '-'}</td>
               <td>${item.origem || '-'}</td>
               <td>${formatarDataBR(dataSel)}</td>
@@ -20457,7 +20300,7 @@ function renderizarSequencia() {
           if (!stream) {
             var camId = '';
             try { camId = modo === 'environment' ? (localStorage.getItem('f538_cam_traseira') || '') : ''; } catch (e0) {}
-            var v1 = { width: { ideal: 1280 }, height: { ideal: 720 } };
+            var v1 = { width: { ideal: 1920 }, height: { ideal: 1080 } };
             if (camId) v1.deviceId = { exact: camId }; else v1.facingMode = { ideal: modo };
             try {
               stream = await navigator.mediaDevices.getUserMedia({ video: v1, audio: false });
@@ -20533,7 +20376,7 @@ function renderizarSequencia() {
         // real da câmera (videoWidth/videoHeight), não na resolução da tela.
         if (!video.videoWidth) { btnCap.disabled = false; return; }
         var canvas = document.createElement('canvas');
-        var escala = Math.min(1, 1280 / Math.max(video.videoWidth, video.videoHeight));
+        var escala = Math.min(1, 1920 / Math.max(video.videoWidth, video.videoHeight));
         canvas.width = Math.round(video.videoWidth * escala);
         canvas.height = Math.round(video.videoHeight * escala);
         canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
@@ -20546,7 +20389,7 @@ function renderizarSequencia() {
           var nome = 'FAST_' + agora.getFullYear() + dd(agora.getMonth()+1) + dd(agora.getDate()) + '_' + dd(agora.getHours()) + dd(agora.getMinutes()) + dd(agora.getSeconds()) + '.jpg';
           var arquivo = new File([blob], nome, { type: 'image/jpeg' });
           salvarFotoRota(dsAtual, idxAtual, { target: { files: [arquivo], value: '' } });
-        }, 'image/jpeg', 0.75);
+        }, 'image/jpeg', 0.85);
       };
       iniciarStream(facing);
     }
@@ -20760,39 +20603,13 @@ function renderizarSequencia() {
           }).catch(() => { errosCount++; processarProximo(i + 1); });
         }
 
-        comprimirImagem(file, 1280, 0.75).then(base64Compact => {
-          // Salva localmente primeiro (rápido) e mostra o feedback imediato.
-          // O upload para a nuvem roda em segundo plano e substitui a referência
-          // quando terminar — a foto já aparece na hora no aparelho.
-          var chaveLocal = item.id + '_' + Date.now() + '_' + i;
-          var refLocal = 'idb:' + chaveLocal;
-          guardarFotoIndexedDB(chaveLocal, base64Compact).then(okLocal => {
-            if (okLocal) {
-              novasRefs.push(refLocal);
-              fastFotoEnfileirarPendente(refLocal);
-              processadas++;
-              mostrarFeedbackFoto(item.id, '⏳ ' + processadas + '/' + totalArquivos + ' foto(s) salvas...', 'sucesso');
-            } else {
-              const tempItem = { fotos: item.fotos.slice(), foto: item.foto };
-              tempItem.fotos.push(base64Compact);
-              const testeSalvo = tentarSalvarStorageCom(tempItem);
-              if (testeSalvo) { novasRefs.push(base64Compact); processadas++; } else { errosCount++; }
-            }
+        comprimirImagem(file, 1920, 0.92).then(base64Compact => {
+          fastFotoSubirNuvem(base64Compact, 'rota').then(urlNuvem => {
+            novasRefs.push(urlNuvem);
+            processadas++;
+            mostrarFeedbackFoto(item.id, '⏳ ' + processadas + '/' + totalArquivos + ' foto(s) enviadas à nuvem...', 'sucesso');
             processarProximo(i + 1);
-            // Em segundo plano: tenta subir à nuvem e trocar a ref local pela URL.
-            fastFotoSubirNuvem(base64Compact, 'rota').then(urlNuvem => {
-              try { if (typeof fastFotoSubstituirRef === 'function') fastFotoSubstituirRef(refLocal, urlNuvem); } catch (eUp2) {}
-              try {
-                var vivo = (bancoDados.sequencias[dataSel] || []).find(x => x && String(x.id) === String(item.id));
-                if (vivo && Array.isArray(vivo.fotos)) {
-                  var idx = vivo.fotos.indexOf(refLocal);
-                  if (idx >= 0) vivo.fotos[idx] = urlNuvem;
-                  else vivo.fotos.push(urlNuvem);
-                  if (vivo.foto === refLocal) vivo.foto = urlNuvem;
-                }
-              } catch (eUp) {}
-            }).catch(() => { /* offline: a foto já está local */ });
-          }).catch(() => { errosCount++; processarProximo(i + 1); });
+          }).catch(() => { fast108FallbackLocal(base64Compact); });
         }).catch(() => { errosCount++; processarProximo(i + 1); });
       }
 
@@ -25665,15 +25482,6 @@ function renderizarSequencia() {
     function adicionarDestinoExtraRota(valor = '') {
       const container = document.getElementById('containerDestinosExtrasRota');
       if (!container) return;
-      // 5.4.x: ao adicionar destino extra, somente o valor e a Quantidade repita do anterior.
-      // O nome do novo destino vem zerado.
-      var qtd = '';
-      if (arguments.length === 0) {
-        var anterior = container.lastElementChild;
-        var qtdAnterior = anterior ? anterior.querySelector('.extra-qtd-rota-input') : document.getElementById('seqQtdDestino');
-        qtd = qtdAnterior ? qtdAnterior.value : '';
-      }
-      var qtdParam = arguments.length >= 2 ? arguments[1] : qtd;
       const div = document.createElement('div');
       div.style.display = 'flex';
       div.style.gap = '8px';
@@ -25681,11 +25489,10 @@ function renderizarSequencia() {
       div.className = 'destino-extra-row-rota';
       div.innerHTML = `
         <input type="text" placeholder="Destino extra..." value="${valor}" class="destino-extra-rota-input" style="flex:1;" oninput="capitalizar(this); atualizarPreviewAba1();">
-        <input type="number" placeholder="Qtd" value="${qtdParam}" class="extra-qtd-rota-input" step="1" min="0" inputmode="numeric" title="Quantidade" style="width:70px;flex-shrink:0;" onfocus="limparZero(this);" oninput="atualizarPreviewAba1();">
         <button type="button" class="btn-danger" style="padding:10px 12px;flex-shrink:0;" onclick="this.parentElement.remove(); atualizarPreviewAba1();"><i class="fa-solid fa-xmark"></i></button>
       `;
       container.appendChild(div);
-      const input = div.querySelector('input[type="text"]');
+      const input = div.querySelector('input');
       if (input) setTimeout(() => input.focus(), 50);
     }
 
@@ -25768,7 +25575,7 @@ function renderizarSequencia() {
           return;
         }
         const file = fileList[i];
-        comprimirImagem(file, 1280, 0.75).then(base64Compact => {
+        comprimirImagem(file, 1920, 0.92).then(base64Compact => {
           // (r108) NUVEM-FIRST: sobe para o Storage e guarda a URL pública.
           fastFotoSubirNuvem(base64Compact, 'editrota').then(urlNuvem => {
             _editRotaFotos.push(urlNuvem);
@@ -26037,7 +25844,6 @@ function renderizarSequencia() {
       document.getElementById('filtroTipoVolume').value = 'TODOS';
       document.getElementById('filtroStatus').value = 'TODOS';
       document.getElementById('filtroStatusRota').value = 'TODOS';
-      const elModo = document.getElementById('filtroModo'); if (elModo) elModo.value = 'TODOS';
       ['filtroRotaOrigem','filtroRotaDestino'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
       renderizar();
     }
@@ -28921,68 +28727,40 @@ function renderizarSequencia() {
       const orig=_rn((document.getElementById('fastRelFiltroOrigem')||{}).value);
       const dest=_rn((document.getElementById('fastRelFiltroDestino')||{}).value);
       const tipo=(document.getElementById('fastRelFiltroTipo')||{}).value||'TODOS';
-      // 5.4.x: filtro de modo (coletas / entregas)
-      const modo=(document.getElementById('fastRelFiltroModo')||{}).value||'TODOS';
       const rotas=(bancoDados.rotas||[]).filter(r=>{
         const nome=String(r.cliente||'').toLocaleLowerCase('pt-BR');
         const exec=String(r.statusExecucao||'EM ROTA');
-        const éColeta=String(r.tipo||'').toLowerCase()==='coleta';
-        const matchModo=modo==='TODOS'||(modo==='coleta'?éColeta:!éColeta);
-        return (!cliente||nome.includes(cliente))&&(!ini||String(r.data||'')>=ini)&&(!fim||String(r.data||'')<=fim)&&(st==='TODOS'||String(r.status||'Pendente')===st)&&(ex==='TODOS'||exec===ex)&&(!orig||_rn(r.origem).includes(orig))&&(!dest||_rn(r.destino).includes(dest))&&(tipo==='TODOS'||String(r.tipoVolume||'MERCADORIA')===tipo)&&(typeof fast47LetraOk!=='function'||fast47LetraOk(r.cliente))&&matchModo;
+        return (!cliente||nome.includes(cliente))&&(!ini||String(r.data||'')>=ini)&&(!fim||String(r.data||'')<=fim)&&(st==='TODOS'||String(r.status||'Pendente')===st)&&(ex==='TODOS'||exec===ex)&&(!orig||_rn(r.origem).includes(orig))&&(!dest||_rn(r.destino).includes(dest))&&(tipo==='TODOS'||String(r.tipoVolume||'MERCADORIA')===tipo)&&(typeof fast47LetraOk!=='function'||fast47LetraOk(r.cliente));
       }).slice().sort((a,b)=>String(b.data||'').localeCompare(String(a.data||''))||Number(b.id||0)-Number(a.id||0));
-      // 5.4.x: coletas entram agrupadas (uma linha por cliente) — não como rotas individuais
-      var gruposRes=fcGruposColetaRotas(rotas);
-      var linhas=[];
-      rotas.forEach(function(r,idx){
-        var k=fcChaveGrupoColetaRota(r);
-        if(gruposRes.mapa.has(k)){
-          if(!linhas.some(function(l){return l._k===k}))linhas.push({_k:k,_pos:idx,_r:fcGrupoLineRota(gruposRes.mapa.get(k))});
-        }else{
-          linhas.push({_k:null,_pos:idx,_r:r});
-        }
-      });
-      linhas.sort(function(a,b){return a._pos-b._pos});
-      var linhasRota=linhas.map(function(l){return l._r});
       const mapa=await fastRelatorioDriveMapa();
       let total=0,recebido=0,pendente=0,fotos=0,enviadas=0,aguardando=0;
-      // KPIs continuam somando TODAS as linhas filtradas (não só a página atual)
-      linhasRota.forEach(r=>{ total++; const v=Number(r.valor)||0; if(r.status==='Recebido')recebido+=v; else pendente+=v; const info=fastRelatorioDriveInfo(r,mapa); fotos+=info.total; enviadas+=info.enviados; aguardando+=info.pendentes; });
-      const totalPaginas = Math.max(1, Math.ceil(linhasRota.length / fastRelPorPagina));
+      // KPIs continuam somando TODAS as rotas filtradas (não só a página atual)
+      rotas.forEach(r=>{ total++; const v=Number(r.valor)||0; if(r.status==='Recebido')recebido+=v; else pendente+=v; const info=fastRelatorioDriveInfo(r,mapa); fotos+=info.total; enviadas+=info.enviados; aguardando+=info.pendentes; });
+      const totalPaginas = Math.max(1, Math.ceil(rotas.length / fastRelPorPagina));
       if (fastRelPagAtual > totalPaginas) fastRelPagAtual = totalPaginas;
       const inicioPag = (fastRelPagAtual-1)*fastRelPorPagina;
-      const rotasPagina = linhasRota.slice(inicioPag, inicioPag+fastRelPorPagina);
+      const rotasPagina = rotas.slice(inicioPag, inicioPag+fastRelPorPagina);
       const rows=rotasPagina.map(r=>{
         const v=Number(r.valor)||0;
         const info=fastRelatorioDriveInfo(r,mapa);
         const link=info.link ? '<a class="fast-drive-route-link" href="'+fastRelatorioEscape(info.link)+'" target="_blank" rel="noopener"><i class="fa-brands fa-google-drive"></i> Abrir fotos</a>' : (info.pendentes?'<span class="fast-drive-pending"><i class="fa-solid fa-cloud-arrow-up"></i> '+info.pendentes+' pendente(s)</span>':'<span class="fast-drive-none">—</span>');
         const fs=info.total?('<b>'+info.total+'</b>'):'0';
         const exec=String(r.statusExecucao||'EM ROTA');
-        return '<tr class="'+(r._grupo?'fc-rel-grupo':'')+'" data-rota-id="'+fastIdSeguro(r.id)+'"><td>'+fastRelatorioEscape(formatarDataBR(r.data))+'</td><td><b>'+fastRelatorioEscape(r.cliente||'-')+'</b></td><td>'+fastRelatorioEscape(r.origem||'-')+'</td><td>'+fastRelatorioEscape(r.destino||'-')+'</td><td>'+(window.fastFormaPgtoHtml?window.fastFormaPgtoHtml(r.pagamento):fastRelatorioEscape(r.pagamento||'-'))+'<div class="fast-rel-status">'+fastRelatorioEscape(r.status||'Pendente')+'</div></td><td class="f63-img">'+fast63CelulaImagem(r)+'</td><td><b>'+fastRelatorioEscape(fmtMoedaBR(v))+'</b></td><td><span class="fast-rel-exec '+(exec==='CONCLUÍDA'?'done':'route')+'">'+fastRelatorioEscape(exec)+'</span></td><td>'+fs+'</td><td>'+link+'</td></tr>';
+        return '<tr data-rota-id="'+fastIdSeguro(r.id)+'"><td>'+fastRelatorioEscape(formatarDataBR(r.data))+'</td><td><b>'+fastRelatorioEscape(r.cliente||'-')+'</b></td><td>'+fastRelatorioEscape(r.origem||'-')+'</td><td>'+fastRelatorioEscape(r.destino||'-')+'</td><td>'+(window.fastFormaPgtoHtml?window.fastFormaPgtoHtml(r.pagamento):fastRelatorioEscape(r.pagamento||'-'))+'<div class="fast-rel-status">'+fastRelatorioEscape(r.status||'Pendente')+'</div></td><td class="f63-img">'+fast63CelulaImagem(r)+'</td><td><b>'+fastRelatorioEscape(fmtMoedaBR(v))+'</b></td><td><span class="fast-rel-exec '+(exec==='CONCLUÍDA'?'done':'route')+'">'+fastRelatorioEscape(exec)+'</span></td><td>'+fs+'</td><td>'+link+'</td></tr>';
       }).join('');
       body.innerHTML=rows||'<tr><td colspan="10" class="fast-rel-empty">Nenhuma rota encontrada com os filtros atuais.</td></tr>';
       if(kpis)kpis.innerHTML='<div><span>Rotas</span><b>'+total+'</b></div><div><span>Recebido</span><b>'+fmtMoedaBR(recebido)+'</b></div><div><span>Pendente</span><b>'+fmtMoedaBR(pendente)+'</b></div><div><span>Fotos</span><b>'+fotos+'</b></div><div><span>No Drive</span><b>'+enviadas+'</b></div><div><span>Aguardando</span><b>'+aguardando+'</b></div>';
       const pagInfo=document.getElementById('fastRelPagInfo');
-      if(pagInfo) pagInfo.textContent = 'Página '+fastRelPagAtual+' de '+totalPaginas+' ('+linhasRota.length+' rota(s))';
+      if(pagInfo) pagInfo.textContent = 'Página '+fastRelPagAtual+' de '+totalPaginas+' ('+rotas.length+' rota(s))';
       const btnAnt=document.getElementById('fastRelBtnAnterior'), btnProx=document.getElementById('fastRelBtnProxima');
       if(btnAnt) btnAnt.disabled = fastRelPagAtual<=1;
       if(btnProx){ btnProx.disabled = fastRelPagAtual>=totalPaginas; btnProx.setAttribute('onclick','fastRelPaginaProxima('+totalPaginas+')'); }
     };
-    window.fastRelatorioRotasLimpar=function(){['fastRelFiltroTipo','fastRelFiltroModo'].forEach(id=>{const x=document.getElementById(id);if(x)x.value='TODOS'});['fastRelFiltroCliente','fastRelFiltroInicio','fastRelFiltroFim','fastRelFiltroOrigem','fastRelFiltroDestino'].forEach(id=>{const x=document.getElementById(id);if(x)x.value=''});const s=document.getElementById('fastRelFiltroStatus');if(s)s.value='TODOS';const e=document.getElementById('fastRelFiltroExec');if(e)e.value='TODOS';fastRelatorioRotasRender()};
+    window.fastRelatorioRotasLimpar=function(){['fastRelFiltroTipo'].forEach(id=>{const x=document.getElementById(id);if(x)x.value='TODOS'});['fastRelFiltroCliente','fastRelFiltroInicio','fastRelFiltroFim','fastRelFiltroOrigem','fastRelFiltroDestino'].forEach(id=>{const x=document.getElementById(id);if(x)x.value=''});const s=document.getElementById('fastRelFiltroStatus');if(s)s.value='TODOS';const e=document.getElementById('fastRelFiltroExec');if(e)e.value='TODOS';fastRelatorioRotasRender()};
     window.fastRelatorioRotasCSV=async function(){
       const cliente=((document.getElementById('fastRelFiltroCliente')||{}).value||'').trim().toLocaleLowerCase('pt-BR'),ini=(document.getElementById('fastRelFiltroInicio')||{}).value||'',fim=(document.getElementById('fastRelFiltroFim')||{}).value||'';
       const mapa=await fastRelatorioDriveMapa(),linhas=[['Data','Cliente','Origem','Destino','Pagamento','Status pagamento','Valor','Execução','Fotos','Google Drive']];
-      // 5.4.x: coletas exportadas agrupadas (uma linha por cliente)
-      var listaCSV=(bancoDados.rotas||[]).filter(r=>{const n=String(r.cliente||'').toLocaleLowerCase('pt-BR');return(!cliente||n.includes(cliente))&&(!ini||String(r.data||'')>=ini)&&(!fim||String(r.data||'')<=fim)}).slice().sort((a,b)=>String(b.data||'').localeCompare(String(a.data||''))||Number(b.id||0)-Number(a.id||0));
-      var gruposCSV=fcGruposColetaRotas(listaCSV);
-      var linhasCSV=[];
-      listaCSV.forEach(function(r,idx){
-        var k=fcChaveGrupoColetaRota(r);
-        if(gruposCSV.mapa.has(k)){
-          if(!linhasCSV.some(function(l){return l._k===k}))linhasCSV.push({_k:k,_pos:idx,_r:fcGrupoLineRota(gruposCSV.mapa.get(k))});
-        }else linhasCSV.push({_k:null,_pos:idx,_r:r});
-      });
-      linhasCSV.sort(function(a,b){return a._pos-b._pos});
-      linhasCSV.forEach(function(l){var r=l._r;const i=fastRelatorioDriveInfo(r,mapa);linhas.push([formatarDataBR(r.data),r.cliente||'',r.origem||'',r.destino||'',r.pagamento||'',r.status||'',String(Number(r.valor)||0).replace('.',','),r.statusExecucao||'EM ROTA',String(i.total),i.link||''])});
+      (bancoDados.rotas||[]).filter(r=>{const n=String(r.cliente||'').toLocaleLowerCase('pt-BR');return(!cliente||n.includes(cliente))&&(!ini||String(r.data||'')>=ini)&&(!fim||String(r.data||'')<=fim)}).forEach(r=>{const i=fastRelatorioDriveInfo(r,mapa);linhas.push([formatarDataBR(r.data),r.cliente||'',r.origem||'',r.destino||'',r.pagamento||'',r.status||'',String(Number(r.valor)||0).replace('.',','),r.statusExecucao||'EM ROTA',String(i.total),i.link||''])});
       const csv='\ufeff'+linhas.map(row=>row.map(v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"').join(';')).join('\n'); const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download='relatorio-geral-rotas.csv';document.body.appendChild(a);a.click();a.remove();
     };
     window.fastRelatorioRotasSincronizarFotos=async function(){
@@ -28998,8 +28776,6 @@ function renderizarSequencia() {
       const tipoVolFiltro = document.getElementById('filtroTipoVolume').value;
       const stFiltro = document.getElementById('filtroStatus').value;
       const stRotaFiltro = document.getElementById('filtroStatusRota').value;
-      // 5.4.x: filtro de modo (coletas / entregas)
-      const modoFiltro = (document.getElementById('filtroModo') || {}).value || 'TODOS';
       // 5.1.6: busca por origem e destino (sem diferença de maiúsculas, acentos e pontuação)
       const _f63n = v => String(v || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
       const origemFiltro = _f63n((document.getElementById('filtroRotaOrigem') || {}).value);
@@ -29017,10 +28793,7 @@ function renderizarSequencia() {
           (stRotaFiltro === 'CONCLUÍDA' && statusExec === 'CONCLUÍDA');
         const matchOrigem = !origemFiltro || _f63n(r.origem).includes(origemFiltro);
         const matchDestino = !destinoFiltro || _f63n(r.destino).includes(destinoFiltro);
-        // 5.4.x: separar coletas de entregas
-        const éColetaRota = String(r.tipo || '').toLowerCase() === 'coleta';
-        const matchModo = modoFiltro === 'TODOS' || (modoFiltro === 'coleta' ? éColetaRota : !éColetaRota);
-        return matchNome && matchDtInicio && matchDtFim && matchTipoVol && matchStatus && matchStatusRota && matchOrigem && matchDestino && matchModo;
+        return matchNome && matchDtInicio && matchDtFim && matchTipoVol && matchStatus && matchStatusRota && matchOrigem && matchDestino;
       });
 
       const tbodyR = document.getElementById('tabelaRotasBody');
@@ -29568,7 +29341,6 @@ function renderizarSequencia() {
     window.renderizarClientesDebounced = debounce(renderizarClientes, 250);
     window.renderizarDebounced = debounce(renderizar, 250);
     window.renderizarSequenciaDebounced = debounce(renderizarSequencia, 250);
-    window.fastRelatorioRotasRenderDebounced = debounce(fastRelatorioRotasRender, 150);
 
     // --- Prevenção de duplicidade de CPF/CNPJ ---
     function docJaCadastrado(doc, tipo, ignorarId, colecao) {
@@ -30400,7 +30172,7 @@ function renderizarSequencia() {
         maxZoom: 19
       }).addTo(rastMapa);
       // Força recálculo de tamanho (corrige renderização em aba oculta)
-      setTimeout(() => { if (rastMapa) rastMapa.invalidateSize(); }, 150);
+      setTimeout(() => { if (rastMapa) rastMapa.invalidateSize(); }, 200);
     }
 
     // Inicia o compartilhamento de posição (modo motorista)
@@ -42084,13 +41856,6 @@ body.fast-home-reveal .tab-content.active{
   .fast-route-report-filters>div:nth-child(4){order:5}
   .fast-route-report-filters>.fast-rel-clear{order:6;width:100%;height:37px}
 }
-/* Fix: botão "Limpar Filtros" — elimina tremor/inversão ao clicar */
-.fast-rel-clear{transform:none!important;-webkit-transform:none!important;transition:none!important;touch-action:manipulation}
-.fast-rel-clear:active{transform:none!important;-webkit-transform:none!important;scale:none!important}
-.fast-rel-clear .ripple-effect{display:none!important}
-.fast-rel-clear.ripple{position:static;overflow:visible}
-html body .f63-rel-filtros>.fast-rel-clear{grid-column:auto!important;order:6!important;width:auto!important;min-width:140px;flex:0 0 auto}
-
 </style>
 <style id="fast-4047-style">
 .f47-bar{display:flex;align-items:center;gap:6px;margin:0 0 10px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding:2px 0 6px;scrollbar-width:thin}
@@ -42853,7 +42618,7 @@ html body .destino-extra-row-rota.f49-dest-row{padding-top:8px;border-top:1px da
     var ok=0;
     for(var i=0;i<arquivos.length;i++){
       try{
-        var b64=await comprimirImagem(arquivos[i],1280,0.75);
+        var b64=await comprimirImagem(arquivos[i],1920,0.92);
         var chave='rota_'+rota.id+'_'+Date.now()+'_'+i+'_'+Math.random().toString(36).slice(2,7);
         var salvo=false;try{salvo=await guardarFotoIndexedDB(chave,b64)}catch(e){}
         var refF=salvo?'idb:'+chave:b64;rota.fotos.push(refF);ok++;
@@ -43120,7 +42885,7 @@ html.f56-travado,html.f56-travado body{overflow:hidden!important;overscroll-beha
     cands.sort(function(a,b){return a.data!==b.data?b.data.localeCompare(a.data):b.id-a.id});
     // completa campos vazios com a rota anterior mais recente que tenha o dado
     var base=Object.assign({},cands[0].o);
-    ['origem','destino','qtdMercadorias','motorista','pagamento'].forEach(function(f){
+    ['origem','destino','qtdMercadorias','descricao','obs','motorista','pagamento'].forEach(function(f){
       if(base[f]==null||base[f]===''){for(var i=1;i<cands.length;i++){var v=cands[i].o[f];if(v!=null&&v!==''){base[f]=v;break}}}
     });
     if(!(Number(base.valor)>0)){for(var j=1;j<cands.length;j++){if(Number(cands[j].o.valor)>0){base.valor=Number(cands[j].o.valor);break}}}
@@ -43182,10 +42947,8 @@ html body .card.fast-filtros-rotas .grid-form{display:grid}
 html body .card.fast-filtros-rotas .ff-cliente{order:1}html body .card.fast-filtros-rotas .ff-status-rota{order:2}
 html body .card.fast-filtros-rotas .ff-origem{order:3}html body .card.fast-filtros-rotas .ff-destino{order:4}
 html body .card.fast-filtros-rotas .ff-data-ini{order:5}html body .card.fast-filtros-rotas .ff-data-fim{order:6}
-html body .card.fast-filtros-rotas .ff-tipo{order:7}html body .card.fast-filtros-rotas .ff-status-pag{order:8}html body .card.fast-filtros-rotas .ff-modo{order:9}
-html body .card.fast-filtros-rotas .ff-modo label,html body .rd-filter-modo label{display:block;font-weight:800;font-size:12px;color:var(--text-muted,#64748b);margin-bottom:3px}
-html body .rd-filter-modo{margin-top:2px}
-html body .card.fast-filtros-rotas .grid-form>.ff-acoes{order:10}
+html body .card.fast-filtros-rotas .ff-tipo{order:7}html body .card.fast-filtros-rotas .ff-status-pag{order:8}
+html body .card.fast-filtros-rotas .grid-form>.ff-acoes{order:9}
 .f47-pp{cursor:pointer}.f47-pp .f47-pp-sel{border:0!important;background:transparent!important;color:inherit!important;font:inherit!important;font-weight:800!important;padding:0 2px!important;margin:0!important;min-height:0!important;height:auto!important;width:auto!important;box-shadow:none!important;-webkit-appearance:menulist!important;appearance:auto!important}
 td.f63-img{text-align:center;white-space:nowrap!important;overflow:hidden;max-width:132px}
 td.f63-img .f63-ok,td.f63-img .f63-sem{display:block;font-size:14px;line-height:1.1}
@@ -43776,7 +43539,7 @@ html body #modalEditarRota .modal-content{margin:0 auto!important;top:auto!impor
   html body #containerSequencia .seq-item .seq-body .seq-info-wa{align-self:flex-start!important;max-width:max-content!important}
 }
 </style>
-<script src="fast-4067.js?v=44"></script>
+<script src="fast-4067.js?v=45"></script>
 <script src="navegacao-fast.js?v=1"></script>
 <script src="recibo-fast.js?v=1"></script>
 <script src="fast-recursos.js?v=46"></script>
@@ -43892,8 +43655,6 @@ html body #modalEditarRota .modal-content{margin:0 auto!important;top:auto!impor
   '.fc-switch.on .fc-track{background:#f59e0b}.fc-switch.on .fc-knob{left:23px}'+
   '.fc-badge{display:inline-block;background:#f59e0b;color:#fff;font-weight:800;font-size:10px;padding:1px 7px;border-radius:999px;margin-left:4px;vertical-align:middle}'+
   'tr.fc-row-coleta td{background:rgba(245,158,11,.08)!important}'+
-  'tr.fc-rel-grupo td{background:rgba(245,158,11,.06)!important}'+
-  '.fc-coleta-final{color:#b45309!important;font-weight:800}'+
   'th.fc-col,td.fc-col{text-align:center;white-space:normal;word-break:break-word;min-width:90px}';
   (document.head||document.documentElement).appendChild(css);
 
@@ -43908,18 +43669,7 @@ html body #modalEditarRota .modal-content{margin:0 auto!important;top:auto!impor
 
   /* ====== 1) FORMULARIO DE LANCAMENTO (Rotas do Dia) ====== */
   function destinoBlocoLanc(){var rows=$all('#formModalSeq .span-4');for(var i=0;i<rows.length;i++){if(rows[i].querySelector('.seq-destino-row'))return rows[i]}return null}
-  function campoDestinoFinalLanc(){
-    var id='coletaDFLancWrap';var ex=document.getElementById(id);
-    if(ex){ /* já existe: garante o campo de valor ao lado do destino final */
-      var vw=ex.querySelector('.fc-df-valor-wrap');
-      if(!vw){var dfi=ex.querySelector('#coletaDestinoFinalLanc');
-        if(dfi){var wrap=document.createElement('div');wrap.className='seq-valor-wrap fc-df-valor-wrap';wrap.style.cssText='flex:0 0 auto;margin-left:6px';
-          wrap.innerHTML='<input type="text" id="coletaDestinoFinalValor" class="seq-valor-input" inputmode="numeric" placeholder="R$ 0,00" title="Valor da coleta (vai só para o destino final)" onfocus="fastMoedaFocus(this)" oninput="fastMascaraMoeda(this); atualizarPreviewAba2();" onblur="fastMoedaBlurVazio(this)"><button type="button" class="fast-step-btn ripple" title="Diminuir R$ 5,00" onclick="fastValorStep(\'coletaDestinoFinalValor\',-5)"><i class="fa-solid fa-minus"></i></button><button type="button" class="fast-step-btn ripple" title="Aumentar R$ 5,00" onclick="fastValorStep(\'coletaDestinoFinalValor\',5)"><i class="fa-solid fa-plus"></i></button>';
-          dfi.parentNode.insertBefore(wrap,dfi.nextSibling)}}
-      return ex}
-    var div=document.createElement('div');div.className='span-4';div.id=id;div.style.display='none';
-    div.innerHTML='<label>Destino final da coleta:</label><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><input type="text" id="coletaDestinoFinalLanc" placeholder="Para onde a coleta vai" oninput="if(window.capitalizar)capitalizar(this); atualizarPreviewAba2();"><div class="seq-valor-wrap fc-df-valor-wrap" style="flex:0 0 auto"><input type="text" id="coletaDestinoFinalValor" class="seq-valor-input" inputmode="numeric" placeholder="R$ 0,00" title="Valor da coleta (vai só para o destino final)" onfocus="fastMoedaFocus(this)" oninput="fastMascaraMoeda(this); atualizarPreviewAba2();" onblur="fastMoedaBlurVazio(this)"><button type="button" class="fast-step-btn ripple" title="Diminuir R$ 5,00" onclick="fastValorStep(\'coletaDestinoFinalValor\',-5)"><i class="fa-solid fa-minus"></i></button><button type="button" class="fast-step-btn ripple" title="Aumentar R$ 5,00" onclick="fastValorStep(\'coletaDestinoFinalValor\',5)"><i class="fa-solid fa-plus"></i></button></div></div>';
-    return div}
+  function campoDestinoFinalLanc(){var id='coletaDFLancWrap';var ex=document.getElementById(id);if(ex)return ex;var div=document.createElement('div');div.className='span-4';div.id=id;div.style.display='none';div.innerHTML='<label>Destino final da coleta:</label><input type="text" id="coletaDestinoFinalLanc" placeholder="Para onde a coleta vai" oninput="if(window.capitalizar)capitalizar(this);">';return div}
   var _snap=null;
   function snapshot(){if(_snap)return;var bloco=destinoBlocoLanc();var extras=document.getElementById('destinosExtrasSection');if(!bloco)return;_snap={bp:bloco.parentNode,bn:bloco.nextSibling,ep:extras?extras.parentNode:null,en:extras?extras.nextSibling:null}}
   function restaurarOrdem(){if(!_snap)return;var bloco=destinoBlocoLanc();var extras=document.getElementById('destinosExtrasSection');try{if(bloco&&_snap.bp)_snap.bp.insertBefore(bloco,_snap.bn);if(extras&&_snap.ep)_snap.ep.insertBefore(extras,_snap.en)}catch(e){}}
@@ -43937,15 +43687,12 @@ html body #modalEditarRota .modal-content{margin:0 auto!important;top:auto!impor
       try{if(extras)bloco.parentNode.insertBefore(extras,bloco.nextSibling);}catch(e){}
       try{if(!dfWrap.parentNode)(extras||bloco).parentNode.insertBefore(dfWrap,(extras||bloco).nextSibling);}catch(e){}
       dfWrap.style.display='';
-      // 5.4.x: o valor sai das linhas de coleta — entra só no destino final
-      $all('#formModalSeq .seq-destino-row .seq-valor-wrap').forEach(function(w){w.style.display='none'});
-      if(destLabel)destLabel.textContent='Coleta / Qtd:';
+      if(destLabel)destLabel.textContent='Coleta / Qtd / Valor:';
       if(destInput)destInput.placeholder='Coleta 1';
       if(addBtn)addBtn.innerHTML='<i class="fa-solid fa-plus"></i> Adicionar Coleta';
       renumerarColetas();
     } else {
       dfWrap.style.display='none';
-      $all('#formModalSeq .seq-destino-row .seq-valor-wrap').forEach(function(w){w.style.display=''});
       if(destLabel)destLabel.textContent='Destino / Qtd / Valor:';
       if(destInput)destInput.placeholder='Destino';
       if(addBtn)addBtn.innerHTML='<i class="fa-solid fa-plus"></i> Adicionar Destino';
@@ -43962,123 +43709,20 @@ html body #modalEditarRota .modal-content{margin:0 auto!important;top:auto!impor
     if(cont){try{new MutationObserver(function(){renumerarColetas()}).observe(cont,{childList:true})}catch(e){}}
   }
 
-  /* 5.4.x — linhas de coleta não levam valor: cada nova linha esconde o campo
-     de valor (o valor entra só no destino final). Fora do modo coleta, tudo
-     volta como estava. */
-  var _origAddDestino=window.adicionarDestinoExtra;
-  window.adicionarDestinoExtra=function(){
-    var row=null;
-    if(typeof _origAddDestino==='function'){try{row=_origAddDestino.apply(this,arguments)}catch(e){row=null}}
-    try{
-      if(ligado()&&row){
-        var w=row.querySelector('.seq-valor-wrap');
-        if(w)w.style.display='none';
-      }
-    }catch(e){}
-    return row;
-  };
-
-  /* 5.4.x — pré-visualização no modo coleta mostra o destino final e o valor
-     que está no campo do destino final (não o valor das linhas de coleta). */
-  var _origPrev2=window.atualizarPreviewAba2;
-  window.atualizarPreviewAba2=function(){
-    if(typeof _origPrev2==='function'){try{_origPrev2.apply(this,arguments)}catch(e){}}
-    try{
-      if(ligado()){
-        var df=(document.getElementById('coletaDestinoFinalLanc')||{}).value||'';
-        var vf=(document.getElementById('coletaDestinoFinalValor')||{}).value||'';
-        var tr=document.getElementById('prev2-trajeto');
-        if(tr&&df)tr.textContent='Destino final: '+df;
-        var pv=document.getElementById('prev2-valor');
-        if(pv)pv.textContent=fmtMoedaBR(fastParseMoeda(vf)||0);
-      }
-    }catch(e){}
-  };
-
-  /* 5.4.x — ao puxar a última rota do cliente no modo coleta, o valor não
-     vai para as linhas de coleta (campo escondido): vai para o campo do
-     destino final. */
-  var _origPreencher=window.preencherDadosClienteSeq;
-  window.preencherDadosClienteSeq=function(nomeCliente){
-    var r;
-    if(typeof _origPreencher==='function'){try{r=_origPreencher.apply(this,arguments)}catch(e){}}
-    try{
-      if(ligado()){
-        var u=(typeof window.fastUltimaRotaCompleta==='function')?window.fastUltimaRotaCompleta(nomeCliente):null;
-        var v=u?(Number(u.valor)||0):0;
-        try{fastSetMoeda('coletaDestinoFinalValor',v)}catch(e){}
-        var sv=document.getElementById('seqValorDestino');if(sv)sv.value='';
-        var sv2=document.getElementById('seqValor');if(sv2)sv2.value='';
-        try{atualizarPreviewAba2()}catch(e){}
-      }
-    }catch(e){}
-    return r;
-  };
-
   /* tag ao salvar: marca os itens novos como coleta (campos extras, sincronizam normal) */
   function hookSalvar(){
     var orig=window.salvarItemSeq;if(typeof orig!=='function'||orig.__fcHook)return;
     var novo=function(e){
       var coleta=ligado();
       var data=(document.getElementById('dpDataSequencia')||{}).value;
-      // lê ANTES do orig: o reset do formulário limpa os campos
       var df=(document.getElementById('coletaDestinoFinalLanc')||{}).value||'';
-      var vf=fastParseMoeda((document.getElementById('coletaDestinoFinalValor')||{}).value);
       var l0=(window.bancoDados&&bancoDados.sequencias&&bancoDados.sequencias[data])||null;
       var antes=l0?l0.length:0;
       var r=orig.apply(this,arguments);
       if(coleta){setTimeout(function(){try{
-        var coletaId='C'+Date.now().toString(36)+Math.floor(Math.random()*1000).toString(36);
         var l=(window.bancoDados&&bancoDados.sequencias&&bancoDados.sequencias[data])||[];
-        var ref=null,qtdTotal=0;
-        for(var i=antes;i<l.length;i++){
-          var it=l[i];if(!it)continue;
-          it.tipo='coleta';
-          if(df)it.destinoFinal=df;
-          it.coletaId=coletaId;
-          it.coletaFinal=0;
-          // 5.4.x: o valor sai das linhas de coleta — vai só para o destino final
-          it.valor=0;
-          if(!ref)ref=it;
-          qtdTotal+=Number(it.qtdMercadorias)||0;
-          var rv=it.rotaId?(bancoDados.rotas||[]).find(function(x){return String(x.id)===String(it.rotaId)}):null;
-          if(rv){rv.tipo='coleta';if(df)rv.destinoFinal=df;rv.coletaId=coletaId;rv.coletaFinal=0;rv.valor=0;}
-        }
-        // 5.4.x: o destino final também vira rota (e item de Rotas do Dia),
-        // com o valor da coleta — o motorista pode finalizar essa rota.
-        if(ref&&df&&df.trim()&&typeof window.sincronizarComCadastroRotas==='function'){
-          var dfT=df.trim();
-          var finalId=window.sincronizarComCadastroRotas(ref.cliente||'',ref.origem||'',dfT,ref.obs||'',data,null,vf||0,qtdTotal||1);
-          var fr=(bancoDados.rotas||[]).find(function(x){return String(x.id)===String(finalId)});
-          if(fr){
-            fr.tipo='coleta';fr.destinoFinal=dfT;fr.coletaId=coletaId;fr.coletaFinal=1;
-            fr.valor=vf||0;fr.descricao=ref.obs||'';
-            if(ref.motorista)fr.motorista=ref.motorista;
-            if(ref.motoristaId!=null)fr.motoristaId=ref.motoristaId;
-          }
-          if(bancoDados.sequencias&&bancoDados.sequencias[data]){
-            bancoDados.sequencias[data].push({
-              id:Date.now()+7000+Math.floor(Math.random()*1000),
-              rotaId:finalId,
-              cliente:ref.cliente||'',
-              origem:ref.origem||'',
-              destino:dfT,
-              obs:ref.obs||'',
-              motorista:ref.motorista||'',
-              motoristaId:ref.motoristaId!=null?ref.motoristaId:null,
-              extras:Array.isArray(ref.extras)?ref.extras.slice():[],
-              valor:vf||0,
-              qtdMercadorias:qtdTotal||1,
-              status:'EM ROTA',
-              tipo:'coleta',
-              destinoFinal:dfT,
-              coletaId:coletaId,
-              coletaFinal:1
-            });
-          }
-        }
+        for(var i=antes;i<l.length;i++){if(l[i]){l[i].tipo='coleta';if(df)l[i].destinoFinal=df;var rv=l[i].rotaId?(bancoDados.rotas||[]).find(function(x){return String(x.id)===String(l[i].rotaId)}):null;if(rv){rv.tipo='coleta';if(df)rv.destinoFinal=df}}}
         if(window.fastSalvarSemBloquear)window.fastSalvarSemBloquear(60);
-        if(window.fastAgendarRenderizacaoCompleta)window.fastAgendarRenderizacaoCompleta(true);
         setTimeout(fcSyncColunas,1500);
       }catch(err){console.warn('coleta tag',err)}},150)}
       return r;
@@ -44109,9 +43753,7 @@ html body #modalEditarRota .modal-content{margin:0 auto!important;top:auto!impor
       tr.appendChild(c1);tr.appendChild(c2);
     });
   }
-  /* 5.4.x: o relatório agrupa as coletas (a descrição vem na coluna Destino),
-     então as colunas extras de coleta só fazem sentido na tabela de rotas. */
-  function applyTables(){try{augment(document.getElementById('rotasTable'))}catch(e){}}
+  function applyTables(){try{augment(document.getElementById('rotasTable'))}catch(e){}try{augment(document.querySelector('#fastRouteReportCard table'))}catch(e){}}
   function montarSwitchRotas(){
     var cont=document.querySelector('.table-rotas-container');
     if(cont&&!document.getElementById('fcBarRotas')){
@@ -44132,35 +43774,17 @@ html body #modalEditarRota .modal-content{margin:0 auto!important;top:auto!impor
   var fcColsOff=false;
   function fcHeaders(){return {apikey:FC_KEY,Authorization:'Bearer '+FC_KEY,'Content-Type':'application/json','Prefer':'return=minimal'}}
   function fcPatch(tabela,id,corpo){return fetch(FC_URL+'/'+tabela+'?id=eq.'+encodeURIComponent(id),{method:'PATCH',headers:fcHeaders(),body:JSON.stringify(corpo)}).then(function(r){if(r.status===400){fcColsOff=true;}return r;}).catch(function(){})}
-  /* 5.4.x: coletaid/coletafinal são colunas novas — se ainda não existirem na
-     nuvem, o PATCH falha mas não bloqueia o sync do tipo/destinofinal. */
-  var fcColsNovasOff=false;
-  function fcPatchNovas(tabela,id,corpo){return fetch(FC_URL+'/'+tabela+'?id=eq.'+encodeURIComponent(id),{method:'PATCH',headers:fcHeaders(),body:JSON.stringify(corpo)}).then(function(r){if(r.status===400){fcColsNovasOff=true;}return r;}).catch(function(){})}
   function fcSyncColunas(){
     if(fcColsOff)return;
     try{
-      ((window.bancoDados&&bancoDados.rotas)||[]).forEach(function(r){
-        if(r&&String(r.tipo).toLowerCase()==='coleta'&&r.id!=null){
-          fcPatch('rotas',r.id,{tipo:'coleta',destinofinal:r.destinoFinal||r.destinofinal||''});
-          if(!fcColsNovasOff&&(r.coletaId||r.coletaFinal===1)){
-            fcPatchNovas('rotas',r.id,{coletaid:r.coletaId||'',coletafinal:r.coletaFinal===1?1:0});
-          }
-        }
-      });
+      ((window.bancoDados&&bancoDados.rotas)||[]).forEach(function(r){if(r&&String(r.tipo).toLowerCase()==='coleta'&&r.id!=null){fcPatch('rotas',r.id,{tipo:'coleta',destinofinal:r.destinoFinal||r.destinofinal||''});}});
       var seq=(window.bancoDados&&bancoDados.sequencias)||{};
-      Object.keys(seq).forEach(function(d){(seq[d]||[]).forEach(function(it){
-        if(it&&String(it.tipo).toLowerCase()==='coleta'&&it.id!=null){
-          fcPatch('sequencias_itens',it.id,{tipo:'coleta',destinofinal:it.destinoFinal||it.destinofinal||''});
-          if(!fcColsNovasOff&&(it.coletaId||it.coletaFinal===1)){
-            fcPatchNovas('sequencias_itens',it.id,{coletaid:it.coletaId||'',coletafinal:it.coletaFinal===1?1:0});
-          }
-        }
-      })});
+      Object.keys(seq).forEach(function(d){(seq[d]||[]).forEach(function(it){if(it&&String(it.tipo).toLowerCase()==='coleta'&&it.id!=null){fcPatch('sequencias_itens',it.id,{tipo:'coleta',destinofinal:it.destinoFinal||it.destinofinal||''});}});});
     }catch(e){}
   }
-  function boot(){try{montarSwitchLanc()}catch(e){}try{montarSwitchRotas()}catch(e){}try{hookSalvar()}catch(e){}applyTables();observeBody('#rotasTable');syncSwitches();setTimeout(fcSyncColunas,3000);}
+  function boot(){try{montarSwitchLanc()}catch(e){}try{montarSwitchRotas()}catch(e){}try{hookSalvar()}catch(e){}applyTables();observeBody('#rotasTable');observeBody('#fastRouteReportCard table');syncSwitches();setTimeout(fcSyncColunas,3000);}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){setTimeout(boot,400)},{once:true});else setTimeout(boot,400);
-  setInterval(function(){try{montarSwitchLanc()}catch(e){}try{montarSwitchRotas()}catch(e){}try{hookSalvar()}catch(e){}observeBody('#rotasTable');},2500);
+  setInterval(function(){try{montarSwitchLanc()}catch(e){}try{montarSwitchRotas()}catch(e){}try{hookSalvar()}catch(e){}observeBody('#rotasTable');observeBody('#fastRouteReportCard table');},2500);
 })();
 </script>
 <!-- 5.1.9: módulo de tempo real duplicado removido (o canal essencial está em fast-519-sync-rapido) -->
@@ -48186,10 +47810,10 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
     if(!b||apkNativa()||W.__f538CamPre||!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)return;
     if(D.getElementById('fastCameraAoVivoOverlay'))return;
     var id='';try{id=localStorage.getItem('f538_cam_traseira')||''}catch(x){}
-    var v={width:{ideal:1280},height:{ideal:720}};if(id)v.deviceId={exact:id};else v.facingMode={ideal:'environment'};
+    var v={width:{ideal:1920},height:{ideal:1080}};if(id)v.deviceId={exact:id};else v.facingMode={ideal:'environment'};
     var p=navigator.mediaDevices.getUserMedia({video:v,audio:false}).catch(function(){return navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false})});
     W.__f538CamPre=p;
-      clearTimeout(tPre);tPre=setTimeout(function(){if(W.__f538CamPre===p)soltar()},4000);   // não tocou de verdade: desliga
+    clearTimeout(tPre);tPre=setTimeout(function(){if(W.__f538CamPre===p)soltar()},4000);   // não tocou de verdade: desliga
   },true);
   D.addEventListener('pointercancel',function(){if(W.__f538CamPre&&!D.getElementById('fastCameraAoVivoOverlay'))soltar()},true);   // era rolagem da tela
 })();
@@ -48665,15 +48289,21 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
     if(b&&e.toLowerCase().indexOf(b.toLowerCase())<0)e=e?(e+' - '+b):b;
     return e;
   }
-  function campos(){
-    var f=$('formModalSeq');if(!f)return [];
-    var l=[];var p=$('seqDestino');if(p)l.push(p);
-    f.querySelectorAll('#containerDestinosExtras .destino-extra-input').forEach(function(i){l.push(i)});
+  // 5.3.8: vale também em ROTAS E SERVIÇOS (origem, destino, destinos extras) e na
+  // janela Editar Rota — todo campo de lugar puxa de LUGARES com prévia
+  var END_DE={txtOrigem:'txtOrigemEnd',editTxtOrigem:'editTxtOrigemEnd'};
+  function camposDe(grupo){
+    var l=[];function add(i){if(i)l.push(i)}
+    if(grupo==='seq'||!grupo){add($('seqDestino'));D.querySelectorAll('#formModalSeq #containerDestinosExtras .destino-extra-input').forEach(add)}
+    if(grupo==='rota'||!grupo){add($('txtOrigem'));add($('txtDestino'));D.querySelectorAll('#containerDestinosExtrasRota .destino-extra-rota-input').forEach(add)}
+    if(grupo==='edit'||!grupo){add($('editTxtOrigem'));add($('editTxtDestino'))}
     return l;
   }
+  function campos(){return camposDe('seq')}
+  function todos(){return camposDe('')}
   function montar(inp){
     if(inp.__f538area&&D.body.contains(inp.__f538area))return inp.__f538area;
-    var row=inp.closest('.seq-destino-row')||inp.parentNode;
+    var row=inp.closest('.seq-destino-row');
     var area=D.createElement('div');area.className='f538-dest-area';area.style.cssText='display:flex;flex-direction:column;gap:6px;';
     area.innerHTML=
       '<div class="f538-dest-sug" style="display:none;border-radius:12px;overflow:hidden;box-shadow:0 6px 18px rgba(0,0,0,.12);background:var(--bg-card,#fff)"></div>'+
@@ -48685,13 +48315,23 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
         '<label style="display:block;margin-top:6px">BAIRRO:</label><input type="text" class="f538-dest-bai" autocomplete="off" placeholder="Bairro">'+
         '<label style="display:block;margin-top:6px">TELEFONE:</label><input type="tel" class="f538-dest-tel" autocomplete="off" placeholder="(85) 9XXXX-XXXX">'+
       '</div>';
-    row.parentNode.insertBefore(area,row.nextSibling);
+    if(row)row.parentNode.insertBefore(area,row.nextSibling);
+    else if(inp.classList.contains('destino-extra-rota-input')){var lin=inp.parentNode;lin.parentNode.insertBefore(area,lin.nextSibling)}
+    else inp.parentNode.insertBefore(area,inp.nextSibling);
+    // origem do FAST: o campo antigo "Endereço da origem" some (o valor continua guardado nele)
+    if(END_DE[inp.id]){var ee=$(END_DE[inp.id]);var bx=ee&&ee.closest('.f538-orig-end');if(bx)bx.style.display='none'}
+    area.querySelectorAll('.f538-dest-end,.f538-dest-bai').forEach(function(x){x.addEventListener('input',function(){gravarEnd(inp)})});
     area.querySelectorAll('input:not([type=tel])').forEach(function(i){i.addEventListener('input',function(){try{capitalizar(i)}catch(x){}})});
-    inp.__f538area=area;inp.setAttribute('autocomplete','off');inp.dataset.f538lug='1';
-    inp.addEventListener('input',function(){sugerir(inp)});
+    inp.__f538area=area;area.__inp=inp;inp.setAttribute('autocomplete','off');inp.dataset.f538lug='1';
+    inp.addEventListener('input',function(){clearTimeout(inp.__f538t);inp.__f538t=setTimeout(function(){sugerir(inp)},80)});
     inp.addEventListener('focus',function(){if(inp.value.trim())sugerir(inp)});
     inp.addEventListener('blur',function(){setTimeout(function(){esconderSug(inp);atualizar(inp,true)},250)});
     return area;
+  }
+  function gravarEnd(inp){
+    var ee=END_DE[inp.id]&&$(END_DE[inp.id]),a=inp.__f538area;if(!ee||!a)return;
+    var e=(a.querySelector('.f538-dest-end').value||'').trim(),bb=(a.querySelector('.f538-dest-bai').value||'').trim();
+    ee.value=(bb&&e.toLowerCase().indexOf(bb.toLowerCase())<0)?(e?e+' - '+bb:bb):e;ee.dataset.auto='0';
   }
   function esconderSug(inp){var a=inp.__f538area;if(a){var s=a.querySelector('.f538-dest-sug');s.style.display='none'}}
   function atualizar(inp,forcar){
@@ -48704,6 +48344,7 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
       var end=endLugar(d);
       prev.innerHTML='📍 <span>'+esc(d.nome)+'</span>'+(d.local?'<span style="display:block">🏢 '+esc(d.local)+'</span>':'')+(end?'<span style="display:block;font-weight:600;opacity:.85">'+esc(end)+'</span>':'<span style="display:block;font-weight:600;opacity:.7">(lugar sem endereço cadastrado)</span>');
       prev.style.display='block';novo.style.display='none';
+      if(END_DE[inp.id]){var ee=$(END_DE[inp.id]);if(ee){ee.value=end;ee.dataset.auto='1'}}
     }else{
       prev.style.display='none';
       var t=N(v),parecidos=lugares().some(function(x){return N(x.nome).indexOf(t)>=0});
@@ -48738,11 +48379,15 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
   }
   /* ao salvar: destinos novos entram em LUGARES com endereço e bairro */
   function instalarSalvar(){
-    var f=W.salvarItemSeq;if(typeof f!=='function'||f.__f538destSalvar)return;
+    [['salvarItemSeq','seq'],['salvarRota','rota'],['salvarEdicaoRotaModal','edit']].forEach(function(p){embrulharSalvar(p[0],p[1])});
+  }
+  function embrulharSalvar(nome,grupo){
+    var f=W[nome];if(typeof f!=='function'||f.__f538destSalvar)return;
     var g=function(){
       try{
         var criou=false;
-        campos().forEach(function(inp){
+        camposDe(grupo).forEach(function(inp){if(END_DE[inp.id]&&!acharLugar(inp.value.trim()))gravarEnd(inp)});
+        camposDe(grupo).forEach(function(inp){
           var v=inp.value.trim();if(!v||acharLugar(v)||typeof destAdicionarOuAtualizar!=='function')return;
           var a=inp.__f538area,end='',bai='',loc='',tel='';
           if(a){end=(a.querySelector('.f538-dest-end').value||'').trim();bai=(a.querySelector('.f538-dest-bai').value||'').trim();loc=(a.querySelector('.f538-dest-loc').value||'').trim();tel=(a.querySelector('.f538-dest-tel').value||'').trim()}
@@ -48752,16 +48397,19 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
         if(criou){try{destRenderizarLista()}catch(x){}}
       }catch(e){}
       var r=f.apply(this,arguments);
-      setTimeout(function(){campos().forEach(function(inp){var a=inp.__f538area;if(a&&!inp.value.trim()){a.querySelectorAll('input').forEach(function(i){i.value=''})}inp.__f538ult=null;atualizar(inp,true)})},300);
+      setTimeout(function(){camposDe(grupo).forEach(function(inp){var a=inp.__f538area;if(a&&!inp.value.trim()){a.querySelectorAll('input').forEach(function(i){i.value=''})}inp.__f538ult=null;atualizar(inp,true)})},300);
       return r;
     };
     Object.keys(f).forEach(function(k){try{g[k]=f[k]}catch(e){}});
-    g.__f538destSalvar=1;W.salvarItemSeq=g;
+    g.__f538destSalvar=1;W[nome]=g;
   }
   function vigiar(){
-    campos().forEach(function(inp){montar(inp);atualizar(inp,false)});
+    // a lista antiga da origem do FAST sai de cena (a nova mostra LUGARES com prévia)
+    if(typeof W.aoDigitarOrigem!=='function'||!W.aoDigitarOrigem.__f538lugar){var nada=function(){};nada.__f538=1;nada.__f538lugar=1;W.aoDigitarOrigem=nada;try{aoDigitarOrigem=nada}catch(e){}}
+    ['listaSugestoesOrigem','listaSugestoesOrigemEdit'].forEach(function(id){var l=$(id);if(l&&l.style.display!=='none')l.style.display='none'});
+    todos().forEach(function(inp){if(inp.offsetParent||inp.__f538area){montar(inp);atualizar(inp,false)}});
     // áreas de destinos extras que foram removidos
-    D.querySelectorAll('.f538-dest-area').forEach(function(a){var prev=a.previousElementSibling;if(!prev||!prev.querySelector||!prev.querySelector('.seq-destino-input'))a.remove()});
+    D.querySelectorAll('.f538-dest-area').forEach(function(a){if(!a.__inp||!D.body.contains(a.__inp))a.remove()});   // só some a área cujo campo foi removido
   }
   instalarSalvar();
   W.addEventListener('load',function(){setTimeout(instalarSalvar,1500);setTimeout(instalarSalvar,5000)});
@@ -48956,6 +48604,208 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
     b.style.background=W.__f538DestIncompletos?'#f59e0b':'#fffbeb';b.style.color=W.__f538DestIncompletos?'#fff':'#92400e';
   }
   setInterval(montar,1500);W.addEventListener('load',function(){setTimeout(montar,1500)});
+})();
+</script>
+<script id="fast538-clientes-lugares">
+/* 5.3.8 — CLIENTES → LUGARES (ferramenta do ADM)
+   Botão "📍 Enviar para Lugares" na tela de Clientes. Leva nome, endereço, bairro e
+   telefone dos clientes para LUGARES/DESTINOS:
+   • só os clientes marcados (se houver) ou todos;
+   • lugar que ainda não existe: é criado;
+   • lugar que já existe com o mesmo nome: NÃO é sobrescrito — só preenche o que
+     estiver vazio (endereço, bairro, telefone), se a opção estiver marcada.
+   Mostra antes quantos vão ser criados/completados e pede confirmação. */
+(function(){
+  var W=window,D=document;
+  function $(id){return D.getElementById(id)}
+  function N(t){try{return destNormalizarNome(t)}catch(e){return String(t||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim()}}
+  function esc(t){return String(t==null?'':t).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+  function tel(v){try{return (W.fastTelefoneBr&&W.fastTelefoneBr(v))||String(v||'').trim()}catch(e){return String(v||'').trim()}}
+  function dadosDoCliente(c){
+    var eo=c.enderecoObj||{};
+    var rua=[c.logradouro||eo.logradouro,c.numero||eo.numero].filter(Boolean).join(', ');
+    var end=rua||String(c.endereco||'').trim();
+    var bai=String(c.bairro||eo.bairro||'').trim();
+    // endereço guardado como "Rua X, 10 - Bairro": separa o bairro se ele não veio à parte
+    if(!bai&&/ - [^-]+$/.test(end)){var p=end.split(' - ');bai=p.pop().trim();end=p.join(' - ').trim()}
+    return {nome:String(c.nome||'').trim(),endereco:end,bairro:bai,telefone:tel(c.whatsapp||c.telefone||'')};
+  }
+  function marcados(){return [].slice.call(D.querySelectorAll('#tabelaClientesBody .cli-sel-linha:checked')).map(function(i){return String(i.getAttribute('data-cli-id'))})}
+  function planejar(soMarcados,completar){
+    var bd=W.bancoDados||{},cl=(bd.clientes||[]).filter(function(c){return c&&String(c.nome||'').trim()});
+    if(soMarcados){var ids={};marcados().forEach(function(i){ids[i]=1});cl=cl.filter(function(c){return ids[String(c.id)]})}
+    var lug={};(bd.destinos||[]).forEach(function(d){if(d&&d.nome)lug[N(d.nome)]=d});
+    var novos=[],completar_=[],iguais=0,vistos={};
+    cl.forEach(function(c){
+      var x=dadosDoCliente(c),k=N(x.nome);if(!k||vistos[k])return;vistos[k]=1;
+      var d=lug[k];
+      if(!d){novos.push(x);return}
+      var falta={};['endereco','bairro','telefone'].forEach(function(f){if(!String(d[f]||'').trim()&&x[f])falta[f]=x[f]});
+      if(completar&&Object.keys(falta).length)completar_.push({d:d,falta:falta});else iguais++;
+    });
+    return {total:cl.length,novos:novos,completar:completar_,iguais:iguais};
+  }
+  function aplicar(pl){
+    var bd=W.bancoDados;if(!bd)return;
+    if(!Array.isArray(bd.destinos))bd.destinos=[];
+    var agora=new Date().toISOString(),base=Date.now();
+    // nomes que estavam na lista de "excluídos" voltam, porque foi o ADM que pediu
+    var exc=bd.destinosExcluidos;
+    pl.novos.forEach(function(x,i){
+      bd.destinos.push({id:base+i,nome:x.nome,local:'',endereco:x.endereco,bairro:x.bairro,telefone:x.telefone,enderecoObj:null,usadoEm:0,ultimaUso:null,updatedAt:agora});
+      if(Array.isArray(exc)){var k=N(x.nome);bd.destinosExcluidos=exc=exc.filter(function(e){return N(typeof e==='string'?e:(e&&e.nome))!==k})}
+    });
+    pl.completar.forEach(function(o){Object.keys(o.falta).forEach(function(f){o.d[f]=o.falta[f]});o.d.updatedAt=agora});
+    try{salvarStorage()}catch(e){}
+    try{destRenderizarLista()}catch(e){}
+    try{if(typeof W.__f538LugPuxar==='function'){} if(typeof W.sincronizarAgora==='function')setTimeout(W.sincronizarAgora,400)}catch(e){}
+  }
+  function abrir(){
+    var temMarc=marcados().length;
+    var f=D.getElementById('f538CliLugModal');if(f)f.remove();
+    f=D.createElement('div');f.id='f538CliLugModal';
+    f.style.cssText='position:fixed;inset:0;z-index:2147483000;background:rgba(15,23,42,.55);display:flex;align-items:center;justify-content:center;padding:16px';
+    f.innerHTML='<div style="background:#fff;color:#0f172a;max-width:520px;width:100%;border-radius:16px;padding:18px;box-shadow:0 20px 50px rgba(0,0,0,.35);font-size:14px">'+
+      '<div style="font-size:17px;font-weight:900;margin-bottom:6px">📍 Enviar clientes para Lugares</div>'+
+      '<div style="opacity:.8;margin-bottom:12px">Leva nome, endereço, bairro e telefone dos clientes para LUGARES/DESTINOS. Lugares que já existem não são apagados nem trocados.</div>'+
+      '<label class="f538op"><input type="radio" name="f538cl" value="m"'+(temMarc?' checked':' disabled')+'> Só os clientes marcados ('+temMarc+')</label>'+
+      '<label class="f538op"><input type="radio" name="f538cl" value="t"'+(temMarc?'':' checked')+'> Todos os clientes</label>'+
+      '<label class="f538op"><input type="checkbox" id="f538ClCompletar" checked> Completar lugares que já existem (só os campos vazios)</label>'+
+      '<div id="f538ClResumo" style="margin:12px 0;padding:10px;border-radius:10px;background:rgba(99,102,241,.08);font-weight:700;line-height:1.5"></div>'+
+      '<div style="display:flex;gap:8px;justify-content:flex-end"><button type="button" id="f538ClCancelar" style="min-height:42px;padding:0 16px;border-radius:10px;border:1px solid #cbd5e1;background:transparent;font-weight:800;cursor:pointer">Cancelar</button>'+
+      '<button type="button" id="f538ClOk" style="min-height:42px;padding:0 16px;border-radius:10px;border:0;background:linear-gradient(135deg,#7c3aed,#0ea5e9);color:#fff;font-weight:900;cursor:pointer">Enviar para Lugares</button></div></div>';
+    D.body.appendChild(f);
+    function opc(){return {so:(f.querySelector('input[name=f538cl]:checked')||{}).value==='m',comp:$('f538ClCompletar').checked}}
+    function resumo(){
+      var o=opc(),pl=planejar(o.so,o.comp);
+      $('f538ClResumo').innerHTML=pl.total+' cliente(s) analisados<br>🆕 '+pl.novos.length+' lugar(es) novo(s)'+(o.comp?'<br>✏️ '+pl.completar.length+' lugar(es) existente(s) completado(s)':'')+'<br>✔️ '+pl.iguais+' já estão em Lugares (sem mudança)'+
+        (pl.novos.length?'<div style="font-weight:600;opacity:.75;margin-top:6px;font-size:12px">Ex.: '+pl.novos.slice(0,4).map(function(x){return esc(x.nome)}).join(', ')+(pl.novos.length>4?'…':'')+'</div>':'');
+      $('f538ClOk').disabled=!(pl.novos.length||pl.completar.length);$('f538ClOk').style.opacity=$('f538ClOk').disabled?'.5':'1';
+      return pl;
+    }
+    f.querySelectorAll('input').forEach(function(i){i.addEventListener('change',resumo)});
+    resumo();
+    $('f538ClCancelar').onclick=function(){f.remove()};
+    f.addEventListener('click',function(e){if(e.target===f)f.remove()});
+    $('f538ClOk').onclick=function(){
+      var o=opc(),pl=planejar(o.so,o.comp);aplicar(pl);f.remove();
+      try{mostrarToast('📍 Lugares: '+pl.novos.length+' novo(s), '+pl.completar.length+' completado(s).','success')}catch(e){}
+    };
+  }
+  W.fast538ClientesParaLugares=abrir;
+  // estilos próprios (o app tem regras gerais para rótulos e botões que bagunçavam esta janela)
+  if(!D.getElementById('f538CliLugCss')){var st=D.createElement('style');st.id='f538CliLugCss';st.textContent=
+    '#f538BtnCliLug{display:block!important;width:100%!important;min-height:44px!important;margin:0 0 12px!important;border-radius:12px!important;border:2px solid #7c3aed!important;background:#f5f3ff!important;color:#5b21b6!important;font-weight:800!important;font-size:14px!important;text-transform:none!important;opacity:1!important;visibility:visible!important}'+
+    '#f538CliLugModal .f538op{display:flex!important;gap:10px!important;align-items:center!important;margin:8px 0!important;text-transform:none!important;font-size:14px!important;font-weight:700!important;color:#0f172a!important;letter-spacing:0!important;width:auto!important}'+
+    '#f538CliLugModal .f538op input{width:20px!important;height:20px!important;min-height:0!important;margin:0!important;flex:0 0 auto!important;opacity:1!important}'+
+    '#f538CliLugModal button{text-transform:none!important;font-size:14px!important;opacity:1!important}'+
+    '#f538ClCancelar{color:#0f172a!important;background:#f1f5f9!important;border:1px solid #cbd5e1!important}'+
+    '#f538ClOk{color:#fff!important}';
+    D.head.appendChild(st)}
+  function montar(){
+    var h=$('contagemClientesHeader');if(!h||$('f538BtnCliLug'))return;
+    var b=D.createElement('button');b.type='button';b.id='f538BtnCliLug';b.className='no-print';
+    b.innerHTML='📍 Enviar clientes para Lugares';
+    b.style.cssText='display:block;width:100%;min-height:42px;margin:0 0 12px;border-radius:12px;border:2px solid #7c3aed;background:rgba(124,58,237,.08);color:#5b21b6;font-weight:800;font-size:14px;cursor:pointer';
+    b.onclick=abrir;h.parentNode.insertBefore(b,h.nextSibling);
+  }
+  setInterval(montar,1500);W.addEventListener('load',function(){setTimeout(montar,1500)});
+})();
+</script>
+<script id="fast538-dia-limpo">
+/* 5.3.8 — ROTAS DO DIA SÓ COM O QUE É DE HOJE
+   Hoje mostra: rotas cadastradas para hoje + pendentes que ficaram de dias anteriores.
+   Rota de outro dia que foi puxada para hoje mas JÁ ESTAVA CONCLUÍDA antes de hoje
+   (a conclusão chegou depois) volta para o dia dela — sai da lista de hoje. */
+(function(){
+  var W=window;
+  function hoje(){try{return fastDataLocalYYYYMMDD()}catch(e){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}}
+  function inicioHoje(){var d=new Date();d.setHours(0,0,0,0);return d.getTime()}
+  function limpar(){
+    try{
+      var bd=W.bancoDados;if(!bd||!bd.sequencias)return;
+      var h=hoje(),lista=bd.sequencias[h]||[],rotas=bd.rotas||[],h0=inicioHoje(),agora=new Date().toISOString(),mexeu=0,fica=[];
+      lista.forEach(function(it){
+        var orig=it&&it.dataOriginal;
+        if(!it||!orig||!/^\d{4}-\d{2}-\d{2}$/.test(orig)||orig>=h||!fastEhConcluido(it,rotas)){fica.push(it);return}
+        var rv=it.rotaId!=null?fastRotaPorId(rotas,it.rotaId):null;
+        var tc=Date.parse(it.dataConclusao||it.statusUpdatedAt||(rv&&rv.updatedAt)||'')||0;
+        if(tc>=h0&&it.dataConclusao){fica.push(it);return}            // concluída HOJE: foi trabalho de hoje, fica
+        var dest=bd.sequencias[orig]||(bd.sequencias[orig]=[]);
+        var ja=dest.some(function(x){return x&&(String(x.id)===String(it.id)||(x.rotaId!=null&&it.rotaId!=null&&String(x.rotaId)===String(it.rotaId)))});
+        delete it.passouEm;it.updatedAt=agora;
+        if(!ja)dest.push(it);
+        if(rv&&String(rv.data||'')===h){rv.data=orig;rv.updatedAt=agora}
+        mexeu++;
+      });
+      if(mexeu){
+        bd.sequencias[h]=fica;
+        try{salvarStorage()}catch(e){}
+        try{W.__frxForcarLista=true;renderizarSequencia()}catch(e){}
+      }
+    }catch(e){}
+  }
+  W.fast538LimparDiaConcluidas=limpar;
+  setInterval(limpar,4000);
+  W.addEventListener('load',function(){setTimeout(limpar,3000)});
+})();
+</script>
+<script id="fast538-alinha-concluidas">
+/* 5.3.8 — ROTA CONCLUÍDA NÃO VOLTA PARA "EM ROTA"
+   Se a rota ligada ao item já está CONCLUÍDA (veio de outro aparelho) e o item das
+   Rotas do Dia ainda mostra EM ROTA sem uma mudança mais nova, o item acompanha a rota. */
+(function(){
+  var W=window;
+  function ts(v){return Date.parse(v||'')||0}
+  function alinhar(){
+    try{
+      var bd=W.bancoDados;if(!bd||!bd.sequencias)return;
+      var mapa={};(bd.rotas||[]).forEach(function(r){if(r&&r.id!=null)mapa[String(r.id)]=r});
+      var mexeu=0;
+      Object.keys(bd.sequencias).forEach(function(d){(bd.sequencias[d]||[]).forEach(function(it){
+        if(!it||it.agrupado||it.rotaId==null)return;
+        var r=mapa[String(it.rotaId)];if(!r)return;
+        var rc=String(r.statusExecucao||'').toUpperCase().indexOf('CONCLU')>=0,ic=String(it.status||'').toUpperCase().indexOf('CONCLU')>=0;
+        if(rc&&!ic&&ts(it.statusUpdatedAt)<=Math.max(ts(r.statusUpdatedAt),ts(r.updatedAt),ts(r.dataConclusao))){
+          it.status='CONCLUÍDA';if(!it.dataConclusao)it.dataConclusao=r.dataConclusao||r.updatedAt||new Date().toISOString();
+          it.statusUpdatedAt=r.statusUpdatedAt||r.updatedAt||it.dataConclusao;mexeu++;
+        }
+      })});
+      if(mexeu){try{salvarStorage()}catch(e){}try{W.__frxForcarLista=true;renderizarSequencia()}catch(e){}}
+    }catch(e){}
+  }
+  W.fast538AlinharConcluidas=alinhar;
+  setInterval(alinhar,2000);
+})();
+</script>
+<script id="fast538-campos-leves">
+/* 5.3.8 — TOQUES MAIS LEVES NOS CAMPOS
+   • Limpar filtros: a tela não pula nem treme (mantém a posição de rolagem).
+   • Campo DESTINO (e ORIGEM): ao tocar, o texto já fica selecionado — digitar troca tudo,
+     como nos outros campos.
+   • Lista de LUGARES enquanto digita/apaga: espera uma pausa curtinha (80 ms) para montar,
+     então apagar pelo teclado fica rápido. */
+(function(){
+  var W=window,D=document;
+  function manterRolagem(nome){
+    var f=W[nome];if(typeof f!=='function'||f.__f538rol)return;
+    var g=function(){
+      var el=D.scrollingElement||D.documentElement,y=el.scrollTop,main=D.querySelector('main'),ym=main?main.scrollTop:0;
+      var r=f.apply(this,arguments);
+      var volta=function(){try{el.scrollTop=y;if(main)main.scrollTop=ym}catch(e){}};
+      volta();requestAnimationFrame(volta);setTimeout(volta,120);
+      return r;
+    };
+    Object.keys(f).forEach(function(k){try{g[k]=f[k]}catch(e){}});g.__f538rol=1;W[nome]=g;
+  }
+  function instalar(){['limparFiltrosSeq','limparFiltros','limparFiltroRotas','limparFiltrosRotas','limparFiltroDespesas','limparFiltrosDespesas'].forEach(manterRolagem)}
+  D.addEventListener('focusin',function(ev){
+    var t=ev.target;if(!t||t.tagName!=='INPUT')return;
+    if(/^(seqDestino|txtDestino|editTxtDestino|seqOrigem|txtOrigem|editTxtOrigem)$/.test(t.id)||t.classList.contains('destino-extra-input')||t.classList.contains('destino-extra-rota-input')){
+      if(t.value)setTimeout(function(){try{t.select()}catch(e){}},0);
+    }
+  },true);
+  instalar();W.addEventListener('load',function(){setTimeout(instalar,1500);setTimeout(instalar,5000)});setInterval(instalar,5000);
 })();
 </script>
 </body></html>
