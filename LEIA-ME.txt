@@ -1,8 +1,9 @@
-FAST 5.3.8 — AJUSTE 2 (25/10/2026)
-==================================
-Só 2 arquivos, sem SQL.
+FAST 5.3.9 — COLAR ENDEREÇO + DATA DAS ROTAS PROTEGIDA (13/11/2026)
+====================================================================
+Arquivos do app: index.html e fast-endereco.js. Sem SQL.
 
-GitHub > fastservicosapp (primeira tela) > Add file > Upload files >
-escolha index.html e fast-4067.js > Commit changes.
+GitHub > fastservicosapp > Add file > Upload files >
+escolha index.html e fast-endereco.js > Commit changes.
 
-Espere 2 minutos e feche/abra o app nos aparelhos.
+Espere 1-2 minutos e feche/abra o app nos aparelhos.
+Testes: node scripts/test-fast-endereco.js && node scripts/test-route-dates.js && node scripts/audit-data-safety.js
