@@ -4,6 +4,11 @@
   "updates": [
     {
       "app": "fast",
+      "type": "correcao",
+      "text": "5.3.9e (14/11/2026): cada rota no seu dia — rota CONCLUÍDA fica no dia em que foi feita (se foi parar em outro dia, volta sozinha); rota NÃO concluída de dia anterior passa para hoje com a marca ⏪ De dd/mm (pendentes dos últimos 7 dias). Excluídas e canceladas não se mexem. E a tela fica parada: Limpar, Marcar Todos, Adicionar Destino e os outros botões não fazem mais a tela subir, descer ou tremer."
+    },
+    {
+      "app": "fast",
       "type": "melhorado",
       "text": "5.3.9d (14/11/2026): modo COLETA — as coletas (Coleta 1, Coleta 2, Coleta 3…) ficam sem valor; o DESTINO FINAL agora tem quantidade e valor e vira uma rota também; ele vem da lista de LUGARES com o endereço, e um destino novo pede endereço/bairro e é salvo em Lugares. Corrigido: o cursor não pula mais sozinho entre os campos de destino."
     },

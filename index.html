@@ -13723,7 +13723,8 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
             ordem: _ordemSeq,
             statusUpdatedAt: item.statusUpdatedAt || '',
             dataOriginal: item.dataOriginal || '',
-            passouEm: item.passouEm || ''
+            passouEm: item.passouEm || '',
+            viradaEm: item.viradaEm || ''
           }});
           rows.push({
             id: Math.floor(Number(item.id)) || Date.now(),
@@ -13800,6 +13801,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
           statusUpdatedAt: fastMeta.statusUpdatedAt || row.updated_at || '',
           dataOriginal: fastMeta.dataOriginal || '',
           passouEm: fastMeta.passouEm || '',
+          viradaEm: fastMeta.viradaEm || '',
           updatedAt: row.updated_at || '',
           // (r109 FIX-ORDEM) relê a ordem manual gravada na nuvem
           ordem: (typeof fastMeta.ordem === 'number' && isFinite(fastMeta.ordem)) ? fastMeta.ordem : undefined
@@ -48777,6 +48779,197 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
     var ligado=on();f.classList.toggle('fc-on',ligado);
     if(ligado){var di=document.getElementById('seqDestino');var bl=di&&di.closest('.span-4');var lb=bl&&bl.querySelector('label.fx-titulo,:scope > label,.fx-obs-head > label');if(lb&&/Valor/.test(lb.textContent))lb.textContent='Coleta / Qtd:';}
   },500);
+})();
+</script>
+<script id="fast539e-tela-parada">
+/* 5.3.9e — TELA PARADA
+   Ao tocar em qualquer botão (Limpar, Marcar Todos, Adicionar Destino, chaves, caixas…)
+   a tela não sobe, não desce e não treme: o botão tocado fica no mesmo lugar da tela
+   por 1,5 s enquanto a lista é redesenhada. Se a pessoa rolar com o dedo/rodinha,
+   a trava solta na hora. Exceções: menu de abas, Editar rota, Novo, Topo/Final. */
+(function(){
+  var W=window,D=document;
+  if(/[?&]semtrava\b/.test(location.search))return;
+  var EXCLUI=/trocarAba|abrirModalEditarSeq|abrirModalNovaSeq|voltarAoTopo|irAoFinal|scrollIntoView|editar/i;
+  var trava=null;
+  function rolaveis(el){
+    var l=[],e=el&&el.parentElement;
+    while(e&&e!==D.body&&e!==D.documentElement){
+      var s=getComputedStyle(e);
+      if(/(auto|scroll)/.test(s.overflowY)&&e.scrollHeight>e.clientHeight+1)l.push(e);
+      e=e.parentElement;
+    }
+    l.push(D.scrollingElement||D.documentElement);
+    return l;
+  }
+  function excluido(b){
+    if(!b)return true;
+    if(b.closest('.nav-item,nav,.bottom-nav,[data-tela-livre]'))return true;
+    var a=b.closest('a[href]');if(a&&!/^#?$/.test(a.getAttribute('href')||'')&&!/^javascript/i.test(a.getAttribute('href')))return true;
+    var oc=(b.getAttribute('onclick')||'')+' '+(b.className||'')+' '+(b.id||'')+' '+(b.title||'');
+    return EXCLUI.test(oc);
+  }
+  function soltar(){if(trava){trava.fim=0;fimTrava(trava);trava=null;try{mo&&mo.disconnect()}catch(e){}}}
+  function corrigir(t){
+    try{
+      if(t.alvo.isConnected&&t.alvo.offsetParent){
+        var d=t.alvo.getBoundingClientRect().top-t.r0;
+        if(Math.abs(d)>0.5){
+          for(var i=0;i<t.sc.length&&Math.abs(d)>0.5;i++){var s=t.sc[i],antes=s.scrollTop;s.scrollTop=antes+d;d-=(s.scrollTop-antes)}
+        }
+      }else{
+        t.sc.forEach(function(s,i){if(Math.abs(s.scrollTop-t.tops[i])>0.5)s.scrollTop=t.tops[i]});
+      }
+    }catch(e){}
+  }
+  var mo=null;
+  function fimTrava(t){if(t.sbFeito)return;t.sbFeito=1;try{t.sc.forEach(function(s,i){s.style.scrollBehavior=t.sb[i]||''})}catch(e){}}
+  function travar(alvo){
+    var sc=rolaveis(alvo),tops=sc.map(function(s){return s.scrollTop});
+    var r0=alvo.getBoundingClientRect().top,t0=performance.now();
+    if(trava)fimTrava(trava);var t={fim:t0+1500,sc:sc,tops:tops,alvo:alvo,r0:r0,sb:sc.map(function(s){var v=s.style.scrollBehavior;s.style.scrollBehavior='auto';return v})};trava=t;
+    if(!mo&&W.MutationObserver){mo=new MutationObserver(function(){if(trava)corrigir(trava)});}
+    try{mo.observe(D.body,{childList:true,subtree:true,attributes:true,attributeFilter:['style','class','hidden']})}catch(e){}
+    (function passo(){
+      if(trava!==t||performance.now()>t.fim){if(trava===t){trava=null;try{mo.disconnect()}catch(e){}}fimTrava(t);return}
+      corrigir(t);
+      requestAnimationFrame(passo);
+    })();
+  }
+  D.addEventListener('scroll',function(){if(trava)corrigir(trava)},true);
+  var ALVO='button,.btn,[role=button],[role=switch],[onclick],input[type=checkbox],input[type=radio],label,.fc-switch,.ripple,select';
+  function aoTocar(ev){
+    var b=ev.target&&ev.target.closest&&ev.target.closest(ALVO);
+    if(!b||excluido(b))return;
+    travar(b);
+  }
+  D.addEventListener('pointerdown',aoTocar,true);
+  D.addEventListener('click',function(ev){if(!trava)aoTocar(ev);else{trava.fim=performance.now()+1500}},true);
+  // a pessoa rolou: a trava solta
+  ['wheel','touchmove'].forEach(function(n){D.addEventListener(n,function(){if(trava&&performance.now()-((trava.fim||0)-1500)>250)soltar()},{capture:true,passive:true})});
+  D.addEventListener('keydown',function(ev){if(/^(PageUp|PageDown|Home|End|ArrowUp|ArrowDown|Space| )$/.test(ev.key)&&!/INPUT|TEXTAREA|SELECT/.test((ev.target||{}).tagName||''))soltar()},true);
+  // durante a trava, foco em campo não rola a tela
+  var foco0=HTMLElement.prototype.focus;
+  HTMLElement.prototype.focus=function(o){if(trava){try{return foco0.call(this,Object.assign({},o||{},{preventScroll:true}))}catch(e){}}return foco0.apply(this,arguments)};
+  // rolagens automáticas durante a trava são ignoradas (exceto as das exceções, que não travam)
+  var siv0=Element.prototype.scrollIntoView;
+  Element.prototype.scrollIntoView=function(){if(trava)return;return siv0.apply(this,arguments)};
+  W.fastTelaParada={soltar:soltar,ativa:function(){return !!trava}};
+
+  /* Redesenho automático da lista (sincronização, conferências): a tela não treme */
+  function segurar(nome,contId){
+    var f=W[nome];if(typeof f!=='function'||f.__f539tela)return;
+    var g=function(){
+      var c=D.getElementById(contId),sc=null,top=0,h=0;
+      try{if(c&&c.offsetParent){sc=rolaveis(c);top=sc.map(function(s){return s.scrollTop});h=c.offsetHeight;c.style.minHeight=h+'px'}}catch(e){}
+      try{return f.apply(this,arguments)}finally{
+        if(sc){
+          try{sc.forEach(function(s,i){if(Math.abs(s.scrollTop-top[i])>0.5)s.scrollTop=top[i]})}catch(e){}
+          requestAnimationFrame(function(){try{c.style.minHeight='';sc.forEach(function(s,i){if(!trava&&Math.abs(s.scrollTop-top[i])>0.5&&s.scrollHeight-s.clientHeight>=top[i])s.scrollTop=top[i]})}catch(e){}});
+        }
+      }
+    };
+    Object.keys(f).forEach(function(k){try{g[k]=f[k]}catch(e){}});g.__f539tela=1;W[nome]=g;
+    try{if(nome==='renderizarSequencia')renderizarSequencia=g}catch(e){}
+  }
+  function instalar(){segurar('renderizarSequencia','containerSequencia');segurar('renderizar','tabelaRotas')}
+  instalar();setInterval(instalar,3000);
+})();
+</script>
+<script id="fast539e-dia-certo">
+/* 5.3.9e — CADA ROTA NO SEU DIA
+   • Rota CONCLUÍDA fica no dia em que foi feita. Se alguma cópia/aparelho antigo a
+     jogou para um dia depois da conclusão, ela volta para o dia da conclusão.
+   • Rota NÃO concluída de um dia anterior passa para hoje (mostra "⏪ De dd/mm").
+     Só valem pendentes dos últimos 7 dias; canceladas e excluídas nunca se mexem.
+   • Nada que está na lista de excluídos volta. */
+(function(){
+  var W=window,JANELA=7;
+  function bd(){try{return bancoDados}catch(e){return W.bancoDados}}
+  function iso(d){try{return fastDataLocalYYYYMMDD(d)}catch(e){var x=d||new Date();return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0')}}
+  function hoje(){return iso(new Date())}
+  function menosDias(ymd,n){var p=ymd.split('-');return iso(new Date(+p[0],+p[1]-1,+p[2]-n))}
+  function valida(v){return /^\d{4}-\d{2}-\d{2}$/.test(String(v||''))}
+  function diaDe(v){if(!v)return '';if(valida(v))return String(v);var t=Date.parse(v);return t?iso(new Date(t)):''}
+  function rotaDe(b,it){if(!it||it.rotaId==null||it.rotaId==='')return null;try{return fastRotaPorId(b.rotas||[],it.rotaId)}catch(e){return (b.rotas||[]).find(function(r){return r&&String(r.id)===String(it.rotaId)})||null}}
+  function concluida(it,rv){return /conclu|entreg|finaliz/i.test(String(it.status||''))||/conclu/i.test(String((rv&&rv.statusExecucao)||''))}
+  function cancelada(it,rv){return /cancel/i.test(String(it.status||''))||/cancel/i.test(String((rv&&rv.statusExecucao)||''))}
+  function excl(b){
+    var s=new Set();
+    [].concat(b.seqItensExcluidos||[]).forEach(function(x){s.add('i'+String(x).split('@')[0])});
+    [].concat(b.rotasExcluidas||[],b.seqRotasExcluidas||[]).forEach(function(x){s.add('r'+String(x))});
+    return s;
+  }
+  function mover(b,it,de,para){
+    var o=b.sequencias[de]||[],ix=o.indexOf(it);if(ix<0)return false;
+    var dst=b.sequencias[para]||(b.sequencias[para]=[]);
+    var ja=dst.find(function(x){return x&&x!==it&&(String(x.id)===String(it.id)||(it.rotaId!=null&&x.rotaId!=null&&String(x.rotaId)===String(it.rotaId)))});
+    o.splice(ix,1);
+    if(!ja){dst.push(it);return true}
+    ja.fotos=Array.from(new Set([].concat(Array.isArray(ja.fotos)?ja.fotos:[],Array.isArray(it.fotos)?it.fotos:[])));
+    if(!ja.foto&&it.foto)ja.foto=it.foto;
+    if(!ja.obs&&it.obs)ja.obs=it.obs;
+    if(!ja.motorista&&it.motorista)ja.motorista=it.motorista;
+    var ta=Date.parse(ja.statusUpdatedAt||ja.dataConclusao||'')||0,ti=Date.parse(it.statusUpdatedAt||it.dataConclusao||'')||0;
+    if(ti>ta){ja.status=it.status;ja.statusUpdatedAt=it.statusUpdatedAt||'';ja.dataConclusao=it.dataConclusao||''}
+    return true;
+  }
+  var rodando=false;
+  function rodar(silencioso){
+    var b=bd();if(rodando||!b||!b.sequencias)return {voltaram:0,passaram:0};
+    rodando=true;
+    var h=hoje(),lim=menosDias(h,JANELA),agora=new Date().toISOString(),ex=excl(b),voltaram=0,passaram=0,mudou=false;
+    try{
+      Object.keys(b.sequencias).filter(valida).sort().forEach(function(d){
+        (b.sequencias[d]||[]).slice().forEach(function(it){
+          if(!it)return;
+          if(ex.has('i'+String(it.id))||(it.rotaId!=null&&ex.has('r'+String(it.rotaId))))return;
+          var rv=rotaDe(b,it);
+          if(concluida(it,rv)){
+            // concluída: fica no dia em que foi feita
+            var c=diaDe(it.dataConclusao)||diaDe(rv&&rv.dataConclusao);
+            if(!c||d<=c||d>h)return;
+            var alvo=c;if(valida(it.dataOriginal)&&it.dataOriginal>c&&it.dataOriginal<d)alvo=it.dataOriginal;
+            if(mover(b,it,d,alvo)){voltaram++;mudou=true;it.updatedAt=agora;if(rv&&String(rv.data||'')===d){rv.data=alvo;rv.updatedAt=agora;rv.ultimaModificacao=agora}}
+            return;
+          }
+          if(cancelada(it,rv))return;
+          // não concluída de dia anterior (últimos 7 dias): passa para hoje
+          if(d>=h||d<lim)return;
+          if(mover(b,it,d,h)){
+            passaram++;mudou=true;
+            if(!valida(it.dataOriginal))it.dataOriginal=d;
+            it.viradaEm=agora;it.updatedAt=agora;
+            if(rv&&(!valida(rv.data)||rv.data<h)){if(!valida(rv.dataOriginal))rv.dataOriginal=String(rv.data||d);rv.data=h;rv.updatedAt=agora;rv.ultimaModificacao=agora}
+          }
+        });
+      });
+      if(mudou){
+        try{b.ultimaModificacao=agora}catch(e){}
+        try{salvarStorage()}catch(e){}
+        try{W.__frxForcarLista=true;renderizarSequencia()}catch(e){}
+        try{if(typeof renderizar==='function')renderizar()}catch(e){}
+        try{if(typeof atualizarContadoresHeader==='function')atualizarContadoresHeader()}catch(e){}
+        if(!silencioso){
+          var t=[];if(passaram)t.push(passaram+' rota(s) não concluída(s) passaram para hoje');if(voltaram)t.push(voltaram+' rota(s) concluída(s) voltaram para o dia em que foram feitas');
+          try{mostrarToast(t.join(' • '),'info')}catch(e){}
+        }
+      }
+    }catch(e){console.warn('FAST dia certo:',e)}
+    rodando=false;
+    return {voltaram:voltaram,passaram:passaram};
+  }
+  W.fastRotasDiaCerto=rodar;
+  // roda junto com a conferência de datas (virada do dia, sincronização, abertura)
+  function embrulhar(){
+    var f=W.verificarEVirarDia;if(typeof f!=='function'||f.__f539dia)return;
+    var g=function(){var r=f.apply(this,arguments);try{var x=rodar();r=(r||0)+x.voltaram+x.passaram}catch(e){}return r};
+    g.__f539dia=1;W.verificarEVirarDia=g;
+  }
+  embrulhar();setInterval(embrulhar,5000);
+  setTimeout(function(){rodar()},8000);
+  setInterval(function(){if(!document.hidden)rodar()},60000);
+  document.addEventListener('visibilitychange',function(){if(!document.hidden)setTimeout(function(){rodar()},2500)});
 })();
 </script>
 </body></html>
