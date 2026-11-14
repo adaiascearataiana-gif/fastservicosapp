@@ -194,14 +194,19 @@
     var agora = Date.now();
     var completa = !c || !c.rows || agora - (c.full || 0) > COMPLETA_MS || restaurando();
     if (!completa) {
-      var desde = new Date(Math.max(0, (c.wm || 0) - SOBREPOR_MS)).toISOString();
+      // 5.3.9c (economia): a janela de 20 s para trás (relógios diferentes entre aparelhos)
+      // só a cada 4ª leitura; nas outras, só o que é MAIS NOVO que a última hora vista.
+      // Antes, parado, cada leitura baixava de novo as linhas gravadas no último instante.
+      c.n = (c.n || 0) + 1;
+      var janela = (c.n % 4 === 0) ? SOBREPOR_MS : 0;
+      var desde = new Date(Math.max(0, (c.wm || 0) - janela)).toISOString();
       // 5.3.8 (economia de dados): primeiro só "id + hora" das linhas da janela (poucos
       // bytes cada); a linha completa só desce se for nova ou mudou. Antes, cada leitura
       // baixava de novo, inteiras, todas as linhas gravadas no mesmo instante da última.
-      var leves = await getTudo(tabela, 'id,updated_at', 'updated_at=gte.' + encodeURIComponent(desde));
+      var leves = await getTudo(tabela, 'id,updated_at', 'updated_at=' + (janela ? 'gte.' : 'gt.') + encodeURIComponent(desde));
       var faltam = leves.filter(function (r) { var c0 = c.rows[String(r.id)]; return !c0 || String(c0.updated_at) !== String(r.updated_at); });
       var novos = [];
-      if (faltam.length > 400) novos = await getTudo(tabela, '*', 'updated_at=gte.' + encodeURIComponent(desde));
+      if (faltam.length > 400) novos = await getTudo(tabela, '*', 'updated_at=' + (janela ? 'gte.' : 'gt.') + encodeURIComponent(desde));
       else {
         for (var fi = 0; fi < faltam.length; fi += 80) {
           var ids80 = faltam.slice(fi, fi + 80).map(function (r) { return encodeURIComponent(String(r.id)); }).join(',');
@@ -1127,7 +1132,7 @@
   async function checar(forcar) {
     if (checando || document.hidden || !navigator.onLine || !pronto()) return;
     // com tempo real ativo, a verificação vira só reserva (a cada 15 s)
-    if (!forcar && Date.now() - ultimaChecagem < (rtConectado() ? 30000 : 8000)) return;   // 5.3.8: sem tempo real confere a cada 8 s (pedido curto, poucos bytes); com tempo real, 30 s (os avisos chegam na hora)
+    if (!forcar && Date.now() - ultimaChecagem < (rtConectado() ? 60000 : 20000)) return;   // 5.3.9c: economia de dados — sem tempo real confere a cada 20 s; com tempo real, 60 s (os avisos chegam na hora)
     if (!token()) { await renovarLogin(true); }
     if (!token()) {
       if (!avisouSemLogin) {
@@ -2186,7 +2191,7 @@
       (tk ? '✅' : '❌') + ' Login no banco: ' + (tk ? 'sim' :
         (DIAG.login === 'sem-sessao' ? 'NÃO — entre NESTE app com e-mail e senha' :
          DIAG.login === 'recusado' ? 'NÃO — login venceu; saia e entre de novo com e-mail e senha' : 'renovando…')),
-      (rt ? '✅' : '⚠️') + ' Tempo real: ' + (rt ? 'conectado' : 'desconectado (conferindo a cada 8 s)'),
+      (rt ? '✅' : '⚠️') + ' Tempo real: ' + (rt ? 'conectado' : 'desconectado (conferindo a cada 20 s)'),
       '⬆️ Último envio: ' + hora(DIAG.envio) + ' · ⬇️ Última leitura: ' + hora(DIAG.baixou),
       (driveToken() ? '✅' : '📷') + ' Google Drive (fotos): ' + (driveToken() ? 'conectado' : (DRV.estado || 'verificando…')) +
         (DRV.pend >= 0 ? ' · ' + DRV.pend + ' foto(s) na fila' : '')

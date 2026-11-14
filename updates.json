@@ -4,6 +4,11 @@
   "updates": [
     {
       "app": "fast",
+      "type": "melhorado",
+      "text": "5.3.9c (13/11/2026): economia de dados — a conferência com a nuvem baixa só o que é novo (antes, parado, baixava de novo as últimas linhas a cada leitura) e fica mais espaçada (20 s sem tempo real, 60 s com tempo real). No simulador: PAINEL de 84 para 18 MB/hora, ROTAS de 35 para 5 MB/hora."
+    },
+    {
+      "app": "fast",
       "type": "correcao",
       "text": "5.3.9b (13/11/2026): clientes e lugares não são mais apagados da nuvem automaticamente (só por ação de Excluir/Unificar); cadastro que existe na nuvem nunca fica escondido por lista antiga de excluídos; aparelhos voltam a mostrar todos os clientes e lugares."
     },
