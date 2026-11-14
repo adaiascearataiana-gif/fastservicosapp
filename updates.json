@@ -5,6 +5,11 @@
     {
       "app": "fast",
       "type": "melhorado",
+      "text": "5.3.9d (14/11/2026): modo COLETA — as coletas (Coleta 1, Coleta 2, Coleta 3…) ficam sem valor; o DESTINO FINAL agora tem quantidade e valor e vira uma rota também; ele vem da lista de LUGARES com o endereço, e um destino novo pede endereço/bairro e é salvo em Lugares. Corrigido: o cursor não pula mais sozinho entre os campos de destino."
+    },
+    {
+      "app": "fast",
+      "type": "melhorado",
       "text": "5.3.9c (13/11/2026): economia de dados — a conferência com a nuvem baixa só o que é novo (antes, parado, baixava de novo as últimas linhas a cada leitura) e fica mais espaçada (20 s sem tempo real, 60 s com tempo real). No simulador: PAINEL de 84 para 18 MB/hora, ROTAS de 35 para 5 MB/hora."
     },
     {

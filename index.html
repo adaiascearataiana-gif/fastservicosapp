@@ -2364,6 +2364,17 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
 }
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 </style>
+<style id="fast539d-coleta-css">
+/* 5.3.9d: modo Coleta — coletas sem valor (o valor fica só no Destino final) */
+#formModalSeq.fc-on .span-4 > .seq-destino-row:not(.f539-df-row) .seq-valor-wrap,
+#formModalSeq.fc-on .fx-obs-head + .seq-destino-row:not(.f539-df-row) .seq-valor-wrap,
+#formModalSeq.fc-on #containerDestinosExtras .seq-valor-wrap{display:none!important}
+#coletaDFLancWrap{border:2px solid #f59e0b;border-radius:12px;padding:10px;background:rgba(245,158,11,.07)}
+#coletaDFLancWrap .f539-df-row{display:flex!important;flex-wrap:wrap!important;gap:8px!important}
+#coletaDFLancWrap #coletaDestinoFinalLanc{flex:1 1 100%!important;min-width:0!important}
+#coletaDFLancWrap #coletaDFQtd{flex:0 0 80px!important}
+#coletaDFLancWrap .seq-valor-wrap{flex:1 1 auto!important}
+</style>
 </head>
 <body class="fast-pro fast-v2 fast-v2-compact fast-edition-mobile fast-touch-ui fx-executive fx-layout-command theme-light" style="" data-fast-layout="operacional">
 <script id="r99-ime-guard">
@@ -43553,7 +43564,7 @@ html body #modalEditarRota .modal-content{margin:0 auto!important;top:auto!impor
 
   /* ====== 1) FORMULARIO DE LANCAMENTO (Rotas do Dia) ====== */
   function destinoBlocoLanc(){var rows=$all('#formModalSeq .span-4');for(var i=0;i<rows.length;i++){if(rows[i].querySelector('.seq-destino-row'))return rows[i]}return null}
-  function campoDestinoFinalLanc(){var id='coletaDFLancWrap';var ex=document.getElementById(id);if(ex)return ex;var div=document.createElement('div');div.className='span-4';div.id=id;div.style.display='none';div.innerHTML='<label>Destino final da coleta:</label><input type="text" id="coletaDestinoFinalLanc" placeholder="Para onde a coleta vai" oninput="if(window.capitalizar)capitalizar(this);">';return div}
+  function campoDestinoFinalLanc(){var id='coletaDFLancWrap';var ex=document.getElementById(id);if(ex)return ex;var div=document.createElement('div');div.className='span-4';div.id=id;div.style.display='none';div.innerHTML='<label>Destino final / Qtd / Valor:</label><div class="seq-destino-row f539-df-row"><input type="text" id="coletaDestinoFinalLanc" class="seq-destino-input" placeholder="Destino final" oninput="if(window.capitalizar)capitalizar(this);"><input type="number" id="coletaDFQtd" class="seq-qtd-input" step="1" min="0" inputmode="numeric" placeholder="Qtd" title="Quantidade"><div class="seq-valor-wrap"><input type="text" id="coletaDFValor" class="seq-valor-input" inputmode="numeric" placeholder="R$ 0,00" title="Valor (R$)" onfocus="fastMoedaFocus(this)" oninput="fastMascaraMoeda(this);" onblur="fastMoedaBlurVazio(this)"><button type="button" class="fast-step-btn ripple" title="Diminuir R$ 5,00" onclick="fastValorStep(\'coletaDFValor\',-5)"><i class="fa-solid fa-minus"></i></button><button type="button" class="fast-step-btn ripple" title="Aumentar R$ 5,00" onclick="fastValorStep(\'coletaDFValor\',5)"><i class="fa-solid fa-plus"></i></button></div></div>';return div}
   var _snap=null;
   function snapshot(){if(_snap)return;var bloco=destinoBlocoLanc();var extras=document.getElementById('destinosExtrasSection');if(!bloco)return;_snap={bp:bloco.parentNode,bn:bloco.nextSibling,ep:extras?extras.parentNode:null,en:extras?extras.nextSibling:null}}
   function restaurarOrdem(){if(!_snap)return;var bloco=destinoBlocoLanc();var extras=document.getElementById('destinosExtrasSection');try{if(bloco&&_snap.bp)_snap.bp.insertBefore(bloco,_snap.bn);if(extras&&_snap.ep)_snap.ep.insertBefore(extras,_snap.en)}catch(e){}}
@@ -43571,7 +43582,7 @@ html body #modalEditarRota .modal-content{margin:0 auto!important;top:auto!impor
       try{if(extras)bloco.parentNode.insertBefore(extras,bloco.nextSibling);}catch(e){}
       try{if(!dfWrap.parentNode)(extras||bloco).parentNode.insertBefore(dfWrap,(extras||bloco).nextSibling);}catch(e){}
       dfWrap.style.display='';
-      if(destLabel)destLabel.textContent='Coleta / Qtd / Valor:';
+      if(destLabel)destLabel.textContent='Coleta / Qtd:';
       if(destInput)destInput.placeholder='Coleta 1';
       if(addBtn)addBtn.innerHTML='<i class="fa-solid fa-plus"></i> Adicionar Coleta';
       renumerarColetas();
@@ -43599,13 +43610,31 @@ html body #modalEditarRota .modal-content{margin:0 auto!important;top:auto!impor
     var novo=function(e){
       var coleta=ligado();
       var data=(document.getElementById('dpDataSequencia')||{}).value;
-      var df=(document.getElementById('coletaDestinoFinalLanc')||{}).value||'';
+      var df=((document.getElementById('coletaDestinoFinalLanc')||{}).value||'').trim();
       var l0=(window.bancoDados&&bancoDados.sequencias&&bancoDados.sequencias[data])||null;
       var antes=l0?l0.length:0;
+      // 5.3.9d: no modo Coleta as coletas não têm valor; o DESTINO FINAL entra como rota
+      // (última linha), com a quantidade e o valor informados
+      var temDF=false;
+      if(coleta){
+        try{['seqValorDestino','seqValor'].forEach(function(id){var e=document.getElementById(id);if(e)e.value=''});
+          $all('#containerDestinosExtras .extra-valor-input').forEach(function(e){e.value=''});}catch(eV){}
+        if(df&&typeof window.adicionarDestinoExtra==='function'){
+          try{window.adicionarDestinoExtra(df,(document.getElementById('coletaDFQtd')||{}).value||'',(document.getElementById('coletaDFValor')||{}).value||'');
+            var cont=document.getElementById('containerDestinosExtras');var ult=cont&&cont.lastElementChild;if(ult){ult.setAttribute('data-f539df','1');ult.style.display='none'}temDF=true;}catch(eA){}
+        }
+      }
       var r=orig.apply(this,arguments);
+      if(coleta){
+        try{var cont2=document.getElementById('containerDestinosExtras');if(cont2)$all('[data-f539df]',cont2).forEach(function(x){x.remove()});
+          if((document.getElementById('seqCliente')||{}).value===''){['coletaDestinoFinalLanc','coletaDFQtd','coletaDFValor'].forEach(function(id){var e=document.getElementById(id);if(e)e.value=''})}}catch(eR){}
+      }
       if(coleta){setTimeout(function(){try{
         var l=(window.bancoDados&&bancoDados.sequencias&&bancoDados.sequencias[data])||[];
-        for(var i=antes;i<l.length;i++){if(l[i]){l[i].tipo='coleta';if(df)l[i].destinoFinal=df;var rv=l[i].rotaId?(bancoDados.rotas||[]).find(function(x){return String(x.id)===String(l[i].rotaId)}):null;if(rv){rv.tipo='coleta';if(df)rv.destinoFinal=df}}}
+        var fim=l.length;
+        // a última linha nova é o destino final: rota normal (não é coleta)
+        if(temDF&&fim>antes&&l[fim-1]&&String(l[fim-1].destino||'').trim().toLowerCase()===df.toLowerCase()){l[fim-1].coletaFinal=true;fim--}
+        for(var i=antes;i<fim;i++){if(l[i]){l[i].tipo='coleta';if(df)l[i].destinoFinal=df;var rv=l[i].rotaId?(bancoDados.rotas||[]).find(function(x){return String(x.id)===String(l[i].rotaId)}):null;if(rv){rv.tipo='coleta';if(df)rv.destinoFinal=df}}}
         if(window.fastSalvarSemBloquear)window.fastSalvarSemBloquear(60);
         setTimeout(fcSyncColunas,1500);
       }catch(err){console.warn('coleta tag',err)}},150)}
@@ -48175,7 +48204,7 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
   var END_DE={txtOrigem:'txtOrigemEnd',editTxtOrigem:'editTxtOrigemEnd'};
   function camposDe(grupo){
     var l=[];function add(i){if(i)l.push(i)}
-    if(grupo==='seq'||!grupo){add($('seqDestino'));D.querySelectorAll('#formModalSeq #containerDestinosExtras .destino-extra-input').forEach(add)}
+    if(grupo==='seq'||!grupo){add($('seqDestino'));var dfc=$('coletaDestinoFinalLanc');if(dfc&&dfc.offsetParent)add(dfc);D.querySelectorAll('#formModalSeq #containerDestinosExtras .destino-extra-input').forEach(add)}
     if(grupo==='rota'||!grupo){add($('txtOrigem'));add($('txtDestino'));D.querySelectorAll('#containerDestinosExtrasRota .destino-extra-rota-input').forEach(add)}
     if(grupo==='edit'||!grupo){add($('editTxtOrigem'));add($('editTxtDestino'))}
     return l;
@@ -48666,7 +48695,10 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
   D.addEventListener('focusin',function(ev){
     var t=ev.target;if(!t||t.tagName!=='INPUT')return;
     if(/^(seqDestino|txtDestino|editTxtDestino|seqOrigem|txtOrigem|editTxtOrigem)$/.test(t.id)||t.classList.contains('destino-extra-input')||t.classList.contains('destino-extra-rota-input')){
-      if(t.value)setTimeout(function(){try{t.select()}catch(e){}},0);
+      // 5.3.9d: só seleciona se o campo AINDA estiver com o foco e o toque foi da pessoa.
+      // Antes, select() em dois campos novos fazia o foco pular de um para o outro sem parar
+      // (teclado digitando no campo errado, tela tremendo).
+      if(t.value&&ev.isTrusted!==false&&!t.__f539sel){t.__f539sel=1;setTimeout(function(){try{if(D.activeElement===t)t.setSelectionRange(0,t.value.length)}catch(e){}t.__f539sel=0},0);}
     }
   },true);
   instalar();W.addEventListener('load',function(){setTimeout(instalar,1500);setTimeout(instalar,5000)});setInterval(instalar,5000);
@@ -48732,6 +48764,19 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
     }catch(e){}
     return F.apply(this,arguments);
   };
+})();
+</script>
+<script id="fast539d-coleta">
+/* 5.3.9d — modo Coleta: marca o formulário (esconde os valores das coletas) e leva o
+   campo Destino final para a lista de LUGARES (prévia, endereço, lugar novo) */
+(function(){
+  var W=window;
+  function on(){try{return localStorage.getItem('fastColetaModo')==='1'}catch(e){return false}}
+  setInterval(function(){
+    var f=document.getElementById('formModalSeq');if(!f)return;
+    var ligado=on();f.classList.toggle('fc-on',ligado);
+    if(ligado){var di=document.getElementById('seqDestino');var bl=di&&di.closest('.span-4');var lb=bl&&bl.querySelector('label.fx-titulo,:scope > label,.fx-obs-head > label');if(lb&&/Valor/.test(lb.textContent))lb.textContent='Coleta / Qtd:';}
+  },500);
 })();
 </script>
 </body></html>
