@@ -1,5 +1,39 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="fast-linux-desktop" data-fast-version="5.3.9" data-fast-enter-navigation="1"><head>
+<html lang="pt-BR" class="fast-linux-desktop" data-fast-version="5.3.9" data-fast-enter-navigation="1"><head><script id="fast539h-rolagem-lisa">
+/* 5.3.9h — ROLAGEM LISA NO CELULAR
+   Enquanto o dedo está na tela ou a tela está rolando, as conferências automáticas
+   (relógio, sincronização, contadores, etc.) esperam. As rápidas pulam a vez; as
+   demoradas (5 s ou mais) rodam logo depois que a tela para, uma de cada vez. */
+(function(){
+  var W=window,ult=-1e9,toque=false,fila=[],rodandoFila=false;
+  function agora(){return (W.performance&&performance.now)?performance.now():Date.now()}
+  function marca(){ult=agora()}
+  ['touchmove','wheel','scroll'].forEach(function(n){W.addEventListener(n,marca,{capture:true,passive:true})});
+  W.addEventListener('touchstart',function(){toque=true;marca()},{capture:true,passive:true});
+  ['touchend','touchcancel'].forEach(function(n){W.addEventListener(n,function(){toque=false;marca()},{capture:true,passive:true})});
+  function rolando(){return toque||agora()-ult<450}
+  W.fastRolando=rolando;
+  function esvaziar(){
+    if(rodandoFila)return;rodandoFila=true;
+    (function prox(){
+      if(rolando()){setTimeout(prox,250);return}
+      var f=fila.shift();if(!f){rodandoFila=false;return}
+      try{f.fn.apply(W,f.a)}catch(e){setTimeout(function(){throw e},0)}
+      f.esperando=false;
+      setTimeout(prox,40);
+    })();
+  }
+  var si=W.setInterval;
+  W.setInterval=function(fn,ms){
+    if(typeof fn!=='function')return si.apply(W,arguments);
+    var a=Array.prototype.slice.call(arguments,2),reg={fn:fn,a:a,esperando:false},longo=Number(ms)>=5000;
+    return si.call(W,function(){
+      if(!rolando())return fn.apply(W,a);
+      if(longo&&!reg.esperando){reg.esperando=true;fila.push(reg);esvaziar()}
+    },ms);
+  };
+})();
+</script>
 <script id="fast538-erros">
 /* 5.3.8 — FASE 1: ERROS QUE ANTES FICAVAM ESCONDIDOS
    O app tem centenas de proteções que "engolem" o erro e seguem em frente. Isso
@@ -37612,7 +37646,9 @@ body.fast-exclusive-app main { padding-bottom: 12px !important; }
   if (window.MutationObserver && document.documentElement) {
     // 5.3.8: no máximo 1 vez por quadro (antes rodava a cada mudança e deixava a tela lenta)
     var agendado = false;
-    new MutationObserver(function(){ if (agendado) return; agendado = true; requestAnimationFrame(function(){ agendado = false; limpar(); }); }).observe(document.documentElement, {childList:true, subtree:true});
+    // 5.3.9h: CSS esconde na hora; a limpeza roda a cada 3 s (antes rodava a cada quadro e pesava na rolagem)
+    try{var cs=document.createElement('style');cs.textContent=SEL.split(',').map(function(x){return 'body.fast-exclusive-app '+x}).join(',')+'{display:none!important}';(document.head||document.documentElement).appendChild(cs)}catch(e){}
+    setInterval(limpar,3000);
   }
 })();
 </script>
@@ -38872,7 +38908,7 @@ body.fast-exclusive-app main { padding-bottom: 12px !important; }
 setInterval(function(){try{var tab=document.getElementById('rotasDia');if(tab&&tab.classList.contains('active')&&typeof renderizarSequencia==='function')renderizarSequencia()}catch(e){}},60000);
 </script>
 <link rel="stylesheet" href="fast-logistics-2.4.css?v=4.0.27">
-<script src="fast-logistics-2.4.js?v=4.0.27"></script>
+<script src="fast-logistics-2.4.js?v=4.0.28"></script>
 
 <!-- FAST 2026-09-18 — camada final de responsividade.
      As versões anteriores acumulavam vários overrides mobile quase idênticos.
@@ -45380,15 +45416,21 @@ body.fx-apk .fx-gal-ajuda{display:flex}
     var t=e.touches[0]; ini={x:t.clientX,y:t.clientY}; alvo=e.target;
     timer=setTimeout(function(){
       timer=0; modo='tela'; ultY=ini.y; ultT=Date.now(); vel=0; alvo=rolador(alvo);
+      ligarSegurar(true);
       document.documentElement.classList.add('f538-rolando');
       aviso.style.display='block';
       try{ if(navigator.vibrate) navigator.vibrate(12); }catch(er){}
     },ESPERA);
   },{passive:true});
   // ouvinte permanente (precisa existir desde o início do toque para poder segurar a rolagem)
+  // 5.3.9h: o ouvinte que pode segurar a rolagem só existe durante o toque longo;
+  // no resto do tempo a rolagem é do navegador (lisa, sem esperar o app)
+  function segurar(e){if(modo==='tela'&&e.cancelable)e.preventDefault()}
+  var segurando=false;
+  function ligarSegurar(on){if(on===segurando)return;segurando=on;if(on)document.addEventListener('touchmove',segurar,{passive:false});else document.removeEventListener('touchmove',segurar,{passive:false})}
+  window.__f539ligarSegurar=ligarSegurar;
   document.addEventListener('touchmove',function(e){
     if(modo==='tela'){
-      if(e.cancelable)e.preventDefault();
       var t=e.touches[0], agora=Date.now(), dy=t.clientY-ultY;
       alvo.scrollTop+=-dy*1.6;
       vel=(-dy*1.6)/Math.max(1,agora-ultT); ultY=t.clientY; ultT=agora;
@@ -45397,9 +45439,10 @@ body.fx-apk .fx-gal-ajuda{display:flex}
     if(!ini||!timer)return;
     var t2=e.touches[0];
     if(Math.abs(t2.clientX-ini.x)>FOLGA || Math.abs(t2.clientY-ini.y)>FOLGA){ parar(); ini=null; }
-  },{passive:false});
+  },{passive:true});
   function fim(){
     parar();
+    ligarSegurar(false);
     if(modo==='tela'){
       aviso.style.display='none'; document.documentElement.classList.remove('f538-rolando');
       var v=vel*16, a=alvo;
@@ -47611,7 +47654,7 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
       g.__f538a='';pintar(g);
     }
   },true);
-  setInterval(preparar,1000);
+  setInterval(preparar,2000);
   W.fast538FotosLote={excluirItem:excluirItem,excluirEdit:excluirEdit};
 })();
 </script>
@@ -48333,7 +48376,7 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
   }
   instalarSalvar();
   W.addEventListener('load',function(){setTimeout(instalarSalvar,1500);setTimeout(instalarSalvar,5000)});
-  setInterval(function(){instalarSalvar();vigiar()},500);
+  setInterval(function(){instalarSalvar();vigiar()},1500);
   W.fast538DestinoRotasCampos=campos;
   W.fast538DestinoRotasMontar=montar;
   W.fast538DestinoRotasAtualizar=atualizar;
@@ -48424,7 +48467,7 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
     }
   }
   instalar();W.addEventListener('load',function(){setTimeout(instalar,1500);setTimeout(instalar,5000)});
-  setInterval(function(){instalar();vigiar()},400);
+  setInterval(function(){instalar();vigiar()},1200);
   W.fast538EdicoesProtegidas=function(){return JSON.parse(JSON.stringify(prot))};
 })();
 </script>
@@ -48493,7 +48536,7 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
     embrulhar('salvarDestinoModal','dest','destinos',CD,'editDestinoId');
   }
   instalar();W.addEventListener('load',function(){setTimeout(instalar,1500);setTimeout(instalar,6000)});
-  setInterval(function(){instalar();liberar();arrumarTelsAbertos();vigiar()},500);
+  setInterval(function(){instalar();liberar();arrumarTelsAbertos();vigiar()},1500);
   W.fast538ProtCadastros=function(){return JSON.parse(JSON.stringify(prot))};
 })();
 </script>
@@ -48843,10 +48886,10 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
     if(!b||excluido(b))return;
     travar(b);
   }
-  D.addEventListener('pointerdown',aoTocar,true);
-  D.addEventListener('click',function(ev){if(!trava)aoTocar(ev);else{trava.fim=performance.now()+1500}},true);
-  // a pessoa rolou: a trava solta
-  ['wheel','touchmove'].forEach(function(n){D.addEventListener(n,function(){if(trava&&performance.now()-((trava.fim||0)-1500)>250)soltar()},{capture:true,passive:true})});
+  // 5.3.9h: só trava no CLIQUE (o toque que vira arrasto nunca trava a tela)
+  D.addEventListener('click',aoTocar,true);
+  // a pessoa encostou o dedo ou rolou: a trava solta na hora
+  ['wheel','touchstart','touchmove','pointerdown'].forEach(function(n){D.addEventListener(n,function(ev){if(trava&&!(ev.type==='pointerdown'&&ev.pointerType==='mouse'))soltar()},{capture:true,passive:true})});
   D.addEventListener('keydown',function(ev){if(/^(PageUp|PageDown|Home|End|ArrowUp|ArrowDown|Space| )$/.test(ev.key)&&!/INPUT|TEXTAREA|SELECT/.test((ev.target||{}).tagName||''))soltar()},true);
   // durante a trava, foco em campo não rola a tela
   var foco0=HTMLElement.prototype.focus;

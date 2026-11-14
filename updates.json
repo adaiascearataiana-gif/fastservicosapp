@@ -4,6 +4,11 @@
   "updates": [
     {
       "app": "fast",
+      "type": "melhorado",
+      "text": "5.3.9h (14/11/2026): rolagem lisa no celular — enquanto o dedo está na tela, as conferências automáticas esperam; a rolagem não depende mais do app (o toque longo continua rolando a tela); tarefas que rodavam a cada quadro ou a cada meio segundo ficaram bem mais leves; a trava da tela parada só age no toque (clique), nunca no arrasto."
+    },
+    {
+      "app": "fast",
       "type": "correcao",
       "text": "5.3.9g (14/11/2026): datas arrumadas — nenhuma rota muda de dia sozinha (nem no PAINEL nem nas Rotas do Dia); o que tinha sido passado para hoje volta para o dia em que a rota foi criada. Se o app ficou aberto de um dia para o outro, as datas dos formulários passam para o novo dia, e aparece um aviso vermelho quando a tela não está em hoje. A tela continua parada ao tocar nos botões."
     },
