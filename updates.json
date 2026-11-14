@@ -5,7 +5,7 @@
     {
       "app": "fast",
       "type": "correcao",
-      "text": "5.3.9e (14/11/2026): cada rota no seu dia — rota CONCLUÍDA fica no dia em que foi feita (se foi parar em outro dia, volta sozinha); rota NÃO concluída de dia anterior passa para hoje com a marca ⏪ De dd/mm (pendentes dos últimos 7 dias). Excluídas e canceladas não se mexem. E a tela fica parada: Limpar, Marcar Todos, Adicionar Destino e os outros botões não fazem mais a tela subir, descer ou tremer."
+      "text": "5.3.9g (14/11/2026): datas arrumadas — nenhuma rota muda de dia sozinha (nem no PAINEL nem nas Rotas do Dia); o que tinha sido passado para hoje volta para o dia em que a rota foi criada. Se o app ficou aberto de um dia para o outro, as datas dos formulários passam para o novo dia, e aparece um aviso vermelho quando a tela não está em hoje. A tela continua parada ao tocar nos botões."
     },
     {
       "app": "fast",

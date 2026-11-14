@@ -48877,99 +48877,100 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
 })();
 </script>
 <script id="fast539e-dia-certo">
-/* 5.3.9e — CADA ROTA NO SEU DIA
-   • Rota CONCLUÍDA fica no dia em que foi feita. Se alguma cópia/aparelho antigo a
-     jogou para um dia depois da conclusão, ela volta para o dia da conclusão.
-   • Rota NÃO concluída de um dia anterior passa para hoje (mostra "⏪ De dd/mm").
-     Só valem pendentes dos últimos 7 dias; canceladas e excluídas nunca se mexem.
-   • Nada que está na lista de excluídos volta. */
+/* 5.3.9f — DATAS: NADA MUDA DE DIA SOZINHO (desfaz o ajuste 26)
+   • O app NÃO passa mais rota de um dia para outro, nem no PAINEL nem nas Rotas do Dia.
+   • O que o ajuste 26 passou para hoje (marca viradaEm) volta para o dia original,
+     no item e na rota do PAINEL.
+   • Data dos formulários: se o app ficou aberto de um dia para o outro, as datas que
+     estavam em "hoje" passam para o novo hoje (antes ficavam presas no dia anterior e
+     as rotas novas iam para ontem).
+   • Aviso vermelho quando a tela/formulário está num dia que não é hoje. */
 (function(){
-  var W=window,JANELA=7;
+  var W=window,D=document;
   function bd(){try{return bancoDados}catch(e){return W.bancoDados}}
   function iso(d){try{return fastDataLocalYYYYMMDD(d)}catch(e){var x=d||new Date();return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0')}}
   function hoje(){return iso(new Date())}
-  function menosDias(ymd,n){var p=ymd.split('-');return iso(new Date(+p[0],+p[1]-1,+p[2]-n))}
   function valida(v){return /^\d{4}-\d{2}-\d{2}$/.test(String(v||''))}
-  function diaDe(v){if(!v)return '';if(valida(v))return String(v);var t=Date.parse(v);return t?iso(new Date(t)):''}
-  function rotaDe(b,it){if(!it||it.rotaId==null||it.rotaId==='')return null;try{return fastRotaPorId(b.rotas||[],it.rotaId)}catch(e){return (b.rotas||[]).find(function(r){return r&&String(r.id)===String(it.rotaId)})||null}}
-  function concluida(it,rv){return /conclu|entreg|finaliz/i.test(String(it.status||''))||/conclu/i.test(String((rv&&rv.statusExecucao)||''))}
-  function cancelada(it,rv){return /cancel/i.test(String(it.status||''))||/cancel/i.test(String((rv&&rv.statusExecucao)||''))}
-  function excl(b){
-    var s=new Set();
-    [].concat(b.seqItensExcluidos||[]).forEach(function(x){s.add('i'+String(x).split('@')[0])});
-    [].concat(b.rotasExcluidas||[],b.seqRotasExcluidas||[]).forEach(function(x){s.add('r'+String(x))});
-    return s;
-  }
-  function mover(b,it,de,para){
-    var o=b.sequencias[de]||[],ix=o.indexOf(it);if(ix<0)return false;
-    var dst=b.sequencias[para]||(b.sequencias[para]=[]);
-    var ja=dst.find(function(x){return x&&x!==it&&(String(x.id)===String(it.id)||(it.rotaId!=null&&x.rotaId!=null&&String(x.rotaId)===String(it.rotaId)))});
-    o.splice(ix,1);
-    if(!ja){dst.push(it);return true}
-    ja.fotos=Array.from(new Set([].concat(Array.isArray(ja.fotos)?ja.fotos:[],Array.isArray(it.fotos)?it.fotos:[])));
-    if(!ja.foto&&it.foto)ja.foto=it.foto;
-    if(!ja.obs&&it.obs)ja.obs=it.obs;
-    if(!ja.motorista&&it.motorista)ja.motorista=it.motorista;
-    var ta=Date.parse(ja.statusUpdatedAt||ja.dataConclusao||'')||0,ti=Date.parse(it.statusUpdatedAt||it.dataConclusao||'')||0;
-    if(ti>ta){ja.status=it.status;ja.statusUpdatedAt=it.statusUpdatedAt||'';ja.dataConclusao=it.dataConclusao||''}
-    return true;
-  }
-  var rodando=false;
-  function rodar(silencioso){
-    var b=bd();if(rodando||!b||!b.sequencias)return {voltaram:0,passaram:0};
-    rodando=true;
-    var h=hoje(),lim=menosDias(h,JANELA),agora=new Date().toISOString(),ex=excl(b),voltaram=0,passaram=0,mudou=false;
+  function br(v){return valida(v)?v.slice(8,10)+'/'+v.slice(5,7):v}
+  function criadoDia(id){var n=Math.floor(Number(id));if(!(n>1600000000000&&n<Date.now()+86400000))return '';var d=iso(new Date(n));return d<=hoje()?d:''}
+  function desfazer(){
+    var b=bd();if(!b||!b.sequencias)return 0;
+    var agora=new Date().toISOString(),n=0;
     try{
-      Object.keys(b.sequencias).filter(valida).sort().forEach(function(d){
+      Object.keys(b.sequencias).forEach(function(d){
         (b.sequencias[d]||[]).slice().forEach(function(it){
-          if(!it)return;
-          if(ex.has('i'+String(it.id))||(it.rotaId!=null&&ex.has('r'+String(it.rotaId))))return;
-          var rv=rotaDe(b,it);
-          if(concluida(it,rv)){
-            // concluída: fica no dia em que foi feita
-            var c=diaDe(it.dataConclusao)||diaDe(rv&&rv.dataConclusao);
-            if(!c||d<=c||d>h)return;
-            var alvo=c;if(valida(it.dataOriginal)&&it.dataOriginal>c&&it.dataOriginal<d)alvo=it.dataOriginal;
-            if(mover(b,it,d,alvo)){voltaram++;mudou=true;it.updatedAt=agora;if(rv&&String(rv.data||'')===d){rv.data=alvo;rv.updatedAt=agora;rv.ultimaModificacao=agora}}
-            return;
+          if(!it||!it.viradaEm)return;
+          var rv=null;try{rv=it.rotaId!=null?fastRotaPorId(b.rotas||[],it.rotaId):null}catch(e){}
+          // volta para o dia em que a rota foi CRIADA (o dataOriginal antigo pode vir de versões velhas)
+          var orig=criadoDia(rv?rv.id:it.id)||(valida(it.dataOriginal)?it.dataOriginal:'');
+          it.viradaEm='';it.updatedAt=agora;
+          if(orig&&orig!==d){
+            var o=b.sequencias[d],ix=o.indexOf(it);if(ix>=0)o.splice(ix,1);
+            var dst=b.sequencias[orig]||(b.sequencias[orig]=[]);
+            var ja=dst.find(function(x){return x&&x!==it&&(String(x.id)===String(it.id)||(it.rotaId!=null&&x.rotaId!=null&&String(x.rotaId)===String(it.rotaId)))});
+            if(!ja)dst.push(it);
+            if(rv&&String(rv.data||'')===d){rv.data=orig;rv.updatedAt=agora;rv.ultimaModificacao=agora}
           }
-          if(cancelada(it,rv))return;
-          // não concluída de dia anterior (últimos 7 dias): passa para hoje
-          if(d>=h||d<lim)return;
-          if(mover(b,it,d,h)){
-            passaram++;mudou=true;
-            if(!valida(it.dataOriginal))it.dataOriginal=d;
-            it.viradaEm=agora;it.updatedAt=agora;
-            if(rv&&(!valida(rv.data)||rv.data<h)){if(!valida(rv.dataOriginal))rv.dataOriginal=String(rv.data||d);rv.data=h;rv.updatedAt=agora;rv.ultimaModificacao=agora}
-          }
+          if(rv&&rv.dataOriginal===orig)rv.dataOriginal='';
+          it.dataOriginal='';
+          n++;
         });
       });
-      if(mudou){
-        try{b.ultimaModificacao=agora}catch(e){}
+      if(n){
         try{salvarStorage()}catch(e){}
         try{W.__frxForcarLista=true;renderizarSequencia()}catch(e){}
         try{if(typeof renderizar==='function')renderizar()}catch(e){}
-        try{if(typeof atualizarContadoresHeader==='function')atualizarContadoresHeader()}catch(e){}
-        if(!silencioso){
-          var t=[];if(passaram)t.push(passaram+' rota(s) não concluída(s) passaram para hoje');if(voltaram)t.push(voltaram+' rota(s) concluída(s) voltaram para o dia em que foram feitas');
-          try{mostrarToast(t.join(' • '),'info')}catch(e){}
-        }
+        try{mostrarToast(n+' rota(s) voltaram para o dia em que foram feitas.','info')}catch(e){}
       }
-    }catch(e){console.warn('FAST dia certo:',e)}
-    rodando=false;
-    return {voltaram:voltaram,passaram:passaram};
+    }catch(e){console.warn('FAST desfazer virada:',e)}
+    return n;
   }
-  W.fastRotasDiaCerto=rodar;
-  // roda junto com a conferência de datas (virada do dia, sincronização, abertura)
-  function embrulhar(){
-    var f=W.verificarEVirarDia;if(typeof f!=='function'||f.__f539dia)return;
-    var g=function(){var r=f.apply(this,arguments);try{var x=rodar();r=(r||0)+x.voltaram+x.passaram}catch(e){}return r};
-    g.__f539dia=1;W.verificarEVirarDia=g;
+  W.fastRotasDiaCerto=function(){return {voltaram:desfazer(),passaram:0}};
+  W.fastDesfazerVirada26=desfazer;
+  setTimeout(desfazer,5000);
+  setInterval(function(){if(!D.hidden)desfazer()},30000);
+
+  /* datas dos formulários acompanham o dia */
+  var ultimoHoje=hoje();
+  var CAMPOS=['dpDataRota','dpDataSequencia','dpDataDespesa'];
+  function acompanhar(){
+    var h=hoje();if(h===ultimoHoje)return;
+    var antes=ultimoHoje;ultimoHoje=h;
+    CAMPOS.forEach(function(id){
+      var el=D.getElementById(id);if(!el||el.value!==antes)return;
+      el.value=h;
+      if(id==='dpDataSequencia'){try{carregarSequenciaDia()}catch(e){}}
+      else{try{el.dispatchEvent(new Event('input',{bubbles:true}))}catch(e){}}
+    });
   }
-  embrulhar();setInterval(embrulhar,5000);
-  setTimeout(function(){rodar()},8000);
-  setInterval(function(){if(!document.hidden)rodar()},60000);
-  document.addEventListener('visibilitychange',function(){if(!document.hidden)setTimeout(function(){rodar()},2500)});
+  setInterval(acompanhar,15000);
+  D.addEventListener('visibilitychange',function(){if(!D.hidden)setTimeout(acompanhar,200)});
+  W.addEventListener('focus',function(){setTimeout(acompanhar,200)});
+  W.addEventListener('pageshow',function(){setTimeout(acompanhar,200)});
+
+  /* aviso quando não é hoje */
+  function aviso(campoId,depoisDe,texto,irHoje){
+    var el=D.getElementById(campoId),ref=D.getElementById(depoisDe)||el;if(!el||!ref)return;
+    var av=D.getElementById(campoId+'Aviso');
+    var h=hoje(),fora=valida(el.value)&&el.value!==h;
+    if(!fora){if(av)av.style.display='none';return}
+    if(!av){
+      av=D.createElement('div');av.id=campoId+'Aviso';av.setAttribute('data-tela-livre','1');
+      av.style.cssText='margin:6px 0 10px;padding:8px 10px;border-radius:10px;background:#fee2e2;color:#991b1b;border:1px solid #f87171;font-weight:800;font-size:13px;display:flex;align-items:center;gap:8px;flex-wrap:wrap';
+      ref.parentNode.insertBefore(av,ref.nextSibling);
+      av.addEventListener('click',function(ev){if(ev.target&&ev.target.closest('button')){var e=D.getElementById(campoId);e.value=hoje();irHoje(e);atualizarAvisos()}});
+    }
+    var msg='⚠️ '+texto.split('{d}').join(br(el.value));
+    if(av.__msg!==msg){av.__msg=msg;av.innerHTML='<span style="flex:1 1 200px">'+msg+'</span><button type="button" style="padding:6px 12px;border-radius:8px;border:none;background:#dc2626;color:#fff;font-weight:800">Ir para hoje</button>'}
+    av.style.display='flex';
+  }
+  function atualizarAvisos(){
+    try{aviso('dpDataSequencia','tituloDataSeq','Você está no dia {d}, não é hoje. O que salvar aqui entra no dia {d}.',function(){try{carregarSequenciaDia()}catch(e){}})}catch(e){}
+    try{aviso('dpDataRota','dpDataRota','Data da rota: {d} (não é hoje).',function(e){try{e.dispatchEvent(new Event('input',{bubbles:true}))}catch(x){}})}catch(e){}
+  }
+  setInterval(atualizarAvisos,1500);
+  D.addEventListener('change',function(ev){if(ev.target&&CAMPOS.indexOf(ev.target.id)>=0)setTimeout(atualizarAvisos,50)},true);
+  D.addEventListener('input',function(ev){if(ev.target&&CAMPOS.indexOf(ev.target.id)>=0)setTimeout(atualizarAvisos,50)},true);
 })();
 </script>
 </body></html>
