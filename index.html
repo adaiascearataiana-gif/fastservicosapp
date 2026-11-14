@@ -252,7 +252,7 @@
   <meta name="fast-app-version" content="5.3.9">
   <script id="fast-version-source-of-truth">try{var __m=document.querySelector('meta[name="fast-app-version"]');if(__m)document.documentElement.setAttribute("data-fast-version",__m.content)}catch(e){}</script>
   <meta name="fast-app-date" content="2026-11-13T12:00:00-03:00">
-  <meta name="fast-latest-update" content="5.3.9: COLAR ENDEREÇO nas ROTAS e data das rotas protegida contra virada automática para o dia atual.">
+  <meta name="fast-latest-update" content="5.3.9b: clientes e lugares não são mais apagados da nuvem automaticamente; COLAR ENDEREÇO nas ROTAS e data das rotas protegida contra virada automática para o dia atual.">
   <!-- r92: verificação automática de nova versão ao abrir; Verificar Atualizações com cache-busting e sem fallback no-cors inválido. -->
   <!-- r70.1: lista corrente no HTML inicial; o painel não espera scripts tardios -->
   <meta name="fast-app-changelog-immediate" content="5.3.9">
@@ -14383,7 +14383,9 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
             throw new Error('POST ' + cfg.tabela + ' (upsert r106): HTTP ' + resp.status + ' — ' + errBody);
           }
         }
-        // mirror-delete: linhas da nuvem sem correspondência local
+        // 5.3.9b: "mirror-delete" DESLIGADO — apagava da nuvem tudo que faltasse na lista
+        // deste aparelho (lista incompleta = cadastros apagados para todos)
+        if (true) return true;
         var idsLocais = payload.map(function(p) { return p.id; });
         var respGet = await fetch(SUPABASE_URL + '/' + cfg.tabela + '?select=id', {
           method: 'GET', headers: supabaseHeaders()
@@ -14874,6 +14876,8 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
         ...(local.destinos || [])
       ]);
       const destinosBloqueados = fastLapideEfetiva(Array.from(destinosExcluidosSet)); // 5.3.8
+      // 5.3.9b: lugar que EXISTE na nuvem nunca fica escondido pela lista antiga de excluídos
+      (nuvem.destinos || []).forEach(d => { try { destinosBloqueados.delete(destNormalizarNome(d && d.nome)); } catch (e) {} });
       const destinosUnificadosOk = destinosUnificados.filter(d => /[a-z]/i.test(destNormalizarNome(d.nome)) && !/^\s*\d/.test(String(d.nome || '')) && !destinosBloqueados.has(destNormalizarNome(d.nome)));
       return {
         rotas: Array.from(rotasMap.values()),
@@ -18014,6 +18018,9 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
     }
     function fastClienteEscondido(mapa, cli, nomesNoBanco) {
       const n = destNormalizarNome(cli && cli.nome); if (!n || !(n in mapa)) return false;
+      // 5.3.9b: cliente que EXISTE na nuvem nunca fica escondido (a nuvem é a referência;
+      // exclusão de verdade apaga da nuvem na hora)
+      if (nomesNoBanco && nomesNoBanco.has(n)) return false;
       const ts = mapa[n];
       if (ts > 0) { const u = Date.parse((cli && (cli.updatedAt || cli.criadoEm || cli.createdAt)) || '') || 0; return !(u > ts); }
       return !(nomesNoBanco && nomesNoBanco.has(n));   // exclusão antiga sem data: só vale se o cliente não está no banco
@@ -41269,6 +41276,7 @@ body.fast-home-reveal .tab-content.active{
     return String(v||'').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').replace(/\s+/g,' ').trim();
   }
   function purgarExcluidos(){
+    return; // 5.3.9b: desligado — tirava da tela lugares que existem na nuvem e o envio seguinte os apagava de lá
     try{
       if(typeof bancoDados==='undefined'||!bancoDados) return;
       var lap=Array.isArray(bancoDados.destinosExcluidos)?bancoDados.destinosExcluidos:[];
@@ -42567,7 +42575,9 @@ html body .destino-extra-row-rota.f49-dest-row{padding-top:8px;border-top:1px da
         var v=new Set(),novo=[];bancoDados[k].forEach(function(n){var c=N(n);if(c&&!v.has(c)){v.add(c);novo.push(c)}});
         if(novo.join('\n')!==bancoDados[k].join('\n'))bancoDados[k]=novo;
       });
-      var bd=(typeof W.fastLapideEfetiva==='function')?W.fastLapideEfetiva(bancoDados.destinosExcluidos):setNomes('destinosExcluidos'),bc=setNomes('clientesExcluidos'); // 5.3.8
+      // 5.3.9b: lugares e clientes NÃO são mais tirados da lista por nome "excluído" — isso
+      // escondia cadastros que existem na nuvem e o envio seguinte os apagava de lá
+      var bd=new Set(),bc=new Set();
       var rx=setIds('rotasExcluidas'),sx=setIds('seqItensExcluidos'),srx=setIds('seqRotasExcluidas');
       var mx=setIds('motoristasExcluidos'),hx=setIds('rhExcluidos'),dex=setIds('despesasEmpresaExcluidas'),dx=setIds('despesasExcluidas');
       var r;
@@ -46312,7 +46322,7 @@ body.fx-apk .fx-gal-ajuda{display:flex}
       var mudou=0,maior=cur;
       rows.forEach(function(row){
         if(row.updated_at&&(!maior||row.updated_at>maior))maior=row.updated_at;
-        var nv=supabaseToDestino(row), k=N(nv.nome); nuvemH[String(nv.id)]=campos(nv); if(!k||lapides.has(k))return;
+        var nv=supabaseToDestino(row), k=N(nv.nome); nuvemH[String(nv.id)]=campos(nv); if(!k)return;   /* 5.3.9b: o que está na nuvem sempre entra */
         var loc=porId[String(nv.id)]||porNome[k];
         if(!loc){lista.push(nv);porId[String(nv.id)]=nv;porNome[k]=nv;vindosDaNuvem[String(nv.id)]=campos(nv);mudou++;return}
         if(ts(nv)>ts(loc)&&campos(nv)!==campos(loc)){
@@ -46380,15 +46390,17 @@ body.fx-apk .fx-gal-ajuda{display:flex}
     var b=bd(); if(!b)return true;
     var ids={destinos:{},clientes:{}},maior=cur;
     l.forEach(function(x){if(x.apagado_em>maior)maior=x.apagado_em;if(ids[x.tabela])ids[x.tabela][String(x.registro_id)]=x.nome||''});
+    // 5.3.9b: confere na nuvem — registro que voltou (recriado/restaurado) NÃO é apagado daqui
+    for(var tb in ids){var lst=Object.keys(ids[tb]).filter(function(x){return /^\d+$/.test(x)});
+      for(var q=0;q<lst.length;q+=80){try{var rc=await fetch(url()+'/'+tb+'?select=id&id=in.('+lst.slice(q,q+80).join(',')+')',{headers:cab(),cache:'no-store'});
+        if(!rc.ok)return true; (await rc.json()).forEach(function(z){delete ids[tb][String(z.id)]});}catch(eC){return true}}}
     var mudouD=false,mudouC=false;
     if(Object.keys(ids.destinos).length&&Array.isArray(b.destinos)){
       var saiu=b.destinos.filter(function(d){return d&&ids.destinos[String(d.id)]!==undefined});
       if(saiu.length){
         b.destinos=b.destinos.filter(function(d){return !(d&&ids.destinos[String(d.id)]!==undefined)});
         saiu.forEach(function(d){var k=N(d.nome);if(k&&!b.destinos.some(function(x){return N(x.nome)===k})){
-          if(!Array.isArray(b.destinosExcluidos))b.destinosExcluidos=[];
-          if(b.destinosExcluidos.indexOf(k)<0)b.destinosExcluidos.push(k);
-          if(typeof W.fastLapideMarcar==='function')W.fastLapideMarcar(b.destinosExcluidos,'excluido',k);}});
+}});
         mudouD=true;
       }
     }
@@ -46397,8 +46409,7 @@ body.fx-apk .fx-gal-ajuda{display:flex}
       if(saiuC.length){
         b.clientes=b.clientes.filter(function(c){return !(c&&ids.clientes[String(c.id)]!==undefined)});
         saiuC.forEach(function(c){var k=N(c.nome);if(k&&!b.clientes.some(function(x){return N(x.nome)===k})){
-          if(!Array.isArray(b.clientesExcluidos))b.clientesExcluidos=[];
-          if(b.clientesExcluidos.indexOf(k)<0)b.clientesExcluidos.push(k);}});
+}});
         // a base da sincronização de cadastros também esquece esses códigos
         try{var bc=JSON.parse(localStorage.getItem('fast512_base_colecoes')||'{}');if(bc.clientes){Object.keys(ids.clientes).forEach(function(k){delete bc.clientes[k]});localStorage.setItem('fast512_base_colecoes',JSON.stringify(bc))}}catch(e){}
         mudouC=true;
@@ -47055,6 +47066,10 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
     return lista;
   }
   async function rodar(forcar){
+    // 5.3.9b: DESLIGADO. A limpeza apagava da nuvem lugares/clientes que um aparelho com
+    // lista incompleta não tinha (até 25% por rodada, a cada 9 min) — foi assim que os
+    // lugares caíram de 99 para 33. Nada é apagado da nuvem automaticamente.
+    return null;
     if(rodando||D.hidden||navigator.onLine===false)return null;
     if(!forcar&&Date.now()-ult<9*60*1000)return null;
     if(typeof SUPABASE_URL==='undefined'||typeof supabaseHeaders!=='function'||!W.bancoDados)return null;
@@ -48655,6 +48670,68 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
     }
   },true);
   instalar();W.addEventListener('load',function(){setTimeout(instalar,1500);setTimeout(instalar,5000)});setInterval(instalar,5000);
+})();
+</script>
+<script id="fast539b-reparo-cadastros">
+/* 5.3.9b — CLIENTES E LUGARES: A NUVEM É A REFERÊNCIA
+   As listas de "excluídos por nome" (clientes e lugares) escondiam cadastros que existem no
+   Supabase e, pior, faziam o envio seguinte apagá-los de lá. Agora a exclusão de verdade
+   apaga direto na nuvem (só por ação sua — ver a trava), e essas listas ficam sempre vazias.
+   Uma vez por aparelho, baixa tudo de novo da nuvem. */
+(function(){
+  var W=window,K='fast539b_reparo_cadastros';
+  function zerar(){
+    var b=(typeof bancoDados!=='undefined'&&bancoDados)||W.bancoDados;if(!b)return false;var m=false;
+    ['clientesExcluidos','destinosExcluidos'].forEach(function(k){if(Array.isArray(b[k])&&b[k].length){b[k]=[];m=true}});
+    return m;
+  }
+  function rodar(){
+    try{
+      var b=(typeof bancoDados!=='undefined'&&bancoDados)||W.bancoDados;if(!b||typeof salvarStorage!=='function')return setTimeout(rodar,1500);
+      zerar();
+      if(!localStorage.getItem(K)){
+        ['f538_lug_cursor','f538_lug_snap','f538_lug_ids','f538_orfaos_nuvem','f538_apag_cursor'].forEach(function(k){try{localStorage.removeItem(k)}catch(e){}});
+        try{var bc=JSON.parse(localStorage.getItem('fast512_base_colecoes')||'{}');delete bc.clientes;delete bc.destinos;localStorage.setItem('fast512_base_colecoes',JSON.stringify(bc))}catch(e){}
+        localStorage.setItem(K,new Date().toISOString());
+        W.__f538ColPendente=true;W.__f68Pesada=0;
+        setTimeout(function(){try{if(typeof W.__f538LugPuxar==='function')W.__f538LugPuxar(true)}catch(e){}try{if(typeof W.sincronizarAgora==='function')W.sincronizarAgora()}catch(e){}},3000);
+      }
+      try{salvarStorage()}catch(e){}
+    }catch(e){}
+  }
+  if(document.readyState==='complete')setTimeout(rodar,1500);else W.addEventListener('load',function(){setTimeout(rodar,1500)});
+})();
+</script>
+<script id="fast539b-trava-exclusao">
+/* 5.3.9b — TRAVA DE SEGURANÇA: CADASTROS SÓ SAEM DA NUVEM POR AÇÃO SUA
+   Clientes, lugares, motoristas e RH só são apagados no Supabase se, nos últimos 10 minutos,
+   você tocou em Excluir/Apagar/Remover/Unificar neste aparelho. Qualquer outra exclusão
+   automática (lista incompleta, sincronização, limpeza) é bloqueada e anotada em
+   Ferramentas → Sincronização. Foi assim que clientes e lugares sumiram da nuvem. */
+(function(){
+  var W=window,D=document,TAB=/\/rest\/v1\/(clientes|destinos|motoristas|rh|funcionarios|despesas_empresa)\?/i,JANELA=10*60*1000;
+  W.__f539DelUser=0;
+  function marcar(){W.__f539DelUser=Date.now()}
+  D.addEventListener('click',function(ev){
+    try{var el=ev.target&&ev.target.closest&&ev.target.closest('button,a,[onclick],[role=button]');if(!el)return;
+      var t=(el.textContent||'')+' '+(el.getAttribute('onclick')||'')+' '+(el.className||'')+' '+(el.title||'')+' '+(el.innerHTML.indexOf('fa-trash')>=0?'trash':'');
+      if(/exclu|apag|remov|unific|trash|lixeira|deletar/i.test(t))marcar();}catch(e){}
+  },true);
+  ['removerCliente','cliExcluirSelecionados','destExcluir','destExcluirSelecionados','removerMotorista','excluirGen','aposUnificar','fastUnificarClientesDuplicadosManual','abrirUnificar'].forEach(function(n){
+    var tentar=function(){var f=W[n];if(typeof f!=='function'||f.__f539del)return;var g=function(){marcar();return f.apply(this,arguments)};Object.keys(f).forEach(function(k){try{g[k]=f[k]}catch(e){}});g.__f539del=1;W[n]=g;};
+    tentar();setTimeout(tentar,3000);setTimeout(tentar,8000);
+  });
+  var F=W.fetch;
+  W.fetch=function(u,o){
+    try{
+      var m=String((o&&o.method)||(u&&u.method)||'GET').toUpperCase(),url=String(u&&u.url||u);
+      if(m==='DELETE'&&TAB.test(url)&&Date.now()-W.__f539DelUser>JANELA){
+        try{if(typeof W.fastErroRegistrar==='function')W.fastErroRegistrar('aviso','Exclusão automática BLOQUEADA (proteção de cadastros)',url.split('/rest/v1/')[1].slice(0,120))}catch(e){}
+        return Promise.resolve(new Response(null,{status:204}));
+      }
+    }catch(e){}
+    return F.apply(this,arguments);
+  };
 })();
 </script>
 </body></html>

@@ -5,6 +5,11 @@
     {
       "app": "fast",
       "type": "correcao",
+      "text": "5.3.9b (13/11/2026): clientes e lugares não são mais apagados da nuvem automaticamente (só por ação de Excluir/Unificar); cadastro que existe na nuvem nunca fica escondido por lista antiga de excluídos; aparelhos voltam a mostrar todos os clientes e lugares."
+    },
+    {
+      "app": "fast",
+      "type": "correcao",
       "text": "5.3.8 (12/11/2026): rotas concluídas não voltam mais para EM ROTA — um aparelho que ainda tinha a cópia antiga não a reenvia mais, e a mescla adota a versão mais nova da nuvem; Limpar filtros sem a tela pular; campo Destino/Origem seleciona o texto ao tocar; lista de Lugares mais leve ao digitar/apagar."
     },
     {
