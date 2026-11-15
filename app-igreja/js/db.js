@@ -35,8 +35,10 @@
     opcoes = opcoes || {};
     var cab = Object.assign({ apikey: CFG.KEY }, opcoes.cabecalhos || {});
     var comToken = opcoes.usarToken !== false;
+    var tokenUsado = null;      /* sessão da pessoa que foi neste pedido (null = foi como visitante) */
     if (comToken) {
-      cab.Authorization = 'Bearer ' + ((Auth.sessao && Auth.sessao.access_token) ? Auth.sessao.access_token : CFG.KEY);
+      tokenUsado = (Auth.sessao && Auth.sessao.access_token) || null;
+      cab.Authorization = 'Bearer ' + (tokenUsado || CFG.KEY);
     }
     var corpo = opcoes.corpo;
     if (corpo !== undefined && corpo !== null && typeof corpo !== 'string' && !(corpo instanceof Blob) && !(corpo instanceof FormData)) {
@@ -52,11 +54,13 @@
       return resp.text().then(function (txt) {
         var dados = null;
         if (txt) { try { dados = JSON.parse(txt); } catch (e) { dados = txt; } }
-        if (resp.status === 401 && opcoes.tentar !== false && Auth.sessao && Auth.sessao.refresh_token) {
-          return Auth.renovar(true).then(function (ok) {
-            if (!ok) throw comErro('Sua sessão expirou. Entre novamente.', 401, dados);
-            var novas = Object.assign({}, opcoes, { tentar: false });
-            return req(caminho, novas);
+        if (resp.status === 401 && tokenUsado) {
+          /* o servidor recusou a sessão: renova e repete o pedido (uma vez só).
+             Se a sessão não vale mais, a pessoa volta a ser visitante e o app é avisado. */
+          if (opcoes.tentar === false) throw comErro(MSG_SESSAO_INCERTA, 401, dados);
+          return acertarSessao(tokenUsado).then(function (estado) {
+            if (estado === 'renovada') return req(caminho, Object.assign({}, opcoes, { tentar: false }));
+            throw comErro(estado === 'encerrada' ? MSG_SESSAO : MSG_SESSAO_INCERTA, 401, dados);
           });
         }
         if (!resp.ok) {
@@ -76,6 +80,47 @@
     e.dados = dados;
     e.rede = status === 0;
     return e;
+  }
+
+  /* ---------------- SESSÃO QUE O SERVIDOR NÃO ACEITA MAIS ---------------- */
+  var MSG_SESSAO = 'Sua sessão expirou. Entre novamente.';
+  var MSG_SESSAO_INCERTA = 'Não foi possível confirmar seu login agora. Tente de novo em instantes.';
+  var renovando = null;       /* uma renovação por vez: os pedidos simultâneos esperam a mesma */
+
+  /* O servidor não aceita mais a sessão guardada neste aparelho (foi cancelada, a conta saiu do ar
+     ou o app passou a usar outro banco). Esquece a sessão — a pessoa volta a ser visitante — e avisa o app. */
+  function sessaoPerdida() {
+    if (!Auth.sessao) return;
+    Auth.limparSessao();
+    try { window.dispatchEvent(new CustomEvent('ibnm:sessao-encerrada')); } catch (e) {}
+  }
+
+  /* O app aberto em outra aba (ou instalado na tela inicial) divide a mesma sessão guardada.
+     Se lá ela já foi renovada, usa a nova: o servidor só aceita cada código de renovação uma vez. */
+  function adotarSessaoGuardada() {
+    var s = Auth.sessao;
+    if (!s) return false;
+    try {
+      var g = JSON.parse(localStorage.getItem(CHAVE_SESSAO) || 'null');
+      if (!g || !g.access_token || !g.refresh_token || g.access_token === s.access_token) return false;
+      if ((g.expires_at || 0) <= (s.expires_at || 0)) return false;
+      if (s.user && g.user && s.user.id !== g.user.id) return false;      /* outra pessoa entrou por lá */
+      Auth.sessao = g;
+      return true;
+    } catch (e) { return false; }
+  }
+
+  /* Um pedido foi recusado (401) levando a sessão "usada". Responde:
+       'renovada'  = há uma sessão nova, pode repetir o pedido;
+       'encerrada' = a sessão não vale mais e foi esquecida;
+       'incerta'   = não deu para saber agora (sem internet, servidor fora do ar). */
+  function acertarSessao(usada) {
+    if (!Auth.sessao) return Promise.resolve('encerrada');                        /* outro pedido já resolveu */
+    if (Auth.sessao.access_token !== usada) return Promise.resolve('renovada');   /* outro pedido já renovou */
+    return Auth.renovar(true).then(function (ok) {
+      if (ok) return 'renovada';
+      return Auth.sessao ? 'incerta' : 'encerrada';
+    });
   }
 
   /* ---------------- LOGIN ---------------- */
@@ -183,20 +228,48 @@
       });
     },
 
+    /* A sessão vale 1 hora e é renovada sozinha. Responde true quando há uma sessão boa para usar.
+       forcar = o servidor acabou de recusar a sessão atual (renova mesmo que pareça em dia). */
     renovar: function (forcar) {
-      if (!Auth.sessao || !Auth.sessao.refresh_token) return Promise.resolve(false);
-      var vence = (Auth.sessao.expires_at || 0) * 1000;
-      if (!forcar && vence && vence - Date.now() > 4 * 60 * 1000) return Promise.resolve(true);
-      return req('/auth/v1/token?grant_type=refresh_token', {
-        metodo: 'POST', usarToken: false,
+      var adotou = adotarSessaoGuardada();
+      var s = Auth.sessao;
+      if (!s) return Promise.resolve(false);
+      var sobra = (s.expires_at || 0) * 1000 - Date.now();
+      if (s.expires_at && ((!forcar && sobra > 4 * 60 * 1000) || (adotou && sobra > 30 * 1000))) return Promise.resolve(true);
+      if (!s.refresh_token) {
+        /* não há como renovar: se o servidor já recusou esta sessão, ela acabou */
+        if (forcar) sessaoPerdida();
+        return Promise.resolve(false);
+      }
+      if (renovando) return renovando;
+      var codigo = s.refresh_token;
+      var aindaEla = function () { return !!(Auth.sessao && Auth.sessao.refresh_token === codigo); };
+      var fim = function (v) { renovando = null; return v; };
+      renovando = req('/auth/v1/token?grant_type=refresh_token', {
+        metodo: 'POST', usarToken: false, tentar: false,
         cabecalhos: { 'Content-Type': 'application/json' },
-        corpo: { refresh_token: Auth.sessao.refresh_token }
-      }).then(function (s) {
-        if (!s || !s.access_token) return false;
-        if (!s.user && Auth.sessao && Auth.sessao.user) s.user = Auth.sessao.user;
-        Auth.salvarSessao(s);
+        corpo: { refresh_token: codigo }
+      }).then(function (n) {
+        if (!n || !n.access_token) return false;
+        /* a pessoa saiu (ou entrou com outra conta) enquanto renovava: não traz a sessão antiga de volta */
+        if (!aindaEla()) return false;
+        if (!n.user && s.user) n.user = s.user;
+        Auth.salvarSessao(n);
         return true;
-      }).catch(function () { return false; });
+      }, function (e) {
+        /* Resposta clara do serviço de login (erro 4xx, em JSON): esta sessão não vale mais.
+           Sem internet, servidor fora do ar, limite de pedidos, página de bloqueio ou chave do app
+           com problema: mantém a sessão e tenta de novo mais tarde. */
+        var st = (e && e.status) || 0;
+        var d = e && e.dados;
+        var txt = '';
+        try { txt = JSON.stringify(d || '').toLowerCase(); } catch (e2) {}
+        var definitivo = st >= 400 && st < 500 && st !== 408 && st !== 429 &&
+                         !!d && typeof d === 'object' && txt.indexOf('api key') < 0;
+        if (definitivo && aindaEla()) sessaoPerdida();
+        return false;
+      }).then(fim, fim);
+      return renovando;
     },
 
     sair: function () {

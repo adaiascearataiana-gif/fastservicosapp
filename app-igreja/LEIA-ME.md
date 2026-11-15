@@ -255,6 +255,11 @@ São dois arquivos, nesta ordem (os dois podem rodar quantas vezes quiser, não 
 > Supabase → SQL Editor → New query → cole o arquivo → Run.
 > ⚠️ Se rodar o `01` de novo, rode o `02` em seguida (o `01` recria as regras da versão 1.0).
 
+> **Projeto novo do Supabase:** desde 30/05/2026 as tabelas novas não ficam mais liberadas sozinhas
+> para o app (na criação do projeto, é a opção *“Automatically expose new tables”*). Não precisa
+> marcar nem mudar nada: os dois arquivos já liberam exatamente o que o app usa (visitante só lê o
+> conteúdo público; o resto é para quem está logado, sempre com a segurança por linha).
+
 - Tabelas da 1.0: `ibnm_perfis`, `ibnm_config`, `ibnm_devocionais`, `ibnm_eventos`,
   `ibnm_palavras`, `ibnm_avisos`, `ibnm_oracoes`, `ibnm_ofertas`.
 - Tabelas da 1.1: `ibnm_secoes`, `ibnm_secao_adms`, `ibnm_secao_posts`, `ibnm_secao_materiais`,
@@ -407,7 +412,7 @@ ibnm
 npm install --no-save jsdom embedded-postgres    # só na primeira vez (computador)
 
 node testes/testar.js                 # telas do app (mais de 150 conferências)
-node testes/local/testar-banco.js     # regras de permissão do banco (mais de 170 conferências)
+node testes/local/testar-banco.js     # regras de permissão do banco (mais de 350 conferências)
 node testes/local/servidor.js --demo  # app completo em http://localhost:8080
 ```
 
@@ -415,12 +420,14 @@ node testes/local/servidor.js --demo  # app completo em http://localhost:8080
   painel do ADM principal (11 abas), tamanhos de letra, faixa de data/hora/clima, seções,
   ADM secundário, Escola Bíblica (aluna, professora e gestão), banco ainda na versão 1.0,
   os arquivos do modo sem internet e os cuidados com o servidor de verdade (listas com mais
-  de 1000 linhas, nome dos arquivos enviados, sessão no fim). Precisa só do `jsdom`
-  (funciona no Termux).
+  de 1000 linhas, nome dos arquivos enviados, sessão no fim, sessão que o servidor não aceita
+  mais). Precisa só do `jsdom` (funciona no Termux).
 - **`testes/local/testar-banco.js`** — sobe um PostgreSQL de verdade, temporário, aplica os
   arquivos da pasta `sql/` e tenta fazer o que **não** pode (ADM secundário mexendo em outra
-  seção, professor vendo outra sala, visitante abrindo foto de relatório…). Precisa do
-  `embedded-postgres`, que só funciona em computador (Linux, Mac ou Windows), não no Termux.
+  seção, professor vendo outra sala, visitante abrindo foto de relatório…). Roda tudo duas
+  vezes: como um projeto antigo do Supabase (o banco atual) e como um projeto novo (regra de
+  30/05/2026). Precisa do `embedded-postgres`, que só funciona em computador (Linux, Mac ou
+  Windows), não no Termux.
 - **`testes/local/servidor.js --demo`** — o app inteiro funcionando com um banco de mentira
   (também só em computador), já com salas, alunos, chamadas, materiais e fotos de exemplo.
   Bom para treinar a equipe sem medo de estragar nada. O que for feito ali some quando o
@@ -440,6 +447,7 @@ node testes/local/servidor.js --demo  # app completo em http://localhost:8080
 
 Outra porta: `PORTA=9000 node testes/local/servidor.js --demo`.
 Banco de teste em outra porta: `PORTA_BANCO=54400 node testes/local/testar-banco.js`.
+Imitar um projeto novo do Supabase no servidor de teste: `IBNM_PROJETO=novo node testes/local/servidor.js --demo`.
 
 ---
 

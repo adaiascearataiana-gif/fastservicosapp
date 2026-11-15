@@ -280,6 +280,15 @@
       }
     });
 
+    /* o servidor não aceita mais a sessão guardada neste aparelho (foi cancelada ou o banco mudou):
+       a pessoa continua usando o app como visitante e é convidada a entrar de novo */
+    window.addEventListener('ibnm:sessao-encerrada', function () {
+      UI.toast('Sua sessão expirou. Entre novamente.');
+      atualizarTopo();
+      if (!ocupado()) render();
+      Promise.resolve(recarregar()).catch(function () {});
+    });
+
     /* links internos */
     document.addEventListener('click', function (ev) {
       var alvo = ev.target.closest ? ev.target.closest('[data-ir]') : null;

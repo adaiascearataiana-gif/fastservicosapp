@@ -11,8 +11,14 @@ function ok(cond, msg) {
   else { falhas++; console.log('  ✗ ' + msg); }
 }
 
-(async () => {
-  const b = await subir();
+/* As mesmas conferências rodam duas vezes: num projeto "antigo" do Supabase (tudo liberado, só a RLS
+   protege — é o banco atual da igreja) e num projeto "novo" (regra de 30/05/2026: só vale o GRANT dos
+   arquivos da pasta sql/). Assim os arquivos servem tanto para o banco atual quanto para um banco novo. */
+async function conferir(projeto) {
+  console.log('\n\n######## ' + (projeto === 'novo'
+    ? 'PROJETO NOVO do Supabase (tabelas só com o que os arquivos liberam)'
+    : 'PROJETO ANTIGO do Supabase (tudo liberado; quem protege é a RLS)') + ' ########');
+  const b = await subir({ projeto });
   const c = b.cliente;
 
   /* roda um comando como a pessoa (uid) ou visitante (null); nunca estoura */
@@ -26,6 +32,29 @@ function ok(cond, msg) {
   }
   const direto = (sql, params) => c.query(sql, params).then((r) => r.rows);
   const um = async (uid, sql, params) => { const r = await tenta(uid, sql, params); return r.linhas[0] || null; };
+
+  console.log('\n== 0. O banco de teste imita o tipo de projeto pedido ==');
+  {
+    await c.query(`create table public.zz_teste_projeto (n int);
+                   alter table public.zz_teste_projeto enable row level security;
+                   create policy zz_ler on public.zz_teste_projeto for select using (true);`);
+    const r = await tenta(null, 'select count(*) from public.zz_teste_projeto');
+    if (projeto === 'novo') ok(!r.ok && /permission denied/.test(r.erro), 'tabela criada sem GRANT: o app não enxerga (regra nova do Supabase)');
+    else ok(r.ok, 'tabela nova já nasce liberada para o app (regra antiga do Supabase)');
+    await c.query('drop table public.zz_teste_projeto');
+    if (projeto === 'novo') {
+      /* aqui dá para ver exatamente o que os arquivos da pasta sql/ liberam */
+      const g = await direto(`select table_name t, grantee g, string_agg(privilege_type, ',' order by privilege_type) p
+                                from information_schema.role_table_grants
+                               where table_schema = 'public' and table_name like 'ibnm\\_%' and grantee in ('anon', 'authenticated')
+                                 and privilege_type in ('SELECT', 'INSERT', 'UPDATE', 'DELETE')
+                               group by 1, 2`);
+      const visitante = g.filter((x) => x.g === 'anon');
+      const logado = g.filter((x) => x.g === 'authenticated');
+      ok(visitante.length === 9 && visitante.every((x) => x.p === 'SELECT'), 'visitante: só leitura, e só nas 9 tabelas de conteúdo público');
+      ok(logado.length === 18 && logado.every((x) => x.p === 'DELETE,INSERT,SELECT,UPDATE'), 'pessoa logada: as 18 tabelas liberadas (quem decide as linhas é a RLS)');
+    }
+  }
 
   /* ---------------- pessoas ---------------- */
   const P = await criarPessoa(c, 'Adaias Principal', 'principal@teste.com');   // 1º perfil = ADM principal
@@ -361,6 +390,11 @@ function ok(cond, msg) {
   }
 
   await b.parar();
+}
+
+(async () => {
+  const pedido = process.env.IBNM_PROJETO;      /* IBNM_PROJETO=novo (ou antigo) roda só um dos dois */
+  for (const projeto of (pedido ? [pedido] : ['antigo', 'novo'])) await conferir(projeto);
   console.log(falhas ? '\n❌ ' + falhas + ' TESTE(S) FALHARAM' : '\n✅ TODAS AS REGRAS DO BANCO PASSARAM');
   process.exit(falhas ? 1 : 0);
 })().catch((e) => { console.error('\nERRO NO TESTE:', e.message); process.exit(1); });

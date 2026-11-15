@@ -77,8 +77,10 @@ begin
   return _parts[1:array_length(_parts, 1) - 1];
 end $$;
 
--- No Supabase, tudo que é criado em "public" já nasce liberado para os papéis do app
--- (quem protege de verdade é a RLS). Repetimos isso aqui para o teste ser fiel.
+-- Nos projetos antigos do Supabase, tudo que é criado em "public" já nasce liberado para os
+-- papéis do app (quem protege de verdade é a RLS). Repetimos isso aqui para o teste ser fiel.
+-- Nos projetos novos (desde 30/05/2026) isso acabou: o banco.js desfaz estas três linhas quando
+-- o teste pede projeto "novo", e aí só vale o que os arquivos da pasta sql/ liberam com GRANT.
 alter default privileges in schema public grant all on tables to anon, authenticated, service_role;
 alter default privileges in schema public grant all on sequences to anon, authenticated, service_role;
 alter default privileges in schema public grant execute on functions to anon, authenticated, service_role;

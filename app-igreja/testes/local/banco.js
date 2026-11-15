@@ -36,6 +36,23 @@ async function subir(opcoes) {
   const cliente = pg.getPgClient();
   await cliente.connect();
   await cliente.query(fs.readFileSync(path.join(__dirname, 'supabase-falso.sql'), 'utf8'));
+  /* Que tipo de projeto do Supabase imitar:
+       'antigo' (padrão) = toda tabela nova nasce liberada para o app e só a RLS protege
+                           (é como está o banco atual da igreja);
+       'novo'            = regra dos projetos criados desde 30/05/2026: nada nasce liberado,
+                           só vale o que os arquivos da pasta sql/ liberam com GRANT.
+     São os mesmos comandos que o painel do Supabase roda ao criar um projeto com a opção
+     "Automatically expose new tables" desligada. */
+  const projeto = opcoes.projeto || process.env.IBNM_PROJETO || 'antigo';
+  if (projeto === 'novo') {
+    await cliente.query(`
+      alter default privileges for role postgres in schema public
+        revoke select, insert, update, delete on tables from anon, authenticated, service_role;
+      alter default privileges for role postgres in schema public
+        revoke usage, select, update on sequences from anon, authenticated, service_role;
+      alter default privileges for role postgres in schema public
+        revoke execute on functions from anon, authenticated, service_role;`);
+  }
   const arquivos = opcoes.arquivos || ['sql/01-base.sql', 'sql/02-secoes-ebd.sql'];
   for (const f of arquivos) {
     try {
@@ -49,7 +66,7 @@ async function subir(opcoes) {
     }
   }
   return {
-    pg, cliente, ler,
+    pg, cliente, ler, projeto,
     async parar() {
       await cliente.end().catch(() => {});
       await pg.stop().catch(() => {});

@@ -27,11 +27,6 @@ const IDENT = /^[a-z_][a-z0-9_]*$/;
 const MAX_LINHAS = 1000;   /* teto do Supabase por pedido (Settings › API › Max rows) */
 
 function b64(obj) { return Buffer.from(JSON.stringify(obj)).toString('base64url'); }
-function fichaDe(req) {
-  const m = /^Bearer\s+falso\.([A-Za-z0-9_-]+)\./.exec(req.headers.authorization || '');
-  if (!m) return null;
-  try { return JSON.parse(Buffer.from(m[1], 'base64url').toString('utf8')); } catch (e) { return null; }
-}
 function lerCorpo(req) {
   return new Promise((ok) => {
     const partes = [];
@@ -52,6 +47,23 @@ async function criarServidor(opcoes) {
   const assinados = new Map();         // token -> "bucket/caminho"
   const clima = Object.assign({ temperature_2m: 29.4, apparent_temperature: 33.2, relative_humidity_2m: 68, weather_code: 2, is_day: 1, wind_speed_10m: 17.3 }, opcoes.clima || {});
   let fila = Promise.resolve();        // um comando por vez (uma conexão só)
+
+  /* Cada servidor de teste é como um projeto do Supabase: só aceita as sessões que ele mesmo criou.
+     Sessão de outro servidor (ou de antes de reiniciar) é recusada, igual ao Supabase de verdade
+     quando o app passa a apontar para outro projeto. */
+  const assinatura = opcoes.assinatura || crypto.randomBytes(5).toString('hex');
+  function fichaDe(req, servico) {
+    const aut = req.headers.authorization || '';
+    if (!/^Bearer\s+falso\./.test(aut)) return null;          // sem login: visitante (o app manda a chave pública)
+    const m = /^Bearer\s+falso\.([A-Za-z0-9_-]+)\.([A-Za-z0-9_-]+)$/.exec(aut);
+    let ficha = null;
+    if (m && m[2] === assinatura) {
+      try { ficha = JSON.parse(Buffer.from(m[1], 'base64url').toString('utf8')); } catch (e) { ficha = null; }
+    }
+    if (ficha) return ficha;
+    if (servico === 'storage') throw new ErroHttp(400, { statusCode: '403', error: 'Unauthorized', message: 'Invalid JWT' });
+    throw new ErroHttp(401, { code: 'PGRST301', details: null, hint: null, message: 'JWSError JWSInvalidSignature' });
+  }
 
   /* roda como o usuário da requisição, com as mesmas regras do Supabase */
   function comoUsuario(ficha, fn) {
@@ -92,8 +104,8 @@ async function criarServidor(opcoes) {
   function sessaoDe(u) {
     const ficha = { sub: u.id, email: u.email, role: 'authenticated' };
     return {
-      access_token: 'falso.' + b64(ficha) + '.x', token_type: 'bearer', expires_in: 3600,
-      refresh_token: 'r.' + b64(ficha),
+      access_token: 'falso.' + b64(ficha) + '.' + assinatura, token_type: 'bearer', expires_in: 3600,
+      refresh_token: 'r.' + b64(ficha) + '.' + assinatura,
       user: { id: u.id, email: u.email, user_metadata: u.raw_user_meta_data || {}, app_metadata: u.raw_app_meta_data || {} }
     };
   }
@@ -115,9 +127,12 @@ async function criarServidor(opcoes) {
     if (p === '/token' && req.method === 'POST') {
       if (url.searchParams.get('grant_type') === 'refresh_token') {
         let f = null;
-        try { f = JSON.parse(Buffer.from(String(dados.refresh_token || '').replace(/^r\./, ''), 'base64url').toString('utf8')); } catch (e) {}
+        const mr = /^r\.([A-Za-z0-9_-]+)\.([A-Za-z0-9_-]+)$/.exec(String(dados.refresh_token || ''));
+        if (mr && mr[2] === assinatura) {
+          try { f = JSON.parse(Buffer.from(mr[1], 'base64url').toString('utf8')); } catch (e) {}
+        }
         const r = f && f.sub ? await interno('select * from auth.users where id = $1', [f.sub]) : { rows: [] };
-        if (!r.rows.length) throw new ErroHttp(400, { error_description: 'Invalid Refresh Token' });
+        if (!r.rows.length) throw new ErroHttp(400, { code: 400, error_code: 'refresh_token_not_found', msg: 'Invalid Refresh Token: Refresh Token Not Found' });
         return enviar(res, 200, sessaoDe(r.rows[0]));
       }
       const r = await interno('select * from auth.users where email = $1', [String(dados.email || '').trim().toLowerCase()]);
@@ -294,9 +309,10 @@ async function criarServidor(opcoes) {
 
   /* ---------------- arquivos (imitação do Supabase Storage) ---------------- */
   async function rotaStorage(req, res, url, corpo) {
-    const ficha = fichaDe(req);
     const partes = decodeURIComponent(url.pathname.replace('/storage/v1/object/', '')).split('/');
     const modo = ['public', 'authenticated', 'sign'].includes(partes[0]) ? partes.shift() : '';
+    /* arquivo público (ou com link assinado) não olha quem está pedindo */
+    const ficha = (req.method === 'GET' && (modo === 'public' || (modo === 'sign' && url.searchParams.get('token')))) ? null : fichaDe(req, 'storage');
     const bucket = partes.shift();
     const nome = partes.join('/');
     const chave = bucket + '/' + nome;

@@ -83,20 +83,36 @@ const CLIMA = {
   daily: { temperature_2m_max: [31.2], temperature_2m_min: [24.8], precipitation_probability_max: [20] }
 };
 
-/* cenario: { perfil, acesso, v10 }
+/* cenario: { perfil, acesso, v10, sessaoMorta }
      perfil  = dados da pessoa logada (padrão: Maria, ADM principal)
      acesso  = resposta de ibnm_meu_acesso (seções liberadas e salas)
-     v10     = true para imitar um banco que ainda não recebeu o sql/02 (tabelas novas não existem) */
+     v10     = true para imitar um banco que ainda não recebeu o sql/02 (tabelas novas não existem)
+     sessaoMorta = o servidor recusa a sessão guardada no aparelho (foi cancelada, ou o app passou a usar
+                   outro banco). true: recusa também a renovação (caso normal);  'servidor-fora': a renovação
+                   cai num servidor fora do ar;  'chave': a renovação reclama da chave do app;
+                   'bloqueio': a renovação esbarra numa página de bloqueio (não é resposta do login). */
 function criarMock(cenario) {
   cenario = cenario || {};
   const eu = cenario.perfil || perfil;
   const acesso = cenario.acesso || { principal: !!eu.is_adm, secoes: [], ebd: [], ebd_pendentes: 0 };
   const chamadas = [];
+  const cabecalhos = [];      /* o "Authorization" de cada pedido, na mesma ordem de "chamadas" */
   const NOVAS = ['ibnm_secoes', 'ibnm_secao_', 'ibnm_ebd_', 'rpc/ibnm_meu_acesso', 'rpc/ibnm_ebd_'];
 
   function mockFetch(url, opcoes) {
     const u = String(url);
+    const aut = (opcoes && opcoes.headers && opcoes.headers.Authorization) || '';
     chamadas.push(((opcoes && opcoes.method) || 'GET') + ' ' + u);
+    cabecalhos.push(aut);
+    if (cenario.sessaoMorta) {
+      if (u.includes('grant_type=refresh_token')) {
+        if (cenario.sessaoMorta === 'servidor-fora') return resposta({ message: 'Service Unavailable' }, 503);
+        if (cenario.sessaoMorta === 'chave') return resposta({ message: 'Invalid API key', hint: 'Double check your Supabase API key.' }, 401);
+        if (cenario.sessaoMorta === 'bloqueio') return resposta('<html><body>Just a moment...</body></html>', 403);
+        return resposta({ code: 400, error_code: 'refresh_token_not_found', msg: 'Invalid Refresh Token: Refresh Token Not Found' }, 400);
+      }
+      if (aut === 'Bearer fake') return resposta({ code: 'PGRST301', details: null, hint: null, message: 'JWSError JWSInvalidSignature' }, 401);
+    }
     if (u.includes('open-meteo.com')) return cenario.semClima ? Promise.reject(new Error('sem internet')) : resposta(CLIMA);
     if (cenario.v10 && NOVAS.some((n) => u.includes('/rest/v1/' + n))) {
       return resposta({ code: 'PGRST205', message: 'Could not find the table in the schema cache' }, 404);
@@ -138,6 +154,7 @@ function criarMock(cenario) {
     return resposta([]);
   }
   mockFetch.chamadas = chamadas;
+  mockFetch.cabecalhos = cabecalhos;
   return mockFetch;
 }
 
@@ -574,6 +591,122 @@ const espera = (ms) => new Promise((r) => setTimeout(r, ms || 60));
     ok(envios.filter((x) => x === 'renovou').length === 1 && envios.filter((x) => x === 'GET Bearer novo').length === 6,
       'seis miniaturas ao mesmo tempo: uma única renovação de sessão');
     ok(!w.erros.length, 'sem erros de JavaScript');
+  }
+
+  console.log('\n== 12. Sessão que o servidor não aceita mais ==');
+  {
+    const renovacoes = (w) => w.fetch.chamadas.filter((c) => c.includes('grant_type=refresh_token')).length;
+    const comSessao = (w) => w.fetch.cabecalhos.filter((a) => a === 'Bearer fake').length;
+    const guardada = (w) => !!w.localStorage.getItem('ibnm.sessao.v1');
+
+    /* (a) o aparelho guarda uma sessão que o servidor recusa de vez
+           (foi cancelada, a conta saiu do ar ou o app passou a usar outro banco) */
+    {
+      const w = criarApp(true, { sessaoMorta: true });
+      await espera(350);
+      const doc = w.document, DB = w.IBNM.DB;
+      ok(!DB.Auth.logado() && !guardada(w) && !w.localStorage.getItem('ibnm.perfil.v1') && !w.localStorage.getItem('ibnm.acesso.v1'),
+        'a sessão recusada é esquecida: a pessoa volta a ser visitante');
+      ok(renovacoes(w) === 1, 'tentou renovar a sessão uma única vez');
+      ok(comSessao(w) === 1, 'só um pedido foi com a sessão recusada; os outros já foram como visitante');
+      ok(doc.querySelector('#toast').textContent.includes('Sua sessão expirou. Entre novamente.'), 'avisa: "Sua sessão expirou. Entre novamente."');
+      ok(!doc.querySelector('#saudacao').textContent.includes('Maria'), 'a saudação deixa de usar o nome de quem estava logado');
+      ok(doc.querySelector('#tela').textContent.includes('Os que esperam no Senhor'), 'a tela inicial mostra o conteúdo da igreja normalmente');
+      const antes = w.fetch.chamadas.length;
+      w.App.ir('#/devocional'); await espera(150);
+      ok(doc.querySelector('#tela').textContent.includes('A esperança que não decepciona'), 'as outras telas abrem como visitante');
+      w.App.ir('#/admin'); await espera(150);
+      ok(w.location.hash === '#/entrar' && !!doc.getElementById('lEntrar'), 'o painel leva para a tela de entrar');
+      ok(renovacoes(w) === 1 && w.fetch.cabecalhos.slice(antes).every((a) => a !== 'Bearer fake'), 'não insiste mais na sessão antiga');
+      ok(!w.erros.length, 'sem erros de JavaScript');
+    }
+
+    /* (b) servidor fora do ar na hora de renovar: NÃO desloga ninguém */
+    {
+      const w = criarApp(true, { sessaoMorta: 'servidor-fora' });
+      await espera(350);
+      ok(w.IBNM.DB.Auth.logado() && guardada(w), 'servidor fora do ar: a sessão continua guardada (tenta de novo depois)');
+      ok(w.document.querySelector('#saudacao').textContent.includes('Maria'), '…e a pessoa continua identificada');
+      ok(!w.erros.length, 'sem erros de JavaScript');
+    }
+
+    /* (c) a própria renovação responde 401 (chave do app com problema): não entra em repetição sem fim */
+    {
+      const w = criarApp(true, { sessaoMorta: 'chave' });
+      await espera(500);
+      const n = renovacoes(w);
+      ok(n >= 1 && n <= 3, 'renovação recusada com erro 401 não vira uma fila sem fim de pedidos');
+      ok(w.IBNM.DB.Auth.logado() && guardada(w), 'problema na chave do app não apaga a sessão de ninguém');
+    }
+    {
+      const w = criarApp(true, { sessaoMorta: 'bloqueio' });
+      await espera(350);
+      ok(w.IBNM.DB.Auth.logado() && guardada(w) && renovacoes(w) <= 3, 'página de bloqueio no meio do caminho também não desloga ninguém');
+    }
+
+    /* (d) vários pedidos recusados ao mesmo tempo dividem uma única renovação e são repetidos com a sessão nova */
+    {
+      const w = criarApp(true);
+      await espera(200);
+      const DB = w.IBNM.DB;
+      const original = w.fetch;
+      const visto = [];
+      w.fetch = (url, op) => {
+        const u = String(url);
+        const aut = (op && op.headers && op.headers.Authorization) || '';
+        if (u.includes('grant_type=refresh_token')) { visto.push('renovou'); return espera(40).then(() => resposta({ access_token: 'novo', refresh_token: 'r2', expires_in: 3600, user: { id: perfil.id, email: perfil.email } })); }
+        if (u.includes('/rest/v1/ibnm_avisos')) { visto.push(aut); return aut === 'Bearer novo' ? resposta([{ id: 'a1', titulo: 'ok' }]) : resposta({ code: 'PGRST303', message: 'JWT expired' }, 401); }
+        return original(url, op);
+      };
+      const r = await Promise.all([1, 2, 3, 4].map(() => DB.Tabela.listar('ibnm_avisos', {})));
+      ok(r.every((x) => x.length === 1 && x[0].titulo === 'ok'), 'sessão vencida no servidor: renova e repete o pedido sozinho');
+      ok(visto.filter((x) => x === 'renovou').length === 1, 'quatro pedidos recusados ao mesmo tempo: uma única renovação');
+      ok(DB.Auth.sessao.access_token === 'novo' && JSON.parse(w.localStorage.getItem('ibnm.sessao.v1')).access_token === 'novo', 'a sessão nova fica guardada');
+
+      /* o pedido repetido também é recusado: para ali (não repete de novo) e não mostra mensagem técnica */
+      const teimoso = w.fetch;
+      let quantos = 0;
+      w.fetch = (url, op) => String(url).includes('/rest/v1/ibnm_palavras') ? (quantos++, resposta({ code: 'PGRST301', message: 'JWSError JWSInvalidSignature' }, 401)) : teimoso(url, op);
+      let recusado = null;
+      try { await DB.Tabela.listar('ibnm_palavras', {}); } catch (e) { recusado = e; }
+      ok(quantos === 2 && recusado && recusado.message === 'Não foi possível confirmar seu login agora. Tente de novo em instantes.' && DB.Auth.logado(),
+        'recusado de novo depois de renovar: para na segunda tentativa, com aviso em português');
+      w.fetch = teimoso;
+
+      /* (e) o app aberto em outra aba já renovou: usa a sessão guardada em vez de renovar de novo */
+      visto.length = 0;
+      DB.Auth.sessao = Object.assign({}, DB.Auth.sessao, { expires_at: Math.floor(Date.now() / 1000) - 10 });      /* esta aba ficou com a velha */
+      w.localStorage.setItem('ibnm.sessao.v1', JSON.stringify({ access_token: 'da-outra-aba', refresh_token: 'r3', expires_at: Math.floor(Date.now() / 1000) + 3500, user: { id: perfil.id, email: perfil.email } }));
+      const bom = await DB.Auth.renovar(false);
+      ok(bom === true && DB.Auth.sessao.access_token === 'da-outra-aba' && !visto.includes('renovou'), 'outra aba já renovou: aproveita a sessão nova, sem pedir de novo ao servidor');
+      w.localStorage.setItem('ibnm.sessao.v1', JSON.stringify({ access_token: 'de-outra-pessoa', refresh_token: 'r4', expires_at: Math.floor(Date.now() / 1000) + 7000, user: { id: 'outra-pessoa', email: 'x@y.z' } }));
+      await DB.Auth.renovar(false);
+      ok(DB.Auth.sessao.access_token === 'da-outra-aba', 'nunca troca para a sessão de outra pessoa');
+      w.localStorage.setItem('ibnm.sessao.v1', JSON.stringify(DB.Auth.sessao));
+
+      /* (f) a pessoa sai do app enquanto a renovação está a caminho: a sessão antiga não volta */
+      DB.Auth.sessao.expires_at = Math.floor(Date.now() / 1000) + 20;
+      const pendente = DB.Auth.renovar(false);
+      DB.Auth.limparSessao();
+      const res = await pendente;
+      ok(res === false && !DB.Auth.logado() && !guardada(w), 'saiu durante a renovação: continua fora (a sessão antiga não volta)');
+      ok(!w.erros.length, 'sem erros de JavaScript');
+    }
+
+    /* (g) sessão sem código de renovação recusada pelo servidor: também volta a ser visitante */
+    {
+      const w = criarApp(true);
+      await espera(200);
+      const DB = w.IBNM.DB;
+      let avisos = 0;
+      w.addEventListener('ibnm:sessao-encerrada', () => { avisos++; });
+      const original = w.fetch;
+      w.fetch = (url, op) => String(url).includes('/rest/v1/ibnm_avisos') ? resposta({ message: 'JWT expired' }, 401) : original(url, op);
+      delete DB.Auth.sessao.refresh_token;
+      let erro = null;
+      try { await DB.Tabela.listar('ibnm_avisos', {}); } catch (e) { erro = e; }
+      ok(erro && erro.message === 'Sua sessão expirou. Entre novamente.' && !DB.Auth.logado() && avisos === 1, 'sem como renovar: encerra a sessão e avisa o app uma vez');
+    }
   }
 
   console.log('\n' + (falhas ? '❌ ' + falhas + ' verificação(ões) falharam' : '✅ TODOS OS TESTES PASSARAM'));
