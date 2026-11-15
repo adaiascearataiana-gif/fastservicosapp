@@ -20442,6 +20442,12 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
             if (/^(idb:|file:)/.test(String(item.foto || ''))) refs[item.foto] = 1;
           });
         });
+        // 5.3.9k: fotos tiradas direto na rota (PAINEL / Editar rota) também sobem
+        ((bancoDados && bancoDados.rotas) || []).forEach(function (r) {
+          if (!r) return;
+          (Array.isArray(r.fotos) ? r.fotos : []).forEach(function (f) { if (/^(idb:|file:)/.test(String(f))) refs[f] = 1; });
+          if (/^(idb:|file:)/.test(String(r.foto || ''))) refs[r.foto] = 1;
+        });
       } catch (e) {}
       var lista = Object.keys(refs);
       if (!lista.length) return Promise.resolve();

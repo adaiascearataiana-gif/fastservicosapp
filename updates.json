@@ -4,6 +4,11 @@
   "updates": [
     {
       "app": "fast",
+      "type": "correcao",
+      "text": "5.3.9k (14/11/2026): fotos tiradas direto na rota (PAINEL / Editar rota) agora sobem para a nuvem e aparecem nos outros aparelhos — antes só as fotos das Rotas do Dia subiam."
+    },
+    {
+      "app": "fast",
       "type": "melhorado",
       "text": "5.3.9j (14/11/2026): no filtro de busca das ROTAS e do Relatório, o status da rota PENDENTE agora se chama EM ROTA, igual ao botão."
     },
