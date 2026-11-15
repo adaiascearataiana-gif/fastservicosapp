@@ -305,7 +305,7 @@
     ]).then(function (r) {
       var lista = r[0], aulas = r[1];
       var buscaPres = aulas.length
-        ? DB.Tabela.listar('ibnm_ebd_presencas', { filtros: { aula_id: 'in.(' + aulas.map(function (a) { return a.id; }).join(',') + ')' }, limite: 5000 })
+        ? DB.Tabela.listarTudo('ibnm_ebd_presencas', { filtros: { aula_id: 'in.(' + aulas.map(function (a) { return a.id; }).join(',') + ')' }, ordem: 'aula_id.asc,matricula_id.asc' })
         : Promise.resolve([]);
       return buscaPres.then(function (pres) {
         var freq = {};
@@ -539,7 +539,7 @@
       DB.Tabela.listar('ibnm_ebd_aulas', { filtros: { sala_id: 'eq.' + s.id, data: 'eq.' + data }, limite: 1 })
     ]).then(function (r) {
       var aula = r[1][0] || null;
-      return (aula ? DB.Tabela.listar('ibnm_ebd_presencas', { filtros: { aula_id: 'eq.' + aula.id }, limite: 2000 }) : Promise.resolve([]))
+      return (aula ? DB.Tabela.listarTudo('ibnm_ebd_presencas', { filtros: { aula_id: 'eq.' + aula.id }, ordem: 'matricula_id.asc' }) : Promise.resolve([]))
         .then(function (pres) { desenharChamada(corpo, s, data, r[0], aula, pres); });
     }).catch(function (e) { erro(corpo, e); });
   }

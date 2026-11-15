@@ -855,7 +855,7 @@
       var arq = (document.getElementById('ofComprovante') || {}).files;
       var arquivo = arq && arq[0];
       if (!arquivo || !of) return null;
-      var ext = (arquivo.name.split('.').pop() || 'jpg').toLowerCase();
+      var ext = DB.Arquivos.extensao(arquivo.name, 'jpg');
       var caminho = 'comprovantes/' + Auth.usuario().id + '/' + Date.now() + '.' + ext;
       return DB.Arquivos.enviar('igreja', caminho, arquivo).then(function () {
         return DB.Tabela.atualizar('ibnm_ofertas', { id: 'eq.' + of.id }, { comprovante_url: caminho });

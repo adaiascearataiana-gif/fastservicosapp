@@ -72,7 +72,7 @@
   function dataInput(v) { return String(v || '').slice(0, 10); }
 
   function enviarImagem(arquivo, pasta, aoEnviar) {
-    var ext = (arquivo.name.split('.').pop() || 'jpg').toLowerCase();
+    var ext = DB.Arquivos.extensao(arquivo.name, 'jpg');
     var caminho = pasta + '/' + Date.now() + '-' + Math.random().toString(36).slice(2, 7) + '.' + ext;
     UI.toast('Enviando imagem…');
     DB.Arquivos.enviar('igreja-publico', caminho, arquivo).then(function () {

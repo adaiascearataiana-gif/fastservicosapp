@@ -287,6 +287,19 @@
     listar: function (tabela, opcoes) {
       return req('/rest/v1/' + tabela + '?' + consulta(opcoes)).then(function (r) { return r || []; });
     },
+    /* lista TODAS as linhas, de 1000 em 1000: o Supabase entrega no máximo 1000 por pedido,
+       mesmo que o "limite" pedido seja maior. Passe uma "ordem" que nunca empate. */
+    listarTudo: function (tabela, opcoes, maxPaginas) {
+      var PAG = 1000, tudo = [];
+      var pagina = function (n) {
+        return Tabela.listar(tabela, Object.assign({}, opcoes, { limite: PAG, offset: n * PAG })).then(function (r) {
+          tudo = tudo.concat(r);
+          if (r.length < PAG || n + 1 >= (maxPaginas || 20)) return tudo;
+          return pagina(n + 1);
+        });
+      };
+      return pagina(0);
+    },
     um: function (tabela, opcoes) {
       return Tabela.listar(tabela, Object.assign({}, opcoes, { limite: 1 })).then(function (r) { return r[0] || null; });
     },
@@ -321,29 +334,52 @@
   }
 
   /* ---------------- ARQUIVOS ---------------- */
+  /* a sessão vale 1 hora; se estiver no fim, renova antes de mexer com arquivos
+     (o envio de arquivo não repete sozinho como os outros pedidos do app) */
+  var conferindoSessao = null;
+  function sessaoEmDia() {
+    /* vários arquivos ao mesmo tempo (miniaturas) dividem uma única conferência;
+       se a rede travar, segue em frente depois de 8 segundos */
+    if (!conferindoSessao) {
+      var pronto = function (ok) { conferindoSessao = null; return ok; };
+      conferindoSessao = Promise.race([
+        Promise.resolve(Auth.renovar(false)).catch(function () { return false; }),
+        new Promise(function (resolver) { setTimeout(function () { resolver(false); }, 8000); })
+      ]).then(pronto, pronto);
+    }
+    return conferindoSessao;
+  }
+  function cabecalhoArquivos(extra) {
+    var token = (Auth.sessao && Auth.sessao.access_token) || CFG.KEY;
+    return Object.assign({ apikey: CFG.KEY, Authorization: 'Bearer ' + token }, extra || {});
+  }
+
   var Arquivos = {
+    /* extensão segura para montar o nome do arquivo: o Storage recusa acentos, espaços e símbolos */
+    extensao: function (nome, padrao) {
+      var partes = String(nome || '').split('.');
+      var ext = partes.length > 1 ? partes.pop().toLowerCase().replace(/[^a-z0-9]/g, '') : '';
+      return (ext && ext.length <= 5) ? ext : (padrao || 'jpg');
+    },
     enviar: function (bucket, caminho, arquivo) {
-      var token = (Auth.sessao && Auth.sessao.access_token) || CFG.KEY;
-      return fetch(CFG.SUPABASE + '/storage/v1/object/' + bucket + '/' + caminho, {
-        method: 'POST',
-        headers: {
-          apikey: CFG.KEY,
-          Authorization: 'Bearer ' + token,
+      return sessaoEmDia().then(function () {
+        return fetch(CFG.SUPABASE + '/storage/v1/object/' + bucket + '/' + caminho, {
+          method: 'POST',
           /* sem "x-upsert": cada arquivo recebe um nome único, então o envio
              depende só da regra de INSERT do Storage (nunca de UPDATE). */
-          'Content-Type': arquivo.type || 'application/octet-stream'
-        },
-        body: arquivo
-      }).then(function (r) {
-        if (!r.ok) {
-          return r.text().then(function (t) {
-            var d = null; try { d = JSON.parse(t); } catch (e) {}
-            throw comErro(traduzir((d && (d.message || d.error)) || t, r.status), r.status, d);
-          });
-        }
-        return r.json().catch(function () { return {}; });
-      }, function () {
-        throw comErro('Sem conexão para enviar o arquivo. Tente novamente.', 0, null);
+          headers: cabecalhoArquivos({ 'Content-Type': arquivo.type || 'application/octet-stream' }),
+          body: arquivo
+        }).then(function (r) {
+          if (!r.ok) {
+            return r.text().then(function (t) {
+              var d = null; try { d = JSON.parse(t); } catch (e) {}
+              throw comErro(traduzir((d && (d.message || d.error)) || t, r.status), r.status, d);
+            });
+          }
+          return r.json().catch(function () { return {}; });
+        }, function () {
+          throw comErro('Sem conexão para enviar o arquivo. Tente novamente.', 0, null);
+        });
       });
     },
     urlPublica: function (bucket, caminho) {
@@ -352,23 +388,25 @@
     /* apaga um arquivo (se não der, tudo bem: o registro no banco é o que vale) */
     apagar: function (bucket, caminho) {
       if (!caminho) return Promise.resolve(false);
-      var token = (Auth.sessao && Auth.sessao.access_token) || CFG.KEY;
-      return fetch(CFG.SUPABASE + '/storage/v1/object/' + bucket + '/' + caminho, {
-        method: 'DELETE',
-        headers: { apikey: CFG.KEY, Authorization: 'Bearer ' + token }
+      return sessaoEmDia().then(function () {
+        return fetch(CFG.SUPABASE + '/storage/v1/object/' + bucket + '/' + caminho, {
+          method: 'DELETE',
+          headers: cabecalhoArquivos()
+        });
       }).then(function (r) { return !!r.ok; }, function () { return false; });
     },
     /* baixa um arquivo privado e devolve um endereço temporário para mostrar na tela */
     baixar: function (bucket, caminho) {
-      var token = (Auth.sessao && Auth.sessao.access_token) || CFG.KEY;
-      return fetch(CFG.SUPABASE + '/storage/v1/object/authenticated/' + bucket + '/' + caminho, {
-        headers: { apikey: CFG.KEY, Authorization: 'Bearer ' + token },
-        cache: 'no-store'
-      }).then(function (r) {
-        if (!r.ok) throw comErro('Não foi possível abrir o arquivo.', r.status, null);
-        return r.blob();
-      }, function () {
-        throw comErro('Sem conexão para abrir o arquivo.', 0, null);
+      return sessaoEmDia().then(function () {
+        return fetch(CFG.SUPABASE + '/storage/v1/object/authenticated/' + bucket + '/' + caminho, {
+          headers: cabecalhoArquivos(),
+          cache: 'no-store'
+        }).then(function (r) {
+          if (!r.ok) throw comErro('Não foi possível abrir o arquivo.', r.status, null);
+          return r.blob();
+        }, function () {
+          throw comErro('Sem conexão para abrir o arquivo.', 0, null);
+        });
       }).then(function (blob) { return URL.createObjectURL(blob); });
     },
     urlAssinada: function (bucket, caminho, segundos) {

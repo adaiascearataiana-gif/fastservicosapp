@@ -24,6 +24,7 @@ const TIPOS = {
   '.md': 'text/plain; charset=utf-8', '.sql': 'text/plain; charset=utf-8'
 };
 const IDENT = /^[a-z_][a-z0-9_]*$/;
+const MAX_LINHAS = 1000;   /* teto do Supabase por pedido (Settings › API › Max rows) */
 
 function b64(obj) { return Buffer.from(JSON.stringify(obj)).toString('base64url'); }
 function fichaDe(req) {
@@ -232,8 +233,9 @@ async function criarServidor(opcoes) {
 
       if (req.method === 'GET') {
         let sql = `select ${colunasSelect(url)} from ${alvo}` + condicoes(url, params) + ordem(url);
-        const lim = Number(url.searchParams.get('limit')), off = Number(url.searchParams.get('offset'));
-        if (lim > 0) sql += ' limit ' + Math.floor(lim);
+        /* como no Supabase: no máximo 1000 linhas por pedido, mesmo que o app peça mais */
+        const pedido = Number(url.searchParams.get('limit')), off = Number(url.searchParams.get('offset'));
+        sql += ' limit ' + (pedido > 0 ? Math.min(Math.floor(pedido), MAX_LINHAS) : MAX_LINHAS);
         if (off > 0) sql += ' offset ' + Math.floor(off);
         const r = await comoUsuario(ficha, (q) => q(sql, params));
         return enviar(res, 200, r.rows);

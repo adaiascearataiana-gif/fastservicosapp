@@ -286,6 +286,12 @@ São dois arquivos, nesta ordem (os dois podem rodar quantas vezes quiser, não 
 
 > No projeto atual isso **já está feito**. O login por e-mail funciona sempre, mesmo sem Google.
 
+> **O cadastro entra direto, sem e-mail de confirmação** — é assim que o projeto está configurado
+> (Authentication → Sign In / Providers → Email → “Confirm email” desligado). Deixe assim.
+> Se um dia ligar a confirmação, o telefone, o endereço e a sala da Escola Bíblica marcados no
+> cadastro não são gravados na hora: a pessoa completa em **Mais › Meu perfil** e escolhe a sala em
+> **Escola Bíblica › Quero participar** depois do primeiro login.
+
 ---
 
 ## 12. Comandos — TERMUX (Android)
@@ -400,15 +406,17 @@ Nada disso encosta no banco de verdade da igreja.
 ibnm
 npm install --no-save jsdom embedded-postgres    # só na primeira vez (computador)
 
-node testes/testar.js                 # telas do app (mais de 140 conferências)
+node testes/testar.js                 # telas do app (mais de 150 conferências)
 node testes/local/testar-banco.js     # regras de permissão do banco (mais de 170 conferências)
 node testes/local/servidor.js --demo  # app completo em http://localhost:8080
 ```
 
 - **`testes/testar.js`** — abre o app sem navegador e confere: PIX e QR Code, visitante,
   painel do ADM principal (11 abas), tamanhos de letra, faixa de data/hora/clima, seções,
-  ADM secundário, Escola Bíblica (aluna, professora e gestão), banco ainda na versão 1.0
-  e os arquivos do modo sem internet. Precisa só do `jsdom` (funciona no Termux).
+  ADM secundário, Escola Bíblica (aluna, professora e gestão), banco ainda na versão 1.0,
+  os arquivos do modo sem internet e os cuidados com o servidor de verdade (listas com mais
+  de 1000 linhas, nome dos arquivos enviados, sessão no fim). Precisa só do `jsdom`
+  (funciona no Termux).
 - **`testes/local/testar-banco.js`** — sobe um PostgreSQL de verdade, temporário, aplica os
   arquivos da pasta `sql/` e tenta fazer o que **não** pode (ADM secundário mexendo em outra
   seção, professor vendo outra sala, visitante abrindo foto de relatório…). Precisa do
@@ -416,7 +424,8 @@ node testes/local/servidor.js --demo  # app completo em http://localhost:8080
 - **`testes/local/servidor.js --demo`** — o app inteiro funcionando com um banco de mentira
   (também só em computador), já com salas, alunos, chamadas, materiais e fotos de exemplo.
   Bom para treinar a equipe sem medo de estragar nada. O que for feito ali some quando o
-  servidor é desligado. Contas de exemplo (senha de todas: `123456`):
+  servidor é desligado. Ele imita o Supabase de verdade, inclusive o limite de 1000 linhas
+  por pedido. Contas de exemplo (senha de todas: `123456`):
 
 | Conta | Papel |
 |---|---|

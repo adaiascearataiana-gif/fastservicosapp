@@ -292,7 +292,7 @@
           if (arq) {
             var ehImagem = /^image\//.test(arq.type || '');
             subir = (ehImagem ? UI.reduzirImagem(arq, 1800, 0.85) : Promise.resolve(arq)).then(function (blob) {
-              var ext = ehImagem ? 'jpg' : ((arq.name.split('.').pop() || 'pdf').toLowerCase().replace(/[^a-z0-9]/g, '') || 'pdf');
+              var ext = ehImagem ? 'jpg' : DB.Arquivos.extensao(arq.name, 'pdf');
               var caminho = pastaDe(secao, sala) + '/' + nomeArquivo(ext);
               return DB.Arquivos.enviar('igreja-publico', caminho, blob).then(function () {
                 dados.url = DB.Arquivos.urlPublica('igreja-publico', caminho);

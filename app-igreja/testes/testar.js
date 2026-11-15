@@ -514,6 +514,68 @@ const espera = (ms) => new Promise((r) => setTimeout(r, ms || 60));
       'arquivos carregam na ordem certa (' + ordem.join(' → ') + ')');
   }
 
+  console.log('\n== 11. Cuidados com o servidor de verdade (Supabase) ==');
+  {
+    /* (a) o Supabase entrega no máximo 1000 linhas por pedido: a lista de presenças vem em partes */
+    const w = criarApp(true);
+    await espera(120);
+    const DB = w.IBNM.DB;
+    const pedidos = [];
+    const linhas = (n, de) => Array.from({ length: n }, (_, i) => ({ aula_id: 'a' + (de + i), matricula_id: 'm1', presente: true }));
+    const original = w.fetch;
+    w.fetch = (url, op) => {
+      const u = String(url);
+      if (u.includes('/rest/v1/ibnm_ebd_presencas')) {
+        pedidos.push(u);
+        const q = new URL(u).searchParams;
+        const off = Number(q.get('offset') || 0);
+        return resposta(off === 0 ? linhas(1000, 0) : off === 1000 ? linhas(1000, 1000) : linhas(170, 2000));
+      }
+      return original(url, op);
+    };
+    const tudo = await DB.Tabela.listarTudo('ibnm_ebd_presencas', { filtros: { aula_id: 'in.(a,b)' }, ordem: 'aula_id.asc,matricula_id.asc' });
+    ok(tudo.length === 2170, 'lista grande chega inteira (2170 linhas em 3 pedidos de até 1000)');
+    ok(pedidos.length === 3 && pedidos.every((u) => u.includes('limit=1000')) && pedidos[1].includes('offset=1000') && pedidos[2].includes('offset=2000'),
+      'cada pedido continua de onde o anterior parou');
+    ok(pedidos.every((u) => u.includes('order=aula_id.asc')), 'sempre na mesma ordem (não repete nem pula linha)');
+    const codigoEbd = fs.readFileSync(pasta('js/ebd.js'), 'utf8');
+    ok(!/listar\('ibnm_ebd_presencas'[^\n]*limite:\s*[1-9]\d{3}/.test(codigoEbd) && (codigoEbd.match(/listarTudo\('ibnm_ebd_presencas'/g) || []).length === 2,
+      'chamada e frequência da sala usam a lista inteira');
+
+    /* (b) nome do arquivo enviado: só letras e números (o Storage recusa acento, espaço e símbolo) */
+    const ext = DB.Arquivos.extensao;
+    ok(ext('Foto da Aula.JPG', 'jpg') === 'jpg' && ext('lição 1.PDF', 'pdf') === 'pdf' && ext('a.b.jpeg') === 'jpeg', 'extensão do arquivo em minúsculas');
+    ok(ext('comprovante', 'jpg') === 'jpg' && ext('recibo.ação', 'pdf') === 'ao' && ext('x.extensaogigante', 'pdf') === 'pdf' && ext('', 'jpg') === 'jpg' && ext('fim.', 'pdf') === 'pdf',
+      'arquivo sem extensão (ou estranha) nunca gera nome inválido');
+
+    /* (c) envio de arquivo com a sessão quase vencida: renova antes de enviar */
+    const envios = [];
+    w.fetch = (url, op) => {
+      const u = String(url);
+      if (u.includes('/auth/v1/token')) { envios.push('renovou'); return resposta({ access_token: 'novo', refresh_token: 'r2', expires_in: 3600, user: { id: perfil.id, email: perfil.email } }); }
+      if (u.includes('/storage/v1/object/')) { envios.push(((op && op.method) || 'GET') + ' ' + ((op.headers && op.headers.Authorization) || '')); return resposta({ Key: 'ok' }); }
+      return original(url, op);
+    };
+    const arquivo = new w.Blob(['abc'], { type: 'image/jpeg' });
+    await DB.Arquivos.enviar('igreja', 'ebd/relatorios/geral/1.jpg', arquivo);
+    ok(envios.length === 1 && envios[0] === 'POST Bearer fake', 'sessão em dia: envia direto, sem pedido a mais');
+    DB.Auth.sessao.expires_at = Math.floor(Date.now() / 1000) + 30;
+    envios.length = 0;
+    await DB.Arquivos.enviar('igreja', 'ebd/relatorios/geral/2.jpg', arquivo);
+    ok(envios.length === 2 && envios[0] === 'renovou' && envios[1] === 'POST Bearer novo', 'sessão no fim: renova e envia com a sessão nova');
+    DB.Auth.sessao.expires_at = Math.floor(Date.now() / 1000) + 30;
+    envios.length = 0;
+    const apagou = await DB.Arquivos.apagar('igreja', 'ebd/relatorios/geral/2.jpg');
+    ok(apagou === true && envios[0] === 'renovou' && envios[1] === 'DELETE Bearer novo', 'apagar arquivo também confere a sessão antes');
+    ok(await DB.Arquivos.apagar('igreja', '') === false, 'apagar sem caminho não faz pedido nenhum');
+    DB.Auth.sessao.expires_at = Math.floor(Date.now() / 1000) + 30;
+    envios.length = 0;
+    await Promise.all([1, 2, 3, 4, 5, 6].map((n) => DB.Arquivos.baixar('igreja', 'ebd/relatorios/geral/' + n + '.jpg').catch(() => null)));
+    ok(envios.filter((x) => x === 'renovou').length === 1 && envios.filter((x) => x === 'GET Bearer novo').length === 6,
+      'seis miniaturas ao mesmo tempo: uma única renovação de sessão');
+    ok(!w.erros.length, 'sem erros de JavaScript');
+  }
+
   console.log('\n' + (falhas ? '❌ ' + falhas + ' verificação(ões) falharam' : '✅ TODOS OS TESTES PASSARAM'));
   process.exit(falhas ? 1 : 0);
 })();
