@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="pt-BR" data-fonte="2">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b4a3a">
+<meta name="description" content="App da Igreja Batista em Nova Metrópole: devocional do dia, agenda semanal e mensal, programações, palavra pastoral, pedidos de oração e ofertas por PIX.">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="IBNM">
+<meta name="format-detection" content="telephone=no">
+<title>Igreja Batista em Nova Metrópole</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="stylesheet" href="css/app.css?v=1.0.0">
+</head>
+<body>
+
+<div id="offline" class="offline" hidden>📴 Você está sem internet. Mostrando as últimas informações salvas.</div>
+
+<header class="topo">
+  <button class="topo-logo" data-ir="#/inicio" aria-label="Ir para o início">
+    <img src="icons/logo.png" alt="IBNM">
+  </button>
+  <div class="topo-txt">
+    <div class="topo-saudacao" id="saudacao">Bom dia!</div>
+    <div class="topo-igreja" id="topoIgreja">Igreja Batista em Nova Metrópole</div>
+  </div>
+  <div class="topo-acoes">
+    <button class="btn-icone" id="btnRadio" hidden aria-label="Rádio da igreja" title="Rádio da igreja">
+      <svg viewBox="0 0 24 24"><path d="M11 5 6.5 9H3v6h3.5L11 19V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+    </button>
+    <button class="btn-icone" id="btnFonte" aria-label="Tamanho da letra" title="Tamanho da letra">A</button>
+    <button class="btn-ofertar" id="btnOfertar" aria-label="Fazer uma oferta">
+      <svg viewBox="0 0 24 24"><path d="M12 20.5s-7.5-4.6-7.5-9.6a4.2 4.2 0 0 1 7.5-2.5 4.2 4.2 0 0 1 7.5 2.5c0 5-7.5 9.6-7.5 9.6Z"/></svg>
+      <span>Ofertar</span>
+    </button>
+  </div>
+</header>
+
+<div id="faixaRedes" class="faixa-redes" hidden aria-label="Redes sociais da igreja">
+  <a id="linkInsta" class="faixa-rede ig" href="#" target="_blank" rel="noopener">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1.2" fill="currentColor" stroke="none"/></svg>
+    Instagram
+  </a>
+  <a id="linkYoutube" class="faixa-rede yt" href="#" target="_blank" rel="noopener">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="5.5" width="19" height="13" rx="4"/><path d="M10.5 9.2v5.6l4.8-2.8-4.8-2.8Z" fill="currentColor" stroke="none"/></svg>
+    YouTube
+  </a>
+</div>
+
+<main id="tela" role="main"></main>
+
+<div id="radioBar" class="radio-bar" hidden>
+  <img id="radioCapa" alt="" hidden>
+  <div class="rt">
+    <b id="radioNome">Rádio IBNM</b>
+    <small id="radioStatus">Ouça agora</small>
+  </div>
+  <button id="radioPlay" class="radio-play" aria-label="Tocar rádio"></button>
+  <button id="radioX" class="radio-fechar" aria-label="Fechar rádio">✕</button>
+</div>
+<audio id="radioAudio" preload="none"></audio>
+
+<nav class="menu" id="menu" aria-label="Menu principal">
+  <button data-rota="#/inicio" class="on">
+    <svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5.5 9.5V21h13V9.5"/><path d="M9.5 21v-6h5v6"/></svg>
+    <span>Início</span>
+  </button>
+  <button data-rota="#/agenda">
+    <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 10h18"/><path d="M8 14h3M13 14h3M8 17.5h3"/></svg>
+    <span>Agenda</span>
+  </button>
+  <button data-rota="#/devocional">
+    <svg viewBox="0 0 24 24"><path d="M12 6.5C9.5 4.8 6.5 4.3 3.5 4.8v13.4c3-.5 6 0 8.5 1.8 2.5-1.8 5.5-2.3 8.5-1.8V4.8c-3-.5-6 0-8.5 1.7Z"/><path d="M12 6.5v13.5"/></svg>
+    <span>Devocional</span>
+  </button>
+  <button data-rota="#/oferta">
+    <svg viewBox="0 0 24 24"><path d="M12 20.5s-7.5-4.6-7.5-9.6a4.2 4.2 0 0 1 7.5-2.5 4.2 4.2 0 0 1 7.5 2.5c0 5-7.5 9.6-7.5 9.6Z"/></svg>
+    <span>Ofertar</span>
+  </button>
+  <button data-rota="#/mais">
+    <svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>
+    <span>Mais</span>
+  </button>
+</nav>
+
+<div id="modal" class="modal" hidden></div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script src="vendor/qrcode.js"></script>
+<script src="js/config.js"></script>
+<script src="js/db.js"></script>
+<script src="js/pix.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/views.js"></script>
+<script src="js/admin.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
