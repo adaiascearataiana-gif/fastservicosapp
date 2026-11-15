@@ -8598,7 +8598,7 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
             <label>Filtrar por Motorista:</label>
             <select id="filtroSeqMotorista" onchange="renderizarSequencia()"><option value="">Todos</option></select>
           </div>
-        <div class="rd-filter-status" id="fastFiltroSeqStatusWrap"><label>Filtrar por Status:</label><select id="fastFiltroSeqStatus"><option value="">Todos</option><option value="pendentes">Pendentes</option><option value="concluidas">Concluidas</option></select></div></div>
+        <div class="rd-filter-status" id="fastFiltroSeqStatusWrap"><label>Filtrar por Status:</label><select id="fastFiltroSeqStatus"><option value="">Todos</option><option value="pendentes">EM ROTA</option><option value="concluidas">CONCLUÍDA</option></select></div></div>
       </div>
 
       <!-- (2.3.35) LANÇAMENTO DE ROTA DO DIA — embutido (antes era o modal ADICIONAR ROTAS) -->
@@ -40549,7 +40549,7 @@ setInterval(function(){try{var tab=document.getElementById('rotasDia');if(tab&&t
         var cell=document.createElement('div');
         cell.className='rd-filter-status';
         cell.id='fastFiltroSeqStatusWrap';
-        cell.innerHTML='<label>Filtrar por Status:</label><select id="fastFiltroSeqStatus"><option value="">Todos</option><option value="pendentes">Pendentes</option><option value="concluidas">Concluidas</option></select>';
+        cell.innerHTML='<label>Filtrar por Status:</label><select id="fastFiltroSeqStatus"><option value="">Todos</option><option value="pendentes">EM ROTA</option><option value="concluidas">CONCLUÍDA</option></select>';
         if(motSel && motSel.closest('.grid-form')===grid){ grid.appendChild(cell); }
         else { grid.appendChild(cell); }
         cell.querySelector('#fastFiltroSeqStatus').addEventListener('change', function(){ navIdx=-1; aplicarFiltroStatus(); });

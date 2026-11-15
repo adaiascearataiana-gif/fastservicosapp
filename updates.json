@@ -4,6 +4,11 @@
   "updates": [
     {
       "app": "fast",
+      "type": "melhorado",
+      "text": "5.3.9l (14/11/2026): no filtro de status das Rotas do Dia, Pendentes agora se chama EM ROTA (e Concluídas, CONCLUÍDA), igual ao botão."
+    },
+    {
+      "app": "fast",
       "type": "correcao",
       "text": "5.3.9k (14/11/2026): fotos tiradas direto na rota (PAINEL / Editar rota) agora sobem para a nuvem e aparecem nos outros aparelhos — antes só as fotos das Rotas do Dia subiam."
     },
