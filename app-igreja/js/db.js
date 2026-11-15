@@ -6,6 +6,7 @@
   var CFG = window.IBNM.CFG;
   var CHAVE_SESSAO = 'ibnm.sessao.v1';
   var CHAVE_PERFIL = 'ibnm.perfil.v1';
+  var CHAVE_ACESSO = 'ibnm.acesso.v1';
 
   function agora() { return Math.floor(Date.now() / 1000); }
 
@@ -18,6 +19,8 @@
     if (m.indexOf('unable to validate email') >= 0 || m.indexOf('invalid email') >= 0) return 'Digite um e-mail válido.';
     if (m.indexOf('jwt expired') >= 0 || m.indexOf('invalid jwt') >= 0) return 'Sua sessão expirou. Entre novamente.';
     if (m.indexOf('row-level security') >= 0 || m.indexOf('permission denied') >= 0) return 'Você não tem permissão para essa ação.';
+    if (m.indexOf('could not find the function') >= 0 || m.indexOf('could not find the table') >= 0 || (m.indexOf('relation') >= 0 && m.indexOf('does not exist') >= 0)) return 'Esta parte do app ainda não foi ativada no banco de dados. Avise o administrador (rodar o arquivo sql/02-secoes-ebd.sql).';
+    if (m.indexOf('payload too large') >= 0 || m.indexOf('exceeded the maximum allowed size') >= 0) return 'O arquivo é grande demais. Tente um arquivo menor.';
     if (m.indexOf('duplicate key') >= 0 || m.indexOf('already exists') >= 0) return 'Este registro já existe.';
     if (m.indexOf('provider is not enabled') >= 0) return 'O login com Google ainda não está ativado no servidor.';
     if (m.indexOf('failed to fetch') >= 0 || m.indexOf('networkerror') >= 0 || m.indexOf('load failed') >= 0) return 'Sem conexão com a internet. Verifique sua rede.';
@@ -79,6 +82,7 @@
   var Auth = {
     sessao: null,
     perfil: null,
+    acesso: null,      /* o que esta pessoa pode fazer: { principal, secoes[], ebd[], ebd_pendentes } */
 
     carregarSessao: function () {
       try {
@@ -87,6 +91,7 @@
           Auth.sessao = s;
           if (s.user) {
             try { Auth.perfil = JSON.parse(localStorage.getItem(CHAVE_PERFIL) || 'null'); } catch (e) {}
+            try { Auth.acesso = arrumarAcesso(JSON.parse(localStorage.getItem(CHAVE_ACESSO) || 'null')); } catch (e) {}
           }
         }
       } catch (e) { Auth.sessao = null; }
@@ -103,9 +108,11 @@
     limparSessao: function () {
       Auth.sessao = null;
       Auth.perfil = null;
+      Auth.acesso = null;
       try {
         localStorage.removeItem(CHAVE_SESSAO);
         localStorage.removeItem(CHAVE_PERFIL);
+        localStorage.removeItem(CHAVE_ACESSO);
       } catch (e) {}
     },
 
@@ -113,7 +120,28 @@
 
     usuario: function () { return (Auth.sessao && Auth.sessao.user) || null; },
 
+    /* ADM principal: faz tudo, cria seções e escolhe quem cuida de cada uma */
     ehAdm: function () { return !!(Auth.perfil && Auth.perfil.is_adm); },
+
+    /* seções que o ADM principal liberou para esta pessoa (ex.: ['ebd', 'eventos']) */
+    secoesAdm: function () { return (Auth.acesso && Auth.acesso.secoes) || []; },
+
+    /* cuida desta seção? (o ADM principal cuida de todas) */
+    temSecao: function (chave) { return Auth.ehAdm() || Auth.secoesAdm().indexOf(chave) >= 0; },
+
+    /* tem alguma coisa para administrar? */
+    temPainel: function () { return Auth.ehAdm() || Auth.secoesAdm().length > 0; },
+
+    /* matrículas desta pessoa na Escola Bíblica: [{ id, sala_id, sala, papel, status }] */
+    ebd: function () { return (Auth.acesso && Auth.acesso.ebd) || []; },
+
+    professorDe: function (salaId) {
+      return Auth.ebd().some(function (m) { return m.sala_id === salaId && m.papel === 'professor' && m.status === 'ativo'; });
+    },
+
+    ehProfessor: function () {
+      return Auth.ebd().some(function (m) { return m.papel === 'professor' && m.status === 'ativo'; });
+    },
 
     entrar: function (email, senha) {
       return req('/auth/v1/token?grant_type=password', {
@@ -301,7 +329,8 @@
         headers: {
           apikey: CFG.KEY,
           Authorization: 'Bearer ' + token,
-          'x-upsert': 'true',
+          /* sem "x-upsert": cada arquivo recebe um nome único, então o envio
+             depende só da regra de INSERT do Storage (nunca de UPDATE). */
           'Content-Type': arquivo.type || 'application/octet-stream'
         },
         body: arquivo
@@ -320,6 +349,28 @@
     urlPublica: function (bucket, caminho) {
       return CFG.SUPABASE + '/storage/v1/object/public/' + bucket + '/' + caminho;
     },
+    /* apaga um arquivo (se não der, tudo bem: o registro no banco é o que vale) */
+    apagar: function (bucket, caminho) {
+      if (!caminho) return Promise.resolve(false);
+      var token = (Auth.sessao && Auth.sessao.access_token) || CFG.KEY;
+      return fetch(CFG.SUPABASE + '/storage/v1/object/' + bucket + '/' + caminho, {
+        method: 'DELETE',
+        headers: { apikey: CFG.KEY, Authorization: 'Bearer ' + token }
+      }).then(function (r) { return !!r.ok; }, function () { return false; });
+    },
+    /* baixa um arquivo privado e devolve um endereço temporário para mostrar na tela */
+    baixar: function (bucket, caminho) {
+      var token = (Auth.sessao && Auth.sessao.access_token) || CFG.KEY;
+      return fetch(CFG.SUPABASE + '/storage/v1/object/authenticated/' + bucket + '/' + caminho, {
+        headers: { apikey: CFG.KEY, Authorization: 'Bearer ' + token },
+        cache: 'no-store'
+      }).then(function (r) {
+        if (!r.ok) throw comErro('Não foi possível abrir o arquivo.', r.status, null);
+        return r.blob();
+      }, function () {
+        throw comErro('Sem conexão para abrir o arquivo.', 0, null);
+      }).then(function (blob) { return URL.createObjectURL(blob); });
+    },
     urlAssinada: function (bucket, caminho, segundos) {
       return req('/storage/v1/object/sign/' + bucket + '/' + caminho, {
         metodo: 'POST',
@@ -334,6 +385,30 @@
       });
     }
   };
+
+  /* ---------------- PERMISSÕES ---------------- */
+  function arrumarAcesso(a) {
+    if (!a || typeof a !== 'object' || Array.isArray(a)) return null;
+    return {
+      principal: !!a.principal,
+      secoes: Array.isArray(a.secoes) ? a.secoes : [],
+      ebd: Array.isArray(a.ebd) ? a.ebd : [],
+      ebd_pendentes: Number(a.ebd_pendentes) || 0
+    };
+  }
+
+  /* pergunta ao banco o que esta pessoa pode fazer (seções liberadas e salas da Escola Bíblica) */
+  function carregarAcesso() {
+    if (!Auth.logado()) { Auth.acesso = null; return Promise.resolve(null); }
+    return rpc('ibnm_meu_acesso', {}).then(function (a) {
+      Auth.acesso = arrumarAcesso(a) || { principal: false, secoes: [], ebd: [], ebd_pendentes: 0 };
+      try { localStorage.setItem(CHAVE_ACESSO, JSON.stringify(Auth.acesso)); } catch (e) {}
+      return Auth.acesso;
+    }).catch(function () {
+      /* sem internet (ou banco ainda sem a versão 1.1): fica com o que já estava salvo no aparelho */
+      return Auth.acesso;
+    });
+  }
 
   /* ---------------- PERFIL ---------------- */
   function garantirPerfil() {
@@ -360,7 +435,7 @@
         Auth.perfil = perfil;
         try { localStorage.setItem(CHAVE_PERFIL, JSON.stringify(perfil)); } catch (e) {}
       }
-      return perfil;
+      return carregarAcesso().then(function () { return perfil; });
     });
   }
 
@@ -386,6 +461,7 @@
     rpc: rpc,
     Arquivos: Arquivos,
     garantirPerfil: garantirPerfil,
+    carregarAcesso: carregarAcesso,
     Cache: Cache,
     req: req
   };

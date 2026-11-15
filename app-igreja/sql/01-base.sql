@@ -5,6 +5,10 @@
 --  Como usar:
 --    Supabase  ->  SQL Editor  ->  New query  ->  cole tudo  ->  Run
 --  Pode rodar quantas vezes quiser: não apaga dados existentes.
+--
+--  IMPORTANTE (versão 1.1 em diante): depois deste arquivo rode também
+--  o 02-secoes-ebd.sql. Se rodar este aqui de novo, rode o 02 em seguida,
+--  porque este arquivo recria as regras de segurança da versão 1.0.
 -- ============================================================
 
 create extension if not exists pgcrypto;
@@ -528,33 +532,36 @@ values (
 on conflict (data) do nothing;
 
 insert into public.ibnm_eventos (titulo, descricao, categoria, recorrente, dia_semana, hora, local, publicado)
-values
+select v.titulo, v.descricao, v.categoria, v.recorrente, v.dia_semana, v.hora::time, v.local, v.publicado
+from (values
   ('Culto de Celebração', 'Venha adorar com a sua família.', 'culto', true, 0, '18:00', 'Templo da IBNM', false),
   ('Culto de Ensino e Oração', 'Estudo da Palavra e oração pelos pedidos da igreja.', 'culto', true, 3, '19:30', 'Templo da IBNM', false),
   ('Ensaio do Ministério de Louvor', 'Ensaio semanal da equipe de louvor.', 'atividade', true, 5, '19:30', 'Templo da IBNM', false),
   ('Reunião da Mocidade', 'Encontro dos jovens da igreja.', 'reuniao', true, 6, '19:30', 'Salão anexo', false)
-on conflict do nothing;
+) as v(titulo, descricao, categoria, recorrente, dia_semana, hora, local, publicado)
+where not exists (select 1 from public.ibnm_eventos);
 
 insert into public.ibnm_palavras (titulo, autor, resumo, texto, publicado)
-values (
+select
   'Uma igreja que cuida de pessoas',
   'Pastor',
   'Este é um espaço para o pastor compartilhar uma palavra com a igreja.',
   'Escreva aqui a sua palavra pastoral. Você pode falar sobre a vida da igreja, um ensino, um agradecimento ou um convite especial. Para publicar, ligue a opção "Publicado" no painel do administrador.',
   false
-);
+where not exists (select 1 from public.ibnm_palavras);
 
 insert into public.ibnm_avisos (titulo, texto, urgencia, publicado)
-values (
+select
   'Bem-vindos ao nosso app!',
   'Este aviso é um exemplo. No painel do administrador você cria, edita e publica os avisos que aparecem na tela inicial.',
   'normal',
   false
-);
+where not exists (select 1 from public.ibnm_avisos);
 
 -- ------------------------------------------------------------
 -- 14. PRONTO!
 --    Para virar administrador, entre no app pela primeira vez.
 --    Se já usava o app antes, rode:
 --      update public.ibnm_perfis set is_adm = true where email = 'seu@email.com';
+--    (esse comando passa a funcionar depois de rodar o 02-secoes-ebd.sql)
 -- ------------------------------------------------------------

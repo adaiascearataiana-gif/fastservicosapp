@@ -14,9 +14,16 @@
     palavras: [],
     avisos: [],
     aniversariantes: [],
+    secoes: [],        /* seções do app (painel, Escola Bíblica e as criadas pelo ADM principal) */
+    ebdSalas: [],      /* salas da Escola Bíblica */
+    ebdResumo: [],     /* quantos alunos e quem ensina em cada sala */
+    ebdConfig: {},     /* horário, tema e revista da Escola Bíblica */
     pronto: false,
     offline: false
   };
+
+  function Sec() { return window.IBNM.Secoes; }
+  function Ebd() { return window.IBNM.EBD; }
 
   function config() { return Estado.config || {}; }
   function cfgPix() { return (config().pix) || {}; }
@@ -61,12 +68,38 @@
       }).catch(function () {}));
     }
 
+    tarefas.push(carregarSecoes());
+
     return Promise.all(tarefas.map(function (p) { return p.catch(function () { return null; }); })).then(function () {
       Estado.pronto = true;
       Estado.offline = !Estado.config;
     }).catch(function () {
       Estado.offline = true;
     });
+  }
+
+  /* Seções e Escola Bíblica. Se o banco ainda estiver na versão 1.0 (sem o arquivo
+     sql/02-secoes-ebd.sql), a busca falha e o app segue normalmente, sem essas telas. */
+  function carregarSecoes() {
+    return DB.Tabela.listar('ibnm_secoes', { ordem: 'ordem.asc,nome.asc', limite: 200 }).then(function (secoes) {
+      if (!Array.isArray(secoes)) return null;
+      Estado.secoes = secoes;
+      DB.Cache.guardar('secoes', Estado.secoes);
+      if (!secoes.some(function (x) { return x.tipo === 'ebd'; })) {
+        Estado.ebdSalas = []; Estado.ebdResumo = [];
+        return null;
+      }
+      return Promise.all([
+        DB.Tabela.listar('ibnm_ebd_salas', { ordem: 'ordem.asc,nome.asc', limite: 200 }).catch(function () { return null; }),
+        DB.rpc('ibnm_ebd_resumo', {}).catch(function () { return null; }),
+        DB.Tabela.um('ibnm_config', { filtros: { chave: 'eq.ebd' } }).catch(function () { return null; })
+      ]).then(function (r) {
+        if (Array.isArray(r[0])) { Estado.ebdSalas = r[0]; DB.Cache.guardar('ebdSalas', r[0]); }
+        if (Array.isArray(r[1])) { Estado.ebdResumo = r[1]; DB.Cache.guardar('ebdResumo', r[1]); }
+        if (r[2] && r[2].valor && typeof r[2].valor === 'object') { Estado.ebdConfig = r[2].valor; DB.Cache.guardar('ebdConfig', r[2].valor); }
+        return null;
+      });
+    }).catch(function () { return null; });
   }
 
   function usarCache() {
@@ -76,6 +109,10 @@
     var p = DB.Cache.pegar('palavras'); if (p) Estado.palavras = p.dados || [];
     var a = DB.Cache.pegar('avisos'); if (a) Estado.avisos = a.dados || [];
     var n = DB.Cache.pegar('aniversariantes'); if (n) Estado.aniversariantes = n.dados || [];
+    var s1 = DB.Cache.pegar('secoes'); if (s1 && Array.isArray(s1.dados)) Estado.secoes = s1.dados;
+    var s2 = DB.Cache.pegar('ebdSalas'); if (s2 && Array.isArray(s2.dados)) Estado.ebdSalas = s2.dados;
+    var s3 = DB.Cache.pegar('ebdResumo'); if (s3 && Array.isArray(s3.dados)) Estado.ebdResumo = s3.dados;
+    var s4 = DB.Cache.pegar('ebdConfig'); if (s4 && s4.dados) Estado.ebdConfig = s4.dados;
     Estado.pronto = true;
     Estado.offline = true;
   }
@@ -240,6 +277,9 @@
       '<button class="acao destaque" data-ir="#/oferta"><span class="acao-ic">💚</span><span>Ofertar</span></button>' +
       '</div></section>';
 
+    /* Escola Bíblica e seções criadas pelo ADM principal */
+    html += blocoSecoes();
+
     /* devocional do dia */
     html += '<section class="secao"><div class="sec-topo"><h3 class="sec-titulo">Devocional do dia</h3>' +
       '<button class="sec-link" data-ir="#/devocional">Ver todos</button></div>';
@@ -317,6 +357,26 @@
         });
       }
     };
+  }
+
+  /* atalhos da Escola Bíblica e das seções (tela inicial) */
+  function blocoSecoes() {
+    var lista = Sec() ? Sec().atalhos() : [];
+    if (!lista.length) return '';
+    var minhas = Auth.ebd().filter(function (m) { return m.status !== 'inativo'; });
+    return '<section class="secao"><div class="sec-topo"><h3 class="sec-titulo">Ministérios e estudos</h3></div>' +
+      '<div class="atalhos-secoes">' + lista.map(function (a) {
+        var sub = a.descricao;
+        if (a.tipo === 'ebd' && minhas.length) {
+          sub = minhas.map(function (m) {
+            if (m.papel === 'professor') return (m.status === 'pendente' ? 'Pedido de professor(a) em análise: ' : 'Você ensina: ') + m.sala;
+            return 'Sua sala: ' + m.sala;
+          }).join(' • ');
+        }
+        return '<button class="atalho-secao' + (a.tipo === 'ebd' ? ' ebd' : '') + '" data-ir="' + UI.esc(a.ir) + '">' +
+          '<span class="ic">' + UI.esc(a.ic) + '</span><span class="tx"><b>' + UI.esc(a.nome) + '</b>' +
+          (sub ? '<small>' + UI.esc(sub) + '</small>' : '') + '</span><span class="seta">›</span></button>';
+      }).join('') + '</div></section>';
   }
 
   /* ============================================================
@@ -961,19 +1021,26 @@
      ============================================================ */
   function mais() {
     var radio = cfgRadio();
-    var adm = Auth.ehAdm();
+    var adm = Auth.temPainel();
     var itens = [];
 
     itens.push({ ic: '📅', t: 'Programações e atividades', s: 'Cultos, reuniões e encontros', ir: '#/programacoes' });
     itens.push({ ic: '💬', t: 'Palavra pastoral', s: 'Mensagens do pastor', ir: '#/palavra' });
     itens.push({ ic: '🙏', t: 'Pedido de oração', s: 'Estamos aqui para orar com você', ir: '#/oracao' });
+    (Sec() ? Sec().visiveis() : []).forEach(function (sc) {
+      itens.push({
+        ic: UI.esc(sc.icone || '📁'), t: UI.esc(sc.nome),
+        s: UI.esc(sc.descricao || (sc.tipo === 'ebd' ? 'Salas, lições, fotos e presença' : 'Mural, materiais e fotos')),
+        ir: Sec().rota(sc)
+      });
+    });
     itens.push({ ic: '⛪', t: 'Nossa igreja', s: 'Endereço, horários e contatos', ir: '#/igreja' });
     if (radio.ativa) itens.push({ ic: '📻', t: radio.nome || 'Rádio da igreja', s: 'Ouça agora', acao: 'radio' });
     itens.push({ ic: '🔠', t: 'Tamanho da letra', s: 'Deixe o app mais confortável', acao: 'fonte' });
     itens.push({ ic: '❓', t: 'Como usar o app', s: 'Ajuda rápida e simples', ir: '#/ajuda' });
     if (Auth.logado()) itens.push({ ic: '👤', t: 'Meu perfil', s: 'Seus dados e senha', ir: '#/perfil' });
     else itens.push({ ic: '🔑', t: 'Entrar ou criar conta', s: 'Acesse todos os recursos', ir: '#/entrar' });
-    if (adm) itens.push({ ic: '🛠️', t: 'Painel do administrador', s: 'Editar tudo no app', ir: '#/admin', destaque: true });
+    if (adm) itens.push({ ic: '🛠️', t: 'Painel do administrador', s: Auth.ehAdm() ? 'Editar tudo no app' : 'Editar as seções que você cuida', ir: '#/admin', destaque: true });
 
     var html = '<div class="detalhe-topo"><button class="voltar" data-ir="#/inicio">← Início</button></div>' +
       '<h2 style="font-size:1.2rem;margin:0 0 12px">Mais</h2><div class="menu-lista">' +
@@ -1009,7 +1076,9 @@
       '<p><b>2. Ajuste o tamanho da letra.</b><br>Toque na letra <b>A</b> no topo da tela ou em <b>Mais › Tamanho da letra</b>. Escolha o que for mais confortável.</p>' +
       '<p><b>3. Veja a agenda.</b><br>Toque em <b>Agenda</b> e escolha entre <b>Semana</b> e <b>Mês</b>. Toque em um evento para ver os detalhes.</p>' +
       '<p><b>4. Oferte pelo app.</b><br>Toque em <b>Ofertar</b>, escolha o valor, abra o app do seu banco e use o <b>QR Code</b> ou o <b>código PIX</b> (botão copiar).</p>' +
-      '<p><b>5. Instale na tela inicial.</b><br>No Chrome, toque nos três pontinhos <b>⋮</b> e escolha <b>Adicionar à tela inicial</b>. O app fica com ícone como os outros.</p>' +
+      '<p><b>5. Participe da Escola Bíblica.</b><br>Na tela inicial, toque em <b>Escola Bíblica Dominical</b>, escolha a sua sala e diga se você é <b>aluno(a)</b> ou <b>professor(a)</b>. Lá ficam as lições, as fotos e a sua frequência.</p>' +
+      '<p><b>6. Veja a data, a hora e o clima.</b><br>Ficam na faixa de cima do app. Toque nela para ver a previsão do dia.</p>' +
+      '<p><b>7. Instale na tela inicial.</b><br>No Chrome, toque nos três pontinhos <b>⋮</b> e escolha <b>Adicionar à tela inicial</b>. O app fica com ícone como os outros.</p>' +
       '</div></div>' +
       '<div class="card mt14"><b>Precisa de ajuda?</b><p class="small mt6">Fale com a secretaria da igreja' +
       (config().whatsapp ? ' pelo WhatsApp ' + UI.esc(config().whatsapp) : '') + '.</p></div>';
@@ -1058,6 +1127,7 @@
         '<div class="linha"><div class="campo curto"><label>Número</label><input id="cNum" inputmode="numeric"></div>' +
         '<div class="campo"><label>Bairro</label><input id="cBairro"></div></div>' +
         '<div class="campo"><label>Cidade/UF</label><input id="cCidade" placeholder="Caucaia/CE"></div>' +
+        (Ebd() ? Ebd().camposCadastro() : '') +
         '<div class="campo"><label>Senha *</label><input id="cSenha" type="password" autocomplete="new-password" placeholder="Mínimo 6 caracteres"></div>' +
         '<div class="campo"><label>Repita a senha *</label><input id="cSenha2" type="password" autocomplete="new-password"></div>' +
         '<label class="checkline"><input type="checkbox" id="cMostrarSenha"> Mostrar a senha</label>' +
@@ -1148,6 +1218,8 @@
             }).catch(function () {});
         });
 
+        if (Ebd()) Ebd().ligarCadastro();
+
         var mostrar = document.getElementById('cMostrarSenha');
         if (mostrar) mostrar.onchange = function () {
           ['cSenha', 'cSenha2'].forEach(function (id) {
@@ -1175,6 +1247,9 @@
           if (s1.length < 6) return avisar('A senha precisa de pelo menos 6 caracteres.');
           if (s1 !== s2) return avisar('As duas senhas não são iguais.');
 
+          /* guarda agora o que foi marcado sobre a Escola Bíblica (a tela pode mudar depois do cadastro) */
+          var escolhaEbd = Ebd() && Ebd().escolhaCadastro ? Ebd().escolhaCadastro() : null;
+
           btnC.disabled = true; btnC.textContent = 'Criando sua conta…';
           Auth.cadastrar(email, s1, { nome: nome, nascimento: nasc || null })
             .then(function (r) {
@@ -1196,8 +1271,17 @@
                 Object.keys(extras).forEach(function (k) { if (!extras[k]) delete extras[k]; });
                 return DB.Tabela.atualizar('ibnm_perfis', { id: 'eq.' + Auth.usuario().id }, extras);
               }).then(function () {
-                return DB.garantirPerfil();
-              }).then(function () {
+                /* escolheu "sou aluno(a)/professor(a)" no cadastro? entra na sala da Escola Bíblica */
+                return Ebd() && escolhaEbd ? Ebd().matricularDoCadastro(escolhaEbd) : null;
+              }).then(function (matricula) {
+                return DB.garantirPerfil().then(function () { return matricula; });
+              }).then(function (matricula) {
+                if (matricula && matricula.status === 'pendente') {
+                  UI.toast('Conta criada! Seu pedido de professor(a) foi enviado para aprovação.', 4500);
+                  window.App.ir('#/inicio');
+                  window.App.atualizarTopo();
+                  return;
+                }
                 UI.toast('Conta criada. Que alegria ter você aqui! 🎉');
                 window.App.ir('#/inicio');
                 window.App.atualizarTopo();
@@ -1227,8 +1311,15 @@
       (p.foto_url ? '<img src="' + UI.esc(p.foto_url) + '" alt="" style="width:82px;height:82px;border-radius:50%;object-fit:cover;margin:0 auto 10px">' : '<div style="width:82px;height:82px;border-radius:50%;background:var(--verde-claro);display:grid;place-items:center;font-size:2rem;margin:0 auto 10px">👤</div>') +
       '<h2 style="margin:0;font-size:1.12rem">' + UI.esc(p.nome || 'Membro') + '</h2>' +
       '<div class="small">' + UI.esc(p.email || '') + '</div>' +
-      (p.is_adm ? '<div class="selo mt10">🛠️ Administrador</div>' : '') +
+      (p.is_adm ? '<div class="selo mt10">👑 ADM principal</div>'
+        : (Auth.temPainel() ? '<div class="selo mt10">🛡️ ADM de seção</div>' : '')) +
+      (Auth.ehProfessor() ? '<div class="selo mt10" style="margin-left:6px">👩‍🏫 Professor(a)</div>' : '') +
       '</div>';
+
+    /* Escola Bíblica: sou aluno(a) / professor(a) */
+    if (Ebd() && Ebd().ativa()) {
+      html += '<section class="secao mt14"><h3 class="sec-titulo mb10">Escola Bíblica Dominical</h3>' + Ebd().cartaoParticipacao() + '</section>';
+    }
 
     html += '<section class="secao mt14"><h3 class="sec-titulo mb10">Meus dados</h3><div class="card">' +
       '<div class="campo"><label>Nome completo</label><input id="pNome" value="' + UI.esc(p.nome || '') + '"></div>' +
@@ -1249,7 +1340,7 @@
     html += '<section class="secao"><div class="menu-lista">' +
       '<button class="menu-item" data-acao="fonte"><span class="ic">🔠</span><span class="tx"><b>Tamanho da letra</b><small>Deixe o app do seu jeito</small></span><span class="seta">›</span></button>' +
       '<button class="menu-item" data-acao="senha"><span class="ic">🔒</span><span class="tx"><b>Trocar minha senha</b><small>Quando quiser</small></span><span class="seta">›</span></button>' +
-      (p.is_adm ? '<button class="menu-item" data-ir="#/admin"><span class="ic">🛠️</span><span class="tx"><b>Painel do administrador</b><small>Editar o conteúdo do app</small></span><span class="seta">›</span></button>' : '') +
+      (Auth.temPainel() ? '<button class="menu-item" data-ir="#/admin"><span class="ic">🛠️</span><span class="tx"><b>Painel do administrador</b><small>' + (p.is_adm ? 'Editar o conteúdo do app' : 'Editar as seções que você cuida') + '</small></span><span class="seta">›</span></button>' : '') +
       '</div></section>';
 
     html += '<div class="rodape">Entrou com ' + UI.esc(p.origem === 'google' ? 'a conta Google' : 'e-mail e senha') + '<br>Versão ' + window.IBNM.CFG.VERSAO + '</div>';
@@ -1257,6 +1348,7 @@
     return {
       html: html,
       montar: function (raiz) {
+        if (Ebd()) Ebd().ligarParticipacao(raiz);
         document.getElementById('pSair').onclick = function () {
           UI.confirmar('Sair do app', 'Você vai precisar entrar novamente para ver seus dados.', 'Sair', true).then(function (ok) {
             if (!ok) return;
@@ -1337,6 +1429,7 @@
   window.IBNM.Views = {
     Estado: Estado,
     carregarTudo: carregarTudo,
+    carregarSecoes: carregarSecoes,
     usarCache: usarCache,
     inicio: inicio,
     devocional: devocional,

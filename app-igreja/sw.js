@@ -1,19 +1,24 @@
 /* Service Worker — app da Igreja Batista em Nova Metrópole
    Guarda o app no celular para abrir rápido e funcionar sem internet. */
-var CACHE = 'ibnm-app-1.0.0';
+var VERSAO = '1.1.0';   /* igual ao número em js/config.js e nos ?v= do index.html */
+var CACHE = 'ibnm-app-' + VERSAO;
+var V = '?v=' + VERSAO;
 var SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
-  './css/app.css',
-  './js/config.js',
-  './js/db.js',
-  './js/pix.js',
-  './js/ui.js',
-  './js/views.js',
-  './js/admin.js',
-  './js/app.js',
-  './vendor/qrcode.js',
+  './css/app.css' + V,
+  './vendor/qrcode.js' + V,
+  './js/config.js' + V,
+  './js/db.js' + V,
+  './js/pix.js' + V,
+  './js/ui.js' + V,
+  './js/views.js' + V,
+  './js/secoes.js' + V,
+  './js/ebd.js' + V,
+  './js/admin.js' + V,
+  './js/topo.js' + V,
+  './js/app.js' + V,
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/logo.png',
@@ -44,8 +49,11 @@ self.addEventListener('fetch', function (evento) {
   if (req.method !== 'GET') return;
   var url = new URL(req.url);
 
-  /* banco de dados e login sempre direto na rede */
-  if (url.hostname.indexOf('supabase.co') >= 0 || url.pathname.indexOf('/auth/v1') >= 0 || url.pathname.indexOf('/rest/v1') >= 0) return;
+  /* banco de dados, login, arquivos enviados e clima: sempre direto na rede */
+  if (url.hostname.indexOf('supabase.co') >= 0 || url.pathname.indexOf('/auth/v1') >= 0 ||
+      url.pathname.indexOf('/rest/v1') >= 0 || url.pathname.indexOf('/storage/v1') >= 0) return;
+  /* tudo que vem de outro site (clima, capas de vídeo, fotos) o navegador resolve sozinho */
+  if (url.origin !== location.origin) return;
 
   /* páginas: rede primeiro, cache se estiver sem internet */
   if (req.mode === 'navigate' || (req.headers.get('accept') || '').indexOf('text/html') >= 0) {

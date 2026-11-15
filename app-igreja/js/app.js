@@ -21,11 +21,16 @@
     ajuda: function () { return Views.ajuda(); },
     entrar: function () { return Views.entrar(); },
     perfil: function () { return Views.perfil(); },
-    admin: function () { return window.IBNM.Admin ? window.IBNM.Admin.tela() : { html: '' }; }
+    admin: function () { return window.IBNM.Admin ? window.IBNM.Admin.tela() : { html: '' }; },
+    /* Escola Bíblica:  #/ebd   #/ebd/sala/<id>   #/ebd/gestao */
+    ebd: function () { return window.IBNM.EBD ? window.IBNM.EBD.tela() : { html: '' }; },
+    /* seções criadas pelo ADM principal:  #/secao/<chave> */
+    secao: function () { return window.IBNM.Secoes ? window.IBNM.Secoes.tela() : { html: '' }; }
   };
 
   var App = {
     rotaAtual: 'inicio',
+    enderecoAtual: null,
     instalou: null
   };
 
@@ -64,6 +69,7 @@
       tela.innerHTML = '<div class="vazio"><span class="em">😕</span><b>Algo deu errado</b>Recarregue o app e tente de novo.</div>';
       return;
     }
+    if (!v) v = { html: '' };
     tela.innerHTML = v.html || '';
     if (typeof v.montar === 'function') {
       try { v.montar(tela); } catch (e) { console.error(e); }
@@ -71,16 +77,23 @@
     atualizarMenu(rota);
     atualizarTopo();
     aplicarRadio();
-    if (rota !== 'admin') window.scrollTo(0, 0);
+    /* nas telas com abas próprias (Escola Bíblica e seções) não pula para o alto ao só atualizar */
+    var mesmaTela = location.hash === App.enderecoAtual;
+    App.enderecoAtual = location.hash;
+    if (rota !== 'admin' && !((rota === 'ebd' || rota === 'secao') && mesmaTela)) window.scrollTo(0, 0);
     if (rota === 'mais') mostrarBannerInstalar();
     UI.animarEntrada(tela);
+    UI.arrumarAbas(tela);
   }
 
   function atualizarMenu(rota) {
-    var mapa = { inicio: 'inicio', devocional: 'devocional', agenda: 'agenda', programacoes: 'mais', palavra: 'mais', oferta: 'oferta', oracao: 'mais', igreja: 'mais', mais: 'mais', ajuda: 'mais', entrar: 'mais', perfil: 'mais', admin: 'mais' };
+    var mapa = { inicio: 'inicio', devocional: 'devocional', agenda: 'agenda', programacoes: 'mais', palavra: 'mais', oferta: 'oferta', oracao: 'mais', igreja: 'mais', mais: 'mais', ajuda: 'mais', entrar: 'mais', perfil: 'mais', admin: 'mais', ebd: 'mais', secao: 'mais' };
     var ativo = mapa[rota] || 'inicio';
     UI.$$('#menu button').forEach(function (b) {
-      b.classList.toggle('on', b.getAttribute('data-rota') === ativo);
+      /* os botões guardam o endereço completo (ex.: "#/inicio") */
+      var ligado = String(b.getAttribute('data-rota') || '').replace(/^#\/?/, '') === ativo;
+      b.classList.toggle('on', ligado);
+      if (ligado) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
     });
   }
 
@@ -175,11 +188,32 @@
   }
 
   /* ---------------- recarregar dados ---------------- */
+  /* a pessoa está no meio de alguma coisa? (digitando, com janela aberta ou fazendo a chamada) */
+  function ocupado() {
+    var m = document.getElementById('modal');
+    if (m && !m.hidden) return true;
+    var a = document.activeElement;
+    if (a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName || '')) return true;
+    return !!document.querySelector('#tela [data-editando]');
+  }
+
   function recarregar() {
     Views.usarCache();
     return Views.carregarTudo().then(function () {
-      render();
+      /* não redesenha a tela por cima de quem está preenchendo algo */
+      if (!ocupado()) render();
     });
+  }
+
+  /* confere de tempos em tempos se o ADM principal liberou (ou tirou) alguma seção desta pessoa */
+  function conferirAcesso() {
+    if (!Auth.logado()) return Promise.resolve(false);
+    var antes = JSON.stringify(Auth.acesso || null);
+    return DB.carregarAcesso().then(function () {
+      var mudou = JSON.stringify(Auth.acesso || null) !== antes;
+      if (mudou && !ocupado()) render();
+      return mudou;
+    }).catch(function () { return false; });
   }
 
   /* ---------------- início ---------------- */
@@ -234,10 +268,16 @@
       estadoOffline(true);
     });
 
-    /* mantém a sessão viva */
+    /* data, hora e clima na barra de cima */
+    if (window.IBNM.Topo) window.IBNM.Topo.iniciar();
+
+    /* mantém a sessão viva e as permissões em dia */
     setInterval(function () { if (Auth.logado()) Auth.renovar(false); }, 4 * 60 * 1000);
+    setInterval(function () { if (!document.hidden) conferirAcesso(); }, 5 * 60 * 1000);
     document.addEventListener('visibilitychange', function () {
-      if (!document.hidden && Auth.logado()) Auth.renovar(false);
+      if (!document.hidden && Auth.logado()) {
+        Promise.resolve(Auth.renovar(false)).catch(function () {}).then(conferirAcesso);
+      }
     });
 
     /* links internos */
@@ -295,6 +335,8 @@
   App.render = render;
   App.atualizarTopo = atualizarTopo;
   App.recarregar = recarregar;
+  App.conferirAcesso = conferirAcesso;
+  App.ocupado = ocupado;
   App.aplicarConfig = aplicarConfig;
   App.aplicarRadio = aplicarRadio;
   App.tocarRadio = tocarRadio;

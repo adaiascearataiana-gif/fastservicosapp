@@ -1,5 +1,10 @@
 /* ============================================================
    PAINEL DO ADMINISTRADOR — edita todo o conteúdo do app
+
+   ADM principal  -> vê todas as abas, cria seções e escolhe quem
+                     cuida de cada uma (aba "👑 ADMs e seções").
+   ADM secundário -> vê só as abas das seções que o principal liberou.
+   (O banco de dados confere de novo cada permissão.)
    ============================================================ */
 (function () {
   var DB = window.IBNM.DB;
@@ -9,12 +14,38 @@
 
   var Adm = { aba: 'igreja' };
 
+  /* abas do painel: a chave é a mesma da seção no banco (tabela ibnm_secoes) */
+  var ABAS = [
+    ['igreja', '⛪ Igreja'],
+    ['pix', '💚 PIX e oferta'],
+    ['radio', '📻 Rádio'],
+    ['devocional', '📖 Devocional'],
+    ['eventos', '📅 Agenda'],
+    ['palavra', '💬 Palavra'],
+    ['avisos', '📌 Avisos'],
+    ['oracoes', '🙏 Orações'],
+    ['ofertas', '💰 Ofertas'],
+    ['membros', '👥 Membros']
+  ];
+
+  function Sec() { return window.IBNM.Secoes; }
+
+  /* abas que esta pessoa pode abrir */
+  function abasLiberadas() {
+    var lista = ABAS.filter(function (a) { return Auth.temSecao(a[0]); });
+    if (Auth.ehAdm()) lista.push(['secoes', '👑 ADMs e seções']);
+    return lista;
+  }
+
   function estado() { return Views.Estado; }
   function cfg() { return estado().config || {}; }
 
   function salvarConfig(parcial) {
     var atual = Object.assign({}, cfg(), parcial || {});
-    return DB.Tabela.atualizar('ibnm_config', { chave: 'eq.igreja' }, { valor: atual }).then(function () {
+    return DB.Tabela.atualizar('ibnm_config', { chave: 'eq.igreja' }, { valor: atual }).then(function (linha) {
+      if (!linha) throw new Error('Não foi possível salvar. Confira se você ainda cuida desta seção.');
+      /* o banco devolve o que ficou gravado de verdade (um ADM de seção só altera a parte dele) */
+      if (linha.valor && typeof linha.valor === 'object') atual = linha.valor;
       estado().config = atual;
       DB.Cache.guardar('config', atual);
       if (window.App && window.App.aplicarConfig) window.App.aplicarConfig();
@@ -60,30 +91,33 @@
       window.App.ir('#/entrar');
       return { html: '' };
     }
-    if (!Auth.ehAdm()) {
+    if (!Auth.temPainel()) {
       return {
         html: '<div class="detalhe-topo"><button class="voltar" data-ir="#/mais">← Voltar</button></div>' +
           Views.vazio('🔒', 'Área do administrador', 'Sua conta não tem permissão de administrador. Fale com a liderança da igreja.')
       };
     }
 
-    var abas = [
-      ['igreja', '⛪ Igreja'],
-      ['pix', '💚 PIX e oferta'],
-      ['radio', '📻 Rádio'],
-      ['devocional', '📖 Devocional'],
-      ['eventos', '📅 Agenda'],
-      ['palavra', '💬 Palavra'],
-      ['avisos', '📌 Avisos'],
-      ['oracoes', '🙏 Orações'],
-      ['ofertas', '💰 Ofertas'],
-      ['membros', '👥 Membros']
-    ];
+    var principal = Auth.ehAdm();
+    var abas = abasLiberadas();
+    if (!abas.some(function (a) { return a[0] === Adm.aba; })) Adm.aba = abas.length ? abas[0][0] : '';
+
+    /* seções do app (Escola Bíblica, Jovens…) que esta pessoa cuida: são editadas na própria tela delas */
+    var doApp = Sec() ? Sec().doApp().filter(function (x) { return Auth.temSecao(x.chave); }) : [];
 
     var html = '<div class="detalhe-topo"><button class="voltar" data-ir="#/mais">← Voltar</button></div>' +
-      '<div class="adm-topo"><span class="adm-ic">🛠️</span><div><b>Painel do administrador</b>' +
-      '<small>Tudo que você escrever aqui aparece no app.</small></div></div>' +
-      '<div class="adm-abas">' + abas.map(function (a) {
+      '<div class="adm-topo"><span class="adm-ic">' + (principal ? '👑' : '🛡️') + '</span><div><b>Painel do administrador</b>' +
+      '<small>' + (principal ? 'Você é o ADM principal: edita tudo e escolhe quem cuida de cada seção.'
+        : 'Você cuida das seções que o ADM principal liberou para você.') + '</small></div></div>';
+
+    if (doApp.length) {
+      html += '<div class="adm-atalhos">' + doApp.map(function (x) {
+        return '<button class="adm-atalho" data-ir="' + (x.tipo === 'ebd' ? '#/ebd/gestao' : Sec().rota(x)) + '">' +
+          '<span>' + UI.esc(x.icone || '📁') + '</span><b>' + UI.esc(x.nome) + '</b><i>›</i></button>';
+      }).join('') + '</div>';
+    }
+
+    html += '<div class="adm-abas">' + abas.map(function (a) {
         return '<button data-adm="' + a[0] + '" class="' + (Adm.aba === a[0] ? 'on' : '') + '">' + a[1] + '</button>';
       }).join('') + '</div><div id="admCorpo"></div>';
 
@@ -104,6 +138,14 @@
   function abrirAba() {
     var corpo = document.getElementById('admCorpo');
     if (!corpo) return;
+    if (!Adm.aba) {
+      corpo.innerHTML = Views.vazio('🛡️', 'Suas seções ficam nos botões acima', 'Toque no nome da seção para publicar e organizar o conteúdo dela.');
+      return;
+    }
+    if (!abasLiberadas().some(function (a) { return a[0] === Adm.aba; })) {
+      corpo.innerHTML = Views.vazio('🔒', 'Seção não liberada', 'Peça ao ADM principal para liberar esta seção para você.');
+      return;
+    }
     corpo.innerHTML = '<div class="esqueleto" style="height:120px"></div>';
     var fn = {
       igreja: abaIgreja,
@@ -115,7 +157,8 @@
       avisos: abaAvisos,
       oracoes: abaOracoes,
       ofertas: abaOfertas,
-      membros: abaMembros
+      membros: abaMembros,
+      secoes: abaSecoes
     }[Adm.aba] || abaIGrejaErro;
     fn(corpo);
   }
@@ -728,7 +771,7 @@
      ============================================================ */
   function abaOracoes(corpo) {
     DB.Tabela.listar('ibnm_oracoes', { ordem: 'criado_em.desc', limite: 200 }).then(function (lista) {
-      corpo.innerHTML = '<div class="adm-aviso">Os pedidos marcados como <b>em sigilo</b> são vistos apenas por você (administrador). Ninguém mais no app tem acesso.</div>' +
+      corpo.innerHTML = '<div class="adm-aviso">Os pedidos marcados como <b>em sigilo</b> aparecem só aqui, para o ADM principal e para quem ele liberou em “Pedidos de oração”. Nenhum outro membro vê.</div>' +
         '<div class="adm-lista">' + (lista.length ? lista.map(function (o) {
           var d = new Date(o.criado_em);
           return '<div class="adm-item" style="flex-direction:column;align-items:stretch">' +
@@ -854,7 +897,9 @@
         '<div class="card" style="padding:13px"><div class="small">Aniversariantes do mês</div><b style="font-size:1.3rem">' + aniversariantes.length + '</b></div>' +
         '</div>' +
         '<div class="campo"><label>Buscar pessoa</label><input id="mbBusca" placeholder="Nome ou e-mail"></div>' +
-        '<div class="adm-aviso">Para dar acesso de administrador a alguém de confiança, toque em <b>Tornar ADM</b>. Essa pessoa poderá editar todo o conteúdo do app.</div>' +
+        (Auth.ehAdm()
+          ? '<div class="adm-aviso"><b>Seções</b>: libera só algumas partes do app para a pessoa (ADM secundário).<br><b>Tornar principal</b>: a pessoa passa a editar tudo e a escolher outros ADMs — use só com quem é de total confiança.</div>'
+          : '<div class="adm-aviso">Lista de pessoas cadastradas no app. Só o ADM principal muda as permissões.</div>') +
         '<div class="adm-lista" id="mbLista">' + lista.map(function (p) { return linhaMembro(p); }).join('') + '</div>';
 
       var busca = document.getElementById('mbBusca');
@@ -870,11 +915,16 @@
 
   function linhaMembro(p) {
     var nasc = p.nascimento ? UI.dataBR(p.nascimento) : 'sem data';
+    var zap = UI.whats(p.telefone);
     return '<div class="adm-item" data-busca="' + UI.esc(((p.nome || '') + ' ' + (p.email || '')).toLowerCase()) + '">' +
-      '<div class="tx"><b>' + UI.esc(p.nome || '(sem nome)') + (p.is_adm ? ' <span class="selo" style="padding:1px 6px">ADM</span>' : '') + '</b>' +
+      '<div class="tx"><b>' + UI.esc(p.nome || '(sem nome)') + (p.is_adm ? ' <span class="selo" style="padding:1px 6px">👑 principal</span>' : '') + '</b>' +
       '<small>' + UI.esc(p.email || '') + ' • 🎂 ' + nasc + (p.telefone ? ' • ' + UI.esc(p.telefone) : '') + '</small></div>' +
-      '<div class="acoes-mini"><button class="mini ' + (p.is_adm ? 'perigo' : '') + '" data-adm-toogle="' + p.id + '" data-adm-atual="' + (p.is_adm ? '1' : '0') + '">' +
-      (p.is_adm ? 'Remover ADM' : 'Tornar ADM') + '</button></div></div>';
+      '<div class="acoes-mini">' + (zap ? '<a class="mini ok" href="' + UI.esc(zap) + '" target="_blank" rel="noopener">WhatsApp</a>' : '') +
+      (Auth.ehAdm()
+        ? (p.is_adm ? '' : '<button class="mini" data-mb-secoes="' + p.id + '">Seções</button>') +
+          '<button class="mini ' + (p.is_adm ? 'perigo' : '') + '" data-adm-toogle="' + p.id + '" data-adm-atual="' + (p.is_adm ? '1' : '0') + '">' +
+          (p.is_adm ? 'Tirar principal' : 'Tornar principal') + '</button>'
+        : '') + '</div></div>';
   }
 
   function ligarMembros(lista) {
@@ -883,9 +933,9 @@
         var id = b.getAttribute('data-adm-toogle');
         var atual = b.getAttribute('data-adm-atual') === '1';
         if (String(id) === String(Auth.usuario().id)) { UI.toast('Você não pode remover o seu próprio acesso.'); return; }
-        UI.confirmar(atual ? 'Remover administrador' : 'Tornar administrador',
-          atual ? 'Esta pessoa deixa de editar o conteúdo do app.' : 'Esta pessoa poderá editar todo o conteúdo do app.',
-          atual ? 'Remover' : 'Tornar ADM', atual).then(function (ok) {
+        UI.confirmar(atual ? 'Tirar ADM principal' : 'Tornar ADM principal',
+          atual ? 'Esta pessoa deixa de ser ADM principal (as seções liberadas para ela continuam).' : 'Esta pessoa poderá editar TUDO no app e escolher outros ADMs. Para liberar só algumas partes, use o botão Seções.',
+          atual ? 'Tirar' : 'Tornar principal', atual).then(function (ok) {
             if (!ok) return;
             DB.Tabela.atualizar('ibnm_perfis', { id: 'eq.' + id }, { is_adm: !atual }).then(function () {
               UI.toast('Permissão atualizada.');
@@ -893,6 +943,335 @@
             }).catch(function (e) { UI.toast(e.message); });
           });
       };
+    });
+    UI.$$('[data-mb-secoes]').forEach(function (b) {
+      b.onclick = function () {
+        var id = b.getAttribute('data-mb-secoes');
+        b.disabled = true;
+        carregarAcessos().then(function () { folhaAcessos(id); }).catch(function (e) {
+          UI.toast(e.message || 'Não foi possível abrir as seções.');
+        }).then(function () { b.disabled = false; });
+      };
+    });
+  }
+
+  /* ============================================================
+     👑 ADMs E SEÇÕES — só o ADM principal
+     ============================================================ */
+  var Ac = { secoes: [], adms: [], pessoas: [] };
+  var ICONES_SECAO = ['📁', '🔥', '🎵', '🧒', '👨‍👩‍👧', '👵', '🌍', '🤝', '💒', '🕊️', '📣', '🎭', '⚽', '🍞', '🧺', '📚', '❤️', '⭐'];
+
+  function carregarAcessos() {
+    return Promise.all([
+      DB.Tabela.listar('ibnm_secoes', { ordem: 'ordem.asc,nome.asc', limite: 200 }),
+      DB.Tabela.listar('ibnm_secao_adms', { limite: 2000 }),
+      DB.Tabela.listar('ibnm_perfis', { select: 'id,nome,email,is_adm,foto_url', ordem: 'nome.asc', limite: 1000 })
+    ]).then(function (r) {
+      Ac.secoes = r[0] || [];
+      Ac.adms = r[1] || [];
+      Ac.pessoas = r[2] || [];
+      estado().secoes = Ac.secoes;
+      DB.Cache.guardar('secoes', Ac.secoes);
+      return Ac;
+    });
+  }
+
+  function acPessoa(id) { return Ac.pessoas.filter(function (p) { return p.id === id; })[0] || null; }
+  function acSecao(id) { return Ac.secoes.filter(function (x) { return x.id === id; })[0] || null; }
+  function acSecoesDe(userId) {
+    return Ac.adms.filter(function (a) { return a.user_id === userId; }).map(function (a) { return acSecao(a.secao_id); }).filter(Boolean);
+  }
+  function acPessoasDa(secaoId) {
+    return Ac.adms.filter(function (a) { return a.secao_id === secaoId; }).map(function (a) { return acPessoa(a.user_id); }).filter(Boolean);
+  }
+  function acTipo(x) { return x.tipo === 'painel' ? 'parte do painel' : (x.tipo === 'ebd' ? 'Escola Bíblica' : 'seção criada por você'); }
+  function quantos(n, um, varios) { return n + ' ' + (n === 1 ? um : varios); }
+
+  function abaSecoes(corpo) {
+    if (!Auth.ehAdm()) { corpo.innerHTML = Views.vazio('🔒', 'Só o ADM principal', 'Apenas o ADM principal cria seções e escolhe os outros ADMs.'); return; }
+    carregarAcessos().then(function () { desenharSecoes(corpo); }).catch(function (e) {
+      corpo.innerHTML = '<div class="adm-aviso"><b>Falta um passo no banco de dados.</b><br>Para usar os ADMs por seção e a Escola Bíblica, rode uma vez o arquivo <b>sql/02-secoes-ebd.sql</b> no SQL Editor do Supabase. O passo a passo está no LEIA-ME.</div>' +
+        '<div class="msg-erro">' + UI.esc((e && e.message) || 'Não foi possível carregar as seções.') + '</div>';
+    });
+  }
+
+  function desenharSecoes(corpo) {
+    var eu = Auth.usuario() ? Auth.usuario().id : '';
+    var principais = Ac.pessoas.filter(function (p) { return p.is_adm; });
+    var secundarios = Ac.pessoas.filter(function (p) { return !p.is_adm && acSecoesDe(p.id).length; });
+    var doApp = Ac.secoes.filter(function (x) { return x.tipo !== 'painel'; });
+    var doPainel = Ac.secoes.filter(function (x) { return x.tipo === 'painel'; });
+
+    var linhaSecao = function (x) {
+      var n = acPessoasDa(x.id).length;
+      var detalhes = [acTipo(x), n ? quantos(n, 'ADM secundário', 'ADMs secundários') : 'só o ADM principal'];
+      if (x.tipo !== 'painel' && x.no_inicio) detalhes.push('atalho no início');
+      return '<div class="adm-item"><span class="avatar sala">' + UI.esc(x.icone || '📁') + '</span><div class="tx"><b>' + UI.esc(x.nome) +
+        (x.tipo !== 'painel' ? (x.ativo ? ' <span class="badge-on">ativa</span>' : ' <span class="badge-off">desativada</span>') : '') + '</b>' +
+        '<small>' + UI.esc(detalhes.join(' • ')) + '</small></div>' +
+        '<div class="acoes-mini"><button class="mini ok" data-sc-adms="' + x.id + '">ADMs</button>' +
+        (x.tipo !== 'painel' ? '<button class="mini" data-sc-ed="' + x.id + '">Editar</button>' : '') +
+        (x.tipo === 'livre' ? '<button class="mini perigo" data-sc-del="' + x.id + '">Excluir</button>' : '') + '</div></div>';
+    };
+
+    corpo.innerHTML =
+      '<div class="adm-aviso"><b>Como funciona:</b> você é o <b>ADM principal</b> e cuida de tudo. Aqui você cria seções e escolhe os <b>ADMs secundários</b>. Cada ADM secundário só consegue mexer nas seções que você liberar — e você pode tirar o acesso quando quiser.</div>' +
+
+      '<div class="sec-topo"><h3 class="sec-titulo">ADMs do app</h3></div>' +
+      '<button class="btn btn-primario btn-bloco mb10" id="acNovo">➕ Adicionar ADM secundário</button>' +
+      '<div class="adm-lista">' +
+      principais.map(function (p) {
+        return '<div class="adm-item pessoa"><span class="avatar prof">👑</span><div class="tx"><b>' + UI.esc(p.nome || '(sem nome)') + (p.id === eu ? ' (você)' : '') + '</b>' +
+          '<small>ADM principal • cuida de todas as seções</small></div></div>';
+      }).join('') +
+      secundarios.map(function (p) {
+        var lista = acSecoesDe(p.id);
+        return '<div class="adm-item pessoa"><span class="avatar">' + UI.esc(UI.iniciais(p.nome)) + '</span><div class="tx"><b>' + UI.esc(p.nome || '(sem nome)') + '</b>' +
+          '<small>ADM secundário • ' + quantos(lista.length, 'seção', 'seções') + '</small>' +
+          '<div class="chips">' + lista.map(function (x) { return '<span class="chip">' + UI.esc((x.icone || '') + ' ' + x.nome) + '</span>'; }).join('') + '</div></div>' +
+          '<div class="acoes-mini"><button class="mini" data-ac-pessoa="' + p.id + '">Acessos</button></div></div>';
+      }).join('') +
+      (!secundarios.length ? '<div class="vazio" style="padding:14px">Nenhum ADM secundário ainda. Toque em <b style="display:inline">Adicionar ADM secundário</b> para escolher alguém.</div>' : '') +
+      '</div>' +
+
+      '<div class="sec-topo mt20"><h3 class="sec-titulo">Seções do app</h3></div>' +
+      '<button class="btn btn-sec btn-bloco mb10" id="scNova">➕ Criar nova seção</button>' +
+      '<div class="small mb10">Uma seção nova ganha uma página no app com <b>mural, materiais e fotos</b> (ex.: Jovens, Missões, Louvor, Mulheres).</div>' +
+      '<div class="adm-lista">' + doApp.map(linhaSecao).join('') + '</div>' +
+
+      '<div class="sec-topo mt20"><h3 class="sec-titulo">Partes do painel</h3></div>' +
+      '<div class="small mb10">São as abas deste painel. Toque em <b>ADMs</b> para escolher quem pode editar cada uma.</div>' +
+      '<div class="adm-lista">' + doPainel.map(linhaSecao).join('') + '</div>';
+
+    document.getElementById('acNovo').onclick = function () {
+      escolherPessoa('Adicionar ADM secundário', 'Escolha a pessoa. Depois você marca as seções dela.', function (p) { folhaAcessos(p.id); });
+    };
+    document.getElementById('scNova').onclick = function () { editorSecao(null); };
+    UI.$$('[data-ac-pessoa]', corpo).forEach(function (b) { b.onclick = function () { folhaAcessos(b.getAttribute('data-ac-pessoa')); }; });
+    UI.$$('[data-sc-adms]', corpo).forEach(function (b) { b.onclick = function () { folhaQuemCuida(b.getAttribute('data-sc-adms')); }; });
+    UI.$$('[data-sc-ed]', corpo).forEach(function (b) { b.onclick = function () { editorSecao(acSecao(b.getAttribute('data-sc-ed'))); }; });
+    UI.$$('[data-sc-del]', corpo).forEach(function (b) {
+      b.onclick = function () {
+        var x = acSecao(b.getAttribute('data-sc-del'));
+        UI.confirmar('Excluir a seção "' + x.nome + '"', 'O mural, os materiais e as fotos desta seção serão apagados para sempre. Se preferir, apenas desative a seção.', 'Excluir tudo', true).then(function (ok) {
+          if (!ok) return;
+          DB.Tabela.apagar('ibnm_secoes', { id: 'eq.' + x.id }).then(function () {
+            UI.toast('Seção excluída.');
+            return Views.carregarSecoes();
+          }).then(abrirAba).catch(function (e) { UI.toast(e.message); });
+        });
+      };
+    });
+  }
+
+  /* liga ou desliga o acesso de uma pessoa a uma seção */
+  function mudarAcesso(userId, secaoId, liberar) {
+    var pedido = liberar
+      ? DB.Tabela.inserir('ibnm_secao_adms', { secao_id: secaoId, user_id: userId })
+      : DB.Tabela.apagar('ibnm_secao_adms', { secao_id: 'eq.' + secaoId, user_id: 'eq.' + userId });
+    return pedido.then(function () {
+      Ac.adms = Ac.adms.filter(function (a) { return !(a.user_id === userId && a.secao_id === secaoId); });
+      if (liberar) Ac.adms.push({ secao_id: secaoId, user_id: userId });
+    });
+  }
+
+  /* janela: seções liberadas para UMA pessoa */
+  function folhaAcessos(userId) {
+    var p = acPessoa(userId);
+    if (!p) { UI.toast('Pessoa não encontrada.'); return; }
+    var tem = {};
+    Ac.adms.forEach(function (a) { if (a.user_id === userId) tem[a.secao_id] = true; });
+    var grupo = function (titulo, lista) {
+      if (!lista.length) return '';
+      return '<div class="grupo-titulo">' + titulo + '</div>' + lista.map(function (x) {
+        return UI.liga('ac_' + x.id, UI.esc((x.icone || '📁') + ' ' + x.nome), UI.esc(x.descricao || ''), !!tem[x.id]);
+      }).join('');
+    };
+    var html;
+    if (p.is_adm) {
+      html = '<div class="adm-aviso">Esta pessoa é <b>ADM principal</b> e já cuida de todas as seções.</div>';
+    } else {
+      html = '<div class="adm-aviso">Ligue as seções que <b>' + UI.esc(UI.primeiroNome(p.nome) || 'esta pessoa') + '</b> pode editar. Vale na hora — não precisa salvar.</div>' +
+        grupo('Seções do app', Ac.secoes.filter(function (x) { return x.tipo !== 'painel'; })) +
+        grupo('Partes do painel', Ac.secoes.filter(function (x) { return x.tipo === 'painel'; })) +
+        '<button class="btn btn-perigo btn-bloco mt14" id="acTirarTudo">Tirar todos os acessos</button>';
+    }
+    html += '<div class="folha-acoes"><button class="btn btn-primario" id="acPronto">Pronto</button></div>';
+
+    UI.abrirFolha({
+      titulo: 'Acessos de ' + (p.nome || 'pessoa'),
+      sub: p.email || '',
+      html: html,
+      aoFechar: abrirAba,
+      montar: function (raiz) {
+        document.getElementById('acPronto').onclick = UI.fecharFolha;
+        UI.$$('input[id^="ac_"]', raiz).forEach(function (el) {
+          el.onchange = function () {
+            var liberar = el.checked;
+            el.disabled = true;
+            mudarAcesso(userId, el.id.slice(3), liberar).then(function () {
+              UI.toast(liberar ? 'Acesso liberado.' : 'Acesso retirado.');
+            }).catch(function (e) {
+              el.checked = !liberar;
+              UI.toast(e.message || 'Não foi possível mudar o acesso.');
+            }).then(function () { el.disabled = false; });
+          };
+        });
+        var tirar = document.getElementById('acTirarTudo');
+        if (tirar) tirar.onclick = function () {
+          if (tirar.getAttribute('data-certeza') !== '1') { tirar.setAttribute('data-certeza', '1'); tirar.textContent = 'Toque de novo para confirmar'; return; }
+          tirar.disabled = true;
+          DB.Tabela.apagar('ibnm_secao_adms', { user_id: 'eq.' + userId }).then(function () {
+            Ac.adms = Ac.adms.filter(function (a) { return a.user_id !== userId; });
+            UI.toast('Todos os acessos foram retirados.');
+            UI.fecharFolha();
+          }).catch(function (e) { UI.toast(e.message); tirar.disabled = false; });
+        };
+      }
+    });
+  }
+
+  /* janela: quem cuida de UMA seção */
+  function folhaQuemCuida(secaoId) {
+    var x = acSecao(secaoId);
+    if (!x) return;
+    UI.abrirFolha({
+      titulo: (x.icone || '📁') + ' ' + x.nome,
+      sub: 'Quem pode editar esta seção',
+      html: '<div id="qcLista" class="adm-lista"></div>' +
+        '<div class="grupo-titulo">Liberar para mais alguém</div>' +
+        '<div class="campo"><input id="qcBusca" type="search" placeholder="Digite o nome ou o e-mail" autocomplete="off"></div>' +
+        '<div id="qcAchados" class="adm-lista"></div>' +
+        '<div class="folha-acoes"><button class="btn btn-primario" id="qcPronto">Pronto</button></div>',
+      aoFechar: abrirAba,
+      montar: function () {
+        var lista = document.getElementById('qcLista'), achados = document.getElementById('qcAchados'), busca = document.getElementById('qcBusca');
+        var desenhar = function () {
+          var pessoas = acPessoasDa(secaoId);
+          lista.innerHTML = '<div class="adm-item pessoa"><span class="avatar prof">👑</span><div class="tx"><b>ADM principal</b><small>sempre cuida de todas as seções</small></div></div>' +
+            pessoas.map(function (p) {
+              return '<div class="adm-item pessoa"><span class="avatar">' + UI.esc(UI.iniciais(p.nome)) + '</span><div class="tx"><b>' + UI.esc(p.nome || '(sem nome)') + '</b><small>' + UI.esc(p.email || '') + '</small></div>' +
+                '<div class="acoes-mini"><button class="mini perigo" data-qc-tirar="' + p.id + '">Tirar</button></div></div>';
+            }).join('');
+          UI.$$('[data-qc-tirar]', lista).forEach(function (b) {
+            b.onclick = function () {
+              b.disabled = true;
+              mudarAcesso(b.getAttribute('data-qc-tirar'), secaoId, false).then(function () { UI.toast('Acesso retirado.'); desenhar(); procurar(); })
+                .catch(function (e) { UI.toast(e.message); b.disabled = false; });
+            };
+          });
+        };
+        var procurar = function () {
+          var q = busca.value.toLowerCase().trim();
+          if (q.length < 2) { achados.innerHTML = ''; return; }
+          var ja = {};
+          acPessoasDa(secaoId).forEach(function (p) { ja[p.id] = true; });
+          var r = Ac.pessoas.filter(function (p) {
+            return !p.is_adm && !ja[p.id] && ((p.nome || '') + ' ' + (p.email || '')).toLowerCase().indexOf(q) >= 0;
+          }).slice(0, 12);
+          achados.innerHTML = r.length ? r.map(function (p) {
+            return '<div class="adm-item pessoa"><span class="avatar">' + UI.esc(UI.iniciais(p.nome)) + '</span><div class="tx"><b>' + UI.esc(p.nome || '(sem nome)') + '</b><small>' + UI.esc(p.email || '') + '</small></div>' +
+              '<div class="acoes-mini"><button class="mini ok" data-qc-liberar="' + p.id + '">Liberar</button></div></div>';
+          }).join('') : '<div class="vazio" style="padding:14px">Ninguém encontrado. A pessoa precisa ter conta no app.</div>';
+          UI.$$('[data-qc-liberar]', achados).forEach(function (b) {
+            b.onclick = function () {
+              b.disabled = true;
+              mudarAcesso(b.getAttribute('data-qc-liberar'), secaoId, true).then(function () {
+                UI.toast('Acesso liberado.'); busca.value = ''; achados.innerHTML = ''; desenhar();
+              }).catch(function (e) { UI.toast(e.message); b.disabled = false; });
+            };
+          });
+        };
+        busca.oninput = procurar;
+        document.getElementById('qcPronto').onclick = UI.fecharFolha;
+        desenhar();
+      }
+    });
+  }
+
+  /* janela: procurar uma pessoa cadastrada */
+  function escolherPessoa(titulo, sub, aoEscolher) {
+    UI.abrirFolha({
+      titulo: titulo,
+      sub: sub,
+      html: '<div class="campo"><input id="epBusca" type="search" placeholder="Digite o nome ou o e-mail" autocomplete="off"></div>' +
+        '<div id="epLista" class="adm-lista"></div>' +
+        '<div class="folha-acoes"><button class="btn btn-sec" id="epFechar">Cancelar</button></div>',
+      montar: function () {
+        var busca = document.getElementById('epBusca'), lista = document.getElementById('epLista');
+        var desenhar = function () {
+          var q = busca.value.toLowerCase().trim();
+          var r = Ac.pessoas.filter(function (p) {
+            return !p.is_adm && (!q || ((p.nome || '') + ' ' + (p.email || '')).toLowerCase().indexOf(q) >= 0);
+          }).slice(0, 25);
+          lista.innerHTML = r.length ? r.map(function (p) {
+            var n = acSecoesDe(p.id).length;
+            return '<div class="adm-item pessoa"><span class="avatar">' + UI.esc(UI.iniciais(p.nome)) + '</span><div class="tx"><b>' + UI.esc(p.nome || '(sem nome)') + '</b>' +
+              '<small>' + UI.esc(p.email || '') + (n ? ' • já cuida de ' + quantos(n, 'seção', 'seções') : '') + '</small></div>' +
+              '<div class="acoes-mini"><button class="mini ok" data-ep="' + p.id + '">Escolher</button></div></div>';
+          }).join('') : '<div class="vazio" style="padding:14px">Ninguém encontrado. A pessoa precisa criar a conta no app primeiro.</div>';
+          UI.$$('[data-ep]', lista).forEach(function (b) {
+            b.onclick = function () { aoEscolher(acPessoa(b.getAttribute('data-ep'))); };
+          });
+        };
+        busca.oninput = desenhar;
+        document.getElementById('epFechar').onclick = UI.fecharFolha;
+        desenhar();
+      }
+    });
+  }
+
+  /* janela: criar ou editar uma seção */
+  function editorSecao(x) {
+    x = x || {};
+    var icone = x.icone || ICONES_SECAO[0];
+    var icones = ICONES_SECAO.indexOf(icone) >= 0 ? ICONES_SECAO : [icone].concat(ICONES_SECAO);
+    UI.abrirFolha({
+      titulo: x.id ? 'Editar seção' : 'Criar nova seção',
+      sub: x.id ? acTipo(x) : 'A seção ganha uma página com mural, materiais e fotos.',
+      html: campo('scNome', 'Nome da seção', x.nome || '', 'text', 'placeholder="Ex.: Jovens, Missões, Louvor"') +
+        area('scDesc', 'Descrição curta', x.descricao || '', 'Aparece embaixo do nome.', 70) +
+        '<div class="campo"><label>Ícone</label><div class="icones" id="scIcones">' + icones.map(function (i) {
+          return '<button type="button" class="' + (i === icone ? 'on' : '') + '" data-ic="' + i + '">' + i + '</button>';
+        }).join('') + '</div></div>' +
+        campo('scOrdem', 'Ordem na lista', x.ordem === undefined ? 500 : String(x.ordem), 'number', 'inputmode="numeric"', 'Número menor aparece primeiro.') +
+        ligaSwitch('scAtivo', 'Seção ativa', 'Desligue para esconder dos membros sem apagar nada.', x.id ? !!x.ativo : true) +
+        ligaSwitch('scInicio', 'Atalho na tela inicial', 'Mostra um botão desta seção logo na primeira tela.', x.id ? !!x.no_inicio : true) +
+        '<div class="folha-acoes"><button class="btn btn-sec" id="scCancelar">Cancelar</button>' +
+        '<button class="btn btn-primario" id="scSalvar">Salvar</button></div><div id="scMsg"></div>',
+      montar: function (raiz) {
+        UI.$$('[data-ic]', raiz).forEach(function (b) {
+          b.onclick = function () {
+            icone = b.getAttribute('data-ic');
+            UI.$$('[data-ic]', raiz).forEach(function (o) { o.classList.toggle('on', o === b); });
+          };
+        });
+        document.getElementById('scCancelar').onclick = UI.fecharFolha;
+        document.getElementById('scSalvar').onclick = function () {
+          var b = this, msg = document.getElementById('scMsg');
+          var dados = {
+            nome: document.getElementById('scNome').value.trim(),
+            descricao: document.getElementById('scDesc').value.trim(),
+            icone: icone,
+            ordem: parseInt(document.getElementById('scOrdem').value, 10) || 500,
+            ativo: document.getElementById('scAtivo').checked,
+            no_inicio: document.getElementById('scInicio').checked
+          };
+          if (dados.nome.length < 2) { msg.innerHTML = '<div class="msg-erro">Dê um nome para a seção.</div>'; return; }
+          b.disabled = true; b.textContent = 'Salvando…';
+          (x.id ? DB.Tabela.atualizar('ibnm_secoes', { id: 'eq.' + x.id }, dados) : DB.Tabela.inserir('ibnm_secoes', dados)).then(function (linha) {
+            if (!linha) throw new Error('Não foi possível salvar a seção.');
+            return Views.carregarSecoes();
+          }).then(function () {
+            UI.fecharFolha();
+            UI.toast(x.id ? 'Seção atualizada.' : 'Seção criada! Agora escolha quem cuida dela.');
+            abrirAba();
+          }).catch(function (e) {
+            msg.innerHTML = '<div class="msg-erro">' + UI.esc(e.message) + '</div>';
+            b.disabled = false; b.textContent = 'Salvar';
+          });
+        };
+      }
     });
   }
 

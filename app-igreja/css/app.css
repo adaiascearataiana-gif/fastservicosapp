@@ -622,3 +622,267 @@ main#tela{padding:14px 13px 22px;max-width:760px;margin:0 auto}
   .btn-ofertar{height:38px;padding:0 11px;font-size:.8rem;border-radius:11px}
   .topo-acoes{gap:6px}
 }
+
+/* ============================================================
+   VERSÃO 1.1 — data/hora/clima, seções, ADMs e Escola Bíblica
+   ============================================================ */
+
+/* ---------- topo: data completa, hora com segundos e clima ----------
+   No celular a data ocupa a linha de cima inteira (cabe até "Segunda-feira, 28 de fevereiro de 2028");
+   embaixo ficam o clima (à esquerda) e a hora (à direita). */
+.topo{flex-wrap:wrap;row-gap:8px}
+.topo-tempo{
+  flex:1 0 100%;min-width:0;display:grid;grid-template-columns:minmax(0,1fr) auto;
+  grid-template-areas:"data data" "clima hora";align-items:center;column-gap:10px;row-gap:0;
+  border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.10);color:#fff;
+  border-radius:14px;padding:6px 12px 7px;cursor:pointer;text-align:left;font:inherit;
+  -webkit-tap-highlight-color:transparent;
+}
+.topo-tempo:active{background:rgba(255,255,255,.17)}
+.tt-data{grid-area:data;min-width:0;font-size:min(.8rem,3.75vw);font-weight:800;line-height:1.3;letter-spacing:.01em}
+.tt-clima{
+  grid-area:clima;display:flex;align-items:center;gap:5px;min-width:0;white-space:nowrap;
+  font-size:min(.76rem,3.55vw);line-height:1.3;color:rgba(255,255,255,.9);
+}
+.tt-clima b{flex:none;font-weight:850;color:var(--dourado-claro)}
+.tt-clima .tt-ic{flex:none;font-size:1.25em;line-height:1}
+.tt-desc{min-width:0;overflow:hidden;text-overflow:ellipsis}
+.tt-cidade{display:none}
+.tt-clima.sem{color:rgba(255,255,255,.66)}
+.tt-hora{
+  grid-area:hora;display:flex;align-items:baseline;font-weight:850;font-size:min(1.3rem,6vw);line-height:1.05;
+  letter-spacing:.02em;font-variant-numeric:tabular-nums;font-feature-settings:"tnum";
+}
+.tt-hora small{font-size:.6em;font-weight:800;color:var(--dourado-claro);min-width:1.6em}
+
+/* ao rolar a tela para baixo a barra verde encolhe: fica só a data, a hora e o clima */
+.topo.compacto{padding-top:calc(7px + env(safe-area-inset-top,0px));padding-bottom:8px;border-radius:0 0 18px 18px}
+.topo.compacto > .topo-logo,.topo.compacto > .topo-txt,.topo.compacto > .topo-acoes{display:none}
+
+.clima-grande{display:flex;align-items:center;gap:14px;padding:4px 0 12px}
+.clima-grande > span{font-size:3rem;line-height:1}
+.clima-grande b{display:block;font-size:2rem;line-height:1.1;color:var(--verde)}
+.clima-grande small{display:block;font-size:.92rem;color:var(--muted);font-weight:700}
+
+/* ---------- atalhos das seções (tela inicial) ---------- */
+.atalhos-secoes{display:grid;gap:9px}
+.atalho-secao{
+  display:flex;align-items:center;gap:12px;padding:13px 14px;border-radius:16px;width:100%;
+  background:#fff;border:1px solid var(--borda);box-shadow:0 5px 16px rgba(9,49,38,.05);
+  cursor:pointer;text-align:left;font:inherit;color:inherit;
+}
+.atalho-secao:active{transform:scale(.99)}
+.atalho-secao .ic{flex:none;width:44px;height:44px;border-radius:13px;display:grid;place-items:center;font-size:1.3rem;background:var(--verde-claro)}
+.atalho-secao .tx{flex:1;min-width:0}
+.atalho-secao b{display:block;font-size:.92rem;font-weight:850;line-height:1.25}
+.atalho-secao small{display:block;font-size:.75rem;color:var(--muted);line-height:1.35;margin-top:1px}
+.atalho-secao .seta{color:#b6c8bf;font-size:1.1rem}
+.atalho-secao.ebd{background:linear-gradient(135deg,#fffaf0,#fff);border-color:#f0e3bb}
+.atalho-secao.ebd .ic{background:var(--dourado-suave)}
+
+/* ---------- abas que rolam para o lado ---------- */
+/* letra Grande / Muito grande: campos lado a lado passam para a linha de baixo quando não cabem */
+html[data-fonte="3"] .linha,html[data-fonte="4"] .linha{flex-wrap:wrap;row-gap:0}
+html[data-fonte="3"] .linha > .campo,html[data-fonte="4"] .linha > .campo{flex:1 1 8.4rem}
+html[data-fonte="3"] .linha > .campo.curto,html[data-fonte="4"] .linha > .campo.curto{flex:0 1 6.6rem}
+
+.abas-rolam{overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;position:relative;padding-bottom:12px;margin-bottom:2px}
+.abas-rolam::-webkit-scrollbar{display:none}
+.abas-rolam button{flex:1 0 auto;padding:0 14px;white-space:nowrap}
+.adm-abas{position:relative}
+/* há mais abas para o lado: a ponta fica esfumada (dica de que dá para arrastar) */
+.abas-rolam.tem-dir,.adm-abas.tem-dir{
+  -webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 40px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 40px),transparent);
+}
+.abas-rolam.tem-esq,.adm-abas.tem-esq{
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 40px);mask-image:linear-gradient(90deg,transparent,#000 40px);
+}
+.abas-rolam.tem-esq.tem-dir,.adm-abas.tem-esq.tem-dir{
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 40px,#000 calc(100% - 40px),transparent);
+  mask-image:linear-gradient(90deg,transparent,#000 40px,#000 calc(100% - 40px),transparent);
+}
+
+/* ---------- capa de seção / sala ---------- */
+.secao-capa .selo{background:rgba(255,255,255,.16);color:#fff}
+.destaque-adm{background:linear-gradient(135deg,#fffaf0,#fff);border-color:#f0e3bb}
+.destaque-adm .ic{background:var(--dourado-suave)}
+.sala-capa{display:flex;gap:13px;align-items:flex-start}
+.sala-capa-ic{flex:none;width:58px;height:58px;border-radius:17px;display:grid;place-items:center;font-size:1.8rem;background:var(--verde-claro)}
+.sala-capa .tx{flex:1;min-width:0}
+.sala-capa h2{margin:0 0 2px;font-size:1.15rem;line-height:1.25}
+.sala-capa p{margin:6px 0 0;font-size:.86rem;color:var(--muted);line-height:1.45}
+.sala-minha{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;background:var(--ok-claro);border-color:#cdeedb}
+.sala-minha b{display:block;font-size:.88rem;color:#14603c}
+.sala-item .tx small + small{margin-top:1px}
+
+/* ---------- pessoas, avatares e etiquetas ---------- */
+.avatar{
+  flex:none;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;
+  background:var(--verde-claro);color:var(--verde);font-weight:850;font-size:.78rem;letter-spacing:.02em;
+}
+.avatar.prof{background:var(--dourado-suave);color:#8a6a12}
+.avatar.sala{border-radius:12px;font-size:1.15rem}
+.adm-item.pessoa{align-items:center}
+/* quando os botões não cabem ao lado do texto, eles descem para a linha de baixo (o texto não fica espremido) */
+.adm-item{flex-wrap:wrap}
+.adm-item .tx{flex:1 1 150px}
+.adm-item .acoes-mini{margin-left:auto}
+.acoes-mini{display:flex;gap:5px;flex-wrap:wrap}
+.acoes-mini a.mini{display:inline-flex;align-items:center;text-decoration:none}
+.chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.chip{background:var(--verde-claro);color:var(--verde);border-radius:999px;padding:2px 9px;font-size:.68rem;font-weight:800;line-height:1.5}
+.grupo-titulo{
+  margin:16px 0 4px;font-size:.7rem;font-weight:850;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);
+}
+.status-pill.ativo{background:var(--ok-claro);color:var(--ok)}
+
+/* ---------- atalhos do painel (seções que a pessoa cuida) ---------- */
+.adm-atalhos{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,9.4rem),1fr));gap:8px;margin-bottom:12px}
+.adm-atalho{
+  display:flex;align-items:center;gap:9px;padding:10px 12px;border-radius:14px;width:100%;min-height:48px;
+  background:linear-gradient(135deg,#fffaf0,#fff);border:1px solid #f0e3bb;cursor:pointer;text-align:left;font:inherit;color:inherit;
+}
+.adm-atalho span{font-size:1.15rem;line-height:1;flex:none}
+.adm-atalho b{flex:1;min-width:0;font-size:.84rem;font-weight:850;line-height:1.25;overflow-wrap:break-word}
+.adm-atalho i{font-style:normal;color:#c2a960;font-size:1.1rem;flex:none}
+
+/* ---------- escolha de ícone ---------- */
+.icones{display:flex;flex-wrap:wrap;gap:7px}
+.icones button{
+  width:44px;height:44px;border-radius:12px;border:1px solid var(--borda);background:#fff;font-size:1.25rem;cursor:pointer;padding:0;
+}
+.icones button.on{border-color:var(--verde-2);background:var(--verde-claro);box-shadow:0 0 0 3px rgba(18,134,106,.16)}
+
+/* ---------- mural ---------- */
+.post{background:#fff;border:1px solid var(--borda);border-radius:18px;padding:14px;box-shadow:0 5px 16px rgba(9,49,38,.05)}
+.post + .post{margin-top:10px}
+.post.fixado{border-color:#f0e3bb;background:linear-gradient(180deg,#fffdf6,#fff)}
+.post-topo{display:flex;align-items:center;flex-wrap:wrap;gap:7px;margin-bottom:6px}
+.post-topo b{font-size:.96rem;line-height:1.3}
+.post-img{width:100%;border-radius:13px;margin:6px 0 8px;cursor:pointer;max-height:340px;object-fit:cover}
+.post-texto{margin:0;font-size:.88rem;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere}
+.post-meta{display:block;margin-top:9px;font-size:.72rem;color:#93a89e;font-weight:700}
+
+/* ---------- materiais ---------- */
+.materiais{display:grid;gap:9px}
+.material{background:#fff;border:1px solid var(--borda);border-radius:16px;box-shadow:0 5px 16px rgba(9,49,38,.05);overflow:hidden}
+.material-abre{
+  display:flex;align-items:center;gap:12px;width:100%;padding:12px 13px;border:0;background:none;
+  cursor:pointer;text-align:left;font:inherit;color:inherit;
+}
+.mat-ic{flex:none;width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-size:1.25rem;background:var(--verde-claro)}
+.mat-capa{flex:none;width:86px;height:50px;border-radius:10px;object-fit:cover;background:#dfe9e3}
+.material .tx{flex:1;min-width:0}
+.material b{display:block;font-size:.9rem;font-weight:800;line-height:1.3}
+.material small{display:block;font-size:.76rem;color:var(--muted);line-height:1.35;overflow-wrap:anywhere}
+.material .mat-meta{color:#93a89e;font-weight:700;font-size:.7rem;margin-top:2px}
+.material .seta{color:#b6c8bf;font-size:1.1rem}
+.material > .acoes-mini{padding:0 13px 11px;justify-content:flex-end}
+.prosa{white-space:pre-wrap;overflow-wrap:anywhere}
+
+/* ---------- fotos ---------- */
+.galeria-data{font-size:.74rem;font-weight:850;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin:14px 2px 7px}
+.galeria-data:first-child{margin-top:0}
+.galeria{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.foto{border:0;padding:0;background:#dfe9e3;border-radius:12px;overflow:hidden;cursor:pointer;aspect-ratio:1/1}
+.foto img{width:100%;height:100%;object-fit:cover}
+.foto-grande{width:100%;border-radius:14px;max-height:68vh;object-fit:contain;background:#f1f5f3}
+
+/* ---------- chamada ---------- */
+.chamada-topo{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:2px 0 10px;font-size:.88rem}
+.chamada-topo b{font-size:1.05rem;color:var(--verde)}
+.chamada-lista{display:grid;gap:7px}
+.chamada-item{
+  display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:14px;min-height:58px;
+  border:1.5px solid var(--borda);background:#fff;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;
+}
+.chamada-item input{position:absolute;opacity:0;pointer-events:none}
+.chamada-item .tx{flex:1;min-width:0}
+.chamada-item .tx b{display:block;font-size:.92rem;font-weight:800;line-height:1.3}
+.chamada-item .tx small{font-size:.7rem;color:var(--muted);font-weight:700}
+.chamada-item .marca{
+  flex:none;width:30px;height:30px;border-radius:50%;border:2px solid #c9d8d0;display:grid;place-items:center;
+  font-size:.95rem;font-weight:900;color:transparent;
+}
+.chamada-item.on{border-color:#9ddbb8;background:var(--ok-claro)}
+.chamada-item.on .marca{background:var(--ok);border-color:var(--ok);color:#fff}
+.chamada-item.on .marca::after{content:"✓"}
+.chamada-item input:focus-visible ~ .marca{box-shadow:0 0 0 4px rgba(18,134,106,.25)}
+.contadores{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:13px}
+.contador{border:1px solid var(--borda);border-radius:14px;padding:9px 6px;text-align:center;background:#fbfdfc}
+.contador > span{display:block;font-size:.72rem;font-weight:800;color:#33473d;margin-bottom:6px}
+.contador > div{display:flex;align-items:center;justify-content:center;gap:3px}
+.contador button{
+  width:34px;height:36px;border-radius:10px;border:1px solid var(--borda);background:#fff;font-size:1.15rem;font-weight:850;
+  color:var(--verde);cursor:pointer;padding:0;line-height:1;flex:none;
+}
+.contador input{
+  width:100%;min-width:0;max-width:52px;border:0;background:none;text-align:center;font-size:1.1rem;font-weight:850;
+  color:var(--texto);padding:0;font-family:inherit;-moz-appearance:textfield;outline:none;
+}
+.contador input::-webkit-outer-spin-button,.contador input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.chamada-total{display:grid;grid-template-columns:repeat(auto-fit,minmax(70px,1fr));gap:8px;margin-top:12px}
+.chamada-total.dois{grid-template-columns:1fr 1fr}
+.chamada-total > div{background:var(--verde-claro);border-radius:13px;padding:10px 6px;text-align:center}
+.chamada-total b{display:block;font-size:1.15rem;color:var(--verde);line-height:1.2}
+.chamada-total small{display:block;font-size:.68rem;font-weight:800;color:var(--verde-2);text-transform:uppercase;letter-spacing:.04em}
+
+/* ---------- frequência do aluno ---------- */
+.freq-card{display:flex;align-items:center;gap:14px}
+.freq-num{flex:none;width:74px;height:74px;border-radius:50%;display:grid;place-items:center;background:var(--verde-claro);color:var(--verde);font-weight:850;font-size:1.25rem}
+.freq-card > div:last-child{flex:1;min-width:0}
+.barra{height:8px;border-radius:99px;background:#e3ece7;overflow:hidden;margin-top:8px}
+.barra i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--verde-3),var(--verde-2))}
+.horario .freq-sim{color:var(--ok)}
+.horario .freq-nao{color:var(--vermelho)}
+
+/* ---------- fotos de relatório ---------- */
+.relatorios{display:grid;gap:9px;margin-top:4px}
+.relatorio{display:flex;gap:12px;align-items:center;background:#fff;border:1px solid var(--borda);border-radius:16px;padding:10px}
+.relatorio-img{
+  flex:none;width:76px;height:76px;border-radius:12px;border:0;padding:0;overflow:hidden;cursor:pointer;
+  background:#eef4f0;display:grid;place-items:center;font-size:1.5rem;
+}
+.relatorio-img img{width:100%;height:100%;object-fit:cover}
+.relatorio .tx{flex:1;min-width:0}
+.relatorio b{display:block;font-size:.86rem;line-height:1.3}
+.relatorio small{display:block;font-size:.74rem;color:var(--muted);line-height:1.35}
+
+/* ---------- tabela do relatório geral (cabe inteira na tela do celular) ---------- */
+.tabela-rola{overflow-x:auto;border:1px solid var(--borda);border-radius:16px;background:#fff;-webkit-overflow-scrolling:touch}
+/* letra grande ou tela estreita: a tabela rola para o lado (o nome da sala fica parado) e a ponta fica esfumada */
+.tabela-rola.tem-dir{-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 34px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 34px),transparent)}
+.tabela-dica{display:none;font-size:.74rem;color:var(--muted);text-align:right;margin-top:5px}
+.tabela-rola.rola + .tabela-dica{display:block}
+.tabela{width:100%;border-collapse:collapse;font-size:.78rem;white-space:nowrap;font-variant-numeric:tabular-nums}
+.tabela th{background:var(--verde-claro);color:var(--verde);font-size:.6rem;text-transform:uppercase;letter-spacing:.02em;padding:9px 2px;text-align:center}
+.tabela td{padding:10px 2px;text-align:center;border-top:1px solid var(--borda)}
+.tabela th:first-child,.tabela td:first-child{
+  text-align:left;position:sticky;left:0;background:#fff;padding-left:11px;max-width:9.5em;white-space:normal;line-height:1.25;
+  overflow-wrap:break-word;word-break:normal;
+}
+.tabela th:last-child,.tabela td:last-child{padding-right:10px;text-align:right}
+.tabela th:first-child{background:var(--verde-claro)}
+.tabela tr.sem td{color:#9db0a6;font-style:italic;text-align:center;white-space:normal}
+.tabela tr.sem td:first-child{font-style:normal;color:var(--texto);text-align:left}
+.tabela tr.total td{background:var(--dourado-suave);font-weight:850}
+
+details > summary{cursor:pointer;padding:6px 2px}
+
+@media (min-width:560px){
+  /* telas largas: data e clima à esquerda, hora grande à direita */
+  .topo-tempo{grid-template-areas:"data hora" "clima hora";padding:7px 14px}
+  .tt-data{font-size:.86rem}
+  .tt-clima{font-size:.8rem}
+  .tt-hora{font-size:1.5rem}
+  .tt-cidade{display:inline}
+}
+@media (min-width:720px){
+  .atalhos-secoes{grid-template-columns:1fr 1fr}
+  .galeria{grid-template-columns:repeat(5,1fr)}
+  .abas-rolam button{flex:1}
+}
+@media (max-width:380px){
+  .topo-tempo{padding:5px 10px 6px}
+  .contador button{width:30px}
+}

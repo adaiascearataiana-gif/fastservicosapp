@@ -1,5 +1,7 @@
 /* Teste automatizado do app (sem navegador).
-   Uso:  node testes/testar.js       (precisa do jsdom instalado) */
+   Uso:  node testes/testar.js       (precisa do jsdom instalado)
+   Confere as telas com um banco de mentira. As regras de permissão do banco
+   de verdade são testadas em testes/local/testar-banco.js. */
 const fs = require('fs');
 const path = require('path');
 function carregarJsdom() {
@@ -50,31 +52,104 @@ function resposta(dados, status) {
   });
 }
 
-function mockFetch(url, opcoes) {
-  const u = String(url);
-  if (u.includes('/auth/v1/user')) return resposta({ id: perfil.id, email: perfil.email, user_metadata: { nome: perfil.nome } });
-  if (u.includes('/auth/v1/token')) return resposta({ access_token: 'fake', refresh_token: 'r', expires_in: 3600, user: { id: perfil.id, email: perfil.email } });
-  if (u.includes('/rest/v1/rpc/ibnm_aniversariantes')) return resposta([{ id: perfil.id, nome: perfil.nome, dia: 4, foto: '' }]);
-  if (u.includes('/rest/v1/ibnm_config')) return resposta([{ chave: 'igreja', valor: CONFIG }]);
-  if (u.includes('/rest/v1/ibnm_devocionais')) return resposta([{
-    id: 'd1', data: iso(hoje), titulo: 'A esperança que não decepciona',
-    versiculo: 'Os que esperam no Senhor renovarão as suas forças.', referencia: 'Isaías 40:31',
-    texto: 'Texto do devocional de hoje.', autor: 'Pastor Teste', publicado: true
-  }]);
-  if (u.includes('/rest/v1/ibnm_eventos')) return resposta([
-    { id: 'e1', titulo: 'Culto de Celebração', descricao: 'Venha adorar', categoria: 'culto', recorrente: true, dia_semana: 0, hora: '18:00', local: 'Templo', publicado: true },
-    { id: 'e2', titulo: 'Culto de Ensino', descricao: 'Estudo bíblico', categoria: 'culto', recorrente: true, dia_semana: 3, hora: '19:30', local: 'Templo', publicado: true },
-    { id: 'e3', titulo: 'Congresso de Missões', descricao: 'Especial', categoria: 'especial', recorrente: false, data: iso(new Date(hoje.getTime() + 5 * 864e5)), hora: '20:00', local: 'Templo', publicado: true }
-  ]);
-  if (u.includes('/rest/v1/ibnm_palavras')) return resposta([{ id: 'p1', titulo: 'Uma igreja que cuida', autor: 'Pastor Teste', resumo: 'Resumo', texto: 'Texto', data: iso(hoje), publicado: true }]);
-  if (u.includes('/rest/v1/ibnm_avisos')) return resposta([{ id: 'a1', titulo: 'Aviso de teste', texto: 'Conteúdo do aviso', urgencia: 'importante' }]);
-  if (u.includes('/rest/v1/ibnm_oracoes')) return resposta([]);
-  if (u.includes('/rest/v1/ibnm_ofertas')) return resposta([]);
-  if (u.includes('/rest/v1/ibnm_perfis')) return resposta(opcoes && opcoes.method === 'GET' ? [perfil] : [perfil]);
-  return resposta([]);
+/* ---------- versão 1.1: seções, ADMs e Escola Bíblica ---------- */
+const painel = (chave, nome, icone, ordem) => ({ id: 's-' + chave, chave, nome, icone, descricao: '', tipo: 'painel', ordem, ativo: true, no_inicio: false, sistema: true });
+const SECOES = [
+  painel('igreja', 'Dados da igreja', '⛪', 10), painel('pix', 'PIX e oferta', '💚', 20), painel('radio', 'Rádio', '📻', 30),
+  painel('devocional', 'Devocional', '📖', 40), painel('eventos', 'Agenda', '📅', 50), painel('palavra', 'Palavra pastoral', '💬', 60),
+  painel('avisos', 'Avisos', '📌', 70), painel('oracoes', 'Pedidos de oração', '🙏', 80), painel('ofertas', 'Ofertas recebidas', '💰', 90),
+  painel('membros', 'Membros', '👥', 100),
+  { id: 's-ebd', chave: 'ebd', nome: 'Escola Bíblica Dominical', icone: '🎓', descricao: 'Salas, materiais, fotos, chamada e relatórios.', tipo: 'ebd', ordem: 110, ativo: true, no_inicio: true, sistema: true },
+  { id: 's-missoes', chave: 'missoes', nome: 'Missões', icone: '🌍', descricao: 'Projetos e campanhas de oração.', tipo: 'livre', ordem: 500, ativo: true, no_inicio: true, sistema: false }
+];
+const SALAS = [
+  { id: 'sala-adultos', nome: 'Adultos', descricao: 'Estudo para adultos', faixa: 'A partir de 25 anos', local: 'Templo', icone: '📘', ordem: 10, ativo: true },
+  { id: 'sala-jovens', nome: 'Jovens', descricao: 'Estudo e conversa', faixa: '18 a 24 anos', local: 'Sala 2', icone: '🔥', ordem: 20, ativo: true }
+];
+const RESUMO = [
+  { sala_id: 'sala-adultos', alunos: 9, professores: 'Eduardo Sousa' },
+  { sala_id: 'sala-jovens', alunos: 3, professores: 'Paula Rocha' }
+];
+const EBD_CONFIG = { horario: 'Domingos, às 9h', tema: 'A vida de Jesus', revista: 'Compromisso', aviso: '' };
+const ALUNOS = [
+  { id: 'm1', sala_id: 'sala-jovens', user_id: null, nome: 'Ana Beatriz', papel: 'aluno', status: 'ativo', telefone: '85911112222', nascimento: '2004-09-17', responsavel: '', observacao: '' },
+  { id: 'm2', sala_id: 'sala-jovens', user_id: null, nome: 'Bruno Carvalho', papel: 'aluno', status: 'ativo', telefone: '', nascimento: null, responsavel: '', observacao: '' },
+  { id: 'm3', sala_id: 'sala-jovens', user_id: null, nome: 'Camila Freitas', papel: 'aluno', status: 'ativo', telefone: '', nascimento: null, responsavel: '', observacao: '' },
+  { id: 'm9', sala_id: 'sala-jovens', user_id: perfil.id, nome: 'Maria da Silva', papel: 'professor', status: 'ativo', telefone: '', nascimento: null, responsavel: '', observacao: '' }
+];
+const MATRICULA = (papel, status) => ({ id: 'm9', sala_id: 'sala-jovens', sala: 'Jovens', icone: '🔥', papel, status: status || 'ativo' });
+const CLIMA = {
+  current: { temperature_2m: 29.4, apparent_temperature: 33.1, relative_humidity_2m: 70, weather_code: 2, is_day: 1, wind_speed_10m: 18 },
+  daily: { temperature_2m_max: [31.2], temperature_2m_min: [24.8], precipitation_probability_max: [20] }
+};
+
+/* cenario: { perfil, acesso, v10 }
+     perfil  = dados da pessoa logada (padrão: Maria, ADM principal)
+     acesso  = resposta de ibnm_meu_acesso (seções liberadas e salas)
+     v10     = true para imitar um banco que ainda não recebeu o sql/02 (tabelas novas não existem) */
+function criarMock(cenario) {
+  cenario = cenario || {};
+  const eu = cenario.perfil || perfil;
+  const acesso = cenario.acesso || { principal: !!eu.is_adm, secoes: [], ebd: [], ebd_pendentes: 0 };
+  const chamadas = [];
+  const NOVAS = ['ibnm_secoes', 'ibnm_secao_', 'ibnm_ebd_', 'rpc/ibnm_meu_acesso', 'rpc/ibnm_ebd_'];
+
+  function mockFetch(url, opcoes) {
+    const u = String(url);
+    chamadas.push(((opcoes && opcoes.method) || 'GET') + ' ' + u);
+    if (u.includes('open-meteo.com')) return cenario.semClima ? Promise.reject(new Error('sem internet')) : resposta(CLIMA);
+    if (cenario.v10 && NOVAS.some((n) => u.includes('/rest/v1/' + n))) {
+      return resposta({ code: 'PGRST205', message: 'Could not find the table in the schema cache' }, 404);
+    }
+    if (u.includes('/auth/v1/user')) return resposta({ id: eu.id, email: eu.email, user_metadata: { nome: eu.nome } });
+    if (u.includes('/auth/v1/token')) return resposta({ access_token: 'fake', refresh_token: 'r', expires_in: 3600, user: { id: eu.id, email: eu.email } });
+    if (u.includes('/rest/v1/rpc/ibnm_aniversariantes')) return resposta([{ id: eu.id, nome: eu.nome, dia: 4, foto: '' }]);
+    if (u.includes('/rest/v1/rpc/ibnm_meu_acesso')) return resposta(acesso);
+    if (u.includes('/rest/v1/rpc/ibnm_ebd_resumo')) return resposta(RESUMO);
+    if (u.includes('/rest/v1/rpc/ibnm_ebd_minha_frequencia')) return resposta([]);
+    if (u.includes('/rest/v1/rpc/')) return resposta([]);
+    if (u.includes('/rest/v1/ibnm_config')) {
+      if (u.includes('chave=eq.ebd')) return resposta(cenario.v10 ? [] : [{ chave: 'ebd', valor: EBD_CONFIG }]);
+      return resposta([{ chave: 'igreja', valor: CONFIG }]);
+    }
+    if (u.includes('/rest/v1/ibnm_secoes')) return resposta(SECOES);
+    if (u.includes('/rest/v1/ibnm_secao_adms')) return resposta([{ id: 'x1', secao_id: 's-avisos', user_id: '22222222-2222-2222-2222-222222222222' }]);
+    if (u.includes('/rest/v1/ibnm_secao_posts')) return resposta([{ id: 'po1', secao_id: 's-missoes', sala_id: null, titulo: 'Campanha de oração', texto: 'Vamos orar pelos missionários.', imagem: '', link: '', fixado: true, publicado: true, autor: 'Júlia', criado_em: hoje.toISOString() }]);
+    if (u.includes('/rest/v1/ibnm_secao_materiais')) return resposta([{ id: 'ma1', secao_id: 's-ebd', sala_id: null, titulo: 'Lição 7 — As parábolas', descricao: '', tipo: 'texto', url: '', texto: 'Resumo da lição.', data: iso(hoje), publicado: true }]);
+    if (u.includes('/rest/v1/ibnm_secao_fotos')) return resposta([]);
+    if (u.includes('/rest/v1/ibnm_ebd_salas')) return resposta(SALAS);
+    if (u.includes('/rest/v1/ibnm_ebd_matriculas')) return resposta(u.includes('papel=eq.aluno') ? ALUNOS.filter((m) => m.papel === 'aluno') : ALUNOS);
+    if (u.includes('/rest/v1/ibnm_ebd_')) return resposta([]);
+    if (u.includes('/rest/v1/ibnm_devocionais')) return resposta([{
+      id: 'd1', data: iso(hoje), titulo: 'A esperança que não decepciona',
+      versiculo: 'Os que esperam no Senhor renovarão as suas forças.', referencia: 'Isaías 40:31',
+      texto: 'Texto do devocional de hoje.', autor: 'Pastor Teste', publicado: true
+    }]);
+    if (u.includes('/rest/v1/ibnm_eventos')) return resposta([
+      { id: 'e1', titulo: 'Culto de Celebração', descricao: 'Venha adorar', categoria: 'culto', recorrente: true, dia_semana: 0, hora: '18:00', local: 'Templo', publicado: true },
+      { id: 'e2', titulo: 'Culto de Ensino', descricao: 'Estudo bíblico', categoria: 'culto', recorrente: true, dia_semana: 3, hora: '19:30', local: 'Templo', publicado: true },
+      { id: 'e3', titulo: 'Congresso de Missões', descricao: 'Especial', categoria: 'especial', recorrente: false, data: iso(new Date(hoje.getTime() + 5 * 864e5)), hora: '20:00', local: 'Templo', publicado: true }
+    ]);
+    if (u.includes('/rest/v1/ibnm_palavras')) return resposta([{ id: 'p1', titulo: 'Uma igreja que cuida', autor: 'Pastor Teste', resumo: 'Resumo', texto: 'Texto', data: iso(hoje), publicado: true }]);
+    if (u.includes('/rest/v1/ibnm_avisos')) return resposta([{ id: 'a1', titulo: 'Aviso de teste', texto: 'Conteúdo do aviso', urgencia: 'importante' }]);
+    if (u.includes('/rest/v1/ibnm_oracoes')) return resposta([]);
+    if (u.includes('/rest/v1/ibnm_ofertas')) return resposta([]);
+    if (u.includes('/rest/v1/ibnm_perfis')) return resposta([eu, { id: '22222222-2222-2222-2222-222222222222', nome: 'Sara Lima', email: 'sara@teste.com', is_adm: false }]);
+    return resposta([]);
+  }
+  mockFetch.chamadas = chamadas;
+  return mockFetch;
 }
 
-function criarApp(logado) {
+/* os arquivos do app são lidos do próprio index.html, na mesma ordem (assim o teste nunca fica desatualizado) */
+function scriptsDoIndex() {
+  const html = fs.readFileSync(pasta('index.html'), 'utf8');
+  return Array.from(html.matchAll(/<script src="([^"]+)"><\/script>/g)).map((m) => m[1]);
+}
+
+function criarApp(logado, cenario) {
+  cenario = cenario || {};
+  const eu = cenario.perfil || perfil;
   let html = fs.readFileSync(pasta('index.html'), 'utf8');
   html = html.replace(/<script src="[^"]+"><\/script>/g, '');
   const dom = new JSDOM(html, {
@@ -83,16 +158,17 @@ function criarApp(logado) {
     pretendToBeVisual: true
   });
   const w = dom.window;
-  w.fetch = mockFetch;
+  w.fetch = criarMock(cenario);
   w.scrollTo = () => {};
   w.matchMedia = w.matchMedia || (() => ({ matches: false, addListener() {}, removeListener() {} }));
   w.requestAnimationFrame = (cb) => setTimeout(cb, 0);
+  w.erros = [];
+  w.addEventListener('error', (e) => w.erros.push(String(e.message || e.error)));
   if (logado) {
-    w.localStorage.setItem('ibnm.sessao.v1', JSON.stringify({ access_token: 'fake', refresh_token: 'r', expires_at: Math.floor(Date.now() / 1000) + 3600, user: { id: perfil.id, email: perfil.email } }));
-    w.localStorage.setItem('ibnm.perfil.v1', JSON.stringify(perfil));
+    w.localStorage.setItem('ibnm.sessao.v1', JSON.stringify({ access_token: 'fake', refresh_token: 'r', expires_at: Math.floor(Date.now() / 1000) + 3600, user: { id: eu.id, email: eu.email } }));
+    w.localStorage.setItem('ibnm.perfil.v1', JSON.stringify(eu));
   }
-  ['vendor/qrcode.js', 'js/config.js', 'js/db.js', 'js/pix.js', 'js/ui.js', 'js/views.js', 'js/admin.js', 'js/app.js']
-    .forEach((f) => w.eval(fs.readFileSync(pasta(f), 'utf8')));
+  scriptsDoIndex().forEach((f) => w.eval(fs.readFileSync(pasta(f.split('?')[0]), 'utf8')));
   return w;
 }
 
@@ -174,8 +250,9 @@ const espera = (ms) => new Promise((r) => setTimeout(r, ms || 60));
     w.App.ir('#/admin'); await espera(200);
     ok(doc.querySelector('#tela').textContent.includes('Painel do administrador'), 'painel do administrador abre');
     const abas = Array.from(doc.querySelectorAll('[data-adm]')).map((b) => b.getAttribute('data-adm'));
-    ok(abas.length === 10, 'painel tem 10 abas de edição');
+    ok(abas.length === 11, 'painel do ADM principal tem 11 abas (10 de edição + ADMs e seções)');
     ok(abas.includes('pix') && abas.includes('radio') && abas.includes('eventos'), 'abas de PIX, rádio e agenda');
+    ok(abas[abas.length - 1] === 'secoes', 'a última aba é "ADMs e seções"');
 
     for (const aba of abas) {
       doc.querySelector('[data-adm="' + aba + '"]').click();
@@ -220,6 +297,221 @@ const espera = (ms) => new Promise((r) => setTimeout(r, ms || 60));
     await espera(60);
     ok(w.document.documentElement.getAttribute('data-fonte') === '4', 'tamanho escolhido é aplicado');
     ok(w.localStorage.getItem('ibnm.fonte') === '4', 'tamanho fica salvo no aparelho');
+  }
+
+  console.log('\n== 5. Barra de cima: data, hora com segundos e clima ==');
+  {
+    const w = criarApp(false);
+    await espera(120);
+    const doc = w.document;
+    const data = doc.querySelector('#topoData').textContent;
+    const meses = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+    const dias = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
+    const agora = new Date();
+    ok(data.includes(dias[agora.getDay()]) && data.includes(String(agora.getDate())) && data.includes(meses[agora.getMonth()]) && data.includes(String(agora.getFullYear())),
+      'data completa por extenso (' + data + ')');
+    ok(/^\d\d:\d\d$/.test(doc.querySelector('#topoHM').textContent), 'hora e minutos no formato 00:00');
+    ok(/^:\d\d$/.test(doc.querySelector('#topoSeg').textContent), 'segundos aparecem ao lado da hora');
+    const antes = doc.querySelector('#topoSeg').textContent;
+    await espera(1150);
+    ok(doc.querySelector('#topoSeg').textContent !== antes, 'os segundos andam sozinhos');
+    await w.IBNM.Topo.buscarClima(true);
+    const clima = doc.querySelector('#topoClima').textContent;
+    ok(clima.includes('29°C'), 'temperatura aparece na barra (' + clima.trim() + ')');
+    ok(clima.includes('Parcialmente nublado'), 'descrição do tempo aparece');
+    ok(!!w.localStorage.getItem('ibnm.clima.v1'), 'clima fica guardado no aparelho (aparece mesmo sem internet)');
+    doc.querySelector('#topoTempo').click(); await espera(60);
+    const folha = doc.querySelector('#modal').textContent;
+    ok(folha.includes('Sensação térmica') && folha.includes('33°C'), 'tocar na barra abre os detalhes do clima');
+    ok(folha.includes('Máxima 31°C') && folha.includes('20%'), 'detalhes mostram máxima, mínima e chance de chuva');
+    ok(w.erros.length === 0, 'nenhum erro de script');
+
+    const sem = criarApp(false, { semClima: true });
+    await espera(120);
+    await sem.IBNM.Topo.buscarClima(true);
+    ok(/^\d\d:\d\d$/.test(sem.document.querySelector('#topoHM').textContent), 'sem internet a hora continua funcionando');
+    ok(!sem.document.querySelector('#topoClima').textContent.includes('°C'), 'sem internet não inventa temperatura');
+  }
+
+  console.log('\n== 6. Seções e Escola Bíblica (visitante) ==');
+  {
+    const w = criarApp(false);
+    await espera(200);
+    const doc = w.document;
+    const inicio = doc.querySelector('#tela').textContent;
+    ok(inicio.includes('Escola Bíblica Dominical'), 'tela inicial tem atalho da Escola Bíblica');
+    ok(inicio.includes('Missões'), 'tela inicial tem atalho da seção criada pelo ADM');
+    ok(!inicio.includes('Pedidos de oração recebidos'), 'partes do painel não viram atalho');
+
+    w.App.ir('#/ebd'); await espera(200);
+    const ebd = doc.querySelector('#tela').textContent;
+    ok(ebd.includes('Adultos') && ebd.includes('Jovens'), 'Escola Bíblica lista as salas');
+    ok(ebd.includes('9 alunos') && ebd.includes('Paula Rocha'), 'cada sala mostra alunos e quem ensina');
+    ok(ebd.includes('Domingos, às 9h') && ebd.includes('A vida de Jesus'), 'mostra horário e tema do trimestre');
+    ok(ebd.includes('Entrar ou criar conta'), 'visitante é convidado a entrar para participar');
+    ok(!doc.querySelector('[data-ir="#/ebd/gestao"]'), 'visitante não vê a gestão');
+
+    w.App.ir('#/ebd/sala/sala-jovens'); await espera(200);
+    const abasSala = Array.from(doc.querySelectorAll('[data-aba-sala]')).map((b) => b.getAttribute('data-aba-sala'));
+    ok(abasSala.length > 0 && !abasSala.includes('chamada') && !abasSala.includes('alunos') && !abasSala.includes('relatorios'), 'visitante não vê chamada, alunos nem relatórios (' + abasSala.join(', ') + ')');
+
+    w.App.ir('#/secao/missoes'); await espera(200);
+    ok(doc.querySelector('#tela').textContent.includes('Campanha de oração'), 'seção livre mostra o mural');
+    ok(!doc.querySelector('#muNovo'), 'visitante não tem botão de publicar');
+    doc.querySelector('[data-aba-secao="fotos"]').click(); await espera(120);
+    ok(/só para quem entrou/i.test(doc.querySelector('#secaoCorpo').textContent), 'fotos só aparecem para quem entrou no app');
+
+    w.App.ir('#/admin'); await espera(150);
+    ok(!doc.querySelector('[data-adm]'), 'visitante não abre o painel');
+
+    w.App.ir('#/entrar'); await espera(80);
+    doc.querySelector('[data-aba="criar"]').click(); await espera(80);
+    const papel = doc.querySelector('#cEbdPapel');
+    ok(!!papel && papel.querySelectorAll('option').length === 3, 'cadastro tem a opção "Sou aluno(a)" / "Sou professor(a)"');
+    ok(doc.querySelector('#cEbdSalaBox').hidden === true, 'a escolha da sala começa escondida');
+    papel.value = 'professor'; papel.onchange();
+    ok(doc.querySelector('#cEbdSalaBox').hidden === false && doc.querySelectorAll('#cEbdSala option').length === 2, 'ao escolher, aparecem as salas');
+    ok(doc.querySelector('#cEbdDica').textContent.includes('aprovação'), 'professor(a) é avisado de que precisa de aprovação');
+    ok(w.erros.length === 0, 'nenhum erro de script');
+  }
+
+  console.log('\n== 7. ADM secundário (só as seções liberadas) ==');
+  {
+    const sara = Object.assign({}, perfil, { id: '22222222-2222-2222-2222-222222222222', nome: 'Sara Lima', email: 'sara@teste.com', is_adm: false });
+    const w = criarApp(true, { perfil: sara, acesso: { principal: false, secoes: ['eventos', 'avisos'], ebd: [], ebd_pendentes: 0 } });
+    await espera(250);
+    const doc = w.document;
+    w.App.ir('#/admin'); await espera(200);
+    const abas = Array.from(doc.querySelectorAll('[data-adm]')).map((b) => b.getAttribute('data-adm'));
+    ok(abas.join(',') === 'eventos,avisos', 'painel mostra só Agenda e Avisos (' + abas.join(', ') + ')');
+    ok(!abas.includes('secoes'), 'ADM secundário não vê "ADMs e seções"');
+    ok(doc.querySelector('#tela').textContent.includes('liberou para você'), 'painel explica que o acesso é limitado');
+    for (const aba of abas) {
+      doc.querySelector('[data-adm="' + aba + '"]').click();
+      await espera(120);
+      ok(doc.querySelector('#admCorpo').childElementCount > 0, 'aba "' + aba + '" carrega conteúdo');
+    }
+    w.App.ir('#/perfil'); await espera(150);
+    ok(doc.querySelector('#tela').textContent.includes('ADM de seção'), 'perfil mostra a etiqueta "ADM de seção"');
+    w.App.ir('#/secao/missoes'); await espera(200);
+    ok(!doc.querySelector('#muNovo'), 'não publica em seção que não foi liberada para ela');
+
+    const marcos = Object.assign({}, perfil, { id: '33333333-3333-3333-3333-333333333333', nome: 'Marcos Silva', email: 'marcos@teste.com', is_adm: false });
+    const m = criarApp(true, { perfil: marcos });
+    await espera(250);
+    m.App.ir('#/mais'); await espera(120);
+    ok(!m.document.querySelector('#tela').textContent.includes('Painel do administrador'), 'membro comum não vê o painel no menu');
+    m.App.ir('#/admin'); await espera(150);
+    ok(!m.document.querySelector('[data-adm]') && m.document.querySelector('#tela').textContent.includes('não tem permissão'), 'membro comum não abre o painel');
+
+    const julia = Object.assign({}, perfil, { id: '44444444-4444-4444-4444-444444444444', nome: 'Júlia Costa', email: 'julia@teste.com', is_adm: false });
+    const j = criarApp(true, { perfil: julia, acesso: { principal: false, secoes: ['missoes'], ebd: [], ebd_pendentes: 0 } });
+    await espera(250);
+    j.App.ir('#/secao/missoes'); await espera(200);
+    ok(!!j.document.querySelector('#muNovo'), 'ADM de uma seção livre publica no mural dela');
+    j.App.ir('#/admin'); await espera(150);
+    ok(j.document.querySelectorAll('[data-adm]').length === 0 && !!j.document.querySelector('.adm-atalho'), 'no painel ela vê só o atalho da seção dela');
+    ok(w.erros.length + m.erros.length + j.erros.length === 0, 'nenhum erro de script');
+  }
+
+  console.log('\n== 8. Escola Bíblica: aluna, professora e ADM ==');
+  {
+    const aluna = Object.assign({}, perfil, { is_adm: false });
+    const a = criarApp(true, { perfil: aluna, acesso: { principal: false, secoes: [], ebd: [MATRICULA('aluno')], ebd_pendentes: 0 } });
+    await espera(250);
+    ok(a.document.querySelector('#tela').textContent.includes('Jovens'), 'início mostra a sala da aluna');
+    a.App.ir('#/ebd/sala/sala-jovens'); await espera(200);
+    let abas = Array.from(a.document.querySelectorAll('[data-aba-sala]')).map((b) => b.getAttribute('data-aba-sala'));
+    ok(abas.includes('frequencia') && !abas.includes('chamada') && !abas.includes('alunos'), 'aluna vê a própria frequência, mas não a chamada (' + abas.join(', ') + ')');
+
+    const pend = criarApp(true, { perfil: aluna, acesso: { principal: false, secoes: [], ebd: [MATRICULA('professor', 'pendente')], ebd_pendentes: 0 } });
+    await espera(250);
+    const inicioPend = pend.document.querySelector('#tela').textContent;
+    ok(/em análise/i.test(inicioPend) && !/Você ensina/.test(inicioPend), 'início de quem pediu para ser professor(a) diz "em análise" (e não "Você ensina")');
+    pend.App.ir('#/ebd/sala/sala-jovens'); await espera(200);
+    abas = Array.from(pend.document.querySelectorAll('[data-aba-sala]')).map((b) => b.getAttribute('data-aba-sala'));
+    ok(!abas.includes('chamada'), 'professor(a) ainda não aprovado não faz chamada');
+    ok(/aguardando|aprova/i.test(pend.document.querySelector('#tela').textContent), 'e vê o aviso de que o pedido aguarda aprovação');
+
+    const p = criarApp(true, { perfil: aluna, acesso: { principal: false, secoes: [], ebd: [MATRICULA('professor')], ebd_pendentes: 0 } });
+    await espera(250);
+    const doc = p.document;
+    ok(/Você ensina: Jovens/.test(doc.querySelector('#tela').textContent), 'início da professora aprovada diz "Você ensina: Jovens"');
+    p.App.ir('#/ebd/sala/sala-jovens'); await espera(250);
+    ok(!!doc.querySelector('.abas-rolam[data-abas-ok] [data-aba-sala]'), 'as abas da sala ficam numa faixa que rola para o lado');
+    abas = Array.from(doc.querySelectorAll('[data-aba-sala]')).map((b) => b.getAttribute('data-aba-sala'));
+    ok(['chamada', 'alunos', 'relatorios', 'materiais', 'fotos'].every((x) => abas.includes(x)), 'professora vê chamada, alunos, relatórios, materiais e fotos');
+    doc.querySelector('#chNova').click(); await espera(250);
+    const caixas = Array.from(doc.querySelectorAll('[data-pres]'));
+    ok(caixas.length === 3, 'a chamada lista os 3 alunos da sala');
+    caixas[0].click(); caixas[1].click(); await espera(30);
+    ok(doc.querySelector('#chPres').textContent === '2', 'contador de presentes acompanha as marcações');
+    ok(Object.keys(p.localStorage).some((k) => k.indexOf('ibnm.chamada.') === 0), 'marcações ficam guardadas no aparelho (não se perdem sem internet)');
+    ok(!!doc.querySelector('#chVis') && !!doc.querySelector('#chBib') && !!doc.querySelector('#chOferta') && !!doc.querySelector('#chSalvar'), 'chamada tem visitantes, Bíblias, oferta e botão salvar');
+    doc.querySelector('[data-aba-sala="alunos"]').click(); await espera(200);
+    ok(doc.querySelector('#salaCorpo').textContent.includes('Ana Beatriz') && !!doc.querySelector('#alNovo'), 'lista de alunos com botão de adicionar');
+    doc.querySelector('[data-aba-sala="relatorios"]').click(); await espera(200);
+    ok(!!doc.querySelector('#rlNovo'), 'professora pode enviar foto do relatório');
+    ok(!doc.querySelector('[data-ir="#/ebd/gestao"]'), 'professora não vê a gestão geral');
+    p.App.ir('#/admin'); await espera(150);
+    ok(!doc.querySelector('[data-adm]'), 'professora não ganha painel de administrador');
+
+    const edu = criarApp(true, { perfil: aluna, acesso: { principal: false, secoes: ['ebd'], ebd: [], ebd_pendentes: 2 } });
+    await espera(250);
+    edu.App.ir('#/ebd'); await espera(200);
+    ok(!!edu.document.querySelector('[data-ir="#/ebd/gestao"]'), 'ADM da Escola Bíblica vê o botão de gestão');
+    edu.App.ir('#/ebd/gestao'); await espera(250);
+    const gest = Array.from(edu.document.querySelectorAll('[data-aba-gestao]')).map((b) => b.getAttribute('data-aba-gestao'));
+    ok(['domingo', 'salas', 'professores', 'dados'].every((x) => gest.includes(x)), 'gestão tem domingo, salas, professores e dados');
+    ok(edu.document.querySelector('[data-aba-gestao="professores"]').textContent.includes('2'), 'pedidos de professor pendentes aparecem no botão');
+    for (const g of gest) {
+      edu.document.querySelector('[data-aba-gestao="' + g + '"]').click();
+      await espera(200);
+      ok(edu.document.querySelector('#gestaoCorpo').childElementCount > 0, 'gestão: aba "' + g + '" carrega conteúdo');
+    }
+    edu.App.ir('#/admin'); await espera(150);
+    ok(edu.document.querySelectorAll('[data-adm]').length === 0 && !!edu.document.querySelector('.adm-atalho'), 'painel dele só tem o atalho da Escola Bíblica');
+    ok(a.erros.length + pend.erros.length + p.erros.length + edu.erros.length === 0, 'nenhum erro de script');
+  }
+
+  console.log('\n== 9. Banco ainda na versão 1.0 (sem o sql/02) ==');
+  {
+    const w = criarApp(true, { v10: true });
+    await espera(250);
+    const doc = w.document;
+    ok(doc.querySelector('#tela').textContent.includes('Devocional do dia'), 'o app abre normalmente');
+    ok(!doc.querySelector('#tela').textContent.includes('Escola Bíblica'), 'sem as tabelas novas, os atalhos novos não aparecem');
+    ok(/^\d\d:\d\d$/.test(doc.querySelector('#topoHM').textContent), 'data, hora e clima funcionam mesmo assim');
+    w.App.ir('#/admin'); await espera(200);
+    const abas = Array.from(doc.querySelectorAll('[data-adm]')).map((b) => b.getAttribute('data-adm'));
+    ok(abas.includes('igreja') && abas.includes('membros'), 'o ADM continua com o painel completo');
+    doc.querySelector('[data-adm="secoes"]').click(); await espera(200);
+    ok(/sql\/02|02-secoes-ebd/.test(doc.querySelector('#admCorpo').textContent), 'a aba "ADMs e seções" explica que falta rodar o sql/02');
+    w.App.ir('#/ebd'); await espera(200);
+    ok(doc.querySelector('#tela').childElementCount > 0 && !doc.querySelector('[data-aba-ebd]'), 'abrir a Escola Bíblica pelo endereço não quebra o app');
+    const v = criarApp(false, { v10: true });
+    await espera(200);
+    v.App.ir('#/entrar'); await espera(80);
+    v.document.querySelector('[data-aba="criar"]').click(); await espera(80);
+    ok(!v.document.querySelector('#cEbdPapel') && !!v.document.querySelector('#cCriar'), 'cadastro funciona, sem a pergunta da Escola Bíblica');
+    ok(w.erros.length + v.erros.length === 0, 'nenhum erro de script');
+  }
+
+  console.log('\n== 10. Arquivos do app (versão e funcionamento sem internet) ==');
+  {
+    const index = fs.readFileSync(pasta('index.html'), 'utf8');
+    const sw = fs.readFileSync(pasta('sw.js'), 'utf8');
+    const versao = (fs.readFileSync(pasta('js/config.js'), 'utf8').match(/VERSAO:\s*'([^']+)'/) || [])[1];
+    ok(/^\d+\.\d+\.\d+$/.test(versao || ''), 'versão do app em js/config.js (' + versao + ')');
+    ok((sw.match(/var VERSAO = '([^']+)'/) || [])[1] === versao, 'sw.js está na mesma versão');
+    const scripts = scriptsDoIndex();
+    ok(scripts.length === 11 && scripts.every((x) => x.endsWith('?v=' + versao)), 'os 11 arquivos do index.html usam ?v=' + versao);
+    ok(index.includes('css/app.css?v=' + versao), 'o visual (css) também usa ?v=' + versao);
+    ok(scripts.every((x) => sw.includes("'./" + x.split('?')[0] + "' + V")), 'todos os arquivos estão na lista que funciona sem internet');
+    ok(scripts.every((x) => fs.existsSync(pasta(x.split('?')[0]))), 'todos os arquivos citados existem');
+    const ordem = scripts.map((x) => x.split('?')[0].replace(/^(js|vendor)\//, '').replace('.js', ''));
+    ok(ordem.indexOf('views') < ordem.indexOf('secoes') && ordem.indexOf('secoes') < ordem.indexOf('ebd') && ordem.indexOf('ebd') < ordem.indexOf('admin') && ordem[ordem.length - 1] === 'app',
+      'arquivos carregam na ordem certa (' + ordem.join(' → ') + ')');
   }
 
   console.log('\n' + (falhas ? '❌ ' + falhas + ' verificação(ões) falharam' : '✅ TODOS OS TESTES PASSARAM'));
