@@ -8464,7 +8464,7 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
             <label>Status da Rota:</label>
             <select id="filtroStatusRota" onchange="renderizar()">
               <option value="TODOS">Todos</option>
-              <option value="PENDENTE">PENDENTE</option>
+              <option value="PENDENTE">EM ROTA</option>
               <option value="CONCLUÍDA">CONCLUÍDA</option>
             </select>
           </div>
@@ -8536,7 +8536,7 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
         <div class="fast-route-report-note"><i class="fa-solid fa-circle-info"></i> Este relatório reúne <b>todas as rotas cadastradas</b>, inclusive as lançadas fora de ROTAS DO DIA. As fotos vinculadas são encaminhadas para a mesma fila do Google Drive e, quando já estiverem lá, aparece um link direto para a pasta da rota.</div>
         <div class="fast-route-report-filters f63-rel-filtros">
           <div class="rf-cliente"><label>Buscar por Cliente:</label><input id="fastRelFiltroCliente" type="text" placeholder="Digite o cliente..." oninput="fastRelatorioRotasRender()" autocomplete="off"></div>
-          <div class="rf-exec"><label>Status da Rota:</label><select id="fastRelFiltroExec" onchange="fastRelatorioRotasRender()"><option value="TODOS">Todos</option><option value="EM ROTA">PENDENTE</option><option value="CONCLUÍDA">CONCLUÍDA</option></select></div>
+          <div class="rf-exec"><label>Status da Rota:</label><select id="fastRelFiltroExec" onchange="fastRelatorioRotasRender()"><option value="TODOS">Todos</option><option value="EM ROTA">EM ROTA</option><option value="CONCLUÍDA">CONCLUÍDA</option></select></div>
           <div class="rf-origem"><label>Buscar por Origem:</label><input id="fastRelFiltroOrigem" type="text" placeholder="Digite a origem..." oninput="fastRelatorioRotasRender()" autocomplete="off"></div>
           <div class="rf-destino"><label>Buscar por Destino:</label><input id="fastRelFiltroDestino" type="text" placeholder="Digite o destino..." oninput="fastRelatorioRotasRender()" autocomplete="off"></div>
           <div class="rf-ini"><label>Data Inicial:</label><input id="fastRelFiltroInicio" type="date" onchange="fastRelatorioRotasRender()"></div>
@@ -13758,7 +13758,8 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
             statusUpdatedAt: item.statusUpdatedAt || '',
             dataOriginal: item.dataOriginal || '',
             passouEm: item.passouEm || '',
-            viradaEm: item.viradaEm || ''
+            viradaEm: item.viradaEm || '',
+            levadaEm: item.levadaEm || ''
           }});
           rows.push({
             id: Math.floor(Number(item.id)) || Date.now(),
@@ -13836,6 +13837,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
           dataOriginal: fastMeta.dataOriginal || '',
           passouEm: fastMeta.passouEm || '',
           viradaEm: fastMeta.viradaEm || '',
+          levadaEm: fastMeta.levadaEm || '',
           updatedAt: row.updated_at || '',
           // (r109 FIX-ORDEM) relê a ordem manual gravada na nuvem
           ordem: (typeof fastMeta.ordem === 'number' && isFinite(fastMeta.ordem)) ? fastMeta.ordem : undefined
@@ -14793,9 +14795,16 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
             return;
           }
           const atual = seqPendentesPorRota.get(rotaId);
+          // 5.3.9i: pendente que passou para o dia seguinte (levadaEm) fica no dia
+          // para onde foi levada; as demais ficam no dia da rota (dia em que foi lançada).
+          const lev = item && item.levadaEm ? String(item.levadaEm) : '';
           if (!atual) {
-            seqPendentesPorRota.set(rotaId, { ...item, __dataDestino: rotaVinc.data });
+            seqPendentesPorRota.set(rotaId, { ...item, __dataDestino: lev ? dataSeq : rotaVinc.data, __lev: lev });
             return;
+          }
+          if (lev && lev > (atual.__lev || '')) {
+            atual.__lev = lev; atual.__dataDestino = dataSeq; atual.levadaEm = item.levadaEm;
+            if (item.dataOriginal) atual.dataOriginal = item.dataOriginal;
           }
           // Preservar tudo o que possa existir somente em uma copia antiga.
           const fotos = [...(Array.isArray(atual.fotos) ? atual.fotos : []), ...(Array.isArray(item.fotos) ? item.fotos : [])]
@@ -14812,6 +14821,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
       seqPendentesPorRota.forEach((item, rotaId) => {
         const dataDestino = item.__dataDestino;
         delete item.__dataDestino;
+        delete item.__lev;
         const rotaVinc = rotasMap.get(rotaId);
         item.cliente = rotaVinc.cliente || item.cliente || '';
         item.origem = rotaVinc.origem || item.origem || '';
@@ -17065,7 +17075,12 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
        virar-de-dia olhava só item.status, divergindo da tela.
        ============================================================ */
     function fastDataLocalYYYYMMDD(d) {
-      const dt = (d instanceof Date) ? d : new Date();
+      // 5.3.9i: "hoje" é sempre o dia de Brasília (GMT-3), mesmo com o celular em outro fuso
+      if (!(d instanceof Date)) {
+        const b = new Date(Date.now() - 3 * 3600000);
+        return b.getUTCFullYear() + '-' + String(b.getUTCMonth() + 1).padStart(2, '0') + '-' + String(b.getUTCDate()).padStart(2, '0');
+      }
+      const dt = d;
       const ano = dt.getFullYear();
       const mes = String(dt.getMonth() + 1).padStart(2, '0');
       const dia = String(dt.getDate()).padStart(2, '0');
@@ -17770,6 +17785,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
     // deixou marcas (dataOriginal + passouEm) e não teve edição manual posterior.
     // Não tenta adivinhar datas de registros sem essas marcas.
     function fastRestaurarViradaAutomatica() {
+      return 0; // 5.3.9i: desligada — nenhuma rotina automática muda data de rota
       const bd = bancoDados;
       if (!bd || !bd.sequencias) return 0;
       const rotas = bd.rotas || [];
@@ -17827,6 +17843,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
       Object.keys(bancoDados.sequencias).forEach(function(dataSeq) {
         (bancoDados.sequencias[dataSeq] || []).forEach(function(item) {
           if (!item || item.agrupado || item.rotaId == null) return;
+          if (item.levadaEm) return; // 5.3.9i: pendente que passou para o dia seguinte fica onde está
           const rv = fastRotaPorId(rotasRef, item.rotaId);
           const dataCorreta = rv && fastDataValidaISO(rv.data) ? String(rv.data) : '';
           // Manutenção só recoloca cópia que caiu em dia POSTERIOR. Nunca promove
@@ -26877,7 +26894,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
         <br><span class="ia-link-aba" onclick="iaIrPara('rotas')">Ver rotas</span>`;
     }
     function iaRotasHoje() {
-      const hoje = new Date().toISOString().substring(0,10);
+      const hoje = fastDataLocalYYYYMMDD();
       const rotas = (bancoDados.rotas || []).filter(r => (r.dataRota || r.data || '') === hoje);
       if (rotas.length === 0) return `Não há rotas agendadas para hoje (${iaFmtData(hoje)}). 📅`;
       const fat = rotas.reduce((s, r) => s + (parseFloat(r.valor) || 0), 0);
@@ -33675,7 +33692,7 @@ window.fastMobileNav = function(ev, abaId, botao) {
 (function(){
   document.body.classList.add('fast-pro');
   const fmtBRL = (n)=> new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:0}).format(Number(n)||0);
-  const todayISO = ()=> new Date().toISOString().slice(0,10);
+  const todayISO = ()=> fastDataLocalYYYYMMDD();
   const comandos = [
     ['central','Centro de Operações','fa-table-cells-large','Visão geral'],['rotas','Nova rota / Rotas','fa-route','Logística'],['rotasDia','Rotas do Dia','fa-calendar-day','Logística'],
     ['rastreamento','Mapa & Rastreamento','fa-location-dot','Logística'],['dashboard','Dashboard','fa-chart-simple','Indicadores'],['dre','DRE','fa-chart-line','Financeiro'],
@@ -35198,7 +35215,7 @@ window.fastMobileNav = function(ev, abaId, botao) {
     function put(store,val){return db().then(function(d){return new Promise(function(ok,fail){var tx=d.transaction(store,'readwrite');tx.objectStore(store).put(val);tx.oncomplete=function(){ok(true)};tx.onerror=function(){fail(tx.error)}})});}
     function del(store,key){return db().then(function(d){return new Promise(function(ok,fail){var tx=d.transaction(store,'readwrite');tx.objectStore(store).delete(key);tx.oncomplete=function(){ok(true)};tx.onerror=function(){fail(tx.error)}})});}
     function esc(v){var e=document.createElement('div');e.textContent=String(v==null?'':v);return e.innerHTML;}
-    function hojeISO(){var d=new Date(),p=function(n){return String(n).padStart(2,'0')};return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate());}
+    function hojeISO(){return fastDataLocalYYYYMMDD()}
     function itens(){var out=[];Object.keys((window.bancoDados&&bancoDados.sequencias)||{}).forEach(function(data){(bancoDados.sequencias[data]||[]).forEach(function(i){if(i)out.push({data:data,item:i})})});return out;}
     function fotosItem(i){var a=[];if(Array.isArray(i.fotos))a=a.concat(i.fotos);else if(i.foto)a.push(i.foto);return a.filter(Boolean);}
     function concl(i){return !!(i.concluido||i.concluida||String(i.status||'').toLowerCase().indexOf('conclu')>=0);}
@@ -35356,7 +35373,7 @@ window.fastMobileNav = function(ev, abaId, botao) {
       var driverOriginal=window.fast70ModoEntregador;
       if(typeof driverOriginal==='function')window.fast70ModoEntregador=function(){
         driverOriginal();
-        var data=(document.getElementById('dpDataSequencia')||{}).value||new Date().toISOString().slice(0,10),lista=(((bancoDados||{}).sequencias||{})[data]||[]),item=lista.find(function(x){return !(x.concluido||x.concluida||String(x.status||'').toLowerCase().indexOf('conclu')>=0)}),acoes=document.querySelector('#fast70Conteudo .fast70-driver-actions');
+        var data=(document.getElementById('dpDataSequencia')||{}).value||fastDataLocalYYYYMMDD(),lista=(((bancoDados||{}).sequencias||{})[data]||[]),item=lista.find(function(x){return !(x.concluido||x.concluida||String(x.status||'').toLowerCase().indexOf('conclu')>=0)}),acoes=document.querySelector('#fast70Conteudo .fast70-driver-actions');
         if(item&&acoes){if(FAST_COMPROVANTE_ATIVO){var c=document.createElement('button');c.className='btn-primary';c.innerHTML='<i class="fa-solid fa-signature"></i> Comprovante';c.onclick=function(){fast70Comprovante(data,item.id)};acoes.insertBefore(c,acoes.children[2]||null);}var w=document.createElement('button');w.className='btn-secondary';w.innerHTML='<i class="fa-brands fa-whatsapp"></i> WhatsApp';w.onclick=function(){fast70WhatsAppCliente(data,item.id)};acoes.appendChild(w)}
       };
       // A lixeira agora é acionada dentro da confirmação de exclusão, antes de remover os dados.
@@ -37962,7 +37979,7 @@ body.fast-exclusive-app main { padding-bottom: 12px !important; }
   }
   atualizarMetadados();
   function avisar(msg,tipo){if(typeof window.mostrarToast==='function')window.mostrarToast(msg,tipo||'info');else alert(msg)}
-  function dataAtual(){return(document.getElementById('dpDataSequencia')||{}).value||new Date().toISOString().slice(0,10)}
+  function dataAtual(){return(document.getElementById('dpDataSequencia')||{}).value||fastDataLocalYYYYMMDD()}
   function listaAtual(data){return(((window.bancoDados||{}).sequencias||{})[data]||[])}
   function indicesSelecionados(lista){return Array.prototype.slice.call(document.querySelectorAll('.seq-checkbox:checked')).map(function(cb){return Number(cb.value)}).filter(function(i,pos,arr){return Number.isInteger(i)&&!!lista[i]&&arr.indexOf(i)===pos})}
   function fotosItem(item){var rota=item&&item.rotaId?(window.bancoDados.rotas||[]).find(function(r){return String(r.id)===String(item.rotaId)}):null;return typeof window.obterFotosDoItem==='function'?window.obterFotosDoItem(item,rota):[].concat(item&&item.fotos||[],item&&item.foto||[]).filter(Boolean)}
@@ -41075,7 +41092,7 @@ setInterval(function(){try{var tab=document.getElementById('rotasDia');if(tab&&t
 (function(){
   'use strict';
   var W=window;
-  function hojeISO(){ try{ return new Date().toISOString().slice(0,10); }catch(e){ return ''; } }
+  function hojeISO(){ try{ return fastDataLocalYYYYMMDD(); }catch(e){ return ''; } }
   function tabDashboard(){ return document.getElementById('dashboard'); }
   function garantirPainel(){
     var p=document.getElementById('fastDashRotas');
@@ -43791,7 +43808,7 @@ html body #rotasDia .rd-actions-grid>button[hidden],html body #rotasDia .rd-acti
   function toast(m,t){try{if(typeof W.mostrarToast==='function')W.mostrarToast(m,t||'info');else console.log(m)}catch(e){}}
   function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
   function sleep(ms){return new Promise(function(r){setTimeout(r,ms)})}
-  function dataSel(){var e=$('dpDataSequencia');return e&&e.value?e.value:new Date().toISOString().slice(0,10)}
+  function dataSel(){var e=$('dpDataSequencia');return e&&e.value?e.value:fastDataLocalYYYYMMDD()}
   function fmtData(iso){var m=/^(\d{4})-(\d{2})-(\d{2})/.exec(String(iso||''));return m?(m[3]+'/'+m[2]+'/'+m[1]):''}
   function listaDia(d){return ((W.bancoDados&&bancoDados.sequencias)||{})[d||dataSel()]||[]}
 
@@ -45304,7 +45321,7 @@ body.fx-apk .fx-gal-ajuda{display:flex}
 (function(){
   var K='fast523_tela', LIMITE=12*3600*1000;
   /* 5.3.9 — a data consultada é lembrada mesmo de um dia para o outro (até 12 h). */
-  function hojeLocal(){ var d=new Date(); return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2); }
+  function hojeLocal(){ return fastDataLocalYYYYMMDD(); }
   function abaAtual(){
     var a=document.querySelector('.tab-content.active')||Array.prototype.filter.call(document.querySelectorAll('.tab-content'),function(t){return t.offsetParent!==null})[0];
     return a?a.id:'';
@@ -45693,7 +45710,7 @@ body.fx-apk .fx-gal-ajuda{display:flex}
   }
   async function aceitar(id,btn){
     var x=pend.filter(function(y){return String(y.id)===String(id)})[0]; if(!x)return;
-    var hoje=new Date(), dia=hoje.getFullYear()+'-'+p2(hoje.getMonth()+1)+'-'+p2(hoje.getDate());
+    var hoje=new Date(), dia=fastDataLocalYYYYMMDD();
     var rota={id:Date.now(),cliente:x.cliente_nome||'',origem:x.origem||'',destino:x.destino||'',data:dia,tipoVolume:'MERCADORIA',qtdMercadorias:Number(x.qtd)||1,
       pagamento:'',status:'Pendente',statusExecucao:'EM ROTA',valor:0,descricao:[x.obs,x.destino_endereco?'Endereço: '+x.destino_endereco:'',(Array.isArray(x.anexos)&&x.anexos.length)?'📎 '+x.anexos.length+' comprovante(s) da coleta: '+x.anexos.map(function(a){return a.url||a}).join(' '):''].filter(Boolean).join(' · '),canalSolicitacao:'app',solicitadoEm:x.criado_em,updatedAt:new Date().toISOString()};
     // destino novo com endereço: entra também nos Lugares do FAST
@@ -46054,7 +46071,10 @@ body.fx-apk .fx-gal-ajuda{display:flex}
       // não promove rota histórica para o dia atual, mesmo se o cadastro veio
       // corrompido por uma versão antiga. Reagendamento explícito é feito na edição.
       var datas=l.map(function(x){return x.d}).sort();
-      var candidatas=l.filter(function(x){return x.d===datas[0]});if(!candidatas.length)return;
+      var candidatas=l.filter(function(x){return x.d===datas[0]});
+      var levadas=l.filter(function(x){return x.it&&x.it.levadaEm}).sort(function(a,b){return String(b.it.levadaEm).localeCompare(String(a.it.levadaEm))});
+      if(levadas.length)candidatas=[levadas[0]];
+      if(!candidatas.length)return;
       var fica=candidatas.slice().sort(function(a,b){return ts(b.it)-ts(a.it)})[0];
       l.forEach(function(x){if(x!==fica&&x.d!==fica.d){unir(fica.it,x.it);remover.add(x)}});
     });
@@ -48920,58 +48940,66 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
 })();
 </script>
 <script id="fast539e-dia-certo">
-/* 5.3.9f — DATAS: NADA MUDA DE DIA SOZINHO (desfaz o ajuste 26)
-   • O app NÃO passa mais rota de um dia para outro, nem no PAINEL nem nas Rotas do Dia.
-   • O que o ajuste 26 passou para hoje (marca viradaEm) volta para o dia original,
-     no item e na rota do PAINEL.
-   • Data dos formulários: se o app ficou aberto de um dia para o outro, as datas que
-     estavam em "hoje" passam para o novo hoje (antes ficavam presas no dia anterior e
-     as rotas novas iam para ontem).
-   • Aviso vermelho quando a tela/formulário está num dia que não é hoje. */
+/* 5.3.9i — CADA ROTA NO SEU DIA (bloqueio)
+   • O dia é sempre o de Brasília (GMT-3).
+   • Rota lançada fica no dia em que foi lançada. Ninguém muda a data sozinho:
+     nem o app, nem a sincronização, nem um aparelho desatualizado.
+   • A ÚNICA exceção: rota NÃO concluída (e não cancelada/excluída) de um dia
+     anterior passa para o dia seguinte nas Rotas do Dia, com a marca "⏪ De dd/mm".
+     Vale para pendentes dos últimos 3 dias. No PAINEL a rota continua no dia em
+     que foi lançada.
+   • Rota concluída nunca muda de dia.
+   • Datas dos formulários acompanham o dia; aviso vermelho quando não é hoje. */
 (function(){
-  var W=window,D=document;
+  var W=window,D=document,JANELA=3;
   function bd(){try{return bancoDados}catch(e){return W.bancoDados}}
-  function iso(d){try{return fastDataLocalYYYYMMDD(d)}catch(e){var x=d||new Date();return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0')}}
-  function hoje(){return iso(new Date())}
+  function hoje(){return fastDataLocalYYYYMMDD()}
   function valida(v){return /^\d{4}-\d{2}-\d{2}$/.test(String(v||''))}
+  function menosDias(ymd,n){var p=ymd.split('-').map(Number);var t=new Date(Date.UTC(p[0],p[1]-1,p[2]-n));return t.getUTCFullYear()+'-'+String(t.getUTCMonth()+1).padStart(2,'0')+'-'+String(t.getUTCDate()).padStart(2,'0')}
   function br(v){return valida(v)?v.slice(8,10)+'/'+v.slice(5,7):v}
-  function criadoDia(id){var n=Math.floor(Number(id));if(!(n>1600000000000&&n<Date.now()+86400000))return '';var d=iso(new Date(n));return d<=hoje()?d:''}
-  function desfazer(){
-    var b=bd();if(!b||!b.sequencias)return 0;
-    var agora=new Date().toISOString(),n=0;
+  function rotaDe(b,it){if(!it||it.rotaId==null||it.rotaId==='')return null;try{return fastRotaPorId(b.rotas||[],it.rotaId)}catch(e){return null}}
+  function concluida(it,rv){return /conclu|entreg|finaliz/i.test(String(it.status||''))||/conclu|entreg|finaliz/i.test(String((rv&&rv.statusExecucao)||''))}
+  function cancelada(it,rv){return /cancel/i.test(String(it.status||''))||/cancel/i.test(String((rv&&rv.statusExecucao)||''))}
+  function excl(b){
+    var s=new Set();
+    [].concat(b.seqItensExcluidos||[]).forEach(function(x){s.add('i'+String(x).split('@')[0])});
+    [].concat(b.rotasExcluidas||[],b.seqRotasExcluidas||[]).forEach(function(x){s.add('r'+String(x))});
+    return s;
+  }
+  var rodando=false;
+  function levar(){
+    var b=bd();if(rodando||!b||!b.sequencias)return 0;rodando=true;
+    var h=hoje(),lim=menosDias(h,JANELA),agora=new Date().toISOString(),ex=excl(b),n=0;
     try{
-      Object.keys(b.sequencias).forEach(function(d){
+      Object.keys(b.sequencias).filter(function(d){return valida(d)&&d<h&&d>=lim}).sort().forEach(function(d){
         (b.sequencias[d]||[]).slice().forEach(function(it){
-          if(!it||!it.viradaEm)return;
-          var rv=null;try{rv=it.rotaId!=null?fastRotaPorId(b.rotas||[],it.rotaId):null}catch(e){}
-          // volta para o dia em que a rota foi CRIADA (o dataOriginal antigo pode vir de versões velhas)
-          var orig=criadoDia(rv?rv.id:it.id)||(valida(it.dataOriginal)?it.dataOriginal:'');
-          it.viradaEm='';it.updatedAt=agora;
-          if(orig&&orig!==d){
-            var o=b.sequencias[d],ix=o.indexOf(it);if(ix>=0)o.splice(ix,1);
-            var dst=b.sequencias[orig]||(b.sequencias[orig]=[]);
-            var ja=dst.find(function(x){return x&&x!==it&&(String(x.id)===String(it.id)||(it.rotaId!=null&&x.rotaId!=null&&String(x.rotaId)===String(it.rotaId)))});
-            if(!ja)dst.push(it);
-            if(rv&&String(rv.data||'')===d){rv.data=orig;rv.updatedAt=agora;rv.ultimaModificacao=agora}
-          }
-          if(rv&&rv.dataOriginal===orig)rv.dataOriginal='';
-          it.dataOriginal='';
+          if(!it)return;
+          if(ex.has('i'+String(it.id))||(it.rotaId!=null&&ex.has('r'+String(it.rotaId))))return;
+          var rv=rotaDe(b,it);
+          if(concluida(it,rv)||cancelada(it,rv))return;
+          var o=b.sequencias[d],ix=o.indexOf(it);if(ix<0)return;
+          var dst=b.sequencias[h]||(b.sequencias[h]=[]);
+          var ja=dst.find(function(x){return x&&x!==it&&(String(x.id)===String(it.id)||(it.rotaId!=null&&x.rotaId!=null&&String(x.rotaId)===String(it.rotaId)))});
+          o.splice(ix,1);
+          if(!ja){if(!valida(it.dataOriginal))it.dataOriginal=d;it.levadaEm=agora;it.updatedAt=agora;dst.push(it)}
           n++;
         });
       });
       if(n){
+        try{b.ultimaModificacao=agora}catch(e){}
         try{salvarStorage()}catch(e){}
         try{W.__frxForcarLista=true;renderizarSequencia()}catch(e){}
-        try{if(typeof renderizar==='function')renderizar()}catch(e){}
-        try{mostrarToast(n+' rota(s) voltaram para o dia em que foram feitas.','info')}catch(e){}
+        try{mostrarToast(n+' rota(s) não concluída(s) passaram para hoje (⏪).','info')}catch(e){}
       }
-    }catch(e){console.warn('FAST desfazer virada:',e)}
-    return n;
+    }catch(e){console.warn('FAST levar pendentes:',e)}
+    rodando=false;return n;
   }
-  W.fastRotasDiaCerto=function(){return {voltaram:desfazer(),passaram:0}};
-  W.fastDesfazerVirada26=desfazer;
-  setTimeout(desfazer,5000);
-  setInterval(function(){if(!D.hidden)desfazer()},30000);
+  W.fastLevarPendentes=levar;
+  W.fastRotasDiaCerto=function(){return {voltaram:0,passaram:levar()}};
+  W.fastDesfazerVirada26=function(){return 0};
+  setTimeout(levar,9000);
+  setInterval(function(){if(!D.hidden)levar()},60000);
+  D.addEventListener('visibilitychange',function(){if(!D.hidden)setTimeout(levar,3000)});
 
   /* datas dos formulários acompanham o dia */
   var ultimoHoje=hoje();
@@ -48985,11 +49013,14 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
       if(id==='dpDataSequencia'){try{carregarSequenciaDia()}catch(e){}}
       else{try{el.dispatchEvent(new Event('input',{bubbles:true}))}catch(e){}}
     });
+    setTimeout(levar,1500);
   }
   setInterval(acompanhar,15000);
   D.addEventListener('visibilitychange',function(){if(!D.hidden)setTimeout(acompanhar,200)});
   W.addEventListener('focus',function(){setTimeout(acompanhar,200)});
   W.addEventListener('pageshow',function(){setTimeout(acompanhar,200)});
+  // ao abrir: formulários de rota começam em hoje
+  setTimeout(function(){['dpDataRota','dpDataSequencia'].forEach(function(id){var el=D.getElementById(id);if(el&&!el.value){el.value=hoje()}})},1500);
 
   /* aviso quando não é hoje */
   function aviso(campoId,depoisDe,texto,irHoje){

@@ -5,6 +5,16 @@
     {
       "app": "fast",
       "type": "melhorado",
+      "text": "5.3.9j (14/11/2026): no filtro de busca das ROTAS e do Relatório, o status da rota PENDENTE agora se chama EM ROTA, igual ao botão."
+    },
+    {
+      "app": "fast",
+      "type": "correcao",
+      "text": "5.3.9i (14/11/2026): bloqueio de datas — o dia é sempre o de Brasília (GMT-3); rota lançada fica no dia em que foi lançada; só a rota NÃO concluída passa para o dia seguinte nas Rotas do Dia (⏪ De dd/mm), e no PAINEL ela continua no dia em que foi lançada. Concluída e cancelada nunca mudam de dia. A sincronização não puxa mais a pendente de volta, e a nuvem tem trava própria (SQL) contra aparelho desatualizado."
+    },
+    {
+      "app": "fast",
+      "type": "melhorado",
       "text": "5.3.9h (14/11/2026): rolagem lisa no celular — enquanto o dedo está na tela, as conferências automáticas esperam; a rolagem não depende mais do app (o toque longo continua rolando a tela); tarefas que rodavam a cada quadro ou a cada meio segundo ficaram bem mais leves; a trava da tela parada só age no toque (clique), nunca no arrasto."
     },
     {
