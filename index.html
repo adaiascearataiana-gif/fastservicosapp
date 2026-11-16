@@ -19815,6 +19815,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
       const rotasPorIdData = new Map((bancoDados.rotas || []).map(r => [String(r.id), r]));
       const lista = listaBruta.filter(item => {
         if (!item || fastEhConcluido(item, bancoDados.rotas || [])) return true;
+        if (item.levadaEm) return true; // 5.3.9m: pendente que passou para o dia seguinte aparece no dia para onde foi
         if (item.rotaId != null) {
           const rota = rotasPorIdData.get(String(item.rotaId));
           if (rota && rota.data && String(rota.data) !== String(dataSel)) return false;
@@ -19873,7 +19874,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
         }
 
         const rotaVinculada = item.rotaId ? (bancoDados.rotas || []).find(r => String(r.id) === String(item.rotaId)) : null;
-        const estaConcluido = (rotaVinculada && rotaVinculada.statusExecucao === 'CONCLUÍDA') || item.status === 'CONCLUÍDA' || item.status === 'Concluído';
+        const estaConcluido = (typeof window.fastItemConcluido === 'function') ? window.fastItemConcluido(item) : ((rotaVinculada && rotaVinculada.statusExecucao === 'CONCLUÍDA') || item.status === 'CONCLUÍDA' || item.status === 'Concluído');
         // Suporte a múltiplas fotos: item.fotos (array) + compatibilidade item.foto (string)
         const fotosArray = obterFotosDoItem(item, rotaVinculada);
         const destinoCaixaAlta = (item.destino || 'N/A').toUpperCase();
@@ -20013,7 +20014,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
 
       listaExibida.forEach((item, idx) => {
         const rotaVinculada = item.rotaId ? (bancoDados.rotas || []).find(r => String(r.id) === String(item.rotaId)) : null;
-        const estaConcluido = (rotaVinculada && rotaVinculada.statusExecucao === 'CONCLUÍDA') || item.status === 'CONCLUÍDA' || item.status === 'Concluído';
+        const estaConcluido = (typeof window.fastItemConcluido === 'function') ? window.fastItemConcluido(item) : ((rotaVinculada && rotaVinculada.statusExecucao === 'CONCLUÍDA') || item.status === 'CONCLUÍDA' || item.status === 'Concluído');
 
         const valItem = parseFloat(item.valor) || 0;
         valorTotal += valItem;
@@ -38931,7 +38932,7 @@ body.fast-exclusive-app main { padding-bottom: 12px !important; }
 setInterval(function(){try{var tab=document.getElementById('rotasDia');if(tab&&tab.classList.contains('active')&&typeof renderizarSequencia==='function')renderizarSequencia()}catch(e){}},60000);
 </script>
 <link rel="stylesheet" href="fast-logistics-2.4.css?v=4.0.27">
-<script src="fast-logistics-2.4.js?v=4.0.28"></script>
+<script src="fast-logistics-2.4.js?v=4.0.29"></script>
 
 <!-- FAST 2026-09-18 — camada final de responsividade.
      As versões anteriores acumulavam vários overrides mobile quase idênticos.
@@ -49053,4 +49054,42 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
   D.addEventListener('input',function(ev){if(ev.target&&CAMPOS.indexOf(ev.target.id)>=0)setTimeout(atualizarAvisos,50)},true);
 })();
 </script>
-</body></html>
+<script id="fast539m-lista-do-dia">
+/* 5.3.9m — a MESMA lista que a tela Rotas do Dia mostra, para todos os totalizadores */
+(function(){
+  var W=window;
+  function bd(){try{return bancoDados}catch(e){return W.bancoDados||{}}}
+  function n(v){return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase()}
+  W.fastItemConcluido=function(item){
+    if(!item)return false;var b=bd();
+    if(/CONCLU|ENTREGU|FINALIZ/.test(n(item.status)))return true;
+    if(item.rotaId!=null&&item.rotaId!==''){var r=null;try{r=fastRotaPorId(b.rotas||[],item.rotaId)}catch(e){}if(r&&/CONCLU|ENTREGU|FINALIZ/.test(n(r.statusExecucao)))return true}
+    return false;
+  };
+  W.fastItemCancelado=function(item){
+    if(!item)return false;var b=bd();
+    if(/CANCEL/.test(n(item.status)))return true;
+    if(item.rotaId!=null&&item.rotaId!==''){var r=null;try{r=fastRotaPorId(b.rotas||[],item.rotaId)}catch(e){}if(r&&/CANCEL/.test(n(r.statusExecucao)))return true}
+    return false;
+  };
+  W.fastListaDoDia=function(dataSel){
+    var b=bd(),lista=(b.sequencias&&b.sequencias[dataSel])||[];
+    var exI=new Set((b.seqItensExcluidos||[]).map(function(x){return String(x).split('@')[0]}));
+    var exR=new Set([].concat(b.rotasExcluidas||[],b.seqRotasExcluidas||[]).map(String));
+    var porId=new Map((b.rotas||[]).map(function(r){return [String(r.id),r]}));
+    return lista.filter(function(item){
+      if(!item)return false;
+      if(exI.has(String(item.id)))return false;
+      if(item.rotaId!=null&&exR.has(String(item.rotaId)))return false;
+      if(W.fastItemConcluido(item))return true;
+      if(item.levadaEm)return true;
+      if(item.rotaId!=null){var r=porId.get(String(item.rotaId));if(r&&r.data&&String(r.data)!==String(dataSel))return false}
+      if(item.agrupado&&Array.isArray(item.rotasOriginais)&&item.rotasOriginais.length){
+        var conh=item.rotasOriginais.map(function(id){return porId.get(String(id))}).filter(Boolean);
+        if(conh.length&&!conh.some(function(r){return !r.data||String(r.data)===String(dataSel)}))return false;
+      }
+      return true;
+    });
+  };
+})();
+</script></body></html>
