@@ -19969,9 +19969,37 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
       return txt||'Coleta';
     }
 
-function renderizarSequencia() {
+    // (FIX 2026-11-18) Rola para um elemento APENAS se ele estiver fora da tela.
+    // Evita o "pulo" de tela em ações rotineiras — a tela fica fixa onde está
+    // quando o alvo já está visível.
+    function fastScrollSeForaDaTela(el) {
+      try {
+        if (!el) return;
+        const r = el.getBoundingClientRect();
+        const vh = window.innerHeight || document.documentElement.clientHeight;
+        const fora = r.top < 0 || r.bottom > vh;
+        if (!fora) return;
+        el.scrollIntoView({ behavior: 'auto', block: 'nearest' });
+      } catch (e) {
+        try { el.scrollIntoView({ block: 'nearest' }); } catch (e2) {}
+      }
+    }
+
+    function renderizarSequencia() {
       const dataSel = document.getElementById('dpDataSequencia').value;
       const container = document.getElementById('containerSequencia');
+      // (FIX 2026-11-18) RETAINED SCROLL: o rebuild do innerHTML colapsa a altura e
+      // zera a rolagem, jogando a tela para o topo em qualquer ação. Captura a
+      // posição antes e restaura DEPOIS que o layout se reajusta.
+      const _mainElR = document.querySelector('main');
+      const _scrollMainR = _mainElR ? _mainElR.scrollTop : 0;
+      const _scrollWinR = window.scrollY || window.pageYOffset || 0;
+      const _restoreScrollR = () => {
+        try {
+          if (_mainElR && _scrollMainR > 0) _mainElR.scrollTop = _scrollMainR;
+          if (_scrollWinR > 0) window.scrollTo(0, _scrollWinR);
+        } catch (e) {}
+      };
       if (!container) {
         // Se o container não existe (ex: tab não está visível), ainda atualiza os boxes
         const lista = (bancoDados.sequencias && bancoDados.sequencias[dataSel]) ? bancoDados.sequencias[dataSel] : [];
@@ -20154,6 +20182,9 @@ function renderizarSequencia() {
         `);
       });
       container.innerHTML = cardsHtml.join('');
+      // (FIX 2026-11-18) Restaura a rolagem AFTER que o layout se reajusta — a
+      // tela não sobe/desce sozinha em qualquer ação.
+      requestAnimationFrame(function(){ requestAnimationFrame(_restoreScrollR); });
 
       /* Restaura a seleção pelo ID estável da rota, nunca pelo índice (a ordem
          pode mudar durante o sincronismo). O balão permanece até o usuário
@@ -23640,7 +23671,7 @@ function renderizarSequencia() {
       // (2.3.35) painel inline: sem modal — rola até o painel e foca
       var cardInline = document.getElementById('fastSeqInlineCard');
       if (cardInline) {
-        try { cardInline.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch(e) { cardInline.scrollIntoView(); }
+        fastScrollSeForaDaTela(cardInline);
         var foco = document.getElementById('seqCliente');
         if (foco) setTimeout(function(){ try { foco.focus(); } catch(e) {} }, 350);
       }
@@ -23697,7 +23728,7 @@ function renderizarSequencia() {
       // (2.3.35) painel inline: sem modal — rola até o painel e foca
       var cardInline2 = document.getElementById('fastSeqInlineCard');
       if (cardInline2) {
-        try { cardInline2.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch(e) { cardInline2.scrollIntoView(); }
+        fastScrollSeForaDaTela(cardInline2);
         var foco2 = document.getElementById('seqCliente');
         if (foco2) setTimeout(function(){ try { foco2.focus(); } catch(e) {} }, 350);
       }
@@ -23705,12 +23736,9 @@ function renderizarSequencia() {
 
     function fecharModalSeq() {
       // (2.3.35) painel inline: recolhe/desmarca item em edição
+      // (FIX 2026-11-18) NÃO força scrollIntoView — deixa a tela fixa onde está.
       var modal = document.getElementById('modalSequencia');
       if (modal) modal.classList.remove('active');
-      var cardInline = document.getElementById('fastSeqInlineCard');
-      if (cardInline) {
-        try { cardInline.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } catch(e) { cardInline.scrollIntoView(); }
-      }
       document.getElementById('seqItemId').value = '';
     }
 
@@ -28090,7 +28118,7 @@ function renderizarSequencia() {
       }
       if (typeof atualizarPreviewAba2 === 'function') atualizarPreviewAba2();
       const card = document.getElementById('fastSeqInlineCard');
-      if (card) setTimeout(function(){ card.scrollIntoView({behavior:'smooth',block:'start'}); },100);
+      if (card) setTimeout(function(){ fastScrollSeForaDaTela(card); },100);
       if (typeof mostrarToast === 'function') mostrarToast('Rota preenchida por voz. Confira e toque em Salvar e Adicionar Outra.','success');
       return d;
     };
@@ -29171,6 +29199,16 @@ function renderizarSequencia() {
     };
 
     function renderizar() {
+      // (FIX 2026-11-18) RETAINED SCROLL: preserva a rolagem no rebuild da tabela.
+      const _mainElR2 = document.querySelector('main');
+      const _scrollMainR2 = _mainElR2 ? _mainElR2.scrollTop : 0;
+      const _scrollWinR2 = window.scrollY || window.pageYOffset || 0;
+      const _restoreScrollR2 = () => {
+        try {
+          if (_mainElR2 && _scrollMainR2 > 0) _mainElR2.scrollTop = _scrollMainR2;
+          if (_scrollWinR2 > 0) window.scrollTo(0, _scrollWinR2);
+        } catch (e) {}
+      };
       // 5.3.8: busca do cliente sem diferença de acento/maiúscula (Kaua = Kauã, Franca = França)
       const nomeFiltro = String(document.getElementById('filtroNome').value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
       const dtInicio = document.getElementById('filtroDataInicio').value;
@@ -29257,6 +29295,8 @@ function renderizarSequencia() {
           + '<button type="button" class="btn-primary" style="margin-left:6px;padding:6px 12px;" onclick="window.__fast538RotasTodas=true;renderizar();">Mostrar todas</button></td></tr>');
       }
       tbodyR.innerHTML = linhasRotas.join('');
+      // (FIX 2026-11-18) Restaura a rolagem após o rebuild da tabela.
+      requestAnimationFrame(function(){ requestAnimationFrame(_restoreScrollR2); });
 
       // Renderizar RH e Despesas da Empresa
       renderizarRh();
@@ -39296,7 +39336,7 @@ body.fast-exclusive-app main { padding-bottom: 12px !important; }
     window.fastHandleRouteSpeech=function(original){
       original=String(original||'').trim();var adicionar=/^(adicionar|adicione|inserir|insira|cadastrar|cadastre|criar|crie|nova)\b/i.test(original)||/\bnova rota\b/i.test(original);
       if(adicionar){if(input)input.value='';if(status)status.innerHTML='<i class="fa-solid fa-route"></i> Preenchendo nova rota…';if(typeof window.fastVozPreencherRotaDia==='function')window.fastVozPreencherRotaDia(original);return}
-      var fala=original.replace(/^(buscar|procure|procurar|pesquisar|busque)(\s+a)?\s+(rota\s+)?/i,'').trim();if(input)input.value=fala;if(status)status.innerHTML='<i class="fa-solid fa-circle-check"></i> '+esc(fala);if(typeof renderizarSequencia==='function')renderizarSequencia();var list=el('containerSequencia');if(list)setTimeout(function(){list.scrollIntoView({behavior:'smooth',block:'start'})},80)
+      var fala=original.replace(/^(buscar|procure|procurar|pesquisar|busque)(\s+a)?\s+(rota\s+)?/i,'').trim();if(input)input.value=fala;if(status)status.innerHTML='<i class="fa-solid fa-circle-check"></i> '+esc(fala);if(typeof renderizarSequencia==='function')renderizarSequencia();var list=el('containerSequencia');if(list)setTimeout(function(){fastScrollSeForaDaTela(list)},80)
     };
     if(window.FASTVoice&&typeof window.FASTVoice.startSpeech==='function'){
       window.fastNativeVoiceMode='route';if(btn){btn.classList.add('listening');btn.innerHTML='<i class="fa-solid fa-wave-square"></i> Ouvindo…'}if(status){status.style.display='inline-flex';status.innerHTML='<i class="fa-solid fa-microphone-lines"></i> Fale o cliente, origem, destino ou motorista'}window.FASTVoice.startSpeech();return
