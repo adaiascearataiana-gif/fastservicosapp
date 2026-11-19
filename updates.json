@@ -5,6 +5,11 @@
     {
       "app": "fast",
       "type": "correcao",
+      "text": "5.3.9n (19/11/2026): rotas antigas não voltam mais para hoje — a versão de 18/11 tinha sido montada em cima de uma cópia antiga do app (de 12/11) e trouxe de volta a rotina que puxava toda rota não concluída antiga para hoje e mudava a data dela no PAINEL. Voltaram todas as proteções (datas, exclusões, clientes e lugares, modo Coleta, tela parada, rolagem lisa, totalizadores) e foram mantidas as melhorias de 18 e 19/11 (fotos em tempo real, tela fixa, sincronização imediata)."
+    },
+    {
+      "app": "fast",
+      "type": "correcao",
       "text": "5.3.9m (16/11/2026): totalizadores da Central Operacional fiéis ao cadastro — contam a mesma lista que a tela Rotas do Dia mostra (sem excluídas e sem rota de outro dia); PENDENTES não conta concluída nem cancelada; RISCO DE ATRASO só conta rota com horário marcado que já passou ou pendente vinda de dia anterior (antes contava qualquer rota aberta há mais de 2 horas); 'aberta(s) sem foto' conta só o dia (antes somava todos os dias); 'concluída sem comprovante' considera a foto como comprovante. A pendente que passou para o dia seguinte agora aparece na lista do dia."
     },
     {
