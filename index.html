@@ -13730,7 +13730,10 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
             chegada_em: item.chegadaEm || '',
             valor: Number(item.valor) || 0,
             data_conclusao: item.dataConclusao || '',
-            updated_at: new Date().toISOString()
+            // (FIX 2026-11-18) PRESERVAR updated_at: antes renovava new Date() a cada
+            // sync, fazendo todos os itens parecerem "novos" no merge e causando
+            // reordenação/reescrita contínua (sync lento). Mantém o carimbo original.
+            updated_at: item.updatedAt || item.updated_at || new Date().toISOString()
           });
         });
       });
@@ -14952,19 +14955,18 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
 
     // --- Enviar TODOS os dados locais para o Supabase (upsert) ---
     async function enviarParaNuvem() {
-      await supabaseSyncRotas();
-      await supabaseSyncDespesas();
-      await supabaseSyncSequencias();
+      // (FIX 2026-11-18) PARALELIZAÇÃO: rotas/despesas/sequencias/destinos são
+      // tabelas independentes — antes subiam uma por uma (sequencial). Agora
+      // correm em paralelo, reduzindo o tempo total do sync.
+      const envioRotasP = Promise.resolve(supabaseSyncRotas()).catch(e => { console.warn('sync rotas:', e.message); });
+      const envioDespP = Promise.resolve(supabaseSyncDespesas()).catch(e => { console.warn('sync despesas:', e.message); });
+      const envioSeqP = Promise.resolve(supabaseSyncSequencias()).catch(e => { console.warn('sync sequencias:', e.message); });
       // (r106) Enviar também as 4 coleções órfãs (nunca aborta o resto do sync)
-      try {
-        await r106EnviarColecoes();
-      } catch (e) {
+      const envioColecoesP = Promise.resolve().then(() => r106EnviarColecoes()).catch(e => {
         console.warn('r106: coleções órfãs não enviadas nesta rodada:', e.message);
-      }
+      });
       // r31: destinos é tolerante a tabela ausente (avisa mas não aborta a sync)
-      try {
-        await supabaseSyncDestinos();
-      } catch(err) {
+      const envioDestP = Promise.resolve(supabaseSyncDestinos()).catch(err => {
         if (String(err.message).includes('404') || String(err.message).includes('PGRST205') || String(err.message).includes('does not exist')) {
           console.warn('Tabela destinos não existe no Supabase — destinos não enviados. Crie a tabela via SQL Editor.');
           // Avisa o usuário uma vez (sem spammar a cada sync)
@@ -14973,9 +14975,10 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
             mostrarToastSync('Aviso: a tabela "destinos" não existe no Supabase. Destinos não sincronizam até criar a tabela. Abra a aba "Passo a Passo SQL" e execute o script.', 'error');
           }
         } else {
-          throw err; // erro real (não é tabela ausente) — propaga
+          console.warn('sync destinos:', err.message);
         }
-      }
+      });
+      await Promise.all([envioRotasP, envioDespP, envioSeqP, envioColecoesP, envioDestP]);
       ultimoSyncTimestamp = Date.now();
       return true;
     }
@@ -20031,14 +20034,33 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
       const rotasPorIdData = new Map((bancoDados.rotas || []).map(r => [String(r.id), r]));
       const lista = listaBruta.filter(item => {
         if (!item) return false;
-        // (FIX 2026-11-12) ROTAS DO OUTRO DIA: item CONCLUÍDO com rota vinculada
-        // em data diferente de dataSel não pode aparecer. O site mostrava rotas
-        // de outros dias porque o filtro só aplicava a data para itens NÃO concluídos.
+        // (FIX 2026-11-19) ROTAS CONCLUÍDAS DE DIAS ANTERIORES NÃO PODEM APARECER.
+        // Causa: a rota foi concluída no dia 9, mas sua rota.data foi ajustada para
+        // hoje (migração de pendências), e o filtro só checava rota.data — o item
+        // concluído passava e subia em ROTAS DO DIA de hoje. Agora, item CONCLUÍDO
+        // só aparece no dia em que foi concluído (ou no dia da rota).
+        const rotaParaData = item.rotaId != null ? rotasPorIdData.get(String(item.rotaId)) : null;
+        // Data de conclusão do item (local, YYYY-MM-DD) — checa item e rota vinculada.
+        let diaConclusao = '';
+        const tsConcl = (rotaParaData && rotaParaData.dataConclusao) || item.dataConclusao || '';
+        if (tsConcl) {
+          const d = new Date(tsConcl);
+          if (!isNaN(d.getTime())) diaConclusao = fastDataLocalYYYYMMDD(d);
+        }
+        // Itens concluídos: só aparecem se a data de conclusão for o dia selecionado.
+        if (fastEhConcluido(item, bancoDados.rotas || [])) {
+          // Se tem data de conclusão e não é o dia atual → não aparece.
+          if (diaConclusao && diaConclusao !== String(dataSel)) return false;
+          // Se a rota vinculada tem data diferente e não há data de conclusão válida:
+          // o item só aparece se a rota.data for o dia atual.
+          if (!diaConclusao && rotaParaData && rotaParaData.data && String(rotaParaData.data) !== String(dataSel)) return false;
+          // Se não há rota vinculada nem data de conclusão, não impomos restrição.
+        }
+        // Itens NÃO concluídos: a data da rota é a fonte de verdade.
         if (item.rotaId != null) {
           const rota = rotasPorIdData.get(String(item.rotaId));
           if (rota && rota.data && String(rota.data) !== String(dataSel)) return false;
         }
-        if (!fastEhConcluido(item, bancoDados.rotas || [])) return true;
         if (item.agrupado && Array.isArray(item.rotasOriginais) && item.rotasOriginais.length) {
           // O grupo so pode aparecer se ao menos uma rota que ainda o compoe
           // pertence a data selecionada. O salvamento abaixo desmembra o grupo
@@ -20958,6 +20980,10 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
                   if (vivo.foto === refLocal) vivo.foto = urlNuvem;
                 }
               } catch (eUp) {}
+              // (FIX 2026-11-18) SINCRONIZAÇÃO IMEDIATA: com a URL da foto pronta,
+              // envia o item NO MOMENTO — não espera o intervalo de 15s. A foto
+              // "bate" no outro app/plataforma em milissegundos.
+              try { if (typeof sincronizarAgora === 'function') sincronizarAgora(); } catch (eSync) {}
             }).catch(() => { /* offline: a foto já está local */ });
           }).catch(() => { errosCount++; processarProximo(i + 1); });
         }).catch(() => { errosCount++; processarProximo(i + 1); });
@@ -21009,6 +21035,10 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
         }
         salvarStorage();
         renderizarSequencia();
+        // (FIX 2026-11-18) SINCRONIZAÇÃO IMEDIATA: dispara a migração das fotos
+        // pendentes e o sync NO MOMENTO do salvamento — não espera o intervalo.
+        try { if (typeof fastFotosGarantirNuvem === 'function') fastFotosGarantirNuvem(); } catch (eMig) {}
+        try { if (typeof sincronizarAgora === 'function') sincronizarAgora(); } catch (eSync) {}
         // r67: cada arquivo entra em uma fila persistente de backup no Drive.
         // A gravação local nunca depende da internet nem da autorização Google.
         if (typeof window.fastDriveEnfileirarArquivos === 'function') {
@@ -21785,6 +21815,10 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
       // começam após o usuário terminar de avançar pelas rotas.
       fastSalvarSemBloquear(300);
       fastAgendarRenderizacaoCompleta(true, 420);
+      // (FIX 2026-11-19) SINCRONIZAÇÃO IMEDIATA: concluir/reabrir rota no app
+      // Rotas do Dia reflete no app FAST, site e outros aparelhos no momento
+      // do clique — não espera o intervalo de 15s.
+      if (typeof sincronizarAgora === 'function') sincronizarAgora();
 
       // Feedback visual sutil
       if (novoStatus === 'CONCLUÍDA') {
@@ -23649,6 +23683,9 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
         salvarStorage();
         renderizarSequencia();
         renderizar();
+        // (FIX 2026-11-19) SINCRONIZAÇÃO IMEDIATA: excluir item reflete nos outros
+        // aparelhos/site no momento — não espera o intervalo.
+        if (typeof sincronizarAgora === 'function') sincronizarAgora();
         mostrarToast('Item exclu\u00eddo das Rotas do Dia.', 'info');
       });
     }
@@ -23982,6 +24019,10 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
       // r58: confirma o clique antes das rotinas pesadas de persistência/render.
       fastSalvarSemBloquear();
       fastAgendarRenderizacaoCompleta(true);
+      // (FIX 2026-11-19) SINCRONIZAÇÃO IMEDIATA: criar/editar item de sequência
+      // (e a rota vinculada) reflete no app principal, site e outros aparelhos
+      // no momento do salvar — não espera o intervalo.
+      if (typeof sincronizarAgora === 'function') sincronizarAgora();
       // Atualiza o botao flutuante ENVIAR RASTREAMENTO
       try { rastAtualizarBotaoFlutuante(); } catch(e) {}
     }
@@ -24018,6 +24059,11 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
         salvarStorage();
         renderizar();
         renderizarSequencia();
+        // (FIX 2026-11-19) SINCRONIZAÇÃO IMEDIATA: o push rápido só cobre
+        // sequencias_itens; o status da ROTA (CONCLUÍDA/EM ROTA) só chega à nuvem
+        // na sincronização completa. Sem isso, concluir rota aqui demorava até a
+        // próxima rodada (15s) para refletir no app FAST / site / outro aparelho.
+        if (typeof sincronizarAgora === 'function') sincronizarAgora();
         if (rota.statusExecucao === 'CONCLUÍDA') {
           if (typeof notifEnviar === 'function') notifEnviar('Rota Concluída ✅', 'A rota de ' + (rota.cliente || 'cliente') + ' foi marcada como concluída.');
           if (typeof atualizarAppBadge === 'function') atualizarAppBadge();
@@ -24051,6 +24097,9 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
       salvarStorage();
       renderizar();
       renderizarSequencia();
+      // (FIX 2026-11-19) SINCRONIZAÇÃO IMEDIATA: alteração de pagamento reflete nos
+      // outros aparelhos/site no momento — não espera o intervalo.
+      if (typeof sincronizarAgora === 'function') sincronizarAgora();
       if (typeof atualizarAppBadge === 'function') atualizarAppBadge();
       if (rota.status === 'Recebido') {
         if (typeof notifEnviar === 'function') notifEnviar('Pagamento Recebido', 'A rota de ' + (rota.cliente || 'cliente') + ' foi marcada como RECEBIDO.');
@@ -25863,6 +25912,10 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
       limparFormularioRota();
       salvarStorage();
       renderizar();
+      // (FIX 2026-11-19) SINCRONIZAÇÃO IMEDIATA: criar/editar rota no app principal
+      // reflete no app Rotas do Dia, site e outros aparelhos no momento do salvar —
+      // não espera o intervalo de 15s.
+      if (typeof sincronizarAgora === 'function') sincronizarAgora();
 
       if (todosDestinos.length > 1) {
         mostrarToast(todosDestinos.length + ' rotas individuais criadas com sucesso!', 'success');
@@ -26221,6 +26274,9 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
         renderizar();
         renderizarSequencia();
         try { renderizarClientes(); } catch(e) {}
+        // (FIX 2026-11-19) SINCRONIZAÇÃO IMEDIATA: excluir rota reflete nos outros
+        // aparelhos/site no momento — não espera o intervalo.
+        if (typeof sincronizarAgora === 'function') sincronizarAgora();
         mostrarToast('Rota excluída.', 'info');
       });
     }
@@ -43892,7 +43948,13 @@ html body #modalEditarRota .modal-content{margin:0 auto!important;top:auto!impor
   setInterval(function(){if(ws&&ws.readyState===1&&Date.now()-conectadoEm>45*60*1000)conectar()},60000);
   document.addEventListener('visibilitychange',function(){
     if(document.hidden){try{ws&&ws.close()}catch(e){}}
-    else{if(!ws||ws.readyState>1)conectar()}
+    else{
+      // (FIX 2026-11-19) AO VOLTAR PARA A APP: sincroniza IMEDIATAMENTE, sem
+      // esperar o próximo ciclo do auto-sync (15s). Garante que os dados
+      // refletidos no outro aparelho já tenham chegado aqui ao retornar.
+      try{if(typeof W.sincronizarAgora==='function')W.sincronizarAgora()}catch(e){}
+      if(!ws||ws.readyState>1)conectar()
+    }
   });
   W.addEventListener('online',function(){conectar()});
 
