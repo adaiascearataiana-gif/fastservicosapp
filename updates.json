@@ -4,6 +4,11 @@
   "updates": [
     {
       "app": "fast",
+      "type": "correcao",
+      "text": "5.3.9s (24/11/2026): cliente e lugar apagados não voltam mais — na nuvem havia cópias repetidas (mesmo nome, outro código) e só uma saía; agora todas as cópias com aquele nome são apagadas. Trava no aparelho: cliente, lugar, motorista ou funcionário apagado não reaparece por sincronização. Cadastrar de novo o mesmo nome continua funcionando."
+    },
+    {
+      "app": "fast",
       "type": "melhorado",
       "text": "5.3.9r (24/11/2026): ORIGEM e DESTINO (ROTAS, Rotas do Dia, destinos extras e Editar rota) puxam de LUGARES e também de CLIENTES, com o endereço; cliente escolhido como origem/destino entra em LUGARES com o endereço dele ao salvar. Clientes e Lugares com o mesmo nome se completam sozinhos (endereço, bairro, telefone) — nada é apagado nem trocado."
     },

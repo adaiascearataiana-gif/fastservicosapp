@@ -49551,7 +49551,7 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
       var nuvem=await lerNuvem();
       var temAqui=new Set(b.clientes.map(function(c){return norm(c&&c.nome)}));
       var faltam=[],vistos=new Set();
-      nuvem.forEach(function(c){var n=norm(c.nome);if(!n||temAqui.has(n)||vistos.has(n))return;vistos.add(n);faltam.push(c)});
+      nuvem.forEach(function(c){var n=norm(c.nome);if(!n||temAqui.has(n)||vistos.has(n))return;if(typeof W.fastClienteApagado==='function'&&W.fastClienteApagado(c))return;vistos.add(n);faltam.push(c)});
       // automático: só quando é perda grande (lista vazia ou faltando muitos)
       if(!manual&&faltam.length<Math.max(10,Math.round(nuvem.length*0.2))){rodando=false;return 0}
       if(!faltam.length){if(manual)try{mostrarToast('Todos os '+nuvem.length+' clientes da nuvem já estão aqui.','info')}catch(e){};rodando=false;return 0}
@@ -49655,4 +49655,102 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
   function instalar(){['salvarCliente','salvarClienteModal','salvarDestinoModal','salvarRota','salvarItemSeq'].forEach(embrulhar)}
   instalar();setInterval(instalar,5000);
 })();
-</script></body></html>
+</script><script id="fast539s-clientes-apagados">
+/* 5.3.9s — CLIENTE APAGADO NÃO VOLTA
+   1) Na nuvem havia o mesmo cliente repetido (mesmo nome, outro código). Ao apagar,
+      só uma cópia saía da nuvem e a outra trazia o cliente de volta em segundos.
+      Agora, ao apagar, TODAS as cópias com aquele nome saem da nuvem.
+   2) Trava local: cliente apagado (com data) não reaparece na lista, venha de onde vier
+      (sincronização, outro aparelho, recuperação). Cadastrar de novo o mesmo nome libera. */
+(function(){
+  var W=window,D=document;
+  function bd(){try{return bancoDados}catch(e){return W.bancoDados}}
+  function N(t){try{return destNormalizarNome(t)}catch(e){return String(t||'').toLowerCase().trim()}}
+  function ts(c){return Date.parse(c&&(c.ultimaModificacao||c.updatedAt||c.updated_at||c.criadoEm||c.dataCadastro)||'')||0}
+  function mapaApagados(){
+    var b=bd();if(!b)return {};
+    try{var m=fastLapideMapa(b.clientesExcluidos||[]),o={};Object.keys(m).forEach(function(n){if(m[n]>0)o[n]=m[n]});return o}catch(e){return {}}
+  }
+  W.fastClienteApagado=function(c){var m=mapaApagados(),n=N(c&&c.nome);return !!(n&&m[n]>0&&ts(c)<=m[n])};
+  // 2) trava local
+  function vigiar(){
+    var b=bd();if(!b||!Array.isArray(b.clientes)||!b.clientes.length)return;
+    var m=mapaApagados();if(!Object.keys(m).length)return;
+    var antes=b.clientes.length;
+    var fica=b.clientes.filter(function(c){var n=N(c&&c.nome);return !(n&&m[n]>0&&ts(c)<=m[n])});
+    if(fica.length!==antes){
+      b.clientes=fica;
+      try{salvarStorage()}catch(e){}
+      try{renderizarClientes()}catch(e){}
+      try{atualizarContadoresHeader()}catch(e){}
+    }
+  }
+  // o mesmo vale para LUGARES (por nome), MOTORISTAS e RH (por código)
+  function vigiarOutros(){
+    var b=bd();if(!b)return;var mud=false;
+    try{
+      if(Array.isArray(b.destinos)&&b.destinos.length&&(b.destinosExcluidos||[]).length){
+        var ef=fastLapideEfetiva(b.destinosExcluidos);
+        if(ef.size){var a=b.destinos.length;b.destinos=b.destinos.filter(function(d){return !(d&&ef.has(N(d.nome)))});if(b.destinos.length!==a){mud=true;try{destRenderizarLista()}catch(e){}}}
+      }
+      [['motoristas','motoristasExcluidos'],['rh','rhExcluidos']].forEach(function(p){
+        var l=b[p[0]],ex=b[p[1]];if(!Array.isArray(l)||!l.length||!Array.isArray(ex)||!ex.length)return;
+        var s=new Set(ex.map(String)),a=l.length;b[p[0]]=l.filter(function(x){return !(x&&s.has(String(x.id)))});if(b[p[0]].length!==a)mud=true;
+      });
+    }catch(e){}
+    if(mud){try{salvarStorage()}catch(e){}try{atualizarContadoresHeader()}catch(e){}}
+  }
+  setInterval(function(){vigiar();vigiarOutros()},1500);
+  // 1) apagar todas as cópias na nuvem
+  async function apagarNaNuvem(nomes){
+    if(!nomes.length)return;
+    try{
+      var r=await fetch(SUPABASE_URL+'/clientes?select=id,dados',{headers:supabaseHeaders(),cache:'no-store'});
+      if(!r.ok)return;
+      var rows=await r.json(),alvo={};nomes.forEach(function(n){alvo[n]=1});
+      var ids=rows.filter(function(row){try{var d=typeof row.dados==='string'?JSON.parse(row.dados):(row.dados||{});return alvo[N(d.nome)]}catch(e){return false}}).map(function(row){return row.id});
+      for(var i=0;i<ids.length;i+=20){
+        W.__f539DelUser=Date.now();
+        await fetch(SUPABASE_URL+'/clientes?id=in.('+ids.slice(i,i+20).join(',')+')',{method:'DELETE',headers:supabaseHeaders({'Prefer':'return=minimal'})});
+      }
+    }catch(e){console.warn('FAST apagar cópias do cliente:',e)}
+  }
+  function recentes(){
+    var b=bd(),lim=Date.now()-3*60*1000,out={};
+    (b&&b.clientesExcluidos||[]).forEach(function(v){var m=/^zz excluido (\d+) (.+)$/.exec(N(v));if(m&&Number(m[1])>lim)out[m[2]]=1});
+    return Object.keys(out);
+  }
+  function embrulhar(nome){
+    var f=W[nome];if(typeof f!=='function'||f.__f539s)return;
+    var g=function(){
+      var r=f.apply(this,arguments);
+      // a confirmação pode vir depois: confere algumas vezes
+      [1500,5000,12000].forEach(function(t){setTimeout(function(){var n=recentes();if(n.length){apagarNaNuvem(n)}vigiar()},t)});
+      return r;
+    };
+    Object.keys(f).forEach(function(k){try{g[k]=f[k]}catch(e){}});g.__f539s=1;W[nome]=g;
+  }
+  async function apagarLugaresNaNuvem(nomes){
+    if(!nomes.length)return;
+    try{
+      var r=await fetch(SUPABASE_URL+'/destinos?select=id,nome',{headers:supabaseHeaders(),cache:'no-store'});if(!r.ok)return;
+      var rows=await r.json(),alvo={};nomes.forEach(function(n){alvo[n]=1});
+      var ids=rows.filter(function(x){return alvo[N(x.nome)]}).map(function(x){return x.id});
+      for(var i=0;i<ids.length;i+=20){W.__f539DelUser=Date.now();await fetch(SUPABASE_URL+'/destinos?id=in.('+ids.slice(i,i+20).join(',')+')',{method:'DELETE',headers:supabaseHeaders({'Prefer':'return=minimal'})})}
+    }catch(e){console.warn('FAST apagar cópias do lugar:',e)}
+  }
+  function recentesLug(){
+    var b=bd(),lim=Date.now()-3*60*1000,out={};
+    (b&&b.destinosExcluidos||[]).forEach(function(v){var m=/^zz excluido (\d+) (.+)$/.exec(N(v));if(m&&Number(m[1])>lim)out[m[2]]=1});
+    return Object.keys(out);
+  }
+  function embrulharLug(nome){
+    var f=W[nome];if(typeof f!=='function'||f.__f539s)return;
+    var g=function(){var r=f.apply(this,arguments);[1500,5000,12000].forEach(function(t){setTimeout(function(){var n=recentesLug();if(n.length)apagarLugaresNaNuvem(n);vigiarOutros()},t)});return r};
+    Object.keys(f).forEach(function(k){try{g[k]=f[k]}catch(e){}});g.__f539s=1;W[nome]=g;
+  }
+  function instalar(){['removerCliente','cliExcluirSelecionados'].forEach(embrulhar);['destExcluir','destExcluirSelecionados'].forEach(embrulharLug)}
+  instalar();setInterval(instalar,3000);
+})();
+</script>
+</body></html>
