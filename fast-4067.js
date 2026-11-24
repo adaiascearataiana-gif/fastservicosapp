@@ -1132,7 +1132,7 @@
   async function checar(forcar) {
     if (checando || document.hidden || !navigator.onLine || !pronto()) return;
     // com tempo real ativo, a verificação vira só reserva (a cada 15 s)
-    if (!forcar && Date.now() - ultimaChecagem < (rtConectado() ? 60000 : 20000)) return;   // 5.3.9c: economia de dados — sem tempo real confere a cada 20 s; com tempo real, 60 s (os avisos chegam na hora)
+    if (!forcar && Date.now() - ultimaChecagem < (rtConectado() ? 30000 : 6000)) return;   // 5.3.9q: sem tempo real confere a cada 6 s (só a data da última mudança — poucos bytes); com tempo real, 30 s de reserva
     if (!token()) { await renovarLogin(true); }
     if (!token()) {
       if (!avisouSemLogin) {

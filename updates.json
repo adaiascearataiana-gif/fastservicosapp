@@ -4,6 +4,11 @@
   "updates": [
     {
       "app": "fast",
+      "type": "melhorado",
+      "text": "5.3.9q (24/11/2026): rota lançada em um aparelho aparece mais rápido nos outros — sem o aviso instantâneo, a conferência passou de 20 s para 6 s (só pergunta a data da última mudança, gasta poucos bytes)."
+    },
+    {
+      "app": "fast",
       "type": "correcao",
       "text": "5.3.9p (24/11/2026): clientes não somem — o app confere a tabela de clientes da nuvem e, se o aparelho estiver mostrando bem menos clientes (ex.: lista vazia), traz de volta os que faltam; botão 'Recuperar clientes da nuvem' na tela de Clientes; excluir 10 ou mais clientes de uma vez pede segunda confirmação."
     },
