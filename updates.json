@@ -5,6 +5,11 @@
     {
       "app": "fast",
       "type": "melhorado",
+      "text": "5.3.9r (24/11/2026): ORIGEM e DESTINO (ROTAS, Rotas do Dia, destinos extras e Editar rota) puxam de LUGARES e também de CLIENTES, com o endereço; cliente escolhido como origem/destino entra em LUGARES com o endereço dele ao salvar. Clientes e Lugares com o mesmo nome se completam sozinhos (endereço, bairro, telefone) — nada é apagado nem trocado."
+    },
+    {
+      "app": "fast",
+      "type": "melhorado",
       "text": "5.3.9q (24/11/2026): rota lançada em um aparelho aparece mais rápido nos outros — sem o aviso instantâneo, a conferência passou de 20 s para 6 s (só pergunta a data da última mudança, gasta poucos bytes)."
     },
     {

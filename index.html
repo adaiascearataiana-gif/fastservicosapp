@@ -48653,10 +48653,21 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
   function esc(t){return String(t==null?'':t).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
   function bd(){return W.bancoDados||{}}
   function lugares(){return (bd().destinos||[]).filter(function(d){return d&&d.nome})}
+  // 5.3.9r: CLIENTES também são fonte (muitas vezes a origem/destino é o próprio cliente)
+  function dadosCliente(c){
+    var eo=c.enderecoObj||{};
+    var rua=[c.logradouro||eo.logradouro,c.numero||eo.numero].filter(Boolean).join(', ');
+    var end=rua||String(c.endereco||'').trim(),bai=String(c.bairro||eo.bairro||'').trim();
+    if(!bai&&/ - [^-]+$/.test(end)){var p=end.split(' - ');bai=p.pop().trim();end=p.join(' - ').trim()}
+    var tel='';try{tel=(W.fastTelefoneBr&&W.fastTelefoneBr(c.whatsapp||c.telefone||''))||String(c.whatsapp||c.telefone||'').trim()}catch(e){}
+    return {nome:String(c.nome||'').trim(),endereco:end,bairro:bai,telefone:tel,local:'',__cliente:true};
+  }
+  function clientes(){return (bd().clientes||[]).filter(function(c){return c&&c.nome})}
+  function acharCliente(nome){var k=N(nome);if(!k)return null;var c=clientes().find(function(x){return N(x.nome)===k||(x.apelido&&N(x.apelido)===k)});return c?dadosCliente(c):null}
   function acharLugar(nome){
     var k=N(nome);if(!k)return null;
     try{var d=destBuscar(nome);if(d)return d}catch(e){}
-    return lugares().find(function(d){return N(d.nome)===k})||null;
+    return lugares().find(function(d){return N(d.nome)===k})||acharCliente(nome)||null;
   }
   function endLugar(d){
     if(!d)return '';
@@ -48725,7 +48736,7 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
     var d=acharLugar(v);
     if(d){
       var end=endLugar(d);
-      prev.innerHTML='📍 <span>'+esc(d.nome)+'</span>'+(d.local?'<span style="display:block">🏢 '+esc(d.local)+'</span>':'')+(end?'<span style="display:block;font-weight:600;opacity:.85">'+esc(end)+'</span>':'<span style="display:block;font-weight:600;opacity:.7">(lugar sem endereço cadastrado)</span>');
+      prev.innerHTML=(d.__cliente?'👤 ':'📍 ')+'<span>'+esc(d.nome)+'</span>'+(d.__cliente?'<span style="display:block;font-size:12px">cliente — vai entrar em LUGARES ao salvar</span>':'')+(d.local?'<span style="display:block">🏢 '+esc(d.local)+'</span>':'')+(end?'<span style="display:block;font-weight:600;opacity:.85">'+esc(end)+'</span>':'<span style="display:block;font-weight:600;opacity:.7">(lugar sem endereço cadastrado)</span>');
       prev.style.display='block';novo.style.display='none';
       if(END_DE[inp.id]){var ee=$(END_DE[inp.id]);if(ee){ee.value=end;ee.dataset.auto='1'}}
     }else{
@@ -48740,13 +48751,15 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
     var termo=N(inp.value);
     if(!termo){div.style.display='none';atualizar(inp,true);return}
     var lista=lugares().filter(function(d){return N(d.nome).indexOf(termo)>=0||(d.local&&N(d.local).indexOf(termo)>=0)});
+    var jaTem={};lista.forEach(function(d){jaTem[N(d.nome)]=1});
+    clientes().forEach(function(c){var k=N(c.nome);if(jaTem[k])return;if(k.indexOf(termo)>=0||(c.apelido&&N(c.apelido).indexOf(termo)>=0)){jaTem[k]=1;lista.push(dadosCliente(c))}});
     lista.sort(function(x,y){var px=N(x.nome).indexOf(termo)===0?0:1,py=N(y.nome).indexOf(termo)===0?0:1;return (px-py)||((y.usadoEm||0)-(x.usadoEm||0))||String(x.nome).localeCompare(String(y.nome))});
-    lista=lista.slice(0,12);
+    lista=lista.slice(0,15);
     div.innerHTML='';
     lista.forEach(function(d){
       var el=D.createElement('div');el.className='suggestion-item';el.style.cssText='padding:10px 12px;cursor:pointer;border-bottom:1px solid rgba(0,0,0,.06)';
       var end=endLugar(d);
-      el.innerHTML='📍 <b>'+esc(d.nome)+'</b>'+(d.local?'<small style="display:block;font-weight:700">🏢 '+esc(d.local)+'</small>':'')+'<small style="display:block;opacity:.75">'+(end?esc(end):'sem endereço cadastrado')+'</small>';
+      el.innerHTML=(d.__cliente?'👤 ':'📍 ')+'<b>'+esc(d.nome)+'</b>'+(d.__cliente?'<small style="display:block;font-weight:700">cliente</small>':'')+(d.local?'<small style="display:block;font-weight:700">🏢 '+esc(d.local)+'</small>':'')+'<small style="display:block;opacity:.75">'+(end?esc(end):'sem endereço cadastrado')+'</small>';
       el.addEventListener('mousedown',function(ev){ev.preventDefault()});   // não tira o foco antes do toque
       el.addEventListener('click',function(){
         inp.value=d.nome;div.style.display='none';
@@ -48771,7 +48784,10 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
         var criou=false;
         camposDe(grupo).forEach(function(inp){if(END_DE[inp.id]&&!acharLugar(inp.value.trim()))gravarEnd(inp)});
         camposDe(grupo).forEach(function(inp){
-          var v=inp.value.trim();if(!v||acharLugar(v)||typeof destAdicionarOuAtualizar!=='function')return;
+          var v=inp.value.trim();if(!v||typeof destAdicionarOuAtualizar!=='function')return;
+          var achou=acharLugar(v);
+          if(achou&&achou.__cliente){var nl=destAdicionarOuAtualizar(achou.nome,{endereco:achou.endereco,bairro:achou.bairro,telefone:achou.telefone});if(nl){nl.updatedAt=new Date().toISOString();criou=true}return}
+          if(achou)return;
           var a=inp.__f538area,end='',bai='',loc='',tel='',num='',eo=null;
           if(a){end=(a.querySelector('.f538-dest-end').value||'').trim();num=((a.querySelector('.f538-dest-num')||{}).value||'').trim();bai=(a.querySelector('.f538-dest-bai').value||'').trim();loc=(a.querySelector('.f538-dest-loc').value||'').trim();tel=(a.querySelector('.f538-dest-tel').value||'').trim();end=juntarNum(end,num);if(end||bai||num)eo=objEndereco(a,end,bai,num)}
           var n=destAdicionarOuAtualizar(v,{endereco:end,bairro:bai,telefone:tel,enderecoObj:eo});
@@ -49586,4 +49602,57 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
   proteger();setInterval(proteger,3000);
 })();
 </script>
-</body></html>
+<script id="fast539r-clientes-lugares">
+/* 5.3.9r — CLIENTES ⇄ LUGARES sempre completos
+   Mesmo nome nos dois cadastros: o que estiver VAZIO num lado é completado com o
+   que existe no outro (endereço, bairro, telefone). Nada é apagado nem trocado.
+   Roda sozinho ao abrir, a cada minuto e logo depois de salvar cliente ou lugar. */
+(function(){
+  var W=window,D=document,rodando=false;
+  function bd(){try{return bancoDados}catch(e){return W.bancoDados}}
+  function N(t){try{return destNormalizarNome(t)}catch(e){return String(t||'').toLowerCase().trim()}}
+  function vazio(v){return !String(v==null?'':v).trim()}
+  function dadosCliente(c){
+    var eo=c.enderecoObj||{};
+    var rua=[c.logradouro||eo.logradouro,c.numero||eo.numero].filter(Boolean).join(', ');
+    var end=rua||String(c.endereco||'').trim(),bai=String(c.bairro||eo.bairro||'').trim();
+    if(!bai&&/ - [^-]+$/.test(end)){var p=end.split(' - ');bai=p.pop().trim();end=p.join(' - ').trim()}
+    return {endereco:end,bairro:bai,telefone:String(c.whatsapp||c.telefone||'').trim()};
+  }
+  function sincronizar(){
+    var b=bd();if(rodando||!b||!Array.isArray(b.clientes)||!Array.isArray(b.destinos))return 0;
+    rodando=true;var agora=new Date().toISOString(),mud=0;
+    try{
+      var lug={};b.destinos.forEach(function(d){if(d&&d.nome)lug[N(d.nome)]=d});
+      b.clientes.forEach(function(c){
+        if(!c||!c.nome)return;var d=lug[N(c.nome)];if(!d)return;
+        var x=dadosCliente(c),mudouL=false,mudouC=false;
+        // cliente -> lugar
+        ['endereco','bairro','telefone'].forEach(function(f){if(vazio(d[f])&&!vazio(x[f])){d[f]=x[f];mudouL=true}});
+        // lugar -> cliente
+        if(vazio(x.endereco)&&!vazio(d.endereco)&&vazio(c.logradouro)&&vazio(c.endereco)){c.endereco=d.endereco;mudouC=true}
+        if(vazio(x.bairro)&&!vazio(d.bairro)&&vazio(c.bairro)){c.bairro=d.bairro;mudouC=true}
+        if(vazio(c.telefone)&&vazio(c.whatsapp)&&!vazio(d.telefone)){c.telefone=d.telefone;mudouC=true}
+        if(mudouL){d.updatedAt=agora;mud++}
+        if(mudouC){c.updatedAt=agora;c.ultimaModificacao=agora;mud++}
+      });
+      if(mud){
+        try{salvarStorage()}catch(e){}
+        try{destRenderizarLista()}catch(e){}
+        try{renderizarClientes()}catch(e){}
+      }
+    }catch(e){console.warn('FAST clientes⇄lugares:',e)}
+    rodando=false;return mud;
+  }
+  W.fastSincronizarClientesLugares=sincronizar;
+  setTimeout(sincronizar,15000);
+  setInterval(function(){if(!D.hidden)sincronizar()},60000);
+  function embrulhar(nome){
+    var f=W[nome];if(typeof f!=='function'||f.__f539cl)return;
+    var g=function(){var r=f.apply(this,arguments);setTimeout(sincronizar,800);return r};
+    Object.keys(f).forEach(function(k){try{g[k]=f[k]}catch(e){}});g.__f539cl=1;W[nome]=g;
+  }
+  function instalar(){['salvarCliente','salvarClienteModal','salvarDestinoModal','salvarRota','salvarItemSeq'].forEach(embrulhar)}
+  instalar();setInterval(instalar,5000);
+})();
+</script></body></html>
