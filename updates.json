@@ -5,6 +5,16 @@
     {
       "app": "fast",
       "type": "correcao",
+      "text": "5.3.9p (24/11/2026): clientes não somem — o app confere a tabela de clientes da nuvem e, se o aparelho estiver mostrando bem menos clientes (ex.: lista vazia), traz de volta os que faltam; botão 'Recuperar clientes da nuvem' na tela de Clientes; excluir 10 ou mais clientes de uma vez pede segunda confirmação."
+    },
+    {
+      "app": "fast",
+      "type": "correcao",
+      "text": "5.3.9o (19/11/2026): nenhuma rota muda de dia sozinha — a passagem da pendente para o dia seguinte foi desligada; as que tinham passado (⏪) voltam para o dia em que foram lançadas."
+    },
+    {
+      "app": "fast",
+      "type": "correcao",
       "text": "5.3.9n (19/11/2026): rotas antigas não voltam mais para hoje — a versão de 18/11 tinha sido montada em cima de uma cópia antiga do app (de 12/11) e trouxe de volta a rotina que puxava toda rota não concluída antiga para hoje e mudava a data dela no PAINEL. Voltaram todas as proteções (datas, exclusões, clientes e lugares, modo Coleta, tela parada, rolagem lisa, totalizadores) e foram mantidas as melhorias de 18 e 19/11 (fotos em tempo real, tela fixa, sincronização imediata)."
     },
     {

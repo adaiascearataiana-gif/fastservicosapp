@@ -49344,10 +49344,8 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
    • O dia é sempre o de Brasília (GMT-3).
    • Rota lançada fica no dia em que foi lançada. Ninguém muda a data sozinho:
      nem o app, nem a sincronização, nem um aparelho desatualizado.
-   • A ÚNICA exceção: rota NÃO concluída (e não cancelada/excluída) de um dia
-     anterior passa para o dia seguinte nas Rotas do Dia, com a marca "⏪ De dd/mm".
-     Vale para pendentes dos últimos 3 dias. No PAINEL a rota continua no dia em
-     que foi lançada.
+   • 5.3.9o: SEM exceção — pendente também fica no dia em que foi lançada
+     (a passagem para o dia seguinte foi desligada). O que tinha passado volta.
    • Rota concluída nunca muda de dia.
    • Datas dos formulários acompanham o dia; aviso vermelho quando não é hoje. */
 (function(){
@@ -49367,7 +49365,35 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
     return s;
   }
   var rodando=false;
-  function levar(){
+  // 5.3.9o: NENHUMA rota muda de dia sozinha (desligado a pedido: pendentes antigas apareciam em hoje).
+  // O que já tinha passado de dia (levadaEm) volta para o dia em que a rota foi LANÇADA.
+  function diaLancada(b,it){
+    var rid=(it.rotaId!=null&&it.rotaId!=='')?it.rotaId:it.id,n=Math.floor(Number(rid));
+    if(n>1600000000000&&n<Date.now()+86400000){var t=new Date(n-3*3600000);return t.getUTCFullYear()+'-'+String(t.getUTCMonth()+1).padStart(2,'0')+'-'+String(t.getUTCDate()).padStart(2,'0')}
+    var rv=rotaDe(b,it);return rv&&valida(rv.data)?String(rv.data):'';
+  }
+  function devolver(){
+    var b=bd();if(!b||!b.sequencias)return 0;var agora=new Date().toISOString(),n=0;
+    try{
+      Object.keys(b.sequencias).forEach(function(d){
+        (b.sequencias[d]||[]).slice().forEach(function(it){
+          if(!it||!it.levadaEm)return;
+          var alvo=diaLancada(b,it);
+          it.levadaEm='';it.dataOriginal='';it.updatedAt=agora;
+          if(alvo&&alvo!==d){
+            var o=b.sequencias[d],ix=o.indexOf(it);if(ix>=0)o.splice(ix,1);
+            var dst=b.sequencias[alvo]||(b.sequencias[alvo]=[]);
+            if(!dst.some(function(x){return x&&(String(x.id)===String(it.id)||(it.rotaId!=null&&String(x.rotaId)===String(it.rotaId)))}))dst.push(it);
+          }
+          n++;
+        });
+      });
+      if(n){try{salvarStorage()}catch(e){}try{W.__frxForcarLista=true;renderizarSequencia()}catch(e){}}
+    }catch(e){console.warn('FAST devolver:',e)}
+    return n;
+  }
+  function levar(){ return devolver(), 0; }
+  function levarAntigo(){
     var b=bd();if(rodando||!b||!b.sequencias)return 0;rodando=true;
     var h=hoje(),lim=menosDias(h,JANELA),agora=new Date().toISOString(),ex=excl(b),n=0;
     try{
@@ -49485,4 +49511,79 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
     });
   };
 })();
-</script></body></html>
+</script><script id="fast539p-clientes-socorro">
+/* 5.3.9p — CLIENTES NÃO SOMEM
+   Confere a tabela de clientes da nuvem. Se este aparelho está mostrando bem menos
+   clientes do que a nuvem tem (ex.: lista vazia), traz de volta os que faltam e
+   libera a "exclusão" que estava escondendo esses nomes. Também há o botão
+   "Recuperar clientes da nuvem" na tela de Clientes. Excluir 10 ou mais clientes
+   de uma vez pede uma segunda confirmação. */
+(function(){
+  var W=window,D=document,rodando=false;
+  function bd(){try{return bancoDados}catch(e){return W.bancoDados}}
+  function norm(n){try{return destNormalizarNome(n)}catch(e){return String(n||'').toLowerCase().trim()}}
+  async function lerNuvem(){
+    var r=await fetch(SUPABASE_URL+'/clientes?select=*',{method:'GET',headers:supabaseHeaders()});
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    var rows=await r.json();
+    return rows.map(function(row){try{var d=(typeof row.dados==='string')?JSON.parse(row.dados):(row.dados||{});d.id=row.id;return d}catch(e){return null}}).filter(function(x){return x&&x.nome});
+  }
+  async function socorro(manual){
+    var b=bd();if(rodando||!b)return -1;rodando=true;
+    try{
+      if(!Array.isArray(b.clientes))b.clientes=[];
+      var nuvem=await lerNuvem();
+      var temAqui=new Set(b.clientes.map(function(c){return norm(c&&c.nome)}));
+      var faltam=[],vistos=new Set();
+      nuvem.forEach(function(c){var n=norm(c.nome);if(!n||temAqui.has(n)||vistos.has(n))return;vistos.add(n);faltam.push(c)});
+      // automático: só quando é perda grande (lista vazia ou faltando muitos)
+      if(!manual&&faltam.length<Math.max(10,Math.round(nuvem.length*0.2))){rodando=false;return 0}
+      if(!faltam.length){if(manual)try{mostrarToast('Todos os '+nuvem.length+' clientes da nuvem já estão aqui.','info')}catch(e){};rodando=false;return 0}
+      if(!Array.isArray(b.clientesExcluidos))b.clientesExcluidos=[];
+      faltam.forEach(function(c){
+        try{fastLapideMarcar(b.clientesExcluidos,'liberado',c.nome)}catch(e){}
+        b.clientes.push(c);
+      });
+      try{renumerarClientesSequencial()}catch(e){}
+      try{salvarStorage()}catch(e){}
+      try{renderizarClientes()}catch(e){}
+      try{atualizarContadoresHeader()}catch(e){}
+      try{mostrarToast(faltam.length+' cliente(s) recuperado(s) da nuvem.','success')}catch(e){}
+      rodando=false;return faltam.length;
+    }catch(e){
+      console.warn('FAST socorro clientes:',e);
+      if(manual)try{mostrarToast('Não consegui ler os clientes da nuvem agora. Tente de novo em instantes.','warning')}catch(x){}
+      rodando=false;return -1;
+    }
+  }
+  W.fastRecuperarClientes=function(){return socorro(true)};
+  W.fastConferirClientesNuvem=function(){return socorro(false)};
+  setTimeout(function(){socorro(false)},12000);
+  setInterval(function(){if(!D.hidden)socorro(false)},10*60*1000);
+  D.addEventListener('visibilitychange',function(){if(!D.hidden)setTimeout(function(){socorro(false)},4000)});
+
+  // botão na tela de Clientes
+  function montar(){
+    var h=D.getElementById('contagemClientesHeader');if(!h||D.getElementById('f539BtnCliRecuperar'))return;
+    var b=D.createElement('button');b.type='button';b.id='f539BtnCliRecuperar';b.className='no-print';
+    b.innerHTML='☁️ Recuperar clientes da nuvem';
+    b.style.cssText='display:block;width:100%;min-height:42px;margin:0 0 12px;border-radius:12px;border:2px solid #0ea5e9;background:rgba(14,165,233,.08);color:#0369a1;font-weight:800;font-size:14px;cursor:pointer';
+    b.onclick=function(){b.disabled=true;b.innerHTML='☁️ Buscando na nuvem...';socorro(true).then(function(){b.disabled=false;b.innerHTML='☁️ Recuperar clientes da nuvem'})};
+    h.parentNode.insertBefore(b,h.nextSibling);
+  }
+  setInterval(montar,1500);W.addEventListener('load',function(){setTimeout(montar,1500)});
+
+  // excluir muitos clientes de uma vez: segunda confirmação
+  function proteger(){
+    var f=W.cliExcluirSelecionados;if(typeof f!=='function'||f.__f539)return;
+    var g=function(){
+      var n=D.querySelectorAll('#tabelaClientesBody input[type=checkbox]:checked').length;
+      if(n>=10&&!confirm('ATENÇÃO: você marcou '+n+' clientes para EXCLUIR.\n\nTem certeza? Eles somem de todos os aparelhos.'))return;
+      return f.apply(this,arguments);
+    };
+    g.__f539=1;W.cliExcluirSelecionados=g;
+  }
+  proteger();setInterval(proteger,3000);
+})();
+</script>
+</body></html>
