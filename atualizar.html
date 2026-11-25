@@ -34,7 +34,7 @@ h1{font-size:20px;margin:14px 0 6px}p{margin:6px 0;color:var(--sub)}#st{color:va
     }
   }catch(e){}
   try{
-    if(window.caches){var ks=await caches.keys();await Promise.all(ks.map(function(k){return caches.delete(k)}));}
+    if(window.caches){var ks=await caches.keys();await Promise.all(ks.filter(function(k){return k.indexOf('fast-fotos-')!==0}).map(function(k){return caches.delete(k)}));}
   }catch(e){}
   var q=new URLSearchParams(location.search), para=q.get('para')||'';
   var destino='./'+(para?para:'')+(para.indexOf('?')>=0?'&':'?')+'fast_fresh='+Date.now();

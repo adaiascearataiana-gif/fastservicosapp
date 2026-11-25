@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="fast-app-version" content="5.4.3">
+<meta name="fast-app-version" content="5.4.4">
 <meta name="theme-color" content="#16a34a">
 <title>Cliente FAST — Histórico</title>
 <link rel="manifest" href="manifest.webmanifest?v=542">
@@ -571,7 +571,7 @@ window.fastBioLockAtivo=function(){return !!cfg()};window.fastBioSuportado=funct
     try{if(typeof render==='function')render()}catch(e){}
   }
   document.addEventListener('fast-mudou',carregar);
-  setInterval(function(){if(!document.hidden)carregar()},15000);
+  setInterval(function(){if(!document.hidden)carregar()},60000);
   var pronto=false;
   setInterval(function(){if(!pronto&&tk()&&typeof cliente!=='undefined'&&cliente){pronto=true;carregarLugares().then(function(){mostrarChip()});carregar()}},1200);
 })();
@@ -1253,7 +1253,7 @@ html.cli-escuro{filter:invert(.92) hue-rotate(180deg);background:#111}html.cli-e
   }
   // de tempos em tempos, volta a procurar fotos/conclusão das rotas que ainda não têm comprovante
   window.cliHistRefrescar=function(tudo){Object.keys(FOT).forEach(function(k){if(tudo||!FOT[k].length)delete FOT[k]});try{window.render()}catch(e){}try{if(window.cliHistAtualizar)cliHistAtualizar()}catch(e){}};
-  setInterval(function(){if(!document.hidden&&typeof tk==='function'&&tk())window.cliHistRefrescar(false)},20000);
+  setInterval(function(){if(!document.hidden&&typeof tk==='function'&&tk())window.cliHistRefrescar(false)},90000);
   window.cliHistLinhas=montarLinhas; window.cliHistTabela=function(vis){var f=[];var t=tabela(vis,f);if(f.length)setTimeout(function(){buscarFotos(f)},50);return t};
   window.render=function(){
     var a=(typeof rotas!=='undefined'?rotas:[]).slice(),de=$('de').value,ate=$('ate').value,pag=$('pag').value,exec=$('exec').value;
@@ -1358,7 +1358,7 @@ html.cli-escuro{filter:invert(.92) hue-rotate(180deg);background:#111}html.cli-e
     ocupado=false;
   };
   document.addEventListener('fast-mudou',function(){clearTimeout(t);t=setTimeout(cliRecarregarRotas,1200)});
-  setInterval(function(){if(!document.hidden&&Date.now()-ultimo>25000)cliRecarregarRotas()},30000);
+  setInterval(function(){if(!document.hidden&&Date.now()-ultimo>85000)cliRecarregarRotas()},90000);
   document.addEventListener('visibilitychange',function(){if(!document.hidden)setTimeout(cliRecarregarRotas,800)});
 })();
 </script>

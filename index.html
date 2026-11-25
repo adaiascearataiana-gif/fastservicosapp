@@ -285,7 +285,7 @@
   <meta name="fast-github-branch" content="main">
   <meta name="fast-github-path" content="index.html">
   <meta name="fast-github-token-env" content="GH_TOKEN">
-  <meta name="fast-app-version" content="5.4.3">
+  <meta name="fast-app-version" content="5.4.4">
   <script id="fast-version-source-of-truth">try{var __m=document.querySelector('meta[name="fast-app-version"]');if(__m)document.documentElement.setAttribute("data-fast-version",__m.content)}catch(e){}</script>
   <meta name="fast-app-date" content="2026-11-13T12:00:00-03:00">
   <meta name="fast-latest-update" content="5.3.9b: clientes e lugares não são mais apagados da nuvem automaticamente; COLAR ENDEREÇO nas ROTAS e data das rotas protegida contra virada automática para o dia atual.">
@@ -16048,7 +16048,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
               keys.forEach(function(k){
                 if (k.indexOf('fast-rotas-dia-r') === 0 || k.indexOf('fast-despesas-r') === 0 ||
                     k.indexOf('cliente-fast-r') === 0 || k.indexOf('fast-motorista-r') === 0 ||
-                    k.indexOf('fast-root-r') === 0) return;
+                    k.indexOf('fast-root-r') === 0 || k.indexOf('fast-fotos-') === 0) return;
                 caches.delete(k).catch(function(){});
               });
             }).catch(function(){});
@@ -19236,7 +19236,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
                 } catch(e) {}
                 if (window.caches) {
                   var ks = await caches.keys();
-                  await Promise.all(ks.map(function(k){return caches.delete(k)}));
+                  await Promise.all(ks.filter(function(k){return k.indexOf('fast-fotos-')!==0}).map(function(k){return caches.delete(k)}));
                 }
                 if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
                   var regs = await navigator.serviceWorker.getRegistrations();
@@ -19632,7 +19632,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
           try {
             if (window.caches) {
               var ks = await caches.keys();
-              await Promise.all(ks.map(function (k) { return caches.delete(k); }));
+              await Promise.all(ks.filter(function (k) { return k.indexOf('fast-fotos-') !== 0; }).map(function (k) { return caches.delete(k); }));
             }
             if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
               var regs = await navigator.serviceWorker.getRegistrations();
@@ -20557,7 +20557,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
         var caminho = (prefixo || 'rota') + '/' + Date.now() + '_' + Math.random().toString(36).slice(2, 10) + '.jpg';
         fetch(fastStorageBase() + '/object/' + FAST_FOTOS_BUCKET + '/' + caminho, {
           method: 'POST',
-          headers: fastStorageHeaders({ 'Content-Type': blob.type || 'image/jpeg', 'x-upsert': 'true' }),
+          headers: fastStorageHeaders({ 'Content-Type': blob.type || 'image/jpeg', 'x-upsert': 'true', 'cache-control': 'max-age=31536000' }),
           body: blob
         }).then(function (r) {
           if (!r.ok) return r.text().then(function (t) {
@@ -20582,7 +20582,7 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
         var caminho = (prefixo || 'rota') + '/' + Date.now() + '_' + Math.random().toString(36).slice(2, 10) + '.jpg';
         fetch(fastStorageBase() + '/object/' + FAST_FOTOS_BUCKET + '/' + caminho, {
           method: 'POST',
-          headers: fastStorageHeaders({ 'Content-Type': blob.type || 'image/jpeg', 'x-upsert': 'true' }),
+          headers: fastStorageHeaders({ 'Content-Type': blob.type || 'image/jpeg', 'x-upsert': 'true', 'cache-control': 'max-age=31536000' }),
           body: blob
         }).then(function (r) {
           if (!r.ok) return r.text().then(function (t) {
@@ -38591,7 +38591,7 @@ body.fast-exclusive-app main { padding-bottom: 12px !important; }
     m.addEventListener('click',function(e){if(e.target===m||e.target.closest('[data-health-close]'))m.classList.remove('fast-open');if(e.target.closest('[data-health-run]'))run();if(e.target.closest('[data-health-backup]'))backup();if(e.target.closest('[data-health-cache]'))renew();if(e.target.closest('[data-health-token]'))clearToken()});return m}
   async function run(){var m=modal(),grid=byId('fastHealthGrid'),summary=byId('fastHealthSummary');m.classList.add('fast-open');grid.innerHTML='<div class="fast-health-item">Verificando…</div>';var tests=await diagnostics(),problems=tests.filter(function(t){return !t.ok});summary.innerHTML='<p><strong>'+((problems.length===0)?'Tudo certo':'Atenção: '+problems.length+' ponto(s)')+'</strong> · '+tests.length+' verificações concluídas.</p>';grid.innerHTML=tests.map(function(t){var cls=t.ok?'fast-health-ok':(t.warn?'fast-health-warn':'fast-health-error');return '<div class="fast-health-item '+cls+'"><strong>'+(t.ok?'✓ ':'⚠ ')+t.name+'</strong><div>'+t.detail+'</div></div>'}).join('')}
   function backup(){try{var payload={app:'FAST Serviços',version:VERSION,createdAt:new Date().toISOString(),localStorage:{}};for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&!/token|secret|senha|password/i.test(k))payload.localStorage[k]=localStorage.getItem(k)}var blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),a=document.createElement('a'),url=URL.createObjectURL(blob);a.href=url;a.download='FAST_BACKUP_'+new Date().toISOString().slice(0,10)+'.json';a.click();setTimeout(function(){URL.revokeObjectURL(url)},2000);toast('Backup criado sem tokens ou senhas.','success')}catch(e){toast('Não foi possível criar o backup: '+e.message,'error')}}
-  async function renew(){if(!confirm('Renovar somente os arquivos de atualização? Seus dados, fotos e configurações não serão apagados.'))return;try{if('caches' in window){var names=await caches.keys();await Promise.all(names.map(function(n){return caches.delete(n)}))}if('serviceWorker' in navigator){var regs=await navigator.serviceWorker.getRegistrations();await Promise.all(regs.map(function(r){return r.unregister()}))}toast('Arquivos de atualização renovados. Reabra o aplicativo.','success')}catch(e){toast('Falha ao renovar: '+e.message,'error')}}
+  async function renew(){if(!confirm('Renovar somente os arquivos de atualização? Seus dados, fotos e configurações não serão apagados.'))return;try{if('caches' in window){var names=await caches.keys();await Promise.all(names.filter(function(n){return n.indexOf('fast-fotos-')!==0}).map(function(n){return caches.delete(n)}))}if('serviceWorker' in navigator){var regs=await navigator.serviceWorker.getRegistrations();await Promise.all(regs.map(function(r){return r.unregister()}))}toast('Arquivos de atualização renovados. Reabra o aplicativo.','success')}catch(e){toast('Falha ao renovar: '+e.message,'error')}}
   function clearToken(){var removed=0;for(var i=localStorage.length-1;i>=0;i--){var k=localStorage.key(i)||'';if(/gh.*token|github.*token/i.test(k)){localStorage.removeItem(k);removed++}}toast(removed?removed+' token(s) removido(s).':'Nenhum token salvo foi encontrado.',removed?'success':'info');run()}
   window.fastAbrirDiagnostico=run;
   function installEntry(){var list=byId('fastV2Commands');if(list&&!list.querySelector('[data-fast-health]')){var b=document.createElement('button');b.className='fast-v2-command ripple';b.setAttribute('data-fast-health','1');b.innerHTML='<i class="fa-solid fa-stethoscope"></i><span>Diagnóstico<small>Integridade, backup e atualização</small></span><i class="fa-solid fa-arrow-right"></i>';b.onclick=function(){var p=byId('fastV2Palette');if(p)p.classList.remove('open','active');run()};list.appendChild(b)}}
@@ -43914,7 +43914,7 @@ html body #modalEditarRota .modal-content{margin:0 auto!important;top:auto!impor
   html body #containerSequencia .seq-item .seq-body .seq-info-wa{align-self:flex-start!important;max-width:max-content!important}
 }
 </style>
-<script src="fast-4067.js?v=48"></script>
+<script src="fast-4067.js?v=49"></script>
 <script src="navegacao-fast.js?v=1"></script>
 <script src="recibo-fast.js?v=1"></script>
 <script src="fast-recursos.js?v=46"></script>
@@ -46986,7 +46986,7 @@ body.fx-apk .fx-gal-ajuda{display:flex}
   })();
   setInterval(function(){subir()},8000);
   W.__f538LugPuxar=function(){setTimeout(function(){puxar(true)},400)};
-  setInterval(function(){puxar(false)},20000)   /* 5.3.8: economia de dados (antes 5 s) */;           // 5.3.8: a cada 5 s (consulta mínima quando nada mudou)
+  setInterval(function(){puxar(false)},60000)   /* 5.4.4: economia de dados (antes 20 s) */;           // 5.3.8: a cada 5 s (consulta mínima quando nada mudou)
   document.addEventListener('visibilitychange',function(){
     if(document.hidden)subir();                            // saindo do app: sobe o que falta
     else puxar(true);                                      // voltando: busca o que mudou

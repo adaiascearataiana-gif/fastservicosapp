@@ -36,7 +36,35 @@
   var VERSAO = 'v35';
   function versaoApp() { try { return (document.querySelector('meta[name="fast-app-version"]') || {}).content || VERSAO; } catch (e) { return VERSAO; } }
   var DIAG = W.__f68Diag = { erro: '', erroEm: 0, envio: 0, baixou: 0 };
-  function falha(txt) { DIAG.erro = String(txt).slice(0, 160); DIAG.erroEm = Date.now(); try { painel(true); } catch (e) {} }
+  function falha(txt) { DIAG.erro = String(txt).slice(0, 160); DIAG.erroEm = Date.now(); if (/HTTP 402/.test(DIAG.erro)) DIAG.bloqueado = Date.now(); try { painel(true); } catch (e) {} }
+  // 5.4.4: HTTP 402 = o Supabase bloqueou o projeto (cota grátis do mês acabou). Enquanto isso,
+  // o app tenta só a cada 5 min (cada tentativa recusada também gasta cota de registros).
+  function bloqueado() { return !!(DIAG.bloqueado && Date.now() - DIAG.bloqueado < 300000); }
+  W.fastBancoBloqueado = function () { return bloqueado(); };
+  // Durante o bloqueio, os pedidos ao banco nem saem do aparelho (resposta 402 na hora);
+  // só 1 "sonda" por minuto vai até o Supabase — quando ela passar, tudo volta sozinho na hora.
+  (function () {
+    var orig = W.fetch, ultSonda = 0;
+    if (!orig || orig.__f544) return;
+    var novo = function (input, init) {
+      var u = typeof input === 'string' ? input : (input && input.url) || '';
+      if (!/\.supabase\.co\//.test(u) || u.indexOf('/storage/v1/object/public/') >= 0) return orig.apply(this, arguments);
+      if (bloqueado()) {
+        if (Date.now() - ultSonda < 60000)
+          return Promise.resolve(new Response('{"message":"Banco bloqueado pelo Supabase (cota do mês) — aguardando liberar"}', { status: 402, headers: { 'Content-Type': 'application/json' } }));
+        ultSonda = Date.now();
+      }
+      return orig.apply(this, arguments).then(function (r) {
+        try {
+          if (r.status === 402) DIAG.bloqueado = Date.now();
+          else if (r.ok && DIAG.bloqueado) { DIAG.bloqueado = 0; if (DIAG.login === 'bloqueado') DIAG.login = ''; if (DIAG.erro && /402/.test(DIAG.erro)) DIAG.erro = ''; }
+        } catch (e) {}
+        return r;
+      });
+    };
+    novo.__f544 = true;
+    W.fetch = novo;
+  })();
   var PAGINA = 1000;
   var LOTE_ENVIO = 150;
   var LOTE_DEL = 50;
@@ -56,6 +84,7 @@
     if (!s || !s.refresh_token) { DIAG.login = 'sem-sessao'; return Promise.resolve(false); }
     if (!forcar && token() && s.expires_at && s.expires_at - Date.now() > 5 * 60000) return Promise.resolve(true);
     if (renovando) return renovando;
+    if (bloqueado()) return Promise.resolve(!!token());
     renovando = (async function () {
       try {
         var base = String(SUPABASE_URL).replace(/\/rest\/v1\/?$/, '');
@@ -64,6 +93,7 @@
           body: JSON.stringify({ refresh_token: s.refresh_token })
         });
         var d = {}; try { d = await r.json(); } catch (e) {}
+        if (r.status === 402) { DIAG.bloqueado = Date.now(); DIAG.login = 'bloqueado'; return false; }
         if (!r.ok || !d.access_token) { DIAG.login = 'recusado'; return false; }
         var atual = sessao() || {};
         atual.access_token = d.access_token;
@@ -984,7 +1014,7 @@
   setInterval(function () {
     if (!pendenteDesde) return;
     if ((W.__f67UltimoEnvio || 0) >= pendenteDesde) { pendenteDesde = 0; return; }
-    if (!navigator.onLine || rodando) return;
+    if (!navigator.onLine || rodando || bloqueado()) return;
     if (Date.now() - pendenteDesde < 8000 || Date.now() - ultimaTentativa < 8000) return;
     ultimaTentativa = Date.now();
     sincronizar(false);
@@ -1108,6 +1138,7 @@
         method: 'GET', cache: 'no-store', headers: supabaseHeaders({ 'Prefer': 'count=exact' })
       });
       if (r.status === 401) { renovarLogin(true); return null; }
+      if (r.status === 402) { DIAG.bloqueado = Date.now(); return null; }
       if (!r.ok) { falha('Verificação recusada pelo banco (HTTP ' + r.status + ')'); return null; }
       var j = await r.json();
       return (r.headers.get('content-range') || '') + '|' + (j[0] ? j[0].updated_at : '');
@@ -1121,6 +1152,7 @@
         method: 'GET', cache: 'no-store', headers: supabaseHeaders({ 'Prefer': 'count=exact' })
       });
       if (r.status === 401) { renovarLogin(true); return null; }
+      if (r.status === 402) { DIAG.bloqueado = Date.now(); return null; }
       if (!r.ok) { falha('Verificação recusada pelo banco (HTTP ' + r.status + ')'); return null; }
       var j = await r.json(), n = parseInt(((r.headers.get('content-range') || '').split('/')[1]), 10);
       var c = CACHE[t]; if (!c || !c.rows) return true;
@@ -1134,7 +1166,8 @@
   async function checar(forcar) {
     if (checando || document.hidden || !navigator.onLine || !pronto()) return;
     // com tempo real ativo, a verificação vira só reserva (a cada 15 s)
-    if (!forcar && Date.now() - ultimaChecagem < (rtConectado() ? 30000 : 6000)) return;   // 5.3.9q: sem tempo real confere a cada 6 s (só a data da última mudança — poucos bytes); com tempo real, 30 s de reserva
+    if (!forcar && Date.now() - ultimaChecagem < (rtConectado() ? 120000 : 30000)) return;   // 5.4.4: economia — com tempo real só reserva a cada 2 min; sem, a cada 30 s
+    if (bloqueado() && !forcar) return;   // 5.3.9q: sem tempo real confere a cada 6 s (só a data da última mudança — poucos bytes); com tempo real, 30 s de reserva
     if (!token()) { await renovarLogin(true); }
     if (!token()) {
       if (!avisouSemLogin) {
@@ -2190,10 +2223,12 @@
     var tk = !!token(), rt = rtConectado();
     var linhas = [
       '<b>FAST ' + versaoApp() + ' · Sincronização</b> — toque para fechar',
+      (bloqueado() || DIAG.login === 'bloqueado') ? '<span style="color:#fde68a">⛔ <b>Banco bloqueado pelo Supabase</b>: a cota grátis do mês acabou (HTTP 402). Não é o seu login. Não saia do app — o que for lançado fica guardado aqui e sobe sozinho quando liberar (novo mês ou plano pago).</span>' : '',
       (tk ? '✅' : '❌') + ' Login no banco: ' + (tk ? 'sim' :
         (DIAG.login === 'sem-sessao' ? 'NÃO — entre NESTE app com e-mail e senha' :
+         (DIAG.login === 'bloqueado' || bloqueado()) ? 'BLOQUEADO pelo Supabase — a cota grátis do mês acabou (HTTP 402). NÃO saia do app: os dados ficam guardados aqui e sobem quando liberar' :
          DIAG.login === 'recusado' ? 'NÃO — login venceu; saia e entre de novo com e-mail e senha' : 'renovando…')),
-      (rt ? '✅' : '⚠️') + ' Tempo real: ' + (rt ? 'conectado' : 'desconectado (conferindo a cada 20 s)'),
+      (rt ? '✅' : '⚠️') + ' Tempo real: ' + (rt ? 'conectado' : 'desconectado (conferindo a cada 30 s)'),
       '⬆️ Último envio: ' + hora(DIAG.envio) + ' · ⬇️ Última leitura: ' + hora(DIAG.baixou),
       (driveToken() ? '✅' : '📷') + ' Google Drive (fotos): ' + (driveToken() ? 'conectado' : (DRV.estado || 'verificando…')) +
         (DRV.pend >= 0 ? ' · ' + DRV.pend + ' foto(s) na fila' : '')
@@ -2214,10 +2249,10 @@
     linhas.push((mb > 4.2 ? '⚠️' : '💾') + ' Espaço do app no aparelho: ' + mb.toFixed(1).replace('.', ',') + ' MB de ~5 MB' + (DIAG.espacoLiberado ? ' (liberados ' + (DIAG.espacoLiberado / 1048576).toFixed(1).replace('.', ',') + ' MB)' : ''));
     try { var pe = pendentesEnvio(); linhas.push(pe.total ? '<span style="color:#fca5a5">⏳ Ainda não subiram: ' + pe.r + ' rota(s), ' + pe.s + ' item(ns) das Rotas do Dia, ' + pe.d + ' despesa(s)</span>' : '✅ Tudo deste aparelho já está na nuvem'); } catch (e) {}
     if (DIAG.erro) linhas.push('<span style="color:#fca5a5">⛔ ' + DIAG.erro.replace(/[<>&]/g, '') + '</span>');
-    document.getElementById('f68DiagTxt').innerHTML = linhas.join('<br>');
+    document.getElementById('f68DiagTxt').innerHTML = linhas.filter(Boolean).join('<br>');
     // 5.3.8 (fase 1): erros que antes ficavam escondidos
     try { var be = document.getElementById('f538Erros'); if (!be) { be = document.createElement('div'); be.id = 'f538Erros'; el.appendChild(be); } if (typeof W.fastErrosRender === 'function') W.fastErrosRender(be); } catch (e) {}
-    formLogin(!tk && (DIAG.login === 'sem-sessao' || DIAG.login === 'recusado'));
+    formLogin(!tk && !bloqueado() && DIAG.login !== 'bloqueado' && (DIAG.login === 'sem-sessao' || DIAG.login === 'recusado'));
     el.style.background = DIAG.erro || !tk ? 'rgba(127,29,29,.95)' : 'rgba(17,24,39,.94)';
     if (mostrar) {
       mostrarPainel(el);
@@ -2307,6 +2342,7 @@
   var PEND = { desde: 0, tentou: 0, ult: null };
   function motivoPendente() {
     if (!navigator.onLine) return 'o aparelho está sem internet';
+    if (bloqueado() || DIAG.login === 'bloqueado') return 'o banco (Supabase) está bloqueado porque a cota grátis do mês acabou — tudo fica guardado aqui e sobe quando liberar';
     if (!token()) return DIAG.login === 'recusado' ? 'o login deste app venceu — toque aqui e entre de novo' : 'este app está sem login no banco — toque aqui e entre';
     if (DIAG.erro) return DIAG.erro.replace(/[<>&]/g, '').slice(0, 140);
     return 'enviando…';
@@ -2343,7 +2379,7 @@
     if (Date.now() - PEND.desde < 20000) return;
     faixaPendente(p);
     // tenta de novo sozinho a cada 20 s enquanto houver algo preso
-    if (!rodando && navigator.onLine && Date.now() - PEND.tentou > 20000) {
+    if (!rodando && navigator.onLine && !bloqueado() && Date.now() - PEND.tentou > 20000) {
       PEND.tentou = Date.now();
       (token() ? Promise.resolve(true) : renovarLogin(true)).then(function (ok) { if (token()) { forcarPesada = true; sincronizar(false); } });
     }
