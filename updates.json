@@ -1,7 +1,12 @@
 {
-  "version": "5.4.1",
+  "version": "5.4.2",
   "releasedAt": "2026-10-14T10:00:00-03:00",
   "updates": [
+    {
+      "app": "fast",
+      "type": "melhorado",
+      "text": "5.4.2 (25/11/2026): ícones novos (versão 2) — FAST, Rotas, Despesas, Cliente e Motorista — no login de cada app, no ícone do Android (sem cortes em nenhum formato) e do iPhone, na Central de Downloads e nas telas de instalação. APKs 5.4.2 com os ícones novos."
+    },
     {
       "app": "fast",
       "type": "melhorado",

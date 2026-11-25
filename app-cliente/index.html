@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="fast-app-version" content="5.4.1">
+<meta name="fast-app-version" content="5.4.2">
 <meta name="theme-color" content="#16a34a">
 <title>Cliente FAST — Histórico</title>
-<link rel="manifest" href="manifest.webmanifest?v=541">
-<link rel="icon" type="image/png" sizes="192x192" href="../assets/icone-cliente-192.png?v=541">
-<link rel="apple-touch-icon" sizes="192x192" href="../assets/icone-cliente-192.png?v=541">
+<link rel="manifest" href="manifest.webmanifest?v=542">
+<link rel="icon" type="image/png" sizes="192x192" href="../assets/icone-cliente-192.png?v=542">
+<link rel="apple-touch-icon" sizes="180x180" href="../assets/icone-cliente-ios-180.png?v=542">
 <style>
 :root{--green:#16a34a;--green2:#15803d;--bg:#f1f5f9;--card:#fff;--text:#0f172a;--muted:#64748b;--border:#e2e8f0;--red:#dc2626;--yellow:#d97706}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--text)}
@@ -47,7 +47,7 @@ main{padding:14px 12px 90px}
 </style>
 </head>
 <body>
-<div id="gate" class="gate"><div class="login"><div class="gate-arte"><img src="../assets/cartao-cliente-1024.png?v=541" alt="Cliente FAST"></div><h1>Cliente FAST</h1><p>Acesse para consultar seu cadastro, histórico de rotas e resumo financeiro.</p><div class="field"><label>E-mail</label><input id="email" type="email" autocomplete="email" placeholder="seuemail@exemplo.com"></div><div class="field"><label>Senha</label><input id="password" type="password" autocomplete="current-password" placeholder="Sua senha"></div><label id="manterBox" style="display:flex;align-items:center;gap:8px;margin:2px 0 12px;font-weight:600;font-size:14px;cursor:pointer"><input type="checkbox" id="manterConectado" checked style="width:18px;height:18px"> Manter conectado neste aparelho</label>
+<div id="gate" class="gate"><div class="login"><div class="gate-arte"><img src="../assets/cartao-cliente-1024.png?v=542" alt="Cliente FAST"></div><h1>Cliente FAST</h1><p>Acesse para consultar seu cadastro, histórico de rotas e resumo financeiro.</p><div class="field"><label>E-mail</label><input id="email" type="email" autocomplete="email" placeholder="seuemail@exemplo.com"></div><div class="field"><label>Senha</label><input id="password" type="password" autocomplete="current-password" placeholder="Sua senha"></div><label id="manterBox" style="display:flex;align-items:center;gap:8px;margin:2px 0 12px;font-weight:600;font-size:14px;cursor:pointer"><input type="checkbox" id="manterConectado" checked style="width:18px;height:18px"> Manter conectado neste aparelho</label>
 <button class="btn primary" id="loginBtn" onclick="login()">Entrar</button><div id="loginErr" class="error"></div>
 <div id="cadOk" style="display:none;margin-top:10px;padding:10px;border-radius:12px;background:#dcfce7;color:#166534;font-weight:700;font-size:14px"></div>
 <button type="button" class="btn secondary" id="cadAbrir" style="margin-top:10px" onclick="cliCadAbrir(true)">Não tem conta? Criar minha conta</button>
