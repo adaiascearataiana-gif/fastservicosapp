@@ -119,7 +119,7 @@ public class MainActivity extends Activity {
         settings.setBuiltInZoomControls(false);
         settings.setDisplayZoomControls(false);
         settings.setTextZoom(100);
-        settings.setUserAgentString(settings.getUserAgentString() + " FASTAndroid/5.3.7");
+        settings.setUserAgentString(settings.getUserAgentString() + " FASTAndroid/5.4.1");
         CookieManager.getInstance().setAcceptCookie(true);
         CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
         webView.addJavascriptInterface(new VoiceBridge(), "FASTVoice");
