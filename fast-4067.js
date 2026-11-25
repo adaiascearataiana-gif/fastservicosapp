@@ -521,7 +521,9 @@
       if (N) linhas.forEach(function (l) { N.r[String(l.id)] = hs[String(l.id)]; });
     }
     var base = lerBase();
-    await limparNuvem('rotas', setStr(locais.map(function (r) { return r.id; })), setStr(bancoDados.rotasExcluidas), base && base.r, null, null, 'r');
+    // 5.3.9t: rota só sai da nuvem com LÁPIDE (alguém apagou de verdade). Antes, uma rota que
+    // sumisse só deste aparelho (cópia local incompleta) era apagada da nuvem para todos.
+    await limparNuvem('rotas', setStr(locais.map(function (r) { return r.id; })), setStr(bancoDados.rotasExcluidas), null, null, null, 'r');
   }
   async function syncDespesas() {
     if (arrumarLista(bancoDados.despesas, false)) gravarLocal();
@@ -2210,11 +2212,12 @@
     if (DRV.pend > 0 && DRV.erroFoto) linhas.push('<span style="color:#fde68a">📷 Erro da foto: ' + DRV.erroFoto.replace(/[<>&]/g, '').slice(0, 160) + '</span>');
     var mb = usoLocal() / 1048576;
     linhas.push((mb > 4.2 ? '⚠️' : '💾') + ' Espaço do app no aparelho: ' + mb.toFixed(1).replace('.', ',') + ' MB de ~5 MB' + (DIAG.espacoLiberado ? ' (liberados ' + (DIAG.espacoLiberado / 1048576).toFixed(1).replace('.', ',') + ' MB)' : ''));
+    try { var pe = pendentesEnvio(); linhas.push(pe.total ? '<span style="color:#fca5a5">⏳ Ainda não subiram: ' + pe.r + ' rota(s), ' + pe.s + ' item(ns) das Rotas do Dia, ' + pe.d + ' despesa(s)</span>' : '✅ Tudo deste aparelho já está na nuvem'); } catch (e) {}
     if (DIAG.erro) linhas.push('<span style="color:#fca5a5">⛔ ' + DIAG.erro.replace(/[<>&]/g, '') + '</span>');
     document.getElementById('f68DiagTxt').innerHTML = linhas.join('<br>');
     // 5.3.8 (fase 1): erros que antes ficavam escondidos
     try { var be = document.getElementById('f538Erros'); if (!be) { be = document.createElement('div'); be.id = 'f538Erros'; el.appendChild(be); } if (typeof W.fastErrosRender === 'function') W.fastErrosRender(be); } catch (e) {}
-    formLogin(!tk && DIAG.login === 'sem-sessao');
+    formLogin(!tk && (DIAG.login === 'sem-sessao' || DIAG.login === 'recusado'));
     el.style.background = DIAG.erro || !tk ? 'rgba(127,29,29,.95)' : 'rgba(17,24,39,.94)';
     if (mostrar) {
       mostrarPainel(el);
@@ -2279,6 +2282,72 @@
     try { if (el.hidePopover) { if (el.matches(':popover-open')) el.hidePopover(); return; } } catch (e) {}
     el.style.display = 'none';
   }
+  /* 5.3.9t — NADA FICA PRESO NO APARELHO
+     Conta o que foi lançado AQUI e ainda não chegou na nuvem. Se ficar preso por mais de
+     20 s, mostra uma faixa no topo com a quantidade e o motivo, tenta de novo sozinho a
+     cada 20 s e tem o botão "Enviar agora". Some sozinha quando tudo subir. */
+  function pendentesEnvio() {
+    var out = { r: 0, s: 0, d: 0 };
+    try {
+      var b = lerBase() || { r: {}, d: {}, s: {} };
+      var lr = setStr(bancoDados.rotasExcluidas), ld = setStr(bancoDados.despesasExcluidas), ls = setStr(bancoDados.seqItensExcluidos);
+      var falta = function (k, id) {
+        id = String(id);
+        if (N && N[k] && N[k][id] !== undefined) return false;   // já está na nuvem
+        return !(b[k] && b[k][id] !== undefined);                 // nunca chegou na nuvem
+      };
+      (bancoDados.rotas || []).forEach(function (r) { if (r && r.id != null && !lr.has(String(r.id)) && falta('r', r.id)) out.r++; });
+      (bancoDados.despesas || []).forEach(function (d) { if (d && d.id != null && !ld.has(String(d.id)) && falta('d', d.id)) out.d++; });
+      linhasSeq().forEach(function (l) { if (l && l.id != null && !ls.has(String(l.id)) && falta('s', l.id)) out.s++; });
+    } catch (e) {}
+    out.total = out.r + out.s + out.d;
+    return out;
+  }
+  W.fastPendentesEnvio = pendentesEnvio;
+  var PEND = { desde: 0, tentou: 0, ult: null };
+  function motivoPendente() {
+    if (!navigator.onLine) return 'o aparelho está sem internet';
+    if (!token()) return DIAG.login === 'recusado' ? 'o login deste app venceu — toque aqui e entre de novo' : 'este app está sem login no banco — toque aqui e entre';
+    if (DIAG.erro) return DIAG.erro.replace(/[<>&]/g, '').slice(0, 140);
+    return 'enviando…';
+  }
+  function faixaPendente(p) {
+    var el = document.getElementById('f539tPend');
+    if (!p || !p.total) { if (el) el.remove(); return; }
+    if (!document.body) return;
+    if (!el) {
+      el = document.createElement('div'); el.id = 'f539tPend'; el.setAttribute('role', 'alert');
+      el.style.cssText = 'position:fixed;left:8px;right:8px;top:calc(8px + env(safe-area-inset-top,0px));z-index:2147483001;max-width:560px;margin:0 auto;padding:10px 12px;border-radius:12px;background:#b91c1c;color:#fff;font:600 14px/1.35 system-ui,sans-serif;box-shadow:0 6px 24px rgba(0,0,0,.35);display:flex;gap:10px;align-items:center';
+      el.innerHTML = '<div id="f539tTxt" style="flex:1;cursor:pointer"></div><button id="f539tBtn" type="button" style="flex:none;min-height:40px;padding:0 12px;border:0;border-radius:10px;background:#fff;color:#b91c1c;font-weight:800">Enviar agora</button>';
+      document.body.appendChild(el);
+      el.querySelector('#f539tTxt').addEventListener('click', function () { try { painel(true); } catch (e) {} });
+      el.querySelector('#f539tBtn').addEventListener('click', function () {
+        var t = el.querySelector('#f539tBtn'); t.textContent = 'Enviando…';
+        PEND.tentou = Date.now();
+        (token() ? Promise.resolve(true) : renovarLogin(true)).then(function () { forcarPesada = true; sincronizar(false); });
+        setTimeout(function () { try { t.textContent = 'Enviar agora'; } catch (e) {} }, 4000);
+        if (!token()) { try { painel(true); } catch (e) {} }
+      });
+    }
+    var partes = [];
+    if (p.r) partes.push(p.r + ' rota(s)');
+    if (p.s) partes.push(p.s + ' item(ns) das Rotas do Dia');
+    if (p.d) partes.push(p.d + ' despesa(s)');
+    el.querySelector('#f539tTxt').textContent = '⚠️ ' + partes.join(', ') + ' deste aparelho ainda não subiram para a nuvem. Motivo: ' + motivoPendente() + '. Não apague os dados do app.';
+  }
+  setInterval(function () {
+    if (!pronto()) return;
+    var p = pendentesEnvio(); PEND.ult = p;
+    if (!p.total) { PEND.desde = 0; faixaPendente(null); return; }
+    if (!PEND.desde) PEND.desde = Date.now();
+    if (Date.now() - PEND.desde < 20000) return;
+    faixaPendente(p);
+    // tenta de novo sozinho a cada 20 s enquanto houver algo preso
+    if (!rodando && navigator.onLine && Date.now() - PEND.tentou > 20000) {
+      PEND.tentou = Date.now();
+      (token() ? Promise.resolve(true) : renovarLogin(true)).then(function (ok) { if (token()) { forcarPesada = true; sincronizar(false); } });
+    }
+  }, 5000);
   W.fastDiagnosticoSync = function () { painel(true); };
   setInterval(function () { try { var el = document.getElementById('f68Diag'); if (el && painelAberto(el)) painel(false); } catch (e) {} }, 2000);
   // abre sozinho só quando há algo a resolver (sem login, erro, ou fotos presas sem Drive);

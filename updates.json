@@ -5,6 +5,11 @@
     {
       "app": "fast",
       "type": "correcao",
+      "text": "5.3.9t (24/11/2026): nada fica preso no aparelho — se alguma rota, item das Rotas do Dia ou despesa lançada num aparelho não subir para a nuvem (login vencido, sem internet, recusa do banco), aparece uma faixa vermelha no topo com a quantidade e o motivo, o app tenta de novo sozinho a cada 20 s e tem o botão \"Enviar agora\". Rota só sai da nuvem quando alguém apaga de verdade. Painel de Sincronização mostra o que ainda não subiu e deixa entrar de novo quando o login vence."
+    },
+    {
+      "app": "fast",
+      "type": "correcao",
       "text": "5.3.9s (24/11/2026): cliente e lugar apagados não voltam mais — na nuvem havia cópias repetidas (mesmo nome, outro código) e só uma saía; agora todas as cópias com aquele nome são apagadas. Trava no aparelho: cliente, lugar, motorista ou funcionário apagado não reaparece por sincronização. Cadastrar de novo o mesmo nome continua funcionando."
     },
     {
