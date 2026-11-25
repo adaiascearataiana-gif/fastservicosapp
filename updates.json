@@ -1,7 +1,12 @@
 {
-  "version": "5.4.2",
+  "version": "5.4.3",
   "releasedAt": "2026-10-14T10:00:00-03:00",
   "updates": [
+    {
+      "app": "fast",
+      "type": "correcao",
+      "text": "5.4.3 (25/11/2026): o FAST no celular também se atualiza sozinho ao voltar para ele (antes só mostrava o aviso). Nova página de socorro atualizar.html: limpa as cópias velhas do app no aparelho (sem apagar dados) e abre a versão publicada."
+    },
     {
       "app": "fast",
       "type": "melhorado",

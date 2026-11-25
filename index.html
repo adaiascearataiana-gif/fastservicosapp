@@ -285,7 +285,7 @@
   <meta name="fast-github-branch" content="main">
   <meta name="fast-github-path" content="index.html">
   <meta name="fast-github-token-env" content="GH_TOKEN">
-  <meta name="fast-app-version" content="5.4.2">
+  <meta name="fast-app-version" content="5.4.3">
   <script id="fast-version-source-of-truth">try{var __m=document.querySelector('meta[name="fast-app-version"]');if(__m)document.documentElement.setAttribute("data-fast-version",__m.content)}catch(e){}</script>
   <meta name="fast-app-date" content="2026-11-13T12:00:00-03:00">
   <meta name="fast-latest-update" content="5.3.9b: clientes e lugares não são mais apagados da nuvem automaticamente; COLAR ENDEREÇO nas ROTAS e data das rotas protegida contra virada automática para o dia atual.">
@@ -19403,6 +19403,19 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
               try { if (typeof mostrarToast === 'function') mostrarToast('Nova versão ' + versaoOnline + ' encontrada. Atualizando Windows/Linux agora…', 'info'); } catch(e){}
               fastExecutarAtualizacao(urlDeploy);
               return { atualizado: true, versaoLocal, versaoOnline, urlDeploy, auto: true, desktopWeb: true };
+            }
+            // 5.4.3: ao VOLTAR para o app (ou a cada 10 min) o celular também atualiza sozinho,
+            // com trava: no máximo 2 tentativas por versão a cada 10 min (evita ciclo).
+            if (window.__fastAtualizarDireto) {
+              var chaveTent = 'fast543_tent_' + versaoOnline, tent = [];
+              try { tent = JSON.parse(localStorage.getItem(chaveTent) || '[]').filter(function(t){ return Date.now() - t < 600000; }); } catch(e){}
+              if (tent.length < 2) {
+                tent.push(Date.now());
+                try { localStorage.setItem(chaveTent, JSON.stringify(tent)); } catch(e){}
+                try { if (typeof mostrarToast === 'function') mostrarToast('Atualizando para a versão ' + versaoOnline + '…', 'info'); } catch(e){}
+                fastExecutarAtualizacao(urlDeploy);
+                return { atualizado: true, versaoLocal, versaoOnline, urlDeploy, auto: true, celular: true };
+              }
             }
             // MOBILE: mantem o balao "Nova versão disponível" atual
             try {
@@ -49399,7 +49412,7 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
     if(!forcar&&Date.now()-ult<INTERVALO)return;
     if(ocupado())return;
     ult=Date.now();
-    try{if(typeof W.fastVerificarAtualizacao==='function')W.fastVerificarAtualizacao(true)}catch(e){}
+    try{if(typeof W.fastVerificarAtualizacao==='function'){W.__fastAtualizarDireto=true;Promise.resolve(W.fastVerificarAtualizacao(true)).then(function(){W.__fastAtualizarDireto=false},function(){W.__fastAtualizarDireto=false})}}catch(e){W.__fastAtualizarDireto=false}
   }
   W.fastConferirVersaoAgora=function(){ult=0;conferir(true)};
   var saiuEm=0;
