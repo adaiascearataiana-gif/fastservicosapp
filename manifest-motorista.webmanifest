@@ -11,9 +11,35 @@
   "background_color": "#374151",
   "theme_color": "#374151",
   "lang": "pt-BR",
-  "categories": ["business", "productivity", "navigation"],
+  "categories": [
+    "business",
+    "productivity",
+    "navigation"
+  ],
   "icons": [
-    {"src":"assets/app-motorista-192.png?v=r4010","sizes":"192x192","type":"image/png","purpose":"any"},
-    {"src":"assets/app-motorista-512.png?v=r4010","sizes":"512x512","type":"image/png","purpose":"any maskable"}
+    {
+      "src": "assets/icone-motorista-192.png?v=541",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icone-motorista-512.png?v=541",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icone-motorista-maskable-192.png?v=541",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "assets/icone-motorista-maskable-512.png?v=541",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ]
 }
