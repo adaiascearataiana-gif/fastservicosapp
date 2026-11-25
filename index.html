@@ -149,6 +149,8 @@
         var tipo=st===401?'login':(st===404||st===416)?'aviso':(alvo==='drive'?'drive':'sync');
         try{r.clone().text().then(function(t){
           if(st===404&&/PGRST202|PGRST205/.test(t)) return;
+          // 5.3.9t: foto que já não existe no Drive (apagada): o app já para de tentar — não é erro
+          if(alvo==='drive'&&st===404&&/notFound|File not found/.test(t)) return;
           // coluna que falta numa tabela opcional: o app já tenta de novo sem ela — só aviso
           if(st===400&&/PGRST204|42703/.test(t)) tipo='aviso';
           registrar(tipo,(alvo==='banco'?'Banco':'Drive')+' recusou '+met+' '+caminho+' (HTTP '+st+')',t);
@@ -45377,11 +45379,11 @@ body.fx-apk .fx-gal-ajuda{display:flex}
     var m=/salvarFotoRota\('([^']+)',\s*(\d+)/.exec(oc);
     return m?{data:m[1],idx:parseInt(m[2],10)}:null;
   }
-  // 1 foto por vez, com um campo criado na hora do toque (alguns seletores nativos só aceitam o modo simples)
+  // campo criado na hora do toque; 5.3.9t: VÁRIAS fotos de uma vez (segure uma e toque nas outras)
   function escolherUma(card){
     var alvo=parseAlvo(card);if(!alvo)return;
     var inp=document.createElement('input');
-    inp.type='file';inp.accept='image/*';
+    inp.type='file';inp.accept='image/*';inp.multiple=true;
     inp.style.cssText='position:fixed;left:-9999px;top:0;width:1px;height:1px;opacity:0';
     document.body.appendChild(inp);
     marcarToque(true);
@@ -45408,7 +45410,7 @@ body.fx-apk .fx-gal-ajuda{display:flex}
      jeito do antigo botão laranja "Galeria (1 foto)" (o que funciona). O botão laranja sai. */
   function escolherGenerico(orig){
     var inp=document.createElement('input');
-    inp.type='file';inp.accept=orig.getAttribute('accept')||'image/*';
+    inp.type='file';inp.accept=orig.getAttribute('accept')||'image/*';if(orig.multiple)inp.multiple=true;
     inp.style.cssText='position:fixed;left:-9999px;top:0;width:1px;height:1px;opacity:0';
     document.body.appendChild(inp);
     marcarToque(true);

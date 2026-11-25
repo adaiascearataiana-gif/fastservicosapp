@@ -4,6 +4,11 @@
   "updates": [
     {
       "app": "fast",
+      "type": "melhorado",
+      "text": "5.3.9t (24/11/2026): no ROTAS, o botão Galeria deixa escolher VÁRIAS fotos de uma vez também no aplicativo — segure uma foto e toque nas outras."
+    },
+    {
+      "app": "fast",
       "type": "correcao",
       "text": "5.3.9t (24/11/2026): nada fica preso no aparelho — se alguma rota, item das Rotas do Dia ou despesa lançada num aparelho não subir para a nuvem (login vencido, sem internet, recusa do banco), aparece uma faixa vermelha no topo com a quantidade e o motivo, o app tenta de novo sozinho a cada 20 s e tem o botão \"Enviar agora\". Rota só sai da nuvem quando alguém apaga de verdade. Painel de Sincronização mostra o que ainda não subiu e deixa entrar de novo quando o login vence."
     },
