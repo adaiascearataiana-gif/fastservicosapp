@@ -285,7 +285,7 @@
   <meta name="fast-github-branch" content="main">
   <meta name="fast-github-path" content="index.html">
   <meta name="fast-github-token-env" content="GH_TOKEN">
-  <meta name="fast-app-version" content="5.3.9">
+  <meta name="fast-app-version" content="5.4.0">
   <script id="fast-version-source-of-truth">try{var __m=document.querySelector('meta[name="fast-app-version"]');if(__m)document.documentElement.setAttribute("data-fast-version",__m.content)}catch(e){}</script>
   <meta name="fast-app-date" content="2026-11-13T12:00:00-03:00">
   <meta name="fast-latest-update" content="5.3.9b: clientes e lugares não são mais apagados da nuvem automaticamente; COLAR ENDEREÇO nas ROTAS e data das rotas protegida contra virada automática para o dia atual.">
@@ -19245,7 +19245,17 @@ CREATE POLICY "biometria_del" ON biometria FOR DELETE USING (auth.role() = 'auth
                   try { navigator.serviceWorker.controller.postMessage({type:'SKIP_WAITING'}); } catch(e) {}
                 }
                 var finalSep = urlDeploy.indexOf('?') >= 0 ? '&' : '?';
-                window.location.replace(urlDeploy + finalSep + 'v=' + encodeURIComponent(versaoConfirmada) + '&fast_fresh=' + Date.now());
+                var destinoAtualizado = urlDeploy + finalSep + 'v=' + encodeURIComponent(versaoConfirmada) + '&fast_fresh=' + Date.now();
+                // 5.4.0: no mesmo site, recarrega ESTA tela (ROTAS, Despesas…) mantendo o modo do app
+                try {
+                  var lu = new URL(location.href), du = new URL(urlDeploy, location.href);
+                  if (lu.origin === du.origin) {
+                    ['v', 'fast_fresh', 'fast_install', 'fast_check'].forEach(function(k){ lu.searchParams.delete(k); });
+                    lu.searchParams.set('v', versaoConfirmada); lu.searchParams.set('fast_fresh', String(Date.now()));
+                    destinoAtualizado = lu.toString();
+                  }
+                } catch(eU) {}
+                window.location.replace(destinoAtualizado);
               } catch (e) {
                 if (prog) prog.style.display = 'none';
                 if (bar) bar.style.width = '0%';
@@ -49355,6 +49365,40 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
   }
   function instalar(){segurar('renderizarSequencia','containerSequencia');segurar('renderizar','tabelaRotas')}
   instalar();setInterval(instalar,3000);
+})();
+</script>
+<script id="fast540-versao-ao-voltar">
+/* 5.4.0 — ATUALIZAÇÃO CHEGA EM TODOS OS APPS (PWA)
+   No celular o app instalado não recarrega ao voltar para ele: ficava na versão velha até
+   ser fechado de vez. Agora confere a versão publicada ao VOLTAR para o app e a cada 10 min
+   (ROTAS e Despesas atualizam sozinhos; o FAST mostra "Nova versão"). Não confere logo
+   depois de abrir galeria/câmera nem com campo sendo digitado, para não perder nada. */
+(function(){
+  var W=window,D=document,ult=0,INTERVALO=10*60000;
+  function ocupado(){
+    try{
+      var g=W.__fxGaleria;if(g&&g.ultimoToque&&Date.now()-g.ultimoToque<180000)return true;
+      var a=D.activeElement;if(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)&&a.type!=='button')return true;
+      if(D.querySelector('video[autoplay],.camera-ao-vivo.ativa,#fastCameraAoVivo:not([hidden])'))return true;
+    }catch(e){}
+    return false;
+  }
+  function conferir(forcar){
+    if(D.hidden||!navigator.onLine)return;
+    if(!forcar&&Date.now()-ult<INTERVALO)return;
+    if(ocupado())return;
+    ult=Date.now();
+    try{if(typeof W.fastVerificarAtualizacao==='function')W.fastVerificarAtualizacao(true)}catch(e){}
+  }
+  W.fastConferirVersaoAgora=function(){ult=0;conferir(true)};
+  var saiuEm=0;
+  D.addEventListener('visibilitychange',function(){
+    if(D.hidden){saiuEm=Date.now();return}
+    // voltou depois de pelo menos 20 s fora: confere (com folga para a tela assentar)
+    if(saiuEm&&Date.now()-saiuEm>20000)setTimeout(function(){conferir(true)},4000);
+  });
+  setInterval(function(){conferir(false)},60000);
+  setTimeout(function(){ult=Date.now()},3000); // a abertura já confere sozinha
 })();
 </script>
 <script id="fast539e-dia-certo">

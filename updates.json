@@ -1,7 +1,12 @@
 {
-  "version": "5.3.8",
+  "version": "5.4.0",
   "releasedAt": "2026-10-14T10:00:00-03:00",
   "updates": [
+    {
+      "app": "fast",
+      "type": "correcao",
+      "text": "5.4.0 (24/11/2026): as atualizações chegam em todos os apps instalados (ROTAS, Despesas, FAST no celular). O app confere a versão publicada ao voltar para ele e a cada 10 minutos; ROTAS e Despesas atualizam sozinhos (sem perder a tela em que estavam) e o FAST mostra \"Nova versão\". Não confere logo depois de abrir a galeria ou a câmera."
+    },
     {
       "app": "fast",
       "type": "melhorado",
