@@ -1,7 +1,17 @@
 {
-  "version": "5.4.7",
+  "version": "5.4.9",
   "releasedAt": "2026-10-14T10:00:00-03:00",
   "updates": [
+    {
+      "app": "fast",
+      "type": "melhorado",
+      "text": "5.4.9 (26/11/2026): a conferência \"mudou alguma coisa?\" virou UMA pergunta ao banco em vez de três (função fast_mudancas) — cerca de 40% menos pedidos com o app aberto, sem perder velocidade. Se a função ainda não existir no banco, o app usa o jeito antigo."
+    },
+    {
+      "app": "fast",
+      "type": "correcao",
+      "text": "5.4.8 (26/11/2026): sincronização rápida de novo — rotas, Rotas do Dia, despesas e fotos de outro aparelho chegam em segundos (a conferência de reserva tinha ficado a cada 2 min na economia de dados; agora é a cada 15 s com tempo real e 6 s sem, só com a data da última mudança). Nas abas Rotas e Despesas do FAST, botão para baixar o app Rotas do Dia e o app Despesas."
+    },
     {
       "app": "fast",
       "type": "correcao",

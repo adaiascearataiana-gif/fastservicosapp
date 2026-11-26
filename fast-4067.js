@@ -1146,7 +1146,33 @@
     if (partes.indexOf(null) >= 0) return null;
     return partes.join('#');
   }
+  // 5.4.9: UMA pergunta ao banco em vez de três (função fast_mudancas no Supabase).
+  // Se a função ainda não existir no banco, usa o jeito antigo (3 perguntas).
+  var rpcMud = null;   // null = não testado; false = não existe
+  function compara(t, max, n) {
+    var c = CACHE[t]; if (!c || !c.rows) return true;
+    if (max && quando(max) > (c.wm || 0)) return true;
+    if (n != null && !isNaN(n) && Number(n) !== Object.keys(c.rows).length) return true;
+    return false;
+  }
   async function precisaBaixar() {
+    if (rpcMud !== false) {
+      try {
+        var r0 = await fetch(SUPABASE_URL + '/rpc/fast_mudancas', { method: 'POST', cache: 'no-store', headers: supabaseHeaders({ 'Content-Type': 'application/json' }), body: '{}' });
+        if (r0.status === 404) { rpcMud = false; }
+        else if (r0.status === 401) { renovarLogin(true); return null; }
+        else if (r0.status === 402) { DIAG.bloqueado = Date.now(); return null; }
+        else if (r0.ok) {
+          rpcMud = true;
+          var j0 = await r0.json();
+          return TABS_RT.some(function (t) { var x = j0 && j0[t]; return !x || compara(t, x.max, x.n); });
+        }
+      } catch (e) { if (rpcMud === null) rpcMud = false; }
+      if (rpcMud === true) return null;
+    }
+    return precisaBaixar3();
+  }
+  async function precisaBaixar3() {
     var res = await Promise.all(TABS_RT.map(async function (t) {
       var r = await fetch(SUPABASE_URL + '/' + t + '?select=updated_at&order=updated_at.desc.nullslast&limit=1', {
         method: 'GET', cache: 'no-store', headers: supabaseHeaders({ 'Prefer': 'count=exact' })
@@ -1166,7 +1192,9 @@
   async function checar(forcar) {
     if (checando || document.hidden || !navigator.onLine || !pronto()) return;
     // com tempo real ativo, a verificação vira só reserva (a cada 15 s)
-    if (!forcar && Date.now() - ultimaChecagem < (rtConectado() ? 120000 : 30000)) return;   // 5.4.4: economia — com tempo real só reserva a cada 2 min; sem, a cada 30 s
+    // 5.4.8: rota/despesa/foto de outro aparelho tem que chegar logo. A conferência é só a data da última
+    // mudança de cada tabela (3 pedidos de poucos bytes); com tempo real, a cada 15 s; sem, a cada 6 s.
+    if (!forcar && Date.now() - ultimaChecagem < (rtConectado() ? 15000 : 6000)) return;
     if (bloqueado() && !forcar) return;   // 5.3.9q: sem tempo real confere a cada 6 s (só a data da última mudança — poucos bytes); com tempo real, 30 s de reserva
     if (!token()) { await renovarLogin(true); }
     if (!token()) {
@@ -2228,7 +2256,7 @@
         (DIAG.login === 'sem-sessao' ? 'NÃO — entre NESTE app com e-mail e senha' :
          (DIAG.login === 'bloqueado' || bloqueado()) ? 'BLOQUEADO pelo Supabase — a cota grátis do mês acabou (HTTP 402). NÃO saia do app: os dados ficam guardados aqui e sobem quando liberar' :
          DIAG.login === 'recusado' ? 'NÃO — login venceu; saia e entre de novo com e-mail e senha' : 'renovando…')),
-      (rt ? '✅' : '⚠️') + ' Tempo real: ' + (rt ? 'conectado' : 'desconectado (conferindo a cada 30 s)'),
+      (rt ? '✅' : '⚠️') + ' Tempo real: ' + (rt ? 'conectado' : 'desconectado (conferindo a cada 6 s)'),
       '⬆️ Último envio: ' + hora(DIAG.envio) + ' · ⬇️ Última leitura: ' + hora(DIAG.baixou),
       (driveToken() ? '✅' : '📷') + ' Google Drive (fotos): ' + (driveToken() ? 'conectado' : (DRV.estado || 'verificando…')) +
         (DRV.pend >= 0 ? ' · ' + DRV.pend + ' foto(s) na fila' : '')

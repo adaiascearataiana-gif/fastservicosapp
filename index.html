@@ -285,7 +285,7 @@
   <meta name="fast-github-branch" content="main">
   <meta name="fast-github-path" content="index.html">
   <meta name="fast-github-token-env" content="GH_TOKEN">
-  <meta name="fast-app-version" content="5.4.7">
+  <meta name="fast-app-version" content="5.4.9">
   <script id="fast-version-source-of-truth">try{var __m=document.querySelector('meta[name="fast-app-version"]');if(__m)document.documentElement.setAttribute("data-fast-version",__m.content)}catch(e){}</script>
   <meta name="fast-app-date" content="2026-11-13T12:00:00-03:00">
   <meta name="fast-latest-update" content="5.3.9b: clientes e lugares não são mais apagados da nuvem automaticamente; COLAR ENDEREÇO nas ROTAS e data das rotas protegida contra virada automática para o dia atual.">
@@ -8302,6 +8302,7 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
 
     <!-- ABA 1: ROTAS -->
     <div id="rotas" class="tab-content">
+      <div class="card no-print fast548-app-card" data-fast548="rotas" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-left:4px solid #1d4ed8"><img src="assets/icone-rotas-192.png?v=542" alt="" width="48" height="48" style="width:48px;height:48px;border-radius:12px;flex:none"><div style="flex:1;min-width:0"><b>App Rotas do Dia</b><div style="font-size:13px;opacity:.75">Para os celulares que lançam e acompanham as rotas</div></div><button type="button" class="btn-success ripple" onclick="fastBaixarAndroid('rotas')" style="white-space:nowrap"><i class="fa-solid fa-download"></i> Baixar app</button></div>
       <div class="card">
         <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
           <span><i class="fa-solid fa-plus"></i> Nova Rota</span>
@@ -8987,6 +8988,7 @@ body.fast-edition-mobile .fast-v2-launcher, body.fast-touch-ui .fast-v2-launcher
 
     <!-- ABA 6: DESPESAS -->
     <div id="despesas" class="tab-content"><!-- (r135) Botão Instalar Despesas movido para a CENTRAL DE DOWNLOADS nas Configurações -->
+      <div class="card no-print fast548-app-card" data-fast548="despesas" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-left:4px solid #b91c1c"><img src="assets/icone-despesas-192.png?v=542" alt="" width="48" height="48" style="width:48px;height:48px;border-radius:12px;flex:none"><div style="flex:1;min-width:0"><b>App Despesas</b><div style="font-size:13px;opacity:.75">Para lançar as despesas pelo celular</div></div><button type="button" class="btn-success ripple" onclick="fastBaixarAndroid('despesas')" style="white-space:nowrap"><i class="fa-solid fa-download"></i> Baixar app</button></div>
       <div id="fastExpenseDashboard" class="card no-print">
         <div class="fed-head">
           <div><span class="fed-eyebrow">VISÃO FINANCEIRA</span><h3><i class="fa-solid fa-chart-pie"></i> Dashboard de Despesas</h3><p>Acompanhe somente os gastos registrados nesta seção.</p></div>
@@ -43914,7 +43916,7 @@ html body #modalEditarRota .modal-content{margin:0 auto!important;top:auto!impor
   html body #containerSequencia .seq-item .seq-body .seq-info-wa{align-self:flex-start!important;max-width:max-content!important}
 }
 </style>
-<script src="fast-4067.js?v=49"></script>
+<script src="fast-4067.js?v=51"></script>
 <script src="navegacao-fast.js?v=1"></script>
 <script src="recibo-fast.js?v=1"></script>
 <script src="fast-recursos.js?v=48"></script>
@@ -49384,6 +49386,7 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
   instalar();setInterval(instalar,3000);
 })();
 </script>
+<style id="fast548-app-card">html.fast-exclusive-app .fast548-app-card,body.fast-exclusive-app .fast548-app-card{display:none!important}</style>
 <style id="fast541-icones">
 #fastLoginGate .fast-gate-logo{background:transparent!important;border-radius:22px!important;box-shadow:0 14px 34px rgba(0,0,0,.30)!important}
 #fastLoginGate .fast-gate-logo img{object-fit:contain!important;padding:0!important}
