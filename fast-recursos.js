@@ -73,6 +73,7 @@
     '.frx-btn.sec{background:transparent;color:inherit;border:1px solid var(--border,#cbd5e1)}',
     '.frx-btn.ok{background:#16a34a}.frx-btn.wa{background:#22c55e;color:#052e16}.frx-btn.pq{padding:7px 10px;min-height:36px;font-size:13px}',
     '.frx-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:12px}',
+    '.frx-kpi-btn{display:block;width:100%;text-align:left;font:inherit;color:inherit;background:transparent;cursor:pointer;transition:border-color .15s,box-shadow .15s}.frx-kpi-btn:hover,.frx-kpi-btn:focus-visible{border-color:#dc2626!important;box-shadow:0 0 0 3px rgba(220,38,38,.12);outline:none}.frx-kpi-btn:active{transform:scale(.99)}',
     '.frx-kpi{border:1px solid var(--border,#e2e8f0);border-radius:14px;padding:10px 12px}.frx-kpi small{display:block;font-size:11px;font-weight:700;opacity:.7;text-transform:uppercase}.frx-kpi b{font-size:17px}',
     // tabela de preços: compacta, tudo centralizado e a coluna Destino do tamanho do maior nome
     '.frx-precos{display:table!important;width:auto!important;min-width:100%;table-layout:auto!important;margin:0 auto!important}' +
@@ -305,6 +306,49 @@
       { txt: '📲 Enviar acompanhamento', cls: 'sec', fn: function () { abrirWhats(telefoneDe(nome), 'Olá ' + nome + '! Acompanhe suas entregas e o histórico com a FAST pelo app: ' + LINK_CLIENTE); } }];
     if (pend.length) bts.push({ txt: '💬 Cobrar ' + moeda(pen), cls: 'wa', fn: function () { abrirWhats(telefoneDe(nome), textoCobranca(nome, pend)); } });
     janela('👤 ' + nome, html, bts);
+  };
+
+  /* 5.4.5 — "A receber (total)" virou botão: mostra TODAS as rotas pendentes (as mesmas que
+     entram na soma do card), agrupadas por cliente, com o total de cada um. Tocar numa rota abre
+     a rota para editar/marcar como recebida. */
+  W.fastPendentesReceber = function () {
+    var grupos = {}, total = 0, qtd = 0;
+    rotas().forEach(function (r) {
+      if (pago(r)) return;
+      var v = Number(r.valor) || 0; total += v; qtd++;
+      var nome = String(r.cliente || '').trim() || 'Sem cliente';
+      var k = norm(nome) || 'sem cliente';
+      var g = grupos[k] || (grupos[k] = { nome: nome, total: 0, rotas: [] });
+      g.total += v; g.rotas.push(r);
+    });
+    var lista = Object.keys(grupos).map(function (k) { return grupos[k]; }).sort(function (a, b) { return b.total - a.total; });
+    lista.forEach(function (g) { g.rotas.sort(function (a, b) { return String(a.data || '').localeCompare(String(b.data || '')); }); });
+    var ref = [];
+    var html = '<div class="frx-kpis"><div class="frx-kpi"><small>A receber</small><b style="color:#dc2626">' + moeda(total) + '</b></div>' +
+      '<div class="frx-kpi"><small>Rotas pendentes</small><b>' + qtd + '</b></div><div class="frx-kpi"><small>Clientes</small><b>' + lista.length + '</b></div></div>' +
+      (lista.map(function (g, gi) {
+        return '<div style="border:1px solid var(--border,#e2e8f0);border-radius:14px;margin:0 0 10px;overflow:hidden">' +
+          '<div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:rgba(220,38,38,.06)"><div style="flex:1;min-width:0"><b>' + esc(g.nome) + '</b><div class="frx-muted">' + g.rotas.length + ' rota(s) · desde ' + dataBR(g.rotas[0].data) + '</div></div>' +
+          '<b style="color:#dc2626;white-space:nowrap">' + moeda(g.total) + '</b>' +
+          (g.nome !== 'Sem cliente' && telefoneDe(g.nome) ? '<button type="button" class="frx-btn wa pq" data-pcob="' + gi + '">💬 Cobrar</button>' : '') + '</div>' +
+          g.rotas.map(function (r) {
+            var i = ref.push(r) - 1;
+            return '<div data-prota="' + i + '" style="display:flex;gap:10px;align-items:center;padding:9px 12px;border-top:1px solid var(--border,#e2e8f0);cursor:pointer">' +
+              '<div style="width:52px;flex:none;font-weight:700">' + esc(dataBR(r.data).slice(0, 5)) + '</div>' +
+              '<div style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc((r.origem || '—') + ' → ' + (r.destino || '—')) + (r.status ? ' <span class="frx-pill">' + esc(r.status) + '</span>' : '') + '</div>' +
+              '<div style="white-space:nowrap;font-weight:700">' + moeda(r.valor) + '</div></div>';
+          }).join('') + '</div>';
+      }).join('') || '<p class="frx-muted">Nenhum valor pendente. 🎉</p>');
+    var j = janela('💰 Pendentes a receber', html, [
+      { txt: 'Fechar', cls: 'sec', fn: function (f) { f(); } },
+      { txt: '💬 Cobrança (WhatsApp + PIX)', cls: 'wa', fn: function (f) { f(); W.fastCobranca(); } }
+    ]);
+    j.corpo.addEventListener('click', function (e) {
+      var c = e.target.closest('[data-pcob]');
+      if (c) { var g = lista[+c.getAttribute('data-pcob')]; abrirWhats(telefoneDe(g.nome), textoCobranca(g.nome, g.rotas)); return; }
+      var l = e.target.closest('[data-prota]');
+      if (l) { var r = ref[+l.getAttribute('data-prota')]; j.fechar(); try { if (typeof abrirModalEditarRota === 'function') abrirModalEditarRota(String(r.id)); } catch (er) {} }
+    });
   };
 
   W.fastCobranca = function () {
@@ -703,7 +747,7 @@
     var varc = fa ? Math.round((fm - fa) / fa * 100) : 0;
     return '<div class="frx-kpis" style="margin-bottom:10px">' +
       '<div class="frx-kpi"><small>Faturamento do mês</small><b>' + moeda(fm) + '</b>' + (fa ? '<div class="frx-muted">' + (varc >= 0 ? '▲ ' : '▼ ') + Math.abs(varc) + '% vs mês passado</div>' : '') + '</div>' +
-      '<div class="frx-kpi"><small>A receber (total)</small><b style="color:#dc2626">' + moeda(rec) + '</b></div>' +
+      '<button type="button" class="frx-kpi frx-kpi-btn" data-a="pend" title="Ver as rotas pendentes"><small>A receber (total)</small><b style="color:#dc2626">' + moeda(rec) + '</b><div class="frx-muted">toque para ver ›</div></button>' +
       '<div class="frx-kpi"><small>Rotas hoje</small><b>' + hj + '</b></div>' +
       '<div class="frx-kpi"><small>Top clientes do mês</small><b style="font-size:13px">' + (top.map(esc).join('<br>') || '—') + '</b></div></div>';
   }
@@ -739,6 +783,7 @@
     var b = e.target.closest && e.target.closest('#frxTools [data-a]'); if (!b) return;
     var a = b.getAttribute('data-a');
     if (a === 'busca') W.fastBuscaCompleta();
+    if (a === 'pend') W.fastPendentesReceber();
     if (a === 'conf') W.fastConferirRotas();
     if (a === 'sup') W.fastCentralSuporte();
     if (a === 'diag' && W.fastDiagnosticoSync) W.fastDiagnosticoSync();

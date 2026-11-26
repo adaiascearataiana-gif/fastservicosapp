@@ -1,7 +1,12 @@
 {
-  "version": "5.4.4",
+  "version": "5.4.5",
   "releasedAt": "2026-10-14T10:00:00-03:00",
   "updates": [
+    {
+      "app": "fast",
+      "type": "melhorado",
+      "text": "5.4.5 (26/11/2026): no Centro de Operações, o card \"A receber (total)\" virou botão — mostra todas as rotas pendentes, separadas por cliente, com o total de cada um; tocar numa rota abre para editar ou marcar como recebida, e tem atalho para cobrar pelo WhatsApp."
+    },
     {
       "app": "fast",
       "type": "correcao",
