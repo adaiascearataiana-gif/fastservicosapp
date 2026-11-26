@@ -1,7 +1,17 @@
 {
-  "version": "5.4.5",
+  "version": "5.4.7",
   "releasedAt": "2026-10-14T10:00:00-03:00",
   "updates": [
+    {
+      "app": "fast",
+      "type": "correcao",
+      "text": "5.4.7 (26/11/2026): tela firme — enquanto o dedo está na tela ou ela está rolando, os redesenhos esperam e acontecem uma vez só quando para; redesenhos seguidos (ex.: etapas do envio de foto) viram um só e mantêm a tela onde estava; ajustes de posição deixaram de ser animados; a foto é preparada sem congelar a tela."
+    },
+    {
+      "app": "fast",
+      "type": "melhorado",
+      "text": "5.4.6 (26/11/2026): na lista \"Pendentes a receber\", botão \"✅ Recebeu tudo\" em cada cliente (quita todas as rotas dele de uma vez) e botão ✅ em cada rota. Pergunta a forma de pagamento (PIX, Dinheiro, Cartão, Transferência), atualiza as Rotas do Dia, envia na hora para os outros aparelhos e tem \"Desfazer\"."
+    },
     {
       "app": "fast",
       "type": "melhorado",

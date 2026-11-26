@@ -311,7 +311,101 @@
   /* 5.4.5 — "A receber (total)" virou botão: mostra TODAS as rotas pendentes (as mesmas que
      entram na soma do card), agrupadas por cliente, com o total de cada um. Tocar numa rota abre
      a rota para editar/marcar como recebida. */
-  W.fastPendentesReceber = function () {
+  /* 5.4.6 — RECEBER PAGAMENTO direto na lista de pendentes (uma rota ou tudo do cliente).
+     Faz o mesmo que tocar no selo "Pendente" da rota: marca Recebido, atualiza as Rotas do Dia,
+     salva e envia na hora para os outros aparelhos. Tem "Desfazer" por alguns segundos. */
+  function marcarRecebido(ids, forma) {
+    var agora = new Date().toISOString(), antes = [], set = {};
+    ids.forEach(function (i) { set[String(i)] = 1; });
+    (bd().rotas || []).forEach(function (r) {
+      if (!r || !set[String(r.id)] || pago(r)) return;
+      antes.push({ id: String(r.id), status: r.status, pagamento: r.pagamento, dataPagamento: r.dataPagamento });
+      r.status = 'Recebido'; if (forma) r.pagamento = forma; else if (!r.pagamento) r.pagamento = 'PIX';
+      r.dataPagamento = agora; r.updatedAt = agora;
+    });
+    acertarSeq(antes.map(function (a) { return a.id; }), 'Recebido');
+    gravar();
+    var quer = {}; antes.forEach(function (a) { quer[a.id] = { status: 'Recebido', pagamento: forma || null }; });
+    garantir(quer);
+    return antes;
+  }
+  /* uma sincronização que já estava em andamento pode trazer de volta o estado de segundos atrás;
+     por 30 s, se isso acontecer, o que a pessoa escolheu é aplicado de novo (e sobe com carimbo novo). */
+  var GARANTIR = {}, tGarantir = 0;
+  function garantir(quer) {
+    var ate = Date.now() + 30000;
+    Object.keys(quer).forEach(function (k) { GARANTIR[k] = { st: quer[k].status, pg: quer[k].pagamento, ate: ate }; });
+    if (tGarantir) return;
+    tGarantir = setInterval(function () {
+      var agora = Date.now(), mudou = [], vivos = 0;
+      (bd().rotas || []).forEach(function (r) {
+        var g = r && GARANTIR[String(r.id)]; if (!g) return;
+        if (agora > g.ate) { delete GARANTIR[String(r.id)]; return; }
+        vivos++;
+        if (String(r.status || '') !== g.st) { r.status = g.st; if (g.pg) r.pagamento = g.pg; r.updatedAt = new Date().toISOString(); mudou.push(String(r.id)); }
+      });
+      if (mudou.length) { acertarSeq(mudou, null, (function () { var m = {}; mudou.forEach(function (k) { m[k] = { status: GARANTIR[k].st }; }); return m; })()); try { salvarStorage(); } catch (e) {} try { if (typeof renderizar === 'function') renderizar(); } catch (e) {} }
+      if (!vivos && !Object.keys(GARANTIR).length) { clearInterval(tGarantir); tGarantir = 0; }
+    }, 400);
+  }
+  function desfazerRecebido(antes) {
+    var agora = new Date().toISOString(), mapa = {};
+    antes.forEach(function (a) { mapa[a.id] = a; });
+    (bd().rotas || []).forEach(function (r) {
+      var a = r && mapa[String(r.id)]; if (!a) return;
+      r.status = a.status || 'Pendente'; r.pagamento = a.pagamento; r.dataPagamento = a.dataPagamento; r.updatedAt = agora;
+    });
+    acertarSeq(Object.keys(mapa), null, mapa);
+    gravar();
+    var quer = {}; Object.keys(mapa).forEach(function (k) { quer[k] = { status: mapa[k].status || 'Pendente', pagamento: mapa[k].pagamento || null }; });
+    garantir(quer);
+  }
+  function acertarSeq(ids, st, mapa) {
+    var set = {}; ids.forEach(function (i) { set[String(i)] = 1; });
+    var seq = bd().sequencias || {};
+    Object.keys(seq).forEach(function (d) { (seq[d] || []).forEach(function (it) {
+      if (it && it.rotaId != null && set[String(it.rotaId)]) it.statusPagamento = st || ((mapa[String(it.rotaId)] || {}).status || 'Pendente');
+    }); });
+  }
+  function gravar() {
+    try { salvarStorage(); } catch (e) {}
+    try { if (typeof renderizar === 'function') renderizar(); } catch (e) {}
+    try { if (typeof renderizarSequencia === 'function') renderizarSequencia(); } catch (e) {}
+    try { if (typeof sincronizarAgora === 'function') sincronizarAgora(); } catch (e) {}
+    try { if (typeof atualizarAppBadge === 'function') atualizarAppBadge(); } catch (e) {}
+    try { painelFerramentas(); } catch (e) {}
+  }
+  function avisoDesfazer(msg, antes, depois) {
+    var t = document.getElementById('frxDesfazer'); if (t) t.remove();
+    t = document.createElement('div'); t.id = 'frxDesfazer'; t.setAttribute('role', 'status');
+    t.style.cssText = 'position:fixed;left:12px;right:12px;bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:2147483002;max-width:520px;margin:0 auto;display:flex;gap:10px;align-items:center;padding:12px 14px;border-radius:14px;background:#14532d;color:#fff;font:600 14px/1.3 system-ui,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.35)';
+    t.innerHTML = '<div style="flex:1"></div><button type="button" style="flex:none;min-height:40px;padding:0 14px;border:0;border-radius:10px;background:#fff;color:#14532d;font-weight:800">Desfazer</button>';
+    t.firstChild.textContent = msg;
+    t.querySelector('button').onclick = function () { t.remove(); desfazerRecebido(antes); aviso('Recebimento desfeito — voltou para Pendente.', 'info'); if (depois) depois(); };
+    document.body.appendChild(t);
+    setTimeout(function () { try { t.remove(); } catch (e) {} }, 9000);
+  }
+  // pergunta a forma de pagamento e confirma
+  function confirmarRecebimento(titulo, rs, depois) {
+    var tot = rs.reduce(function (a, r) { return a + (Number(r.valor) || 0); }, 0);
+    var formaAtual = (rs[0] && rs[0].pagamento) || 'PIX';
+    var formas = ['PIX', 'Dinheiro', 'Cartão', 'Transferência'];
+    var html = '<p style="margin:0 0 10px"><b>' + esc(titulo) + '</b><br><span class="frx-muted">' + rs.length + ' rota(s) · </span><b style="color:#15803d">' + moeda(tot) + '</b></p>' +
+      '<p class="frx-muted" style="margin:0 0 8px">Como foi pago?</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">' +
+      formas.map(function (f) { return '<button type="button" class="frx-btn ' + (f === formaAtual ? 'wa' : 'sec') + '" data-forma="' + esc(f) + '" style="min-height:48px">' + esc(f) + '</button>'; }).join('') + '</div>';
+    var j = janela('✅ Confirmar recebimento', html, [{ txt: 'Cancelar', cls: 'sec', fn: function (f) { f(); } }]);
+    j.corpo.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-forma]'); if (!b) return;
+      var forma = b.getAttribute('data-forma');
+      var antes = marcarRecebido(rs.map(function (r) { return r.id; }), forma);
+      j.fechar();
+      if (typeof notifEnviar === 'function') try { notifEnviar('Pagamento Recebido', titulo + ' — ' + moeda(tot) + ' (' + forma + ')'); } catch (er) {}
+      avisoDesfazer('✅ Recebido: ' + moeda(tot) + ' (' + forma + ')', antes, depois);
+      if (depois) depois();
+    });
+  }
+
+  W.fastPendentesReceber = function (rolar) {
     var grupos = {}, total = 0, qtd = 0;
     rotas().forEach(function (r) {
       if (pago(r)) return;
@@ -330,20 +424,29 @@
         return '<div style="border:1px solid var(--border,#e2e8f0);border-radius:14px;margin:0 0 10px;overflow:hidden">' +
           '<div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:rgba(220,38,38,.06)"><div style="flex:1;min-width:0"><b>' + esc(g.nome) + '</b><div class="frx-muted">' + g.rotas.length + ' rota(s) · desde ' + dataBR(g.rotas[0].data) + '</div></div>' +
           '<b style="color:#dc2626;white-space:nowrap">' + moeda(g.total) + '</b>' +
+          '</div><div style="display:flex;gap:8px;flex-wrap:wrap;padding:0 12px 10px;background:rgba(220,38,38,.06)">' +
+          '<button type="button" class="frx-btn pq" data-prec="' + gi + '" style="background:#15803d;color:#fff;border-color:#15803d">✅ Recebeu tudo (' + moeda(g.total) + ')</button>' +
           (g.nome !== 'Sem cliente' && telefoneDe(g.nome) ? '<button type="button" class="frx-btn wa pq" data-pcob="' + gi + '">💬 Cobrar</button>' : '') + '</div>' +
           g.rotas.map(function (r) {
             var i = ref.push(r) - 1;
             return '<div data-prota="' + i + '" style="display:flex;gap:10px;align-items:center;padding:9px 12px;border-top:1px solid var(--border,#e2e8f0);cursor:pointer">' +
               '<div style="width:52px;flex:none;font-weight:700">' + esc(dataBR(r.data).slice(0, 5)) + '</div>' +
               '<div style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc((r.origem || '—') + ' → ' + (r.destino || '—')) + (r.status ? ' <span class="frx-pill">' + esc(r.status) + '</span>' : '') + '</div>' +
-              '<div style="white-space:nowrap;font-weight:700">' + moeda(r.valor) + '</div></div>';
+              '<div style="white-space:nowrap;font-weight:700">' + moeda(r.valor) + '</div>' +
+              '<button type="button" data-precr="' + i + '" title="Marcar esta rota como recebida" aria-label="Recebido" style="flex:none;min-width:44px;min-height:40px;border-radius:10px;border:1px solid #15803d;background:#f0fdf4;color:#15803d;font-weight:800;cursor:pointer">✅</button></div>';
           }).join('') + '</div>';
       }).join('') || '<p class="frx-muted">Nenhum valor pendente. 🎉</p>');
     var j = janela('💰 Pendentes a receber', html, [
       { txt: 'Fechar', cls: 'sec', fn: function (f) { f(); } },
       { txt: '💬 Cobrança (WhatsApp + PIX)', cls: 'wa', fn: function (f) { f(); W.fastCobranca(); } }
     ]);
+    function reabrir() { var y = j.corpo.scrollTop; j.fechar(); W.fastPendentesReceber(y); }
+    if (rolar) setTimeout(function () { j.corpo.scrollTop = rolar; }, 0);
     j.corpo.addEventListener('click', function (e) {
+      var rc = e.target.closest('[data-prec]');
+      if (rc) { var gg = lista[+rc.getAttribute('data-prec')]; confirmarRecebimento(gg.nome, gg.rotas.slice(), reabrir); return; }
+      var rr = e.target.closest('[data-precr]');
+      if (rr) { var ro = ref[+rr.getAttribute('data-precr')]; confirmarRecebimento((ro.cliente || 'Sem cliente') + ' · ' + dataBR(ro.data), [ro], reabrir); return; }
       var c = e.target.closest('[data-pcob]');
       if (c) { var g = lista[+c.getAttribute('data-pcob')]; abrirWhats(telefoneDe(g.nome), textoCobranca(g.nome, g.rotas)); return; }
       var l = e.target.closest('[data-prota]');

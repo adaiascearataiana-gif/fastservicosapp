@@ -285,7 +285,7 @@
   <meta name="fast-github-branch" content="main">
   <meta name="fast-github-path" content="index.html">
   <meta name="fast-github-token-env" content="GH_TOKEN">
-  <meta name="fast-app-version" content="5.4.5">
+  <meta name="fast-app-version" content="5.4.7">
   <script id="fast-version-source-of-truth">try{var __m=document.querySelector('meta[name="fast-app-version"]');if(__m)document.documentElement.setAttribute("data-fast-version",__m.content)}catch(e){}</script>
   <meta name="fast-app-date" content="2026-11-13T12:00:00-03:00">
   <meta name="fast-latest-update" content="5.3.9b: clientes e lugares não são mais apagados da nuvem automaticamente; COLAR ENDEREÇO nas ROTAS e data das rotas protegida contra virada automática para o dia atual.">
@@ -43917,7 +43917,7 @@ html body #modalEditarRota .modal-content{margin:0 auto!important;top:auto!impor
 <script src="fast-4067.js?v=49"></script>
 <script src="navegacao-fast.js?v=1"></script>
 <script src="recibo-fast.js?v=1"></script>
-<script src="fast-recursos.js?v=47"></script>
+<script src="fast-recursos.js?v=48"></script>
 <script src="fast-endereco.js?v=5.3.9"></script>
 <!-- (r108) Painel de diagnostico de fotos na nuvem -->
 <style id="fast108-diag-css">
@@ -45578,7 +45578,10 @@ body.fx-apk .fx-gal-ajuda{display:flex}
         var cv=document.createElement('canvas');cv.width=w;cv.height=h;
         var ctx=cv.getContext('2d');if(!ctx)throw new Error('canvas indisponível');
         src.draw(ctx,w,h);
-        var data=cv.toDataURL('image/jpeg',passos[k][1]);
+        // 5.4.7: a codificação do JPEG sai da linha principal (toBlob) — a tela não congela ao subir foto
+        var data=null;
+        if(cv.toBlob){try{var bl=await new Promise(function(ok){cv.toBlob(ok,'image/jpeg',passos[k][1])});if(bl&&bl.size>100)data=await lerDataUrl(bl)}catch(eB){data=null}}
+        if(!data)data=cv.toDataURL('image/jpeg',passos[k][1]);
         cv.width=cv.height=0;src.close();
         if(!data||data.length<200||data==='data:,')throw new Error('canvas devolveu imagem vazia');
         log('foto ok','via '+src.via+' '+w+'x'+h+' '+Math.round(data.length/1024)+'KB');
@@ -49821,6 +49824,78 @@ header.top-nav,.top-nav,.card,.pro-date-chip,.pro-health-card,.scroll-nav-btn,.f
   }
   function instalar(){['removerCliente','cliExcluirSelecionados'].forEach(embrulhar);['destExcluir','destExcluirSelecionados'].forEach(embrulharLug)}
   instalar();setInterval(instalar,3000);
+})();
+</script>
+<script id="fast546-tela-firme">
+/* 5.4.7 — TELA FIRME
+   A tela pulava, tremia e "subia e descia" porque a lista era redesenhada inteira no meio da
+   rolagem (quando chega sincronização, foto enviada, contadores…), e cada ajuste de posição
+   ainda vinha ANIMADO (rolagem suave). Agora:
+   - enquanto o dedo está na tela ou ela está rolando, os redesenhos esperam e acontecem
+     uma vez só quando a tela para;
+   - redesenhos seguidos (ex.: várias etapas do envio de foto) viram um só;
+   - redesenhos que não foram pedidos por um toque seu mantêm a tela exatamente onde estava;
+   - ajustes de posição deixam de ser animados. */
+(function(){
+  var W=window,D=document;
+  var st=D.createElement('style');
+  st.textContent='body.fast-pro main,html,body,main{scroll-behavior:auto!important}';
+  (D.head||D.documentElement).appendChild(st);
+  var NOMES=['renderizar','renderizarSequencia','renderizarClientes','renderizarMotoristas','renderizarDespesasEmp','renderizarRh','renderizarQuickActions','renderizarRelatorioSequencia'];
+  var ultAcao=0;
+  ['click','keydown','change','submit'].forEach(function(n){D.addEventListener(n,function(){ultAcao=Date.now()},true)});
+  function rolando(){try{return !!(W.fastRolando&&W.fastRolando())}catch(e){return false}}
+  function scroller(){var m=D.querySelector('main');if(m&&m.scrollHeight>m.clientHeight+2&&getComputedStyle(m).overflowY!=='visible')return m;return null}
+  function chave(el){
+    for(var i=0;el&&i<10&&el!==D.body;i++,el=el.parentElement){
+      var a=['data-id','data-rota-id','data-item-id','data-seq-id','data-id-rota','data-cli-nome'];
+      for(var j=0;j<a.length;j++){var v=el.getAttribute&&el.getAttribute(a[j]);if(v)return '['+a[j]+'="'+String(v).replace(/"/g,'\\"')+'"]'}
+      if(el.id&&!/^(main|app|content|central|rotas|rotasDia|despesas|clientes)$/i.test(el.id))return '#'+(W.CSS&&CSS.escape?CSS.escape(el.id):el.id);
+    }
+    return null;
+  }
+  function capturar(){
+    var sc=scroller(),r=sc?sc.getBoundingClientRect():{top:0,left:0,width:innerWidth,height:innerHeight};
+    var x=r.left+r.width/2,y=r.top+Math.min(140,r.height*0.3),el=null;
+    try{el=D.elementFromPoint(x,y)}catch(e){}
+    var sel=el?chave(el):null,y0=0;
+    if(sel){try{var e2=D.querySelector(sel);if(e2)y0=e2.getBoundingClientRect().top;else sel=null}catch(e){sel=null}}
+    return {sc:sc,top:sc?sc.scrollTop:0,win:W.scrollY,sel:sel,y0:y0};
+  }
+  function restaurar(c){
+    try{
+      if(c.sc){if(c.sc.scrollTop!==c.top)c.sc.scrollTop=c.top}else if(W.scrollY!==c.win)W.scrollTo(0,c.win);
+      if(c.sel){var e=D.querySelector(c.sel);if(e){var d=e.getBoundingClientRect().top-c.y0;if(Math.abs(d)>1&&Math.abs(d)<5000){if(c.sc)c.sc.scrollTop+=d;else W.scrollBy(0,d)}}}
+    }catch(e){}
+  }
+  function embrulhar(nome){
+    var f=W[nome];if(typeof f!=='function'||f.__f546)return false;
+    var pend=null,tTrail=0,ult=0,tEsp=0;
+    function rodar(self,args){
+      ult=Date.now();
+      var fixar=Date.now()-ultAcao>1200;   // redesenho que não veio de um toque seu
+      var c=fixar?capturar():null;
+      try{return f.apply(self,args)}finally{if(c){restaurar(c);requestAnimationFrame(function(){restaurar(c)})}}
+    }
+    function esperarParar(){
+      if(tEsp)return;
+      (function v(){if(rolando()){tEsp=setTimeout(v,150);return}tEsp=0;if(pend){var p=pend;pend=null;rodar(p.s,p.a)}})();
+    }
+    var g=function(){
+      var args=arguments,self=this;
+      if(Date.now()-ultAcao<400&&!rolando())return rodar(self,args);   // resposta a um toque: na hora
+      if(rolando()){pend={s:self,a:args};esperarParar();return}
+      var falta=180-(Date.now()-ult);
+      if(falta>0){pend={s:self,a:args};if(!tTrail)tTrail=setTimeout(function(){tTrail=0;if(pend){if(rolando()){esperarParar();return}var p=pend;pend=null;rodar(p.s,p.a)}},falta);return}
+      return rodar(self,args);
+    };
+    g.__f546=1;g.__orig=f;
+    try{W[nome]=g}catch(e){return false}
+    return true;
+  }
+  function instalar(){NOMES.forEach(embrulhar)}
+  instalar();setTimeout(instalar,1500);setTimeout(instalar,6000);
+  W.fastTelaFirme={instalar:instalar,capturar:capturar,restaurar:restaurar};
 })();
 </script>
 </body></html>
